@@ -6,11 +6,13 @@ import { withTracker } from 'meteor/react-meteor-data';
 import { SessionTemplates } from '../api/sessionTemplates.js';
 import { Filters } from '../api/filters.js';
 import { ImageSessions } from '../api/imageSessions.js';
+import { TheSkyXInfos } from '../api/theSkyXInfo.js';
 
 // Import the ...
 import ImageSession from './ImageSession.js';
 import SessionTemplate from './SessionTemplate.js';
 import Filter from './Filter.js';
+import TheSkyXInfo from './TheSkyXInfo.js';
 
 // App component - represents the whole app
 class App extends Component {
