@@ -142,6 +142,25 @@ class App extends Component {
           <label>Radio choice</label>
         </div>
 
+        <div class="ui indicating progress">
+          <div class="bar"></div>
+          <div class="label">Funding</div>
+        </div>
+
+        <div class="ui progress success">
+          <div class="bar">
+            <div class="progress"></div>
+          </div>
+          <div class="label">Everything worked, your file is all ready.</div>
+        </div>
+
+        <div class="ui progress">
+          <div class="bar">
+            <div class="progress"></div>
+          </div>
+          <div class="label">Uploading Files</div>
+        </div>                
+
         <form class="ui form">
           <div class="field">Selected value: <b>
         </b>
