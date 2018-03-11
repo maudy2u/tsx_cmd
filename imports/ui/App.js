@@ -87,6 +87,29 @@ class App extends Component {
       <div className="container">
         <header>
           <h1>Image Sessions</h1>
+          <div class="ui breadcrumb">
+            <a class="section">Home</a>
+            <i class="right angle icon divider"></i>
+            <a class="section">Store</a>
+            <i class="right angle icon divider"></i>
+            <div class="active section">T-Shirt</div>
+          </div>
+
+          <div class="ui menu">
+            <div class="header item">
+              Our Company
+            </div>
+            <a class="item active">
+              About Us
+            </a>
+            <a class="item">
+              Jobs
+            </a>
+            <a class="item">
+              Locations
+            </a>
+          </div>
+
           <form className="new-filter" onSubmit={this.addNewFilter.bind(this)} >
              <input
                type="text"
@@ -107,6 +130,37 @@ class App extends Component {
         <ul>
           {this.renderTasks()}
         </ul>
+        <br/>
+        <div class="ui relaxed divided list">
+          <div class="item">
+            <i class="large github middle aligned icon"></i>
+            <div class="content">
+              <a class="header">Semantic-Org/Semantic-UI</a>
+              <div class="description">Updated 10 mins ago</div>
+            </div>
+          </div>
+          <div class="item">
+            <i class="large github middle aligned icon"></i>
+            <div class="content">
+              <a class="header">Semantic-Org/Semantic-UI-Docs</a>
+              <div class="description">        <div class="ui indicating progress">
+                        <div class="bar"></div>
+                        <div class="label">Funding</div>
+                      </div>
+</div>
+            </div>
+          </div>
+          <div class="item">
+            <i class="large github middle aligned icon"></i>
+            <div class="content">
+              <a class="header">Semantic-Org/Semantic-UI-Meteor</a>
+              <div class="description">Updated 34 mins ago</div>
+            </div>
+          </div>
+        </div>
+        <br/>
+
+
         <div class="ui checked checkbox">
           <input type="checkbox" checked="" class="hidden" readonly="" tabindex="0" />
           <label>This checkbox comes pre-checked</label>
@@ -159,7 +213,7 @@ class App extends Component {
             <div class="progress"></div>
           </div>
           <div class="label">Uploading Files</div>
-        </div>                
+        </div>
 
         <form class="ui form">
           <div class="field">Selected value: <b>
@@ -178,6 +232,76 @@ class App extends Component {
             </div>
           </div>
         </form>
+
+        <table class="ui striped table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Date Joined</th>
+              <th>E-mail</th>
+              <th>Called</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>John Lilki</td>
+              <td>September 14, 2013</td>
+              <td>jhlilk22@yahoo.com</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>Jamie Harington</td>
+              <td>January 11, 2014</td>
+              <td>jamieharingonton@yahoo.com</td>
+              <td>Yes</td>
+            </tr>
+            <tr>
+              <td>Jill Lewis</td>
+              <td>May 11, 2014</td>
+              <td>jilsewris22@yahoo.com</td>
+              <td>Yes</td>
+            </tr>
+            <tr>
+              <td>John Lilki</td>
+              <td>September 14, 2013</td>
+              <td>jhlilk22@yahoo.com</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>John Lilki</td>
+              <td>September 14, 2013</td>
+              <td>jhlilk22@yahoo.com</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>Jamie Harington</td>
+              <td>January 11, 2014</td>
+              <td>jamieharingonton@yahoo.com</td>
+              <td>Yes</td>
+            </tr>
+            <tr>
+              <td>Jill Lewis</td>
+              <td>May 11, 2014</td>
+              <td>jilsewris22@yahoo.com</td>
+              <td>Yes</td>
+            </tr>
+            <tr>
+              <td>John Lilki</td>
+              <td>September 14, 2013</td>
+              <td>        <div class="ui indicating progress">
+                        <div class="bar"></div>
+                        <div class="label">Funding</div>
+                      </div>
+</td>
+              <td>        <div class="ui checked checkbox">
+                        <input type="checkbox" checked="" class="hidden" readonly="" tabindex="0" />
+                        <label>This checkbox comes pre-checked</label>
+                      </div>
+</td>
+            </tr>
+          </tbody>
+        </table>
+
 
 
       </div>
