@@ -159,7 +159,64 @@ def AGfindstar( ):
     TCP_IP = '127.0.0.1'
     TCP_PORT = 3040
     BUFFER_SIZE = 1024
-    MESSAGE = "/* Java Script */function median(values){values.sort(function(a,b){return a - b;});var half=Math.floor(values.length/2);if(values.length%2){return values[half];}else{return(values[half-1]+values[half])/2.0;}}var CSAGI=ccdsoftAutoguiderImage;CSAGI.AttachToActiveAutoguider();CSAGI.ShowInventory();var X=CSAGI.InventoryArray(0);var Y=CSAGI.InventoryArray(1);var Mag=CSAGI.InventoryArray(2);var Class=CSAGI.InventoryArray(3);var FWHM=CSAGI.InventoryArray(4);var AImage=CSAGI.InventoryArray(5);var BImage=CSAGI.InventoryArray(6);var Theta=CSAGI.InventoryArray(7);var Elong=CSAGI.InventoryArray(8);var disposableX=CSAGI.InventoryArray(0);var disposableY=CSAGI.InventoryArray(1);var disposableMag=CSAGI.InventoryArray(2);var disposableFWHM=CSAGI.InventoryArray(4);var disposableElong=CSAGI.InventoryArray(8);var Width=CSAGI.WidthInPixels;var Height=CSAGI.HeightInPixels;var strResult='';var Brightest=0;var newX=0;var newY=0;var counter=X.length;var medFWHM=median(disposableFWHM);var medMag=median(disposableMag);var medElong=median(disposableElong);var baseMag=medMag;var path='Nothing';median(disposableX);median(disposableY);X.push(0);Y.push(0);X.push(Width);Y.push(Height);Mag.push(medMag,medMag);for(ls=0;ls<counter;++ls){if(((X[ls]>30&&X[ls]<(Width-30)))&&(Y[ls]>30&&Y[ls]<(Height-30))){if((Elong[ls]<medElong*2.5)&&(Mag[ls]<(medMag))){if(FWHM[ls]<(medFWHM*3)&&(FWHM[ls]>1)){var highNeighborX=disposableX[disposableX.indexOf(X[ls])+1];var lowNeighborX=disposableX[disposableX.indexOf(X[ls])-1];var highNeighborY=disposableY[disposableY.indexOf(Y[ls])+1];var lowNeighborY=disposableY[disposableY.indexOf(Y[ls])-1];if(!highNeighborY)highNeighborY=Height;if(!lowNeighborY)lowNeighborY=0;if(!highNeighborX)highNeighborX=Width;if(!lowNeighborX)lowNeighborX=0;var highNeighborXLS=X.indexOf(highNeighborX);var lowNeighborXLS=X.indexOf(lowNeighborX);var highNeighborYLS=Y.indexOf(highNeighborY);var lowNeighborYLS=Y.indexOf(lowNeighborY);if(((X[highNeighborXLS]-X[ls])>20)||(((Y[highNeighborXLS]-Y[ls])>20)&&((Y[ls]-Y[highNeighborXLS])>20))||(Mag[highNeighborXLS]>((Mag[ls]+medMag)/1.75))){if(((X[ls]-X[lowNeighborXLS])>20)||(((Y[lowNeighborXLS]-Y[ls])>20)&&((Y[ls]-Y[lowNeighborXLS])>20))||(Mag[lowNeighborXLS]>((Mag[ls]+medMag)/1.75))){if(((Y[highNeighborYLS]-Y[ls])>20)||(((X[highNeighborYLS]-X[ls])>20)&&((X[ls]-X[highNeighborYLS])>20))||(Mag[lowNeighborYLS]>((Mag[ls]+medMag)/1.75))){if(((Y[ls]-Y[lowNeighborYLS])>20)||(((X[lowNeighborYLS]-X[ls])>20)&&((X[ls]-X[lowNeighborYLS])>20))||(Mag[lowNeighborYLS]>((Mag[ls]+medMag)/1.75))){if(Mag[ls]<baseMag){baseMag=Mag[ls];Brightest=ls;}}}}}}}}}if((ccdsoftAutoguider.ImageUseDigitizedSkySurvey=='1')&&(CSAGI.FITSKeyword('XBINNING')=='1')){newY =(Height-Y[Brightest]);}else{newY=Y[Brightest];}newX=X[Brightest];newX=newX.toFixed(2);newY=newY.toFixed(2);Mag[Brightest]=Mag[Brightest].toFixed(2);newMedMag=medMag.toFixed(2);path=CSAGI.Path;strResult += newX + '|' + newY + '|(X,Y)';strResult+='Mag='+Mag[Brightest]+',';strResult+='MedMag='+newMedMag+',';strResult+='FWHM='+FWHM[Brightest]+',';strResult+='MedFWHM='+medFWHM+',';strResult+='TtlLgtSrcs='+counter+';';strResult+='Path='+path;"
+    MESSAGE = "/* Java Script */\
+    function median(values){values.sort(function(a,b){return a - b;});\
+    var half=Math.floor(values.length/2);\
+    if(values.length%2){return values[half];\
+    }else{return(values[half-1]+values[half])/2.0;}}\
+    var CSAGI=ccdsoftAutoguiderImage;\
+    CSAGI.AttachToActiveAutoguider();\
+    CSAGI.ShowInventory();\
+    var X=CSAGI.InventoryArray(0);\
+    var Y=CSAGI.InventoryArray(1);\
+    var Mag=CSAGI.InventoryArray(2);\
+    var Class=CSAGI.InventoryArray(3);\
+    var FWHM=CSAGI.InventoryArray(4);\
+    var AImage=CSAGI.InventoryArray(5);\
+    var BImage=CSAGI.InventoryArray(6);\
+    var Theta=CSAGI.InventoryArray(7);\
+    var Elong=CSAGI.InventoryArray(8);\
+    var disposableX=CSAGI.InventoryArray(0);\
+    var disposableY=CSAGI.InventoryArray(1);\
+    var disposableMag=CSAGI.InventoryArray(2);\
+    var disposableFWHM=CSAGI.InventoryArray(4);\
+    var disposableElong=CSAGI.InventoryArray(8);\
+    var Width=CSAGI.WidthInPixels;\
+    var Height=CSAGI.HeightInPixels;\
+    var strResult='';var Brightest=0;\
+    var newX=0;var newY=0;\
+    var counter=X.length;\
+    var medFWHM=median(disposableFWHM);\
+    var medMag=median(disposableMag);\
+    var medElong=median(disposableElong);var baseMag=medMag;var path='Nothing';\
+    median(disposableX);median(disposableY);X.push(0);\
+    Y.push(0);X.push(Width);Y.push(Height);Mag.push(medMag,medMag);\
+    for(ls=0;ls<counter;++ls){\
+    if(((X[ls]>30&&X[ls]<(Width-30)))&&(Y[ls]>30&&Y[ls]<(Height-30))){\
+    if((Elong[ls]<medElong*2.5)&&(Mag[ls]<(medMag))){\
+    if(FWHM[ls]<(medFWHM*3)&&(FWHM[ls]>1)){\
+    var highNeighborX=disposableX[disposableX.indexOf(X[ls])+1];\
+    var lowNeighborX=disposableX[disposableX.indexOf(X[ls])-1];\
+    var highNeighborY=disposableY[disposableY.indexOf(Y[ls])+1];\
+    var lowNeighborY=disposableY[disposableY.indexOf(Y[ls])-1];\
+    if(!highNeighborY)highNeighborY=Height;\
+    if(!lowNeighborY)lowNeighborY=0;if(!highNeighborX)highNeighborX=Width;if(!lowNeighborX)lowNeighborX=0;\
+    var highNeighborXLS=X.indexOf(highNeighborX);\
+    var lowNeighborXLS=X.indexOf(lowNeighborX);\
+    var highNeighborYLS=Y.indexOf(highNeighborY);\
+    var lowNeighborYLS=Y.indexOf(lowNeighborY);\
+    if(((X[highNeighborXLS]-X[ls])>20)||(((Y[highNeighborXLS]-Y[ls])>20)&&((Y[ls]-Y[highNeighborXLS])>20))||(Mag[highNeighborXLS]>((Mag[ls]+medMag)/1.75))){\
+    if(((X[ls]-X[lowNeighborXLS])>20)||(((Y[lowNeighborXLS]-Y[ls])>20)&&((Y[ls]-Y[lowNeighborXLS])>20))||(Mag[lowNeighborXLS]>((Mag[ls]+medMag)/1.75))){\
+    if(((Y[highNeighborYLS]-Y[ls])>20)||(((X[highNeighborYLS]-X[ls])>20)&&((X[ls]-X[highNeighborYLS])>20))||(Mag[lowNeighborYLS]>((Mag[ls]+medMag)/1.75))){\
+    if(((Y[ls]-Y[lowNeighborYLS])>20)||(((X[lowNeighborYLS]-X[ls])>20)&&((X[ls]-X[lowNeighborYLS])>20))||(Mag[lowNeighborYLS]>((Mag[ls]+medMag)/1.75))){\
+    if(Mag[ls]<baseMag){baseMag=Mag[ls];Brightest=ls;}}}}}}}}}\
+    if((ccdsoftAutoguider.ImageUseDigitizedSkySurvey=='1')&&(CSAGI.FITSKeyword('XBINNING')=='1')){\
+    newY =(Height-Y[Brightest]);}else{newY=Y[Brightest];}\
+    newX=X[Brightest];\
+    newX=newX.toFixed(2);\
+    newY=newY.toFixed(2);\
+    Mag[Brightest]=Mag[Brightest].toFixed(2);\
+    newMedMag=medMag.toFixed(2);path=CSAGI.Path;strResult += newX + '|' + newY + '|(X,Y)';strResult+='Mag='+Mag[Brightest]+',';strResult+='MedMag='+newMedMag+',';strResult+='FWHM='+FWHM[Brightest]+',';strResult+='MedFWHM='+medFWHM+',';strResult+='TtlLgtSrcs='+counter+';';strResult+='Path='+path;"
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((TCP_IP, TCP_PORT))
     s.send(MESSAGE)

@@ -85,15 +85,18 @@ class App extends Component {
 
     return (
       <div className="container">
-      Sessions found:
-      <ul>
-        {this.renderImageSessions()}
-      </ul>
-      Filters found:
-      <ul>
-        {this.renderFilters()}
-      </ul>
-      Task:
+        <header>
+          <h1>Todo List</h1>
+        </header>
+        Sessions found:
+        <ul>
+          {this.renderImageSessions()}
+        </ul>
+        Filters found:
+        <ul>
+          {this.renderFilters()}
+        </ul>
+        Task:
         <ul>
           {this.renderTasks()}
         </ul>
