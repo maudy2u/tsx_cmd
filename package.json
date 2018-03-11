@@ -13,8 +13,15 @@
     "utf-8-validate": "^4.0.0"
   },
   "devDependencies": {
-    "meteor-node-stubs": "^0.3.2",
-    "socket.io": "^2.0.4",
-    "socket.io-client": "^2.0.4"
+    "autoprefixer": "^6.3.1"
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {
+        "browsers": [
+          "last 2 versions"
+        ]
+      }
+    }
   }
 }

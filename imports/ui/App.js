@@ -86,7 +86,14 @@ class App extends Component {
     return (
       <div className="container">
         <header>
-          <h1>Todo List</h1>
+          <h1>Image Sessions</h1>
+          <form className="new-filter" onSubmit={this.addNewFilter.bind(this)} >
+             <input
+               type="text"
+               ref="textInput"
+               placeholder="Type to add new tasks"
+             />
+           </form>
         </header>
         Sessions found:
         <ul>

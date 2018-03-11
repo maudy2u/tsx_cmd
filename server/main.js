@@ -4,6 +4,7 @@ import '../imports/api/imageSessions.js';
 import '../imports/api/filters.js';
 import '../imports/api/sessionTemplates.js';
 import '../imports/api/theSkyXInfos.js';
+import '../imports/api/run_imageSession.js'
 
 
 Meteor.startup(() => {
