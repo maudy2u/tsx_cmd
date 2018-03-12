@@ -4,7 +4,8 @@ import '../imports/api/imageSessions.js';
 import '../imports/api/filters.js';
 import '../imports/api/sessionTemplates.js';
 import '../imports/api/theSkyXInfos.js';
-import '../imports/api/run_imageSession.js'
+import '../imports/api/run_imageSession.js';
+import './filters.js';
 
 
 Meteor.startup(() => {
@@ -49,7 +50,7 @@ Meteor.startup(() => {
 
    // *******************************
    // Test of the python to connect to TSX
-   tsx_mountRaDec(arg1, arg2) {
+   tsx_getMountRaDec(arg1, arg2) { // Parameters not used
      var cmd_real = "\
     /* Java Script */\
     /* Socket Start Packet */\
@@ -101,9 +102,9 @@ Meteor.startup(() => {
 
 // *******************************
 // Test of the python to connect to TSX
-//     check(arg1, String);
+//     check(, String);
 //     check(arg2, [Number]);
-   tsx_feeder(arg1, arg2) {
+   tsx_feederOLD(arg1, arg2) {
 
      var cmd_real = "\
     /* Java Script */\
@@ -149,5 +150,6 @@ Meteor.startup(() => {
    bar() {
      // Do other stuff...
      return 'baz';
-   }
+   },
+
  });

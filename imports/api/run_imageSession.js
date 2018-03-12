@@ -18,6 +18,47 @@ Meteor.methods({
 // NEED A METHOD TO ADD TEMP SAMPLES INTO Database
 // NEED A METHOD TO RESET THE TEMP DATA IN DATABASE
 
+// *******************************
+// Utilities:
+// 1. CLS
+// 2. stop SkyX_JS_StopTracking
+// 3. MountParkHard
+// 4. MountParkSoft
+// 5. Focus
+// 6. SkyX_JS_FindAutoGuideStar
+// 6. waitTilDark
+// 7. Get Filter names...
+//    numFilters = lNumberFilters | filterName = ccdsoftCamera::szFilterName
+//    ignore the offset for now... assume TSX will manage
+
+// *******************************
+// Target Series
+// 1. Target - image, RA/DEC, Name
+// 2. priority - in the case more than one session is ready...
+// 3. Minimum Altitude - start or stop... for now
+// 4. start Time
+// 5. Stop time
+// 6. Temp to check focus
+// 7. Meridian Flip
+// 8. Image Camera Temp
+
+// *******************************
+// Capture Series - SHO|LRGB
+// 1. Per Filter or Across Filters
+// 1. FilterSession 1
+// 2. Filter Session N
+
+// *******************************
+// Filter Series
+// 1. Filter name
+// 2. Exposure
+// 3. Quantity
+// 4. taken - number of images obtained
+
+
+
+
+
   // *******************************
   // 0. Find a session
   //    - check start time
@@ -33,6 +74,9 @@ Meteor.methods({
   //  a) Object name to find
   //  b) Image
   //  c) Ra/Dec
+
+  // *******************************
+  // Check target... altitude ok, time okay,
 
   // *******************************
   // 2. Frame target

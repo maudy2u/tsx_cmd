@@ -7,9 +7,10 @@ import { withTracker } from 'meteor/react-meteor-data';
 import { SessionTemplates } from '../api/sessionTemplates.js';
 import { Filters } from '../api/filters.js';
 import { ImageSessions } from '../api/imageSessions.js';
+import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 // PROBLEM: import { TheSkyXInfos } from '../api/theSkyXInfo.js';
 
-// Import the ...
+// Import the UI
 import ImageSession from './ImageSession.js';
 import SessionTemplate from './SessionTemplate.js';
 import Filter from './Filter.js';
@@ -79,6 +80,19 @@ class App extends Component {
   }
 
 
+  testMeteorMethod() {
+
+    // on the client
+    Meteor.call("tsx_getFilterWheelMakeModel", function (error) {
+      // identify the error
+      if (error && error.error === "logged-out") {
+        // show a nice error message
+        Session.set("errorMessage", "Please log in to post a comment.");
+      }
+    });
+  }
+
+
   render() {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
     */
@@ -109,6 +123,10 @@ class App extends Component {
               Locations
             </a>
           </div>
+
+          <button class="circular ui icon button" onClick={this.testMeteorMethod.bind(this)}>
+            <i class="icon settings"></i>
+          </button>
 
           <form className="new-filter" onSubmit={this.addNewFilter.bind(this)} >
              <input
