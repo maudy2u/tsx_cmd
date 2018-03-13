@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import { Dropdown } from 'semantic-ui-react'
 
 import { withTracker } from 'meteor/react-meteor-data';
 
@@ -94,6 +95,13 @@ class App extends Component {
       <Filter key={filter._id} filter={filter} />
     ));
   }
+  renderDropDownFilters() {
+    return [
+      { text: 'Static Lum', value: 0 },
+      { text: 'Static R', value: 1 },
+      { text: 'Static G', value: 2 },
+    ];
+  }
 
   // *******************************
   getTasks() {
@@ -158,6 +166,8 @@ class App extends Component {
           <button class="circular ui icon button" onClick={this.testMeteorMethod.bind(this)}>
             <i class="icon settings"></i>
           </button>
+
+          <Dropdown placeholder='Select Filter' fluid selection options={this.renderDropDownFilters()} />
 
           {this.renderTSXConnetion()}
           <form className="new-filter" onSubmit={this.addNewFilter.bind(this)} >

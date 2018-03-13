@@ -27,7 +27,7 @@ Meteor.methods({
 // 5. Focus
 // 6. SkyX_JS_FindAutoGuideStar
 // 6. waitTilDark
-// 7. Get Filter names...
+// DONE 7. Get Filter names...
 //    numFilters = lNumberFilters | filterName = ccdsoftCamera::szFilterName
 //    ignore the offset for now... assume TSX will manage
 
@@ -54,10 +54,6 @@ Meteor.methods({
 // 2. Exposure
 // 3. Quantity
 // 4. taken - number of images obtained
-
-
-
-
 
   // *******************************
   // 0. Find a session
