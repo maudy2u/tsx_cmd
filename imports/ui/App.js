@@ -135,35 +135,42 @@ class App extends Component {
 
     var segementOut;
 
-    if (this.menuState == 'Target Sequences' ) {
+    if (this.menuState == 'Target Sessions' ) {
         segementOut = renderTargetSequences();
-    } else if (this.menuState == 'Target Sequences') {
-      segementOut = renderTargetSequences();
 
-    } else if (this.menuState == 'Sequences') {
-      segementOut = renderTargetSequences();
+    } else if (this.menuState == 'Imaging Sequence') {
+      segementOut = renderImagingSequences();
 
     } else if (this.menuState == 'Settings') {
-      segementOut = renderTargetSequences();
+      segementOut = renderSettings();
 
-    } else if (this.menuState == 'Tests') {
+    } else if (this.menuState == 'tests') {
       segementOut = renderTestSegement();
 
     } else if (this.menuState == 'logout') {
-      segementOut = renderTargetSequences();
+      segementOut = renderLogout();
 
     } else {
-      this.setMenuState({ activeItem: 'Target Sequences' });
+      this.setMenuState({ activeItem: 'Target Sessions' });
       segementOut = renderTargetSequences();
     }
 
     return segementOut;
   }
 
-  renderTestSegement() {
+  renderTargetSequences() {
 
   }
-  renderTargetSequences() {
+
+  renderImagingSequences() {
+
+  }
+
+  renderSettings() {
+
+  }
+
+  renderLogout() {
 
   }
 
@@ -210,193 +217,202 @@ class App extends Component {
              />
            </form>
         </header>
-        Sessions found:
-        <ul>
-          {this.renderImageSessions()}
-        </ul>
-        Filters found:
-        <ul>
-          {this.renderFilters()}
-        </ul>
-        Task:
-        <ul>
-          {this.renderTasks()}
-        </ul>
-        <br/>
-        <div class="ui relaxed divided list">
-          <div class="item">
-            <i class="large github middle aligned icon"></i>
-            <div class="content">
-              <a class="header">Semantic-Org/Semantic-UI</a>
-              <div class="description">Updated 10 mins ago</div>
-            </div>
+        <div>
+          <Segment>
+            <img src='/assets/images/wireframe/media-paragraph.png' />
+          </Segment>
+        </div>
+      </div>
+    );
+  }
+
+  renderTestSegement() {
+    return (
+      <div>
+      Sessions found:
+      <ul>
+        {this.renderImageSessions()}
+      </ul>
+      Filters found:
+      <ul>
+        {this.renderFilters()}
+      </ul>
+      Task:
+      <ul>
+        {this.renderTasks()}
+      </ul>
+      <br/>
+      <div class="ui relaxed divided list">
+        <div class="item">
+          <i class="large github middle aligned icon"></i>
+          <div class="content">
+            <a class="header">Semantic-Org/Semantic-UI</a>
+            <div class="description">Updated 10 mins ago</div>
           </div>
-          <div class="item">
-            <i class="large github middle aligned icon"></i>
-            <div class="content">
-              <a class="header">Semantic-Org/Semantic-UI-Docs</a>
-              <div class="description">        <div class="ui indicating progress">
-                        <div class="bar"></div>
-                        <div class="label">Funding</div>
-                      </div>
+        </div>
+        <div class="item">
+          <i class="large github middle aligned icon"></i>
+          <div class="content">
+            <a class="header">Semantic-Org/Semantic-UI-Docs</a>
+            <div class="description">        <div class="ui indicating progress">
+                      <div class="bar"></div>
+                      <div class="label">Funding</div>
+                    </div>
 </div>
+          </div>
+        </div>
+        <div class="item">
+          <i class="large github middle aligned icon"></i>
+          <div class="content">
+            <a class="header">Semantic-Org/Semantic-UI-Meteor</a>
+            <div class="description">Updated 34 mins ago</div>
+          </div>
+        </div>
+      </div>
+      <br/>
+
+
+      <div class="ui checked checkbox">
+        <input type="checkbox" checked="" class="hidden" readonly="" tabindex="0" />
+        <label>This checkbox comes pre-checked</label>
+      </div>
+
+      <div class="ui vertical menu">
+        <div class="item">Home</div>
+        <div role="listbox" aria-expanded="false" class="ui left pointing dropdown link item" tabindex="0">
+          <div class="text" role="alert" aria-live="polite">Messages</div>
+          <i aria-hidden="true" class="dropdown icon"></i>
+          <div class="menu transition">
+            <div role="option" class="item">Inbox</div>
+            <div role="option" class="item">Starred</div>
+            <div role="option" class="item">Sent Mail</div>
+            <div role="option" class="item">Drafts (143)</div>
+            <div class="divider">
             </div>
-          </div>
-          <div class="item">
-            <i class="large github middle aligned icon"></i>
-            <div class="content">
-              <a class="header">Semantic-Org/Semantic-UI-Meteor</a>
-              <div class="description">Updated 34 mins ago</div>
-            </div>
+            <div role="option" class="item">Spam (1009)</div>
+            <div role="option" class="item">Trash</div>
           </div>
         </div>
-        <br/>
+        <div class="item">Browse</div>
+        <div class="item">Help</div>
+      </div>
 
+      <div class="ui fitted toggle checkbox">
+        <input type="checkbox" class="hidden" readonly="" tabindex="0" />
+        <label></label>
+      </div>
 
-        <div class="ui checked checkbox">
-          <input type="checkbox" checked="" class="hidden" readonly="" tabindex="0" />
-          <label>This checkbox comes pre-checked</label>
+      <div class="ui radio checkbox">
+        <input type="checkbox" class="hidden" readonly="" tabindex="0" />
+        <label>Radio choice</label>
+      </div>
+
+      <div class="ui indicating progress">
+        <div class="bar"></div>
+        <div class="label">Funding</div>
+      </div>
+
+      <div class="ui progress success">
+        <div class="bar">
+          <div class="progress"></div>
         </div>
+        <div class="label">Everything worked, your file is all ready.</div>
+      </div>
 
-        <div class="ui vertical menu">
-          <div class="item">Home</div>
-          <div role="listbox" aria-expanded="false" class="ui left pointing dropdown link item" tabindex="0">
-            <div class="text" role="alert" aria-live="polite">Messages</div>
-            <i aria-hidden="true" class="dropdown icon"></i>
-            <div class="menu transition">
-              <div role="option" class="item">Inbox</div>
-              <div role="option" class="item">Starred</div>
-              <div role="option" class="item">Sent Mail</div>
-              <div role="option" class="item">Drafts (143)</div>
-              <div class="divider">
-              </div>
-              <div role="option" class="item">Spam (1009)</div>
-              <div role="option" class="item">Trash</div>
-            </div>
+      <div class="ui progress">
+        <div class="bar">
+          <div class="progress"></div>
+        </div>
+        <div class="label">Uploading Files</div>
+      </div>
+
+      <form class="ui form">
+        <div class="field">Selected value: <b>
+      </b>
+        </div>
+        <div class="field">
+          <div class="ui radio checkbox">
+            <input type="checkbox" class="hidden" name="checkboxRadioGroup" readonly="" tabindex="0" value="this" />
+            <label>Choose this</label>
           </div>
-          <div class="item">Browse</div>
-          <div class="item">Help</div>
         </div>
-
-        <div class="ui fitted toggle checkbox">
-          <input type="checkbox" class="hidden" readonly="" tabindex="0" />
-          <label></label>
-        </div>
-
-        <div class="ui radio checkbox">
-          <input type="checkbox" class="hidden" readonly="" tabindex="0" />
-          <label>Radio choice</label>
-        </div>
-
-        <div class="ui indicating progress">
-          <div class="bar"></div>
-          <div class="label">Funding</div>
-        </div>
-
-        <div class="ui progress success">
-          <div class="bar">
-            <div class="progress"></div>
+        <div class="field">
+          <div class="ui radio checkbox">
+            <input type="checkbox" class="hidden" name="checkboxRadioGroup" readonly="" tabindex="0" value="that" />
+            <label>Or that</label>
           </div>
-          <div class="label">Everything worked, your file is all ready.</div>
         </div>
+      </form>
 
-        <div class="ui progress">
-          <div class="bar">
-            <div class="progress"></div>
-          </div>
-          <div class="label">Uploading Files</div>
-        </div>
-
-        <form class="ui form">
-          <div class="field">Selected value: <b>
-        </b>
-          </div>
-          <div class="field">
-            <div class="ui radio checkbox">
-              <input type="checkbox" class="hidden" name="checkboxRadioGroup" readonly="" tabindex="0" value="this" />
-              <label>Choose this</label>
-            </div>
-          </div>
-          <div class="field">
-            <div class="ui radio checkbox">
-              <input type="checkbox" class="hidden" name="checkboxRadioGroup" readonly="" tabindex="0" value="that" />
-              <label>Or that</label>
-            </div>
-          </div>
-        </form>
-
-        <table class="ui striped table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Date Joined</th>
-              <th>E-mail</th>
-              <th>Called</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>John Lilki</td>
-              <td>September 14, 2013</td>
-              <td>jhlilk22@yahoo.com</td>
-              <td>No</td>
-            </tr>
-            <tr>
-              <td>Jamie Harington</td>
-              <td>January 11, 2014</td>
-              <td>jamieharingonton@yahoo.com</td>
-              <td>Yes</td>
-            </tr>
-            <tr>
-              <td>Jill Lewis</td>
-              <td>May 11, 2014</td>
-              <td>jilsewris22@yahoo.com</td>
-              <td>Yes</td>
-            </tr>
-            <tr>
-              <td>John Lilki</td>
-              <td>September 14, 2013</td>
-              <td>jhlilk22@yahoo.com</td>
-              <td>No</td>
-            </tr>
-            <tr>
-              <td>John Lilki</td>
-              <td>September 14, 2013</td>
-              <td>jhlilk22@yahoo.com</td>
-              <td>No</td>
-            </tr>
-            <tr>
-              <td>Jamie Harington</td>
-              <td>January 11, 2014</td>
-              <td>jamieharingonton@yahoo.com</td>
-              <td>Yes</td>
-            </tr>
-            <tr>
-              <td>Jill Lewis</td>
-              <td>May 11, 2014</td>
-              <td>jilsewris22@yahoo.com</td>
-              <td>Yes</td>
-            </tr>
-            <tr>
-              <td>John Lilki</td>
-              <td>September 14, 2013</td>
-              <td>        <div class="ui indicating progress">
-                <div class="bar"></div>
-                <div class="label">Funding</div>
-              </div>
-            </td>
-            <td>        <div class="ui checked checkbox">
-              <input type="checkbox" checked="" class="hidden" readonly="" tabindex="0" />
-              <label>This checkbox comes pre-checked</label>
+      <table class="ui striped table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Date Joined</th>
+            <th>E-mail</th>
+            <th>Called</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>John Lilki</td>
+            <td>September 14, 2013</td>
+            <td>jhlilk22@yahoo.com</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td>Jamie Harington</td>
+            <td>January 11, 2014</td>
+            <td>jamieharingonton@yahoo.com</td>
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <td>Jill Lewis</td>
+            <td>May 11, 2014</td>
+            <td>jilsewris22@yahoo.com</td>
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <td>John Lilki</td>
+            <td>September 14, 2013</td>
+            <td>jhlilk22@yahoo.com</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td>John Lilki</td>
+            <td>September 14, 2013</td>
+            <td>jhlilk22@yahoo.com</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td>Jamie Harington</td>
+            <td>January 11, 2014</td>
+            <td>jamieharingonton@yahoo.com</td>
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <td>Jill Lewis</td>
+            <td>May 11, 2014</td>
+            <td>jilsewris22@yahoo.com</td>
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <td>John Lilki</td>
+            <td>September 14, 2013</td>
+            <td>        <div class="ui indicating progress">
+              <div class="bar"></div>
+              <div class="label">Funding</div>
             </div>
           </td>
-        </tr>
-      </tbody>
-    </table>
-
-
-
-      </div>
+          <td>        <div class="ui checked checkbox">
+            <input type="checkbox" checked="" class="hidden" readonly="" tabindex="0" />
+            <label>This checkbox comes pre-checked</label>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
     );
   }
 }
