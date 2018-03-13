@@ -131,42 +131,38 @@ class App extends Component {
     });
   }
 
-  renderMenuSegment(){
-
-    var segementOut;
-
-    if (this.menuState == 'Target Sessions' ) {
-        segementOut = renderTargetSequences();
-
-    } else if (this.menuState == 'Imaging Sequence') {
-      segementOut = renderImagingSequences();
-
-    } else if (this.menuState == 'Settings') {
-      segementOut = renderSettings();
-
-    } else if (this.menuState == 'tests') {
-      segementOut = renderTestSegement();
-
-    } else if (this.menuState == 'logout') {
-      segementOut = renderLogout();
-
-    } else {
-      this.setMenuState({ activeItem: 'Target Sessions' });
-      segementOut = renderTargetSequences();
-    }
-
-    return segementOut;
-  }
-
-  renderTargetSequences() {
-
+  renderTargetSequences(){
+    return (
+      <ul>
+        {this.renderImageSessions()}
+      </ul>
+    );
   }
 
   renderImagingSequences() {
-
+    return (
+    <div>
+      <Dropdown placeholder='Select Filter' fluid selection options={this.renderDropDownFilters()} />
+    </div>
+    );
   }
 
   renderSettings() {
+    return (
+      <div>
+        <button class="circular ui icon button" onClick={this.testMeteorMethod.bind(this)}>
+          <i class="icon settings"></i>
+        </button>
+        {this.renderTSXConnetion()}
+        <form className="new-filter" onSubmit={this.addNewFilter.bind(this)} >
+          <input
+            type="text"
+            ref="textInput"
+            placeholder="Type to add new filter"
+          />
+        </form>
+      </div>
+    );
 
   }
 
@@ -174,12 +170,40 @@ class App extends Component {
 
   }
 
+  renderMenuSegments(){
+
+    console.log('Found state: ' + this.state.activeItem);
+
+    if (this.state.activeItem == 'Target Sessions' ) {
+      console.log('Running state: ' + this.state.activeItem);
+        return this.renderTargetSequences();
+
+    } else if (this.state.activeItem == 'Imaging Sequence') {
+      return this.renderImagingSequences();
+
+    } else if (this.state.activeItem == 'Settings') {
+      return this.renderSettings();
+
+    } else if (this.state.activeItem == 'tests') {
+      console.log('Running state: ' + this.state.activeItem);
+      return this.renderTestSegement();
+
+    } else if (this.state.activeItem == 'logout') {
+      return this.renderLogout();
+
+    } else {
+      this.state = { activeItem: 'Target Sessions' };
+      return this.renderTargetSequences();
+    }
+  }
   state = { activeItem: 'Target Sessions' }
-  handleItemClick = (e, { name }) => this.setState({ activeItem: name })
+  handleMenuItemClick = (e, { name }) => this.setState({ activeItem: name })
 
   render() {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
     */
+    //        {this.renderMenuSegments()}
+
     const { activeItem } = this.state
 
     return (
@@ -188,40 +212,19 @@ class App extends Component {
           <h1>Image Sessions</h1>
           <div>
             <Menu pointing secondary>
-              <Menu.Item name='Target Sessions' active={activeItem === 'Target Sessions'} onClick={this.handleItemClick} />
-              <Menu.Item name='Imaging Sequence' active={activeItem === 'Imaging Sequence'} onClick={this.handleItemClick} />
-              <Menu.Item name='Settings' active={activeItem === 'Settings'} onClick={this.handleItemClick} />
+              <Menu.Item name='Target Sessions' active={activeItem === 'Target Sessions'} onClick={this.handleMenuItemClick} />
+              <Menu.Item name='Imaging Sequence' active={activeItem === 'Imaging Sequence'} onClick={this.handleMenuItemClick} />
+              <Menu.Item name='Settings' active={activeItem === 'Settings'} onClick={this.handleMenuItemClick} />
               <Menu.Menu position='right'>
-                <Menu.Item name='tests' active={activeItem === 'tests'} onClick={this.handleItemClick} />
-                <Menu.Item name='logout' active={activeItem === 'logout'} onClick={this.handleItemClick} />
+                <Menu.Item name='tests' active={activeItem === 'tests'} onClick={this.handleMenuItemClick} />
+                <Menu.Item name='logout' active={activeItem === 'logout'} onClick={this.handleMenuItemClick} />
               </Menu.Menu>
             </Menu>
-
-            <Segment>
-              <img src='/assets/images/wireframe/media-paragraph.png' />
+            <Segment raised>
+                {this.renderMenuSegments()}
             </Segment>
           </div>
-
-          <button class="circular ui icon button" onClick={this.testMeteorMethod.bind(this)}>
-            <i class="icon settings"></i>
-          </button>
-
-          <Dropdown placeholder='Select Filter' fluid selection options={this.renderDropDownFilters()} />
-
-          {this.renderTSXConnetion()}
-          <form className="new-filter" onSubmit={this.addNewFilter.bind(this)} >
-             <input
-               type="text"
-               ref="textInput"
-               placeholder="Type to add new filter"
-             />
-           </form>
         </header>
-        <div>
-          <Segment>
-            <img src='/assets/images/wireframe/media-paragraph.png' />
-          </Segment>
-        </div>
       </div>
     );
   }
