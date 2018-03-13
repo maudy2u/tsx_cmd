@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { Dropdown } from 'semantic-ui-react'
+import { Dropdown, Menu, Segment } from 'semantic-ui-react'
 
 import { withTracker } from 'meteor/react-meteor-data';
 
@@ -131,36 +131,68 @@ class App extends Component {
     });
   }
 
+  renderMenuSegment(){
+
+    var segementOut;
+
+    if (this.menuState == 'Target Sequences' ) {
+        segementOut = renderTargetSequences();
+    } else if (this.menuState == 'Target Sequences') {
+      segementOut = renderTargetSequences();
+
+    } else if (this.menuState == 'Sequences') {
+      segementOut = renderTargetSequences();
+
+    } else if (this.menuState == 'Settings') {
+      segementOut = renderTargetSequences();
+
+    } else if (this.menuState == 'Tests') {
+      segementOut = renderTestSegement();
+
+    } else if (this.menuState == 'logout') {
+      segementOut = renderTargetSequences();
+
+    } else {
+      this.setMenuState({ activeItem: 'Target Sequences' });
+      segementOut = renderTargetSequences();
+    }
+
+    return segementOut;
+  }
+
+  renderTestSegement() {
+
+  }
+  renderTargetSequences() {
+
+  }
+
+  state = { activeItem: 'Target Sessions' }
+  handleItemClick = (e, { name }) => this.setState({ activeItem: name })
 
   render() {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
     */
+    const { activeItem } = this.state
 
     return (
       <div className="container">
         <header>
           <h1>Image Sessions</h1>
-          <div class="ui breadcrumb">
-            <a class="section">Home</a>
-            <i class="right angle icon divider"></i>
-            <a class="section">Store</a>
-            <i class="right angle icon divider"></i>
-            <div class="active section">T-Shirt</div>
-          </div>
+          <div>
+            <Menu pointing secondary>
+              <Menu.Item name='Target Sessions' active={activeItem === 'Target Sessions'} onClick={this.handleItemClick} />
+              <Menu.Item name='Imaging Sequence' active={activeItem === 'Imaging Sequence'} onClick={this.handleItemClick} />
+              <Menu.Item name='Settings' active={activeItem === 'Settings'} onClick={this.handleItemClick} />
+              <Menu.Menu position='right'>
+                <Menu.Item name='tests' active={activeItem === 'tests'} onClick={this.handleItemClick} />
+                <Menu.Item name='logout' active={activeItem === 'logout'} onClick={this.handleItemClick} />
+              </Menu.Menu>
+            </Menu>
 
-          <div class="ui menu">
-            <div class="header item">
-              Our Company
-            </div>
-            <a class="item active">
-              About Us
-            </a>
-            <a class="item">
-              Jobs
-            </a>
-            <a class="item">
-              Locations
-            </a>
+            <Segment>
+              <img src='/assets/images/wireframe/media-paragraph.png' />
+            </Segment>
           </div>
 
           <button class="circular ui icon button" onClick={this.testMeteorMethod.bind(this)}>
@@ -349,18 +381,18 @@ class App extends Component {
               <td>John Lilki</td>
               <td>September 14, 2013</td>
               <td>        <div class="ui indicating progress">
-                        <div class="bar"></div>
-                        <div class="label">Funding</div>
-                      </div>
-</td>
-              <td>        <div class="ui checked checkbox">
-                        <input type="checkbox" checked="" class="hidden" readonly="" tabindex="0" />
-                        <label>This checkbox comes pre-checked</label>
-                      </div>
-</td>
-            </tr>
-          </tbody>
-        </table>
+                <div class="bar"></div>
+                <div class="label">Funding</div>
+              </div>
+            </td>
+            <td>        <div class="ui checked checkbox">
+              <input type="checkbox" checked="" class="hidden" readonly="" tabindex="0" />
+              <label>This checkbox comes pre-checked</label>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
 
 
