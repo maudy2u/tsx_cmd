@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { Dropdown, Menu, Segment } from 'semantic-ui-react'
+import { Dropdown, Menu, Segment, Button, Progress } from 'semantic-ui-react'
 
 import { withTracker } from 'meteor/react-meteor-data';
 
@@ -132,8 +132,18 @@ class App extends Component {
   }
 
   renderTargetSequences(){
+    // imageNum = { percent: 33 };
+    // increment = () => this.setState({
+    //   percent: this.state.percent >= 100 ? 0 : this.state.percent + 20,
+    // });
+    // var cImage = 10;
+    // var tImage = 33;
+    // var per = cImage/tIMage;
+    //var imageNum = {per};
+
     return (
       <ul>
+        <Progress percent={44} progress />
         {this.renderImageSessions()}
       </ul>
     );
@@ -232,10 +242,6 @@ class App extends Component {
   renderTestSegement() {
     return (
       <div>
-      Sessions found:
-      <ul>
-        {this.renderImageSessions()}
-      </ul>
       Filters found:
       <ul>
         {this.renderFilters()}
@@ -257,7 +263,7 @@ class App extends Component {
           <i class="large github middle aligned icon"></i>
           <div class="content">
             <a class="header">Semantic-Org/Semantic-UI-Docs</a>
-            <div class="description">        <div class="ui indicating progress">
+            <div class="description">        <div class="ui indicating progress" data-value="1" data-total="200" id="example1">
                       <div class="bar"></div>
                       <div class="label">Funding</div>
                     </div>
@@ -402,7 +408,7 @@ class App extends Component {
           <tr>
             <td>John Lilki</td>
             <td>September 14, 2013</td>
-            <td>        <div class="ui indicating progress">
+            <td>        <div class="ui indicating progress" data-value="1" data-total="200" id="example5">
               <div class="bar"></div>
               <div class="label">Funding</div>
             </div>
