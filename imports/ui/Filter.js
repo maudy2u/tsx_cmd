@@ -58,7 +58,7 @@ export default class Filter extends Component {
           onClick={this.toggleChecked.bind(this)}
         />
 
-        <span className="text">{this.props.filter.name}</span>
+        <span className="text">{this.props.filter.slot}: {this.props.filter.name}</span>
       </li>
     );
   }

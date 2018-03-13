@@ -56,6 +56,37 @@ class App extends Component {
     ReactDOM.findDOMNode(this.refs.textInput).value = '';
   }
 
+  renderTSXConnetion() {
+
+    return (
+      <form className="tsx_connection" onSubmit={this.connectTSX.bind(this)} >
+        Server Connection:
+        <input
+          type="text"
+          ref="tsx_ip"
+          placeholder="Enter TSX address"
+        />
+        <input
+          type="text"
+          ref="tsx_port"
+          placeholder="Enter TSX port"
+        />
+      </form>);
+
+  }
+
+  connectTSX(event) {
+    // Find the text field via the React ref
+    const tsx_ip = ReactDOM.findDOMNode(this.refs.tsx_ip).value.trim();
+    const tsx_port = ReactDOM.findDOMNode(this.refs.tsx_port).value.trim();
+
+    TheSkyXInfos.insert({
+      device: 'TheSkyX',
+      address: tsx_ip, // current time
+      port: tsx_port,
+    });
+  }
+
   // Used to put the filter line into the table
   renderFilters() {
     // "filters" ise created in the withTracker loading at the bottom
@@ -83,7 +114,7 @@ class App extends Component {
   testMeteorMethod() {
 
     // on the client
-    Meteor.call("tsx_getFilterWheelMakeModel", function (error) {
+    Meteor.call("tsx_updateFilterNames", function (error) {
       // identify the error
       if (error && error.error === "logged-out") {
         // show a nice error message
@@ -128,11 +159,12 @@ class App extends Component {
             <i class="icon settings"></i>
           </button>
 
+          {this.renderTSXConnetion()}
           <form className="new-filter" onSubmit={this.addNewFilter.bind(this)} >
              <input
                type="text"
                ref="textInput"
-               placeholder="Type to add new tasks"
+               placeholder="Type to add new filter"
              />
            </form>
         </header>
@@ -331,6 +363,6 @@ class App extends Component {
 // USE THIS POINT TO GRAB THE FILTERS
 export default withTracker(() => {
   return {
-    filters: Filters.find({}, { sort: { name: -1 } }).fetch(),
+    filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
   };
 })(App);
