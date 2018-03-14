@@ -132,18 +132,17 @@ class App extends Component {
   }
 
   renderTargetSequences(){
-    // imageNum = { percent: 33 };
-    // increment = () => this.setState({
-    //   percent: this.state.percent >= 100 ? 0 : this.state.percent + 20,
-    // });
-    // var cImage = 10;
-    // var tImage = 33;
-    // var per = cImage/tIMage;
-    //var imageNum = {per};
+
+    // need to retrieve the process for the session, and for the series...
+    
+    var cImage = 10;
+    var tImage = 33;
+    var iNum = (cImage/tImage*100).toFixed(0);
+    console.log( 'Percent complete: ' + iNum);
 
     return (
       <ul>
-        <Progress percent={44} progress />
+        <Progress percent={iNum} progress />
         {this.renderImageSessions()}
       </ul>
     );
