@@ -100,53 +100,6 @@ Meteor.startup(() => {
 
    },
 
-// *******************************
-// Test of the python to connect to TSX
-//     check(, String);
-//     check(arg2, [Number]);
-   tsx_feederOLD(arg1, arg2) {
-
-     var cmd_real = "\
-    /* Java Script */\
-    /* Socket Start Packet */\
-      var Out;\
-      sky6RASCOMTele.Connect();\
-      if (sky6RASCOMTele.IsConnected==0)\
-      {\
-          Out = 'Not connected';\
-      }\
-      else\
-      {\
-          sky6RASCOMTele.GetRaDec();\
-          Out  = String(sky6RASCOMTele.dRa) + '|' + String(sky6RASCOMTele.dDec);\
-      }\
-    /* Socket End Packet */";
-
-
-     var PythonShell = require('python-shell');
-
-     var options = {
-       mode: 'text',
-     //  pythonPath: 'path/to/python',
-     //  pythonOptions: ['-u'],
-       scriptPath: '/Users/stephen/Documents/code/tsx_cmd/imports/tsx/',
-     //  args: ['value1', 'value2', 'value3']
-     };
-
-     PythonShell.run('PyTSX.py', options, function (err, results) {
-       if (err) throw err;
-       console.log('finished py: ' + err);
-       console.log(results);
-
-     });
-
-     if (false) {
-       throw new Meteor.Error('pants-not-found', "Can't find my pants");
-     }
-
-     return 'some return value';
-   },
-
    bar() {
      // Do other stuff...
      return 'baz';
