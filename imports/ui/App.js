@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { Dropdown, Menu, Segment, Button, Progress } from 'semantic-ui-react'
+import { Dropdown, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
 
 import { withTracker } from 'meteor/react-meteor-data';
 
@@ -95,7 +95,8 @@ class App extends Component {
       <Filter key={filter._id} filter={filter} />
     ));
   }
-  renderDropDownFilters() {
+
+  renderDropDownFiltersTest() {
     return [
       { text: 'Static Lum', value: 0 },
       { text: 'Static R', value: 1 },
@@ -118,7 +119,6 @@ class App extends Component {
     ));
   }
 
-
   testMeteorMethod() {
 
     // on the client
@@ -134,24 +134,207 @@ class App extends Component {
   renderTargetSequences(){
 
     // need to retrieve the process for the session, and for the series...
-    
+
     var cImage = 10;
     var tImage = 33;
     var iNum = (cImage/tImage*100).toFixed(0);
     console.log( 'Percent complete: ' + iNum);
 
     return (
-      <ul>
-        <Progress percent={iNum} progress />
-        {this.renderImageSessions()}
-      </ul>
+      <div>
+        <div>
+          <Button.Group labeled icon>
+            <Button icon='play' content='Start' />
+            <Button icon='pause' content='Pause' />
+            <Button icon='stop' content='Stop' />
+          </Button.Group>
+           <Button circular icon='delete' />
+           <Button circular icon='edit' />
+         <Button.Group>
+           <Button circular icon='upload' />
+           <Button circular icon='download' />
+         </Button.Group>
+           <Button.Group>
+         <Button circular icon='settings' />
+           <Button circular icon='help circle' />
+         </Button.Group>
+        </div>
+
+        <ul>
+          {this.renderImageSessions()}
+        </ul>
+      </div>
     );
   }
 
+/*
+<table class="ui selectable celled table">
+  <thead>
+    <tr>
+      <th>Series#</th>
+      <th>Frame/Action</th>
+      <th>Exposure/Time/Temp</th>
+      <th>Binning</th>
+      <th>Filter</th>
+      <th>Repeat</th>
+      <th>Calibration</th>
+      <th>Progress</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <div class="ui checked checkbox">
+          <input type="checkbox" checked="" class="hidden" readonly="" tabIndex="0" />
+          <label>This checkbox comes pre-checked</label>
+        </div>
+        1
+      </td>
+      <td>Light</td>
+      <td>300</td>
+      <td>1x1</td>
+      <td>Lum</td>
+      <td>33</td>
+      <td>None</td>
+      <td><Progress percent={0} progress /></td>
+    </tr>
+    <tr>
+      <td>Focus</td>
+      <td>Light</td>
+      <td>300</td>
+      <td>1x1</td>
+      <td>Lum</td>
+      <td>33</td>
+      <td>None</td>
+      <td><Progress percent={0} progress /></td>
+    </tr>
+    <tr>
+      <td>Jill</td>
+      <td>Light</td>
+      <td>300</td>
+      <td>1x1</td>
+      <td>Lum</td>
+      <td>33</td>
+      <td>None</td>
+      <td><Progress percent={0} progress /></td>
+    </tr>
+    <tr class="warning">
+      <td>John</td>
+      <td>Light</td>
+      <td>300</td>
+      <td>1x1</td>
+      <td>Lum</td>
+      <td>33</td>
+      <td>None</td>
+      <td><Progress percent={0} progress /></td>
+    </tr>
+    <tr>
+      <td>Jamie</td>
+      <td class="positive">Light</td>
+      <td class="warning">300</td>
+      <td>1x1</td>
+      <td>Lum</td>
+      <td>33</td>
+      <td>None</td>
+      <td><Progress percent={0} progress /></td>
+    </tr>
+    <tr>
+      <td>Jill</td>
+      <td class="negative">Light</td>
+      <td>300</td>
+      <td>1x1</td>
+      <td>Lum</td>
+      <td>33</td>
+      <td>None</td>
+      <td><Progress percent={0} progress /></td>
+    </tr>
+  </tbody>
+</table>
+*/
+
+  renderModalSeriesTable() {
+    return (
+<div>
+</div>
+    );
+  }
+
+  seriesState = { type: "per series"};
+  setSeriesState(x) {
+    console.log('Received: ' + x);
+    console.log('Received: ' + String(x));
+    this.seriesState = { type: x};
+    console.log('Found series: ' + this.seriesState.type);
+  }
+  handleSeriesState = (e, { value }) => this.setSeriesState({ value });
+
   renderImagingSequences() {
+
     return (
     <div>
-      <Dropdown placeholder='Select Filter' fluid selection options={this.renderDropDownFilters()} />
+      <Modal trigger={<Button>Create Series</Button>}>
+      <Modal.Header>Create Series</Modal.Header>
+      <Modal.Content>
+        <Modal.Description>
+          <Form>
+            <Form.Field>
+              Repeat executes: <b>{this.seriesState.type}</b>
+            </Form.Field>
+            <Form.Field>
+              <Radio
+                label='Per series'
+                name='seriesRadioGroup'
+                value='per series'
+                checked={this.seriesState.type === "per series"}
+                onChange={this.handleSeriesState}
+              />
+            </Form.Field>
+            <Form.Field>
+              <Radio
+                label='Across series'
+                name='seriesRadioGroup'
+                value='across series'
+                checked={this.seriesState.type === "across series"}
+                onChange={this.handleSeriesState}
+              />
+            </Form.Field>
+          </Form>
+        </Modal.Description>
+      </Modal.Content>
+    </Modal>
+    <table className="ui selectable celled table">
+      <thead>
+        <tr>
+          <th>Series#</th>
+          <th>Frame/Action</th>
+          <th>Exposure/Time/Temp</th>
+          <th>Binning</th>
+          <th>Filter</th>
+          <th>Repeat</th>
+          <th>Calibration</th>
+          <th>Progress</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div className="ui checked checkbox">
+              <input type="checkbox" checked="" name="series1" readOnly="" tabIndex="0" />
+              <label>This checkbox comes pre-checked</label>
+            </div>
+            1
+          </td>
+          <td>Light</td>
+          <td>300</td>
+          <td>1x1</td>
+          <td>Lum</td>
+          <td>33</td>
+          <td>None</td>
+          <td><Progress percent={0} progress /></td>
+        </tr>
+      </tbody>
+    </table>
+      <Dropdown placeholder='Select Filter' fluid selection options={this.renderDropDownFiltersTest()} />
     </div>
     );
   }
@@ -205,6 +388,7 @@ class App extends Component {
       return this.renderTargetSequences();
     }
   }
+
   state = { activeItem: 'Target Sessions' }
   handleMenuItemClick = (e, { name }) => this.setState({ activeItem: name })
 
@@ -239,196 +423,186 @@ class App extends Component {
   }
 
   renderTestSegement() {
-    return (
-      <div>
-      Filters found:
-      <ul>
-        {this.renderFilters()}
-      </ul>
-      Task:
-      <ul>
-        {this.renderTasks()}
-      </ul>
-      <br/>
-      <div class="ui relaxed divided list">
-        <div class="item">
-          <i class="large github middle aligned icon"></i>
-          <div class="content">
-            <a class="header">Semantic-Org/Semantic-UI</a>
-            <div class="description">Updated 10 mins ago</div>
-          </div>
-        </div>
-        <div class="item">
-          <i class="large github middle aligned icon"></i>
-          <div class="content">
-            <a class="header">Semantic-Org/Semantic-UI-Docs</a>
-            <div class="description">        <div class="ui indicating progress" data-value="1" data-total="200" id="example1">
+          return (
+            <div>
+              Filters found:
+              <ul>
+                {this.renderFilters()}
+              </ul>
+              Task:
+              <ul>
+                {this.renderTasks()}
+              </ul>
+              <br/>
+              <div class="ui relaxed divided list">
+                <div class="item">
+                  <i class="large github middle aligned icon"></i>
+                  <div class="content">
+                    <a class="header">Semantic-Org/Semantic-UI</a>
+                    <div class="description">Updated 10 mins ago</div>
+                  </div>
+                </div>
+                <div class="item">
+                  <i class="large github middle aligned icon"></i>
+                  <div class="content">
+                    <a class="header">Semantic-Org/Semantic-UI-Docs</a>
+                    <div class="description">        <div class="ui indicating progress" data-value="1" data-total="200" id="example1">
                       <div class="bar"></div>
                       <div class="label">Funding</div>
                     </div>
-</div>
-          </div>
-        </div>
-        <div class="item">
-          <i class="large github middle aligned icon"></i>
-          <div class="content">
-            <a class="header">Semantic-Org/Semantic-UI-Meteor</a>
-            <div class="description">Updated 34 mins ago</div>
-          </div>
-        </div>
-      </div>
-      <br/>
-
-
-      <div class="ui checked checkbox">
-        <input type="checkbox" checked="" class="hidden" readonly="" tabindex="0" />
-        <label>This checkbox comes pre-checked</label>
-      </div>
-
-      <div class="ui vertical menu">
-        <div class="item">Home</div>
-        <div role="listbox" aria-expanded="false" class="ui left pointing dropdown link item" tabindex="0">
-          <div class="text" role="alert" aria-live="polite">Messages</div>
-          <i aria-hidden="true" class="dropdown icon"></i>
-          <div class="menu transition">
-            <div role="option" class="item">Inbox</div>
-            <div role="option" class="item">Starred</div>
-            <div role="option" class="item">Sent Mail</div>
-            <div role="option" class="item">Drafts (143)</div>
-            <div class="divider">
+                  </div>
+                </div>
+              </div>
+              <div class="item">
+                <i class="large github middle aligned icon"></i>
+                <div class="content">
+                  <a class="header">Semantic-Org/Semantic-UI-Meteor</a>
+                  <div class="description">Updated 34 mins ago</div>
+                </div>
+              </div>
             </div>
-            <div role="option" class="item">Spam (1009)</div>
-            <div role="option" class="item">Trash</div>
-          </div>
-        </div>
-        <div class="item">Browse</div>
-        <div class="item">Help</div>
-      </div>
-
-      <div class="ui fitted toggle checkbox">
-        <input type="checkbox" class="hidden" readonly="" tabindex="0" />
-        <label></label>
-      </div>
-
-      <div class="ui radio checkbox">
-        <input type="checkbox" class="hidden" readonly="" tabindex="0" />
-        <label>Radio choice</label>
-      </div>
-
-      <div class="ui indicating progress">
-        <div class="bar"></div>
-        <div class="label">Funding</div>
-      </div>
-
-      <div class="ui progress success">
-        <div class="bar">
-          <div class="progress"></div>
-        </div>
-        <div class="label">Everything worked, your file is all ready.</div>
-      </div>
-
-      <div class="ui progress">
-        <div class="bar">
-          <div class="progress"></div>
-        </div>
-        <div class="label">Uploading Files</div>
-      </div>
-
-      <form class="ui form">
-        <div class="field">Selected value: <b>
-      </b>
-        </div>
-        <div class="field">
-          <div class="ui radio checkbox">
-            <input type="checkbox" class="hidden" name="checkboxRadioGroup" readonly="" tabindex="0" value="this" />
-            <label>Choose this</label>
-          </div>
-        </div>
-        <div class="field">
-          <div class="ui radio checkbox">
-            <input type="checkbox" class="hidden" name="checkboxRadioGroup" readonly="" tabindex="0" value="that" />
-            <label>Or that</label>
-          </div>
-        </div>
-      </form>
-
-      <table class="ui striped table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Date Joined</th>
-            <th>E-mail</th>
-            <th>Called</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>John Lilki</td>
-            <td>September 14, 2013</td>
-            <td>jhlilk22@yahoo.com</td>
-            <td>No</td>
-          </tr>
-          <tr>
-            <td>Jamie Harington</td>
-            <td>January 11, 2014</td>
-            <td>jamieharingonton@yahoo.com</td>
-            <td>Yes</td>
-          </tr>
-          <tr>
-            <td>Jill Lewis</td>
-            <td>May 11, 2014</td>
-            <td>jilsewris22@yahoo.com</td>
-            <td>Yes</td>
-          </tr>
-          <tr>
-            <td>John Lilki</td>
-            <td>September 14, 2013</td>
-            <td>jhlilk22@yahoo.com</td>
-            <td>No</td>
-          </tr>
-          <tr>
-            <td>John Lilki</td>
-            <td>September 14, 2013</td>
-            <td>jhlilk22@yahoo.com</td>
-            <td>No</td>
-          </tr>
-          <tr>
-            <td>Jamie Harington</td>
-            <td>January 11, 2014</td>
-            <td>jamieharingonton@yahoo.com</td>
-            <td>Yes</td>
-          </tr>
-          <tr>
-            <td>Jill Lewis</td>
-            <td>May 11, 2014</td>
-            <td>jilsewris22@yahoo.com</td>
-            <td>Yes</td>
-          </tr>
-          <tr>
-            <td>John Lilki</td>
-            <td>September 14, 2013</td>
-            <td>        <div class="ui indicating progress" data-value="1" data-total="200" id="example5">
+            <br/>
+            <div class="ui checked checkbox">
+              <input type="checkbox" checked="" class="hidden" readOnly="" tabIndex="0" />
+              <label>This checkbox comes pre-checked</label>
+            </div>
+            <div class="ui vertical menu">
+              <div class="item">Home</div>
+              <div role="listbox" aria-expanded="false" class="ui left pointing dropdown link item" tabIndex="0">
+                <div class="text" role="alert" aria-live="polite">Messages</div>
+                <i aria-hidden="true" class="dropdown icon"></i>
+                <div class="menu transition">
+                  <div role="option" class="item">Inbox</div>
+                  <div role="option" class="item">Starred</div>
+                  <div role="option" class="item">Sent Mail</div>
+                  <div role="option" class="item">Drafts (143)</div>
+                  <div class="divider">
+                  </div>
+                  <div role="option" class="item">Spam (1009)</div>
+                  <div role="option" class="item">Trash</div>
+                </div>
+              </div>
+              <div class="item">Browse</div>
+              <div class="item">Help</div>
+            </div>
+            <div class="ui fitted toggle checkbox">
+              <input type="checkbox" class="hidden" readOnly="" tabIndex="0" />
+              <label></label>
+            </div>
+            <div class="ui radio checkbox">
+              <input type="checkbox" class="hidden" readOnly="" tabIndex="0" />
+              <label>Radio choice</label>
+            </div>
+            <div class="ui indicating progress">
               <div class="bar"></div>
               <div class="label">Funding</div>
             </div>
-          </td>
-          <td>        <div class="ui checked checkbox">
-            <input type="checkbox" checked="" class="hidden" readonly="" tabindex="0" />
-            <label>This checkbox comes pre-checked</label>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-    );
+            <div class="ui progress success">
+              <div class="bar">
+                <div class="progress"></div>
+              </div>
+              <div class="label">Everything worked, your file is all ready.</div>
+            </div>
+            <div class="ui progress">
+              <div class="bar">
+                <div class="progress"></div>
+              </div>
+              <div class="label">Uploading Files</div>
+            </div>
+            <form class="ui form">
+              <div class="field">Selected value: <b>
+              </b>
+            </div>
+            <div class="field">
+              <div class="ui radio checkbox">
+                <input type="checkbox" class="hidden" name="checkboxRadioGroup" readOnly="" tabIndex="0" value="this" />
+                <label>Choose this</label>
+              </div>
+            </div>
+            <div class="field">
+              <div class="ui radio checkbox">
+                <input type="checkbox" class="hidden" name="checkboxRadioGroup" readOnly="" tabIndex="0" value="that" />
+                <label>Or that</label>
+              </div>
+            </div>
+          </form>
+          <table class="ui striped table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Date Joined</th>
+                <th>E-mail</th>
+                <th>Called</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>John Lilki</td>
+                <td>September 14, 2013</td>
+                <td>jhlilk22@yahoo.com</td>
+                <td>No</td>
+              </tr>
+              <tr>
+                <td>Jamie Harington</td>
+                <td>January 11, 2014</td>
+                <td>jamieharingonton@yahoo.com</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>Jill Lewis</td>
+                <td>May 11, 2014</td>
+                <td>jilsewris22@yahoo.com</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>John Lilki</td>
+                <td>September 14, 2013</td>
+                <td>jhlilk22@yahoo.com</td>
+                <td>No</td>
+              </tr>
+              <tr>
+                <td>John Lilki</td>
+                <td>September 14, 2013</td>
+                <td>jhlilk22@yahoo.com</td>
+                <td>No</td>
+              </tr>
+              <tr>
+                <td>Jamie Harington</td>
+                <td>January 11, 2014</td>
+                <td>jamieharingonton@yahoo.com</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>Jill Lewis</td>
+                <td>May 11, 2014</td>
+                <td>jilsewris22@yahoo.com</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>John Lilki</td>
+                <td>September 14, 2013</td>
+                <td>        <div class="ui indicating progress" data-value="1" data-total="200" id="example5">
+                  <div class="bar"></div>
+                  <div class="label">Funding</div>
+                </div>
+              </td>
+              <td>        <div class="ui checked checkbox">
+                <input type="checkbox" checked="" class="hidden" readonly="" tabIndex="0" />
+                <label>This checkbox comes pre-checked</label>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      );
+    }
   }
-}
-// *******************************
-// THIS IS THE DEFAULT EXPORT AND IS WHERE THE LOADING OF THE PAGE STARTS
-// USE THIS POINT TO GRAB THE FILTERS
-export default withTracker(() => {
-  return {
-    filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
+  // *******************************
+  // THIS IS THE DEFAULT EXPORT AND IS WHERE THE LOADING OF THE PAGE STARTS
+  // USE THIS POINT TO GRAB THE FILTERS
+  export default withTracker(() => {
+    return {
+      filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
   };
 })(App);
