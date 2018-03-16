@@ -3,6 +3,7 @@ import { Filters } from '../api/filters.js';
 
 // Filter component - represents a single filter item
 export default class Filter extends Component {
+
   toggleChecked() {
     // Set the checked property to the opposite of its current value
     Filters.update(this.props.filter._id, {
