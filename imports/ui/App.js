@@ -382,58 +382,6 @@ renderImagingSequences() {
                  <Button circular icon='add' />
                </Button.Group>
                 <Modal.Description>
-                  <Form>
-                    <table className="ui selectable celled table">
-                      <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>Exposure</th>
-                          <th>Binning</th>
-                          <th>Frame</th>
-                          <th>Filter</th>
-                          <th>Repeat</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td></td>
-                          <td>
-                            <form className="exposure" onSubmit="" >
-                              <input
-                                type="text"
-                                ref="textInput"
-                                placeholder="seconds"
-                              />
-                            </form>
-                          </td>
-                          <td>
-                            <form className="binning" onSubmit="" >
-                              <input
-                                type="text"
-                                ref="textInput"
-                                placeholder="binning need dropbown"
-                              />
-                            </form>
-                          </td>
-                          <td>
-                            <Dropdown placeholder='Frame' fluid selection options={this.renderDropDownFrames()} />
-                          </td>
-                          <td>
-                            <Dropdown placeholder='Filter' fluid selection options={this.renderDropDownFilters()} />
-                          </td>
-                          <td>
-                            <form className="Repeat" onSubmit="" >
-                              <input
-                                type="text"
-                                ref="textInput"
-                                placeholder="Repeat"
-                              />
-                            </form>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </Form>
                 </Modal.Description>
               </Modal.Content>
             </Modal>
@@ -521,7 +469,7 @@ renderImagingSequences() {
 
     console.log('Found state: ' + this.state.activeItem);
 
-    if (this.state.activeItem == 'Target Sessions' ) {
+    if (this.state.activeItem == 'Targets' ) {
       console.log('Running state: ' + this.state.activeItem);
         return this.renderTargetSequences();
 
@@ -539,14 +487,14 @@ renderImagingSequences() {
       return this.renderLogout();
 
     } else {
-      this.state = { activeItem: 'Target Sessions' };
+      this.state = { activeItem: 'Targets' };
       return this.renderTargetSequences();
     }
   }
 
   // *******************************
   //
-  state = { activeItem: 'Target Sessions' }
+  state = { activeItem: 'Targets' }
   handleMenuItemClick = (e, { name }) => this.setState({ activeItem: name })
 
   render() {
@@ -562,7 +510,7 @@ renderImagingSequences() {
           <h1>Image Sessions</h1>
           <div>
             <Menu pointing secondary>
-              <Menu.Item name='Target Sessions' active={activeItem === 'Target Sessions'} onClick={this.handleMenuItemClick} />
+              <Menu.Item name='Targets' active={activeItem === 'Targets'} onClick={this.handleMenuItemClick} />
               <Menu.Item name='Series' active={activeItem === 'Series'} onClick={this.handleMenuItemClick} />
               <Menu.Item name='Settings' active={activeItem === 'Settings'} onClick={this.handleMenuItemClick} />
               <Menu.Menu position='right'>
