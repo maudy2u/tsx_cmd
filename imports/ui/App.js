@@ -19,6 +19,7 @@ import SessionTemplate from './SessionTemplate.js';
 import Filter from './Filter.js';
 import Series from './Series.js';
 import TakeSeriesTemplate from './TakeSeriesTemplate.js';
+import EditorSeriesForm from './EditorSeriesForm.js';
 import TheSkyXInfo from './TheSkyXInfo.js';
 
 
@@ -113,6 +114,26 @@ class App extends Component {
     return this.props.takeSeriesTemplates.map((obj) => (
       <TakeSeriesTemplates key={obj._id} takeSeriesTemplate={obj} />
     ));
+  }
+
+  // *******************************
+  addSeriesTemplate() {
+    const seriesName = ReactDOM.findDOMNode(this.refs.seriesName).value.trim();
+
+    Seriess.insert({
+      priority: 0,
+      name: seriesName, // current time
+      series: [
+        { order: 'Order', value: 0 },
+        { exposure: 'Exposure', value: 300 },
+        { binning: 'Binning', value: 1 },
+        { frame: 'Frame', value: 'Light' },
+        { filter: 'LUM', value: 0 },
+        { repeat: 'Repeat', value: 33 },
+      ],
+    });
+
+
   }
 
   // *******************************
@@ -342,17 +363,17 @@ renderModalSeriesTable() {
 
 // *******************************
 //
-seriesState = { type: "per series"};
+seriesState = { value: "per series"};
 setSeriesState(x) {
-   console.log('Received: ' + x);
-   console.log('Received: ' + String(x));
-   this.seriesState = { type: x};
-   console.log('Found series: ' + this.seriesState.type);
+   console.log('Received: ' + x.value);
+   this.seriesState = { value: x.value};
+   console.log('Found series: ' + this.seriesState.value);
 }
 handleSeriesState = (e, { value }) => this.setSeriesState({ value });
 
 // *******************************
 //
+//aSeriesForm = EditorSeriesForm.render();
 renderImagingSequences() {
 
 //            <td><Progress percent={0} progress /></td>
@@ -371,39 +392,38 @@ renderImagingSequences() {
         <Modal.Header>Create Series</Modal.Header>
         <Modal.Content>
           <Button.Group>
-           <Button circular icon='arrow left' />
-           <Button circular icon='arrow right' />
+            <Button circular icon='save' onClick={this.addSeriesTemplate.bind(this)} />
+           <Button circular icon='arrow up' />
+           <Button circular icon='arrow down' />
          </Button.Group>
           <Modal.Description>
             <Modal trigger={<Button>Add Series</Button>}>
               <Modal.Header>Adding A Series</Modal.Header>
               <Modal.Content>
-                <Button.Group>
-                 <Button circular icon='add' />
-               </Button.Group>
                 <Modal.Description>
+                  <EditorSeriesForm />
                 </Modal.Description>
               </Modal.Content>
             </Modal>
             <Form>
               <Form.Field>
-                <form className="SeriesName" onSubmit="" >
+                <form className="textInputSeriesName" onSubmit="" >
                   <input
                     type="text"
-                    ref="textInput"
+                    ref="seriesName"
                     placeholder="Name for the series"
                   />
                 </form>
               </Form.Field>
               <Form.Field>
-                Repeat executes: <b>{this.seriesState.type}</b>
+                Repeat executes: <b>{this.seriesState.value}</b>
               </Form.Field>
               <Form.Field>
                 <Radio
                   label='Per series'
                   name='seriesRadioGroup'
                   value='per series'
-                  checked={this.seriesState.type === "per series"}
+                  checked={this.seriesState.value == "per series"}
                   onChange={this.handleSeriesState}
                 />
               </Form.Field>
@@ -412,7 +432,7 @@ renderImagingSequences() {
                   label='Across series'
                   name='seriesRadioGroup'
                   value='across series'
-                  checked={this.seriesState.type === "across series"}
+                  checked={this.seriesState.value == "across series"}
                   onChange={this.handleSeriesState}
                 />
               </Form.Field>
@@ -686,12 +706,14 @@ renderImagingSequences() {
               <tr>
                 <td>John Lilki</td>
                 <td>September 14, 2013</td>
-                <td>        <div class="ui indicating progress" data-value="1" data-total="200" id="example5">
+                <td>
+                  <div class="ui indicating progress" data-value="1" data-total="200" id="example5">
                   <div class="bar"></div>
                   <div class="label">Funding</div>
                 </div>
               </td>
-              <td>        <div class="ui checked checkbox">
+              <td>
+                <div class="ui checked checkbox">
                 <input type="checkbox" checked="" class="hidden" readonly="" tabIndex="0" />
                 <label>This checkbox comes pre-checked</label>
               </div>
