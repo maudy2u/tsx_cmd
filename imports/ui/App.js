@@ -4,7 +4,7 @@ import { withTracker } from 'meteor/react-meteor-data';
 
 // Import the API Model
 import { SessionTemplates } from '../api/sessionTemplates.js';
-import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
+import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
 import { Seriess } from '../api/seriess.js';
 import { Filters } from '../api/filters.js';
 import { TargetSessions } from '../api/targetSessions.js';
@@ -304,7 +304,7 @@ class App extends Component {
 
     } else if (this.state.activeItem == 'Series') {
       return (
-      <TakeSeriesTemplate takeSeriesTemplates={this.props.takeSeriesTemplates}/>
+      <TakeSeriesTemplate takeSeriesTemplates={this.takeSeriesTemplates}/>
       )
     } else if (this.state.activeItem == 'Settings') {
       return this.renderSettings();
@@ -327,6 +327,27 @@ class App extends Component {
   state = { activeItem: 'Targets' }
   handleMenuItemClick = (e, { name }) => this.setState({ activeItem: name })
 
+  addNewTemplate() {
+    TakeSeriesTemplates.insert({
+      name: "",
+      processSeries: "across series",
+      // series: {
+      //   order: 0,
+      //   checked: false,
+      //   series: [
+      //     { order: 'Order', value: 0 },
+      //     { exposure: 'Exposure', value: 1 },
+      //     { binning: 'Binning', value: 1 },
+      //     { frame: 'Frame', value: 'Light' },
+      //     { filter: 'LUM', value: 0 },
+      //     { repeat: 'Repeat', value: 1 },
+      //   ],
+      // },
+      createdAt: new Date(), // current time
+    });
+    return;
+  }
+
   render() {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
     */
@@ -339,6 +360,8 @@ class App extends Component {
         <header>
           <h1>Image Sessions</h1>
           <div>
+            {/* <Button primary onClick={this.addNewTemplate()}>Add</Button> */}
+            {/* <button onClick={this.addNewTemplate()}>Click me</button> */}
             <Menu pointing secondary>
               <Menu.Item name='Targets' active={activeItem === 'Targets'} onClick={this.handleMenuItemClick} />
               <Menu.Item name='Series' active={activeItem === 'Series'} onClick={this.handleMenuItemClick} />

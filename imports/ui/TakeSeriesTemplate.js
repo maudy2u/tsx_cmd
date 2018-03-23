@@ -3,7 +3,7 @@ import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 
 import DefineTemplate from './DefineTemplate.js'
 import EditorSeriesForm from './EditorSeriesForm.js';
-import { Modal, Button, Radio } from 'semantic-ui-react'
+import { Modal, Button, Radio, Icon } from 'semantic-ui-react'
 
 // Filter component - represents a single filter item
 export default class TakeSeriesTemplate extends Component {
@@ -19,114 +19,123 @@ export default class TakeSeriesTemplate extends Component {
     TakeSeriesTemplates.remove(template._id);
   }
   deleteCheckedTemplateSeries() {
-//     const { open } = this.closeDel
-//
-//     return (
-//       <Modal open={open} onClose={this.close}>
-//         <Modal.Header>
-//           Delete Account
-//         </Modal.Header>
-//         <Modal.Content>
-//      <p>Are you sure you want to delete your account</p>
-//     </Modal.Content>
-//     <Modal.Actions>
-//      <Button negative>No</Button>
-//      <Button positive icon='checkmark' labelPosition='right' content='Yes' onClick={this.confirmedDeleteTemplateSeries(template)}/>
-//    </Modal.Actions>
-//   </Modal>
-// )
+
+    return (
+      <Modal
+        open={this.state.modalDelOpen}
+        onClose={this.handleDelClose}
+        closeIcon>
+        <Modal.Header>
+          Delete Template
+        </Modal.Header>
+        <Modal.Content>
+     <p>Are you sure you want to delete this template</p>
+    </Modal.Content>
+    <Modal.Actions>
+     <Button negative>No</Button>
+     <Button positive icon='checkmark' labelPosition='right' content='Yes' />
+     {/* onClick={this.confirmedDeleteTemplateSeries(template)} */}
+   </Modal.Actions>
+  </Modal>
+)
   }
 
   editTemplateSeries() {
-    // // Clear form
-    // const { open } = this.closeEdit
-    // var selTemplate = this.props.takeSeriesTemplates[0];
-    // //key={selTemplate._id} template={selTemplate} />
-    // if (typeof selTemplate == 'undefined') {
-    //   this.addNewTemplate();
-    //   selTemplate = this.newTemplate;
-    // }
-    //   return (
-    //     <Modal open={open} onClose={this.close} >
-    //       <Modal.Header>Edit Series</Modal.Header>
-    //       <Modal.Content>
-    //         <Modal.Description>
-    //           <EditorSeriesForm key={selTemplate._id} template={selTemplate} />
-    //         </Modal.Description>
-    //       </Modal.Content>
-    //     </Modal>
-    //   )
+    // Clear form
+    var selTemplate = this.props.takeSeriesTemplates[0];
+    //key={selTemplate._id} template={selTemplate} />
+    if (typeof selTemplate == 'undefined') {
+      this.addNewTemplate();
+      selTemplate = this.newTemplate;
+    }
+      return (
+        <Modal
+          open={this.state.modalEditOpen}
+          onClose={this.handleEditClose}
+          closeIcon>
+          <Modal.Header>Edit Series</Modal.Header>
+          <Modal.Content>
+            <Modal.Description>
+              <EditorSeriesForm key={selTemplate._id} template={selTemplate} />
+            </Modal.Description>
+          </Modal.Content>
+          <Modal.Actions>
+            <Button circular icon='save'  onClick={this.handleEditClose} inverted/>
+            <Button circular icon='cancel'  onClick={this.handleEditClose} inverted/>
+          </Modal.Actions>
+        </Modal>
+      )
   }
 
   newTemplate = '';
   addNewTemplate() {
-    this.newTemplate = TakeSeriesTemplates.insert({
-      name: "",
-      processSeries: "across series",
-      series: {
-        order: 0,
-        checked: false,
-        series: [
-          { order: 'Order', value: 0 },
-          { exposure: 'Exposure', value: 1 },
-          { binning: 'Binning', value: 1 },
-          { frame: 'Frame', value: 'Light' },
-          { filter: 'LUM', value: 0 },
-          { repeat: 'Repeat', value: 1 },
-        ],
-      },
-      createdAt: new Date(), // current time
-    })
+    if( this.state.modalAddOpen == true ) {
+      this.newTemplate = TakeSeriesTemplates.insert({
+        name: "",
+        processSeries: "across series",
+        series: {
+          order: 0,
+          checked: false,
+          series: [
+            { order: 'Order', value: 0 },
+            { exposure: 'Exposure', value: 1 },
+            { binning: 'Binning', value: 1 },
+            { frame: 'Frame', value: 'Light' },
+            { filter: 'LUM', value: 0 },
+            { repeat: 'Repeat', value: 1 },
+          ],
+        },
+        createdAt: new Date(), // current time
+      })
+    }
   }
 
   createNewTemplateSeries() {
-    const { open } = this.closeAdd
-
+//    const { open } = this.addTemplate
+//            <EditorSeriesForm key={this.newTemplate._id} template={this.newTemplate} />
+//onOpen={this.addNewTemplate()}>
     return (
-      <Modal open={open} onClose={this.close} onOpen={this.addNewTemplate()}>
+      <Modal
+        open={this.state.modalAddOpen}
+        onClose={this.handleAddClose}
+        closeIcon>
         <Modal.Header>Create Series</Modal.Header>
+        <Button.Group>
+          {/* <Button circular icon='save'  onClick={this.handleAddClose} />
+          <Button circular icon='cancel'  onClick={this.handleAddClose}/> */}
+          <Button circular icon='add' onClick={this.addNewTemplate()} />
+          {/* <Button circular icon='edit' onClick={this.handleAddClose} />
+          <Button circular icon='delete' onClick={this.handleAddClose} /> */}
+       </Button.Group>
         <Modal.Content>
           <Modal.Description>
-            <EditorSeriesForm key={this.newTemplate._id} template={this.newTemplate} />
+            hello
           </Modal.Description>
         </Modal.Content>
       </Modal>
     )
   }
 
-//  state = { open: false }
-  addTemplate = { open: false }
-  editTemplate = { open: false }
-  delTemplate = { open: false }
-
-//  show = size => () => this.setState({ size, open: true })
-  showAddTemp(){ this.addTemplate= { open: true }}
-  showEditTemp(){ this.editTemplate={ open: true }}
-  showDelTemp(){ this.delTemplate={ open: true }}
-
-  closeAdd(){ this.addTemplate={ open: false }}
-  closeEdit(){ this.editTemplate={ open: false }}
-  closeDel(){ this.delTemplate={ open: false }}
+  state = { modalAddOpen: false, modalEditOpen: false, modalDelOpen: false, }
+  handleAddOpen = () => this.setState({ modalAddOpen: true })
+  handleAddClose = () => this.setState({ modalAddOpen: false })
+  handleEditOpen = () => this.setState({ modalEditOpen: true })
+  handleEditClose = () => this.setState({ modalEditOpen: false })
+  handleDelOpen = () => this.setState({ modalDelOpen: true })
+  handleDelClose = () => this.setState({ modalDelOpen: false })
 
 
   render() {
-
-    // Give tasks a different className when they are checked off,
-    // so that we can style them nicely in CSS
-
-//    const filterClassName = this.props.takeSeriesTemplate.checked ? 'checked' : '';
-//    const { open, size } = this.state
-
     return (
       <div>
         <Button.Group>
-          <Button circular icon='add' onClick={this.showAddTemp()} />
-          <Button circular icon='edit' onClick={this.showEditTemp()} />
-          <Button circular icon='delete' onClick={this.showDelTemp()} />
+          <Button circular icon='add' onClick={this.handleAddOpen} />
+          <Button circular icon='edit' onClick={this.handleEditOpen} />
+          <Button circular icon='delete' onClick={this.handleDelOpen} />
        </Button.Group>
        {this.createNewTemplateSeries()}
-       {this.editTemplateSeries()}
-       {this.deleteCheckedTemplateSeries()}
+       {/* {this.editTemplateSeries()}
+       {this.deleteCheckedTemplateSeries()} */}
         <table className="ui selectable celled table">
           <thead>
             <tr>
@@ -137,9 +146,9 @@ export default class TakeSeriesTemplate extends Component {
             </tr>
           </thead>
           <tbody>
-            {this.props.takeSeriesTemplates.map( (takeSeriesTemplate)=>{
-//              return <DefineTemplate key={takeSeriesTemplate._id} seriesTemplate={takeSeriesTemplate} />
-            })}
+            {/* {TakeSeriesTemplates.map( (takeSeriesTemplate)=>{
+              return <DefineTemplate key={takeSeriesTemplate._id} seriesTemplate={takeSeriesTemplate} />
+            })} */}
           </tbody>
         </table>
       </div>

@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 
 export default class DefineTemplate extends Component {
 

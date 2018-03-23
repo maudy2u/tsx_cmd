@@ -93,7 +93,7 @@ export default class EditorSeriesForm extends Component {
               name='seriesRadioGroup'
               value='per series'
               checked={this.props.template.processSeries === "per series"}
-              onChange={this.handleSeriesState}
+              // onChange={this.handleSeriesState}
             />
           </Form.Field>
           <Form.Field>
@@ -102,7 +102,7 @@ export default class EditorSeriesForm extends Component {
               name='seriesRadioGroup'
               value='across series'
               checked={this.props.template.processSeries === "across series"}
-              onChange={this.handleSeriesState}
+              // onChange={this.handleSeriesState}
             />
           </Form.Field>
         </Form>
