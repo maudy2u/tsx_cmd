@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { Dropdown, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
-
 import { withTracker } from 'meteor/react-meteor-data';
 
 // Import the API Model
@@ -9,12 +7,13 @@ import { SessionTemplates } from '../api/sessionTemplates.js';
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 import { Seriess } from '../api/seriess.js';
 import { Filters } from '../api/filters.js';
-import { ImageSessions } from '../api/imageSessions.js';
+import { TargetSessions } from '../api/targetSessions.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 // PROBLEM: import { TheSkyXInfos } from '../api/theSkyXInfo.js';
 
 // Import the UI
-import ImageSession from './ImageSession.js';
+import { Dropdown, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
+import TargetSession from './TargetSession.js';
 import SessionTemplate from './SessionTemplate.js';
 import Filter from './Filter.js';
 import Series from './Series.js';
@@ -23,6 +22,7 @@ import EditorSeriesForm from './EditorSeriesForm.js';
 import TheSkyXInfo from './TheSkyXInfo.js';
 
 
+// Examples
 import Task from './Task.js';
 
 // App component - represents the whole app
@@ -41,9 +41,9 @@ class App extends Component {
   // *******************************
   //
   // Default creation of sessions using above method
-  renderImageSessions() {
-    return this.getImageSessions().map((imageSession) => (
-      <ImageSession key={imageSession._id} imageSession={imageSession} />
+  renderTargetSessions() {
+    return this.getImageSessions().map((targetSession) => (
+      <TargetSession key={targetSession._id} targetSession={targetSession} />
     ));
   }
 
@@ -60,6 +60,16 @@ class App extends Component {
     });
     // Clear form
     ReactDOM.findDOMNode(this.refs.textInput).value = '';
+  }
+
+  renderSeriesEditor() {
+
+    // if creating then create a blank series to Edit
+    // if exist then load and poplate the form
+
+    return this.props.filters.map((obj) => (
+        <EditorSeriesForm key={obj._id} filter={obj} />
+    ));
   }
 
   // *******************************
@@ -105,35 +115,6 @@ class App extends Component {
     return this.props.filters.map((obj) => (
       <Filter key={obj._id} filter={obj} />
     ));
-  }
-
-  // *******************************
-  //
-  renderTakeSeriesTemplates() {
-    // "filters" ise created in the withTracker loading at the bottom
-    return this.props.takeSeriesTemplates.map((obj) => (
-      <TakeSeriesTemplates key={obj._id} takeSeriesTemplate={obj} />
-    ));
-  }
-
-  // *******************************
-  addSeriesTemplate() {
-    const seriesName = ReactDOM.findDOMNode(this.refs.seriesName).value.trim();
-
-    Seriess.insert({
-      priority: 0,
-      name: seriesName, // current time
-      series: [
-        { order: 'Order', value: 0 },
-        { exposure: 'Exposure', value: 300 },
-        { binning: 'Binning', value: 1 },
-        { frame: 'Frame', value: 'Light' },
-        { filter: 'LUM', value: 0 },
-        { repeat: 'Repeat', value: 33 },
-      ],
-    });
-
-
   }
 
   // *******************************
@@ -227,233 +208,61 @@ class App extends Component {
          </Button.Group>
         </div>
         <ul>
-          {this.renderImageSessions()}
+          {this.renderTargetSessions()}
         </ul>
       </div>
     );
   }
 
-/*
-<table class="ui selectable celled table">
-  <thead>
-    <tr>
-      <th>Series#</th>
-      <th>Frame/Action</th>
-      <th>Exposure/Time/Temp</th>
-      <th>Binning</th>
-      <th>Filter</th>
-      <th>Repeat</th>
-      <th>Calibration</th>
-      <th>Progress</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
-        <div class="ui checked checkbox">
-          <input type="checkbox" checked="" class="hidden" readonly="" tabIndex="0" />
-          <label>This checkbox comes pre-checked</label>
-        </div>
-        1
-      </td>
-      <td>Light</td>
-      <td>300</td>
-      <td>1x1</td>
-      <td>Lum</td>
-      <td>33</td>
-      <td>None</td>
-      <td><Progress percent={0} progress /></td>
-    </tr>
-    <tr>
-      <td>Focus</td>
-      <td>Light</td>
-      <td>300</td>
-      <td>1x1</td>
-      <td>Lum</td>
-      <td>33</td>
-      <td>None</td>
-      <td><Progress percent={0} progress /></td>
-    </tr>
-    <tr>
-      <td>Jill</td>
-      <td>Light</td>
-      <td>300</td>
-      <td>1x1</td>
-      <td>Lum</td>
-      <td>33</td>
-      <td>None</td>
-      <td><Progress percent={0} progress /></td>
-    </tr>
-    <tr class="warning">
-      <td>John</td>
-      <td>Light</td>
-      <td>300</td>
-      <td>1x1</td>
-      <td>Lum</td>
-      <td>33</td>
-      <td>None</td>
-      <td><Progress percent={0} progress /></td>
-    </tr>
-    <tr>
-      <td>Jamie</td>
-      <td class="positive">Light</td>
-      <td class="warning">300</td>
-      <td>1x1</td>
-      <td>Lum</td>
-      <td>33</td>
-      <td>None</td>
-      <td><Progress percent={0} progress /></td>
-    </tr>
-    <tr>
-      <td>Jill</td>
-      <td class="negative">Light</td>
-      <td>300</td>
-      <td>1x1</td>
-      <td>Lum</td>
-      <td>33</td>
-      <td>None</td>
-      <td><Progress percent={0} progress /></td>
-    </tr>
-  </tbody>
-</table>
-*/
-
-renderModalSeriesTable() {
-  return (
-    <div>
-    </div>
-  );
-}
-
-/*
-<Dropdown placeholder='Select Filter' fluid selection options={this.renderDropDownFiltersTest()} />
-<table className="ui selectable celled table">
-  <thead>
-    <tr>
-      <th>Series#</th>
-      <th>Frame/Action</th>
-      <th>Exposure/Time/Temp</th>
-      <th>Binning</th>
-      <th>Filter</th>
-      <th>Repeat</th>
-      <th>Calibration</th>
-      <th>Progress</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
-        <div className="ui checked checkbox">
-          <input type="checkbox" checked="" name="series1" readOnly="" tabIndex="0" />
-          <label>This checkbox comes pre-checked</label>
-        </div>
-        1
-      </td>
-      <td>Light</td>
-      <td>300</td>
-      <td>1x1</td>
-      <td>Lum</td>
-      <td>33</td>
-      <td>None</td>
-      <td><Progress percent={0} progress /></td>
-    </tr>
-  </tbody>
-</table>
- */
-
-// *******************************
-//
-seriesState = { value: "per series"};
-setSeriesState(x) {
-   console.log('Received: ' + x.value);
-   this.seriesState = { value: x.value};
-   console.log('Found series: ' + this.seriesState.value);
-}
-handleSeriesState = (e, { value }) => this.setSeriesState({ value });
-
-// *******************************
-//
-//aSeriesForm = EditorSeriesForm.render();
-renderImagingSequences() {
-
-//            <td><Progress percent={0} progress /></td>
-
+  renderModalSeriesTable() {
     return (
-    <div>
-      <Button.Group>
-       <Button circular icon='arrow up' />
-       <Button circular icon='arrow down' />
-     </Button.Group>
-      <Button.Group>
-       <Button circular icon='delete' />
-       <Button circular icon='edit' />
-     </Button.Group>
-      <Modal trigger={<Button>Create Series</Button>}>
-        <Modal.Header>Create Series</Modal.Header>
-        <Modal.Content>
-          <Button.Group>
-            <Button circular icon='save' onClick={this.addSeriesTemplate.bind(this)} />
-           <Button circular icon='arrow up' />
-           <Button circular icon='arrow down' />
-         </Button.Group>
-          <Modal.Description>
-            <Modal trigger={<Button>Add Series</Button>}>
-              <Modal.Header>Adding A Series</Modal.Header>
-              <Modal.Content>
-                <Modal.Description>
-                  <EditorSeriesForm />
-                </Modal.Description>
-              </Modal.Content>
-            </Modal>
-            <Form>
-              <Form.Field>
-                <form className="textInputSeriesName" onSubmit="" >
-                  <input
-                    type="text"
-                    ref="seriesName"
-                    placeholder="Name for the series"
-                  />
-                </form>
-              </Form.Field>
-              <Form.Field>
-                Repeat executes: <b>{this.seriesState.value}</b>
-              </Form.Field>
-              <Form.Field>
-                <Radio
-                  label='Per series'
-                  name='seriesRadioGroup'
-                  value='per series'
-                  checked={this.seriesState.value == "per series"}
-                  onChange={this.handleSeriesState}
-                />
-              </Form.Field>
-              <Form.Field>
-                <Radio
-                  label='Across series'
-                  name='seriesRadioGroup'
-                  value='across series'
-                  checked={this.seriesState.value == "across series"}
-                  onChange={this.handleSeriesState}
-                />
-              </Form.Field>
-            </Form>
-          </Modal.Description>
-        </Modal.Content>
-      </Modal>
-      <table className="ui selectable celled table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Take Series Name</th>
-            <th>Details</th>
-          </tr>
-        </thead>
-        <tbody>
-          {this.renderTakeSeriesTemplates()}
-        </tbody>
-      </table>
-    </div>
+      <div>
+      </div>
     );
+  }
+
+  /*
+  <Dropdown placeholder='Select Filter' fluid selection options={this.renderDropDownFiltersTest()} />
+  <table className="ui selectable celled table">
+    <thead>
+      <tr>
+        <th>Series#</th>
+        <th>Frame/Action</th>
+        <th>Exposure/Time/Temp</th>
+        <th>Binning</th>
+        <th>Filter</th>
+        <th>Repeat</th>
+        <th>Calibration</th>
+        <th>Progress</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <div className="ui checked checkbox">
+            <input type="checkbox" checked="" name="series1" readOnly="" tabIndex="0" />
+            <label>This checkbox comes pre-checked</label>
+          </div>
+          1
+        </td>
+        <td>Light</td>
+        <td>300</td>
+        <td>1x1</td>
+        <td>Lum</td>
+        <td>33</td>
+        <td>None</td>
+        <td><Progress percent={0} progress /></td>
+      </tr>
+    </tbody>
+  </table>
+   */
+
+
+  // *******************************
+  //
+  //aSeriesForm = EditorSeriesForm.render();
+
+  renderTakeSeriesTemplates() {
   }
 
   // *******************************
@@ -491,11 +300,12 @@ renderImagingSequences() {
 
     if (this.state.activeItem == 'Targets' ) {
       console.log('Running state: ' + this.state.activeItem);
-        return this.renderTargetSequences();
+      return this.renderTargetSequences();
 
     } else if (this.state.activeItem == 'Series') {
-      return this.renderImagingSequences();
-
+      return (
+      <TakeSeriesTemplate takeSeriesTemplates={this.props.takeSeriesTemplates}/>
+      )
     } else if (this.state.activeItem == 'Settings') {
       return this.renderSettings();
 
@@ -726,12 +536,97 @@ renderImagingSequences() {
     }
   }
   // *******************************
-  // THIS IS THE DEFAULT EXPORT AND IS WHERE THE LOADING OF THE PAGE STARTS
+  // THIS IS THE DEFAULT EXPORT AND IS WHERE THE LOADING OF THE COMPONENT STARTS
   // USE THIS POINT TO GRAB THE FILTERS
   export default withTracker(() => {
     return {
       seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
       filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
+      targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
   };
 })(App);
+/*
+<table class="ui selectable celled table">
+  <thead>
+    <tr>
+      <th>Series#</th>
+      <th>Frame/Action</th>
+      <th>Exposure/Time/Temp</th>
+      <th>Binning</th>
+      <th>Filter</th>
+      <th>Repeat</th>
+      <th>Calibration</th>
+      <th>Progress</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <div class="ui checked checkbox">
+          <input type="checkbox" checked="" class="hidden" readonly="" tabIndex="0" />
+          <label>This checkbox comes pre-checked</label>
+        </div>
+        1
+      </td>
+      <td>Light</td>
+      <td>300</td>
+      <td>1x1</td>
+      <td>Lum</td>
+      <td>33</td>
+      <td>None</td>
+      <td><Progress percent={0} progress /></td>
+    </tr>
+    <tr>
+      <td>Focus</td>
+      <td>Light</td>
+      <td>300</td>
+      <td>1x1</td>
+      <td>Lum</td>
+      <td>33</td>
+      <td>None</td>
+      <td><Progress percent={0} progress /></td>
+    </tr>
+    <tr>
+      <td>Jill</td>
+      <td>Light</td>
+      <td>300</td>
+      <td>1x1</td>
+      <td>Lum</td>
+      <td>33</td>
+      <td>None</td>
+      <td><Progress percent={0} progress /></td>
+    </tr>
+    <tr class="warning">
+      <td>John</td>
+      <td>Light</td>
+      <td>300</td>
+      <td>1x1</td>
+      <td>Lum</td>
+      <td>33</td>
+      <td>None</td>
+      <td><Progress percent={0} progress /></td>
+    </tr>
+    <tr>
+      <td>Jamie</td>
+      <td class="positive">Light</td>
+      <td class="warning">300</td>
+      <td>1x1</td>
+      <td>Lum</td>
+      <td>33</td>
+      <td>None</td>
+      <td><Progress percent={0} progress /></td>
+    </tr>
+    <tr>
+      <td>Jill</td>
+      <td class="negative">Light</td>
+      <td>300</td>
+      <td>1x1</td>
+      <td>Lum</td>
+      <td>33</td>
+      <td>None</td>
+      <td><Progress percent={0} progress /></td>
+    </tr>
+  </tbody>
+</table>
+*/

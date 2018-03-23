@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import { Dropdown, Menu, Segment, Button, Progress } from 'semantic-ui-react'
-import { ImageSessions } from '../api/imageSessions.js';
+import { TargetSessions } from '../api/targetSessions.js';
 
 
 // ImageSession component - represents a single ImageSession
-export default class ImageSession extends Component {
+export default class TargetSession extends Component {
   render() {
     // Get the data for the sessions
     // var test;
@@ -17,7 +17,7 @@ export default class ImageSession extends Component {
 
     return (
       <li>
-        {this.props.imageSession.description}
+        {this.props.targetSession.description}
         <Progress percent={iNum} progress />
       </li>
     );

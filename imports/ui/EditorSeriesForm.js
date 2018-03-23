@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
-import { Form } from 'semantic-ui-react'
+import { Form, Button, Radio } from 'semantic-ui-react'
+import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 
-class EditorSeriesForm extends Component {
+export default class EditorSeriesForm extends Component {
   // *******************************
   state = { exposure: '', binning: '', frame: '', filter: '', repeat: '' }
 
@@ -15,6 +16,36 @@ class EditorSeriesForm extends Component {
     this.setState({ submittedExposure: exposure, submittedBinning: binning, submittedFrame: frame, submittedFilter: filter, submittedRpeat: repeat })
   }
 
+  toggleChecked() {
+    // Set the checked property to the opposite of its current value
+    TakeSeriesTemplates.update(this.props.takeSeriesTemplates._id, {
+      $set: { checked: !this.props.takeSeriesTemplates.checked },
+    });
+  }
+
+  deleteCheckedSeries() {
+  }
+
+  // *******************************
+  addSeries() {
+//    TakeSeriesTemplates.update(this.props.takeSeriesTemplates._id, {
+//    }
+
+    this.props.template.processSeries.push({
+      order: 0,
+      checked: false,
+      series: [
+        { order: 'Order', value: 0 },
+        { exposure: 'Exposure', value: 1 },
+        { binning: 'Binning', value: 1 },
+        { frame: 'Frame', value: 'Light' },
+        { filter: 'LUM', value: 0 },
+        { repeat: 'Repeat', value: 1 },
+      ],
+    });
+  }
+
+
   // *******************************
   // Get the binning from TheSkyX
   renderDropDownBinning() {
@@ -25,27 +56,15 @@ class EditorSeriesForm extends Component {
     ];
   }
 
-  // *******************************
-  // Get the filters from TheSkyX
-  renderDropDownFilters() {
-    return [
-      { key: 'l', text: 'Static LUM', value: 'LUM' },
-      { key: 'r', text: 'Static R', value: 'R' },
-      { key: 'g', text: 'Static B', value: 'G' },
-      { key: 'b', text: 'Static G', value: 'B' },
+  handleSeriesState = (e, { value }) => this.setTemplateProcessing({ value });
+  setTemplateProcessing(x) {
+     console.log('Received: ' + x.value);
+     TakeSeriesTemplates.update(this.props.template._id, {
+       $set: { processSeries: !this.props.template.processSeries },
+     });
 
-    ];
-  }
-
-  // *******************************
-  // This is used to populate drop down frame lists
-  renderDropDownFrames() {
-    return [
-      { key: 'l', text: 'Light', value: 'light' },
-      { key: 'f', text: 'Flat', value: 'flat' },
-      { key: 'd', text: 'Dark', value: 'dark' },
-      { key: 'b', text: 'Bias', value: 'bias' },
-    ];
+     this.props.template.processSeries = x.value;
+     console.log('Found series: ' + this.props.template.processSeries);
   }
 
   render() {
@@ -53,43 +72,57 @@ class EditorSeriesForm extends Component {
 
     return (
       <div>
+        <Button circular icon='add' onClick={this.addSeries.bind(this)} />
+        <Button circular icon='delete' onClick={this.deleteCheckedSeries.bind(this)} />
         <Form>
-          <Form.Button circular icon='save'ref="saveSeries" onClick={this.handleSubmit} />
-          <Form.Group>
-          <table className="ui selectable celled table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Exposure</th>
-                <th>Binning</th>
-                <th>Frame</th>
-                <th>Filter</th>
-                <th>Repeat</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td></td>
-                <td>
-                  <Form.Input ref="exposure" placeholder='Exposure' name='exposure' value={exposure} onChange={this.handleChange} />
-                </td>
-                <td>
-                  <Form.Input ref="binning" placeholder='Binning' name='binning' value={binning} onChange={this.handleChange} />
-                </td>
-                <td>
-                  <Form.Select fluid ref="frame" label='Frame' options={this.renderDropDownFrames()} placeholder='Light' />
-                </td>
-                <td>
-                  <Form.Select fluid ref="filter" label='Filter' options={this.renderDropDownFilters()} placeholder='Filter' />
-                </td>
-                <td>
-                  <Form.Input ref="repeat" placeholder='Repeat' name='repeat' value={repeat} onChange={this.handleChange} />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </Form.Group>
+          <Form.Field>
+            <form className="textInputSeriesName" onSubmit="" >
+              <input
+                type="text"
+                ref="seriesName"
+                placeholder="Name for the series"
+              />
+            </form>
+          </Form.Field>
+          <Form.Field>
+            Repeat executes: <b>{this.props.template.processSeries}</b>
+          </Form.Field>
+          <Form.Field>
+            <Radio
+              label='Per series'
+              name='seriesRadioGroup'
+              value='per series'
+              checked={this.props.template.processSeries === "per series"}
+              onChange={this.handleSeriesState}
+            />
+          </Form.Field>
+          <Form.Field>
+            <Radio
+              label='Across series'
+              name='seriesRadioGroup'
+              value='across series'
+              checked={this.props.template.processSeries === "across series"}
+              onChange={this.handleSeriesState}
+            />
+          </Form.Field>
         </Form>
+        <table className="ui selectable celled table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Exposure</th>
+              <th>Binning</th>
+              <th>Frame</th>
+              <th>Filter</th>
+              <th>Repeat</th>
+            </tr>
+          </thead>
+          <tbody>
+            {this.props.template.series.map( (definedSeries)=>{
+              return  <DefineSeries key={definedSeries._id} definedSeries={definedSeries} />
+            })}
+          </tbody>
+        </table>
       </div>
     )
   }
@@ -100,4 +133,3 @@ class EditorSeriesForm extends Component {
 <strong>onSubmit:</strong>
 <pre>{JSON.stringify({ submittedName, submittedEmail }, null, 2)}</pre>
 */
-export default EditorSeriesForm
