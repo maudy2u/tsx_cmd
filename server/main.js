@@ -8,6 +8,11 @@ import '../imports/api/run_imageSession.js';
 import './filters.js';
 
 
+// https://stackoverflow.com/questions/5223/length-of-a-javascript-object
+// MAP: var num = Object.keys(targetSessions).size;
+// Array: Object.keys(myArray).length
+
+
 Meteor.startup(() => {
   // code to run on server at startup
 

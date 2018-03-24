@@ -25,6 +25,133 @@ import TheSkyXInfo from './TheSkyXInfo.js';
 // Examples
 import Task from './Task.js';
 
+// *******************************
+// Filter Series
+// 1. Filter name
+// 2. Exposure
+// 3. Quantity
+// 4. taken - number of images obtained
+// LUM Imaging
+var takeSeries1 = new Map();
+takeSeries1.set( "order": 0);
+takeSeries1.set("exposure", 1 );
+takeSeries1.set("binning",  1 );
+takeSeries1.set("frame", 'Light' );
+takeSeries1.set("filter", 0 );
+takeSeries1.set("repeat", 2 );
+takeSeries1.set("taken", 0);
+
+// R Imaging
+var takeSeries2 = new Map();
+takeSeries2.set( "order": 1);
+takeSeries2.set("exposure", 2 );
+takeSeries2.set("binning",  1 );
+takeSeries2.set("frame", 'Light' );
+takeSeries2.set("filter", 1 );
+takeSeries2.set("repeat", 2 );
+takeSeries2.set("taken", 0);
+
+var takeSeries3 = new Map();
+takeSeries3.set( "order": 0);
+takeSeries3.set("exposure", 3 );
+takeSeries3.set("binning",  1 );
+takeSeries3.set("frame", 'Light' );
+takeSeries3.set("filter", 1 );
+takeSeries3.set("repeat", 2 );
+takeSeries3.set("taken", 0);
+
+var takeSeries4 = new Map();
+takeSeries4.set( "order": 1);
+takeSeries4.set("exposure", 4 );
+takeSeries4.set("binning",  1 );
+takeSeries4.set("frame", 'Light' );
+takeSeries4.set("filter", 1 );
+takeSeries4.set("repeat", 2 );
+takeSeries4.set("taken", 0);
+
+var testTakeSeries1 = [];
+testTakeSeries1.push(takeSeries1);
+testTakeSeries1.push(takeSeries2);
+
+var testTakeSeries2 = [];
+testTakeSeries2.push(takeSeries3);
+testTakeSeries2.push(takeSeries4);
+
+var testTakeSeriesTemplate1 = new Map();
+testTakeSeriesTemplate1.set("name", "SHO - example");
+testTakeSeriesTemplate1.set("description", "Example test");
+testTakeSeriesTemplate1.set("processSeries", "across series");
+testTakeSeriesTemplate1.set("createdAt", new Date()); // current time
+testTakeSeriesTemplate1.set("series", testTakeSeries1); // current time
+
+var testTakeSeriesTemplate2 = new Map();
+testTakeSeriesTemplate2.set("name", "SHO - alternate");
+testTakeSeriesTemplate2.set("description", "Used as a test to show");
+testTakeSeriesTemplate2.set("processSeries", "per series");
+testTakeSeriesTemplate2.set("createdAt", new Date()); // current time
+testTakeSeriesTemplate2.set("series", testTakeSeries2); // current time
+
+
+var testAllTakeSeriesTemplates = [];
+testAllTakeSeriesTemplates.push(testTakeSeriesTemplate1);
+testAllTakeSeriesTemplates.push(testTakeSeriesTemplate2);
+
+// *******************************
+var target1 = new Map();
+var target2 = new Map();
+
+target1.set("name", 'Higher Priority Rerun of NGC3628');
+target1.set("targetFindName", 'NGC3682');
+target1.set("targetImage", '');
+target1.set("description", 'test run');
+target1.set("takeSeries", testTakeSeriesTemplate1);
+target1.set("ra", 11.338111053923866);
+target1.set("dec", 13.5897473762046);
+target1.set("angle", 209.1496693374404);
+target1.set("scale", 0.281);
+target1.set("coolingTemp", -19);
+target1.set("clsFliter", 'Lum');
+target1.set("focusFliter",'Lum');
+target1.set("foccusSamples", 3);
+target1.set("focusBin", '4');
+target1.set("guideExposure", '9');
+target1.set("guideDelay", '2');
+target1.set("startTime", '');
+target1.set("stopTime", '');
+target1.set("priority", 0);
+target1.set("tempChg", 0.7);
+target1.set("minAlt", 30);
+target1.set("completed", false);
+target1.set("createdAt", new Date());
+
+target2.set("name", 'Lower priority Rerun of NGC3628');
+target2.set("targetFindName", 'NGC3682');
+target2.set("targetImage", '');
+target2.set("description", 'test run');
+target1.set("takeSeries", testTakeSeriesTemplate1);
+target2.set("ra", 11.338111053923866);
+target2.set("dec", 13.5897473762046);
+target2.set("angle", 209.1496693374404);
+target2.set("scale", 0.281);
+target2.set("coolingTemp", -19);
+target2.set("clsFliter", 'Lum');
+target2.set("focusFliter", 'Lum');
+target2.set("foccusSamples", 3);
+target2.set("focusBin", '4');
+target2.set("guideExposure", '9');
+target2.set("guideDelay", '2');
+target2.set("startTime", '');
+target2.set("stopTime", '');
+target2.set("priority", 1);
+target2.set("tempChg", 0.7);
+target2.set("minAlt", 30);
+target2.set("completed", false);
+target2.set("createdAt", new Date());
+
+var testTargetSessions = [];
+testTargetSessions.push(target1);
+testTargetSessions.push(target2);
+
 // App component - represents the whole app
 class App extends Component {
 
@@ -38,12 +165,38 @@ class App extends Component {
     ];
   }
 
+  loadTestDataAllTakeSeriesTemplates() {
+    var testData = testAllTakeSeriesTemplates;
+    // now need to load the information into Mongo
+
+  }
+
+  loadTestDataTargetSessions() {
+    var testData = testTargetSessions;
+    
+
+  }
+
   // *******************************
   //
   // Default creation of sessions using above method
   renderTargetSessions() {
-    return this.getImageSessions().map((targetSession) => (
-      <TargetSession key={targetSession._id} targetSession={targetSession} />
+
+/*
+  If there is no content in the map then use the test data to create a samples
+
+*/
+    var chkTargetSize = testTargetSessions.length;
+    console.log('Number of Target Sessions found in Test data: ' + chkTargetSize);
+
+    var chkSeriesSize = testAllTakeSeriesTemplates.length;
+    console.log('Number of Series Templates found in Test data: ' + chkSeriesSize);
+
+    var chkDBSize = Object.keys(this.props.targetSessions).length;
+    console.log('Number of Sessions found in Mongo DB: ' + chkDBSize);
+
+    return testTargetSessions.map((targetSession) => (
+      <TargetSession key={targetSession.name} targetSession={targetSession} />
     ));
   }
 
@@ -200,11 +353,6 @@ class App extends Component {
            <Button circular icon='edit' />
          <Button.Group>
            <Button circular icon='upload' />
-           <Button circular icon='download' />
-         </Button.Group>
-           <Button.Group>
-         <Button circular icon='settings' />
-           <Button circular icon='help circle' />
          </Button.Group>
         </div>
         <ul>
@@ -360,6 +508,10 @@ class App extends Component {
         <header>
           <h1>Image Sessions</h1>
           <div>
+            <button class="circular ui icon button" onClick={this.loadTestDataTargetSessions.bind(this)}>
+              <i class="icon settings"></i>
+            </button>
+
             {/* <Button primary onClick={this.addNewTemplate()}>Add</Button> */}
             {/* <button onClick={this.addNewTemplate()}>Click me</button> */}
             <Menu pointing secondary>
