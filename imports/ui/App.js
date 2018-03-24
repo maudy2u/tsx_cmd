@@ -52,7 +52,7 @@ takeSeries2.set("repeat", 2 );
 takeSeries2.set("taken", 0);
 
 var takeSeries3 = new Map();
-takeSeries3.set( "order": 0);
+takeSeries3.set( "order", 0);
 takeSeries3.set("exposure", 3 );
 takeSeries3.set("binning",  1 );
 takeSeries3.set("frame", 'Light' );
@@ -61,7 +61,7 @@ takeSeries3.set("repeat", 2 );
 takeSeries3.set("taken", 0);
 
 var takeSeries4 = new Map();
-takeSeries4.set( "order": 1);
+takeSeries4.set( "order", 1);
 takeSeries4.set("exposure", 4 );
 takeSeries4.set("binning",  1 );
 takeSeries4.set("frame", 'Light' );
