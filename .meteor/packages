@@ -28,3 +28,5 @@ flemay:less-autoprefixer@1.2.0
 jquery@1.11.9
 semantic:ui-data@2.3.1
 meteortoys:allthings
+#aldeed:simple-schema # used for schema settings...
+#aldeed:collection2 # additionally for schemas

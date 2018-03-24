@@ -18,13 +18,13 @@ export default class TargetSession extends Component {
     var cImage = 9;
     var tImage = 33;
     var iNum = (cImage/tImage*100).toFixed(0);
-    var name = this.props.targetSession.get('name');
-    var description = this.props.targetSession.get('description');
+    // var name = this.props.targetSession.get('name');
+    // var description = this.props.targetSession.get('description');
 
     return (
       <Table.Row>
-        <Table.Cell>{name}</Table.Cell>
-        <Table.Cell>{description}</Table.Cell>
+        <Table.Cell>{this.props.targetSession.name}</Table.Cell>
+        <Table.Cell>{this.props.targetSession.description}</Table.Cell>
         <Table.Cell><Progress percent={iNum} progress /></Table.Cell>
         <Table.Cell>
           <Button.Group basic size='small'>

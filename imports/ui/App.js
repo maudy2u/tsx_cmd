@@ -128,7 +128,7 @@ target2.set("name", 'Lower priority Rerun of NGC3628');
 target2.set("targetFindName", 'NGC3682');
 target2.set("targetImage", '');
 target2.set("description", 'test run');
-target2.set("takeSeries", testTakeSeriesTemplate1);
+target2.set("takeSeries", testTakeSeriesTemplate2);
 target2.set("ra", 11.338111053923866);
 target2.set("dec", 13.5897473762046);
 target2.set("angle", 209.1496693374404);
@@ -168,20 +168,49 @@ class App extends Component {
   loadTestDataAllTakeSeriesTemplates() {
     var testData = testAllTakeSeriesTemplates;
     // now need to load the information into Mongo
+    for (var i = 0; i < testData.length; i++) {
 
+      // get the id for the new object
+      const id = TakeSeriesTemplates.insert(
+        {
+          name: testData[i].get("name"),
+          description: testData[i].get("description"),
+          processSeries: testData[i].get("processSeries"),
+          createdAt: testData[i].get("createdAt"),
+          series: "",
+        }
+      )
+
+      // then can get object back with // And this line is querying it
+      // const todo = Todos.findOne({_id: 'my-todo'});
+      const takeSeries = TakeSeriesTemplates.findOne({_id: id});
+
+      var allSeries = testData[i].get("series");
+      for (var i = 0; i < series.length; i++) {
+        for (var i = 0; i < allSeries.length; i++) {
+          array[i];
+        }
+      }
+
+    }
   }
 
   loadTestDataTargetSessions() {
+
+    // load the templates
+    //this.loadTestDataAllTakeSeriesTemplates();
+
     var testData = testTargetSessions;
 
     for (var i = 0; i < testData.length; i++) {
-      TargetSessions.insert(
+      var takesSeriesMap = testData[i].get("takeSeries");
+      var id = TargetSessions.insert(
         {
           name: testData[i].get("name"),
           targetFindName: testData[i].get("targetFindName"),
           targetImage: testData[i].get("targetImage"),
           description: testData[i].get("description"),
-          takeSeries: testData[i].get("takeSeries"),
+          takeSeries: new Map(),
           ra: testData[i].get("ra"),
           dec: testData[i].get("dec"),
           angle: testData[i].get("angle"),
@@ -202,6 +231,18 @@ class App extends Component {
           createdAt: testData[i].get("createdAt"),
         }
       )
+      const tSession = TargetSessions.findOne({_id: id});
+      tSession.takeSeries = testData[i].get("takeSeries");
+
+      // TargetSessions.update({ _id: tSession._id }, {
+      //     $addToSet: {
+      //         takeSeries: {
+      //             _id: Random.id(),
+      //             service: $('#new_service_name').val(),
+      //             bufferEnd: $('#new_service_description').val(),
+      //         }
+      //     }
+      // );
     }
   }
 
@@ -223,7 +264,9 @@ class App extends Component {
     var chkDBSize = Object.keys(this.props.targetSessions).length;
     console.log('Number of Sessions found in Mongo DB: ' + chkDBSize);
 
-    return testTargetSessions.map((targetSession) => (
+    // switch "this.props.targetSessions" to "testTargetSessions" if trying to
+    // load the test data instead... should be able to remove if the load is right
+    return this.props.targetSessions.map((targetSession) => (
       <TargetSession key={targetSession.name} targetSession={targetSession} />
     ));
   }
