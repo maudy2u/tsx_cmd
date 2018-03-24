@@ -33,7 +33,7 @@ import Task from './Task.js';
 // 4. taken - number of images obtained
 // LUM Imaging
 var takeSeries1 = new Map();
-takeSeries1.set( "order": 0);
+takeSeries1.set( "order", 0);
 takeSeries1.set("exposure", 1 );
 takeSeries1.set("binning",  1 );
 takeSeries1.set("frame", 'Light' );
@@ -43,7 +43,7 @@ takeSeries1.set("taken", 0);
 
 // R Imaging
 var takeSeries2 = new Map();
-takeSeries2.set( "order": 1);
+takeSeries2.set( "order", 1);
 takeSeries2.set("exposure", 2 );
 takeSeries2.set("binning",  1 );
 takeSeries2.set("frame", 'Light' );
