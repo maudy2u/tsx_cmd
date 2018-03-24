@@ -9,6 +9,7 @@ var ip = 'localhost';
 import '../tsx/SkyX_JS_TryTarget.js'
 import '../tsx/SkyX_JS_Slew.js'
 import '../tsx/SkyX_JS_CLS.js'
+import '../tsx/SkyX_JS_Twilight.js'
 
 import '../tsx/SkyX_JS_FindGuideStar.js'
 import '../tsx/SkyX_JS_Focus-3.js'
@@ -131,6 +132,7 @@ nErr = ClosedLoopSlew.exec();\
       dec: 13.5897473762046,
       angle: 209.1496693374404,
       scale: 0.281,
+      coolingTemp: -19,
       clsFliter: 'Lum',
       focusFliter: 'Lum',
       foccusSamples: 3,
@@ -142,6 +144,7 @@ nErr = ClosedLoopSlew.exec();\
       priority: 0,
       tempChg: 0.7,
       minAlt: 30,
+      completed: false,
       createdAt: new Date(),
     },
     {
@@ -154,6 +157,7 @@ nErr = ClosedLoopSlew.exec();\
       dec: 13.5897473762046,
       angle: 209.1496693374404,
       scale: 0.281,
+      coolingTemp: -19,
       clsFliter: 'Lum',
       focusFliter: 'Lum',
       foccusSamples: 3,
@@ -165,6 +169,7 @@ nErr = ClosedLoopSlew.exec();\
       priority: 1,
       tempChg: 0.7,
       minAlt: 30,
+      completed: false,
       createdAt: new Date(),
     },
   ];
@@ -182,28 +187,56 @@ var seriesTemplates = [
     processSeries: "across series",
     createdAt: new Date(), // current time
     series: [
-     {
-      order: 0,
-      series: [
-        { exposure: 'Exposure', value: 1 },
-        { binning: 'Binning', value: 1 },
-        { frame: 'Frame', value: 'Light' },
-        { filter: 'LUM', value: 0 },
-        { repeat: 'Repeat', value: 2 },
-        { taken: 'Taken', value: 0}],
-    },
-    {
-     order: 1,
-     series: [
-       { exposure: 'Exposure', value: 2 },
-       { binning: 'Binning', value: 1 },
-       { frame: 'Frame', value: 'Light' },
-       { filter: 'R', value: 1 },
-       { repeat: 'Repeat', value: 2 },
-       { taken: 'Taken', value: 0}],
-   },
-  ],
-},
+      {
+        order: 0,
+        series: [
+          { exposure: 'Exposure', value: 1 },
+          { binning: 'Binning', value: 1 },
+          { frame: 'Frame', value: 'Light' },
+          { filter: 'LUM', value: 0 },
+          { repeat: 'Repeat', value: 2 },
+          { taken: 'Taken', value: 0}],
+      },
+      {
+       order: 1,
+       series: [
+         { exposure: 'Exposure', value: 2 },
+         { binning: 'Binning', value: 1 },
+         { frame: 'Frame', value: 'Light' },
+         { filter: 'R', value: 1 },
+         { repeat: 'Repeat', value: 2 },
+         { taken: 'Taken', value: 0}],
+      },
+    ],
+  },
+  {
+    name: "SHO2",
+    description: "",
+    processSeries: "across series",
+    createdAt: new Date(), // current time
+    series: [
+      {
+        order: 0,
+        series: [
+          { exposure: 'Exposure', value: 1 },
+          { binning: 'Binning', value: 1 },
+          { frame: 'Frame', value: 'Light' },
+          { filter: 'LUM', value: 0 },
+          { repeat: 'Repeat', value: 2 },
+          { taken: 'Taken', value: 0}],
+      },
+      {
+       order: 1,
+       series: [
+         { exposure: 'Exposure', value: 2 },
+         { binning: 'Binning', value: 1 },
+         { frame: 'Frame', value: 'Light' },
+         { filter: 'R', value: 1 },
+         { repeat: 'Repeat', value: 2 },
+         { taken: 'Taken', value: 0}],
+      },
+    ],
+  },
 ];
 
 // *******************************
@@ -252,18 +285,18 @@ Meteor.methods({
     //    - check for end times
     //    - check end alitudes
     //    - check morning sunrise
-    getImageSeries(targetSessions) {
-      imagingSession = getTargetSession(targetSessions);
+  getImageSeries(targetSessions) {
+    imagingSession = getTargetSession(targetSessions);
 
-      // *******************************
-      // 1. Get target's Ra/Dec to Slew, options:
-      //  a) Object name to find
-      //  b) Image
-      //  c) Ra/Dec
-      var targetFound = false;
-      if( !forceAbort && imageSession != '' ) {
-        var cmd = tsxCmdSetTargetRaDec (imageSession.ra,imageSession.dec);
-        tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+    // *******************************
+    // 1. Get target's Ra/Dec to Slew, options:
+    //  a) Object name to find
+    //  b) Image
+    //  c) Ra/Dec
+    var targetFound = false;
+    if( !forceAbort && imageSession != '' ) {
+      var cmd = tsxCmdSetTargetRaDec (imageSession.ra,imageSession.dec);
+      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
           var result = tsx_return.split('|')[0].trim();
           console.log('Target: ' + result);
           if( result === "Found") {
@@ -274,11 +307,11 @@ Meteor.methods({
       )
     }
   },
-// *******************************
-// *******************************
-// Prepare target
-// *******************************
-// *******************************
+  // *******************************
+  // *******************************
+  // Prepare target
+  // *******************************
+  // *******************************
   prepareTarget(imageSession) {
     // *******************************
     //    B. Slew to target
@@ -286,42 +319,40 @@ Meteor.methods({
     if( !forceAbort && targetFound ) {
       var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
       tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
-        var result = tsx_return.split('|')[0].trim();
-        console.log('Any error?: ' + result);
-        if( result != 'Success') {
-          forceAbort = true;
-          console.log('Slew Failed. Error: ' + result);
+          var result = tsx_return.split('|')[0].trim();
+          console.log('Any error?: ' + result);
+          if( result != 'Success') {
+            forceAbort = true;
+            console.log('Slew Failed. Error: ' + result);
+          }
+          slewSuccess = true;
         }
-        slewSuccess = true;
-      }
+      )
     )
-  )
-}
+  }
 
 
-    // *******************************
-    // 3. refine Focus - @Focus3
-    var focusSuccess = false;
-    if( !forceAbort && slewSuccess ) {
-      var cmd = tsxCmdFocus3(targetSession.focusFilter,targetSession.focusBin,targetSession.focusSamples);
-      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
-        var result = tsx_return.split('|')[0].trim();
-        console.log('Any error?: ' + result);
-        if( result != 'Success') {
-          forceAbort = true;
-          console.log('Focus3 Failed. Error: ' + result);
-        }
-        focusSuccess = true;
+  // *******************************
+  // 3. refine Focus - @Focus3
+  var focusSuccess = false;
+  if( !forceAbort && slewSuccess ) {
+    var cmd = tsxCmdFocus3(targetSession.focusFilter,targetSession.focusBin,targetSession.focusSamples);
+    tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+      var result = tsx_return.split('|')[0].trim();
+      console.log('Any error?: ' + result);
+      if( result != 'Success') {
+        forceAbort = true;
+        console.log('Focus3 Failed. Error: ' + result);
       }
-    )
-  )
-}
+      focusSuccess = true;
+    }))
+  }
 
-    var lastFocusTemp = 0;
-    var getFocusTempSuccess = false;
-    if( !forceAbort && slewSuccess ) {
-      var cmd = tsxCmdGetFocusTemp();
-      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+  var lastFocusTemp = 0;
+  var getFocusTempSuccess = false;
+  if( !forceAbort && slewSuccess ) {
+    var cmd = tsxCmdGetFocusTemp();
+    tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
         var result = tsx_return.split('|')[0].trim();
         console.log('Any error?: ' + result);
         if( result != 'Success') {
@@ -330,47 +361,41 @@ Meteor.methods({
         }
         getFocusTempSuccess = true;
         lastFocusTemp = tsx_return.split('|')[1].trim();
-      }
-    )
-  )
-}
+      }))
+  }
 
-    // *******************************
-    //    B. CLS to target
-    var clsSuccess = false;
-    if( !forceAbort && focusSuccess ) {
-      var cmd = tsxCmdCLS();
-      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
-        var result = tsx_return.split('|')[0].trim();
-        console.log('Any error?: ' + result);
-        if( result != 'Success') {
-          forceAbort = true;
-          console.log('CLS Failed. Error: ' + result);
-        }
-        clsSuccess = true;
+  // *******************************
+  //    B. CLS to target
+  var clsSuccess = false;
+  if( !forceAbort && focusSuccess ) {
+    var cmd = tsxCmdCLS();
+    tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+      var result = tsx_return.split('|')[0].trim();
+      console.log('Any error?: ' + result);
+      if( result != 'Success') {
+        forceAbort = true;
+        console.log('CLS Failed. Error: ' + result);
       }
-    )
-  )
-}
-    // *******************************
-    //    C. Match Rotation/Angle if provided:
-    //      a) if entered for session
-    //      b) obtained from image
-    var rotateSucess = false;
-    if( !forceAbort && clsSuccess ) {
-      var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale);
-      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
-        var result = tsx_return.split('|')[0].trim();
-        console.log('Any error?: ' + result);
-        if( result != 'Success') {
-          forceAbort = true;
-          console.log('CLS Failed. Error: ' + result);
-        }
-        rotateSucess = true;
+      clsSuccess = true;
+    }))
+  }
+  // *******************************
+  //    C. Match Rotation/Angle if provided:
+  //      a) if entered for session
+  //      b) obtained from image
+  var rotateSucess = false;
+  if( !forceAbort && clsSuccess ) {
+    var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale);
+    tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+      var result = tsx_return.split('|')[0].trim();
+      console.log('Any error?: ' + result);
+      if( result != 'Success') {
+        forceAbort = true;
+        console.log('CLS Failed. Error: ' + result);
       }
-    )
-  )
-}
+      rotateSucess = true;
+    }))
+  }
 
   // *******************************
   // 4. Get Guidestar
@@ -385,10 +410,8 @@ Meteor.methods({
         console.log('Rotate Failed. Error: ' + result);
       }
       guideImageSuccess = true;
-    }
-  )
-)
-}
+    }))
+  }
   var guideStarSuccess = false;
   var guideStarX = 0;
   var guideStarY = 0;
@@ -404,10 +427,8 @@ Meteor.methods({
       guideStarSuccess = true;
       guideStarX = tsx_return.split('|')[1].trim();
       guideStarY = tsx_return.split('|')[2].trim();
-    }
-  )
-)
-}
+    }))
+  }
 
   var guidingSuccess = false;
   if( !forceAbort && guideStarSuccess ) {
@@ -420,15 +441,11 @@ Meteor.methods({
         console.log('Guiding Failed. Error: ' + result);
       }
       guidingSuccess = true;
-    }
-  )
-)
-}
-
-
+    }))
+  }
   // *******************************
   // 5. Calibrate Autoguide
-},
+  },
   // *******************************
   // 6. Load filters, exposures, quantity
 
@@ -438,6 +455,22 @@ Meteor.methods({
   // *******************************
   // 7. Start session run:
   //    - take image
+  startImaging() {
+    // use the order of the series
+    // count number of series
+    // do across series, or per series
+    // for the selected series - do while notNextSeries...
+    // takeImage(exposure, filter)
+    // check Twilight - force stop
+    // check minAlt - stop - find next
+    // check stopTime - stop - find next
+    // check reFocusTemp - refocus
+    // if not meridian - dither...
+    // if meridian  - flip/slew... - preRun: focus - CLS - rotation - guidestar - guiding...
+    // if targetDone/stopped... find next
+
+  },
+
 
   // *******************************
   //  8. Image done... next?

@@ -15,6 +15,11 @@ Meteor.startup(() => {
   // This does load the script
   //var mount = require('../imports/tsx/SkyX_JS_GetMntCoords.js');
 
+  // connect MOUNT
+  // connect camera, filterwheel, focuser, rotator
+  // connect guider
+  // get filters
+  // set camera temp
 
 
 });
@@ -100,8 +105,11 @@ Meteor.startup(() => {
 
    },
 
-   bar() {
-     // Do other stuff...
+   startupImaging() {
+     // tweet... we are starting up... https://stackoverflow.com/questions/6640520/post-to-twitter
+     //https://developer.twitter.com/en/docs/tweets/tweet-updates
+
+
      return 'baz';
    },
 
