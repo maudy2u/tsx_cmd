@@ -128,7 +128,7 @@ target2.set("name", 'Lower priority Rerun of NGC3628');
 target2.set("targetFindName", 'NGC3682');
 target2.set("targetImage", '');
 target2.set("description", 'test run');
-target1.set("takeSeries", testTakeSeriesTemplate1);
+target2.set("takeSeries", testTakeSeriesTemplate1);
 target2.set("ra", 11.338111053923866);
 target2.set("dec", 13.5897473762046);
 target2.set("angle", 209.1496693374404);
@@ -173,8 +173,36 @@ class App extends Component {
 
   loadTestDataTargetSessions() {
     var testData = testTargetSessions;
-    
 
+    for (var i = 0; i < testData.length; i++) {
+      TargetSessions.insert(
+        {
+          name: testData[i].get("name"),
+          targetFindName: testData[i].get("targetFindName"),
+          targetImage: testData[i].get("targetImage"),
+          description: testData[i].get("description"),
+          takeSeries: testData[i].get("takeSeries"),
+          ra: testData[i].get("ra"),
+          dec: testData[i].get("dec"),
+          angle: testData[i].get("angle"),
+          scale: testData[i].get("scale"),
+          coolingTemp: testData[i].get("coolingTemp"),
+          clsFliter: testData[i].get("clsFliter"),
+          focusFliter: testData[i].get("focusFliter"),
+          foccusSamples: testData[i].get("foccusSamples"),
+          focusBin: testData[i].get("focusBin"),
+          guideExposure: testData[i].get("guideExposure"),
+          guideDelay: testData[i].get("guideDelay"),
+          startTime: testData[i].get("startTime"),
+          stopTime: testData[i].get("stopTime"),
+          priority: testData[i].get("priority"),
+          tempChg: testData[i].get("tempChg"),
+          minAlt: testData[i].get("minAlt"),
+          completed: testData[i].get("completed"),
+          createdAt: testData[i].get("createdAt"),
+        }
+      )
+    }
   }
 
   // *******************************
@@ -418,7 +446,7 @@ class App extends Component {
   renderSettings() {
     return (
       <div>
-        <button class="circular ui icon button" onClick={this.testMeteorMethod.bind(this)}>
+        <button className="circular ui icon button" onClick={this.testMeteorMethod.bind(this)}>
           <i class="icon settings"></i>
         </button>
         {this.renderTSXConnetion()}
@@ -508,7 +536,7 @@ class App extends Component {
         <header>
           <h1>Image Sessions</h1>
           <div>
-            <button class="circular ui icon button" onClick={this.loadTestDataTargetSessions.bind(this)}>
+            <button className="circular ui icon button" onClick={this.loadTestDataTargetSessions.bind(this)}>
               <i class="icon settings"></i>
             </button>
 
@@ -544,99 +572,99 @@ class App extends Component {
                 {this.renderTasks()}
               </ul>
               <br/>
-              <div class="ui relaxed divided list">
-                <div class="item">
-                  <i class="large github middle aligned icon"></i>
-                  <div class="content">
-                    <a class="header">Semantic-Org/Semantic-UI</a>
-                    <div class="description">Updated 10 mins ago</div>
+              <div className="ui relaxed divided list">
+                <div className="item">
+                  <i className="large github middle aligned icon"></i>
+                  <div className="content">
+                    <a className="header">Semantic-Org/Semantic-UI</a>
+                    <div className="description">Updated 10 mins ago</div>
                   </div>
                 </div>
-                <div class="item">
-                  <i class="large github middle aligned icon"></i>
-                  <div class="content">
-                    <a class="header">Semantic-Org/Semantic-UI-Docs</a>
-                    <div class="description">        <div class="ui indicating progress" data-value="1" data-total="200" id="example1">
-                      <div class="bar"></div>
-                      <div class="label">Funding</div>
+                <div className="item">
+                  <i className="large github middle aligned icon"></i>
+                  <div className="content">
+                    <a className="header">Semantic-Org/Semantic-UI-Docs</a>
+                    <div className="description">        <div className="ui indicating progress" data-value="1" data-total="200" id="example1">
+                      <div className="bar"></div>
+                      <div className="label">Funding</div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="item">
-                <i class="large github middle aligned icon"></i>
-                <div class="content">
-                  <a class="header">Semantic-Org/Semantic-UI-Meteor</a>
-                  <div class="description">Updated 34 mins ago</div>
+              <div className="item">
+                <i className="large github middle aligned icon"></i>
+                <div className="content">
+                  <a className="header">Semantic-Org/Semantic-UI-Meteor</a>
+                  <div className="description">Updated 34 mins ago</div>
                 </div>
               </div>
             </div>
             <br/>
-            <div class="ui checked checkbox">
-              <input type="checkbox" checked="" class="hidden" readOnly="" tabIndex="0" />
+            <div className="ui checked checkbox">
+              <input type="checkbox" checked="" className="hidden" readOnly="" tabIndex="0" />
               <label>This checkbox comes pre-checked</label>
             </div>
-            <div class="ui vertical menu">
-              <div class="item">Home</div>
-              <div role="listbox" aria-expanded="false" class="ui left pointing dropdown link item" tabIndex="0">
-                <div class="text" role="alert" aria-live="polite">Messages</div>
-                <i aria-hidden="true" class="dropdown icon"></i>
-                <div class="menu transition">
-                  <div role="option" class="item">Inbox</div>
-                  <div role="option" class="item">Starred</div>
-                  <div role="option" class="item">Sent Mail</div>
-                  <div role="option" class="item">Drafts (143)</div>
-                  <div class="divider">
+            <div className="ui vertical menu">
+              <div className="item">Home</div>
+              <div role="listbox" aria-expanded="false" className="ui left pointing dropdown link item" tabIndex="0">
+                <div className="text" role="alert" aria-live="polite">Messages</div>
+                <i aria-hidden="true" className="dropdown icon"></i>
+                <div className="menu transition">
+                  <div role="option" className="item">Inbox</div>
+                  <div role="option" className="item">Starred</div>
+                  <div role="option" className="item">Sent Mail</div>
+                  <div role="option" className="item">Drafts (143)</div>
+                  <div className="divider">
                   </div>
-                  <div role="option" class="item">Spam (1009)</div>
-                  <div role="option" class="item">Trash</div>
+                  <div role="option" className="item">Spam (1009)</div>
+                  <div role="option" className="item">Trash</div>
                 </div>
               </div>
-              <div class="item">Browse</div>
-              <div class="item">Help</div>
+              <div className="item">Browse</div>
+              <div className="item">Help</div>
             </div>
-            <div class="ui fitted toggle checkbox">
-              <input type="checkbox" class="hidden" readOnly="" tabIndex="0" />
+            <div className="ui fitted toggle checkbox">
+              <input type="checkbox" className="hidden" readOnly="" tabIndex="0" />
               <label></label>
             </div>
-            <div class="ui radio checkbox">
-              <input type="checkbox" class="hidden" readOnly="" tabIndex="0" />
+            <div className="ui radio checkbox">
+              <input type="checkbox" className="hidden" readOnly="" tabIndex="0" />
               <label>Radio choice</label>
             </div>
-            <div class="ui indicating progress">
-              <div class="bar"></div>
-              <div class="label">Funding</div>
+            <div className="ui indicating progress">
+              <div className="bar"></div>
+              <div className="label">Funding</div>
             </div>
-            <div class="ui progress success">
-              <div class="bar">
-                <div class="progress"></div>
+            <div className="ui progress success">
+              <div className="bar">
+                <div className="progress"></div>
               </div>
-              <div class="label">Everything worked, your file is all ready.</div>
+              <div className="label">Everything worked, your file is all ready.</div>
             </div>
-            <div class="ui progress">
-              <div class="bar">
-                <div class="progress"></div>
+            <div className="ui progress">
+              <div className="bar">
+                <div className="progress"></div>
               </div>
-              <div class="label">Uploading Files</div>
+              <div className="label">Uploading Files</div>
             </div>
-            <form class="ui form">
-              <div class="field">Selected value: <b>
+            <form className="ui form">
+              <div className="field">Selected value: <b>
               </b>
             </div>
-            <div class="field">
-              <div class="ui radio checkbox">
-                <input type="checkbox" class="hidden" name="checkboxRadioGroup" readOnly="" tabIndex="0" value="this" />
+            <div className="field">
+              <div className="ui radio checkbox">
+                <input type="checkbox" className="hidden" name="checkboxRadioGroup" readOnly="" tabIndex="0" value="this" />
                 <label>Choose this</label>
               </div>
             </div>
-            <div class="field">
-              <div class="ui radio checkbox">
-                <input type="checkbox" class="hidden" name="checkboxRadioGroup" readOnly="" tabIndex="0" value="that" />
+            <div className="field">
+              <div className="ui radio checkbox">
+                <input type="checkbox" className="hidden" name="checkboxRadioGroup" readOnly="" tabIndex="0" value="that" />
                 <label>Or that</label>
               </div>
             </div>
           </form>
-          <table class="ui striped table">
+          <table className="ui striped table">
             <thead>
               <tr>
                 <th>Name</th>
@@ -692,14 +720,14 @@ class App extends Component {
                 <td>John Lilki</td>
                 <td>September 14, 2013</td>
                 <td>
-                  <div class="ui indicating progress" data-value="1" data-total="200" id="example5">
-                  <div class="bar"></div>
-                  <div class="label">Funding</div>
+                  <div className="ui indicating progress" data-value="1" data-total="200" id="example5">
+                  <div className="bar"></div>
+                  <div className="label">Funding</div>
                 </div>
               </td>
               <td>
-                <div class="ui checked checkbox">
-                <input type="checkbox" checked="" class="hidden" readonly="" tabIndex="0" />
+                <div className="ui checked checkbox">
+                <input type="checkbox" checked="" className="hidden" readOnly="" tabIndex="0" />
                 <label>This checkbox comes pre-checked</label>
               </div>
             </td>
@@ -722,7 +750,7 @@ class App extends Component {
   };
 })(App);
 /*
-<table class="ui selectable celled table">
+<table className="ui selectable celled table">
   <thead>
     <tr>
       <th>Series#</th>
@@ -738,8 +766,8 @@ class App extends Component {
   <tbody>
     <tr>
       <td>
-        <div class="ui checked checkbox">
-          <input type="checkbox" checked="" class="hidden" readonly="" tabIndex="0" />
+        <div className="ui checked checkbox">
+          <input type="checkbox" checked="" className="hidden" readonly="" tabIndex="0" />
           <label>This checkbox comes pre-checked</label>
         </div>
         1
