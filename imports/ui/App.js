@@ -12,7 +12,7 @@ import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 // PROBLEM: import { TheSkyXInfos } from '../api/theSkyXInfo.js';
 
 // Import the UI
-import { Dropdown, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
+import { Dropdown, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
 import TargetSession from './TargetSession.js';
 import SessionTemplate from './SessionTemplate.js';
 import Filter from './Filter.js';
@@ -371,21 +371,25 @@ class App extends Component {
 
     return (
       <div>
-        <div>
-          <Button.Group labeled icon>
-            <Button icon='play' content='Start' />
-            <Button icon='pause' content='Pause' />
-            <Button icon='stop' content='Stop' />
-          </Button.Group>
-           <Button circular icon='delete' />
-           <Button circular icon='edit' />
-         <Button.Group>
-           <Button circular icon='upload' />
-         </Button.Group>
-        </div>
-        <ul>
-          {this.renderTargetSessions()}
-        </ul>
+        <Button.Group labeled icon>
+          <Button icon='play' content='Start' />
+          <Button icon='pause' content='Pause' />
+          <Button icon='stop' content='Stop' />
+        </Button.Group>
+      <Table celled selectable>
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell>Name</Table.HeaderCell>
+            <Table.HeaderCell>Description</Table.HeaderCell>
+            <Table.HeaderCell>Progress</Table.HeaderCell>
+            <Table.HeaderCell>Actions</Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+
+        <Table.Body>
+            {this.renderTargetSessions()}
+        </Table.Body>
+      </Table>
       </div>
     );
   }

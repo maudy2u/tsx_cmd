@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Dropdown, Menu, Segment, Button, Progress } from 'semantic-ui-react'
+import { Dropdown, Menu, Table, Segment, Button, Progress } from 'semantic-ui-react'
 import { TargetSessions } from '../api/targetSessions.js';
 
 function totalImages (target) {
@@ -22,10 +22,18 @@ export default class TargetSession extends Component {
     var description = this.props.targetSession.get('description');
 
     return (
-      <li>
-        {name} : {description}
-        <Progress percent={iNum} progress />
-      </li>
+      <Table.Row>
+        <Table.Cell>{name}</Table.Cell>
+        <Table.Cell>{description}</Table.Cell>
+        <Table.Cell><Progress percent={iNum} progress /></Table.Cell>
+        <Table.Cell>
+          <Button.Group basic size='small'>
+            <Button icon='delete' />
+            <Button icon='edit' />
+            <Button icon='upload' />
+          </Button.Group>
+        </Table.Cell>
+      </Table.Row>
     );
   }
 }
