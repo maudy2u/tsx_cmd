@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom';
+import {mount} from 'react-mounter';
+
 import { withTracker } from 'meteor/react-meteor-data';
 
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
@@ -28,7 +30,7 @@ class TakeSeriesTemplateEditor extends Component {
 
   }
 
-  ComponentWillMount() {
+  componentWillMount() {
     // do not modify the state directly
     this.setState({value: this.props.template.processSeries});
   }
@@ -102,7 +104,7 @@ class TakeSeriesTemplateEditor extends Component {
             </Table.Header>
             <Table.Body>
               {this.props.template.series.map( (definedSeries)=>{
-                 return  <TakeSeriesEditor key={definedSeries._id} definedSeries={definedSeries} />
+                 return  <TakeSeriesEditor key={definedSeries.order} definedSeries={definedSeries} />
               })}
             </Table.Body>
           </Table>
@@ -111,6 +113,7 @@ class TakeSeriesTemplateEditor extends Component {
   }
 }
 export default withTracker(() => {
+  //{}, { sort: { name: 1 } }
     return {
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
   };

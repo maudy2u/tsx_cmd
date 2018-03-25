@@ -65,7 +65,6 @@ class TakeSeriesEditor extends Component {
         <Table.Cell>
           <Form.Input
             fluid
-            ref="exposure"
             placeholder='Exposure'
             name='exposure'
             defaultValue={this.props.definedSeries.exposure}
@@ -73,19 +72,21 @@ class TakeSeriesEditor extends Component {
           />
         </Table.Cell>
         <Table.Cell>
-          <Form.Select fluid ref="frame" name='Frame' options={this.renderDropDownFrames()} placeholder='Light' />
+          <Form.Select fluid name='Frame' options={this.renderDropDownFrames()} placeholder='Light' />
         </Table.Cell>
         <Table.Cell>
-          <Form.Select fluid ref="filter" name='Filter' options={this.renderDropDownFilters()} placeholder='Filter' />
+          <Form.Select fluid name='Filter' options={this.renderDropDownFilters()} placeholder='Filter' />
         </Table.Cell>
         <Table.Cell>
-          <Form.Input fluid ref="repeat" placeholder='Repeat' name='repeat' defaultValue={this.props.definedSeries.repeat}  />
+          <Form.Input fluid placeholder='Repeat' name='repeat' defaultValue={this.props.definedSeries.repeat}  />
         </Table.Cell>
         <Table.Cell>
-          <Form.Input fluid ref="binning" placeholder='Binning' name='binning' defaultValue={this.props.definedSeries.binning}  />
+          <Form.Input fluid placeholder='Binning' name='binning' defaultValue={this.props.definedSeries.binning}  />
         </Table.Cell>
         <Table.Cell>
           <Button size='mini' icon='delete'  />
+          <Button size='mini' icon='arrow up'  />
+          <Button size='mini' icon='arrow down'  />
         </Table.Cell>
       </Table.Row>
     )
