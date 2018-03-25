@@ -59,7 +59,7 @@ class App extends Component {
     // switch "this.props.targetSessions" to "testTargetSessions" if trying to
     // load the test data instead... should be able to remove if the load is right
     return this.props.targetSessions.map((targetSession) => (
-      <TargetSession key={targetSession.name} targetSession={targetSession} />
+      <TargetSession key={targetSession._id} targetSession={targetSession} />
     ));
   }
 
@@ -342,7 +342,7 @@ class App extends Component {
 
     } else if (this.state.activeItem == 'Series') {
       return (
-      <TakeSeriesTemplate takeSeriesTemplates={this.takeSeriesTemplates}/>
+      <TakeSeriesTemplate />
       )
     } else if (this.state.activeItem == 'Settings') {
       return this.renderSettings();

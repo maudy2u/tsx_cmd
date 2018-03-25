@@ -1,26 +1,48 @@
 import React, { Component } from 'react'
-import { Form, Button, Radio } from 'semantic-ui-react'
+import ReactDOM from 'react-dom';
+
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
+
+import { Form, Button, Radio, Input, } from 'semantic-ui-react'
+
+import DefineSeries from './DefineSeries.js';
 
 export default class EditorSeriesForm extends Component {
 
+  saveEntry() {
+    const name = ReactDOM.findDOMNode(this.refs.tempName.inputRef).value; //.trim();
+
+    TakeSeriesTemplates.update(this.props.template._id, {
+      $set: { name: name },
+    });
+
+  }
 
   render() {
-    const { exposure, binning, frame, filter, repeat } = this.state
 
     return (
       <div>
-        <Button circular icon='add' onClick='' />
-        <Button circular icon='delete' onClick='' />
+        <Button  icon='save' onClick={this.saveEntry.bind(this)} />
+        <Button  icon='add'  />
+        <Button  icon='delete'  />
         <Form>
           <Form.Field>
-            <form className="textInputSeriesName" onSubmit="" >
-              <input
-                type="text"
-                ref="seriesName"
-                placeholder="Name for the series"
-              />
-            </form>
+            <Input
+              label='Name:'
+              ref='tempName'
+              type='text'
+              placeholder='Name for the series'
+              defaultValue={this.props.template.name}
+            />
+          </Form.Field>
+          <Form.Field>
+            <Input
+              label='Description:'
+              ref='tempDesc'
+              type='text'
+              placeholder='Describe the series'
+              value={this.props.template.description}
+            />
           </Form.Field>
           <Form.Field>
             Repeat executes: <b>{this.props.template.processSeries}</b>
@@ -66,7 +88,7 @@ export default class EditorSeriesForm extends Component {
           </thead>
           <tbody>
             {this.props.template.series.map( (definedSeries)=>{
-              return  <DefineSeries key={definedSeries._id} definedSeries={definedSeries} />
+              // return  <DefineSeries key={definedSeries._id} definedSeries={definedSeries} />
             })}
           </tbody>
         </table>

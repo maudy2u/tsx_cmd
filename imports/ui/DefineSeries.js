@@ -31,10 +31,10 @@ export default class DefineSeries extends Component {
       <tr>
         <td></td>
         <td>
-          <Form.Input ref="exposure" placeholder='Exposure' name='exposure' value={exposure} onChange={this.handleChange} />
+          <Form.Input ref="exposure" placeholder='Exposure' name='exposure' value={seriesTemplate.exposure}  />
         </td>
         <td>
-          <Form.Input ref="binning" placeholder='Binning' name='binning' value={binning} onChange={this.handleChange} />
+          <Form.Input ref="binning" placeholder='Binning' name='binning' value={seriesTemplate.binning}  />
         </td>
         <td>
           <Form.Select fluid ref="frame" label='Frame' options={this.renderDropDownFrames()} placeholder='Light' />
@@ -43,7 +43,7 @@ export default class DefineSeries extends Component {
           <Form.Select fluid ref="filter" label='Filter' options={this.renderDropDownFilters()} placeholder='Filter' />
         </td>
         <td>
-          <Form.Input ref="repeat" placeholder='Repeat' name='repeat' value={repeat} onChange={this.handleChange} />
+          <Form.Input ref="repeat" placeholder='Repeat' name='repeat' value={seriesTemplate.repeat}  />
         </td>
       </tr>
     )

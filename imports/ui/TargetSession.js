@@ -21,7 +21,7 @@ export default class TargetSession extends Component {
       return totalTakenImages;
   };
 
-  deleteTarget() {
+  deleteEntry() {
       TargetSessions.remove(this.props.targetSession._id);
   }
 
@@ -45,7 +45,7 @@ export default class TargetSession extends Component {
         <Table.Cell><Progress percent={iNum} progress /></Table.Cell>
         <Table.Cell>
           <Button.Group basic size='small'>
-            <Button icon='delete' onClick={this.deleteTarget.bind(this)}/>
+            <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
             <Button icon='edit' />
             <Button icon='upload' />
           </Button.Group>

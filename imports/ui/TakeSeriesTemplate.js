@@ -1,71 +1,15 @@
 import React, { Component } from 'react';
+import { withTracker } from 'meteor/react-meteor-data';
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
+
+import { Modal, Button, Radio, Icon } from 'semantic-ui-react'
 
 import DefineTemplate from './DefineTemplate.js'
 import EditorSeriesForm from './EditorSeriesForm.js';
-import { Modal, Button, Radio, Icon } from 'semantic-ui-react'
 
 // Filter component - represents a single filter item
-export default class TakeSeriesTemplate extends Component {
+class TakeSeriesTemplate extends Component {
 
-  toggleChecked() {
-    // Set the checked property to the opposite of its current value
-    TakeSeriesTemplates.update(this.props.takeSeriesTemplate._id, {
-      $set: { checked: !this.props.takeSeriesTemplate.checked },
-    });
-  }
-
-  confirmedDeleteTemplateSeries(template) {
-    TakeSeriesTemplates.remove(template._id);
-  }
-  deleteCheckedTemplateSeries() {
-
-    return (
-      <Modal
-        open={this.state.modalDelOpen}
-        onClose={this.handleDelClose.bind(this)}
-        closeIcon>
-        <Modal.Header>
-          Delete Template
-        </Modal.Header>
-        <Modal.Content>
-     <p>Are you sure you want to delete this template</p>
-    </Modal.Content>
-    <Modal.Actions>
-     <Button negative>No</Button>
-     <Button positive icon='checkmark' labelPosition='right' content='Yes' />
-     {/* onClick={this.confirmedDeleteTemplateSeries(template)} */}
-   </Modal.Actions>
-  </Modal>
-)
-  }
-
-  editTemplateSeries() {
-    // Clear form
-    var selTemplate = this.props.takeSeriesTemplates[0];
-    //key={selTemplate._id} template={selTemplate} />
-    if (typeof selTemplate == 'undefined') {
-      this.addNewTemplate();
-      selTemplate = this.newTemplate;
-    }
-      return (
-        <Modal
-          open={this.state.modalEditOpen}
-          onClose={this.handleEditClose.bind(this)}
-          closeIcon>
-          <Modal.Header>Edit Series</Modal.Header>
-          <Modal.Content>
-            <Modal.Description>
-              <EditorSeriesForm key={selTemplate._id} template={selTemplate} />
-            </Modal.Description>
-          </Modal.Content>
-          <Modal.Actions>
-            <Button circular icon='save'  onClick={this.handleEditClose.bind(this)} inverted/>
-            <Button circular icon='cancel'  onClick={this.handleEditClose.bind(this)} inverted/>
-          </Modal.Actions>
-        </Modal>
-      )
-  }
 
   newTemplate = '';
   addNewTemplate() {
@@ -90,40 +34,6 @@ export default class TakeSeriesTemplate extends Component {
     }
   }
 
-  createNewTemplateSeries() {
-//    const { open } = this.addTemplate
-//            <EditorSeriesForm key={this.newTemplate._id} template={this.newTemplate} />
-//onOpen={this.addNewTemplate()}>
-    return (
-      <Modal
-        open={this.state.modalAddOpen}
-        onClose={this.handleAddClose.bind(this)}
-        closeIcon>
-        <Modal.Header>Create Series</Modal.Header>
-        <Button.Group>
-          {/* <Button circular icon='save'  onClick={this.handleAddClose} />
-          <Button circular icon='cancel'  onClick={this.handleAddClose}/> */}
-          <Button circular icon='add' onClick={this.addNewTemplate.bind(this)} />
-          {/* <Button circular icon='edit' onClick={this.handleAddClose} />
-          <Button circular icon='delete' onClick={this.handleAddClose} /> */}
-       </Button.Group>
-        <Modal.Content>
-          <Modal.Description>
-            hello
-          </Modal.Description>
-        </Modal.Content>
-      </Modal>
-    )
-  }
-
-  state = { modalAddOpen: false, modalEditOpen: false, modalDelOpen: false, }
-  handleAddOpen = () => this.setState({ modalAddOpen: true })
-  handleAddClose = () => this.setState({ modalAddOpen: false })
-  handleEditOpen = () => this.setState({ modalEditOpen: true })
-  handleEditClose = () => this.setState({ modalEditOpen: false })
-  handleDelOpen = () => this.setState({ modalDelOpen: true })
-  handleDelClose = () => this.setState({ modalDelOpen: false })
-
   //{this.testMeteorMethod.bind(this)}
   loadTestDataMeteorMethod() {
 
@@ -138,11 +48,15 @@ export default class TakeSeriesTemplate extends Component {
   }
 
   chkTestData() {
-    var targetSessions = this.props.takeSeriesTemplates;
+    var takeSeries = this.props.takeSeriesTemplates;
     console.log('test');
   }
 
   render() {
+
+    var test0 = this.props.takeSeriesTemplates;
+    var test1 = this.props.takeSeriesTemplates.series;
+
     return (
       <div>
         <Button.Group basic size='small'>
@@ -150,12 +64,12 @@ export default class TakeSeriesTemplate extends Component {
           <Button icon='find' onClick={this.chkTestData.bind(this)}/>
           <Button icon='upload' />
         </Button.Group>
-        <Button.Group>
+        {/* <Button.Group>
           <Button circular icon='add' onClick={this.handleAddOpen.bind(this)} />
           <Button circular icon='edit' onClick={this.handleEditOpen.bind(this)} />
           <Button circular icon='delete' onClick={this.handleDelOpen.bind(this)} />
-       </Button.Group>
-       {this.createNewTemplateSeries()}
+       </Button.Group> */}
+       {/* {this.createNewTemplateSeries()} */}
        {/* {this.editTemplateSeries()}
        {this.deleteCheckedTemplateSeries()} */}
         <table className="ui selectable celled table">
@@ -168,15 +82,20 @@ export default class TakeSeriesTemplate extends Component {
             </tr>
           </thead>
           <tbody>
-            {/* {TakeSeriesTemplates.map( (takeSeriesTemplate)=>{
+            {this.props.takeSeriesTemplates.map( (takeSeriesTemplate)=>{
               return <DefineTemplate key={takeSeriesTemplate._id} seriesTemplate={takeSeriesTemplate} />
-            })} */}
+            })}
           </tbody>
         </table>
       </div>
       )
   }
 }
+export default withTracker(() => {
+    return {
+      takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
+  };
+})(TakeSeriesTemplate);
 
 /*
 
