@@ -21,6 +21,9 @@ export default class TargetSession extends Component {
       return totalTakenImages;
   };
 
+  deleteTarget() {
+      TargetSessions.remove(this.props.targetSession._id);
+  }
 
   render() {
     // Get the data for the sessions
@@ -42,7 +45,7 @@ export default class TargetSession extends Component {
         <Table.Cell><Progress percent={iNum} progress /></Table.Cell>
         <Table.Cell>
           <Button.Group basic size='small'>
-            <Button icon='delete' />
+            <Button icon='delete' onClick={this.deleteTarget.bind(this)}/>
             <Button icon='edit' />
             <Button icon='upload' />
           </Button.Group>

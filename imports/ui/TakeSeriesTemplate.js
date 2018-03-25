@@ -23,7 +23,7 @@ export default class TakeSeriesTemplate extends Component {
     return (
       <Modal
         open={this.state.modalDelOpen}
-        onClose={this.handleDelClose}
+        onClose={this.handleDelClose.bind(this)}
         closeIcon>
         <Modal.Header>
           Delete Template
@@ -51,7 +51,7 @@ export default class TakeSeriesTemplate extends Component {
       return (
         <Modal
           open={this.state.modalEditOpen}
-          onClose={this.handleEditClose}
+          onClose={this.handleEditClose.bind(this)}
           closeIcon>
           <Modal.Header>Edit Series</Modal.Header>
           <Modal.Content>
@@ -60,8 +60,8 @@ export default class TakeSeriesTemplate extends Component {
             </Modal.Description>
           </Modal.Content>
           <Modal.Actions>
-            <Button circular icon='save'  onClick={this.handleEditClose} inverted/>
-            <Button circular icon='cancel'  onClick={this.handleEditClose} inverted/>
+            <Button circular icon='save'  onClick={this.handleEditClose.bind(this)} inverted/>
+            <Button circular icon='cancel'  onClick={this.handleEditClose.bind(this)} inverted/>
           </Modal.Actions>
         </Modal>
       )
@@ -97,13 +97,13 @@ export default class TakeSeriesTemplate extends Component {
     return (
       <Modal
         open={this.state.modalAddOpen}
-        onClose={this.handleAddClose}
+        onClose={this.handleAddClose.bind(this)}
         closeIcon>
         <Modal.Header>Create Series</Modal.Header>
         <Button.Group>
           {/* <Button circular icon='save'  onClick={this.handleAddClose} />
           <Button circular icon='cancel'  onClick={this.handleAddClose}/> */}
-          <Button circular icon='add' onClick={this.addNewTemplate()} />
+          <Button circular icon='add' onClick={this.addNewTemplate.bind(this)} />
           {/* <Button circular icon='edit' onClick={this.handleAddClose} />
           <Button circular icon='delete' onClick={this.handleAddClose} /> */}
        </Button.Group>
@@ -124,14 +124,36 @@ export default class TakeSeriesTemplate extends Component {
   handleDelOpen = () => this.setState({ modalDelOpen: true })
   handleDelClose = () => this.setState({ modalDelOpen: false })
 
+  //{this.testMeteorMethod.bind(this)}
+  loadTestDataMeteorMethod() {
+
+    // on the client
+    Meteor.call("loadTestDataAllTakeSeriesTemplates", function (error) {
+      // identify the error
+      if (error && error.error === "logged-out") {
+        // show a nice error message
+        Session.set("errorMessage", "Please log in to post a comment.");
+      }
+    });
+  }
+
+  chkTestData() {
+    var targetSessions = this.props.takeSeriesTemplates;
+    console.log('test');
+  }
 
   render() {
     return (
       <div>
+        <Button.Group basic size='small'>
+          <Button icon='settings' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
+          <Button icon='find' onClick={this.chkTestData.bind(this)}/>
+          <Button icon='upload' />
+        </Button.Group>
         <Button.Group>
-          <Button circular icon='add' onClick={this.handleAddOpen} />
-          <Button circular icon='edit' onClick={this.handleEditOpen} />
-          <Button circular icon='delete' onClick={this.handleDelOpen} />
+          <Button circular icon='add' onClick={this.handleAddOpen.bind(this)} />
+          <Button circular icon='edit' onClick={this.handleEditOpen.bind(this)} />
+          <Button circular icon='delete' onClick={this.handleDelOpen.bind(this)} />
        </Button.Group>
        {this.createNewTemplateSeries()}
        {/* {this.editTemplateSeries()}

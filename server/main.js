@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 
 import { TargetSessions } from '../imports/api/targetSessions.js';
+import { TakeSeriesTemplates} from '../imports/api/takeSeriesTemplates.js';
 import '../imports/api/filters.js';
 import '../imports/api/sessionTemplates.js';
 import '../imports/api/theSkyXInfos.js';
@@ -182,31 +183,30 @@ Meteor.startup(() => {
 
    loadTestDataAllTakeSeriesTemplates() {
      var testData = testAllTakeSeriesTemplates;
+
      // now need to load the information into Mongo
      for (var i = 0; i < testData.length; i++) {
+
+      var takeSeries = testData[i];
 
        // get the id for the new object
        const id = TakeSeriesTemplates.insert(
          {
-           name: testData[i].get("name"),
-           description: testData[i].get("description"),
+           name: takeSeries.get("name"),
+           description: takeSeries.get("description"),
            processSeries: testData[i].get("processSeries"),
-           createdAt: testData[i].get("createdAt"),
-           series: "",
+           createdAt: takeSeries.get("createdAt"),
+           series: [],
          }
        )
 
-       // then can get object back with // And this line is querying it
-       // const todo = Todos.findOne({_id: 'my-todo'});
-       const takeSeries = TakeSeriesTemplates.findOne({_id: id});
-
-       var allSeries = testData[i].get("series");
+       var series = takeSeries.get("series");
        for (var i = 0; i < series.length; i++) {
-         for (var i = 0; i < allSeries.length; i++) {
-           array[i];
-         }
+         seriesMap = series[i];
+         TakeSeriesTemplates.update({_id: id}, {
+           $push: { 'series': seriesMap },
+         });
        }
-
      }
    },
 
@@ -230,7 +230,7 @@ Meteor.startup(() => {
            targetFindName: testData[i].get("targetFindName"),
            targetImage: testData[i].get("targetImage"),
            description: testData[i].get("description"),
-           takeSeries: JSON.parse(JSON.stringify(takesSeriesMap)),
+           takeSeries: {},
            ra: testData[i].get("ra"),
            dec: testData[i].get("dec"),
            angle: testData[i].get("angle"),

@@ -224,6 +224,11 @@ class App extends Component {
 
     return (
       <div>
+        <Button.Group basic size='small'>
+          <Button icon='settings' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
+          <Button icon='find' onClick={this.chkTestData.bind(this)}/>
+          <Button icon='upload' />
+        </Button.Group>
         <Button.Group labeled icon>
           <Button icon='play' content='Start' />
           <Button icon='pause' content='Pause' />
@@ -393,11 +398,6 @@ class App extends Component {
         <header>
           <h1>Image Sessions</h1>
           <div>
-            <Button.Group basic size='small'>
-              <Button icon='settings' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
-              <Button icon='find' onClick={this.chkTestData.bind(this)}/>
-              <Button icon='upload' />
-            </Button.Group>
 {/*
             <button className="circular ui icon button" onClick={this.loadTestDataMeteorMethod.bind(this)}>
               <i class="icon settings"></i>
