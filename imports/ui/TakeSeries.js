@@ -26,12 +26,6 @@ class TakeSeries extends Component {
     return (
       <Table.Row>
         <Table.Cell>
-          <div className="ui checked checkbox">
-            <input type="checkbox" checked="" name={this.props.seriesTemplate.name} readOnly="" tabIndex="0" />
-            <label></label>
-          </div>
-        </Table.Cell>
-        <Table.Cell>
           {this.props.seriesTemplate.name}
         </Table.Cell>
         <Table.Cell>

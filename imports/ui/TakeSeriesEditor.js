@@ -4,7 +4,7 @@ import { withTracker } from 'meteor/react-meteor-data';
 
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 
-import { Form, Table, Button,} from 'semantic-ui-react'
+import { Form, Table, Button, Dropdown, } from 'semantic-ui-react'
 
 class TakeSeriesEditor extends Component {
   // *******************************
@@ -54,10 +54,46 @@ class TakeSeriesEditor extends Component {
   }
 
   deleteEntry() {
-      TakeSeriesTemplates.remove(this.props.targetSession._id);
+    // get the current map
+    var takeSeries = TakeSeriesTemplates.findOne({_id: this.props.template._id});
+    var series = takeSeries.series;
+    var remove = takeSeries.series.order;
+    console.log('Removing order number: ' + remove);
+    // all the series
+    var cursor = 0;
+    var newSeries = [];
+    for (var i = 0; i < series.length; i++) {
+      // cannot guarantee items are sorted by order
+      console.log('Comparing order number ('+series[i].order+') or remove ('+remove+')');
+      if( series[i].order < remove ) {
+        // do nothing
+        newSeries.push(series[i]);
+        console.log('No change to order');
+      }
+      else if (series[i].order >= remove ) {
+        var newOrder = series[i].order-1;
+        if( newOrder >= 0) {
+          console.log('Order decreased by one');
+          series[i].order = series[i].order-1;
+          newSeries.push(series[i]);
+        }
+      }
+      else {
+        // for order = remove... do nothing - do not add to newSeries
+        console.log('Order matches so ignore');
+      }
+    }
+    // update
+    TakeSeriesTemplates.update({_id: this.props.template._id}, {
+      $set: { 'series': newSeries },
+    });
+
   }
 
-
+  moveUpEntry() {
+  }
+  moveDownEntry() {
+  }
 
   render() {
     return (
@@ -66,27 +102,46 @@ class TakeSeriesEditor extends Component {
           <Form.Input
             fluid
             placeholder='Exposure'
-            name='exposure'
+            className='exposure'
             defaultValue={this.props.definedSeries.exposure}
             onChange={this.onChangeExposure.bind(this)}
           />
         </Table.Cell>
         <Table.Cell>
-          <Form.Select fluid name='Frame' options={this.renderDropDownFrames()} placeholder='Light' />
+          <Dropdown
+            className='Frame'
+            options={this.renderDropDownFrames()}
+            placeholder='Light'
+          />
         </Table.Cell>
         <Table.Cell>
-          <Form.Select fluid name='Filter' options={this.renderDropDownFilters()} placeholder='Filter' />
+          <Dropdown
+              floating
+              className='filter'
+              options={this.renderDropDownFilters()}
+              placeholder='Filter'
+            />
         </Table.Cell>
         <Table.Cell>
-          <Form.Input fluid placeholder='Repeat' name='repeat' defaultValue={this.props.definedSeries.repeat}  />
+          <Form.Input
+            fluid
+            placeholder='Repeat'
+            className='repeat'
+            defaultValue={this.props.definedSeries.repeat}
+          />
         </Table.Cell>
         <Table.Cell>
-          <Form.Input fluid placeholder='Binning' name='binning' defaultValue={this.props.definedSeries.binning}  />
+          <Form.Input
+            fluid
+            placeholder='Binning'
+            className='binning'
+            defaultValue={this.props.definedSeries.binning}
+          />
         </Table.Cell>
         <Table.Cell>
-          <Button size='mini' icon='delete'  />
-          <Button size='mini' icon='arrow up'  />
-          <Button size='mini' icon='arrow down'  />
+          <Button size='mini' icon='delete'  onClick={this.deleteEntry.bind(this)}/>
+          <Button size='mini' icon='arrow up'  onClick={this.moveUpEntry.bind(this)}/>
+          <Button size='mini' icon='arrow down'  onClick={this.moveDownEntry.bind(this)}/>
         </Table.Cell>
       </Table.Row>
     )

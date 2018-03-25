@@ -14,8 +14,8 @@ class TakeSeriesTemplateMenu extends Component {
   addNewTemplate() {
     const id = TakeSeriesTemplates.insert(
       {
-        name: "",
-        description: "",
+        name: "New Take Series",
+        description: "EDIT ME",
         processSeries: 'across series',
         createdAt: new Date(),
         series: [],
@@ -67,7 +67,6 @@ class TakeSeriesTemplateMenu extends Component {
        <Table fixed celled selectable>
            <Table.Header>
              <Table.Row>
-               <Table.HeaderCell width={1}>#</Table.HeaderCell>
                <Table.HeaderCell width={1}>Take Series Name</Table.HeaderCell>
                <Table.HeaderCell width={1}>Details</Table.HeaderCell>
                <Table.HeaderCell width={1}>DeleteX</Table.HeaderCell>

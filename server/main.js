@@ -15,60 +15,93 @@ import './filters.js';
 // 3. Quantity
 // 4. taken - number of images obtained
 // LUM Imaging
+var nBExposure = 8*60;
+var lrgbExposure = 3*60;
+
 var takeSeries1 = new Map();
+// LUM
 takeSeries1.set( "order", 0);
-takeSeries1.set("exposure", 1 );
+takeSeries1.set("exposure", lrgbExposure );
 takeSeries1.set("binning",  1 );
 takeSeries1.set("frame", 'Light' );
 takeSeries1.set("filter", 0 );
-takeSeries1.set("repeat", 2 );
-takeSeries1.set("taken", 3);
-
+takeSeries1.set("repeat", 33 );
+takeSeries1.set("taken", 0);
 // R Imaging
 var takeSeries2 = new Map();
 takeSeries2.set( "order", 1);
-takeSeries2.set("exposure", 2 );
+takeSeries2.set("exposure", lrgbExposure );
 takeSeries2.set("binning",  1 );
 takeSeries2.set("frame", 'Light' );
 takeSeries2.set("filter", 1 );
-takeSeries2.set("repeat", 2 );
-takeSeries2.set("taken", 7);
-
+takeSeries2.set("repeat", 33 );
+takeSeries2.set("taken", 0);
+// G
 var takeSeries3 = new Map();
-takeSeries3.set( "order", 0);
-takeSeries3.set("exposure", 3 );
+takeSeries3.set( "order", 2);
+takeSeries3.set("exposure", lrgbExposure );
 takeSeries3.set("binning",  1 );
 takeSeries3.set("frame", 'Light' );
-takeSeries3.set("filter", 1 );
-takeSeries3.set("repeat", 2 );
-takeSeries3.set("taken", 2);
-
+takeSeries3.set("filter", 2 );
+takeSeries3.set("repeat", 33 );
+takeSeries3.set("taken", 0);
+// B
 var takeSeries4 = new Map();
-takeSeries4.set( "order", 1);
-takeSeries4.set("exposure", 4 );
+takeSeries4.set( "order", 3);
+takeSeries4.set("exposure", lrgbExposure );
 takeSeries4.set("binning",  1 );
 takeSeries4.set("frame", 'Light' );
-takeSeries4.set("filter", 1 );
-takeSeries4.set("repeat", 2 );
-takeSeries4.set("taken", 3);
+takeSeries4.set("filter", 3 );
+takeSeries4.set("repeat", 33 );
+takeSeries4.set("taken", 0);
+// Ha
+var takeSeries5 = new Map();
+takeSeries5.set( "order", 0);
+takeSeries5.set("exposure", nBExposure );
+takeSeries5.set("binning",  1 );
+takeSeries5.set("frame", 'Light' );
+takeSeries5.set("filter", 4 );
+takeSeries5.set("repeat", 33 );
+takeSeries5.set("taken", 0);
+// OIII
+var takeSeries6 = new Map();
+takeSeries6.set( "order", 1);
+takeSeries6.set("exposure", nBExposure );
+takeSeries6.set("binning",  1 );
+takeSeries6.set("frame", 'Light' );
+takeSeries6.set("filter", 5 );
+takeSeries6.set("repeat", 33 );
+takeSeries6.set("taken", 0);
+// SII
+var takeSeries7 = new Map();
+takeSeries7.set( "order", 2);
+takeSeries7.set("exposure", nBExposure );
+takeSeries7.set("binning",  1 );
+takeSeries7.set("frame", 'Light' );
+takeSeries7.set("filter", 6 );
+takeSeries7.set("repeat", 33 );
+takeSeries7.set("taken", 0);
 
 var testTakeSeries1 = [];
 testTakeSeries1.push(takeSeries1);
 testTakeSeries1.push(takeSeries2);
+testTakeSeries1.push(takeSeries3);
+testTakeSeries1.push(takeSeries4);
 
 var testTakeSeries2 = [];
-testTakeSeries2.push(takeSeries3);
-testTakeSeries2.push(takeSeries4);
+testTakeSeries2.push(takeSeries5);
+testTakeSeries2.push(takeSeries6);
+testTakeSeries2.push(takeSeries7);
 
 var testTakeSeriesTemplate1 = new Map();
-testTakeSeriesTemplate1.set("name", "SHO - example");
+testTakeSeriesTemplate1.set("name", "LRGB - example");
 testTakeSeriesTemplate1.set("description", "Example test");
 testTakeSeriesTemplate1.set("processSeries", "across series");
 testTakeSeriesTemplate1.set("createdAt", new Date()); // current time
 testTakeSeriesTemplate1.set("series", testTakeSeries1); // current time
 
 var testTakeSeriesTemplate2 = new Map();
-testTakeSeriesTemplate2.set("name", "SHO - alternate");
+testTakeSeriesTemplate2.set("name", "SHO - Example");
 testTakeSeriesTemplate2.set("description", "Used as a test to show");
 testTakeSeriesTemplate2.set("processSeries", "per series");
 testTakeSeriesTemplate2.set("createdAt", new Date()); // current time
@@ -112,7 +145,6 @@ target2.set("targetFindName", 'NGC3682');
 target2.set("targetImage", '');
 target2.set("description", 'test run');
 target2.set("takeSeries", testTakeSeriesTemplate2);
-
 target2.set("ra", 11.338111053923866);
 target2.set("dec", 13.5897473762046);
 target2.set("angle", 209.1496693374404);
@@ -277,6 +309,9 @@ Meteor.startup(() => {
      }
    },
 
+   takeSeriesForTarget( targetSession ) {
+     
+   },
 
    // *******************************
    // Test of the python to connect to TSX

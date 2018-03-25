@@ -121,142 +121,18 @@ nErr = ClosedLoopSlew.exec();\
   // var test = [ t1, t2, t3 ];
   // ];
 
-  var targetSessions = [
-    {
-      name: 'Higher Priority Rerun of NGC3628',
-      targetFindName: 'NGC3682',
-      targetImage: '',
-      description: 'test run',
-      seriesTemplateName: 'SHO',
-      ra: 11.338111053923866,
-      dec: 13.5897473762046,
-      angle: 209.1496693374404,
-      scale: 0.281,
-      coolingTemp: -19,
-      clsFliter: 'Lum',
-      focusFliter: 'Lum',
-      foccusSamples: 3,
-      focusBin: '4',
-      guideExposure: '9',
-      guideDelay: '2',
-      startTime: '',
-      stopTime: '',
-      priority: 0,
-      tempChg: 0.7,
-      minAlt: 30,
-      completed: false,
-      createdAt: new Date(),
-    },
-    {
-      name: 'Lower priority Rerun of NGC3628',
-      targetFindName: 'NGC3682',
-      targetImage: '',
-      description: 'test run',
-      seriesTemplateName: 'SHO',
-      ra: 11.338111053923866,
-      dec: 13.5897473762046,
-      angle: 209.1496693374404,
-      scale: 0.281,
-      coolingTemp: -19,
-      clsFliter: 'Lum',
-      focusFliter: 'Lum',
-      foccusSamples: 3,
-      focusBin: '4',
-      guideExposure: '9',
-      guideDelay: '2',
-      startTime: '',
-      stopTime: '',
-      priority: 1,
-      tempChg: 0.7,
-      minAlt: 30,
-      completed: false,
-      createdAt: new Date(),
-    },
-  ];
-
 // *******************************
 // Filter Series
 // 1. Filter name
 // 2. Exposure
 // 3. Quantity
 // 4. taken - number of images obtained
-var seriesTemplates = [
-  {
-    name: "SHO",
-    description: "",
-    processSeries: "across series",
-    createdAt: new Date(), // current time
-    series: [
-      {
-        order: 0,
-        series: [
-          { exposure: 'Exposure', value: 1 },
-          { binning: 'Binning', value: 1 },
-          { frame: 'Frame', value: 'Light' },
-          { filter: 'LUM', value: 0 },
-          { repeat: 'Repeat', value: 2 },
-          { taken: 'Taken', value: 0}],
-      },
-      {
-       order: 1,
-       series: [
-         { exposure: 'Exposure', value: 2 },
-         { binning: 'Binning', value: 1 },
-         { frame: 'Frame', value: 'Light' },
-         { filter: 'R', value: 1 },
-         { repeat: 'Repeat', value: 2 },
-         { taken: 'Taken', value: 0}],
-      },
-    ],
-  },
-  {
-    name: "SHO2",
-    description: "",
-    processSeries: "across series",
-    createdAt: new Date(), // current time
-    series: [
-      {
-        order: 0,
-        series: [
-          { exposure: 'Exposure', value: 1 },
-          { binning: 'Binning', value: 1 },
-          { frame: 'Frame', value: 'Light' },
-          { filter: 'LUM', value: 0 },
-          { repeat: 'Repeat', value: 2 },
-          { taken: 'Taken', value: 0}],
-      },
-      {
-       order: 1,
-       series: [
-         { exposure: 'Exposure', value: 2 },
-         { binning: 'Binning', value: 1 },
-         { frame: 'Frame', value: 'Light' },
-         { filter: 'R', value: 1 },
-         { repeat: 'Repeat', value: 2 },
-         { taken: 'Taken', value: 0}],
-      },
-    ],
-  },
-];
+
 
 // *******************************
 // the following is an outline for running an image session
 //
 var imagingSession;
-
-Meteor.methods({
-
-  // Assumed balanced RA/DEC
-  // Assumed Date/Time/Long/Lat correct
-  // Assumed Homed
-  // Assume Polar aligned (rough, or with Polemaster)
-  // Assumed initial focus is done
-  // Assume TPoint recalibration done
-  // Assumed Accurate Polar Alignment (APA) done
-  // Do not assume Autoguider calibrated, will be done once guide star found
-
-// NEED A METHOD TO ADD TEMP SAMPLES INTO Database
-// NEED A METHOD TO RESET THE TEMP DATA IN DATABASE
 
 // *******************************
 // Utilities:
@@ -271,13 +147,24 @@ Meteor.methods({
 //    numFilters = lNumberFilters | filterName = ccdsoftCamera::szFilterName
 //    ignore the offset for now... assume TSX will manage
 
+Meteor.methods({
 
+  // Assumed balanced RA/DEC
+  // Assumed Date/Time/Long/Lat correct
+  // Assumed Homed
+  // Assume Polar aligned (rough, or with Polemaster)
+  // Assumed initial focus is done
+  // Assume TPoint recalibration done
+  // Assumed Accurate Polar Alignment (APA) done
+  // Do not assume Autoguider calibrated, will be done once guide star found
 
-// *******************************
-// *******************************
-// Find a session
-// *******************************
-// *******************************
+  // NEED A METHOD TO ADD TEMP SAMPLES INTO Database
+  // NEED A METHOD TO RESET THE TEMP DATA IN DATABASE
+  // *******************************
+  // *******************************
+  // Find a session
+  // *******************************
+  // *******************************
     //    - check start time
     //    - check for dark time... is darkenough
     //    - check start altitude
@@ -319,132 +206,145 @@ Meteor.methods({
     if( !forceAbort && targetFound ) {
       var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
       tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
-          var result = tsx_return.split('|')[0].trim();
-          console.log('Any error?: ' + result);
-          if( result != 'Success') {
-            forceAbort = true;
-            console.log('Slew Failed. Error: ' + result);
+            var result = tsx_return.split('|')[0].trim();
+            console.log('Any error?: ' + result);
+            if( result != 'Success') {
+              forceAbort = true;
+              console.log('Slew Failed. Error: ' + result);
+            }
+            slewSuccess = true;
           }
-          slewSuccess = true;
-        }
+        )
       )
-    )
-  }
+    }
 
+    // *******************************
+    // 3. refine Focus - @Focus3
+    var focusSuccess = false;
+    if( !forceAbort && slewSuccess ) {
+      var cmd = tsxCmdFocus3(targetSession.focusFilter,targetSession.focusBin,targetSession.focusSamples);
+      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+            var result = tsx_return.split('|')[0].trim();
+            console.log('Any error?: ' + result);
+            if( result != 'Success') {
+              forceAbort = true;
+              console.log('Focus3 Failed. Error: ' + result);
+            }
+            focusSuccess = true;
+          }
+        )
+      )
+    }
 
-  // *******************************
-  // 3. refine Focus - @Focus3
-  var focusSuccess = false;
-  if( !forceAbort && slewSuccess ) {
-    var cmd = tsxCmdFocus3(targetSession.focusFilter,targetSession.focusBin,targetSession.focusSamples);
-    tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
-      var result = tsx_return.split('|')[0].trim();
-      console.log('Any error?: ' + result);
-      if( result != 'Success') {
-        forceAbort = true;
-        console.log('Focus3 Failed. Error: ' + result);
-      }
-      focusSuccess = true;
-    }))
-  }
+    var lastFocusTemp = 0;
+    var getFocusTempSuccess = false;
+    if( !forceAbort && slewSuccess ) {
+      var cmd = tsxCmdGetFocusTemp();
+      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+            var result = tsx_return.split('|')[0].trim();
+            console.log('Any error?: ' + result);
+            if( result != 'Success') {
+              forceAbort = true;
+              console.log('Focus Temp Failed. Error: ' + result);
+            }
+            getFocusTempSuccess = true;
+            lastFocusTemp = tsx_return.split('|')[1].trim();
+          }
+        )
+      )
+    }
 
-  var lastFocusTemp = 0;
-  var getFocusTempSuccess = false;
-  if( !forceAbort && slewSuccess ) {
-    var cmd = tsxCmdGetFocusTemp();
-    tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
-        var result = tsx_return.split('|')[0].trim();
-        console.log('Any error?: ' + result);
-        if( result != 'Success') {
-          forceAbort = true;
-          console.log('Focus Temp Failed. Error: ' + result);
-        }
-        getFocusTempSuccess = true;
-        lastFocusTemp = tsx_return.split('|')[1].trim();
-      }))
-  }
+    // *******************************
+    //    B. CLS to target
+    var clsSuccess = false;
+    if( !forceAbort && focusSuccess ) {
+      var cmd = tsxCmdCLS();
+      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+            var result = tsx_return.split('|')[0].trim();
+            console.log('Any error?: ' + result);
+            if( result != 'Success') {
+              forceAbort = true;
+              console.log('CLS Failed. Error: ' + result);
+            }
+            clsSuccess = true;
+          }
+        )
+      )
+    }
+    // *******************************
+    //    C. Match Rotation/Angle if provided:
+    //      a) if entered for session
+    //      b) obtained from image
+    var rotateSucess = false;
+    if( !forceAbort && clsSuccess ) {
+      var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale);
+      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+            var result = tsx_return.split('|')[0].trim();
+            console.log('Any error?: ' + result);
+            if( result != 'Success') {
+              forceAbort = true;
+              console.log('CLS Failed. Error: ' + result);
+            }
+            rotateSucess = true;
+          }
+        )
+      )
+    }
 
-  // *******************************
-  //    B. CLS to target
-  var clsSuccess = false;
-  if( !forceAbort && focusSuccess ) {
-    var cmd = tsxCmdCLS();
-    tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
-      var result = tsx_return.split('|')[0].trim();
-      console.log('Any error?: ' + result);
-      if( result != 'Success') {
-        forceAbort = true;
-        console.log('CLS Failed. Error: ' + result);
-      }
-      clsSuccess = true;
-    }))
-  }
-  // *******************************
-  //    C. Match Rotation/Angle if provided:
-  //      a) if entered for session
-  //      b) obtained from image
-  var rotateSucess = false;
-  if( !forceAbort && clsSuccess ) {
-    var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale);
-    tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
-      var result = tsx_return.split('|')[0].trim();
-      console.log('Any error?: ' + result);
-      if( result != 'Success') {
-        forceAbort = true;
-        console.log('CLS Failed. Error: ' + result);
-      }
-      rotateSucess = true;
-    }))
-  }
+    // *******************************
+    // 4. Get Guidestar
+    var guideImageSuccess = false;
+    if( !forceAbort && rotateSucess ) {
+      var cmd = tsxCmdTakeGuiderImage(targetSession.guideExposure, targetSession.guideDelay);
+      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+            var result = tsx_return.split('|')[0].trim();
+            console.log('Any error?: ' + result);
+            if( result != 'Success') {
+              forceAbort = true;
+              console.log('Rotate Failed. Error: ' + result);
+            }
+            guideImageSuccess = true;
+          }
+        )
+      )
+    }
+    var guideStarSuccess = false;
+    var guideStarX = 0;
+    var guideStarY = 0;
+    if( !forceAbort && rotateSucess ) {
+      var cmd = tsxCmdFindGuideStar();
+      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+            var result = tsx_return.split('|')[0].trim();
+            console.log('Any error?: ' + result);
+            if( result != 'Success') {
+              forceAbort = true;
+              console.log('Guider Image Failed. Error: ' + result);
+            }
+            guideStarSuccess = true;
+            guideStarX = tsx_return.split('|')[1].trim();
+            guideStarY = tsx_return.split('|')[2].trim();
+          }
+        )
+      )
+    }
 
-  // *******************************
-  // 4. Get Guidestar
-  var guideImageSuccess = false;
-  if( !forceAbort && rotateSucess ) {
-    var cmd = tsxCmdTakeGuiderImage(targetSession.guideExposure, targetSession.guideDelay);
-    tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
-      var result = tsx_return.split('|')[0].trim();
-      console.log('Any error?: ' + result);
-      if( result != 'Success') {
-        forceAbort = true;
-        console.log('Rotate Failed. Error: ' + result);
-      }
-      guideImageSuccess = true;
-    }))
-  }
-  var guideStarSuccess = false;
-  var guideStarX = 0;
-  var guideStarY = 0;
-  if( !forceAbort && rotateSucess ) {
-    var cmd = tsxCmdFindGuideStar();
-    tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
-      var result = tsx_return.split('|')[0].trim();
-      console.log('Any error?: ' + result);
-      if( result != 'Success') {
-        forceAbort = true;
-        console.log('Guider Image Failed. Error: ' + result);
-      }
-      guideStarSuccess = true;
-      guideStarX = tsx_return.split('|')[1].trim();
-      guideStarY = tsx_return.split('|')[2].trim();
-    }))
-  }
-
-  var guidingSuccess = false;
-  if( !forceAbort && guideStarSuccess ) {
-    var cmd = tsxCmdFrameAndGuide(guideStarX,guideStarY,subFrameStar );
-    tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
-      var result = tsx_return.split('|')[0];
-      console.log('Any error?: ' + result);
-      if( result != 'Success') {
-        forceAbort = true;
-        console.log('Guiding Failed. Error: ' + result);
-      }
-      guidingSuccess = true;
-    }))
-  }
-  // *******************************
-  // 5. Calibrate Autoguide
+    var guidingSuccess = false;
+    if( !forceAbort && guideStarSuccess ) {
+      var cmd = tsxCmdFrameAndGuide(guideStarX,guideStarY,subFrameStar );
+      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+            var result = tsx_return.split('|')[0];
+            console.log('Any error?: ' + result);
+            if( result != 'Success') {
+              forceAbort = true;
+              console.log('Guiding Failed. Error: ' + result);
+            }
+            guidingSuccess = true;
+          }
+        )
+      )
+    }
+    // *******************************
+    // 5. Calibrate Autoguide
   },
   // *******************************
   // 6. Load filters, exposures, quantity

@@ -30,6 +30,33 @@ class TakeSeriesTemplateEditor extends Component {
 
   }
 
+
+  addEntry() {
+    // get the current map
+    var seriesMap = this.props.template.series;
+    console.log('current series size: ' + seriesMap.length);
+    // get the end of the array
+    var append = seriesMap.length+1;
+    console.log('Increased series size to: ' + append);
+
+    // create a new map to add
+    var newSeries = new Map();
+    newSeries.set( "order", append);
+    newSeries.set("exposure", 1 );
+    newSeries.set("binning",  1 );
+    newSeries.set("frame", 'Light' );
+    newSeries.set("filter", 0 );
+    newSeries.set("repeat", 1 );
+    newSeries.set("taken", 0);
+    // add the new map to the end, with correct order
+    seriesMap.push(newSeries);
+    // update
+    TakeSeriesTemplates.update({_id: this.props.template._id}, {
+      $push: { 'series': seriesMap },
+    });
+  }
+
+
   componentWillMount() {
     // do not modify the state directly
     this.setState({value: this.props.template.processSeries});
@@ -40,7 +67,7 @@ class TakeSeriesTemplateEditor extends Component {
     return (
       <div>
         <Button  icon='save' onClick={this.saveEntry.bind(this)} />
-        <Button  icon='add'  />
+        <Button  icon='add' onClick={this.addEntry.bind(this)} />
         <Form>
           <Form.Field>
             <Input
@@ -95,8 +122,8 @@ class TakeSeriesTemplateEditor extends Component {
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell width={1}>Exposure</Table.HeaderCell>
-                <Table.HeaderCell width={3}>Frame</Table.HeaderCell>
-                <Table.HeaderCell width={3}>Filter</Table.HeaderCell>
+                <Table.HeaderCell width={1}>Frame</Table.HeaderCell>
+                <Table.HeaderCell width={1}>Filter</Table.HeaderCell>
                 <Table.HeaderCell width={1}>Repeat</Table.HeaderCell>
                 <Table.HeaderCell width={1}>Binning</Table.HeaderCell>
                 <Table.HeaderCell width={1}></Table.HeaderCell>
@@ -104,7 +131,7 @@ class TakeSeriesTemplateEditor extends Component {
             </Table.Header>
             <Table.Body>
               {this.props.template.series.map( (definedSeries)=>{
-                 return  <TakeSeriesEditor key={definedSeries.order} definedSeries={definedSeries} />
+                 return  <TakeSeriesEditor key={definedSeries.order} template={this.props.template} definedSeries={definedSeries} />
               })}
             </Table.Body>
           </Table>
