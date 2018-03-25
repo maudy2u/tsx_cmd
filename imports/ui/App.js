@@ -17,8 +17,7 @@ import TargetSession from './TargetSession.js';
 import SessionTemplate from './SessionTemplate.js';
 import Filter from './Filter.js';
 import Series from './Series.js';
-import TakeSeriesTemplate from './TakeSeriesTemplate.js';
-import EditorSeriesForm from './EditorSeriesForm.js';
+import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 import TheSkyXInfo from './TheSkyXInfo.js';
 
 
@@ -76,16 +75,6 @@ class App extends Component {
     });
     // Clear form
     ReactDOM.findDOMNode(this.refs.textInput).value = '';
-  }
-
-  renderSeriesEditor() {
-
-    // if creating then create a blank series to Edit
-    // if exist then load and poplate the form
-
-    return this.props.filters.map((obj) => (
-        <EditorSeriesForm key={obj._id} filter={obj} />
-    ));
   }
 
   // *******************************
@@ -342,7 +331,7 @@ class App extends Component {
 
     } else if (this.state.activeItem == 'Series') {
       return (
-      <TakeSeriesTemplate />
+      <TakeSeriesTemplateMenu />
       )
     } else if (this.state.activeItem == 'Settings') {
       return this.renderSettings();
