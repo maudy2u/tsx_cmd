@@ -9,6 +9,19 @@ function totalImages (target) {
 
 // ImageSession component - represents a single ImageSession
 export default class TargetSession extends Component {
+
+  calcTargetProgress() {
+      var totalPlannedImages = 0;
+      var totalTakenImages = 0;
+      var target = this.props.targetSession.takeSeries.series;
+      for (var i = 0; i < target.length; i++) {
+
+        totalTakenImages += target[i].taken;
+      }
+      return totalTakenImages;
+  };
+
+
   render() {
     // Get the data for the sessions
     // var test;
@@ -20,6 +33,7 @@ export default class TargetSession extends Component {
     var iNum = (cImage/tImage*100).toFixed(0);
     // var name = this.props.targetSession.get('name');
     // var description = this.props.targetSession.get('description');
+    iNum = this.calcTargetProgress();
 
     return (
       <Table.Row>
