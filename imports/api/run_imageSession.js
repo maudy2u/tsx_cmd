@@ -1,7 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 
-import {tsx_feeder} from '../../server/tsx_feeder.js'
+import {tsx_feeder, tsx_is_waiting} from '../../server/tsx_feeder.js'
 
 var forceAbort = false;
 var port = 3040;
@@ -111,6 +111,9 @@ function takeImage( filter, exposure ) {
       }
     )
   )
+  while( tsx_is_waiting() ) {
+   sleep( 1000 );
+  }
   return success;
 };
 

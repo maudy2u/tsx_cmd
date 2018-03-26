@@ -1,4 +1,11 @@
+import { Meteor } from 'meteor/meteor';
 // import { Meteor } from 'meteor/meteor';
+
+var tsx_waiting = false;
+
+export function tsx_is_waiting() {
+  return tsx_waiting;
+}
 
 // *******************************
 // test of generic write method...
@@ -27,22 +34,26 @@ export function tsx_feeder( ip, port, cmd, callback ) {
       console.log('Received: '  + chunk);
       Out = chunk;
       callback(Out);
+      tsx_waiting = false;
      });
 
      tsx.connect(port, ip, function() {
        console.log('Connected to: ' + ip +':' + port );
      });
 
+     tsx_waiting = true;
      tsx.write(cmd, (err) => {
        console.log('Sending data: ' + cmd);
        console.log('Sending err: ' + err);
      });
 
-     tsx.reads;
-//     tsx.close;
-     console.log('Finished function tsx_feeder.');
 
      // need a TSX WAIT FOR SCRIPT DONE...
-
-   //    return 'tsx_loadFilterNames: ' + Out ;
+     // https://www.w3schools.com/js/js_timing.asp
+     while( tsx_waiting ) {
+      tsx.reads;
+      Meteor.sleep( 1000 );
+     }
+     tsx.close;
+     console.log('Finished function tsx_feeder.');
  };
