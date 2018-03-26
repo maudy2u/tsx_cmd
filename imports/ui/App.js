@@ -199,6 +199,14 @@ class App extends Component {
 
     var remainingImages = d.repeat - d.taken;
 
+    if( (remainingImages < d.repeat) && (remainingImages > 0) ) {
+      console.log('Launching take image for: ' + d.filter + ' at ' + d.exposure + ' seconds');
+      // var res = this.takeImage(series.filter,series.exposure);
+      console.log('Taken image: ' +series.taken);
+      series.taken++;
+      console.log('Taken image: ' +series.taken);
+    }
+    // return;
     // on the client
     Meteor.call("startImaging", this.props.targetSessions[0], function (error) {
       // identify the error

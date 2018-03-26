@@ -407,7 +407,7 @@ Meteor.methods({
         for (var repeatSeries = 0; repeatSeries < targetSession.takeSeries.series.length; repeatSeries++) {
           // take image
           var series = targetSession.takeSeries.series[repeatSeries];
-          var res = this.takeImage(series.filter,series.exposure);
+          var res = takeImage(series.filter,series.exposure);
           console.log('Take image: ' +res);
           series.taken++;
           // check end conditions
@@ -428,9 +428,9 @@ Meteor.methods({
           console.log('Series taken: ' + series.taken);
           var remainingImages = series.repeat - series.taken;
           console.log('number of images remaining: ' + remainingImages);
-          if( remainingImages < series.repeat && remainingImages > 0 ) {
+          if( (remainingImages <= series.repeat) && (remainingImages > 0) ) {
             console.log('Launching take image for: ' + series.filter + ' at ' + series.exposure + ' seconds');
-            var res = this.takeImage(series.filter,series.exposure);
+            var res = takeImage(series.filter,series.exposure);
             console.log('Taken image: ' +res);
             series.taken++;
           }
@@ -444,7 +444,7 @@ Meteor.methods({
         var numImages = targetSession.takeSeries.series[i].repeat - targetSession.takeSeries.series[i].taken;
         for (var perSeries = 0; perSeries < numImages; repeatSeries++) {
           // take image
-          var res = this.takeImage(targetSession.takeSeries.series[i].filter,targetSession.takeSeries.series[i].exposure);
+          var res = takeImage(targetSession.takeSeries.series[i].filter,targetSession.takeSeries.series[i].exposure);
           console.log('Take image: ' +res);
           // check end conditions
           targetSession.takeSeries.series[i].taken++;

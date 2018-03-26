@@ -42,5 +42,7 @@ export function tsx_feeder( ip, port, cmd, callback ) {
 //     tsx.close;
      console.log('Finished function tsx_feeder.');
 
+     // need a TSX WAIT FOR SCRIPT DONE...
+
    //    return 'tsx_loadFilterNames: ' + Out ;
  };
