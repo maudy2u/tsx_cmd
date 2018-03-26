@@ -1,26 +1,28 @@
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 
+import {tsx_feeder} from '../../server/tsx_feeder.js'
 
 var forceAbort = false;
 var port = 3040;
 var ip = 'localhost';
 
-import '../tsx/SkyX_JS_TryTarget.js'
-import '../tsx/SkyX_JS_Slew.js'
-import '../tsx/SkyX_JS_CLS.js'
-import '../tsx/SkyX_JS_Twilight.js'
+import {tsxCmdSetTargetRaDec} from '../tsx/SkyX_JS_TryTarget.js'
+import {tsxCmdSlewRaDec} from '../tsx/SkyX_JS_Slew.js'
+import {tsxCmdCLS} from '../tsx/SkyX_JS_CLS.js'
+import {tsxCmdGetTwilight} from '../tsx/SkyX_JS_Twilight.js'
 
-import '../tsx/SkyX_JS_FindGuideStar.js'
-import '../tsx/SkyX_JS_Focus-3.js'
-import '../tsx/SkyX_JS_FrameAndGuide.js'
-import '../tsx/SkyX_JS_GetFocTemp.js'
-import '../tsx/SkyX_JS_MatchAngle.js'
-import '../tsx/SkyX_JS_TakeGuideImage.js'
-import '../tsx/SkyX_JS_TryTarget.js'
+import {tsxCmdFindGuideStar} from '../tsx/SkyX_JS_FindGuideStar.js'
+import {tsxCmdFocus3} from '../tsx/SkyX_JS_Focus-3.js'
+import {tsxCmdFrameAndGuide} from '../tsx/SkyX_JS_FrameAndGuide.js'
+import {tsxCmdGetFocusTemp} from '../tsx/SkyX_JS_GetFocTemp.js'
+import {tsxCmdMatchAngle} from '../tsx/SkyX_JS_MatchAngle.js'
+import {tsxCmdTakeGuiderImage} from '../tsx/SkyX_JS_TakeGuideImage.js'
+import {tsxCmdFindTargetWithRaDecAlt} from '../tsx/SkyX_JS_TryTarget.js'
+import {tsxCmdTakeImage} from '../tsx/SkyX_JS_TakeImage.js'
 
 // More advance with image supplied... perhaps save an image with the target...
-import '../tsx/SkyX_JS_ImageLink.js'
+import {tsxCmdImageLink} from '../tsx/SkyX_JS_ImageLink.js'
 
 // *******************************
 // Get Target Series
@@ -94,7 +96,25 @@ function canTargetSessionStart(targetSession) {
   return canStart;
 };
 
-function tsxCmdCLS() {
+// *******************************
+function takeImage( filter, exposure ) {
+  console.log('Starting image');
+  var success = false;
+  var cmd = tsxCmdTakeImage(filter,exposure);
+  console.log('Using tsxCmd: ' + cmd);
+  tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+        var result = tsx_return.split('|')[0].trim();
+        console.log('Image: ' + result);
+        if( result === "Sucess") {
+          success = true;
+        }
+      }
+    )
+  )
+  return success;
+};
+
+function tsxCmdTestCLS() {
   // Turn on camera autosave
   //Do the closed loop slew synchronously
 Out ='\
@@ -194,6 +214,7 @@ Meteor.methods({
       )
     }
   },
+
   // *******************************
   // *******************************
   // Prepare target
@@ -355,11 +376,97 @@ Meteor.methods({
   // *******************************
   // 7. Start session run:
   //    - take image
-  startImaging() {
+  startImagingTest(targetSession) {
     // use the order of the series
-    // count number of series
-    // do across series, or per series
-    // for the selected series - do while notNextSeries...
+    var series = targetSession.takeSeries.series[0];
+    console.log('\nProcesing filter: ' + series.filter);
+    console.log('Series repeat: ' + series.repeat);
+    console.log('Series taken: ' + series.taken);
+    var remainingImages = series.repeat - series.taken;
+    console.log('number of images remaining: ' + remainingImages);
+    console.log('Launching take image for: ' + series.filter + ' at ' + series.exposure + ' seconds');
+    var res = takeImage(series.filter,series.exposure);
+    console.log('Taken image: ' +res);
+
+    return;
+  },
+
+  startImaging(targetSession) {
+    // process for each filter
+    var seriesProcess = targetSession.takeSeries.processSeries;
+    console.log('Imaging process: ' + seriesProcess );
+
+    var numFilters = targetSession.takeSeries.series.length;
+    console.log('Number of filters: ' + numFilters );
+    for (var i = 0; i < numFilters; i++) {
+      // this will loop through each seriess
+
+      if ( seriesProcess === 'repeat series' ) {
+        console.log('Entered ' + seriesProcess);
+        // use length and cycle until a stop condition
+        for (var repeatSeries = 0; repeatSeries < targetSession.takeSeries.series.length; repeatSeries++) {
+          // take image
+          var series = targetSession.takeSeries.series[repeatSeries];
+          var res = this.takeImage(series.filter,series.exposure);
+          console.log('Take image: ' +res);
+          series.taken++;
+          // check end conditions
+        }
+        // check end conditions... if okay
+        // allow to repeat
+          i=0;
+      }
+      // similar to continual repeat... except allow to exit without end condition
+      else if( seriesProcess === 'across series' ) {
+        console.log('Entered ' + seriesProcess);
+        // use length and cycle until a stop condition
+        for (var acrossSeries = 0; acrossSeries < targetSession.takeSeries.series.length; acrossSeries++) {
+          // take image
+          var series = targetSession.takeSeries.series[acrossSeries];
+          console.log('\nProcesing filter: ' + series.filter);
+          console.log('Series repeat: ' + series.repeat);
+          console.log('Series taken: ' + series.taken);
+          var remainingImages = series.repeat - series.taken;
+          console.log('number of images remaining: ' + remainingImages);
+          if( remainingImages < series.repeat && remainingImages > 0 ) {
+            console.log('Launching take image for: ' + series.filter + ' at ' + series.exposure + ' seconds');
+            var res = this.takeImage(series.filter,series.exposure);
+            console.log('Taken image: ' +res);
+            series.taken++;
+          }
+          // check end conditions
+        }
+        // similar to repeat series, except do not reset i...
+      }
+      else if ( seriesProcess === 'per series' ) {
+        console.log('Entered ' + seriesProcess);
+        // use i to lock to the current filter
+        var numImages = targetSession.takeSeries.series[i].repeat - targetSession.takeSeries.series[i].taken;
+        for (var perSeries = 0; perSeries < numImages; repeatSeries++) {
+          // take image
+          var res = this.takeImage(targetSession.takeSeries.series[i].filter,targetSession.takeSeries.series[i].exposure);
+          console.log('Take image: ' +res);
+          // check end conditions
+          targetSession.takeSeries.series[i].taken++;
+        }
+      }
+      else {
+        console.log('*** FAILED to process seriess');
+      }
+      // do we RESET to repeat and check each series
+      if( i+1 >= targetSession.takeSeries.series.length ) {
+        for (var chk = 0; chk < targetSession.takeSeries.series.length; chk++) {
+          if( targetSession.takeSeries.series[i].taken < targetSession.takeSeries.series[i].repeat ) {
+            i=0;
+            console.log('Reset - more images for : ' + targetSession.takeSeries.series[i].filter );
+            break;
+          }
+          else {
+            console.log('Filter done : ' + targetSession.takeSeries.series[i].filter );
+          }
+        }
+      }
+    }
     // takeImage(exposure, filter)
     // check Twilight - force stop
     // check minAlt - stop - find next

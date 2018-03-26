@@ -23,6 +23,7 @@ import TheSkyXInfo from './TheSkyXInfo.js';
 
 // Examples
 import Task from './Task.js';
+import {tsxCmdTakeImage} from '../tsx/SkyX_JS_TakeImage.js'
 
 // App component - represents the whole app
 class App extends Component {
@@ -182,6 +183,32 @@ class App extends Component {
     });
   }
 
+  testTakeImage() {
+    var a = this.props.targetSessions;
+    var a1 = this.props.targetSessions[0];
+    var a2 = this.props.targetSessions[0].name;
+    var b = this.props.targetSessions[0].takeSeries;
+    var b2 = this.props.targetSessions[0].takeSeries.name;
+    var c = this.props.targetSessions[0].takeSeries.series;
+    var d = this.props.targetSessions[0].takeSeries.series[0];
+    var f = d.frame;
+    var e = d.filter;
+    var e1 = d.repeat;
+    var e2 = d.taken;
+    var cmd = tsxCmdTakeImage(e,d.exposure);
+
+    var remainingImages = d.repeat - d.taken;
+
+    // on the client
+    Meteor.call("startImaging", this.props.targetSessions[0], function (error) {
+      // identify the error
+      if (error && error.error === "logged-out") {
+        // show a nice error message
+        Session.set("errorMessage", "Please log in to post a comment.");
+      }
+    });
+  }
+
   //{this.testMeteorMethod.bind(this)}
   loadTestDataMeteorMethod() {
 
@@ -198,6 +225,14 @@ class App extends Component {
   chkTestData() {
     var targetSessions = this.props.targetSessions;
     console.log('test');
+    // on the client
+    Meteor.call("loadTestDataAllTakeSeriesTemplates", function (error) {
+      // identify the error
+      if (error && error.error === "logged-out") {
+        // show a nice error message
+        Session.set("errorMessage", "Please log in to post a comment.");
+      }
+    });
   }
 
   // *******************************
@@ -219,9 +254,9 @@ class App extends Component {
           <Button icon='upload' />
         </Button.Group>
         <Button.Group labeled icon>
-          <Button icon='play' content='Start' />
-          <Button icon='pause' content='Pause' />
-          <Button icon='stop' content='Stop' />
+          <Button icon='play'  onClick={this.testTakeImage.bind(this)}/>
+          <Button icon='pause'  />
+          <Button icon='stop'  />
         </Button.Group>
       <Table celled selectable>
         <Table.Header>

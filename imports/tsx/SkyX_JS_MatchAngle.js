@@ -1,8 +1,7 @@
-import { Meteor } from 'meteor/meteor';
 
 
 // Assumed Target already set
-function tsxCmdMatchAngle(targetAng, knownImageScale) {
+export function tsxCmdMatchAngle(targetAng, knownImageScale) {
 var Out = '\
   var Out="";\
   function calcNewPostion( imageLinkAng, rotPos, targetAng)  {\
@@ -53,4 +52,5 @@ var Out = '\
   RunJavaScriptOutput.writeLine ("DONE");\
   Out = Out;\
   ';
+  return Out;
 };

@@ -1,4 +1,3 @@
-import { Meteor } from 'meteor/meteor';
 /* Java Script */
 /* Socket Start Packet */
 
@@ -28,7 +27,7 @@ import { Meteor } from 'meteor/meteor';
 var tester1 = 0;
 
 // Assumed Target already set
-function tsxCmdCLS() {
+export function tsxCmdCLS() {
   Out = '\
   var CLSStatus = "Success";\
   var iScale		= 0			// Holds the calculated Image Scale\
@@ -49,4 +48,5 @@ function tsxCmdCLS() {
   }\
   }\
   ';
+  return Out;
 }

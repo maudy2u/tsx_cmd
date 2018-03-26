@@ -1,4 +1,3 @@
-import { Meteor } from 'meteor/meteor';
 /* Java Script */
 /* Socket Start Packet */
 
@@ -27,7 +26,7 @@ import { Meteor } from 'meteor/meteor';
 //
 
 // Assumed Target already set
-function tsxCmdSlewRaDec(ra,dec) {
+export function tsxCmdSlewRaDec(ra,dec) {
   Out = '\
   var slewStatus = "Success";\
 	//Do the closed loop slew synchronously\
@@ -43,4 +42,5 @@ function tsxCmdSlewRaDec(ra,dec) {
   }\
   }\
   ';
+  return Out;
 }

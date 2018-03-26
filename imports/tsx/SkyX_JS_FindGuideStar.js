@@ -1,8 +1,7 @@
-import { Meteor } from 'meteor/meteor';
 
 
 // Assumed Target already set
-function tsxCmdFindGuideStar() {
+export function tsxCmdFindGuideStar() {
   var Out = '\
   // Ken Sturrock\
   // January 13, 2018\
@@ -143,6 +142,7 @@ function tsxCmdFindGuideStar() {
     path = CAGI.Path;\
     out = "Succes|" + newX + "|" + newY + "|" + path;\
   ';
+  return Out;
 };
 
 /*

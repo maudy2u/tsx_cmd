@@ -1,8 +1,8 @@
-import { Meteor } from 'meteor/meteor';
+
 /* Java Script */
 /* Socket Start Packet */
 
-function tsxCmdGetFocusTemp() {
+export function tsxCmdGetFocusTemp() {
 var Out = '\
   //\
   //	Get the focuser temperature\
@@ -13,4 +13,5 @@ var Out = '\
 \
   Out = "Success|" + ccdsoftCamera.focTemperature.toFixed(1);\
 ';
+return Out;
 }

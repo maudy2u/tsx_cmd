@@ -1,4 +1,3 @@
-import { Meteor } from 'meteor/meteor';
 /* Java Script */
 /* Socket Start Packet */
 
@@ -8,7 +7,7 @@ import { Meteor } from 'meteor/meteor';
 // Ken Sturrock
 // January 13, 2018
 //
-function tsxCmdGetTwilight(target) {
+export function tsxCmdGetTwilight(target) {
 var Out ='\
 var Target 	= '+target+';	// tsxfeeder replaces $000 with the current target name.\
 \
@@ -42,6 +41,7 @@ if (ccdsoftCamera.ImageUseDigitizedSkySurvey == 1)\
 	simpErr = "Simulator. " + altitude;\
 }\
 ';
+return Out;
 }
 
 /* Socket End Packet */

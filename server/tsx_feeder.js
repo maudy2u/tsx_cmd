@@ -1,8 +1,8 @@
-import { Meteor } from 'meteor/meteor';
+// import { Meteor } from 'meteor/meteor';
 
 // *******************************
 // test of generic write method...
-function tsx_feeder( ip, port, cmd, callback ) {
+export function tsx_feeder( ip, port, cmd, callback ) {
     console.log('Started tsx_feeder.');
      var Out;
      var net = require('net');
@@ -44,5 +44,3 @@ function tsx_feeder( ip, port, cmd, callback ) {
 
    //    return 'tsx_loadFilterNames: ' + Out ;
  };
-
-export default tsx_feeder;

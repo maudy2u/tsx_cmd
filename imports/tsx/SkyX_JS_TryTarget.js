@@ -1,4 +1,3 @@
-import { Meteor } from 'meteor/meteor';
 /* Java Script */
 /* Socket Start Packet */
 
@@ -10,7 +9,7 @@ import { Meteor } from 'meteor/meteor';
 //
 
 // select the target per its Ra/dec
-function tsxCmdSetTargetRaDec(ra, dec) {
+export function tsxCmdSetTargetRaDec(ra, dec) {
 Out = 'var err;\
 sky6StarChart.LASTCOMERROR=0;\
 sky6StarChart.EquatorialToStarChartXY('+ra+','+dec+');\
@@ -23,9 +22,10 @@ return false;\
 }\
 return "Found";\
 }';
+return Out;
 };
 
-function tsxCmdFindTargetWithRaDecAlt(ra, dec, alt) {
+export function tsxCmdFindTargetWithRaDecAlt(ra, dec, alt) {
 
 Out = 'var err;\
 var FindStatus	= "Success";	// Preload value for success.\
@@ -65,5 +65,6 @@ out = "has sunk too low.";\
 }\
 }\
 ';
+return Out;
 }
 /* Socket End Packet */

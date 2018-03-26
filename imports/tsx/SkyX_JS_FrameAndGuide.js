@@ -1,9 +1,8 @@
-import { Meteor } from 'meteor/meteor';
 /* Java Script */
 
 
 // Assumed Target already set
-function tsxCmdFrameAndGuide(guideX,guideY,subFrameStar ) {
+export function tsxCmdFrameAndGuide(guideX,guideY,subFrameStar ) {
 var Out ='\
 //\
 //	This script takes the GuideX and GuideY variables passed to it from the main script\
@@ -29,4 +28,5 @@ ccdsoftAutoguider.Asynchronous = true;		// Turn on so we do not get stuck waitin
 ccdsoftAutoguider.Autoguide();			// Do it.\
 Out="Success|"\
 ';
+return Out;
 }

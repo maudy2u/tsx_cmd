@@ -1,4 +1,3 @@
-import { Meteor } from 'meteor/meteor';
 /* Java Script */
 /* Socket Start Packet */
 
@@ -7,7 +6,7 @@ import { Meteor } from 'meteor/meteor';
 //
 //	Ken Sturrock December 25, 2017
 //
-function tsxCmdTakeGuiderImage(guideExposure) {
+export function tsxCmdTakeGuiderImage(guideExposure) {
 var Out = '\
 ccdsoftAutoguider.Connect();\
 ccdsoftAutoguider.Asynchronous = false;\
@@ -23,4 +22,5 @@ if (SelectedHardware.autoguiderCameraModel == "SBIG ST-i")\
 ccdsoftAutoguider.TakeImage();\
 Out="Success|";\
 ';
+return Out;
 }

@@ -1,4 +1,3 @@
-import { Meteor } from 'meteor/meteor';
 /* Java Script */
 /* Socket Start Packet */
 
@@ -15,7 +14,7 @@ import { Meteor } from 'meteor/meteor';
 // January 17, 2018
 //
 
-function tsxCmdFocus3(focusFilter,bin,numSamples) {
+export function tsxCmdFocus3(focusFilter,bin,numSamples) {
 var Out = '\
 	var CCDSC		= ccdsoftCamera;\
 	var initExp 		= CCDSC.ExposureTime;			// How long of an exposure does the camera use?\
@@ -78,4 +77,5 @@ var Out = '\
 	}\
 	out\
 ';
+return Out;
 }

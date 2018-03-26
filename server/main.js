@@ -7,6 +7,7 @@ import '../imports/api/sessionTemplates.js';
 import '../imports/api/theSkyXInfos.js';
 import '../imports/api/run_imageSession.js';
 import './filters.js';
+import './tsx_feeder.js'
 
 // *******************************
 // Filter Series
@@ -15,8 +16,8 @@ import './filters.js';
 // 3. Quantity
 // 4. taken - number of images obtained
 // LUM Imaging
-var nBExposure = 8*60;
-var lrgbExposure = 3*60;
+var nBExposure = 8;
+var lrgbExposure = 3;
 
 var takeSeries1 = new Map();
 // LUM
@@ -116,7 +117,7 @@ testAllTakeSeriesTemplates.push(testTakeSeriesTemplate2);
 var target1 = new Map();
 var target2 = new Map();
 
-target1.set("name", 'Higher Priority Rerun of NGC3628');
+target1.set("name", 'LRGB Galaxy');
 target1.set("targetFindName", 'NGC3682');
 target1.set("targetImage", '');
 target1.set("description", 'test run');
@@ -140,7 +141,7 @@ target1.set("minAlt", 30);
 target1.set("completed", false);
 target1.set("createdAt", new Date());
 
-target2.set("name", 'Lower priority Rerun of NGC3628');
+target2.set("name", 'SHO - Nebula');
 target2.set("targetFindName", 'NGC3682');
 target2.set("targetImage", '');
 target2.set("description", 'test run');
@@ -310,7 +311,7 @@ Meteor.startup(() => {
    },
 
    takeSeriesForTarget( targetSession ) {
-     
+
    },
 
    // *******************************

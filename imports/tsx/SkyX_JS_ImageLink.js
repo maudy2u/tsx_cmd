@@ -1,8 +1,7 @@
-import { Meteor } from 'meteor/meteor';
 
 
 // Assumed Target already set
-function tsxCmdImageLink(completePathToFile, knownImageScale) {
+export function tsxCmdImageLink(completePathToFile, knownImageScale) {
   Out = '\
 ImageLink.pathToFITS = '+completePathToFile+';\
 ImageLink.scale = '+knownImageScale+';\
@@ -13,4 +12,5 @@ Ra=ImageLinkResults.imageCenterRAJ2000;\
 Dec=ImageLinkResults.imageCenterDecJ2000;\
 Out="Success|"+String(scale) + "|" + String(Ra) + "|" + String(Dec) + "|" + String(ang);\
 ';
+return Out;
 };
