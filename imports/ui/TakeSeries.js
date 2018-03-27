@@ -8,13 +8,13 @@ import TakeSeriesTemplateEditor from './TakeSeriesTemplateEditor.js';
 
 class TakeSeries extends Component {
 
-  deleteEntry() {
-      TakeSeriesTemplates.remove(this.props.seriesTemplate._id);
-  }
-
   state = { modalOpen: false }
   handleOpen = () => this.setState({ modalOpen: true })
   handleClose = () => this.setState({ modalOpen: false })
+
+  deleteEntry() {
+      TakeSeriesTemplates.remove(this.props.seriesTemplate._id);
+  }
 
   editEntry() {
     console.log('In the DefineTemplate editEntry');
@@ -33,8 +33,9 @@ class TakeSeries extends Component {
         </Table.Cell>
         <Table.Cell>
           <Button.Group basic size='small'>
-            <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
             <Button icon='edit' onClick={this.editEntry.bind(this)}/>
+            <Button icon='copy' />            
+            <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
           </Button.Group>
           <Modal
             open={this.state.modalOpen}

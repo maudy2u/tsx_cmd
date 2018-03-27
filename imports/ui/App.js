@@ -13,7 +13,7 @@ import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 
 // Import the UI
 import { Dropdown, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
-import TargetSession from './TargetSession.js';
+import TargetSessionMenu from './TargetSessionMenu.js';
 import SessionTemplate from './SessionTemplate.js';
 import Filter from './Filter.js';
 import Series from './Series.js';
@@ -183,65 +183,6 @@ class App extends Component {
     });
   }
 
-  testTakeImage() {
-    var a = this.props.targetSessions;
-    var a1 = this.props.targetSessions[0];
-    var a2 = this.props.targetSessions[0].name;
-    var b = this.props.targetSessions[0].takeSeries;
-    var b2 = this.props.targetSessions[0].takeSeries.name;
-    var c = this.props.targetSessions[0].takeSeries.series;
-    var d = this.props.targetSessions[0].takeSeries.series[0];
-    var f = d.frame;
-    var e = d.filter;
-    var e1 = d.repeat;
-    var e2 = d.taken;
-    var cmd = tsxCmdTakeImage(e,d.exposure);
-
-    var remainingImages = d.repeat - d.taken;
-
-    if( (remainingImages < d.repeat) && (remainingImages > 0) ) {
-      console.log('Launching take image for: ' + d.filter + ' at ' + d.exposure + ' seconds');
-      // var res = this.takeImage(series.filter,series.exposure);
-      console.log('Taken image: ' +series.taken);
-      series.taken++;
-      console.log('Taken image: ' +series.taken);
-    }
-    // return;
-    // on the client
-    Meteor.call("startImaging", this.props.targetSessions[0], function (error) {
-      // identify the error
-      if (error && error.error === "logged-out") {
-        // show a nice error message
-        Session.set("errorMessage", "Please log in to post a comment.");
-      }
-    });
-  }
-
-  //{this.testMeteorMethod.bind(this)}
-  loadTestDataMeteorMethod() {
-
-    // on the client
-    Meteor.call("loadTestDataTargetSessions", function (error) {
-      // identify the error
-      if (error && error.error === "logged-out") {
-        // show a nice error message
-        Session.set("errorMessage", "Please log in to post a comment.");
-      }
-    });
-  }
-
-  chkTestData() {
-    var targetSessions = this.props.targetSessions;
-    console.log('test');
-    // on the client
-    Meteor.call("loadTestDataAllTakeSeriesTemplates", function (error) {
-      // identify the error
-      if (error && error.error === "logged-out") {
-        // show a nice error message
-        Session.set("errorMessage", "Please log in to post a comment.");
-      }
-    });
-  }
 
   // *******************************
   //
@@ -370,11 +311,12 @@ class App extends Component {
 
     if (this.state.activeItem == 'Targets' ) {
       console.log('Running state: ' + this.state.activeItem);
-      return this.renderTargetSequences();
-
+      return (
+        <TargetSessionMenu />
+      )
     } else if (this.state.activeItem == 'Series') {
       return (
-      <TakeSeriesTemplateMenu />
+        <TakeSeriesTemplateMenu />
       )
     } else if (this.state.activeItem == 'Settings') {
       return this.renderSettings();
@@ -388,7 +330,9 @@ class App extends Component {
 
     } else {
       this.state = { activeItem: 'Targets' };
-      return this.renderTargetSequences();
+      return (
+        <TargetSessionMenu />
+      )
     }
   }
 
@@ -422,6 +366,16 @@ class App extends Component {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
     */
     //        {this.renderMenuSegments()}
+    // var totalPlannedImages = 0;
+    // var totalTakenImages = 0;
+    // var target = this.props.targetSessions[0];
+    // var take = target.takeSeries;
+    // var series = take.series[0];
+    // for (var i = 0; i < target.length; i++) {
+    //   totalTakenImages += target[i].taken;
+    //   // totalPlannedImages +=target.[i].repeat;
+    // }
+
 
     const { activeItem } = this.state
 

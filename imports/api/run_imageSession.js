@@ -112,7 +112,7 @@ function takeImage( filter, exposure ) {
     )
   )
   while( tsx_is_waiting() ) {
-   sleep( 1000 );
+   Meteor.sleep( 1000 );
   }
   return success;
 };

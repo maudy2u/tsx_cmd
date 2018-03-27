@@ -7,6 +7,7 @@ import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 import { Form, Table, Button, Dropdown, } from 'semantic-ui-react'
 
 class TakeSeriesEditor extends Component {
+  
   // *******************************
   // Get the filters from TheSkyX
   renderDropDownFilters() {
