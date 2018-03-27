@@ -72,14 +72,14 @@ class TargetEditor extends Component {
     return (
       <div>
         <Button  icon='save' onClick={this.saveEntry.bind(this)} />
+        <Checkbox
+          label='Completed'
+          toggle
+          checked={this.state.value}
+          onChange={this.handleChange}
+        />
         <Form>
           <Form.Field>
-            <Checkbox
-              label='Completed'
-              toggle
-              checked={this.state.value}
-              onChange={this.handleChange}
-            />
             <Input
               label='Name:'
               ref='targetName'

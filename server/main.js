@@ -263,6 +263,7 @@ Meteor.startup(() => {
            targetFindName: testData[i].get("targetFindName"),
            targetImage: testData[i].get("targetImage"),
            description: testData[i].get("description"),
+           enabledActive: false,
            takeSeries: {},
            ra: testData[i].get("ra"),
            dec: testData[i].get("dec"),

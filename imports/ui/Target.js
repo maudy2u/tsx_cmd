@@ -23,7 +23,7 @@ class TargetSession extends Component {
 
   componentWillMount() {
     // do not modify the state directly
-    this.setState({value: this.props.target.checked});
+    this.setState({checked: this.props.target.enabledActive});
   }
 
   calcTargetProgress() {
@@ -55,7 +55,7 @@ class TargetSession extends Component {
         <Table.Cell>
           <Checkbox
             toggle
-            checked={this.state.value}
+            checked={this.state.checked}
             onChange={this.handleChange}
         />
         </Table.Cell>
