@@ -7,7 +7,7 @@ import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 import { Form, Table, Button, Dropdown, } from 'semantic-ui-react'
 
 class TakeSeriesEditor extends Component {
-  
+
   // *******************************
   // Get the filters from TheSkyX
   renderDropDownFilters() {
@@ -140,6 +140,7 @@ class TakeSeriesEditor extends Component {
           />
         </Table.Cell>
         <Table.Cell>
+          <label>{this.props.definedSeries.order}</label>
           <Button size='mini' icon='delete'  onClick={this.deleteEntry.bind(this)}/>
           <Button size='mini' icon='arrow up'  onClick={this.moveUpEntry.bind(this)}/>
           <Button size='mini' icon='arrow down'  onClick={this.moveDownEntry.bind(this)}/>

@@ -124,18 +124,18 @@ class TargetSession extends Component {
             <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
             <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
           </Button.Group>
-          <Modal
-            open={this.state.modalOpen}
-            onClose={this.handleClose}
-            closeIcon>
-            <Modal.Header>Edit Series</Modal.Header>
-            <Modal.Content>
-              <Modal.Description>
-                <TargetEditor key={this.props.target._id} target={this.props.target} />
-              </Modal.Description>
-            </Modal.Content>
-          </Modal>
         </Table.Cell>
+        <Modal
+          open={this.state.modalOpen}
+          onClose={this.handleClose}
+          closeIcon>
+          <Modal.Header>Edit Series</Modal.Header>
+          <Modal.Content>
+            <Modal.Description>
+              <TargetEditor key={this.props.target._id} target={this.props.target} />
+            </Modal.Description>
+          </Modal.Content>
+        </Modal>
       </Table.Row>
     )
   }

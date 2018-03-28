@@ -4,13 +4,16 @@ import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
 import { TargetSessions } from '../api/targetSessions.js';
+import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 
 import { Form, Segment, Button, Radio, Input, Table, Dropdown, Checkbox, } from 'semantic-ui-react'
 
 class TargetEditor extends Component {
 
-  state = { value: false };
-  handleChange = (e, { value }) => this.setState({ value });
+  state = { value: false, openModal: false };
+  handleChange = (e, { value }) => this.setState({ checked: value });
+  handleOpen = () => this.setState({ modalOpen: true })
+  handleClose = () => this.setState({ modalOpen: false })
 
   saveEntry() {
     // const name = ReactDOM.findDOMNode(this.refs.tempName.inputRef).value; //.trim();
@@ -62,9 +65,13 @@ class TargetEditor extends Component {
     ];
   }
 
+  getTakeSeriesTemplates() {
+
+  }
+
   componentWillMount() {
     // // do not modify the state directly
-    this.setState({value: this.props.target.enabledActive});
+    this.setState({checked: this.props.target.enabledActive});
   }
 
   render() {
@@ -75,7 +82,7 @@ class TargetEditor extends Component {
         <Checkbox
           label='Enabled'
           toggle
-          checked={this.state.value}
+          checked={this.state.checked}
           onChange={this.handleChange}
         />
         <h3 className="ui header">Target Details</h3>
@@ -95,6 +102,13 @@ class TargetEditor extends Component {
                   placeholder='Describe the session'
                   defaultValue={this.props.target.description}
                 />
+                <Dropdown
+                    floating
+                    label='Filter'
+                    className='filter'
+                    options={this.getTakeSeriesTemplates()}
+                    placeholder='Filter for focusing'
+                  />
           </Segment>
           <Segment>
                 <Input
@@ -115,24 +129,13 @@ class TargetEditor extends Component {
                 />
           </Segment>
           <Segment>
-                <Input
-                  label='Ra'
-                  ref='ra'
-                  type='text'
-                  defaultValue={this.props.target.ra}
-                />
-                <Input
-                  label='Dec'
-                  ref='dec'
-                  type='text'
-                  defaultValue={this.props.target.dec}
-                />
-                <Input
-                  label='Angle'
-                  ref='angle'
-                  type='text'
-                  defaultValue={this.props.target.angle}
-                />
+            <Form>
+              <Form.Group widths='equal'>
+                <Form.Field control={Input} label='Ra' ref='ra' placeholder='RA' defaultValue={this.props.target.ra}/>
+                <Form.Field control={Input} label='Dec' ref='dec' placeholder='DEC' defaultValue={this.props.target.dec}/>
+                <Form.Field control={Input} label='Angle' ref='angle' placeholder='Angle' defaultValue={this.props.target.angle}/>
+              </Form.Group>
+            </Form>
           </Segment>
         </Segment.Group>
         <h3 className="ui header">Focus</h3>
@@ -228,6 +231,8 @@ completed: testData[i].get("completed"),
 export default withTracker(() => {
     return {
       targets: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
+      takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
+
   };
 })(TargetEditor);
 

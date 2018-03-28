@@ -100,12 +100,12 @@ class TakeSeriesTemplateEditor extends Component {
         <Table celled padded selectable>
             <Table.Header>
               <Table.Row>
-                <Table.HeaderCell width={1}>Exposure</Table.HeaderCell>
-                <Table.HeaderCell width={1}>Frame</Table.HeaderCell>
-                <Table.HeaderCell width={1}>Filter</Table.HeaderCell>
-                <Table.HeaderCell width={1}>Repeat</Table.HeaderCell>
-                <Table.HeaderCell width={1}>Binning</Table.HeaderCell>
-                <Table.HeaderCell width={1}></Table.HeaderCell>
+                <Table.HeaderCell>Exposure</Table.HeaderCell>
+                <Table.HeaderCell>Frame</Table.HeaderCell>
+                <Table.HeaderCell>Filter</Table.HeaderCell>
+                <Table.HeaderCell>Repeat</Table.HeaderCell>
+                <Table.HeaderCell>Binning</Table.HeaderCell>
+                <Table.HeaderCell></Table.HeaderCell>
               </Table.Row>
             </Table.Header>
             <Table.Body>
