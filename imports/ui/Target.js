@@ -19,7 +19,14 @@ class TargetSession extends Component {
   state = { modalOpen: false, checked: false }
   handleOpen = () => this.setState({ modalOpen: true })
   handleClose = () => this.setState({ modalOpen: false })
-  handleChecked = (e, { value }) => this.setState({ checked: value });
+
+  onChangeChecked() {
+    this.setState({checked: !this.props.target.enabledActive});
+    TargetSessions.update({_id: this.props.target._id}, {
+      $set: { enabledActive: !this.props.target.enabledActive },
+    })
+    this.props.target.enabledActive = !this.props.target.enabledActive;
+  }
 
   componentWillMount() {
     // do not modify the state directly
@@ -47,6 +54,55 @@ class TargetSession extends Component {
     this.handleOpen();
   }
 
+  copyEntry() {
+    console.log('In the DefineTemplate editEntry');
+
+    orgTarget = this.props.target;
+
+    // get the id for the new object
+    const id = TargetSessions.insert(
+      {
+        name: orgTarget.name + ' Duplicated',
+        targetFindName: orgTarget.targetFindName,
+        targetImage: orgTarget.targetImage,
+        description: orgTarget.description,
+        enabledActive: false,
+        takeSeries: {
+          name: orgTarget.takeSeries.name,
+          description: orgTarget.takeSeries.description,
+          processSeries: orgTarget.takeSeries.processSeries,
+          createdAt: new Date(),
+          series: [],
+        },
+        ra: orgTarget.ra,
+        dec: orgTarget.dec,
+        angle: orgTarget.angle,
+        scale: orgTarget.scale,
+        coolingTemp: orgTarget.coolingTemp,
+        clsFliter: orgTarget.clsFliter,
+        focusFliter: orgTarget.focusFliter,
+        foccusSamples: orgTarget.foccusSamples,
+        focusBin: orgTarget.focusBin,
+        guideExposure: orgTarget.guideExposure,
+        guideDelay: orgTarget.guideDelay,
+        startTime: orgTarget.startTime,
+        stopTime: orgTarget.stopTime,
+        priority: orgTarget.priority,
+        tempChg: orgTarget.tempChg,
+        minAlt: orgTarget.minAlt,
+        completed: orgTarget.completed,
+        createdAt: orgTarget.createdAt,
+      }
+    )
+
+    var series = orgTarget.takeSeries.series;
+    for (var i = 0; i < series.length; i++) {
+      seriesMap = series[i];
+      TargetSessions.update({_id: id}, {
+        $push: { 'takeSeries.series': seriesMap },
+      });
+    }
+  }
 
   render() {
 
@@ -56,7 +112,7 @@ class TargetSession extends Component {
           <Checkbox
             toggle
             checked={this.state.checked}
-            onChange={this.handleChange}
+            onChange={this.onChangeChecked.bind(this)}
         />
         </Table.Cell>
         <Table.Cell>{this.props.target.name}</Table.Cell>
@@ -65,7 +121,7 @@ class TargetSession extends Component {
         <Table.Cell>
           <Button.Group basic size='small'>
             <Button icon='edit' onClick={this.editEntry.bind(this)}/>
-            <Button icon='copy' />
+            <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
             <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
           </Button.Group>
           <Modal

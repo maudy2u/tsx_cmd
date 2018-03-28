@@ -69,6 +69,7 @@ class TakeSeriesTemplateEditor extends Component {
         <Button  icon='save' onClick={this.saveEntry.bind(this)} />
         <Button  icon='add' onClick={this.addEntry.bind(this)} />
         <Form>
+          <Form.Group widths='equal'>
           <Form.Field>
             <Input
               label='Name:'
@@ -87,38 +88,16 @@ class TakeSeriesTemplateEditor extends Component {
               defaultValue={this.props.template.description}
             />
           </Form.Field>
-          <Form.Field>
-            Repeat executes: <b>{this.state.value}</b>
-          </Form.Field>
-          <Form.Field>
-            <Radio
-              label='Per series'
-              name='seriesRadioGroup'
-              value='per series'
-              checked={this.state.value === "per series"}
-              onChange={this.handleChange}
-            />
-          </Form.Field>
-          <Form.Field>
-            <Radio
-              label='Across series'
-              name='seriesRadioGroup'
-              value='across series'
-              checked={this.state.value === "across series"}
-              onChange={this.handleChange}
-            />
-          </Form.Field>
-          <Form.Field>
-            <Radio
-              label='Repeat series'
-              name='seriesRadioGroup'
-              value='repeat'
-              checked={this.state.value === "repeat"}
-              onChange={this.handleChange}
-            />
-          </Form.Field>
+        </Form.Group>
+
+          <Form.Group inline>
+            <h3 className="ui header">Repeat executes: <b>{this.state.value}</b></h3>
+          <Form.Field control={Radio} label='Per series' value='per series' checked={this.state.value === "per series"} onChange={this.handleChange} />
+          <Form.Field control={Radio} label='Across series' value='across series' checked={this.state.value === "across series"} onChange={this.handleChange} />
+          <Form.Field control={Radio} label='Repeat series' value='repeat' checked={this.state.value === "repeat"} onChange={this.handleChange} />
+        </Form.Group>
         </Form>
-        <Table fixed celled selectable>
+        <Table celled padded selectable>
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell width={1}>Exposure</Table.HeaderCell>

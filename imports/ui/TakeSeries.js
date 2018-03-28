@@ -21,6 +21,32 @@ class TakeSeries extends Component {
     this.handleOpen();
   }
 
+  copyEntry() {
+    console.log('In the DefineTemplate editEntry');
+
+    orgSeries = this.props.seriesTemplate;
+
+    // get the id for the new object
+    const id = TakeSeriesTemplates.insert(
+      {
+        name: orgSeries.name + ' Duplicated',
+        description: orgSeries.description,
+        processSeries: orgSeries.processSeries,
+        createdAt: new Date(),
+        series: [],
+      }
+    )
+
+    var series = orgSeries.series;
+    for (var i = 0; i < series.length; i++) {
+      seriesMap = series[i];
+      TakeSeriesTemplates.update({_id: id}, {
+        $push: { 'series': seriesMap },
+      });
+    }
+  }
+
+
   render() {
 //    <input type="checkbox" checked={!!this.props.takeSeriesTemplate.checked} name={this.props.takeSeriesTemplate.name} readOnly="" tabIndex="0" />
     return (
@@ -34,7 +60,7 @@ class TakeSeries extends Component {
         <Table.Cell>
           <Button.Group basic size='small'>
             <Button icon='edit' onClick={this.editEntry.bind(this)}/>
-            <Button icon='copy' />            
+            <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
             <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
           </Button.Group>
           <Modal
@@ -42,13 +68,6 @@ class TakeSeries extends Component {
             onClose={this.handleClose}
             closeIcon>
             <Modal.Header>Edit Series</Modal.Header>
-            <Button.Group>
-              {/* <Button circular icon='save'  onClick={this.handleAddClose} />
-              <Button circular icon='cancel'  onClick={this.handleAddClose}/> */}
-              <Button circular icon='add' />
-              {/* <Button circular icon='edit' onClick={this.handleAddClose} />
-              <Button circular icon='delete' onClick={this.handleAddClose} /> */}
-           </Button.Group>
             <Modal.Content>
               <Modal.Description>
                 <TakeSeriesTemplateEditor key={this.props.seriesTemplate._id} template={this.props.seriesTemplate} />

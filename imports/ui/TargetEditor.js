@@ -5,11 +5,11 @@ import { withTracker } from 'meteor/react-meteor-data';
 
 import { TargetSessions } from '../api/targetSessions.js';
 
-import { Form, Button, Radio, Input, Table, Dropdown, Checkbox, } from 'semantic-ui-react'
+import { Form, Segment, Button, Radio, Input, Table, Dropdown, Checkbox, } from 'semantic-ui-react'
 
 class TargetEditor extends Component {
 
-  state = { value: " " };
+  state = { value: false };
   handleChange = (e, { value }) => this.setState({ value });
 
   saveEntry() {
@@ -64,7 +64,7 @@ class TargetEditor extends Component {
 
   componentWillMount() {
     // // do not modify the state directly
-    // this.setState({value: this.props.target.processSeries});
+    this.setState({value: this.props.target.enabledActive});
   }
 
   render() {
@@ -73,119 +73,127 @@ class TargetEditor extends Component {
       <div>
         <Button  icon='save' onClick={this.saveEntry.bind(this)} />
         <Checkbox
-          label='Completed'
+          label='Enabled'
           toggle
           checked={this.state.value}
           onChange={this.handleChange}
         />
-        <Form>
-          <Form.Field>
-            <Input
-              label='Name:'
-              ref='targetName'
-              type='text'
-              placeholder='Name for session'
-              defaultValue={this.props.target.name}
-            />
-            <Input
-              label='Description:'
-              ref='targetDesc'
-              type='text'
-              placeholder='Describe the session'
-              defaultValue={this.props.target.description}
-            />
-          </Form.Field>
-          <Form.Field>
-            <Input
-              label='Target Name:'
-              ref='targetName'
-              type='text'
-              placeholder='Name to search for'
-              defaultValue=''
-            />
-            <Button  icon='find' />
-            <Input
-              label='Image to load:'
-              ref='imageFile'
-              type='text'
-              placeholder='Filename to load on server'
-              defaultValue=''
-            />
-            <Button  icon='find' />
-            <Input
-              label='Ra:'
-              ref='ra'
-              type='text'
-              defaultValue=''
-            />
-            <Input
-              label='Dec:'
-              ref='dec'
-              type='text'
-              defaultValue=''
-            />
-            <Input
-              label='Angle:'
-              ref='angle'
-              type='text'
-              defaultValue=''
-            />
-            <Button  icon='find' />
-          </Form.Field>
-          <Form.Field>
-            <Input
-              label='Cooling temp:'
-              ref='cool'
-              type='text'
-              placeholder='Name for session'
-              defaultValue={this.props.target.name}
-            />
-            <Input
-              label='Focusing Temp Delta:'
-              ref='tempChg'
-              type='text'
-              placeholder='change diff.'
-              defaultValue=''
-            />
-            <Dropdown
-                floating
-                className='filter'
-                options={this.renderDropDownFilters()}
-                placeholder='Focusing Filter'
+        <h3 className="ui header">Target Details</h3>
+        <Segment.Group>
+          <Segment>
+                <Input
+                  label='Name'
+                  ref='targetName'
+                  type='text'
+                  placeholder='Name for session'
+                  defaultValue={this.props.target.name}
+                />
+                <Input
+                  label='Description'
+                  ref='targetDesc'
+                  type='text'
+                  placeholder='Describe the session'
+                  defaultValue={this.props.target.description}
+                />
+          </Segment>
+          <Segment>
+                <Input
+                  label='Target Name'
+                  ref='targetName'
+                  placeholder='Name to search for'
+                  defaultValue={this.props.target.targetFindName}
+                  action={{ icon: 'find', content: 'Find' }}
+                  actionPosition='right'
+                />
+                <Input
+                  label='Image to load'
+                  ref='imageFile'
+                  action={{ icon: 'find', content: 'Find' }}
+                  actionPosition='right'
+                  placeholder='Filename to load on server'
+                  defaultValue={this.props.target.targetImage}
+                />
+          </Segment>
+          <Segment>
+                <Input
+                  label='Ra'
+                  ref='ra'
+                  type='text'
+                  defaultValue={this.props.target.ra}
+                />
+                <Input
+                  label='Dec'
+                  ref='dec'
+                  type='text'
+                  defaultValue={this.props.target.dec}
+                />
+                <Input
+                  label='Angle'
+                  ref='angle'
+                  type='text'
+                  defaultValue={this.props.target.angle}
+                />
+          </Segment>
+        </Segment.Group>
+        <h3 className="ui header">Focus</h3>
+        <Segment.Group>
+          <Segment>
+              <Input
+                label='Cooling temp'
+                ref='cool'
+                type='text'
+                placeholder='Imaging temperature'
+                defaultValue={this.props.target.coolingTemp}
               />
-          </Form.Field>
-          <Form.Field>
-            <Input
-              label='Start:'
-              ref='start'
-              type='text'
-              placeholder='Start Time'
-              defaultValue=''
-            />
-            <Input
-              label='Stop:'
-              ref='stop'
-              type='text'
-              placeholder='Stop time'
-              defaultValue=''
-            />
-            <Input
-              label='Priority:'
-              ref='priority'
-              type='text'
-              placeholder='Priority'
-              defaultValue=''
-            />
-            <Input
-              label='Minimum Altitude:'
-              ref='minAlt'
-              type='text'
-              placeholder='Minimum Altitude'
-              defaultValue=''
-            />
-          </Form.Field>
-
-        </Form>
+              <Input
+                label='Focusing Temp Delta'
+                ref='tempChg'
+                type='text'
+                placeholder='change diff.'
+                defaultValue={this.props.target.tempChg}
+              />
+              <Dropdown
+                  floating
+                  label='Filter'
+                  className='filter'
+                  options={this.renderDropDownFilters()}
+                  placeholder='Filter for focusing'
+                />
+          </Segment>
+        </Segment.Group>
+        <h3 className="ui header">Session Constraints</h3>
+        <Segment.Group>
+          <Segment>
+                <Input
+                  label='Start'
+                  ref='start'
+                  type='text'
+                  placeholder='Start Time'
+                  defaultValue={this.props.target.startTime}
+                />
+                <Input
+                  label='Stop'
+                  ref='stop'
+                  type='text'
+                  placeholder='Stop time'
+                  defaultValue={this.props.target.stopTime}
+                />
+                <Input
+                  label='Priority'
+                  ref='priority'
+                  type='text'
+                  placeholder='Priority'
+                  defaultValue={this.props.target.priority}
+                />
+                <Input
+                  label='Minimum Altitude:'
+                  ref='minAlt'
+                  type='text'
+                  placeholder='Minimum Altitude'
+                  defaultValue={this.props.target.minAlt}
+                />
+          </Segment>
+        </Segment.Group>
       </div>
     )
   }
