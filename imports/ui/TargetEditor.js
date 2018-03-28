@@ -85,9 +85,9 @@ class TargetEditor extends Component {
           checked={this.state.checked}
           onChange={this.handleChange}
         />
-        <h3 className="ui header">Target Details</h3>
         <Segment.Group>
           <Segment>
+            <h3 className="ui header">Target Session</h3>
                 <Input
                   label='Name'
                   ref='targetName'
@@ -102,15 +102,30 @@ class TargetEditor extends Component {
                   placeholder='Describe the session'
                   defaultValue={this.props.target.description}
                 />
+              </Segment>
+              </Segment.Group>
+              <Segment.Group>
+                <Segment>
+              <h3 className="ui header">Imaging Series</h3>
+              <Input
+                label='Cooling temp'
+                ref='cool'
+                type='text'
+                placeholder='Imaging temperature'
+                defaultValue={this.props.target.coolingTemp}
+              />
                 <Dropdown
                     floating
                     label='Filter'
                     className='filter'
                     options={this.getTakeSeriesTemplates()}
-                    placeholder='Filter for focusing'
+                    placeholder='Series to use for Imaging'
                   />
           </Segment>
+        </Segment.Group>
+        <Segment.Group>
           <Segment>
+            <h3 className="ui header">Target Details</h3>
                 <Input
                   label='Target Name'
                   ref='targetName'
@@ -138,16 +153,9 @@ class TargetEditor extends Component {
             </Form>
           </Segment>
         </Segment.Group>
-        <h3 className="ui header">Focus</h3>
         <Segment.Group>
           <Segment>
-              <Input
-                label='Cooling temp'
-                ref='cool'
-                type='text'
-                placeholder='Imaging temperature'
-                defaultValue={this.props.target.coolingTemp}
-              />
+            <h3 className="ui header">Focus</h3>
               <Input
                 label='Focusing Temp Delta'
                 ref='tempChg'
@@ -164,9 +172,9 @@ class TargetEditor extends Component {
                 />
           </Segment>
         </Segment.Group>
-        <h3 className="ui header">Session Constraints</h3>
         <Segment.Group>
           <Segment>
+            <h3 className="ui header">Session Constraints</h3>
                 <Input
                   label='Start'
                   ref='start'
