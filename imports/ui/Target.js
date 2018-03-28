@@ -108,17 +108,17 @@ class TargetSession extends Component {
 
     return (
       <Table.Row>
-        <Table.Cell>
+        <Table.Cell collapsing>
           <Checkbox
             toggle
             checked={this.state.checked}
             onChange={this.onChangeChecked.bind(this)}
         />
         </Table.Cell>
-        <Table.Cell>{this.props.target.name}</Table.Cell>
-        <Table.Cell>{this.props.target.description}</Table.Cell>
-        <Table.Cell><Progress percent={this.calcTargetProgress()} progress /></Table.Cell>
-        <Table.Cell>
+        <Table.Cell collapsing>{this.props.target.name}</Table.Cell>
+        <Table.Cell collapsing>{this.props.target.description}</Table.Cell>
+        <Table.Cell collapsing><Progress percent={this.calcTargetProgress()} progress /></Table.Cell>
+        <Table.Cell collapsing>
           <Button.Group basic size='small'>
             <Button icon='edit' onClick={this.editEntry.bind(this)}/>
             <Button icon='copy' onClick={this.copyEntry.bind(this)}/>

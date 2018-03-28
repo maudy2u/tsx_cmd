@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withTracker } from 'meteor/react-meteor-data';
-import { Dropdown, Menu, Table, Segment, Button, Progress } from 'semantic-ui-react'
+import { Dropdown, Menu, Confirm, Modal, Table, Segment, Button, Progress } from 'semantic-ui-react'
 
 import { TargetSessions } from '../api/targetSessions.js';
 import Target  from './Target.js';
@@ -68,8 +68,15 @@ class TargetSessionMenu extends Component {
       }
     });
   }
+  state = { open: false }
+
+// example of more than one state...
+//  show = size => () => this.setState({ size, open: true })
+  show = () => this.setState({ open: true })
+  close = () => this.setState({ open: false })
 
   render() {
+    const { open } = this.state
 
       return (
         <div>
@@ -79,18 +86,25 @@ class TargetSessionMenu extends Component {
             <Button icon='upload' />
           </Button.Group>
           <Button.Group labeled icon>
-            <Button icon='play'  onClick={this.testTakeImage.bind(this)}/>
+            <Button icon='play'  onClick={this.show.bind(this)}/>
             <Button icon='pause'  />
             <Button icon='stop'  />
           </Button.Group>
-        <Table celled selectable>
+          <Confirm
+            header='Start an imaging session'
+            open={this.state.open}
+            content='Do you wish to continue and start an imaging session?'
+            onCancel={this.close}
+            onConfirm={this.testTakeImage.bind(this)}
+          />
+        <Table selectable size='small' fixed>
           <Table.Header>
             <Table.Row>
-              <Table.HeaderCell>Enabled</Table.HeaderCell>
-              <Table.HeaderCell>Name</Table.HeaderCell>
-              <Table.HeaderCell>Description</Table.HeaderCell>
-              <Table.HeaderCell>Progress</Table.HeaderCell>
-              <Table.HeaderCell>Actions</Table.HeaderCell>
+              <Table.HeaderCell >Enabled</Table.HeaderCell>
+              <Table.HeaderCell >Name</Table.HeaderCell>
+              <Table.HeaderCell >Description</Table.HeaderCell>
+              <Table.HeaderCell >Progress</Table.HeaderCell>
+              <Table.HeaderCell >Actions</Table.HeaderCell>
             </Table.Row>
           </Table.Header>
           <Table.Body>
