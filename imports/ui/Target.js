@@ -6,6 +6,7 @@ import { withTracker } from 'meteor/react-meteor-data';
 import { Item, Button, Modal, Header, Icon, Table, Checkbox, Progress } from 'semantic-ui-react'
 
 import { TargetSessions } from '../api/targetSessions.js';
+import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
 
 import TargetEditor from './TargetEditor.js';
 
@@ -36,7 +37,10 @@ class TargetSession extends Component {
   calcTargetProgress() {
       var totalPlannedImages = 0;
       var totalTakenImages = 0;
-      var series = this.props.target.takeSeries.series;
+      var template = TakeSeriesTemplates.findOne(
+        {_id:this.props.target.series._id});
+
+      var series = template.series;
       for (var i = 0; i < series.length; i++) {
         totalTakenImages += series[i].taken;
         totalPlannedImages += series[i].repeat;
@@ -67,12 +71,9 @@ class TargetSession extends Component {
         targetImage: orgTarget.targetImage,
         description: orgTarget.description,
         enabledActive: false,
-        takeSeries: {
-          name: orgTarget.takeSeries.name,
-          description: orgTarget.takeSeries.description,
-          processSeries: orgTarget.takeSeries.processSeries,
-          createdAt: new Date(),
-          series: [],
+        series: {
+          _id: orgTarget.series._id,
+          text: orgTarget.series.text,
         },
         ra: orgTarget.ra,
         dec: orgTarget.dec,
@@ -94,14 +95,6 @@ class TargetSession extends Component {
         createdAt: orgTarget.createdAt,
       }
     )
-
-    var series = orgTarget.takeSeries.series;
-    for (var i = 0; i < series.length; i++) {
-      seriesMap = series[i];
-      TargetSessions.update({_id: id}, {
-        $push: { 'takeSeries.series': seriesMap },
-      });
-    }
   }
 
   render() {

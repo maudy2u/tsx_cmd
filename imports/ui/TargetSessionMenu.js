@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { withTracker } from 'meteor/react-meteor-data';
 import { Item, Dropdown, Menu, Confirm, Modal, Table, Segment, Button, Progress } from 'semantic-ui-react'
 
+import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
 import { TargetSessions } from '../api/targetSessions.js';
 import Target  from './Target.js';
 

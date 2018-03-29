@@ -18,7 +18,7 @@ class TargetEditor extends Component {
     focusBin: '',
     guideExposure: '',
     guideDelay: '',
-    targetSeries: {}, priority: '', minAlt: '', startTime: '', stopTime: '',
+    seriesTemplate: {}, priority: '', minAlt: '', startTime: '', stopTime: '',
     targetImage: '', targetFindName: '', coolingTemp: '', description: '',
     name: '', value: false, openModal: false, ra: "", dec: "", angle: "",
     templates: [], template_id: '' };
@@ -37,7 +37,7 @@ class TargetEditor extends Component {
   raChange = (e, { value }) => this.setState({ ra: value });
   decChange = (e, { value }) => this.setState({ ra: value });
   angleChange = (e, { value }) => this.setState({ ra: value });
-  templateChange = (e, { value }) => this.setState({ template_id: value });
+  seriesTemplateChange = (e, { value }) => this.setState({ seriesTemplate: value });
   priority = (e, { value }) => this.setState({ priority: value });
   minAlt = (e, { value }) => this.setState({ minAlt: value });
   clsFliter = (e, { value }) => this.setState({ clsFliter: value });
@@ -60,7 +60,7 @@ class TargetEditor extends Component {
         coolingTemp: this.state.coolingTemp,
         targetFindName: this.state.targetFindName,
         targetImage: this.state.targetImage,
-//        targetSeries: this.stateSeries,
+        series: this.state.seriesTemplate,
         ra: this.state.ra,
         dec: this.state.dec,
         angle: this.state.angle,
@@ -117,9 +117,16 @@ class TargetEditor extends Component {
 
   getTakeSeriesTemplates() {
     var options = [];
-    this.props.takeSeriesTemplates.map( (takeSeriesTemplate)=>{
-      options.push({id: takeSeriesTemplate._id, text: takeSeriesTemplate.name} );
+    const topPosts = TakeSeriesTemplates.find({}, { sort: { name: -1 } });
+
+    var count =0;
+    topPosts.forEach((series) => {
+      //      { key: 0, text: 'Static LUM', value: 0 },
+      options.push({key:series._id, text:series.name, value: count});
+      count++;
+      console.log(`Found series._id: ${series._id}, name: ${series.text}`);
     });
+
     return options;
   }
 
@@ -132,13 +139,12 @@ class TargetEditor extends Component {
       coolingTemp: this.props.target.coolingTemp,
       targetFindName: this.props.target.targetFindName,
       targetImage: this.props.target.targetImage,
-      targetSeries: this.props.targetSeries,
+      seriesTemplate: this.props.target.series,
       ra: this.props.target.ra,
       dec: this.props.target.dec,
       angle: this.props.target.angle,
       value: false,
       openModal: false,
-      templates: this.getTakeSeriesTemplates(),
       startTime: this.props.target.startTime,
       stopTime: this.props.target.stopTime,
       priority: this.props.target.priority,
@@ -166,13 +172,11 @@ class TargetEditor extends Component {
                   placeholder='Name to search for'
                   defaultValue={this.state.targetFindName}
                   action={{ icon: 'find', content: 'Find' }}
-                  actionPosition='right'
                 />
                 <Input
                   label='Image to load'
                   ref='imageFile'
                   action={{ icon: 'find', content: 'Find' }}
-                  actionPosition='right'
                   placeholder='Filename to load on server'
                   defaultValue={this.state.targetImage}
                 />
@@ -188,8 +192,49 @@ class TargetEditor extends Component {
           </Segment>
         </Segment.Group>
       </Tab.Pane> },
-      { menuItem: 'Series', render: () => <Tab.Pane>
-        <TakeSeriesTemplateEditor key={this.props.target._id} template={this.props.target.takeSeries} enableSaving={false}/>
+      { menuItem: 'Session', render: () => <Tab.Pane>
+        <Segment.Group>
+          <Segment>
+            <h3 className="ui header">Session Constraints</h3>
+            <Dropdown
+                floating
+                label='Series'
+                className='filter'
+                options={this.getTakeSeriesTemplates()}
+                placeholder='Series to use for Imaging'
+                text={this.state.seriesTemplate.text}
+              />
+            <Input
+              label='Start'
+              ref='start'
+              type='text'
+              placeholder='Start Time'
+              defaultValue={this.state.startTime}
+            />
+            <Input
+              label='Stop'
+              ref='stop'
+              type='text'
+              placeholder='Stop time'
+              defaultValue={this.state.stopTime}
+            />
+            <Input
+              label='Priority'
+              ref='priority'
+              type='text'
+              placeholder='Priority'
+              defaultValue={this.state.priority}
+            />
+            <Input
+              label='Minimum Altitude:'
+              ref='minAlt'
+              type='text'
+              placeholder='Minimum Altitude'
+              defaultValue={this.state.minAlt}
+            />
+          </Segment>
+        </Segment.Group>
+
       </Tab.Pane> },
       { menuItem: 'Focus', render: () => <Tab.Pane>
         <Segment.Group>
@@ -208,6 +253,7 @@ class TargetEditor extends Component {
                   className='filter'
                   options={this.renderDropDownFilters()}
                   placeholder='Filter for focusing'
+                  selection={this.state.focusFilter}
                 />
           </Segment>
         </Segment.Group>
@@ -223,49 +269,6 @@ class TargetEditor extends Component {
           placeholder='Imaging temperature'
           defaultValue={this.state.coolingTemp}
         />
-          <Dropdown
-              floating
-              label='Filter'
-              className='filter'
-              options={this.getTakeSeriesTemplates()}
-              placeholder='Series to use for Imaging'
-              text={this.state.targetSeries}
-            />
-          </Segment>
-        </Segment.Group>
-      </Tab.Pane> },
-      { menuItem: 'Constraints', render: () => <Tab.Pane>
-        <Segment.Group>
-          <Segment>
-            <h3 className="ui header">Session Constraints</h3>
-                <Input
-                  label='Start'
-                  ref='start'
-                  type='text'
-                  placeholder='Start Time'
-                  defaultValue={this.state.startTime}
-                />
-                <Input
-                  label='Stop'
-                  ref='stop'
-                  type='text'
-                  placeholder='Stop time'
-                  defaultValue={this.state.stopTime}
-                />
-                <Input
-                  label='Priority'
-                  ref='priority'
-                  type='text'
-                  placeholder='Priority'
-                  defaultValue={this.state.priority}
-                />
-                <Input
-                  label='Minimum Altitude:'
-                  ref='minAlt'
-                  type='text'
-                  placeholder='Minimum Altitude'
-                  defaultValue={this.state.minAlt}
-                />
           </Segment>
         </Segment.Group>
       </Tab.Pane> },

@@ -1,15 +1,28 @@
 import { Meteor } from 'meteor/meteor';
-// import { Meteor } from 'meteor/meteor';
+import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
 
 var tsx_waiting = false;
+var ip = 0;
+var port = 0;
 
 export function tsx_is_waiting() {
   return tsx_waiting;
 }
 
+function loadPortAndIP(){
+  // TheSlyXInfo... get map parameter
+  // port
+  //ip
+
+}
+
 // *******************************
 // test of generic write method...
 export function tsx_feeder( ip, port, cmd, callback ) {
+    if( ip ==0 && port == 0 ) {
+      loadPortAndIP();
+    }
+
     console.log('Started tsx_feeder.');
      var Out;
      var net = require('net');

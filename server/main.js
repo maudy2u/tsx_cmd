@@ -267,7 +267,7 @@ Meteor.startup(() => {
            targetImage: testData[i].get("targetImage"),
            description: testData[i].get("description"),
            enabledActive: false,
-           takeSeries: {},
+           series: {},
            ra: testData[i].get("ra"),
            dec: testData[i].get("dec"),
            angle: testData[i].get("angle"),
@@ -289,18 +289,19 @@ Meteor.startup(() => {
          }
        )
        console.log('Loading 1');
+       var series = TakeSeriesTemplates.find().fetch();
 
        TargetSessions.update({_id: id}, {
-         $set: { 'takeSeries': takesSeriesMap },
+         $set: { 'series': { _id:series[i]._id, text:series[i].name } },
        });
        // TargetSessions.update(
-       //   {_id: id, 'takeSeries'},
-       //   {$set: {'takeSeries',takesSeriesMap}}
+       //   {_id: id, 'series'},
+       //   {$set: {'series',takesSeriesMap}}
        // );
 
        const tSession = TargetSessions.findOne({_id: id});
-       console.log('Done load test object: ' + i);
-       // tSession.takeSeries = testData[i].get("takeSeries");
+       console.log('Done load test object: ' + tSession.name );
+       // tSession.series = testData[i].get("series");
 
        // TargetSessions.update({ _id: tSession._id }, {
        //     $addToSet: {
