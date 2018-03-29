@@ -91,7 +91,7 @@ class TakeSeries extends Component {
               <Modal.Header>Edit Series</Modal.Header>
               <Modal.Content>
                 <Modal.Description>
-                  <TakeSeriesTemplateEditor key={this.props.seriesTemplate._id} template={this.props.seriesTemplate} />
+                  <TakeSeriesTemplateEditor key={this.props.seriesTemplate._id} template={this.props.seriesTemplate} enableSaving={true}/>
                 </Modal.Description>
               </Modal.Content>
             </Modal>

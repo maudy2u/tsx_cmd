@@ -12,88 +12,109 @@ import TakeSeriesEditor from './TakeSeriesEditor.js';
 
 class TakeSeriesTemplateEditor extends Component {
 
-  state = { value: " " };
-  handleChange = (e, { value }) => this.setState({ value });
+  state = { name: '',
+    description: '',
+    seriesProcess: "", seriesContainer: [],
+  };
 
-  saveEntry() {
-    const name = ReactDOM.findDOMNode(this.refs.tempName.inputRef).value; //.trim();
-    const description = ReactDOM.findDOMNode(this.refs.tempDesc.inputRef).value; //.trim();
-    const processSeries = this.state.value;
-
-    TakeSeriesTemplates.update(this.props.template._id, {
-      $set: {
-        name: name,
-        description: description,
-        processSeries: processSeries,
-       },
-    });
-
-  }
-
-
-  addEntry() {
-    // get the current map
-    var seriesMap = this.props.template.series;
-    console.log('current series size: ' + seriesMap.length);
-    // get the end of the array
-    var append = seriesMap.length+1;
-    console.log('Increased series size to: ' + append);
-
-    // create a new map to add
-    var newSeries = new Map();
-    newSeries.set( "order", append);
-    newSeries.set("exposure", 1 );
-    newSeries.set("binning",  1 );
-    newSeries.set("frame", 'Light' );
-    newSeries.set("filter", 0 );
-    newSeries.set("repeat", 1 );
-    newSeries.set("taken", 0);
-    // add the new map to the end, with correct order
-    seriesMap.push(newSeries);
-    // update
-    TakeSeriesTemplates.update({_id: this.props.template._id}, {
-      $push: { 'series': seriesMap },
-    });
-  }
-
+  nameChange = (e, { value }) => this.setState({ name: value });
+  descriptionChange = (e, { value }) => this.setState({ description: value });
+  seriesProcessChange = (e, { value }) => this.setState({ seriesProcess: value });
+  updateSeriesContainer = (e, { value }) => this.setState({ seriesContainer: value });
 
   componentWillMount() {
     // do not modify the state directly
-    this.setState({value: this.props.template.processSeries});
+    this.setState({name: this.props.template.name});
+    this.setState({description: this.props.template.description});
+    this.setState({seriesProcess: this.props.template.processSeries});
+    this.setState({seriesContainer: this.props.template.series});
+  }
+
+  saveEntry() {
+    if( this.props.targetEditor == false ) {
+      const name = ReactDOM.findDOMNode(this.refs.tempName.inputRef).value; //.trim();
+      const description = ReactDOM.findDOMNode(this.refs.tempDesc.inputRef).value; //.trim();
+      const processSeries = this.state.seriesProcess;
+
+      TakeSeriesTemplates.update(this.props.template._id, {
+        $set: {
+          name: name,
+          description: description,
+          processSeries: processSeries,
+         },
+      });
+    }
+  }
+
+  addEntry() {
+    if( this.props.targetEditor == false ) {
+
+      // get the current map
+      var seriesMap = this.props.template.series;
+      console.log('current series size: ' + seriesMap.length);
+      // get the end of the array
+      var append = seriesMap.length+1;
+      console.log('Increased series size to: ' + append);
+
+      // create a new map to add
+      var newSeries = new Map();
+      newSeries.set( "order", append);
+      newSeries.set("exposure", 1 );
+      newSeries.set("binning",  1 );
+      newSeries.set("frame", 'Light' );
+      newSeries.set("filter", 0 );
+      newSeries.set("repeat", 1 );
+      newSeries.set("taken", 0);
+      // add the new map to the end, with correct order
+      seriesMap.push(newSeries);
+      // update
+      TakeSeriesTemplates.update({_id: this.props.template._id}, {
+        $push: { 'series': seriesMap },
+      });
+    }
+  }
+
+
+  saveTemplateEditor() {
+    if( this.props.enableSaving == true ) {
+      return (
+        <Button  icon='save' onClick={this.saveEntry.bind(this)} />
+      )
+    }
   }
 
   render() {
 
     return (
       <div>
-        <Button  icon='save' onClick={this.saveEntry.bind(this)} />
+        {this.saveTemplateEditor()}
         <Button  icon='add' onClick={this.addEntry.bind(this)} />
         <Form>
           <Form.Group widths='equal'>
           <Form.Field>
             <Input
               label='Name:'
-              ref='tempName'
               type='text'
               placeholder='Name for the series'
-              defaultValue={this.props.template.name}
+              defaultValue={this.state.name}
+              onChange={this.nameChange}
             />
           </Form.Field>
           <Form.Field>
             <Input
               label='Description:'
-              ref='tempDesc'
               type='text'
               placeholder='Describe the series'
-              defaultValue={this.props.template.description}
+              defaultValue={this.state.description}
+              onChange={this.descriptionChange}
             />
           </Form.Field>
         </Form.Group>
         <h3 className="ui header">Images executes: </h3>
           <Form.Group inline>
-            <Form.Field control={Radio} label='Per series' value='per series' checked={this.state.value === "per series"} onChange={this.handleChange} />
-            <Form.Field control={Radio} label='Across series' value='across series' checked={this.state.value === "across series"} onChange={this.handleChange} />
-            <Form.Field control={Radio} label='Repeat series' value='repeat' checked={this.state.value === "repeat"} onChange={this.handleChange} />
+            <Form.Field control={Radio} label='Per series' value='per series' checked={this.state.seriesProcess === "per series"} onChange={this.seriesProcessChange} />
+            <Form.Field control={Radio} label='Across series' value='across series' checked={this.state.seriesProcess === "across series"} onChange={this.seriesProcessChange} />
+            <Form.Field control={Radio} label='Repeat series' value='repeat' checked={this.state.seriesProcess === "repeat"} onChange={this.seriesProcessChange} />
           </Form.Group>
         </Form>
         <Grid columns={6} centered divided='vertically'>

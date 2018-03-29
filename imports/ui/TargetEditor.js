@@ -5,8 +5,9 @@ import { withTracker } from 'meteor/react-meteor-data';
 
 import { TargetSessions } from '../api/targetSessions.js';
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
+import TakeSeriesTemplateEditor from './TakeSeriesTemplateEditor.js';
 
-import { Form, Segment, Button, Radio, Input, Table, Dropdown, Checkbox, } from 'semantic-ui-react'
+import { Form, Tab, Segment, Button, Radio, Input, Table, Dropdown, Checkbox, } from 'semantic-ui-react'
 
 class TargetEditor extends Component {
 
@@ -153,54 +154,9 @@ class TargetEditor extends Component {
 
   render() {
 
-    return (
-      <div>
-        <Button  icon='save' onClick={this.saveEntry.bind(this)} />
-        <Checkbox
-          label='Enabled'
-          toggle
-          checked={this.state.checked}
-          onChange={this.handleChange}
-        />
-        <Segment.Group>
-          <Segment>
-            <h3 className="ui header">Target Session</h3>
-                <Input
-                  label='Name'
-                  ref='targetName'
-                  type='text'
-                  placeholder='Name for session'
-                  defaultValue={this.state.name}
-                />
-                <Input
-                  label='Description'
-                  ref='targetDesc'
-                  type='text'
-                  placeholder='Describe the session'
-                  defaultValue={this.props.target.description}
-                />
-              </Segment>
-              </Segment.Group>
-              <Segment.Group>
-                <Segment>
-              <h3 className="ui header">Imaging Series</h3>
-              <Input
-                label='Cooling temp'
-                ref='cool'
-                type='text'
-                placeholder='Imaging temperature'
-                defaultValue={this.state.coolingTemp}
-              />
-                <Dropdown
-                    floating
-                    label='Filter'
-                    className='filter'
-                    options={this.getTakeSeriesTemplates()}
-                    placeholder='Series to use for Imaging'
-                    text={this.state.targetSeries}
-                  />
-          </Segment>
-        </Segment.Group>
+    const panes = [
+      { menuItem: 'Target', render: () =>
+      <Tab.Pane>
         <Segment.Group>
           <Segment>
             <h3 className="ui header">Target Details</h3>
@@ -231,6 +187,11 @@ class TargetEditor extends Component {
             </Form>
           </Segment>
         </Segment.Group>
+      </Tab.Pane> },
+      { menuItem: 'Series', render: () => <Tab.Pane>
+        <TakeSeriesTemplateEditor key={this.props.target._id} template={this.props.target.takeSeries} enableSaving={false}/>
+      </Tab.Pane> },
+      { menuItem: 'Focus', render: () => <Tab.Pane>
         <Segment.Group>
           <Segment>
             <h3 className="ui header">Focus</h3>
@@ -250,6 +211,30 @@ class TargetEditor extends Component {
                 />
           </Segment>
         </Segment.Group>
+      </Tab.Pane> },
+      { menuItem: 'Imaging', render: () => <Tab.Pane>
+        <Segment.Group>
+          <Segment>
+        <h3 className="ui header">Imaging Series</h3>
+        <Input
+          label='Cooling temp'
+          ref='cool'
+          type='text'
+          placeholder='Imaging temperature'
+          defaultValue={this.state.coolingTemp}
+        />
+          <Dropdown
+              floating
+              label='Filter'
+              className='filter'
+              options={this.getTakeSeriesTemplates()}
+              placeholder='Series to use for Imaging'
+              text={this.state.targetSeries}
+            />
+          </Segment>
+        </Segment.Group>
+      </Tab.Pane> },
+      { menuItem: 'Constraints', render: () => <Tab.Pane>
         <Segment.Group>
           <Segment>
             <h3 className="ui header">Session Constraints</h3>
@@ -283,6 +268,38 @@ class TargetEditor extends Component {
                 />
           </Segment>
         </Segment.Group>
+      </Tab.Pane> },
+    ]
+
+    return (
+      <div>
+        <Button  icon='save' onClick={this.saveEntry.bind(this)} />
+        <Checkbox
+          label='Enabled'
+          toggle
+          checked={this.state.checked}
+          onChange={this.handleChange}
+        />
+        <Segment.Group>
+          <Segment>
+            <h3 className="ui header">Target Session</h3>
+                <Input
+                  label='Name'
+                  ref='targetName'
+                  type='text'
+                  placeholder='Name for session'
+                  defaultValue={this.state.name}
+                />
+                <Input
+                  label='Description'
+                  ref='targetDesc'
+                  type='text'
+                  placeholder='Describe the session'
+                  defaultValue={this.props.target.description}
+                />
+              </Segment>
+              </Segment.Group>
+              <Tab menu={{ pointing: true }} panes={panes} />
       </div>
     )
   }

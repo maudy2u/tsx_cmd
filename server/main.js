@@ -169,6 +169,36 @@ var testTargetSessions = [];
 testTargetSessions.push(target1);
 testTargetSessions.push(target2);
 
+function loadTestDataAllTakeSeriesTemplates() {
+  var testData = testAllTakeSeriesTemplates;
+
+  // now need to load the information into Mongo
+  for (var i = 0; i < testData.length; i++) {
+
+   var takeSeries = testData[i];
+
+    // get the id for the new object
+    const id = TakeSeriesTemplates.insert(
+      {
+        name: takeSeries.get("name"),
+        description: takeSeries.get("description"),
+        processSeries: testData[i].get("processSeries"),
+        createdAt: takeSeries.get("createdAt"),
+        series: [],
+      }
+    )
+
+    var series = takeSeries.get("series");
+    for (var i = 0; i < series.length; i++) {
+      seriesMap = series[i];
+      TakeSeriesTemplates.update({_id: id}, {
+        $push: { 'series': seriesMap },
+      });
+    }
+  }
+}
+
+
 Meteor.startup(() => {
   // code to run on server at startup
 
@@ -212,41 +242,14 @@ Meteor.startup(() => {
   Out = "^          Now - " + CoordsHMSNow + "\n" + "          j2k - " + CoordsHMS2k;			// Form the output string
 
  */
+
+
  Meteor.methods({
-
-   loadTestDataAllTakeSeriesTemplates() {
-     var testData = testAllTakeSeriesTemplates;
-
-     // now need to load the information into Mongo
-     for (var i = 0; i < testData.length; i++) {
-
-      var takeSeries = testData[i];
-
-       // get the id for the new object
-       const id = TakeSeriesTemplates.insert(
-         {
-           name: takeSeries.get("name"),
-           description: takeSeries.get("description"),
-           processSeries: testData[i].get("processSeries"),
-           createdAt: takeSeries.get("createdAt"),
-           series: [],
-         }
-       )
-
-       var series = takeSeries.get("series");
-       for (var i = 0; i < series.length; i++) {
-         seriesMap = series[i];
-         TakeSeriesTemplates.update({_id: id}, {
-           $push: { 'series': seriesMap },
-         });
-       }
-     }
-   },
 
    loadTestDataTargetSessions() {
 
      // load the templates
-     //this.loadTestDataAllTakeSeriesTemplates();
+     loadTestDataAllTakeSeriesTemplates();
 
      var testData = testTargetSessions;
      console.log('Loading 1');
