@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 
 import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
-import { Button, Modal, Header, Icon, Table, Checkbox, Progress } from 'semantic-ui-react'
+import { Item, Button, Modal, Header, Icon, Table, Checkbox, Progress } from 'semantic-ui-react'
 
 import { TargetSessions } from '../api/targetSessions.js';
 
@@ -105,38 +105,46 @@ class TargetSession extends Component {
   }
 
   render() {
+// Use the image for a stretched image in the Future
+//       <Item.Image size='tiny' src='' />
 
     return (
-      <Table.Row>
-        <Table.Cell collapsing>
+    <Item>
+      <Item.Content>
+        <Item.Header as='a'>
+          {this.props.target.name}
+        </Item.Header>
+        <Item.Meta>
           <Checkbox
             toggle
             checked={this.state.checked}
             onChange={this.onChangeChecked.bind(this)}
-        />
-        </Table.Cell>
-        <Table.Cell collapsing>{this.props.target.name}</Table.Cell>
-        <Table.Cell collapsing>{this.props.target.description}</Table.Cell>
-        <Table.Cell collapsing><Progress percent={this.calcTargetProgress()} progress /></Table.Cell>
-        <Table.Cell collapsing>
+          />
+          {this.props.target.description}
+        </Item.Meta>
+        <Item.Description>
+          <Progress percent={this.calcTargetProgress()} progress />
+        </Item.Description>
+        <Item.Extra>
           <Button.Group basic size='small'>
             <Button icon='edit' onClick={this.editEntry.bind(this)}/>
             <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
             <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
           </Button.Group>
-        </Table.Cell>
-        <Modal
-          open={this.state.modalOpen}
-          onClose={this.handleClose}
-          closeIcon>
-          <Modal.Header>Edit Series</Modal.Header>
-          <Modal.Content>
-            <Modal.Description>
-              <TargetEditor key={this.props.target._id} target={this.props.target} />
-            </Modal.Description>
-          </Modal.Content>
-        </Modal>
-      </Table.Row>
+          <Modal
+            open={this.state.modalOpen}
+            onClose={this.handleClose}
+            closeIcon>
+            <Modal.Header>Edit Series</Modal.Header>
+            <Modal.Content>
+              <Modal.Description>
+                <TargetEditor key={this.props.target._id} target={this.props.target} />
+              </Modal.Description>
+            </Modal.Content>
+          </Modal>
+        </Item.Extra>
+      </Item.Content>
+    </Item>
     )
   }
 }

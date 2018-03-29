@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { withTracker } from 'meteor/react-meteor-data';
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 
-import { Modal, Button, Radio, Icon, Table, } from 'semantic-ui-react'
+import { Modal, Button, Item, Radio, Icon, Table, } from 'semantic-ui-react'
 
 import TakeSeries from './TakeSeries.js'
 
@@ -64,20 +64,11 @@ class TakeSeriesTemplateMenu extends Component {
        {/* {this.createNewTemplateSeries()} */}
        {/* {this.editTemplateSeries()}
        {this.deleteCheckedTemplateSeries()} */}
-       <Table fixed celled selectable>
-           <Table.Header>
-             <Table.Row>
-               <Table.HeaderCell width={1}>Take Series Name</Table.HeaderCell>
-               <Table.HeaderCell width={1}>Details</Table.HeaderCell>
-               <Table.HeaderCell width={1}>DeleteX</Table.HeaderCell>
-             </Table.Row>
-           </Table.Header>
-           <Table.Body>
-             {this.props.takeSeriesTemplates.map( (takeSeriesTemplate)=>{
-               return <TakeSeries key={takeSeriesTemplate._id} seriesTemplate={takeSeriesTemplate} />
-             })}
-           </Table.Body>
-         </Table>
+       <Item.Group divided>
+         {this.props.takeSeriesTemplates.map( (takeSeriesTemplate)=>{
+           return <TakeSeries key={takeSeriesTemplate._id} seriesTemplate={takeSeriesTemplate} />
+         })}
+       </Item.Group>
       </div>
       )
   }

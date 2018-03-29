@@ -89,15 +89,14 @@ class TakeSeriesTemplateEditor extends Component {
             />
           </Form.Field>
         </Form.Group>
-
+        <h3 className="ui header">Repeat executes: </h3>
           <Form.Group inline>
-            <h3 className="ui header">Repeat executes: <b>{this.state.value}</b></h3>
-          <Form.Field control={Radio} label='Per series' value='per series' checked={this.state.value === "per series"} onChange={this.handleChange} />
-          <Form.Field control={Radio} label='Across series' value='across series' checked={this.state.value === "across series"} onChange={this.handleChange} />
-          <Form.Field control={Radio} label='Repeat series' value='repeat' checked={this.state.value === "repeat"} onChange={this.handleChange} />
-        </Form.Group>
+            <Form.Field control={Radio} label='Per series' value='per series' checked={this.state.value === "per series"} onChange={this.handleChange} />
+            <Form.Field control={Radio} label='Across series' value='across series' checked={this.state.value === "across series"} onChange={this.handleChange} />
+            <Form.Field control={Radio} label='Repeat series' value='repeat' checked={this.state.value === "repeat"} onChange={this.handleChange} />
+          </Form.Group>
         </Form>
-        <Table celled padded selectable>
+        <Table collapsing selectable size='small'>
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell>Exposure</Table.HeaderCell>

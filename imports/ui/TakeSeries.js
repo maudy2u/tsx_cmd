@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { withTracker } from 'meteor/react-meteor-data';
-import { Button, Modal, Header, Icon, Table, } from 'semantic-ui-react'
+import { Button, Modal, Item, Header, Icon, Table, } from 'semantic-ui-react'
 
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 
@@ -46,36 +46,58 @@ class TakeSeries extends Component {
     }
   }
 
+  seriesDetails() {
+    var template = this.props.seriesTemplate;
+    var seriesArray = template.series;
+    var details = "";
+    for (var i = 0; i < seriesArray.length; i++) {
+      series = seriesArray[i];
+      if(details != "") { details += ", "};
+      details += series.filter + ':' + series.repeat + 'x' + series.exposure + 's';
+    }
+
+    return details
+  }
 
   render() {
 //    <input type="checkbox" checked={!!this.props.takeSeriesTemplate.checked} name={this.props.takeSeriesTemplate.name} readOnly="" tabIndex="0" />
     return (
-      <Table.Row>
-        <Table.Cell>
-          {this.props.seriesTemplate.name}
-        </Table.Cell>
-        <Table.Cell>
-          {this.props.seriesTemplate.description}
-        </Table.Cell>
-        <Table.Cell>
-          <Button.Group basic size='small'>
-            <Button icon='edit' onClick={this.editEntry.bind(this)}/>
-            <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
-            <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
-          </Button.Group>
-          <Modal
-            open={this.state.modalOpen}
-            onClose={this.handleClose}
-            closeIcon>
-            <Modal.Header>Edit Series</Modal.Header>
-            <Modal.Content>
-              <Modal.Description>
-                <TakeSeriesTemplateEditor key={this.props.seriesTemplate._id} template={this.props.seriesTemplate} />
-              </Modal.Description>
-            </Modal.Content>
-          </Modal>
-        </Table.Cell>
-      </Table.Row>
+      <Item>
+        <Item.Content>
+          <Item.Header as='a'>
+            {this.props.seriesTemplate.name}
+          </Item.Header>
+          <Item.Meta>
+            {/* <Checkbox
+              toggle
+              checked={this.state.checked}
+              onChange={this.onChangeChecked.bind(this)}
+            /> */}
+            {this.props.seriesTemplate.description}
+          </Item.Meta>
+          <Item.Description>
+            {this.seriesDetails()}
+          </Item.Description>
+          <Item.Extra>
+            <Button.Group basic size='small'>
+              <Button icon='edit' onClick={this.editEntry.bind(this)}/>
+              <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
+              <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
+            </Button.Group>
+            <Modal
+              open={this.state.modalOpen}
+              onClose={this.handleClose}
+              closeIcon>
+              <Modal.Header>Edit Series</Modal.Header>
+              <Modal.Content>
+                <Modal.Description>
+                  <TakeSeriesTemplateEditor key={this.props.seriesTemplate._id} template={this.props.seriesTemplate} />
+                </Modal.Description>
+              </Modal.Content>
+            </Modal>
+          </Item.Extra>
+        </Item.Content>
+      </Item>
     )
   }
 

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withTracker } from 'meteor/react-meteor-data';
-import { Dropdown, Menu, Confirm, Modal, Table, Segment, Button, Progress } from 'semantic-ui-react'
+import { Item, Dropdown, Menu, Confirm, Modal, Table, Segment, Button, Progress } from 'semantic-ui-react'
 
 import { TargetSessions } from '../api/targetSessions.js';
 import Target  from './Target.js';
@@ -80,40 +80,29 @@ class TargetSessionMenu extends Component {
 
       return (
         <div>
-          <Button.Group basic size='small'>
-            <Button icon='settings' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
-            <Button icon='find' onClick={this.chkTestData.bind(this)}/>
-            <Button icon='upload' />
-          </Button.Group>
-          <Button.Group labeled icon>
-            <Button icon='play'  onClick={this.show.bind(this)}/>
-            <Button icon='pause'  />
-            <Button icon='stop'  />
-          </Button.Group>
-          <Confirm
-            header='Start an imaging session'
-            open={this.state.open}
-            content='Do you wish to continue and start an imaging session?'
-            onCancel={this.close}
-            onConfirm={this.testTakeImage.bind(this)}
-          />
-        <Table selectable size='small' fixed>
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell >Enabled</Table.HeaderCell>
-              <Table.HeaderCell >Name</Table.HeaderCell>
-              <Table.HeaderCell >Description</Table.HeaderCell>
-              <Table.HeaderCell >Progress</Table.HeaderCell>
-              <Table.HeaderCell >Actions</Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {this.props.targets.map( (target)=>{
-              return <Target key={target._id} target={target} />
-            })}
-          </Table.Body>
-        </Table>
-      </div>
+        <Button.Group basic size='small'>
+          <Button icon='settings' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
+          <Button icon='find' onClick={this.chkTestData.bind(this)}/>
+          <Button icon='upload' />
+        </Button.Group>
+        <Button.Group icon>
+          <Button icon='play'  onClick={this.show.bind(this)}/>
+          <Button icon='pause'  />
+          <Button icon='stop'  />
+        </Button.Group>
+          <Item.Group divided>
+            <Confirm
+              header='Start an imaging session'
+              open={this.state.open}
+              content='Do you wish to continue and start an imaging session?'
+              onCancel={this.close}
+              onConfirm={this.testTakeImage.bind(this)}
+            />
+              {this.props.targets.map( (target)=>{
+                return <Target key={target._id} target={target} />
+              })}
+          </Item.Group>
+        </div>
     )
   }
 }

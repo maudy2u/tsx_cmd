@@ -4,7 +4,7 @@ import { withTracker } from 'meteor/react-meteor-data';
 
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 
-import { Form, Table, Button, Dropdown, } from 'semantic-ui-react'
+import { Form, Input, Table, Button, Dropdown, } from 'semantic-ui-react'
 
 class TakeSeriesEditor extends Component {
 
@@ -99,47 +99,51 @@ class TakeSeriesEditor extends Component {
   render() {
     return (
       <Table.Row>
-        <Table.Cell>
-          <Form.Input
+        <Table.Cell width={1}>
+          <Input
             fluid
+            width={2}
             placeholder='Exposure'
             className='exposure'
             defaultValue={this.props.definedSeries.exposure}
             onChange={this.onChangeExposure.bind(this)}
           />
         </Table.Cell>
-        <Table.Cell>
+        <Table.Cell width={1}>
           <Dropdown
+            fluid
             className='Frame'
             options={this.renderDropDownFrames()}
             placeholder='Light'
           />
         </Table.Cell>
-        <Table.Cell>
+        <Table.Cell width={1}>
           <Dropdown
-              floating
+              fluid
               className='filter'
               options={this.renderDropDownFilters()}
               placeholder='Filter'
             />
         </Table.Cell>
-        <Table.Cell>
-          <Form.Input
+        <Table.Cell width={1}>
+          <Input
             fluid
+            width={2}
             placeholder='Repeat'
             className='repeat'
             defaultValue={this.props.definedSeries.repeat}
           />
         </Table.Cell>
-        <Table.Cell>
-          <Form.Input
+        <Table.Cell width={1}>
+          <Input
             fluid
+            width={2}
             placeholder='Binning'
             className='binning'
             defaultValue={this.props.definedSeries.binning}
           />
         </Table.Cell>
-        <Table.Cell>
+        <Table.Cell width={3}>
           <label>{this.props.definedSeries.order}</label>
           <Button size='mini' icon='delete'  onClick={this.deleteEntry.bind(this)}/>
           <Button size='mini' icon='arrow up'  onClick={this.moveUpEntry.bind(this)}/>
