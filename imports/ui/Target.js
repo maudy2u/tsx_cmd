@@ -22,7 +22,7 @@ class TargetSession extends Component {
   handleClose = () => this.setState({ modalOpen: false })
 
   onChangeChecked() {
-    this.setState({checked: !this.props.target.enabledActive});
+    // this.setState({checked: !this.props.target.enabledActive});
     TargetSessions.update({_id: this.props.target._id}, {
       $set: { enabledActive: !this.props.target.enabledActive },
     })
@@ -31,7 +31,6 @@ class TargetSession extends Component {
 
   componentWillMount() {
     // do not modify the state directly
-    this.setState({checked: this.props.target.enabledActive});
   }
 
   calcTargetProgress() {
@@ -110,7 +109,7 @@ class TargetSession extends Component {
         <Item.Meta>
           <Checkbox
             toggle
-            checked={this.state.checked}
+            checked={this.props.target.enabledActive}
             onChange={this.onChangeChecked.bind(this)}
           />
           {this.props.target.description}
@@ -144,6 +143,6 @@ class TargetSession extends Component {
 
 export default withTracker(() => {
     return {
-      targets: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
+      targets2: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
   };
 })(TargetSession);

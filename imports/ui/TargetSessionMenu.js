@@ -10,6 +10,13 @@ import Target  from './Target.js';
 // export default
 class TargetSessionMenu extends Component {
 
+  state = { open: false }
+
+// example of more than one state...
+//  show = size => () => this.setState({ size, open: true })
+  show = () => this.setState({ open: true })
+  close = () => this.setState({ open: false })
+
   //{this.testMeteorMethod.bind(this)}
   loadTestDataMeteorMethod() {
 
@@ -69,12 +76,45 @@ class TargetSessionMenu extends Component {
       }
     });
   }
-  state = { open: false }
 
-// example of more than one state...
-//  show = size => () => this.setState({ size, open: true })
-  show = () => this.setState({ open: true })
-  close = () => this.setState({ open: false })
+  addEntry() {
+    console.log('In the DefineTemplate editEntry');
+
+    orgTarget = this.props.target;
+
+    // get the id for the new object
+    const id = TargetSessions.insert(
+      {
+        name: '',
+        targetFindName: '',
+        targetImage: '',
+        description: '',
+        enabledActive: false,
+        series: {
+          _id: '',
+          text: '',
+        },
+        ra: '',
+        dec: '',
+        angle: '',
+        scale: '',
+        coolingTemp: '',
+        clsFliter: '',
+        focusFliter: '',
+        foccusSamples: '',
+        focusBin: '',
+        guideExposure: '',
+        guideDelay: '',
+        startTime: '',
+        stopTime: '',
+        priority: '',
+        tempChg: '',
+        minAlt: '',
+        completed: falase,
+        createdAt: new Date(),
+      }
+    )
+  }
 
   render() {
     const { open } = this.state
@@ -84,6 +124,7 @@ class TargetSessionMenu extends Component {
         <Button.Group basic size='small'>
           <Button icon='settings' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
           <Button icon='find' onClick={this.chkTestData.bind(this)}/>
+          <Button icon='add' />
           <Button icon='upload' />
         </Button.Group>
         <Button.Group icon>

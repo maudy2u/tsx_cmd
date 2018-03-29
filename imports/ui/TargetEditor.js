@@ -12,128 +12,66 @@ import { Form, Tab, Segment, Button, Radio, Input, Table, Dropdown, Checkbox, } 
 class TargetEditor extends Component {
 
   state = {
+    enabledActive: false,
+    name: '',
+    targetImage: '',
+    targetFindName: '',
+    description: '',
+    seriesTemplate: {},
+    ra: "",
+    dec: "",
+    angle: "",
+    priority: '',
     clsFliter: '',
     focusFliter: '',
     foccusSamples: '',
     focusBin: '',
     guideExposure: '',
     guideDelay: '',
-    seriesTemplate: {}, priority: '', minAlt: '', startTime: '', stopTime: '',
-    targetImage: '', targetFindName: '', coolingTemp: '', description: '',
-    name: '', value: false, openModal: false, ra: "", dec: "", angle: "",
-    templates: [], template_id: '' };
+    minAlt: '',
+    startTime: '',
+    stopTime: '',
+    coolingTemp: '',
+    value: false,
+    openModal: false,
+    templates: [],
+    checked: false,
+    template_id: '',
+    tempChg: '',
+  };
 
-  handleChange = (e, { value }) => this.setState({ checked: value });
   handleOpen = () => this.setState({ modalOpen: true })
   handleClose = () => this.setState({ modalOpen: false })
 
-  nameChange = (e, { value }) => this.setState({ name: value });
-  descriptionChange = (e, { value }) => this.setState({ description: value });
-  coolingTemp = (e, { value }) => this.setState({ coolingTemp: value });
-  targetFindName = (e, { value }) => this.setState({ targetFindName: value });
-  targetImage = (e, { value }) => this.setState({ targetImage: value });
-  startTime = (e, { value }) => this.setState({ startTime: value });
-  stopTime = (e, { value }) => this.setState({ stopTime: value });
+  nameChange = (e, { value }) => this.setState({ name: value.trim() });
+  descriptionChange = (e, { value }) => this.setState({ description: value.trim() });
+  coolingTempChange = (e, { value }) => this.setState({ coolingTemp: value });
+  targetFindNameChange = (e, { value }) => this.setState({ targetFindName: value.trim() });
+  targetImageChange = (e, { value }) => this.setState({ targetImage: value.trim() });
+  startTimeChange = (e, { value }) => this.setState({ startTime: value });
+  stopTimeChange = (e, { value }) => this.setState({ stopTime: value });
   raChange = (e, { value }) => this.setState({ ra: value });
   decChange = (e, { value }) => this.setState({ ra: value });
   angleChange = (e, { value }) => this.setState({ ra: value });
   seriesTemplateChange = (e, { value }) => this.setState({ seriesTemplate: value });
-  priority = (e, { value }) => this.setState({ priority: value });
-  minAlt = (e, { value }) => this.setState({ minAlt: value });
-  clsFliter = (e, { value }) => this.setState({ clsFliter: value });
-  focusFliter = (e, { value }) => this.setState({ focusFliter: value });
-  foccusSamples = (e, { value }) => this.setState({ foccusSamples: value });
-  focusBin = (e, { value }) => this.setState({ focusBin: value });
-  guideExposure = (e, { value }) => this.setState({ guideExposure: value });
-  guideDelay = (e, { value }) => this.setState({ guideDelay: value });
+  priorityChange = (e, { value }) => this.setState({ priority: value });
+  minAltChange = (e, { value }) => this.setState({ minAlt: value });
+  clsFliterChange = (e, { value }) => this.setState({ clsFliter: value });
+  focusFliterChange = (e, { value }) => this.setState({ focusFliter: value });
+  foccusSamplesChange = (e, { value }) => this.setState({ foccusSamples: value });
+  focusBinChange = (e, { value }) => this.setState({ focusBin: value });
+  guideExposureChange = (e, { value }) => this.setState({ guideExposure: value });
+  guideDelayChange = (e, { value }) => this.setState({ guideDelay: value });
+  tempChgChange = (e, { value }) => this.setState({ tempChg: value });
 
-  saveEntry() {
-    // const name = ReactDOM.findDOMNode(this.refs.tempName.inputRef).value; //.trim();
-    // const description = ReactDOM.findDOMNode(this.refs.tempDesc.inputRef).value; //.trim();
-    // const processSeries = this.state.value;
-    //
-    TargetSessions.update(this.props.target._id, {
-      $set: {
-        checked: this.state.enabledActive,
-        name: this.state.name,
-        description: this.state.description,
-        coolingTemp: this.state.coolingTemp,
-        targetFindName: this.state.targetFindName,
-        targetImage: this.state.targetImage,
-        series: this.state.seriesTemplate,
-        ra: this.state.ra,
-        dec: this.state.dec,
-        angle: this.state.angle,
-        startTime: this.state.startTime,
-        stopTime: this.state.stopTime,
-        priority: this.state.priority,
-        minAlt: this.state.minAlt,
-        clsFliter: this.state.clsFliter,
-        focusFliter: this.state.focusFliter,
-        foccusSamples: this.state.foccusSamples,
-        focusBin: this.state.focusBin,
-        guideExposure: this.state.guideExposure,
-        guideDelay: this.state.guideDelay,
-       },
-    });
-
-  }
-
-
-  addEntry() {
-    // get the current map
-    // var seriesMap = this.props.target.series;
-    // console.log('current series size: ' + seriesMap.length);
-    // // get the end of the array
-    // var append = seriesMap.length+1;
-    // console.log('Increased series size to: ' + append);
-    //
-    // // create a new map to add
-    // var newSeries = new Map();
-    // newSeries.set( "order", append);
-    // newSeries.set("exposure", 1 );
-    // newSeries.set("binning",  1 );
-    // newSeries.set("frame", 'Light' );
-    // newSeries.set("filter", 0 );
-    // newSeries.set("repeat", 1 );
-    // newSeries.set("taken", 0);
-    // // add the new map to the end, with correct order
-    // seriesMap.push(newSeries);
-    // // update
-    // TakeSeriesTemplates.update({_id: this.props.template._id}, {
-    //   $push: { 'series': seriesMap },
-    // });
-  }
-
-  renderDropDownFilters() {
-    return [
-      { key: 'l', text: 'Static LUM', value: 'LUM' },
-      { key: 'r', text: 'Static R', value: 'R' },
-      { key: 'g', text: 'Static B', value: 'G' },
-      { key: 'b', text: 'Static G', value: 'B' },
-
-    ];
-  }
-
-  getTakeSeriesTemplates() {
-    var options = [];
-    const topPosts = TakeSeriesTemplates.find({}, { sort: { name: -1 } });
-
-    var count =0;
-    topPosts.forEach((series) => {
-      //      { key: 0, text: 'Static LUM', value: 0 },
-      options.push({key:series._id, text:series.name, value: count});
-      count++;
-      console.log(`Found series._id: ${series._id}, name: ${series.text}`);
-    });
-
-    return options;
+  onChangeChecked() {
+    this.setState({enabledActive: !this.state.enabledActive});
   }
 
   componentWillMount() {
     // // do not modify the state directly
     this.setState({
-      checked: this.props.target.enabledActive,
+      enabledActive: this.props.target.enabledActive,
       name: this.props.target.name,
       description: this.props.target.description,
       coolingTemp: this.props.target.coolingTemp,
@@ -155,41 +93,108 @@ class TargetEditor extends Component {
       focusBin: this.props.target.focusBin,
       guideExposure: this.props.target.guideExposure,
       guideDelay: this.props.target.guideDelay,
+      tempChg: this.props.target.tempChg,
     });
+  }
+
+  saveEntry() {
+    TargetSessions.update(this.props.target._id, {
+      $set: {
+        enabledActive: this.state.enabledActive,
+        name: this.state.name,
+        description: this.state.description,
+        coolingTemp: this.state.coolingTemp,
+        targetFindName: this.state.targetFindName,
+        targetImage: this.state.targetImage,
+        series: this.state.seriesTemplate,
+        ra: this.state.ra,
+        dec: this.state.dec,
+        angle: this.state.angle,
+        startTime: this.state.startTime,
+        stopTime: this.state.stopTime,
+        priority: this.state.priority,
+        minAlt: this.state.minAlt,
+        clsFliter: this.state.clsFliter,
+        focusFliter: this.state.focusFliter,
+        foccusSamples: this.state.foccusSamples,
+        focusBin: this.state.focusBin,
+        guideExposure: this.state.guideExposure,
+        guideDelay: this.state.guideDelay,
+       },
+    });
+  }
+
+  renderDropDownFilters() {
+    return [
+      { key: 'l', text: 'Static LUM', value: 'LUM' },
+      { key: 'r', text: 'Static R', value: 'R' },
+      { key: 'g', text: 'Static B', value: 'G' },
+      { key: 'b', text: 'Static G', value: 'B' },
+    ];
+  }
+
+  getTakeSeriesTemplates() {
+    var options = [];
+    const topPosts = TakeSeriesTemplates.find({}, { sort: { name: -1 } });
+
+    var count =0;
+    topPosts.forEach((series) => {
+      //      { key: 0, text: 'Static LUM', value: 0 },
+      options.push({key:series._id, text:series.name, value: count});
+      count++;
+      console.log(`Found series._id: ${series._id}, name: ${series.text}`);
+    });
+    return options;
   }
 
   render() {
 
+    // *******************************
+    // this is not the render return... scroll down...
     const panes = [
       { menuItem: 'Target', render: () =>
       <Tab.Pane>
         <Segment.Group>
           <Segment>
             <h3 className="ui header">Target Details</h3>
-                <Input
-                  label='Target Name'
-                  ref='targetName'
-                  placeholder='Name to search for'
-                  defaultValue={this.state.targetFindName}
-                  action={{ icon: 'find', content: 'Find' }}
-                />
-                <Input
-                  label='Image to load'
-                  ref='imageFile'
-                  action={{ icon: 'find', content: 'Find' }}
-                  placeholder='Filename to load on server'
-                  defaultValue={this.state.targetImage}
-                />
-          </Segment>
-          <Segment>
             <Form>
               <Form.Group widths='equal'>
-                <Form.Field control={Input} label='Ra' placeholder='RA' defaultValue={this.state.ra} onChange={this.raChange}/>
-                <Form.Field control={Input} label='Dec' placeholder='DEC' defaultValue={this.state.dec} onChange={this.decChange}/>
-                <Form.Field control={Input} label='Angle' placeholder='Angle' defaultValue={this.state.angle} onChange={this.angleChange}/>
+                <Form.Field control={Input}
+                  label='Ra'
+                  placeholder='RA'
+                  defaultValue={this.state.ra}
+                  onChange={this.raChange}/>
+                <Form.Field control={Input}
+                  label='Dec'
+                  placeholder='DEC'
+                  defaultValue={this.state.dec}
+                  onChange={this.decChange}/>
+                <Form.Field control={Input}
+                  label='Angle'
+                  placeholder='Angle'
+                  defaultValue={this.state.angle}
+                  onChange={this.angleChange}/>
               </Form.Group>
             </Form>
-          </Segment>
+        </Segment>
+        <Segment>
+          <Input
+            label='Target Name'
+            placeholder='Name to search for'
+            defaultValue={this.state.targetFindName}
+            action={{ icon: 'find', content: 'Find' }}
+            onChange={this.targetFindNameChange}
+          />
+        </Segment>
+        <Segment>
+          <Input
+            label='Image to load'
+            action={{ icon: 'find', content: 'Find' }}
+            placeholder='Filename to load on server'
+            defaultValue={this.state.targetImage}
+            onChange={this.targetImageChange}
+          />
+        </Segment>
         </Segment.Group>
       </Tab.Pane> },
       { menuItem: 'Session', render: () => <Tab.Pane>
@@ -203,34 +208,43 @@ class TargetEditor extends Component {
                 options={this.getTakeSeriesTemplates()}
                 placeholder='Series to use for Imaging'
                 text={this.state.seriesTemplate.text}
+                onChange={this.seriesTemplateChange}
               />
+          </Segment>
+          <Segment>
             <Input
               label='Start'
-              ref='start'
               type='text'
               placeholder='Start Time'
               defaultValue={this.state.startTime}
+              onChange={this.startTimeChange}
             />
+          </Segment>
+          <Segment>
             <Input
               label='Stop'
-              ref='stop'
               type='text'
               placeholder='Stop time'
               defaultValue={this.state.stopTime}
+              onChange={this.stopTimeChange}
             />
+          </Segment>
+          <Segment>
             <Input
               label='Priority'
-              ref='priority'
               type='text'
               placeholder='Priority'
               defaultValue={this.state.priority}
+              onChange={this.priorityChange}
             />
+          </Segment>
+          <Segment>
             <Input
               label='Minimum Altitude:'
-              ref='minAlt'
               type='text'
               placeholder='Minimum Altitude'
               defaultValue={this.state.minAlt}
+              onChange={this.minAltChange}
             />
           </Segment>
         </Segment.Group>
@@ -242,33 +256,36 @@ class TargetEditor extends Component {
             <h3 className="ui header">Focus</h3>
               <Input
                 label='Focusing Temp Delta'
-                ref='tempChg'
                 type='text'
                 placeholder='change diff.'
                 defaultValue={this.props.target.tempChg}
+                onChange={this.tempChgChange}
               />
-              <Dropdown
-                  floating
-                  label='Filter'
-                  className='filter'
-                  options={this.renderDropDownFilters()}
-                  placeholder='Filter for focusing'
-                  selection={this.state.focusFilter}
-                />
+          </Segment>
+          <Segment>
+            <Dropdown
+                floating
+                label='Filter'
+                className='filter'
+                options={this.renderDropDownFilters()}
+                placeholder='Filter for focusing'
+                selection={this.state.focusFilter}
+                onChange={this.focusFilterChange}
+              />
           </Segment>
         </Segment.Group>
       </Tab.Pane> },
       { menuItem: 'Imaging', render: () => <Tab.Pane>
         <Segment.Group>
           <Segment>
-        <h3 className="ui header">Imaging Series</h3>
-        <Input
-          label='Cooling temp'
-          ref='cool'
-          type='text'
-          placeholder='Imaging temperature'
-          defaultValue={this.state.coolingTemp}
-        />
+            <h3 className="ui header">Imaging Series</h3>
+            <Input
+              label='Cooling temp'
+              ref='cool'
+              placeholder='Imaging temperature'
+              defaultValue={this.state.coolingTemp}
+              onChange={this.coolingTempChange}
+            />
           </Segment>
         </Segment.Group>
       </Tab.Pane> },
@@ -280,71 +297,37 @@ class TargetEditor extends Component {
         <Checkbox
           label='Enabled'
           toggle
-          checked={this.state.checked}
-          onChange={this.handleChange}
+          checked={this.state.enabledActive}
+          onChange={this.onChangeChecked.bind(this)}
         />
         <Segment.Group>
           <Segment>
             <h3 className="ui header">Target Session</h3>
-                <Input
+            <Form>
+              <Form.Group widths='equal'>
+                <Form.Field control={Input}
                   label='Name'
-                  ref='targetName'
-                  type='text'
                   placeholder='Name for session'
                   defaultValue={this.state.name}
-                />
-                <Input
+                  onChange={this.nameChange}/>
+                <Form.Field control={Input}
                   label='Description'
-                  ref='targetDesc'
-                  type='text'
                   placeholder='Describe the session'
-                  defaultValue={this.props.target.description}
-                />
-              </Segment>
-              </Segment.Group>
-              <Tab menu={{ pointing: true }} panes={panes} />
-      </div>
+                  defaultValue={this.state.description}
+                  onChange={this.descriptionChange}/>
+              </Form.Group>
+            </Form>
+          </Segment>
+        </Segment.Group>
+      <Tab menu={{ pointing: true }} panes={panes} />
+    </div>
     )
   }
 }
-/*
-name: testData[i].get("name"),
-targetFindName: testData[i].get("targetFindName"),
-targetImage: testData[i].get("targetImage"),
-description: testData[i].get("description"),
-enableActive: false,
-takeSeries: {},
-ra: testData[i].get("ra"),
-dec: testData[i].get("dec"),
-angle: testData[i].get("angle"),
-scale: testData[i].get("scale"),
-coolingTemp: testData[i].get("coolingTemp"),
-clsFliter: testData[i].get("clsFliter"),
-focusFliter: testData[i].get("focusFliter"),
-foccusSamples: testData[i].get("foccusSamples"),
-focusBin: testData[i].get("focusBin"),
-guideExposure: testData[i].get("guideExposure"),
-guideDelay: testData[i].get("guideDelay"),
-startTime: testData[i].get("startTime"),
-stopTime: testData[i].get("stopTime"),
-priority: testData[i].get("priority"),
-tempChg: testData[i].get("tempChg"),
-minAlt: testData[i].get("minAlt"),
-completed: testData[i].get("completed"),
-
-*/
 
 export default withTracker(() => {
     return {
-      targets: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
-      takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
-
+      targets1: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
+      takeSeriesTemplates1: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
   };
 })(TargetEditor);
-
-/*
-<strong>onChange:</strong>
-<pre>{JSON.stringify({ name, email }, null, 2)}</pre>
-<strong>onSubmit:</strong>
-<pre>{JSON.stringify({ submittedName, submittedEmail }, null, 2)}</pre>
-*/
