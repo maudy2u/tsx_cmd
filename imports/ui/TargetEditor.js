@@ -10,22 +10,71 @@ import { Form, Segment, Button, Radio, Input, Table, Dropdown, Checkbox, } from 
 
 class TargetEditor extends Component {
 
-  state = { value: false, openModal: false };
+  state = {
+    clsFliter: '',
+    focusFliter: '',
+    foccusSamples: '',
+    focusBin: '',
+    guideExposure: '',
+    guideDelay: '',
+    targetSeries: {}, priority: '', minAlt: '', startTime: '', stopTime: '',
+    targetImage: '', targetFindName: '', coolingTemp: '', description: '',
+    name: '', value: false, openModal: false, ra: "", dec: "", angle: "",
+    templates: [], template_id: '' };
+
   handleChange = (e, { value }) => this.setState({ checked: value });
   handleOpen = () => this.setState({ modalOpen: true })
   handleClose = () => this.setState({ modalOpen: false })
+
+  nameChange = (e, { value }) => this.setState({ name: value });
+  descriptionChange = (e, { value }) => this.setState({ description: value });
+  coolingTemp = (e, { value }) => this.setState({ coolingTemp: value });
+  targetFindName = (e, { value }) => this.setState({ targetFindName: value });
+  targetImage = (e, { value }) => this.setState({ targetImage: value });
+  startTime = (e, { value }) => this.setState({ startTime: value });
+  stopTime = (e, { value }) => this.setState({ stopTime: value });
+  raChange = (e, { value }) => this.setState({ ra: value });
+  decChange = (e, { value }) => this.setState({ ra: value });
+  angleChange = (e, { value }) => this.setState({ ra: value });
+  templateChange = (e, { value }) => this.setState({ template_id: value });
+  priority = (e, { value }) => this.setState({ priority: value });
+  minAlt = (e, { value }) => this.setState({ minAlt: value });
+  clsFliter = (e, { value }) => this.setState({ clsFliter: value });
+  focusFliter = (e, { value }) => this.setState({ focusFliter: value });
+  foccusSamples = (e, { value }) => this.setState({ foccusSamples: value });
+  focusBin = (e, { value }) => this.setState({ focusBin: value });
+  guideExposure = (e, { value }) => this.setState({ guideExposure: value });
+  guideDelay = (e, { value }) => this.setState({ guideDelay: value });
 
   saveEntry() {
     // const name = ReactDOM.findDOMNode(this.refs.tempName.inputRef).value; //.trim();
     // const description = ReactDOM.findDOMNode(this.refs.tempDesc.inputRef).value; //.trim();
     // const processSeries = this.state.value;
     //
-    // TargetSessions.update(this.props.target._id, {
-    //   $set: {
-    //     name: name,
-    //     description: description,
-    //    },
-    // });
+    TargetSessions.update(this.props.target._id, {
+      $set: {
+        checked: this.state.enabledActive,
+        name: this.state.name,
+        description: this.state.description,
+        coolingTemp: this.state.coolingTemp,
+        targetFindName: this.state.targetFindName,
+        targetImage: this.state.targetImage,
+//        targetSeries: this.stateSeries,
+        ra: this.state.ra,
+        dec: this.state.dec,
+        angle: this.state.angle,
+        startTime: this.state.startTime,
+        stopTime: this.state.stopTime,
+        priority: this.state.priority,
+        minAlt: this.state.minAlt,
+        clsFliter: this.state.clsFliter,
+        focusFliter: this.state.focusFliter,
+        foccusSamples: this.state.foccusSamples,
+        focusBin: this.state.focusBin,
+        guideExposure: this.state.guideExposure,
+        guideDelay: this.state.guideDelay,
+       },
+    });
 
   }
 
@@ -66,12 +115,40 @@ class TargetEditor extends Component {
   }
 
   getTakeSeriesTemplates() {
-
+    var options = [];
+    this.props.takeSeriesTemplates.map( (takeSeriesTemplate)=>{
+      options.push({id: takeSeriesTemplate._id, text: takeSeriesTemplate.name} );
+    });
+    return options;
   }
 
   componentWillMount() {
     // // do not modify the state directly
-    this.setState({checked: this.props.target.enabledActive});
+    this.setState({
+      checked: this.props.target.enabledActive,
+      name: this.props.target.name,
+      description: this.props.target.description,
+      coolingTemp: this.props.target.coolingTemp,
+      targetFindName: this.props.target.targetFindName,
+      targetImage: this.props.target.targetImage,
+      targetSeries: this.props.targetSeries,
+      ra: this.props.target.ra,
+      dec: this.props.target.dec,
+      angle: this.props.target.angle,
+      value: false,
+      openModal: false,
+      templates: this.getTakeSeriesTemplates(),
+      startTime: this.props.target.startTime,
+      stopTime: this.props.target.stopTime,
+      priority: this.props.target.priority,
+      minAlt: this.props.target.minAlt,
+      clsFliter: this.props.target.clsFliter,
+      focusFliter: this.props.target.focusFliter,
+      foccusSamples: this.props.target.foccusSamples,
+      focusBin: this.props.target.focusBin,
+      guideExposure: this.props.target.guideExposure,
+      guideDelay: this.props.target.guideDelay,
+    });
   }
 
   render() {
@@ -93,7 +170,7 @@ class TargetEditor extends Component {
                   ref='targetName'
                   type='text'
                   placeholder='Name for session'
-                  defaultValue={this.props.target.name}
+                  defaultValue={this.state.name}
                 />
                 <Input
                   label='Description'
@@ -112,7 +189,7 @@ class TargetEditor extends Component {
                 ref='cool'
                 type='text'
                 placeholder='Imaging temperature'
-                defaultValue={this.props.target.coolingTemp}
+                defaultValue={this.state.coolingTemp}
               />
                 <Dropdown
                     floating
@@ -120,6 +197,7 @@ class TargetEditor extends Component {
                     className='filter'
                     options={this.getTakeSeriesTemplates()}
                     placeholder='Series to use for Imaging'
+                    text={this.state.targetSeries}
                   />
           </Segment>
         </Segment.Group>
@@ -130,7 +208,7 @@ class TargetEditor extends Component {
                   label='Target Name'
                   ref='targetName'
                   placeholder='Name to search for'
-                  defaultValue={this.props.target.targetFindName}
+                  defaultValue={this.state.targetFindName}
                   action={{ icon: 'find', content: 'Find' }}
                   actionPosition='right'
                 />
@@ -140,15 +218,15 @@ class TargetEditor extends Component {
                   action={{ icon: 'find', content: 'Find' }}
                   actionPosition='right'
                   placeholder='Filename to load on server'
-                  defaultValue={this.props.target.targetImage}
+                  defaultValue={this.state.targetImage}
                 />
           </Segment>
           <Segment>
             <Form>
               <Form.Group widths='equal'>
-                <Form.Field control={Input} label='Ra' ref='ra' placeholder='RA' defaultValue={this.props.target.ra}/>
-                <Form.Field control={Input} label='Dec' ref='dec' placeholder='DEC' defaultValue={this.props.target.dec}/>
-                <Form.Field control={Input} label='Angle' ref='angle' placeholder='Angle' defaultValue={this.props.target.angle}/>
+                <Form.Field control={Input} label='Ra' placeholder='RA' defaultValue={this.state.ra} onChange={this.raChange}/>
+                <Form.Field control={Input} label='Dec' placeholder='DEC' defaultValue={this.state.dec} onChange={this.decChange}/>
+                <Form.Field control={Input} label='Angle' placeholder='Angle' defaultValue={this.state.angle} onChange={this.angleChange}/>
               </Form.Group>
             </Form>
           </Segment>
@@ -180,28 +258,28 @@ class TargetEditor extends Component {
                   ref='start'
                   type='text'
                   placeholder='Start Time'
-                  defaultValue={this.props.target.startTime}
+                  defaultValue={this.state.startTime}
                 />
                 <Input
                   label='Stop'
                   ref='stop'
                   type='text'
                   placeholder='Stop time'
-                  defaultValue={this.props.target.stopTime}
+                  defaultValue={this.state.stopTime}
                 />
                 <Input
                   label='Priority'
                   ref='priority'
                   type='text'
                   placeholder='Priority'
-                  defaultValue={this.props.target.priority}
+                  defaultValue={this.state.priority}
                 />
                 <Input
                   label='Minimum Altitude:'
                   ref='minAlt'
                   type='text'
                   placeholder='Minimum Altitude'
-                  defaultValue={this.props.target.minAlt}
+                  defaultValue={this.state.minAlt}
                 />
           </Segment>
         </Segment.Group>

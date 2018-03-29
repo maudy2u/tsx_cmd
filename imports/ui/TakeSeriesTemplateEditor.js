@@ -6,7 +6,7 @@ import { withTracker } from 'meteor/react-meteor-data';
 
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 
-import { Form, Button, Radio, Input, Table, } from 'semantic-ui-react'
+import { Form, Grid, Item, Button, Radio, Input, Table, } from 'semantic-ui-react'
 
 import TakeSeriesEditor from './TakeSeriesEditor.js';
 
@@ -89,30 +89,45 @@ class TakeSeriesTemplateEditor extends Component {
             />
           </Form.Field>
         </Form.Group>
-        <h3 className="ui header">Repeat executes: </h3>
+        <h3 className="ui header">Images executes: </h3>
           <Form.Group inline>
             <Form.Field control={Radio} label='Per series' value='per series' checked={this.state.value === "per series"} onChange={this.handleChange} />
             <Form.Field control={Radio} label='Across series' value='across series' checked={this.state.value === "across series"} onChange={this.handleChange} />
             <Form.Field control={Radio} label='Repeat series' value='repeat' checked={this.state.value === "repeat"} onChange={this.handleChange} />
           </Form.Group>
         </Form>
-        <Table collapsing selectable size='small'>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell>Exposure</Table.HeaderCell>
-                <Table.HeaderCell>Frame</Table.HeaderCell>
-                <Table.HeaderCell>Filter</Table.HeaderCell>
-                <Table.HeaderCell>Repeat</Table.HeaderCell>
-                <Table.HeaderCell>Binning</Table.HeaderCell>
-                <Table.HeaderCell></Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {this.props.template.series.map( (definedSeries)=>{
-                 return  <TakeSeriesEditor key={definedSeries.order} template={this.props.template} definedSeries={definedSeries} />
-              })}
-            </Table.Body>
-          </Table>
+        <Grid columns={6} centered divided='vertically'>
+          <Grid.Row >
+            <Grid.Column>
+            <b>Exposure</b>
+            </Grid.Column>
+            <Grid.Column>
+            <b>Frame</b>
+            </Grid.Column>
+            <Grid.Column>
+            <b>Filter</b>
+            </Grid.Column>
+            <Grid.Column>
+            <b>Repeat</b>
+            </Grid.Column>
+            <Grid.Column>
+            <b>Bin</b>
+            </Grid.Column>
+            <Grid.Column>
+            <b>Tools</b>
+            </Grid.Column>
+          </Grid.Row>
+          {this.props.template.series.map( (definedSeries)=>{
+             return  <TakeSeriesEditor key={definedSeries.order} template={this.props.template} definedSeries={definedSeries} />
+          })}
+        </Grid>
+        {/* <Table divided>
+          <Table.Body>
+            {this.props.template.series.map( (definedSeries)=>{
+               return  <TakeSeriesEditor key={definedSeries.order} template={this.props.template} definedSeries={definedSeries} />
+            })}
+          </Table.Body>
+        </Table> */}
       </div>
     )
   }
