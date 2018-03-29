@@ -66,65 +66,31 @@ class TakeSeriesEditor extends Component {
     ];
   }
 
-  onChangeExposure(event) {
-    const name = ReactDOM.findDOMNode(this.refs.exposure).value; //.trim();
-
-    TakeSeriesTemplates.update(this.props.definedSeries._id, {
-      $set: {
-        exposure: name,
-       },
-    });
-
-  }
-  onChangeFrame(event) {
-
-  }
-  onChangeFilter(event) {
-
-  }
-  onChangeRepeat(event) {
-
-  }
-  onChangeBinning(event) {
-
-  }
 
   deleteEntry() {
-    // get the current map
-    var takeSeries = TakeSeriesTemplates.findOne({_id: this.props.template._id});
-    var series = takeSeries.series;
-    var remove = takeSeries.series.order;
-    console.log('Removing order number: ' + remove);
-    // all the series
-    var cursor = 0;
-    var newSeries = [];
-    for (var i = 0; i < series.length; i++) {
-      // cannot guarantee items are sorted by order
-      console.log('Comparing order number ('+series[i].order+') or remove ('+remove+')');
-      if( series[i].order < remove ) {
-        // do nothing
-        newSeries.push(series[i]);
-        console.log('No change to order');
+    if( this.props.enableSaving ) {
+      var takeSeries = this.props.template;
+      var series = takeSeries.series;
+      var index = this.props.definedSeries.order;
+      if( index > -1 ) {
+        // remove the current item
+        series.splice(index, 1);
       }
-      else if (series[i].order >= remove ) {
-        var newOrder = series[i].order-1;
-        if( newOrder >= 0) {
-          console.log('Order decreased by one');
-          series[i].order = series[i].order-1;
-          newSeries.push(series[i]);
-        }
-      }
-      else {
-        // for order = remove... do nothing - do not add to newSeries
-        console.log('Order matches so ignore');
-      }
-    }
-    // update
-    TakeSeriesTemplates.update({_id: this.props.template._id}, {
-      $set: { 'series': newSeries },
-    });
 
+      // renumber...
+      for (var i = 0; i < series.length; i++) {
+        series[i].order=i;
+      }
+
+      TakeSeriesTemplates.update(
+        {_id: this.props.template._id}, {
+        $set: {
+          series: series,
+        }
+      });
+    }
   }
+
 
   moveUpEntry() {
   }

@@ -32,15 +32,12 @@ class TakeSeriesTemplateEditor extends Component {
 
   saveEntry() {
     if( this.props.targetEditor == false ) {
-      const name = ReactDOM.findDOMNode(this.refs.tempName.inputRef).value; //.trim();
-      const description = ReactDOM.findDOMNode(this.refs.tempDesc.inputRef).value; //.trim();
-      const processSeries = this.state.seriesProcess;
 
       TakeSeriesTemplates.update(this.props.template._id, {
         $set: {
-          name: name,
-          description: description,
-          processSeries: processSeries,
+          name: this.state.name,
+          description: this.state.description,
+          processSeries: this.state.processSeries,
          },
       });
     }
@@ -75,7 +72,7 @@ class TakeSeriesTemplateEditor extends Component {
   }
 
 
-  saveTemplateEditor() {
+  enableSaving() {
     if( this.props.enableSaving == true ) {
       return (
         <Button  icon='save' onClick={this.saveEntry.bind(this)} />
@@ -87,7 +84,7 @@ class TakeSeriesTemplateEditor extends Component {
 
     return (
       <div>
-        {this.saveTemplateEditor()}
+        {this.enableSaving()}
         <Button  icon='add' onClick={this.addEntry.bind(this)} />
         <Form>
           <Form.Group widths='equal'>
@@ -139,7 +136,7 @@ class TakeSeriesTemplateEditor extends Component {
             </Grid.Column>
           </Grid.Row>
           {this.props.template.series.map( (definedSeries)=>{
-             return  <TakeSeriesEditor key={definedSeries.order} template={this.props.template} definedSeries={definedSeries} />
+             return  <TakeSeriesEditor key={definedSeries.order} template={this.props.template} definedSeries={definedSeries} enableSaving={this.props.enableSaving} />
           })}
         </Grid>
         {/* <Table divided>
