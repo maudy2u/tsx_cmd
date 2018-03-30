@@ -64,13 +64,17 @@ class TakeSeries extends Component {
   }
 
   seriesDetails() {
+
+    // CURRENTLY: 0:33x3s, 1:33x3s, 2:33x3s, 3:33x3s
+    // WANT: LIGHT:LUM@33X3S
+
     var template = this.props.seriesTemplate;
     var seriesArray = template.series;
     var details = "";
     for (var i = 0; i < seriesArray.length; i++) {
       series = seriesArray[i];
       if(details != "") { details += ", "};
-      details += series.filter + ':' + series.repeat + 'x' + series.exposure + 's';
+      details += series.frame +'-' + series.filter + ' for ' + series.repeat + 'x' + series.exposure + 's';
     }
 
     return details

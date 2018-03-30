@@ -8,6 +8,13 @@ import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 
 import { Form, Grid, Input, Table, Button, Dropdown, } from 'semantic-ui-react'
 
+var frames = [
+  'Light',
+  'Flat',
+  'Dark',
+  'Bias',
+];
+
 class TakeSeriesEditor extends Component {
 
 // Setup states
@@ -21,13 +28,15 @@ class TakeSeriesEditor extends Component {
     taken: 0,
   };
 
+  handleChange = (e, { name, value }) => this.setState({ [name]: value })
+
   // change states
-  exposureChange = (e, { value }) => this.setState({ exposure: value });
-  frameChange = (e, { value }) => this.setState({ frame: value });
-  filterChange = (e, { value }) => this.setState({ filter: value });
-  repeatChange = (e, { value }) => this.setState({ repeat: value });
-  binningChange = (e, { value }) => this.setState({ binning: value });
-  takenChange = (e, { value }) => this.setState({ taken: value });
+  // exposureChange = (e, { value }) => this.setState({ exposure: value });
+  // frameChange = (e, { value }) => this.setState({ frame: value });
+  // filterChange = (e, { value }) => this.setState({ filter: value });
+  // repeatChange = (e, { value }) => this.setState({ repeat: value });
+  // binningChange = (e, { value }) => this.setState({ binning: value });
+  // takenChange = (e, { value }) => this.setState({ taken: value });
 
   // Initialize states
   componentWillMount() {
@@ -46,24 +55,34 @@ class TakeSeriesEditor extends Component {
   // *******************************
   // Get the filters from TheSkyX
   renderDropDownFilters() {
-    return [
-      { key: 0, text: 'Static LUM', value: 0 },
-      { key: 1, text: 'Static R', value: 1 },
-      { key: 2, text: 'Static B', value: 2 },
-      { key: 3, text: 'Static G', value: 3 },
 
+    // NEED TO RETRIEVE FROM TSX....
+    var filters = [
+      'Static LUM',
+      'Static R',
+      'Static G',
+      'Static B',
+      'Static Ha',
+      'Static OIII',
+      'Static SII',
     ];
+
+    var filterArray = [];
+    for (var i = 0; i < filters.length; i++) {
+      filterArray.push({ key: i, text: filters[i], value: filters[i] });
+    }
+    return filterArray;
   }
 
   // *******************************
   // This is used to populate drop down frame lists
   renderDropDownFrames() {
-    return [
-      { key: 0, text: 'Light', value: 0 },
-      { key: 1, text: 'Flat', value: 1 },
-      { key: 2, text: 'Dark', value: 2 },
-      { key: 3, text: 'Bias', value: 3 },
-    ];
+
+    var frameArray = [];
+    for (var i = 0; i < frames.length; i++) {
+      frameArray.push({ key: i, text: frames[i], value: frames[i] });
+    }
+    return frameArray;
   }
 
 
@@ -91,7 +110,6 @@ class TakeSeriesEditor extends Component {
     }
   }
 
-
   moveUpEntry() {
   }
   moveDownEntry() {
@@ -104,47 +122,47 @@ class TakeSeriesEditor extends Component {
           <Input
             fluid
             placeholder='Exposure'
-            className='exposure'
+            name='exposure'
             defaultValue={this.state.exposure}
-            onChange={this.exposureChange}
+            onChange={this.handleChange}
           />
         </Grid.Column>
         <Grid.Column>
           <Dropdown
             fluid
-            className='Frame'
-            selection={this.state.frame}
+            name='frame'
             options={this.renderDropDownFrames()}
             placeholder='Light'
-            onChange={this.frameChange}
+            text={this.state.frame.text}
+            onChange={this.handleChange}
           />
         </Grid.Column>
         <Grid.Column>
           <Dropdown
               fluid
-              className='filter'
-              selection={this.state.filter}
+              name='filter'
               options={this.renderDropDownFilters()}
               placeholder='Filter'
-              onChange={this.filterChange}
+              text={this.state.filter.text}
+              onChange={this.handleChange}
             />
           </Grid.Column>
           <Grid.Column>
           <Input
             fluid
             placeholder='Repeat'
-            className='repeat'
+            name='repeat'
             defaultValue={this.state.repeat}
-            onChange={this.repeatChange}
+            onChange={this.handleChange}
           />
         </Grid.Column>
         <Grid.Column>
           <Input
             fluid
             placeholder='Binning'
-            className='binning'
+            name='binning'
             defaultValue={this.state.binning}
-            onChange={this.binningChange}
+            onChange={this.handleChange}
           />
         </Grid.Column>
         <Grid.Column>

@@ -42,6 +42,7 @@ class TargetEditor extends Component {
 
   handleOpen = () => this.setState({ modalOpen: true })
   handleClose = () => this.setState({ modalOpen: false })
+  handleChange = (e, { name, value }) => this.setState({ [name]: value })
 
   nameChange = (e, { value }) => this.setState({ name: value.trim() });
   descriptionChange = (e, { value }) => this.setState({ description: value.trim() });
@@ -162,149 +163,11 @@ class TargetEditor extends Component {
     // *******************************
     // this is not the render return... scroll down...
     const panes = [
-      { menuItem: 'Target', render: () =>
-      <Tab.Pane>
-        <Segment.Group>
-          <Segment>
-            <h3 className="ui header">Target Details</h3>
-            <Form>
-              <Form.Group widths='equal'>
-                <Form.Field control={Input}
-                  label='Ra'
-                  placeholder='RA'
-                  defaultValue={this.state.ra}
-                  onChange={this.raChange}/>
-                <Form.Field control={Input}
-                  label='Dec'
-                  placeholder='DEC'
-                  defaultValue={this.state.dec}
-                  onChange={this.decChange}/>
-                <Form.Field control={Input}
-                  label='Angle'
-                  placeholder='Angle'
-                  defaultValue={this.state.angle}
-                  onChange={this.angleChange}/>
-              </Form.Group>
-            </Form>
-        </Segment>
-        <Segment>
-          <Input
-            label='Target Name'
-            placeholder='Name to search for'
-            defaultValue={this.state.targetFindName}
-            action={{ icon: 'find', content: 'Find' }}
-            onChange={this.targetFindNameChange}
-          />
-        </Segment>
-        <Segment>
-          <Input
-            label='Image to load'
-            action={{ icon: 'find', content: 'Find' }}
-            placeholder='Filename to load on server'
-            defaultValue={this.state.targetImage}
-            onChange={this.targetImageChange}
-          />
-        </Segment>
-      </Segment.Group>
-    </Tab.Pane> },
-
       { menuItem: 'Session', render: () =>
       <Tab.Pane>
         <Segment.Group>
           <Segment>
-            <h3 className="ui header">Session Constraints</h3>
-            <Input
-              label='Start'
-              type='text'
-              placeholder='Start Time'
-              defaultValue={this.state.startTime}
-              onChange={this.startTimeChange}
-            />
-          </Segment>
-          <Segment>
-            <Input
-              label='Stop'
-              type='text'
-              placeholder='Stop time'
-              defaultValue={this.state.stopTime}
-              onChange={this.stopTimeChange}
-            />
-          </Segment>
-          <Segment>
-            <Input
-              label='Priority'
-              type='text'
-              placeholder='Priority'
-              defaultValue={this.state.priority}
-              onChange={this.priorityChange}
-            />
-          </Segment>
-          <Segment>
-            <Input
-              label='Minimum Altitude:'
-              type='text'
-              placeholder='Minimum Altitude'
-              defaultValue={this.state.minAlt}
-              onChange={this.minAltChange}
-            />
-          </Segment>
-        </Segment.Group>
-
-      </Tab.Pane> },
-
-      { menuItem: 'Focus', render: () =>
-      <Tab.Pane>
-          <Segment>
-            <h3 className="ui header">Focus</h3>
-              <Input
-                label='Focusing Temp Delta'
-                type='text'
-                placeholder='change diff.'
-                defaultValue={this.props.target.tempChg}
-                onChange={this.tempChgChange}
-              />
-          </Segment>
-          <Segment>
-            <Dropdown
-                floating
-                label='Filter'
-                options={this.renderDropDownFilters()}
-                placeholder='Filter for focusing'
-                selection={this.state.focusFilter}
-                onChange={this.focusFilterChange}
-              />
-          </Segment>
-      </Tab.Pane> },
-
-      { menuItem: 'Imaging', render: () =>
-      <Tab.Pane>
-          <Segment>
-            <h3 className="ui header">Imaging Series</h3>
-            <Input
-              label='Cooling temp'
-              placeholder='Imaging temperature'
-              defaultValue={this.state.coolingTemp}
-              onChange={this.coolingTempChange}
-            />
-          </Segment>
-      </Tab.Pane> },
-    ]
-// *******************************
-// THIS IS THE ACTUAL RENDERING...
-// *******************************
-    return (
-      <div>
-        <Button  icon='save' onClick={this.saveEntry.bind(this)} />
-        <Checkbox
-          label='Enabled'
-          className='enabledActive'
-          toggle
-          checked={this.state.enabledActive}
-          onChange={this.onChangeChecked.bind(this)}
-        />
-        <Segment.Group>
-          <Segment>
-            <h3 className="ui header">Target Session</h3>
+            <h3 className="ui header">Session</h3>
             <Form>
               <Form.Group widths='equal'>
                 <Form.Field control={Input}
@@ -329,7 +192,145 @@ class TargetEditor extends Component {
             </Form>
           </Segment>
         </Segment.Group>
-      <Tab menu={{ pointing: true }} renderActiveOnly={true} panes={panes} />
+      </Tab.Pane> },
+
+
+      { menuItem: 'Details', render: () =>
+      <Tab.Pane>
+        <Segment>
+            <h3 className="ui header">Details</h3>
+            <Form.Group widths='equal'>
+              <Form.Input
+                label='Ra'
+                name='ra'
+                placeholder='RA'
+                defaultValue={this.state.ra}
+                onChange={this.handleChange}/>
+              <Form.Input
+                label='Dec'
+                name='dec'
+                placeholder='DEC'
+                defaultValue={this.state.dec}
+                onChange={this.handleChange}/>
+              <Form.Input
+                label='Angle'
+                name='angle'
+                placeholder='Angle'
+                defaultValue={this.state.angle}
+                onChange={this.handleChange}/>
+            </Form.Group>
+          <Form.Group widths='equal'>
+          <Form.Input
+            label='Target Name'
+            name='targetFindName'
+            placeholder='Name to search for'
+            defaultValue={this.state.targetFindName}
+            action={{ icon: 'find', content: 'Find' }}
+            onChange={this.handleChange}/>
+          <Form.Input
+            label='Image to load'
+            name='targetImage'
+            action={{ icon: 'find', content: 'Find' }}
+            placeholder='Filename to load on server'
+            defaultValue={this.state.targetImage}
+            onChange={this.handleChange}
+          />
+        </Form.Group>
+      </Segment>
+    </Tab.Pane> },
+
+      { menuItem: 'Constraints', render: () =>
+      <Tab.Pane>
+            <h3 className="ui header">Constraints</h3>
+              <Form.Group widths='equal'>
+            <Form.Input
+              label='Start'
+              name='startTime'
+              placeholder='Start Time'
+              defaultValue={this.state.startTime}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='Stop'
+              name='stopTime'
+              placeholder='Stop time'
+              defaultValue={this.state.stopTime}
+              onChange={this.handleChange}
+            />
+          </Form.Group>
+          <Form.Group widths='equal'>
+
+            <Form.Input
+              label='Priority'
+              name='priority'
+              placeholder='Priority'
+              defaultValue={this.state.priority}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='Minimum Altitude:'
+              name='minAlt'
+              placeholder='Minimum Altitude'
+              defaultValue={this.state.minAlt}
+              onChange={this.handleChange}
+            />
+          </Form.Group>
+      </Tab.Pane> },
+
+      { menuItem: 'Focus', render: () =>
+      <Tab.Pane>
+          <Segment>
+            <h3 className="ui header">Focus</h3>
+              <Input
+                label='Focusing Temp Delta'
+                type='text'
+                name='tempChg'
+                placeholder='change diff.'
+                defaultValue={this.state.tempChg}
+                onChange={this.handleChange}
+              />
+            <Dropdown
+                floating
+                label='Filter'
+                name='focusFilter'
+                options={this.renderDropDownFilters()}
+                placeholder='Filter for focusing'
+                selection={this.state.focusFilter}
+                onChange={this.handleChange}
+              />
+          </Segment>
+      </Tab.Pane> },
+
+      { menuItem: 'Imaging', render: () =>
+      <Tab.Pane>
+        <Segment>
+          <h3 className="ui header">Imaging Series</h3>
+          <Input
+            label='Cooling temp'
+            name='coolingTemp'
+            placeholder='Imaging temperature'
+            defaultValue={this.state.coolingTemp}
+            onChange={this.coolingTempChange}
+          />
+        </Segment>
+      </Tab.Pane> },
+    ]
+// *******************************
+// THIS IS THE ACTUAL RENDERING...
+// *******************************
+    return (
+      <div>
+        <Button  icon='save' onClick={this.saveEntry.bind(this)} />
+        <Checkbox
+          label='Enabled'
+          className='enabledActive'
+          toggle
+          checked={this.state.enabledActive}
+          onChange={this.onChangeChecked.bind(this)}
+        />
+        <Form>
+          <Tab menu={{ pointing: true }} renderActiveOnly={true} panes={panes} />
+        </Form>
     </div>
     )
   }
