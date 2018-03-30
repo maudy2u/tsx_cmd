@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
+
+import { Input, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
 
 // Import the API Model
 import { SessionTemplates } from '../api/sessionTemplates.js';
@@ -12,7 +15,6 @@ import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 // PROBLEM: import { TheSkyXInfos } from '../api/theSkyXInfo.js';
 
 // Import the UI
-import { Dropdown, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
 import TargetSessionMenu from './TargetSessionMenu.js';
 import SessionTemplate from './SessionTemplate.js';
 import Filter from './Filter.js';
@@ -27,6 +29,26 @@ import {tsxCmdTakeImage} from '../tsx/SkyX_JS_TakeImage.js'
 
 // App component - represents the whole app
 class App extends Component {
+
+  state = {
+    activeItem: 'Targets',
+    ip: '',
+    port: '',
+  }
+  handleMenuItemClick = (e, { name }) => this.setState({ activeItem: name })
+  ipChange = (e, { value }) => this.setState({ ip: value.trim() });
+  portChange = (e, { value }) => this.setState({ port: value.trim() });
+
+  componentWillMount() {
+    // do not modify the state directly
+    //TheSkyXInfos.findOne({name:'camera'})
+    var connection = TheSkyXInfos.findOne({name:'TheSkyX_connection'});
+    console.log('End initialization');
+    // this.setState({
+    //   ip: connection.address,
+    //   port: connection.port,
+    // });
+  }
 
   // *******************************
   //
@@ -83,33 +105,33 @@ class App extends Component {
   renderTSXConnetion() {
 
     return (
-      <form className="tsx_connection" onSubmit={this.connectTSX.bind(this)} >
-        Server Connection:
-        <input
-          type="text"
-          ref="tsx_ip"
-          placeholder="Enter TSX address"
-        />
-        <input
-          type="text"
-          ref="tsx_port"
-          placeholder="Enter TSX port"
-        />
-      </form>);
-
+      <Form>
+        <Form.Group widths='equal' onSubmit={this.connectTSX.bind(this)}>
+          <Form.Field control={Input}
+            label='IP Address'
+            placeholder="Enter TSX address"
+            defaultValue={this.state.ip}
+            onChange={this.ipChange}/>
+          <Form.Field control={Input}
+            label='Port'
+            placeholder="Enter TSX port"
+            defaultValue={this.state.port}
+            onChange={this.portChange}/>
+        </Form.Group>
+      </Form>
+    );
   }
 
   // *******************************
   //
   connectTSX(event) {
-    // Find the text field via the React ref
-    const tsx_ip = ReactDOM.findDOMNode(this.refs.tsx_ip).value.trim();
-    const tsx_port = ReactDOM.findDOMNode(this.refs.tsx_port).value.trim();
 
     TheSkyXInfos.insert({
-      device: 'TheSkyX',
-      address: tsx_ip, // current time
-      port: tsx_port,
+      name: 'TheSkyX_connection',
+      connection: {
+        address: tsx_ip, // current time
+        port: tsx_port,
+      },
     });
   }
 
@@ -279,6 +301,15 @@ class App extends Component {
   // *******************************
   //
   renderSettings() {
+
+    var info = this.props.tsxInfo;
+    var mount = TheSkyXInfos.findOne({name:'mount'});
+    var man = mount.mount.manufacturer;
+    var camera = TheSkyXInfos.findOne({name:'camera'});
+    var guider = TheSkyXInfos.findOne({name:'guider'});
+    var rotator = TheSkyXInfos.findOne({name:'rotator'});
+    var efw = TheSkyXInfos.findOne({name:'efw'});
+    var focuser = TheSkyXInfos.findOne({name:'focuser'});
     return (
       <div>
         <button className="circular ui icon button" onClick={this.testMeteorMethod.bind(this)}>
@@ -292,6 +323,26 @@ class App extends Component {
             placeholder="Type to add new filter"
           />
         </form>
+        <Segment.Group>
+          <Segment><Label>Mount<Label.Detail>
+            {mount.mount.manufacturer}|{mount.mount.model}
+          </Label.Detail></Label></Segment>
+          <Segment><Label>Camera<Label.Detail>
+            {camera.camera.manufacturer}|{camera.camera.model}
+          </Label.Detail></Label></Segment>
+          <Segment><Label>Autoguider<Label.Detail>
+            {guider.guider.manufacturer}|{guider.guider.model}
+          </Label.Detail></Label></Segment>
+          <Segment><Label>Filter Wheel<Label.Detail>
+            {efw.efw.manufacturer}|{efw.efw.model}
+          </Label.Detail></Label></Segment>
+          <Segment><Label>Focuser<Label.Detail>
+            {focuser.focuser.manufacturer}|{focuser.focuser.model}
+          </Label.Detail></Label></Segment>
+          <Segment><Label>Rotator<Label.Detail>
+            {rotator.rotator.manufacturer}|{rotator.rotator.model}
+          </Label.Detail></Label></Segment>
+        </Segment.Group>
       </div>
     );
 
@@ -338,9 +389,6 @@ class App extends Component {
 
   // *******************************
   //
-  state = { activeItem: 'Targets' }
-  handleMenuItemClick = (e, { name }) => this.setState({ activeItem: name })
-
   addNewTemplate() {
     TakeSeriesTemplates.insert({
       name: "",
@@ -360,6 +408,18 @@ class App extends Component {
       createdAt: new Date(), // current time
     });
     return;
+  }
+
+  connectToTSX() {
+
+    // on the client
+    Meteor.call("connectTsx", function (error) {
+      // identify the error
+      if (error && error.error === "logged-out") {
+        // show a nice error message
+        Session.set("errorMessage", "Please log in to post a comment.");
+      }
+    });
   }
 
   render() {
@@ -384,6 +444,8 @@ class App extends Component {
         <header>
           <h1>Image Sessions</h1>
           <div>
+            <Button icon='linkify' onClick={this.connectToTSX.bind(this)}/>
+
 {/*
             <button className="circular ui icon button" onClick={this.loadTestDataMeteorMethod.bind(this)}>
               <i class="icon settings"></i>
@@ -592,6 +654,7 @@ class App extends Component {
   // USE THIS POINT TO GRAB THE FILTERS
   export default withTracker(() => {
     return {
+      tsxInfo: TheSkyXInfos.find().fetch(),
       seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
       filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),

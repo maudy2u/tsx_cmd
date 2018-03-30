@@ -195,16 +195,17 @@ class TargetEditor extends Component {
             onChange={this.targetImageChange}
           />
         </Segment>
-        </Segment.Group>
-      </Tab.Pane> },
-      { menuItem: 'Session', render: () => <Tab.Pane>
+      </Segment.Group>
+    </Tab.Pane> },
+
+      { menuItem: 'Session', render: () =>
+      <Tab.Pane>
         <Segment.Group>
           <Segment>
             <h3 className="ui header">Session Constraints</h3>
             <Dropdown
                 floating
                 label='Series'
-                className='filter'
                 options={this.getTakeSeriesTemplates()}
                 placeholder='Series to use for Imaging'
                 text={this.state.seriesTemplate.text}
@@ -250,8 +251,9 @@ class TargetEditor extends Component {
         </Segment.Group>
 
       </Tab.Pane> },
-      { menuItem: 'Focus', render: () => <Tab.Pane>
-        <Segment.Group>
+
+      { menuItem: 'Focus', render: () =>
+      <Tab.Pane>
           <Segment>
             <h3 className="ui header">Focus</h3>
               <Input
@@ -266,28 +268,25 @@ class TargetEditor extends Component {
             <Dropdown
                 floating
                 label='Filter'
-                className='filter'
                 options={this.renderDropDownFilters()}
                 placeholder='Filter for focusing'
                 selection={this.state.focusFilter}
                 onChange={this.focusFilterChange}
               />
           </Segment>
-        </Segment.Group>
       </Tab.Pane> },
-      { menuItem: 'Imaging', render: () => <Tab.Pane>
-        <Segment.Group>
+
+      { menuItem: 'Imaging', render: () =>
+      <Tab.Pane>
           <Segment>
             <h3 className="ui header">Imaging Series</h3>
             <Input
               label='Cooling temp'
-              ref='cool'
               placeholder='Imaging temperature'
               defaultValue={this.state.coolingTemp}
               onChange={this.coolingTempChange}
             />
           </Segment>
-        </Segment.Group>
       </Tab.Pane> },
     ]
 
@@ -296,6 +295,7 @@ class TargetEditor extends Component {
         <Button  icon='save' onClick={this.saveEntry.bind(this)} />
         <Checkbox
           label='Enabled'
+          className='enabledActive'
           toggle
           checked={this.state.enabledActive}
           onChange={this.onChangeChecked.bind(this)}
@@ -307,10 +307,12 @@ class TargetEditor extends Component {
               <Form.Group widths='equal'>
                 <Form.Field control={Input}
                   label='Name'
+                  className='name'
                   placeholder='Name for session'
                   defaultValue={this.state.name}
                   onChange={this.nameChange}/>
                 <Form.Field control={Input}
+                  className='description'
                   label='Description'
                   placeholder='Describe the session'
                   defaultValue={this.state.description}
@@ -319,7 +321,7 @@ class TargetEditor extends Component {
             </Form>
           </Segment>
         </Segment.Group>
-      <Tab menu={{ pointing: true }} panes={panes} />
+      <Tab menu={{ pointing: true }} renderActiveOnly={true} panes={panes} />
     </div>
     )
   }

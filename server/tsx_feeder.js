@@ -16,6 +16,9 @@ function loadPortAndIP(){
 
 }
 
+var tsxHeader =  '/* Java Script *//* Socket Start Packet */';
+var tsxFooter = '/* Socket End Packet */';
+
 // *******************************
 // test of generic write method...
 export function tsx_feeder( ip, port, cmd, callback ) {
@@ -55,8 +58,11 @@ export function tsx_feeder( ip, port, cmd, callback ) {
      });
 
      tsx_waiting = true;
+
+     cmd = tsxHeader+cmd+tsxFooter;
+
      tsx.write(cmd, (err) => {
-       console.log('Sending data: ' + cmd);
+       console.log('Sending tsxCmd: ' + cmd);
        console.log('Sending err: ' + err);
      });
 

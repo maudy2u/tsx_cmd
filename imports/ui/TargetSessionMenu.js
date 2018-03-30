@@ -18,6 +18,18 @@ class TargetSessionMenu extends Component {
   close = () => this.setState({ open: false })
 
   //{this.testMeteorMethod.bind(this)}
+  connectTsxMeteorMethod() {
+
+    // on the client
+    Meteor.call("loadTestDataTargetSessions", function (error) {
+      // identify the error
+      if (error && error.error === "logged-out") {
+        // show a nice error message
+        Session.set("errorMessage", "Please log in to post a comment.");
+      }
+    });
+  }
+
   loadTestDataMeteorMethod() {
 
     // on the client
@@ -122,6 +134,7 @@ class TargetSessionMenu extends Component {
       return (
         <div>
         <Button.Group basic size='small'>
+          <Button icon='linkify' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
           <Button icon='settings' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
           <Button icon='find' onClick={this.chkTestData.bind(this)}/>
           <Button icon='add' />

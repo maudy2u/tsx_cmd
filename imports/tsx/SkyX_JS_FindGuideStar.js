@@ -1,10 +1,9 @@
-
+// Ken Sturrock\
+// January 13, 2018\
 
 // Assumed Target already set
 export function tsxCmdFindGuideStar() {
   var Out = '\
-  // Ken Sturrock\
-  // January 13, 2018\
   var CAGI = ccdsoftAutoguiderImage, CAG = ccdsoftAutoguider;\
   CAGI.AttachToActiveAutoguider();\
   CAGI.ShowInventory();\

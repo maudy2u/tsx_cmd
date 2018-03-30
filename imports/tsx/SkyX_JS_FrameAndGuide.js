@@ -1,9 +1,3 @@
-/* Java Script */
-
-
-// Assumed Target already set
-export function tsxCmdFrameAndGuide(guideX,guideY,subFrameStar ) {
-var Out ='\
 //\
 //	This script takes the GuideX and GuideY variables passed to it from the main script\
 //	(using the substitution function in Terry"s tsxfeeder) and then sets up autoguiding.\
@@ -11,12 +5,17 @@ var Out ='\
 //	Ken Sturrock\
 //	January 13, 2018\
 //\
-\
+
 // The lines below take the guide star coordinates from the main script (the $ tokens\
 // are swapped for the real numbers by tsxfeeder) and the multiplication magic is done\
 // to un-compensate SkyX compensation of coordinates for binned images which\
 // I do not want it to do because I actually know what I am doing....\
 //\
+
+
+// Assumed Target already set
+export function tsxCmdFrameAndGuide(guideX,guideY,subFrameStar ) {
+var Out ='\
 ccdsoftAutoguider.GuideStarX = "'+guideX+'" * ccdsoftAutoguiderImage.FITSKeyword ("XBINNING") ;\
 ccdsoftAutoguider.GuideStarY = "'+guideY+'" * ccdsoftAutoguiderImage.FITSKeyword ("YBINNING") ;\
 \

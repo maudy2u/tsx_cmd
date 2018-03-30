@@ -2,12 +2,11 @@ import { Meteor } from 'meteor/meteor';
 
 import { TargetSessions } from '../imports/api/targetSessions.js';
 import { TakeSeriesTemplates} from '../imports/api/takeSeriesTemplates.js';
-import '../imports/api/filters.js';
-import '../imports/api/sessionTemplates.js';
-import '../imports/api/theSkyXInfos.js';
+import {TheSkyXInfos} from '../imports/api/theSkyXInfos.js';
+import {Filters} from '../imports/api/filters.js';
 import '../imports/api/run_imageSession.js';
 import './filters.js';
-import './tsx_feeder.js'
+import {tsx_feeder, tsx_is_waiting} from './tsx_feeder.js';
 
 // *******************************
 // Filter Series
@@ -243,8 +242,106 @@ Meteor.startup(() => {
 
  */
 
+var tsxHeader =  '/* Java Script *//* Socket Start Packet */';
+var tsxFooter = '/* Socket End Packet */';
+var forceAbort = false;
+var port = 3040;
+var ip = 'localhost';
+
+// var tsxHeader = '/* Java Script *//* Socket Start Packet */';
+// var tsxFooter = '/* Socket End Packet */';
+
 
  Meteor.methods({
+
+   connectTsx() {
+     var camera = { model: '', manufacturer: '' };
+     var guider = { model: '', manufacturer: '' };
+     var mount = { model: '', manufacturer: '' };
+     var efw = { model: '', manufacturer: '' };
+     var rotator = { model: '', manufacturer: '' };
+     var focuser = { model: '', manufacturer: '' };
+
+// *******************************
+//  GET THE CONNECTED EQUIPEMENT
+     var cmd = '\
+     Out =\
+     "aMan|"+ SelectedHardware.autoguiderCameraManufacturer +"\
+     |aMod|"+ SelectedHardware.autoguiderCameraModel +"\
+     |cMan|"+ SelectedHardware.cameraManufacturer +"\
+     |cMod|"+ SelectedHardware.cameraModel +"\
+     |efwMan|"+ SelectedHardware.filterWheelManufacturer +"\
+     |efwMod|"+ SelectedHardware.filterWheelModel +"\
+     |focMan|"+ SelectedHardware.focuserManufacturer +"\
+     |focMod|"+ SelectedHardware.focuserModel +"\
+     |mntMan|"+ SelectedHardware.mountManufacturer +"\
+     |mntMod|"+ SelectedHardware.mountModel +"\
+     |rotMan|"+ SelectedHardware.rotatorManufacturer +"\
+     |rotMod|"+ SelectedHardware.rotatorModel +"\
+     ";'
+     var success;
+     tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+
+          if( tsx_return.split('|')[24].trim() === "No error. Error = 0.") {
+             success = true;
+          }
+
+          guider.manufacturer = tsx_return.split('|')[1].trim();
+          guider.model = tsx_return.split('|')[3].trim();
+          TheSkyXInfos.upsert({name: 'guider'}, {
+            $set: {
+              guider: guider
+            }
+          });
+
+           camera.manufacturer = tsx_return.split('|')[5].trim();
+           camera.model = tsx_return.split('|')[7].trim();
+           TheSkyXInfos.upsert({name: 'camera'}, {
+             $set: {
+               camera: camera
+             }
+           });
+
+           efw.manufacturer = tsx_return.split('|')[9].trim();
+           efw.model = tsx_return.split('|')[11].trim();
+           TheSkyXInfos.upsert({name: 'efw'}, {
+             $set: {
+               efw: efw
+             }
+           });
+
+           focuser.manufacturer = tsx_return.split('|')[13].trim();
+           focuser.model = tsx_return.split('|')[15].trim();
+           TheSkyXInfos.upsert({name: 'focuser'}, {
+             $set: {
+               focuser: focuser
+             }
+           });
+
+           mount.manufacturer = tsx_return.split('|')[17].trim();
+           mount.model = tsx_return.split('|')[19].trim();
+           TheSkyXInfos.upsert({name: 'mount'}, {
+             $set: {
+               mount: mount
+             }
+           });
+
+           rotator.manufacturer = tsx_return.split('|')[21].trim();
+           rotator.model = tsx_return.split('|')[23].trim();
+           TheSkyXInfos.upsert({name: 'rotator'}, {
+             $set: {
+               rotator: rotator
+             }
+           });
+         }
+       )
+     )
+
+ // *******************************
+ //  GET THE CONNECTED EQUIPEMENT
+      var detais;
+
+   },
 
    loadTestDataTargetSessions() {
 

@@ -14,8 +14,6 @@
 //
 export function tsxCmdTakeImage(filter, exposure) {
 var Out = '\
-/* Java Script */\
-/* Socket Start Packet */\
 while (!ccdsoftCamera.State == 0)\
 {\
 	sky6Web.Sleep (1000);\
@@ -35,7 +33,6 @@ if ( SelectedHardware.filterWheelModel !== "<No Filter Wheel Selected>" )\
 }\
 ccdsoftCamera.TakeImage();\
 Out="Success|";\
-/* Socket End Packet */\
 ';
 return Out;
 }

@@ -101,7 +101,6 @@ function takeImage( filter, exposure ) {
   console.log('Starting image');
   var success = false;
   var cmd = tsxCmdTakeImage(filter,exposure);
-  console.log('Using tsxCmd: ' + cmd);
   tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
         var result = tsx_return.split('|')[0].trim();
         console.log('Image: ' + result);
