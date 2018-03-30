@@ -389,26 +389,12 @@ var ip = 'localhost';
        var series = TakeSeriesTemplates.find().fetch();
 
        TargetSessions.update({_id: id}, {
+         // $set: { 'series': { _id:series[i]._id } },
          $set: { 'series': { _id:series[i]._id, text:series[i].name } },
        });
-       // TargetSessions.update(
-       //   {_id: id, 'series'},
-       //   {$set: {'series',takesSeriesMap}}
-       // );
 
        const tSession = TargetSessions.findOne({_id: id});
        console.log('Done load test object: ' + tSession.name );
-       // tSession.series = testData[i].get("series");
-
-       // TargetSessions.update({ _id: tSession._id }, {
-       //     $addToSet: {
-       //         takeSeries: {
-       //             _id: Random.id(),
-       //             service: $('#new_service_name').val(),
-       //             bufferEnd: $('#new_service_description').val(),
-       //         }
-       //     }
-       // );
      }
    },
 

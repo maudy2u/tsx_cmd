@@ -69,6 +69,12 @@ class TargetEditor extends Component {
   }
 
   componentWillMount() {
+    // NEED TO UPDATE THE NAME GIVEN TO THE SERIES...
+    var series = this.props.target.series;
+    var update = TakeSeriesTemplates.findOne({_id: series._id});
+    series.text = update.name;
+    this.props.target.series = series;
+
     // // do not modify the state directly
     this.setState({
       enabledActive: this.props.target.enabledActive,
@@ -98,6 +104,9 @@ class TargetEditor extends Component {
   }
 
   saveEntry() {
+
+    var series = this.state.seriesTemplate;
+
     TargetSessions.update(this.props.target._id, {
       $set: {
         enabledActive: this.state.enabledActive,
@@ -133,16 +142,17 @@ class TargetEditor extends Component {
     ];
   }
 
+  // Get all the current values from the TaeSeriesTemplate collections
   getTakeSeriesTemplates() {
     var options = [];
     const topPosts = TakeSeriesTemplates.find({}, { sort: { name: -1 } });
 
     var count =0;
-    topPosts.forEach((series) => {
+    this.props.takeSeriesTemplates1.forEach((series) => {
       //      { key: 0, text: 'Static LUM', value: 0 },
-      options.push({key:series._id, text:series.name, value: count});
+      options.push({key:series._id, text:series.name, value: { _id:series._id, text:series.name }});
       count++;
-      console.log(`Found series._id: ${series._id}, name: ${series.text}`);
+      console.log(`Found series._id: ${series._id}, name: ${series.name}`);
     });
     return options;
   }
@@ -203,16 +213,6 @@ class TargetEditor extends Component {
         <Segment.Group>
           <Segment>
             <h3 className="ui header">Session Constraints</h3>
-            <Dropdown
-                floating
-                label='Series'
-                options={this.getTakeSeriesTemplates()}
-                placeholder='Series to use for Imaging'
-                text={this.state.seriesTemplate.text}
-                onChange={this.seriesTemplateChange}
-              />
-          </Segment>
-          <Segment>
             <Input
               label='Start'
               type='text'
@@ -289,7 +289,9 @@ class TargetEditor extends Component {
           </Segment>
       </Tab.Pane> },
     ]
-
+// *******************************
+// THIS IS THE ACTUAL RENDERING...
+// *******************************
     return (
       <div>
         <Button  icon='save' onClick={this.saveEntry.bind(this)} />
@@ -317,6 +319,12 @@ class TargetEditor extends Component {
                   placeholder='Describe the session'
                   defaultValue={this.state.description}
                   onChange={this.descriptionChange}/>
+                  <Form.Select
+                    label='Series'
+                    options={this.getTakeSeriesTemplates()}
+                    placeholder='Series to use for Imaging'
+                    text={this.state.seriesTemplate.text}
+                    onChange={this.seriesTemplateChange}/>
               </Form.Group>
             </Form>
           </Segment>

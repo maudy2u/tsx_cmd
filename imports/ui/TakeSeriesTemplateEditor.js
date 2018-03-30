@@ -12,7 +12,8 @@ import TakeSeriesEditor from './TakeSeriesEditor.js';
 
 class TakeSeriesTemplateEditor extends Component {
 
-  state = { name: '',
+  state = {
+    name: '',
     description: '',
     seriesProcess: "", seriesContainer: [],
   };
@@ -31,16 +32,13 @@ class TakeSeriesTemplateEditor extends Component {
   }
 
   saveEntry() {
-    if( this.props.targetEditor == false ) {
-
-      TakeSeriesTemplates.update(this.props.template._id, {
-        $set: {
-          name: this.state.name,
-          description: this.state.description,
-          processSeries: this.state.processSeries,
-         },
-      });
-    }
+    TakeSeriesTemplates.update(this.props.template._id, {
+      $set: {
+        name: this.state.name,
+        description: this.state.description,
+        processSeries: this.state.processSeries,
+       },
+    });
   }
 
   addEntry() {
@@ -72,19 +70,11 @@ class TakeSeriesTemplateEditor extends Component {
   }
 
 
-  enableSaving() {
-    if( this.props.enableSaving == true ) {
-      return (
-        <Button  icon='save' onClick={this.saveEntry.bind(this)} />
-      )
-    }
-  }
-
   render() {
 
     return (
       <div>
-        {this.enableSaving()}
+        <Button  icon='save' onClick={this.saveEntry.bind(this)} />
         <Button  icon='add' onClick={this.addEntry.bind(this)} />
         <Form>
           <Form.Group widths='equal'>

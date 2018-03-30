@@ -3,22 +3,39 @@ import { withTracker } from 'meteor/react-meteor-data';
 import { Button, Modal, Item, Header, Icon, Table, } from 'semantic-ui-react'
 
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
+import { TargetSessions } from '../api/targetSessions.js';
 
 import TakeSeriesTemplateEditor from './TakeSeriesTemplateEditor.js';
 
 class TakeSeries extends Component {
 
-  state = { modalOpen: false }
-  handleOpen = () => this.setState({ modalOpen: true })
-  handleClose = () => this.setState({ modalOpen: false })
+  state = { editOpen: false, deleteFailed: false, targetsPreventingDelete: [], }
+  editOpen = () => this.setState({ editOpen: true })
+  editClose = () => this.setState({ editOpen: false })
+  deleteFailedOpen = () => this.setState({ deleteFailed: true })
+  deleteFailedClose = () => this.setState({ deleteFailed: false })
 
   deleteEntry() {
+    // check if the series is used - if so cannot delete... list the Targets using it
+    var sessions  = this.props.targetSessions;
+    var targets = [];
+    for (var i = 0; i < sessions.length; i++) {
+      if( sessions[i].series._id == this.props.seriesTemplate._id) {
+        targets.push(sessions[i]);
+      }
+    }
+    if( targets.length>0 ) {
+      this.setState({ targetsPreventingDelete: targets });
+      this.deleteFailedOpen();
+    }
+    else {
       TakeSeriesTemplates.remove(this.props.seriesTemplate._id);
+    }
   }
 
   editEntry() {
     console.log('In the DefineTemplate editEntry');
-    this.handleOpen();
+    this.editOpen();
   }
 
   copyEntry() {
@@ -84,9 +101,12 @@ class TakeSeries extends Component {
               <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
               <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
             </Button.Group>
+            {/* *******************************
+              Used to handle the Editing deleting of a series
+              */}
             <Modal
-              open={this.state.modalOpen}
-              onClose={this.handleClose}
+              open={this.state.editOpen}
+              onClose={this.editClose}
               closeIcon>
               <Modal.Header>Edit Series</Modal.Header>
               <Modal.Content>
@@ -94,6 +114,32 @@ class TakeSeries extends Component {
                   <TakeSeriesTemplateEditor key={this.props.seriesTemplate._id} template={this.props.seriesTemplate} enableSaving={true}/>
                 </Modal.Description>
               </Modal.Content>
+            </Modal>
+            {/* *******************************
+              Used to handle the FAILED deleting of a series
+              */}
+            <Modal
+              open={this.state.deleteFailed}
+              onClose={this.deleteFailedClose.bind(this)}
+              basic
+              size='small'
+              closeIcon>
+              <Modal.Header>Delete Failed</Modal.Header>
+              <Modal.Content>
+                <h3>This series is used by a Target. Please change the target and try again:</h3>
+                {this.state.targetsPreventingDelete.map( (target)=>{
+                  return (
+                      <li>
+                        {target.name}
+                      </li>
+                  )
+                })}
+              </Modal.Content>
+              <Modal.Actions>
+                <Button color='red' onClick={this.deleteFailedClose.bind(this)} inverted>
+                  <Icon name='stop' /> Got it
+                </Button>
+              </Modal.Actions>
             </Modal>
           </Item.Extra>
         </Item.Content>
@@ -106,5 +152,6 @@ class TakeSeries extends Component {
 export default withTracker(() => {
     return {
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
+      targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
   };
 })(TakeSeries);

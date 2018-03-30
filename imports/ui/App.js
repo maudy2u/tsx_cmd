@@ -39,6 +39,10 @@ class App extends Component {
   ipChange = (e, { value }) => this.setState({ ip: value.trim() });
   portChange = (e, { value }) => this.setState({ port: value.trim() });
 
+  onPortChange() {
+//    this.setState({port: this.state.port});
+  }
+
   componentWillMount() {
     // do not modify the state directly
     //TheSkyXInfos.findOne({name:'camera'})
