@@ -1,10 +1,11 @@
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom';
-import {mount} from 'react-mounter';
+// import {mount} from 'react-mounter';
 
 import { withTracker } from 'meteor/react-meteor-data';
 
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
+import { Seriess } from '../api/seriess.js';
 
 import { Form, Grid, Input, Table, Button, Dropdown, } from 'semantic-ui-react'
 
@@ -15,10 +16,21 @@ var frames = [
   'Bias',
 ];
 
+var filters = [
+  'Static LUM',
+  'Static R',
+  'Static G',
+  'Static B',
+  'Static Ha',
+  'Static OIII',
+  'Static SII',
+];
+
 class TakeSeriesEditor extends Component {
 
 // Setup states
   state = {
+    id: '',
     order: 0,
     exposure: 0,
     frame: 'Light',
@@ -28,10 +40,18 @@ class TakeSeriesEditor extends Component {
     taken: 0,
   };
 
-  handleChange = (e, { name, value }) => this.setState({ [name]: value })
+  handleChange = (e, { name, value }) => this.setState({ [name]: value });
 
   // change states
-  // exposureChange = (e, { value }) => this.setState({ exposure: value });
+  exposureChange = (e, { value }) => {
+    this.setState({ exposure: value });
+    this.props.definedSeries.exposure = value;
+
+// can the tempalte edirot that callss this use tracter properties and so
+// that this issue of changes and savins goes away...
+
+
+  };
   // frameChange = (e, { value }) => this.setState({ frame: value });
   // filterChange = (e, { value }) => this.setState({ filter: value });
   // repeatChange = (e, { value }) => this.setState({ repeat: value });
@@ -40,15 +60,17 @@ class TakeSeriesEditor extends Component {
 
   // Initialize states
   componentWillMount() {
+    var definedSeries = Seriess.findOne({_id:this.props.key}).fetch();
     // // do not modify the state directly
     this.setState({
-      order: this.props.definedSeries.order,
-      exposure: this.props.definedSeries.exposure,
-      frame: this.props.definedSeries.frame,
-      filter: this.props.definedSeries.filter,
-      repeat: this.props.definedSeries.repeat,
-      binning: this.props.definedSeries.binning,
-      taken: this.props.definedSeries.taken,
+      id: this.props.key,
+      order: definedSeries.order,
+      exposure: definedSeries.exposure,
+      frame: { text: definedSeries.frame},
+      filter: { text: definedSeries.filter},
+      repeat: definedSeries.repeat,
+      binning: definedSeries.binning,
+      taken: definedSeries.taken,
     });
   }
 
@@ -57,16 +79,6 @@ class TakeSeriesEditor extends Component {
   renderDropDownFilters() {
 
     // NEED TO RETRIEVE FROM TSX....
-    var filters = [
-      'Static LUM',
-      'Static R',
-      'Static G',
-      'Static B',
-      'Static Ha',
-      'Static OIII',
-      'Static SII',
-    ];
-
     var filterArray = [];
     for (var i = 0; i < filters.length; i++) {
       filterArray.push({ key: i, text: filters[i], value: filters[i] });
@@ -87,27 +99,30 @@ class TakeSeriesEditor extends Component {
 
 
   deleteEntry() {
-    if( this.props.enableSaving ) {
-      var takeSeries = this.props.template;
-      var series = takeSeries.series;
-      var index = this.props.definedSeries.order;
-      if( index > -1 ) {
-        // remove the current item
-        series.splice(index, 1);
-      }
 
-      // renumber...
-      for (var i = 0; i < series.length; i++) {
-        series[i].order=i;
+    // Recreate the series with ID removed
+    // then delete the entry
+    var takeSeries = this.props.template;
+    var seriesDb = takeSeries.series;
+    var series = [];
+    for (var i = 0; i < seriesDb.length; i++) {
+      if( seriesDb._id != removeID ) {
+        var tmp = Seriess.findOne({_id:seriesDb[i].id}).fetch();
+        series.push(tmp._id);
       }
-
-      TakeSeriesTemplates.update(
-        {_id: this.props.template._id}, {
-        $set: {
-          series: series,
-        }
-      });
     }
+
+    // Now remove form Seriess
+    var removeID = this.state.id;
+    Seriess.remove({_id:this.state.id});
+
+    // now reset the series Map
+    TakeSeriesTemplates.update(
+      {_id: this.props.template._id}, {
+      $set: {
+        series: series,
+      }
+    });
   }
 
   moveUpEntry() {
@@ -124,7 +139,7 @@ class TakeSeriesEditor extends Component {
             placeholder='Exposure'
             name='exposure'
             defaultValue={this.state.exposure}
-            onChange={this.handleChange}
+            onChange={this.exposureChange}
           />
         </Grid.Column>
         <Grid.Column>
@@ -178,6 +193,6 @@ class TakeSeriesEditor extends Component {
 }
 export default withTracker(() => {
     return {
-      takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
+      // takeSeriesTemplates: TakeSeriesTemplates.find({_id:seriesTemplate._id}, { sort: { name: 1 } }).fetch(),
   };
 })(TakeSeriesEditor);

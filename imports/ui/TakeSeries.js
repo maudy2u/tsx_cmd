@@ -4,6 +4,7 @@ import { Button, Modal, Item, Header, Icon, Table, } from 'semantic-ui-react'
 
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 import { TargetSessions } from '../api/targetSessions.js';
+import { Seriess } from '../api/seriess.js';
 
 import TakeSeriesTemplateEditor from './TakeSeriesTemplateEditor.js';
 
@@ -115,7 +116,7 @@ class TakeSeries extends Component {
               <Modal.Header>Edit Series</Modal.Header>
               <Modal.Content>
                 <Modal.Description>
-                  <TakeSeriesTemplateEditor key={this.props.seriesTemplate._id} template={this.props.seriesTemplate} enableSaving={true}/>
+                  <TakeSeriesTemplateEditor key={this.props.seriesTemplate._id} template={this.props.seriesTemplate}/>
                 </Modal.Description>
               </Modal.Content>
             </Modal>

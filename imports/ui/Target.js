@@ -1,12 +1,13 @@
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom';
-
-import {mount} from 'react-mounter';
+// import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
+
 import { Item, Button, Modal, Header, Icon, Table, Checkbox, Progress } from 'semantic-ui-react'
 
 import { TargetSessions } from '../api/targetSessions.js';
 import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
+import { Seriess } from '../api/seriess.js';
 
 import TargetEditor from './TargetEditor.js';
 
@@ -39,10 +40,16 @@ class TargetSession extends Component {
       var template = TakeSeriesTemplates.findOne(
         {_id:this.props.target.series._id});
 
+      if( typeof template == "undefined") {
+        return 0;
+      }
+
       var series = template.series;
       for (var i = 0; i < series.length; i++) {
-        totalTakenImages += series[i].taken;
-        totalPlannedImages += series[i].repeat;
+        var a = series[i];
+        var item = Seriess.findOne({_id:series[i].id}); //.fetch();
+        totalTakenImages += item.taken;
+        totalPlannedImages += item.repeat;
       }
 
       return totalTakenImages/totalPlannedImages;

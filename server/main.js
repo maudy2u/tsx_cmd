@@ -1,9 +1,10 @@
 import { Meteor } from 'meteor/meteor';
 
 import { TargetSessions } from '../imports/api/targetSessions.js';
-import { TakeSeriesTemplates} from '../imports/api/takeSeriesTemplates.js';
-import {TheSkyXInfos} from '../imports/api/theSkyXInfos.js';
-import {Filters} from '../imports/api/filters.js';
+import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
+import { Seriess } from '../imports/api/seriess.js';
+import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
+import { Filters } from '../imports/api/filters.js';
 import '../imports/api/run_imageSession.js';
 import './filters.js';
 import {tsx_feeder, tsx_is_waiting} from './tsx_feeder.js';
@@ -189,9 +190,22 @@ function loadTestDataAllTakeSeriesTemplates() {
 
     var series = takeSeries.get("series");
     for (var i = 0; i < series.length; i++) {
+
       seriesMap = series[i];
+      const sid = Seriess.insert(
+        {
+          order: seriesMap.get("order"),
+          exposure: seriesMap.get("exposure"),
+          binning: seriesMap.get("binning"),
+          frame: seriesMap.get("frame"),
+          filter: seriesMap.get("filter"),
+          repeat: seriesMap.get("repeat"),
+          taken: seriesMap.get("taken"),
+        }
+      );
+
       TakeSeriesTemplates.update({_id: id}, {
-        $push: { 'series': seriesMap },
+        $push: { 'series': {id: sid} }
       });
     }
   }

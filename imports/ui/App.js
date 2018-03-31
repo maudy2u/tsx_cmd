@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import {mount} from 'react-mounter';
+// import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
 import { Input, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'

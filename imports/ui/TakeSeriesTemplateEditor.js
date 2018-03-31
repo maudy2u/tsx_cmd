@@ -1,10 +1,11 @@
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom';
-import {mount} from 'react-mounter';
+// import {mount} from 'react-mounter';
 
 import { withTracker } from 'meteor/react-meteor-data';
 
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
+import { Seriess } from '../api/seriess.js';
 
 import { Form, Grid, Item, Button, Radio, Input, Table, } from 'semantic-ui-react'
 
@@ -72,6 +73,7 @@ class TakeSeriesTemplateEditor extends Component {
 
   render() {
 
+
     return (
       <div>
         <Button  icon='save' onClick={this.saveEntry.bind(this)} />
@@ -125,17 +127,11 @@ class TakeSeriesTemplateEditor extends Component {
             <b>Tools</b>
             </Grid.Column>
           </Grid.Row>
-          {this.props.template.series.map( (definedSeries)=>{
-             return  <TakeSeriesEditor key={definedSeries.order} template={this.props.template} definedSeries={definedSeries} enableSaving={this.props.enableSaving} />
+          {// this.props.template.series.. this is a series ID
+            this.props.template.series.map( (definedSeries)=>{
+             return  <TakeSeriesEditor key={definedSeries._id} template={this.props.template} />
           })}
         </Grid>
-        {/* <Table divided>
-          <Table.Body>
-            {this.props.template.series.map( (definedSeries)=>{
-               return  <TakeSeriesEditor key={definedSeries.order} template={this.props.template} definedSeries={definedSeries} />
-            })}
-          </Table.Body>
-        </Table> */}
       </div>
     )
   }
@@ -143,7 +139,7 @@ class TakeSeriesTemplateEditor extends Component {
 export default withTracker(() => {
   //{}, { sort: { name: 1 } }
     return {
-      takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
+      // template: TakeSeriesTemplates.find({}, ).fetch(),
   };
 })(TakeSeriesTemplateEditor);
 

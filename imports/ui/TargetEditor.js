@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom';
-import {mount} from 'react-mounter';
+// import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
 import { TargetSessions } from '../api/targetSessions.js';
@@ -71,10 +71,21 @@ class TargetEditor extends Component {
 
   componentWillMount() {
     // NEED TO UPDATE THE NAME GIVEN TO THE SERIES...
-    var series = this.props.target.series;
-    var update = TakeSeriesTemplates.findOne({_id: series._id});
-    series.text = update.name;
-    this.props.target.series = series;
+    // var series = this.props.target.series;
+    // if( series != 'undefined') {
+    //   var update = TakeSeriesTemplates.findOne({_id: series._id});
+    //
+    //   var item = update.series;
+    //   for (var i = 0; i < item.length; i++) {
+    //     var a = item[i];
+    //     var image = Seriess.findOne({_id:item[i].id}); //.fetch();
+    //     totalTakenImages += image.taken;
+    //     totalPlannedImages += image.repeat;
+    //   }
+    //
+    //   series.text = update.name;
+    //   this.props.target.series = series;
+    // }
 
     // // do not modify the state directly
     this.setState({
