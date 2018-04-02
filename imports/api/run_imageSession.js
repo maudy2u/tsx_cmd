@@ -69,6 +69,19 @@ function getTargetSession(targetSessions) {
 };
 
 // *******************************
+// Substrung replacement routine for the loading of tsx.js library
+// replace the given strings with values...
+//
+// e.g. $0000 string_replace( tsx_FindTarget, '$0000', 'M1');
+// Do this for each needed parameters
+//
+// src: https://stackoverflow.com/questions/252924/javascript-how-to-replace-a-sub-string
+//
+function string_replace(haystack, find, sub) {
+    return haystack.split(find).join(sub);
+}
+
+// *******************************
 // Check target... altitude ok, time okay,
 function canTargetSessionStart(targetSession) {
   var canStart = false;

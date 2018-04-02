@@ -60,10 +60,10 @@ class TakeSeriesEditor extends Component {
 
   // Initialize states
   componentWillMount() {
-    var definedSeries = Seriess.findOne({_id:this.props.key}).fetch();
+    var definedSeries = Seriess.findOne({_id:this.props.series_id.id});
     // // do not modify the state directly
     this.setState({
-      id: this.props.key,
+      id: this.props.series_id,
       order: definedSeries.order,
       exposure: definedSeries.exposure,
       frame: { text: definedSeries.frame},
@@ -100,27 +100,35 @@ class TakeSeriesEditor extends Component {
 
   deleteEntry() {
 
+    // Get remove form Seriess
+    var removeID = this.props.series_id.id;
+    var removedSeries = Seriess.findOne({_id:removeID})
     // Recreate the series with ID removed
     // then delete the entry
     var takeSeries = this.props.template;
     var seriesDb = takeSeries.series;
-    var series = [];
+    var newSeries = [];
     for (var i = 0; i < seriesDb.length; i++) {
-      if( seriesDb._id != removeID ) {
-        var tmp = Seriess.findOne({_id:seriesDb[i].id}).fetch();
-        series.push(tmp._id);
+      if( seriesDb[i].id != removeID ) {
+        var tmp = Seriess.findOne({_id:seriesDb[i].id});
+        // redo order
+        if( tmp.order > removedSeries.order ) {
+          tmp.order = tmp.order-1;
+          Seriess.update( {_id:tmp._id},{
+            $set:{ order: tmp.order}
+          });
+        }
+        newSeries.push({id:tmp._id});
       }
     }
 
-    // Now remove form Seriess
-    var removeID = this.state.id;
-    Seriess.remove({_id:this.state.id});
+    Seriess.remove({_id:removeID});
 
     // now reset the series Map
     TakeSeriesTemplates.update(
       {_id: this.props.template._id}, {
       $set: {
-        series: series,
+        series: newSeries,
       }
     });
   }
@@ -193,6 +201,10 @@ class TakeSeriesEditor extends Component {
 }
 export default withTracker(() => {
     return {
-      // takeSeriesTemplates: TakeSeriesTemplates.find({_id:seriesTemplate._id}, { sort: { name: 1 } }).fetch(),
+      // tsxInfo: TheSkyXInfos.find().fetch(),
+      seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
+      // filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
+      takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
+      // targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
   };
 })(TakeSeriesEditor);

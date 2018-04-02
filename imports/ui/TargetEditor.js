@@ -7,7 +7,31 @@ import { TargetSessions } from '../api/targetSessions.js';
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 import TakeSeriesTemplateEditor from './TakeSeriesTemplateEditor.js';
 
-import { Form, Tab, Segment, Button, Radio, Input, Table, Dropdown, Checkbox, } from 'semantic-ui-react'
+import { Form, Label, Tab, Segment, Button, Radio, Input, Table, Dropdown, Checkbox, } from 'semantic-ui-react'
+
+// import {datetimepicker} from 'meteor/tsega:bootstrap3-datetimepicker'
+import { DateTimePicker,
+  DateTimePickerStore,  } from 'meteor/alonoslav:react-datetimepicker';
+// import {
+//   DateTimePicker,
+//   DateTimePickerStore,
+// } from 'meteor/alonoslav:react-datetimepicker-new';
+
+const STARTTIME_ID = 'startTimeId';
+const STOPTIME_ID = 'stopTimeId';
+
+const setStartTime = (date) => {
+  const instance = DateTimePickerStore.getInstanceById(STARTTIME_ID);
+  // set a new date
+  instance.date(date);
+};
+
+const setStopTime = (date) => {
+  const instance = DateTimePickerStore.getInstanceById(STOPTIME_ID);
+  // set a new date
+  instance.date(date);
+};
+
 
 class TargetEditor extends Component {
 
@@ -117,6 +141,9 @@ class TargetEditor extends Component {
 
   saveEntry() {
 
+    var d = new Date();
+    var n = d.getHours();
+    var n = d.getMinutes();
     var series = this.state.seriesTemplate;
 
     TargetSessions.update(this.props.target._id, {
@@ -162,7 +189,7 @@ class TargetEditor extends Component {
     var count =0;
     this.props.takeSeriesTemplates1.forEach((series) => {
       //      { key: 0, text: 'Static LUM', value: 0 },
-      options.push({key:series._id, text:series.name, value: { _id:series._id, text:series.name }});
+      options.push({key:series._id, text:series.name, value: { _id:series._id, text:series.name, value:series.name }});
       count++;
       console.log(`Found series._id: ${series._id}, name: ${series.name}`);
     });
@@ -170,7 +197,14 @@ class TargetEditor extends Component {
   }
 
   render() {
+    const options = {
+      inline: true,
+      format: 'HH:mm',
+      defaultDate: new Date(),
+    };
 
+    const hideStartOnInit = (calendarInstance) => calendarInstance.hide();
+    const hideStopOnInit = (calendarInstance) => calendarInstance.hide();
     // *******************************
     // this is not the render return... scroll down...
     const panes = [
@@ -179,28 +213,26 @@ class TargetEditor extends Component {
         <Segment.Group>
           <Segment>
             <h3 className="ui header">Session</h3>
-            <Form>
+            {/* <Form> */}
               <Form.Group widths='equal'>
                 <Form.Field control={Input}
                   label='Name'
-                  className='name'
                   placeholder='Name for session'
                   defaultValue={this.state.name}
                   onChange={this.nameChange}/>
                 <Form.Field control={Input}
-                  className='description'
                   label='Description'
                   placeholder='Describe the session'
                   defaultValue={this.state.description}
                   onChange={this.descriptionChange}/>
-                  <Form.Select
-                    label='Series'
-                    options={this.getTakeSeriesTemplates()}
-                    placeholder='Series to use for Imaging'
-                    text={this.state.seriesTemplate.text}
-                    onChange={this.seriesTemplateChange}/>
+                <Form.Select
+                  label='Series'
+                  options={this.getTakeSeriesTemplates()}
+                  placeholder='Series to use for Imaging'
+                  text={this.state.seriesTemplate.text}
+                  onChange={this.seriesTemplateChange}/>
               </Form.Group>
-            </Form>
+            {/* </Form> */}
           </Segment>
         </Segment.Group>
       </Tab.Pane> },
@@ -252,25 +284,40 @@ class TargetEditor extends Component {
 
       { menuItem: 'Constraints', render: () =>
       <Tab.Pane>
-            <h3 className="ui header">Constraints</h3>
-              <Form.Group widths='equal'>
-            <Form.Input
-              label='Start'
-              name='startTime'
-              placeholder='Start Time'
-              defaultValue={this.state.startTime}
-              onChange={this.handleChange}
+        <h3 className="ui header">Constraints</h3>
+          <Form.Group widths='equal'>
+            {/*
+              https://github.com/vadym-vorobel/react-datetimepicker
+              const instance = DateTimePickerStore.getInstanceById(DATEPICKER_ID);
+              e.g.
+              var startTime = DateTimePickerStore.getInstanceById(STARTTIME_ID);
+
+              THIS STILL SEEMS THE BEST SOURCE:
+              http://eonasdan.github.io/bootstrap-datetimepicker/
+
+
+              */}
+            <Label>Start Time</Label>
+            <DateTimePicker
+              id="STARTTIME_ID"
+              icon="right"
+              format="HH:mm"
+              onDateChanged={this.startTimeChange}
+              defaultDate={this.state.startTime}
+              dateTimePickerMount={hideStartOnInit}
             />
-            <Form.Input
-              label='Stop'
-              name='stopTime'
-              placeholder='Stop time'
-              defaultValue={this.state.stopTime}
-              onChange={this.handleChange}
-            />
+            <Label>Stop Time</Label>
+              <DateTimePicker
+                id="STOPTIME_ID"
+                icon="right"
+                format="HH:mm"
+                options={options}
+                onDateChanged={this.stopTimeChange}
+                defaultDate={this.state.stopTime}
+                dateTimePickerMount={hideStopOnInit}
+              />
           </Form.Group>
           <Form.Group widths='equal'>
-
             <Form.Input
               label='Priority'
               name='priority'
@@ -303,7 +350,6 @@ class TargetEditor extends Component {
             <Dropdown
                 floating
                 label='Filter'
-                name='focusFilter'
                 options={this.renderDropDownFilters()}
                 placeholder='Filter for focusing'
                 selection={this.state.focusFilter}

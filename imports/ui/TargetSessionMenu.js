@@ -4,13 +4,23 @@ import { Item, Dropdown, Menu, Confirm, Modal, Table, Segment, Button, Progress 
 
 import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
 import { TargetSessions } from '../api/targetSessions.js';
+
+import TargetEditor from './TargetEditor.js';
 import Target  from './Target.js';
 
 // ImageSession component - represents a single ImageSession
 // export default
 class TargetSessionMenu extends Component {
 
-  state = { open: false }
+  state = {
+    open: false ,
+    addModalOpen: false,
+    newTarget: {
+      _id:'',
+    },
+  }
+  handleAddModalOpen = () => this.setState({ addModalOpen: true })
+  handleAddModalClose = () => this.setState({ addModalOpen: false })
 
 // example of more than one state...
 //  show = size => () => this.setState({ size, open: true })
@@ -90,12 +100,10 @@ class TargetSessionMenu extends Component {
   }
 
   addEntry() {
-    console.log('In the DefineTemplate editEntry');
-
-    orgTarget = this.props.target;
+    console.log('In the TargetSessionMenu addEntry');
 
     // get the id for the new object
-    const id = TargetSessions.insert(
+    var newSession = TargetSessions.insert(
       {
         name: '',
         targetFindName: '',
@@ -103,8 +111,6 @@ class TargetSessionMenu extends Component {
         description: '',
         enabledActive: false,
         series: {
-          _id: '',
-          text: '',
         },
         ra: '',
         dec: '',
@@ -122,42 +128,60 @@ class TargetSessionMenu extends Component {
         priority: '',
         tempChg: '',
         minAlt: '',
-        completed: falase,
+        completed: false,
         createdAt: new Date(),
       }
-    )
+    );
+
+    this.setState({addModalOpen: true });
+    this.setState({newTarget:
+      TargetSessions.findOne({_id: newSession })
+    });
+
   }
 
   render() {
-    const { open } = this.state
+
+    const { open } = this.state;
 
       return (
         <div>
-        <Button.Group basic size='small'>
-          <Button icon='linkify' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
-          <Button icon='settings' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
-          <Button icon='find' onClick={this.chkTestData.bind(this)}/>
-          <Button icon='add' />
-          <Button icon='upload' />
-        </Button.Group>
-        <Button.Group icon>
-          <Button icon='play'  onClick={this.show.bind(this)}/>
-          <Button icon='pause'  />
-          <Button icon='stop'  />
-        </Button.Group>
+          <Button.Group basic size='small'>
+            <Button icon='linkify' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
+            <Button icon='settings' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
+            <Button icon='find' onClick={this.chkTestData.bind(this)}/>
+            <Button icon='add' onClick={this.addEntry.bind(this)}/>
+            <Button icon='upload' />
+          </Button.Group>
+          <Modal
+            open={this.state.addModalOpen}
+            onClose={this.handleAddModalClose}
+            closeIcon>
+            <Modal.Header>Add Session</Modal.Header>
+            <Modal.Content>
+              <Modal.Description>
+                <TargetEditor key={this.state.newTarget._id} target={this.state.newTarget} />
+              </Modal.Description>
+            </Modal.Content>
+          </Modal>
+          <Button.Group icon>
+            <Button icon='play'  onClick={this.show.bind(this)}/>
+            <Button icon='pause'  />
+            <Button icon='stop'  />
+          </Button.Group>
           <Item.Group divided>
-            <Confirm
-              header='Start an imaging session'
-              open={this.state.open}
-              content='Do you wish to continue and start an imaging session?'
-              onCancel={this.close}
-              onConfirm={this.testTakeImage.bind(this)}
-            />
-              {this.props.targets.map( (target)=>{
-                return <Target key={target._id} target={target} />
-              })}
-          </Item.Group>
-        </div>
+          <Confirm
+            header='Start an imaging session'
+            open={this.state.open}
+            content='Do you wish to continue and start an imaging session?'
+            onCancel={this.close}
+            onConfirm={this.testTakeImage.bind(this)}
+          />
+            {this.props.targets.map( (target)=>{
+              return <Target key={target._id} target={target} />
+            })}
+        </Item.Group>
+      </div>
     )
   }
 }

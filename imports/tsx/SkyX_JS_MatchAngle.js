@@ -3,6 +3,10 @@
 // Assumed Target already set
 export function tsxCmdMatchAngle(targetAng, knownImageScale) {
 var Out = '\
+  var targetAng= '+targetAng+';\
+  var knownImageScale ='+knownImageScale+';\
+  var exposure = 4;\
+  var saveOn = 1;\
   var Out="";\
   function calcNewPostion( imageLinkAng, rotPos, targetAng)  {\
     var diff = imageLinkAng - targetAng; // difference between the actual and target\
@@ -28,11 +32,10 @@ var Out = '\
   	var ccd = ccdsoftCamera;\
   	var accuracy = 1;\
   	ccd.Connect();\
-  	ccd.AutoSaveOn = 1;\
-  	ccd.ExposureTime=5;\
+  	ccd.AutoSaveOn = saveOn;\
+  	ccd.ExposureTime=exposure;\
   	ccd.TakeImage();\
   	ImageLink.scale = imageScale;\
-  	//ImageLink.unknownScale=1;\
   	ImageLink.pathToFITS = ccd.LastImageFileName;\
   	ImageLink.execute();\
   	var imageLinkAng=ImageLinkResults.imagePositionAngle; // the real sky position\
@@ -48,7 +51,7 @@ var Out = '\
   		rotate(targetAng, imageScale);\
   	}\
   }\
-  rotate( '+targetAng+', '+knownImageScale+' ); // using 1.17 and CCW=false for simulator\
+  rotate( targetAng, knownImageScale ); // using 1.17 and CCW=false for simulator\
   RunJavaScriptOutput.writeLine ("DONE");\
   Out = Out;\
   ';

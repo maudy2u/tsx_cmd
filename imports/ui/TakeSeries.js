@@ -156,6 +156,7 @@ class TakeSeries extends Component {
 
 export default withTracker(() => {
     return {
+      seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
       targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
   };

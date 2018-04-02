@@ -18,7 +18,10 @@ function totalImages (target) {
 
 // export default
 class TargetSession extends Component {
-  state = { modalOpen: false, checked: false }
+  state = {
+    modalOpen: false,
+    checked: false ,
+  }
   handleOpen = () => this.setState({ modalOpen: true })
   handleClose = () => this.setState({ modalOpen: false })
 

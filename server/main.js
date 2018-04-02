@@ -1,13 +1,14 @@
 import { Meteor } from 'meteor/meteor';
 
+// import { Ping } from 'frpz';
+
 import { TargetSessions } from '../imports/api/targetSessions.js';
 import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
 import { Seriess } from '../imports/api/seriess.js';
 import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
-import { Filters } from '../imports/api/filters.js';
 import '../imports/api/run_imageSession.js';
-import './filters.js';
 import {tsx_feeder, tsx_is_waiting} from './tsx_feeder.js';
+import {shelljs} from 'meteor/akasha:shelljs';
 
 // *******************************
 // Filter Series
@@ -16,6 +17,7 @@ import {tsx_feeder, tsx_is_waiting} from './tsx_feeder.js';
 // 3. Quantity
 // 4. taken - number of images obtained
 // LUM Imaging
+
 var nBExposure = 8;
 var lrgbExposure = 3;
 
@@ -26,6 +28,7 @@ takeSeries1.set("exposure", lrgbExposure );
 takeSeries1.set("binning",  1 );
 takeSeries1.set("frame", 'Light' );
 takeSeries1.set("filter", 0 );
+takeSeries1.set("filterLabel", 'LUM' );
 takeSeries1.set("repeat", 33 );
 takeSeries1.set("taken", 0);
 // R Imaging
@@ -35,6 +38,7 @@ takeSeries2.set("exposure", lrgbExposure );
 takeSeries2.set("binning",  1 );
 takeSeries2.set("frame", 'Light' );
 takeSeries2.set("filter", 1 );
+takeSeries1.set("filterLabel", 'R' );
 takeSeries2.set("repeat", 33 );
 takeSeries2.set("taken", 0);
 // G
@@ -44,6 +48,7 @@ takeSeries3.set("exposure", lrgbExposure );
 takeSeries3.set("binning",  1 );
 takeSeries3.set("frame", 'Light' );
 takeSeries3.set("filter", 2 );
+takeSeries3.set("filterLabel", 'G' );
 takeSeries3.set("repeat", 33 );
 takeSeries3.set("taken", 0);
 // B
@@ -53,6 +58,7 @@ takeSeries4.set("exposure", lrgbExposure );
 takeSeries4.set("binning",  1 );
 takeSeries4.set("frame", 'Light' );
 takeSeries4.set("filter", 3 );
+takeSeries3.set("filterLabel", 'B' );
 takeSeries4.set("repeat", 33 );
 takeSeries4.set("taken", 0);
 // Ha
@@ -62,6 +68,7 @@ takeSeries5.set("exposure", nBExposure );
 takeSeries5.set("binning",  1 );
 takeSeries5.set("frame", 'Light' );
 takeSeries5.set("filter", 4 );
+takeSeries3.set("filterLabel", 'Ha' );
 takeSeries5.set("repeat", 33 );
 takeSeries5.set("taken", 0);
 // OIII
@@ -71,6 +78,7 @@ takeSeries6.set("exposure", nBExposure );
 takeSeries6.set("binning",  1 );
 takeSeries6.set("frame", 'Light' );
 takeSeries6.set("filter", 5 );
+takeSeries3.set("filterLabel", 'OIII' );
 takeSeries6.set("repeat", 33 );
 takeSeries6.set("taken", 0);
 // SII
@@ -80,6 +88,7 @@ takeSeries7.set("exposure", nBExposure );
 takeSeries7.set("binning",  1 );
 takeSeries7.set("frame", 'Light' );
 takeSeries7.set("filter", 6 );
+takeSeries3.set("filterLabel", 'SII' );
 takeSeries7.set("repeat", 33 );
 takeSeries7.set("taken", 0);
 
@@ -199,6 +208,7 @@ function loadTestDataAllTakeSeriesTemplates() {
           binning: seriesMap.get("binning"),
           frame: seriesMap.get("frame"),
           filter: seriesMap.get("filter"),
+          filterLabel: seriesMap.get("filterLabel"),
           repeat: seriesMap.get("repeat"),
           taken: seriesMap.get("taken"),
         }
@@ -211,9 +221,34 @@ function loadTestDataAllTakeSeriesTemplates() {
   }
 }
 
+function tsxServerIsOnline() {
+  var success = 'Error|';
+  if( ip == '' || port == '' ) {
+    return success;
+  }
+  var cmd = tsxHeader + tsxFooter;
+  tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+    if( tsx_return == 'undefined|No error. Error = 0.') {
+      success = 'Success|';
+    }
+  }));
+  return success;
+}
 
 Meteor.startup(() => {
   // code to run on server at startup
+
+  var dbIp = TheSkyXInfos.findOne({name:'ip'});
+  var dbPort = TheSkyXInfos.findOne({name:'port'});
+
+  if( (typeof dbIp != 'undefined') && (typeof dbPort != 'undefined') ) {
+    ip = dbIp.text;
+    console.log('TSX server set to IP: ' +ip );
+    port = dbPort.text;
+    console.log('TSX server set to port: ' + port );
+  };
+
+
 
   // imports/tsx/SkyX_JS_GetMntCoords.js
   // This does load the script
@@ -259,8 +294,8 @@ Meteor.startup(() => {
 var tsxHeader =  '/* Java Script *//* Socket Start Packet */';
 var tsxFooter = '/* Socket End Packet */';
 var forceAbort = false;
-var port = 3040;
-var ip = 'localhost';
+var port;// = 3040;
+var ip;// = 'localhost';
 
 // var tsxHeader = '/* Java Script *//* Socket Start Packet */';
 // var tsxFooter = '/* Socket End Packet */';
@@ -268,7 +303,44 @@ var ip = 'localhost';
 
  Meteor.methods({
 
+   serverSideText() {
+     console.log(
+       '\
+       *******************************/n\
+       *******************************/n\
+       *******************************/n\
+       '
+     );
+
+     var filename = '/home/stellarmate/tsx_cmd/api/tsx/SkyX_JS_CLS.js';
+    filename = '../api/tsx/SkyX_JS_CLS.js';
+    filename = '~/tsx_cmd/api/tsx/SkyX_JS_CLS.js';
+    filename = '/Users/stephen/Documents/code/tsx_cmd/imports/tsx/SkyX_JS_CLS.js';
+
+
+     var shell = require('shelljs');
+     console.log('Loading file: ' + filename);
+     var str = shell.cat(filename);
+     console.log(str);
+     console.log(filename);
+
+    console.log(
+      '\
+      *******************************/n\
+      *******************************/n\
+      *******************************/n\
+      '
+    );
+   },
+
    connectTsx() {
+
+     var isOnline = tsxServerIsOnline();
+     console.log('tsxServerIsOnline: ' + isOnline);
+     if( isOnline ) {
+       return "Error|";
+     }
+
      var camera = { model: '', manufacturer: '' };
      var guider = { model: '', manufacturer: '' };
      var mount = { model: '', manufacturer: '' };

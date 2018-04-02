@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import { Session } from 'meteor/session'
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { Input, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
+import { Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
 
 // Import the API Model
 import { SessionTemplates } from '../api/sessionTemplates.js';
@@ -12,9 +13,9 @@ import { Seriess } from '../api/seriess.js';
 import { Filters } from '../api/filters.js';
 import { TargetSessions } from '../api/targetSessions.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
-// PROBLEM: import { TheSkyXInfos } from '../api/theSkyXInfo.js';
 
 // Import the UI
+import ModalInput from './ModalInput.js';
 import TargetSessionMenu from './TargetSessionMenu.js';
 import SessionTemplate from './SessionTemplate.js';
 import Filter from './Filter.js';
@@ -32,27 +33,73 @@ class App extends Component {
 
   state = {
     activeItem: 'Targets',
-    ip: '',
-    port: '',
-  }
-  handleMenuItemClick = (e, { name }) => this.setState({ activeItem: name })
+    ip: 'Not connected',
+    port: 'Not connected',
+    saveServerFailed: false,
+    modalEnterIp: false,
+    modalEnterPort: false,
+  };
+  handleMenuItemClick = (e, { name }) => this.setState({ activeItem: name });
+  saveServerFailedOpen = () => this.setState({ saveServerFailed: true });
+  saveServerFailedClose = () => this.setState({ saveServerFailed: false });
+
+  // Set TSX Server
   ipChange = (e, { value }) => this.setState({ ip: value.trim() });
   portChange = (e, { value }) => this.setState({ port: value.trim() });
+  modalEnterIpOpen = () => this.setState({ modalEnterIp: true });
+  modalEnterIpClose = () => this.setState({ modalEnterIp: false });
+  modalEnterPortOpen = () => this.setState({ modalEnterPort: true });
+  modalEnterPortClose = () => this.setState({ modalEnterPort: false });
 
-  onPortChange() {
-//    this.setState({port: this.state.port});
-  }
+  // onChangeChecked() {
+  //   // this.setState({checked: !this.props.target.enabledActive});
+  //   this!this.props.target.enabledActive;
+  // }
+
+
+
+  //    this.setState({port: this.state.port});
+  // TargetSessions.update({_id: this.props.target._id}, {
+  //   $set: { enabledActive: !this.props.target.enabledActive },
+  // })
+  saveTSXServerConnection() {
+
+    if( this.state.port == "" || this.state.ip == ""  ) {
+      this.saveServerFailedOpen();
+    }
+    else {
+      var portId = TheSkyXInfos.findOne({name: 'port'});
+      if ( typeof portId == 'undefined' ) {
+        TheSkyXInfos.insert({
+          name: 'port',
+          text: this.state.port
+        });
+      }
+      else {
+        TheSkyXInfos.update( {_id: portId._id}, {
+          $set: { text: this.state.port}
+        });
+      }
+      var pID = TheSkyXInfos.findOne({name: 'ip'});
+      if ( typeof pID == 'undefined' ) {
+        TheSkyXInfos.insert({
+          name: 'ip',
+          text: this.state.ip
+        });
+      }
+      else {
+        TheSkyXInfos.update( {_id: pID._id }, {
+          $set: { text: this.state.ip}
+        });
+      }
+    };
+  };
 
   componentWillMount() {
     // do not modify the state directly
-    //TheSkyXInfos.findOne({name:'camera'})
-    var connection = TheSkyXInfos.findOne({name:'TheSkyX_connection'});
-    console.log('End initialization');
-    // this.setState({
-    //   ip: connection.address,
-    //   port: connection.port,
-    // });
-  }
+    // console.log('End initialization');
+
+  };
 
   // *******************************
   //
@@ -62,7 +109,7 @@ class App extends Component {
       { _id: 2, description: 'This is task 2' },
       { _id: 3, description: 'This is task 3' },
     ];
-  }
+  };
 
   // *******************************
   //
@@ -108,21 +155,60 @@ class App extends Component {
   //
   renderTSXConnetion() {
 
+    // var pID = TheSkyXInfos.findOne( { name: 'ip'} );
+    // if( typeof pID == 'undefined') {
+    //   TheSkyXInfos.insert(
+    //     name: 'ip',
+    //     text: ""
+    //   );
+    // }
+    // var portID = TheSkyXInfos.findOne( { name: 'port'} );
+    // if( typeof portID == 'undefined') {
+    //   TheSkyXInfos.insert(
+    //     name: 'port',
+    //     text: ""
+    //   );
+    // }
+
     return (
-      <Form>
-        <Form.Group widths='equal' onSubmit={this.connectTSX.bind(this)}>
-          <Form.Field control={Input}
-            label='IP Address'
-            placeholder="Enter TSX address"
-            defaultValue={this.state.ip}
-            onChange={this.ipChange}/>
-          <Form.Field control={Input}
-            label='Port'
-            placeholder="Enter TSX port"
-            defaultValue={this.state.port}
-            onChange={this.portChange}/>
-        </Form.Group>
-      </Form>
+      <Segment>
+        <Button icon='save' onClick={this.saveTSXServerConnection.bind(this)}/>
+        <Form>
+          <Form.Group widths='equal' onSubmit={this.connectTSX.bind(this)}>
+            <Form.Input
+              label='IP Address'
+              className='textIP'
+              placeholder="Enter TSX address"
+              defaultValue={this.state.ip}
+              onChange={this.ipChange}/>
+            <Form.Input
+              label='Port'
+              placeholder="Enter TSX port"
+              defaultValue={this.state.port}
+              onChange={this.portChange}/>
+          </Form.Group>
+        </Form>
+
+           {/* *******************************
+             Used to handle the FAILED deleting of a series
+             */}
+           <Modal
+             open={this.state.saveServerFailed}
+             onClose={this.saveServerFailedClose.bind(this)}
+             basic
+             size='small'
+             closeIcon>
+             <Modal.Header>Save Failed</Modal.Header>
+             <Modal.Content>
+               <h3>Both IP and Port need to have a value.</h3>
+             </Modal.Content>
+             <Modal.Actions>
+               <Button color='red' onClick={this.saveServerFailedClose.bind(this)} inverted>
+                 <Icon name='stop' /> Got it
+               </Button>
+             </Modal.Actions>
+           </Modal>
+      </Segment>
     );
   }
 
@@ -130,7 +216,7 @@ class App extends Component {
   //
   connectTSX(event) {
 
-    TheSkyXInfos.insert({
+    TheSkyXInfos.upsert({
       name: 'TheSkyX_connection',
       connection: {
         address: tsx_ip, // current time
@@ -197,7 +283,7 @@ class App extends Component {
 
   // *******************************
   //
-  testMeteorMethod() {
+  tsxUpdateFilterNames() {
 
     // on the client
     Meteor.call("tsx_updateFilterNames", function (error) {
@@ -208,7 +294,6 @@ class App extends Component {
       }
     });
   }
-
 
   // *******************************
   //
@@ -306,45 +391,88 @@ class App extends Component {
   //
   renderSettings() {
 
-    var info = this.props.tsxInfo;
+
+    var tsxInfo = this.props.tsxInfo;
+//    var tsxInfo = TheSkyXInfos.find().fetch();
+    ip = tsxInfo.ip;
+    port = tsxInfo.port;
+
     var mount = TheSkyXInfos.findOne({name:'mount'});
-    var man = mount.mount.manufacturer;
+    var mountInfo;
+    if( (typeof mount.mount.manufacturer != 'undefined') && (typeof mount.mount.model != 'undefined') ) {
+      mountInfo = mount.mount.manufacturer + '|' + mount.mount.model;
+    }
+    else {
+      mountInfo = 'Not connected';
+    }
+
     var camera = TheSkyXInfos.findOne({name:'camera'});
+    var cameraInfo;
+    if( (typeof camera.camera.manufacturer != 'undefined') && (typeof camera.camera.model != 'undefined') ) {
+      cameraInfo = camera.camera.manufacturer + '|' + camera.camera.model;
+    }
+    else {
+      cameraInfo = 'Not connected';
+    }
+
     var guider = TheSkyXInfos.findOne({name:'guider'});
+    var guiderInfo;
+    if( (typeof guider.guider.manufacturer != 'undefined') && (typeof guider.guider.model != 'undefined') ) {
+      guiderInfo = guider.guider.manufacturer + '|' + guider.guider.model;
+    }
+    else {
+      guiderInfo = 'Not connected';
+    }
+
     var rotator = TheSkyXInfos.findOne({name:'rotator'});
+    var rotatorInfo;
+    if( (typeof rotator.rotator.manufacturer != 'undefined') && (typeof rotator.rotator.model != 'undefined') ) {
+      rotatorInfo = rotator.rotator.manufacturer + '|' + rotator.rotator.model;
+    }
+    else {
+      rotatorInfo = 'Not connected';
+    }
+
     var efw = TheSkyXInfos.findOne({name:'efw'});
+    var efwInfo;
+    if( (typeof efw.efw.manufacturer != 'undefined') && (typeof efw.efw.model != 'undefined') ) {
+      efwInfo = efw.efw.manufacturer + '|' + efw.efw.model;
+    }
+    else {
+      efwInfo = 'Not connected';
+    }
+
     var focuser = TheSkyXInfos.findOne({name:'focuser'});
+    var focuserInfo;
+    if( (typeof focuser.focuser.manufacturer != 'undefined') && (typeof focuser.focuser.model != 'undefined') ) {
+      focuserInfo = focuser.focuser.manufacturer + '|' + focuser.focuser.model;
+    }
+    else {
+      focuserInfo = 'Not connected';
+    }
+
     return (
       <div>
-        <button className="circular ui icon button" onClick={this.testMeteorMethod.bind(this)}>
-          <i class="icon settings"></i>
-        </button>
+        <Button  icon='settings' onClick={this.tsxUpdateFilterNames.bind(this)} />
         {this.renderTSXConnetion()}
-        <form className="new-filter" onSubmit={this.addNewFilter.bind(this)} >
-          <input
-            type="text"
-            ref="textInput"
-            placeholder="Type to add new filter"
-          />
-        </form>
         <Segment.Group>
           <Segment><Label>Mount<Label.Detail>
-            {mount.mount.manufacturer}|{mount.mount.model}
+            {mountInfo}
           </Label.Detail></Label></Segment>
           <Segment><Label>Camera<Label.Detail>
-            {camera.camera.manufacturer}|{camera.camera.model}
+            {cameraInfo}
           </Label.Detail></Label></Segment>
           <Segment><Label>Autoguider<Label.Detail>
-            {guider.guider.manufacturer}|{guider.guider.model}
+            {guiderInfo}
           </Label.Detail></Label></Segment>
           <Segment><Label>Filter Wheel<Label.Detail>
-            {efw.efw.manufacturer}|{efw.efw.model}
+            {efwInfo}
           </Label.Detail></Label></Segment>
           <Segment><Label>Focuser<Label.Detail>
-            {focuser.focuser.manufacturer}|{focuser.focuser.model}
+            {focuserInfo}
           </Label.Detail></Label></Segment>
           <Segment><Label>Rotator<Label.Detail>
-            {rotator.rotator.manufacturer}|{rotator.rotator.model}
+            {rotatorInfo}
           </Label.Detail></Label></Segment>
         </Segment.Group>
       </div>
@@ -414,7 +542,29 @@ class App extends Component {
     return;
   }
 
+  saveTSXServerIp() {
+
+  }
+
   connectToTSX() {
+
+    // these are all working methods
+    var getIp = TheSkyXInfos.find().fetch();
+    var pid = TheSkyXInfos.findOne({name: 'ip'});
+    var prt = TheSkyXInfos.findOne({name: 'port'});
+    var i1 = TheSkyXInfos.findOne().ip().text;
+    var i2 = this.props.tsxIP.text;
+
+    // var portId = TheSkyXInfos.findOne({name: 'port'});
+    if( typeof pid != 'undefined' ) { //}&& (typeof portId != 'undefined') ) {
+      ip = pid.text;
+      this.setState({ ip: pid.text.trim() });
+    }
+    // var portId = TheSkyXInfos.findOne({name: 'port'});
+    if( typeof prt != 'undefined' ) { //}&& (typeof portId != 'undefined') ) {
+      ip = prt.text;
+      this.setState({ port: prt.text.trim() });
+    }
 
     // on the client
     Meteor.call("connectTsx", function (error) {
@@ -424,32 +574,112 @@ class App extends Component {
         Session.set("errorMessage", "Please log in to post a comment.");
       }
     });
+
+  }
+
+  getTsxIp() {
+    var found = this.props.tsxIP.name;
+    if( typeof found == 'undefined') {
+      found = 'Click to enter IP'
+    }
+    return (
+        <div>
+          {found}
+        </div>
+    )
+  }
+
+  serverTest() {
+
+    // on the client
+    Meteor.call("serverSideText", function (error) {
+      // identify the error
+      if (error && error.error === "logged-out") {
+        // show a nice error message
+        Session.set("errorMessage", "Please log in to post a comment.");
+      }
+    });
+
   }
 
   render() {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
     */
-    //        {this.renderMenuSegments()}
-    // var totalPlannedImages = 0;
-    // var totalTakenImages = 0;
-    // var target = this.props.targetSessions[0];
-    // var take = target.takeSeries;
-    // var series = take.series[0];
-    // for (var i = 0; i < target.length; i++) {
-    //   totalTakenImages += target[i].taken;
-    //   // totalPlannedImages +=target.[i].repeat;
-    // }
 
-
-    const { activeItem } = this.state
+    const { activeItem } = this.state;
 
     return (
       <div className="container">
         <header>
           <h1>Image Sessions</h1>
           <div>
-            <Button icon='linkify' onClick={this.connectToTSX.bind(this)}/>
-
+            <Segment>
+              <Button icon='refresh' onClick={this.connectToTSX.bind(this)}/>
+              <Button icon='exchange' onClick={this.serverTest.bind(this)}/>
+              <Label>TSX ip:
+                <Label.Detail onClick={this.modalEnterIpOpen.bind(this)}>
+                  {this.state.ip}
+                </Label.Detail>
+              </Label>
+              <Modal
+                open={this.state.modalEnterIp}
+                onClose={this.modalEnterIpClose.bind(this)}
+                basic
+                size='small'
+                closeIcon>
+                <Modal.Header>TSX Server IP</Modal.Header>
+                <Modal.Content>
+                  <h3>Enter the IP to use to connect to the TSX Server.</h3>
+                </Modal.Content>
+                <Modal.Description>
+                  <Input
+                    label='IP:'
+                    defaultValue=
+                    {this.state.ip}
+                    onChange={this.ipChange}/>
+                </Modal.Description>
+                <Modal.Actions>
+                  <Button onClick={this.modalEnterIpClose.bind(this)} inverted>
+                    <Icon name='cancel' />Cancel
+                  </Button>
+                  <Button onClick={this.modalEnterIpClose.bind(this)} inverted>
+                    <Icon name='save' />Save
+                  </Button>
+                </Modal.Actions>
+              </Modal>
+              <Label>
+                TSX port:
+                <Label.Detail onClick={this.modalEnterPortOpen.bind(this)}>
+                  {this.state.port}
+                </Label.Detail>
+              </Label>
+              <Modal
+                open={this.state.modalEnterPort}
+                onClose={this.modalEnterPortClose.bind(this)}
+                basic
+                size='small'
+                closeIcon>
+                <Modal.Header>TSX Server TCP Port</Modal.Header>
+                <Modal.Content>
+                  <h3>Enter the TCP Port to use to connect to the TSX Server.</h3>
+                </Modal.Content>
+                <Modal.Description>
+                  <Input
+                    label='Port:'
+                    defaultValue=
+                    {this.state.port}
+                    onChange={this.portChange}/>
+                </Modal.Description>
+                <Modal.Actions>
+                  <Button onClick={this.modalEnterPortClose.bind(this)} inverted>
+                    <Icon name='cancel' />Cancel
+                  </Button>
+                  <Button onClick={this.modalEnterPortClose.bind(this)} inverted>
+                    <Icon name='save' />Save
+                  </Button>
+                </Modal.Actions>
+              </Modal>
+            </Segment>
 {/*
             <button className="circular ui icon button" onClick={this.loadTestDataMeteorMethod.bind(this)}>
               <i class="icon settings"></i>
@@ -657,8 +887,11 @@ class App extends Component {
   // THIS IS THE DEFAULT EXPORT AND IS WHERE THE LOADING OF THE COMPONENT STARTS
   // USE THIS POINT TO GRAB THE FILTERS
   export default withTracker(() => {
+
     return {
-      tsxInfo: TheSkyXInfos.find().fetch(),
+      tsxInfo: TheSkyXInfos.find({}).fetch(),
+      tsxIP: TheSkyXInfos.find({name: 'ip' }).fetch(),
+      tsxPort: TheSkyXInfos.findOne({name: 'port' }),
       seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
       filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),

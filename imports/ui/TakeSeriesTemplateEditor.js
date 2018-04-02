@@ -129,7 +129,7 @@ class TakeSeriesTemplateEditor extends Component {
           </Grid.Row>
           {// this.props.template.series.. this is a series ID
             this.props.template.series.map( (definedSeries)=>{
-             return  <TakeSeriesEditor key={definedSeries._id} template={this.props.template} />
+             return  <TakeSeriesEditor key={definedSeries.id} template={this.props.template} series_id={definedSeries} />
           })}
         </Grid>
       </div>
@@ -139,7 +139,8 @@ class TakeSeriesTemplateEditor extends Component {
 export default withTracker(() => {
   //{}, { sort: { name: 1 } }
     return {
-      // template: TakeSeriesTemplates.find({}, ).fetch(),
+      seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
+      template: TakeSeriesTemplates.find({} ).fetch(),
   };
 })(TakeSeriesTemplateEditor);
 
