@@ -196,6 +196,53 @@ class TargetEditor extends Component {
     return options;
   }
 
+  getTargetRaDec() {
+    console.log('tsx_TargetRaDec');
+    Meteor.call("tsx_TargetRaDec", this.props.target, function (error, result) {
+      // identify the error
+      console.log('Search for target: ' + this.props.target.targetFindName);
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+      for (var i = 0; i < tsx_return.split('|').length; i++) {
+        var txt = tsx_return.split('|')[0].trim();
+        console.log('Found: ' + txt);
+      }
+      if (error && error.error === "logged-out") {
+        // show a nice error message
+        Session.set("errorMessage", "Please log in to post a comment.");
+      }
+      else {
+        // if success then TheSkyX has made this point the target...
+        // now get the coordinates
+        cmdSuccess = true;
+        targetSession.ra = tsx_return.split('|')[1].trim();
+        targetSession.dec = tsx_return.split('|')[2].trim();
+        targetSession.description = tsx_return.split('|')[3].trim();
+
+      }
+    });
+  }
+
+  findTarget() {
+    // on the client
+    console.log('tsx_TargetFind');
+    var found = false;
+    Meteor.call("tsx_TargetFind", this.props.target, function (error, result) {
+      // identify the error
+      var success = result.split('|')[0].trim();
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+      if (success != "Success") {
+        // show a nice error message
+        Session.set("errorMessage", "Please confirm TSX is active.\nerror.error");
+      }
+      else {
+        this.getTargetRaDec();
+      }
+    });
+
+  }
+
   render() {
     const options = {
       inline: true,
@@ -208,6 +255,9 @@ class TargetEditor extends Component {
     // *******************************
     // this is not the render return... scroll down...
     const panes = [
+      // *******************************
+      // name for the Target session
+      // *******************************
       { menuItem: 'Session', render: () =>
       <Tab.Pane>
         <Segment.Group>
@@ -236,48 +286,51 @@ class TargetEditor extends Component {
           </Segment>
         </Segment.Group>
       </Tab.Pane> },
-
-
+      // *******************************
+      // Details for the Target session
+      // *******************************
       { menuItem: 'Details', render: () =>
       <Tab.Pane>
         <Segment>
-            <h3 className="ui header">Details</h3>
-            <Form.Group widths='equal'>
-              <Form.Input
-                label='Ra'
-                name='ra'
-                placeholder='RA'
-                defaultValue={this.state.ra}
-                onChange={this.handleChange}/>
-              <Form.Input
-                label='Dec'
-                name='dec'
-                placeholder='DEC'
-                defaultValue={this.state.dec}
-                onChange={this.handleChange}/>
-              <Form.Input
-                label='Angle'
-                name='angle'
-                placeholder='Angle'
-                defaultValue={this.state.angle}
-                onChange={this.handleChange}/>
-            </Form.Group>
+          <h3 className="ui header">Details</h3>
           <Form.Group widths='equal'>
-          <Form.Input
-            label='Target Name'
-            name='targetFindName'
-            placeholder='Name to search for'
-            defaultValue={this.state.targetFindName}
-            action={{ icon: 'find', content: 'Find' }}
-            onChange={this.handleChange}/>
-          <Form.Input
-            label='Image to load'
-            name='targetImage'
-            action={{ icon: 'find', content: 'Find' }}
-            placeholder='Filename to load on server'
-            defaultValue={this.state.targetImage}
-            onChange={this.handleChange}
-          />
+            <Form.Input
+              label='Ra'
+              name='ra'
+              placeholder='RA'
+              defaultValue={this.state.ra}
+              onChange={this.handleChange}/>
+            <Form.Input
+              label='Dec'
+              name='dec'
+              placeholder='DEC'
+              defaultValue={this.state.dec}
+              onChange={this.handleChange}/>
+            <Form.Input
+              label='Angle'
+              name='angle'
+              placeholder='Angle'
+              defaultValue={this.state.angle}
+              onChange={this.handleChange}/>
+          </Form.Group>
+        </Segment>
+        <Segment>
+          <Form.Group widths='equal'>
+            <Form.Input
+              label='Target Name'
+              name='targetFindName'
+              placeholder='Name to search for'
+              defaultValue={this.state.targetFindName}
+              onChange={this.handleChange}/>
+            <Button onClick={this.findTarget.bind(this)}>Find</Button>
+            <Form.Input
+              label='Image to load'
+              name='targetImage'
+              placeholder='Filename to load on server'
+              defaultValue={this.state.targetImage}
+              onChange={this.handleChange}
+            />
+            <Button onClick={this.findTarget.bind(this)}>Solve</Button>
         </Form.Group>
       </Segment>
     </Tab.Pane> },
@@ -337,17 +390,16 @@ class TargetEditor extends Component {
 
       { menuItem: 'Focus', render: () =>
       <Tab.Pane>
-          <Segment>
+        <Form.Group>
             <h3 className="ui header">Focus</h3>
-              <Input
+            <Form.Input
                 label='Focusing Temp Delta'
-                type='text'
                 name='tempChg'
                 placeholder='change diff.'
                 defaultValue={this.state.tempChg}
                 onChange={this.handleChange}
               />
-            <Dropdown
+              <Form.Select
                 floating
                 label='Filter'
                 options={this.renderDropDownFilters()}
@@ -355,21 +407,21 @@ class TargetEditor extends Component {
                 selection={this.state.focusFilter}
                 onChange={this.handleChange}
               />
-          </Segment>
+        </Form.Group>
       </Tab.Pane> },
 
       { menuItem: 'Imaging', render: () =>
       <Tab.Pane>
-        <Segment>
+      <Form.Group>
           <h3 className="ui header">Imaging Series</h3>
-          <Input
+          <Form.Input
             label='Cooling temp'
             name='coolingTemp'
             placeholder='Imaging temperature'
             defaultValue={this.state.coolingTemp}
             onChange={this.coolingTempChange}
           />
-        </Segment>
+        </Form.Group>
       </Tab.Pane> },
     ]
 // *******************************

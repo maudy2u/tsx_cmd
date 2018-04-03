@@ -11,15 +11,17 @@
 //
 // Define variables and set known initial values
 //
-
+var targetName = "$000";
 var CoordsHMSNow = "";
 var CoordsHMS2k = "";
 
-sky6RASCOMTele.GetRaDec();			
-	
-sky6Utils.ConvertEquatorialToString(sky6RASCOMTele.dRa, sky6RASCOMTele.dDec, 5);
+sky6StarChart.Find(targetName);
+var dec2000 = sky6StarChart.Declination;
+var ra2000 = sky6StarChart.RightAscension;
 
-CoordsHMSNow = sky6Utils.strOut;    
+sky6Utils.PrecessNowTo2000(ra2000, dec2000, 5);
+
+//var CoordsHMS2000 = sky6Utils.strOut;
 
 sky6Utils.PrecessNowTo2000( sky6RASCOMTele.dRa, sky6RASCOMTele.dDec);
 
@@ -28,10 +30,7 @@ sky6Utils.ConvertEquatorialToString(sky6Utils.dOut0, sky6Utils.dOut1, 5);
 CoordsHMS2k = sky6Utils.strOut;
 
 
-Out = "^          Now - " + CoordsHMSNow + "\n" + "          j2k - " + CoordsHMS2k;			// Form the output string
+Out = 'Success|' + ra2000 + '|' + dec2000+ '|' + CoordsHMS2000 + '|';			// Form the output string
+//Out = ra2000 + '|' + dec2000+ '|';// + CoordsHMS2000 + '|';			// Form the output string
 
 /* Socket End Packet */
-
-
-
-

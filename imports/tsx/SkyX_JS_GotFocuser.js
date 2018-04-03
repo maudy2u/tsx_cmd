@@ -2,12 +2,13 @@
 /* Socket Start Packet */
 
 //	
-//	Get the focuser temperature	
+//	Is there a focuser attached to the system?
 //
 //	Ken Sturrock 
 //	January 13, 2018
 //
 
-ccdsoftCamera.focTemperature.toFixed(1);
+SelectedHardware.focuserModel
 
 /* Socket End Packet */
+

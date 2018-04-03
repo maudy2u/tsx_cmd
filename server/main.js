@@ -7,8 +7,10 @@ import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
 import { Seriess } from '../imports/api/seriess.js';
 import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
 import '../imports/api/run_imageSession.js';
+import {string_replace} from '../imports/api/run_imageSession.js';
 import {tsx_feeder, tsx_is_waiting} from './tsx_feeder.js';
 import {shelljs} from 'meteor/akasha:shelljs';
+// import {xregex} from 'meteor/smoiz:xregexp';
 
 // *******************************
 // Filter Series
@@ -237,7 +239,9 @@ function tsxServerIsOnline() {
 
 Meteor.startup(() => {
   // code to run on server at startup
-
+  console.log(' ******************');
+  console.log(' RESTARTED');
+  console.log(' ******************');
   var dbIp = TheSkyXInfos.findOne({name:'ip'});
   var dbPort = TheSkyXInfos.findOne({name:'port'});
 
@@ -300,16 +304,21 @@ var ip;// = 'localhost';
 // var tsxHeader = '/* Java Script *//* Socket Start Packet */';
 // var tsxFooter = '/* Socket End Packet */';
 
+// String.prototype.replaceAll = function(search, replacement) {
+//     var target = this;
+//     return target.split(search).join(replacement);
+// };
+
+// String.prototype.replaceAll = function(search, replacement) {
+//     var target = this;
+//     return target.replace(new RegExp(search, 'g'), replacement);
+// };
 
  Meteor.methods({
 
    serverSideText() {
      console.log(
-       '\
-       *******************************/n\
-       *******************************/n\
-       *******************************/n\
-       '
+       '*******************************'
      );
 
      var filename = '/home/stellarmate/tsx_cmd/api/tsx/SkyX_JS_CLS.js';
@@ -321,15 +330,20 @@ var ip;// = 'localhost';
      var shell = require('shelljs');
      console.log('Loading file: ' + filename);
      var str = shell.cat(filename);
-     console.log(str);
-     console.log(filename);
+     // console.log(str);
+     // console.log(filename);
 
-    console.log(
-      '\
-      *******************************/n\
-      *******************************/n\
-      *******************************/n\
-      '
+     var testStr = new String("/* this is a test*/ var b=$0000;batman;$0001");
+     console.log('Test var: ' + testStr);
+     // testStr = string_replace(testStr, '$0000', '5');
+     // testStr =  string_replace(testStr, '$0000', 'hi');
+     testStr = testStr.replace("$0000", "var=test;");
+     testStr = testStr.replace("$0001", '99999999999999');
+     console.log('Result:   ' + testStr);
+
+     //console.log(str);
+     console.log(
+      '*******************************'
     );
    },
 

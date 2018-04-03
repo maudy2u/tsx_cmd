@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Session } from 'meteor/session'
+
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
@@ -23,10 +24,8 @@ import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 import TheSkyXInfo from './TheSkyXInfo.js';
 
-
 // Examples
 import Task from './Task.js';
-import {tsxCmdTakeImage} from '../tsx/SkyX_JS_TakeImage.js'
 
 // App component - represents the whole app
 class App extends Component {
@@ -38,6 +37,7 @@ class App extends Component {
     saveServerFailed: false,
     modalEnterIp: false,
     modalEnterPort: false,
+    defaultMinAlt: 30,
   };
   handleMenuItemClick = (e, { name }) => this.setState({ activeItem: name });
   saveServerFailedOpen = () => this.setState({ saveServerFailed: true });
@@ -455,6 +455,16 @@ class App extends Component {
       <div>
         <Button  icon='settings' onClick={this.tsxUpdateFilterNames.bind(this)} />
         {this.renderTSXConnetion()}
+        <Form.Group>
+            <h3 className="ui header">Defaults</h3>
+            <Form.Input
+                label='Default Minimum Altitude '
+                name='minAlt'
+                placeholder='30'
+                defaultValue={this.state.defaultMinAlt}
+                onChange={this.handleChange}
+              />
+        </Form.Group>
         <Segment.Group>
           <Segment><Label>Mount<Label.Detail>
             {mountInfo}

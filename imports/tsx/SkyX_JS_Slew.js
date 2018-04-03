@@ -26,21 +26,19 @@
 //
 
 // Assumed Target already set
-export function tsxCmdSlewRaDec(ra,dec) {
-  Out = '\
-  var slewStatus = "Success";\
+  var ra='$000';
+  var dec='$001';
+  var Out;
+  var slewStatus = "Success";
 	//Do the closed loop slew synchronously\
-  try{\
-    sky6RASCOMTele.SlewToRaDec('+ra+', '+dec+', "Slew"); 	// Go to the RA & DEC;\
-  } catch( nErr ) {\
-    slewStatus = "Failed";\
-  }\
-  if( slewStatus == "Success") {\
-    out = "Success |";\
-  } else {\
-  	out = "Slew Failed"\
-  }\
-  }\
-  ';
-  return Out;
-}
+  try{
+    sky6RASCOMTele.SlewToRaDec('+ra+', '+dec+', "Slew"); 	// Go to the RA & DEC;
+  } catch( nErr ) {
+    slewStatus = "Failed";
+  }
+  if( slewStatus == "Success") {
+    Out = "Success |";
+  } else {
+  	Out = "Slew Failed|";
+  }
+  Out;

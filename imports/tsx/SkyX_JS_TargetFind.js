@@ -10,7 +10,6 @@
 
 var Target	= "$000";	// tsxfeeder replaces $000 with a command line parameter
 var FindStatus	= "Success";	// Preload value for success.
-var altLimit	= $001;	// Really a constant for the altitude limit
 var altitude 	= 0;
 var azimuth 	= 0;
 var out 	= "";
@@ -35,7 +34,7 @@ try
 if ( FindStatus == "fail" )
 {
 
-	out = "cannot be found.";
+	out = "Cannot be found.|";
 
 } else {
 
@@ -47,30 +46,7 @@ if ( FindStatus == "fail" )
 	sky6ObjectInformation.Property(58);
     	azimuth = sky6ObjectInformation.ObjInfoPropOut;
 
-	out = "Success";
-
-	if (azimuth < 179)
-	//
-	//
-	//
-	{
-			if ((altitude < altLimit) && ( ! ccdsoftCamera.ImageUseDigitizedSkySurvey == "1" ))
-			{
-				out = "is below " + altLimit + " degrees. Currently: " + altitude + " degrees." ;
-			}
-
-			if (altitude < 0)
-			{
-		 		out = "is below the horizon: " + altitude + " degrees.";
-			}
-
-	} else {
-
-			if (altitude < altLimit)
-			{
-				out = "has sunk too low." ;
-			}
-	}
+	out = "Success|";
 }
 
 /* Socket End Packet */

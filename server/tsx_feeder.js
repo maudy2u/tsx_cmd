@@ -41,6 +41,8 @@ export function tsx_feeder( ip, port, cmd, callback ) {
      });
 
      tsx.on('error', function(err) {
+          console.log(" ******************************* ");
+          console.log(cmd);
          console.error('Connection error: ' + err);
          console.error(new Error().stack);
      });
@@ -59,11 +61,9 @@ export function tsx_feeder( ip, port, cmd, callback ) {
 
      tsx_waiting = true;
 
-     cmd = tsxHeader+cmd+tsxFooter;
-
      tsx.write(cmd, (err) => {
-       console.log('Sending tsxCmd: ' + cmd);
-       console.log('Sending err: ' + err);
+       // console.log('Sending tsxCmd: ' + cmd);
+       // console.log('Sending err: ' + err);
      });
 
 
