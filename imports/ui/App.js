@@ -37,8 +37,14 @@ class App extends Component {
     saveServerFailed: false,
     modalEnterIp: false,
     modalEnterPort: false,
+
     defaultMinAlt: 30,
-  };
+    defaultCoolTemp: -20,
+    defaultFocusTempDiff: 0.7,
+    defaultMeridianFlip: true,
+    defaultStartTime: 21,
+    defaultStopTime: 6,
+};
   handleMenuItemClick = (e, { name }) => this.setState({ activeItem: name });
   saveServerFailedOpen = () => this.setState({ saveServerFailed: true });
   saveServerFailedClose = () => this.setState({ saveServerFailed: false });
@@ -51,10 +57,9 @@ class App extends Component {
   modalEnterPortOpen = () => this.setState({ modalEnterPort: true });
   modalEnterPortClose = () => this.setState({ modalEnterPort: false });
 
-  // onChangeChecked() {
-  //   // this.setState({checked: !this.props.target.enabledActive});
-  //   this!this.props.target.enabledActive;
-  // }
+  defaultMeridianFlipChange() {
+    this.setState({defaultMeridianFlip: !this.state.defaultMeridianFlip});
+  }
 
 
 
@@ -172,7 +177,6 @@ class App extends Component {
 
     return (
       <Segment>
-        <Button icon='save' onClick={this.saveTSXServerConnection.bind(this)}/>
         <Form>
           <Form.Group widths='equal' onSubmit={this.connectTSX.bind(this)}>
             <Form.Input
@@ -387,13 +391,98 @@ class App extends Component {
   renderTakeSeriesTemplates() {
   }
 
+
+  saveDefaultState( param ) {
+    var paramId = TheSkyXInfos.findOne({name: param});
+    if ( typeof paramId == 'undefined' ) {
+      TheSkyXInfos.insert({
+        name: param,
+        text: eval("this.state."+param)
+      });
+    }
+    else {
+      TheSkyXInfos.update( {_id: paramId._id}, {
+        $set: { text: eval("this.state."+param)}
+      });
+    }
+  }
+
+  saveDefaults(){
+    this.saveDefaultState('defaultMinAlt');
+    this.saveDefaultState('defaultCoolTemp');
+    this.saveDefaultState('defaultFocusTempDiff');
+    this.saveDefaultState('defaultMeridianFlip');
+    this.saveDefaultState('defaultStartTime');
+    this.saveDefaultState('defaultStopTime');
+
+  }
   // *******************************
   //
-  renderSettings() {
+  renderDefaultSettings() {
+    return (
+      <Segment.Group>
+        <Segment>
+          <Button  icon='settings' onClick={this.tsxUpdateFilterNames.bind(this)} />
+          <Button icon='save' onClick={this.saveTSXServerConnection.bind(this)}/>
+          <Button onClick={this.saveDefaults.bind(this)}>Save Defaults</Button>
+          {this.renderTSXConnetion()}
+        </Segment>
+        <Segment>
+          <Form.Group>
+            <h3 className="ui header">Defaults</h3>
+            <Form.Input
+              label='Minimum Altitude '
+              name='defaultMinAlt'
+              placeholder='Enter Minimum Altitude to start/stop'
+              value={this.state.defaultMinAlt}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='Cooling Temperature '
+              name='defaultCoolTemp'
+              placeholder='-20'
+              value={this.state.defaultCoolTemp}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='Focusing Temperature'
+              name='defaultCoolTemp'
+              placeholder='Temp diff to run auto focus'
+              value={this.state.defaultFocusTempDiff}
+              onChange={this.handleChange}
+            />
+            <Form.Checkbox
+              label='Meridian Flip Enabled'
+              name='merdianFlip'
+              toggle
+              placeholder= 'Enable auto meridian flip'
+              checked={this.state.defaultMeridianFlip}
+              onChange={this.defaultMeridianFlipChange.bind(this)}
+            />
+            <Form.Input
+              label='Start Time'
+              name='defaultStartTime'
+              placeholder= 'Enter time to start'
+              value={this.state.defaultStartTime}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='Stop Time'
+              name='defaultStopTime'
+              placeholder= 'Enter time to stop'
+              value={this.state.defaultStopTime}
+              onChange={this.handleChange}
+            />
+          </Form.Group>
+        </Segment>
+      </Segment.Group>
+    );
+  }
 
+  renderDevices() {
 
     var tsxInfo = this.props.tsxInfo;
-//    var tsxInfo = TheSkyXInfos.find().fetch();
+    //    var tsxInfo = TheSkyXInfos.find().fetch();
     ip = tsxInfo.ip;
     port = tsxInfo.port;
 
@@ -452,19 +541,6 @@ class App extends Component {
     }
 
     return (
-      <div>
-        <Button  icon='settings' onClick={this.tsxUpdateFilterNames.bind(this)} />
-        {this.renderTSXConnetion()}
-        <Form.Group>
-            <h3 className="ui header">Defaults</h3>
-            <Form.Input
-                label='Default Minimum Altitude '
-                name='minAlt'
-                placeholder='30'
-                defaultValue={this.state.defaultMinAlt}
-                onChange={this.handleChange}
-              />
-        </Form.Group>
         <Segment.Group>
           <Segment><Label>Mount<Label.Detail>
             {mountInfo}
@@ -485,7 +561,6 @@ class App extends Component {
             {rotatorInfo}
           </Label.Detail></Label></Segment>
         </Segment.Group>
-      </div>
     );
 
   }
@@ -511,8 +586,11 @@ class App extends Component {
       return (
         <TakeSeriesTemplateMenu />
       )
+    } else if (this.state.activeItem == 'Devices') {
+      return this.renderDevices();
+
     } else if (this.state.activeItem == 'Settings') {
-      return this.renderSettings();
+      return this.renderDefaultSettings();
 
     } else if (this.state.activeItem == 'tests') {
       console.log('Running state: ' + this.state.activeItem);
@@ -700,6 +778,7 @@ class App extends Component {
             <Menu pointing secondary>
               <Menu.Item name='Targets' active={activeItem === 'Targets'} onClick={this.handleMenuItemClick} />
               <Menu.Item name='Series' active={activeItem === 'Series'} onClick={this.handleMenuItemClick} />
+              <Menu.Item name='Devices' active={activeItem === 'Devices'} onClick={this.handleMenuItemClick} />
               <Menu.Item name='Settings' active={activeItem === 'Settings'} onClick={this.handleMenuItemClick} />
               <Menu.Menu position='right'>
                 <Menu.Item name='tests' active={activeItem === 'tests'} onClick={this.handleMenuItemClick} />

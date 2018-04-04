@@ -11,28 +11,24 @@ import TakeSeriesTemplateEditor from './TakeSeriesTemplateEditor.js';
 import { Form, Label, Tab, Segment, Button, Radio, Input, Table, Dropdown, Checkbox, } from 'semantic-ui-react'
 
 // import {datetimepicker} from 'meteor/tsega:bootstrap3-datetimepicker'
+//import { DateTimePicker, DateTimePickerStore, } from 'meteor/alonoslav:react-datetimepicker';
 import { DateTimePicker, DateTimePickerStore, } from 'meteor/alonoslav:react-datetimepicker-new';
 
 const STARTTIME_ID = 'startTimeId';
-const STOPTIME_ID = 'stopTimeId';
-
+const startInstance = DateTimePickerStore.getInstanceById(STARTTIME_ID);
 const setStartTime = (date) => {
-  console.log('setStartTime');
+  console.log(STARTTIME_ID);
   // set a new date
   startInstance.date=date;
 };
 
+const STOPTIME_ID = 'stopTimeId';
+const stopInstance = DateTimePickerStore.getInstanceById(STOPTIME_ID);
 const setStopTime = (date) => {
-  console.log('setStopTime');
+  console.log(STOPTIME_ID);
   // set a new date
   stopInstance.date(date);
 };
-
-const stopInstance = DateTimePickerStore.getInstanceById(STOPTIME_ID);
-const startInstance = DateTimePickerStore.getInstanceById(STARTTIME_ID);
-
-
-
 
 class TargetEditor extends Component {
 
@@ -72,29 +68,29 @@ class TargetEditor extends Component {
   handleClose = () => this.setState({ modalOpen: false })
   handleChange = (e, { name, value }) => this.setState({ [name]: value })
 
-  nameChange = (e, { value }) => this.setState({ name: value.trim() });
-  descriptionChange = (e, { value }) => this.setState({ description: value.trim() });
-  coolingTempChange = (e, { value }) => this.setState({ coolingTemp: value });
-  coolingTimeChange = (e, { value }) => this.setState({ coolingTime: value });
-  targetFindNameChange = (e, { value }) => this.setState({ targetFindName: value.trim() });
-  targetImageChange = (e, { value }) => this.setState({ targetImage: value.trim() });
-  startTimeChange = (e, { value }) => this.setState({ startTime: value });
-  stopTimeChange = (e, { value }) => this.setState({ stopTime: value });
-  raChange = (e, { value }) => this.setState({ ra: value });
-  decChange = (e, { value }) => this.setState({ dec: value });
-  angleChange = (e, { value }) => this.setState({ angle: value });
-  seriesTemplateChange = (e, { value }) => this.setState({ seriesTemplate: value});
-  // seriesTemplateChange = (e, { value }) => this.setState({ seriesTemplate: {key:value.key, text:value.text, value:value.value} });
-  priorityChange = (e, { value }) => this.setState({ priority: value });
-  minAltChange = (e, { value }) => this.setState({ minAlt: value });
-  clsFilterChange = (e, { value }) => this.setState({ clsFilter: value });
-  focusFilterChange = (e, { value }) => this.setState({ focusFilter: value });
-  // focusFilterChange = (e, { value }) => this.setState({ focusFilter: {key:value.key, text:value.text, value:value.value} });
-  foccusSamplesChange = (e, { value }) => this.setState({ foccusSamples: value });
-  focusBinChange = (e, { value }) => this.setState({ focusBin: value });
-  guideExposureChange = (e, { value }) => this.setState({ guideExposure: value });
-  guideDelayChange = (e, { value }) => this.setState({ guideDelay: value });
-  tempChgChange = (e, { value }) => this.setState({ tempChg: value });
+  // nameChange = (e, { value }) => this.setState({ name: value.trim() });
+  // descriptionChange = (e, { value }) => this.setState({ description: value.trim() });
+  // coolingTempChange = (e, { value }) => this.setState({ coolingTemp: value });
+  // coolingTimeChange = (e, { value }) => this.setState({ coolingTime: value });
+  // targetFindNameChange = (e, { value }) => this.setState({ targetFindName: value.trim() });
+  // targetImageChange = (e, { value }) => this.setState({ targetImage: value.trim() });
+  // startTimeChange = (e, { value }) => this.setState({ startTime: value });
+  // stopTimeChange = (e, { value }) => this.setState({ stopTime: value });
+  // raChange = (e, { value }) => this.setState({ ra: value });
+  // decChange = (e, { value }) => this.setState({ dec: value });
+  // angleChange = (e, { value }) => this.setState({ angle: value });
+  // seriesTemplateChange = (e, { value }) => this.setState({ seriesTemplate: value});
+  // // seriesTemplateChange = (e, { value }) => this.setState({ seriesTemplate: {key:value.key, text:value.text, value:value.value} });
+  // priorityChange = (e, { value }) => this.setState({ priority: value });
+  // minAltChange = (e, { value }) => this.setState({ minAlt: value });
+  // clsFilterChange = (e, { value }) => this.setState({ clsFilter: value });
+  // focusFilterChange = (e, { value }) => this.setState({ focusFilter: value });
+  // // focusFilterChange = (e, { value }) => this.setState({ focusFilter: {key:value.key, text:value.text, value:value.value} });
+  // foccusSamplesChange = (e, { value }) => this.setState({ foccusSamples: value });
+  // focusBinChange = (e, { value }) => this.setState({ focusBin: value });
+  // guideExposureChange = (e, { value }) => this.setState({ guideExposure: value });
+  // guideDelayChange = (e, { value }) => this.setState({ guideDelay: value });
+  // tempChgChange = (e, { value }) => this.setState({ tempChg: value });
 
   onChangeChecked() {
     this.setState({enabledActive: !this.state.enabledActive});
@@ -291,10 +287,11 @@ class TargetEditor extends Component {
   render() {
     // *******************************
     // TIME DATEPICKER OPTIONS
-    const hideStartOnInit = (calendarInstance) => calendarInstance.hide();
-    const hideStopOnInit = (calendarInstance) => calendarInstance.hide();
+    const hideTimeOnInit = (calendarInstance) => calendarInstance.hide();
+    // const hideStartOnInit = (calendarInstance) => calendarInstance.hide();
+    // const hideStopOnInit = (calendarInstance) => calendarInstance.hide();
     const timeOptions = {
-      inline: true,
+      //inline: true,
       format: 'HH:mm',
       defaultDate: new Date(),
     };
@@ -326,20 +323,23 @@ class TargetEditor extends Component {
               <Form.Group widths='equal'>
                 <Form.Field control={Input}
                   label='Name'
+                  name='name'
                   placeholder='Name for session'
-                  defaultValue={this.state.name}
-                  onChange={this.nameChange}/>
+                  value={this.state.name}
+                  onChange={this.handleChange}/>
                 <Form.Field control={Input}
                   label='Description'
+                  name='description'
                   placeholder='Describe the session'
-                  defaultValue={this.state.description}
-                  onChange={this.descriptionChange}/>
+                  value={this.state.description}
+                  onChange={this.handleChange}/>
                 <Form.Field control={Dropdown}
                   label='Series'
+                  name='seriesTemplate'
                   options={takeSeries}
                   placeholder='Series to use for Imaging'
                   text={this.state.seriesTemplate}
-                  onChange={this.seriesTemplateChange}/>
+                  onChange={this.handleChange}/>
               </Form.Group>
             {/* </Form> */}
           </Segment>
@@ -414,29 +414,29 @@ class TargetEditor extends Component {
               id="STARTTIME_ID"
               onDateChanged={setStartTime}
               options={timeOptions}
-              dateTimePickerMount={hideStartOnInit}
+              dateTimePickerMount={hideTimeOnInit}
             />
             <Label>Stop Time</Label>
-              <DateTimePicker
-                id="STOPTIME_ID"
-                onDateChanged={setStopTime}
-                options={timeOptions}
-                dateTimePickerMount={hideStopOnInit}
-              />
+            <DateTimePicker
+              id="STARTTIME_ID"
+              onDateChanged={setStopTime}
+              options={timeOptions}
+              dateTimePickerMount={hideTimeOnInit}
+            />
           </Form.Group>
           <Form.Group widths='equal'>
             <Form.Input
               label='Priority'
               name='priority'
               placeholder='Priority'
-              defaultValue={this.state.priority}
+              value={this.state.priority}
               onChange={this.handleChange}
             />
             <Form.Input
               label='Minimum Altitude:'
               name='minAlt'
               placeholder='Minimum Altitude'
-              defaultValue={this.state.minAlt}
+              value={this.state.minAlt}
               onChange={this.handleChange}
             />
           </Form.Group>
@@ -452,7 +452,7 @@ class TargetEditor extends Component {
                   label='Focusing Temp Delta'
                   name='tempChg'
                   placeholder='change diff.'
-                  defaultValue={this.state.tempChg}
+                  value={this.state.tempChg}
                   onChange={this.handleChange}
                 />
                 <Form.Field control={Dropdown}
@@ -461,18 +461,6 @@ class TargetEditor extends Component {
                   placeholder='Filter for focusing'
                   text={this.state.focusFilter}
                   onChange={this.focusFilterChange}/>
-                {/* <Form.Select
-                  label='Filter'
-                  options={this.renderDropDownFilters()}
-                  placeholder='Filter for focusing'
-                  text={this.state.focusFilter.text}
-                  onChange={this.focusFilterChange}/> */}
-                {/* <Form.Select
-                  label='Filter'
-                  options={this.getTakeSeriesTemplates()}
-                  placeholder='Filter for focusing'
-                  text={this.state.seriesTemplate.text}
-                  onChange={this.seriesTemplateChange}/> */}
               </Form.Group>
       </Tab.Pane> },
 //
@@ -480,22 +468,22 @@ class TargetEditor extends Component {
 //
       { menuItem: 'Imaging', render: () =>
       <Tab.Pane>
-            <h3 className="ui header">Imaging Series</h3>
-              <Form.Group widths='equal'>
-                <Form.Input
-                  label='Cooling temp'
-                  name='coolTemp'
-                  placeholder='Imaging temperature'
-                  defaultValue={this.state.coolingTemp}
-                  onChange={this.handleChange}
-                />
-                <Form.Input
-                  label='Warm up/down over how many minutes'
-                  name='coolTime'
-                  placeholder='Number of minutes'
-                  defaultValue={this.state.coolingTime}
-                  onChange={this.handleChange}/>
-              </Form.Group>
+        <h3 className="ui header">Imaging Series</h3>
+        <Form.Group widths='equal'>
+          <Form.Input
+            label='Cooling temp'
+            name='coolingTemp'
+            placeholder='Imaging temperature'
+            value={this.state.coolingTemp}
+            onChange={this.handleChange}
+          />
+          <Form.Input
+            label='Warm up/down over how many minutes'
+            name='coolingTime'
+            placeholder='Number of minutes'
+            value={this.state.coolingTime}
+            onChange={this.handleChange}/>
+        </Form.Group>
       </Tab.Pane> },
     ]
 // *******************************

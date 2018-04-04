@@ -139,6 +139,13 @@ class TakeSeriesEditor extends Component {
   }
 
   render() {
+
+    var exposure = `${this.state.exposure}`;
+    var frame = `${this.state.frame.text}`;
+    var filter = `${this.state.filter.text}`;
+    var repeat = `${this.state.repeat}`;
+    var binning = `${this.state.binning}`;
+    
     return (
       <Grid.Row>
         <Grid.Column>
@@ -146,7 +153,7 @@ class TakeSeriesEditor extends Component {
             fluid
             placeholder='Exposure'
             name='exposure'
-            defaultValue={this.state.exposure}
+            value={exposure}
             onChange={this.exposureChange}
           />
         </Grid.Column>
@@ -155,8 +162,8 @@ class TakeSeriesEditor extends Component {
             fluid
             name='frame'
             options={this.renderDropDownFrames()}
-            placeholder='Light'
-            text={this.state.frame.text}
+            placeholder='Frame'
+            text={frame}
             onChange={this.handleChange}
           />
         </Grid.Column>
@@ -166,7 +173,7 @@ class TakeSeriesEditor extends Component {
               name='filter'
               options={this.renderDropDownFilters()}
               placeholder='Filter'
-              text={this.state.filter.text}
+              text={filter}
               onChange={this.handleChange}
             />
           </Grid.Column>
@@ -175,7 +182,7 @@ class TakeSeriesEditor extends Component {
             fluid
             placeholder='Repeat'
             name='repeat'
-            defaultValue={this.state.repeat}
+            value={repeat}
             onChange={this.handleChange}
           />
         </Grid.Column>
@@ -184,7 +191,7 @@ class TakeSeriesEditor extends Component {
             fluid
             placeholder='Binning'
             name='binning'
-            defaultValue={this.state.binning}
+            value={binning}
             onChange={this.handleChange}
           />
         </Grid.Column>

@@ -16,7 +16,8 @@ class TakeSeriesTemplateEditor extends Component {
   state = {
     name: '',
     description: '',
-    seriesProcess: "", seriesContainer: [],
+    seriesProcess: "",
+    seriesContainer: [],
   };
 
   nameChange = (e, { value }) => this.setState({ name: value });
@@ -73,6 +74,7 @@ class TakeSeriesTemplateEditor extends Component {
 
   render() {
 
+    var a = this.props.template.series;
 
     return (
       <div>
@@ -140,7 +142,7 @@ export default withTracker(() => {
   //{}, { sort: { name: 1 } }
     return {
       seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
-      template: TakeSeriesTemplates.find({} ).fetch(),
+      templates: TakeSeriesTemplates.find({} ).fetch(),
   };
 })(TakeSeriesTemplateEditor);
 

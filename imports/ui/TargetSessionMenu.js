@@ -4,6 +4,7 @@ import { Item, Dropdown, Menu, Confirm, Modal, Table, Segment, Button, Progress 
 
 import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
 import { TargetSessions } from '../api/targetSessions.js';
+import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 
 import TargetEditor from './TargetEditor.js';
 import Target  from './Target.js';
@@ -117,18 +118,19 @@ class TargetSessionMenu extends Component {
         dec: '',
         angle: '',
         scale: '',
-        coolingTemp: '',
+        coolingTemp: TheSkyXInfos.findOne({text: 'defaultCoolTemp'}),
         clsFliter: '',
         focusFliter: '',
         foccusSamples: '',
         focusBin: '',
         guideExposure: '',
         guideDelay: '',
-        startTime: '',
-        stopTime: '',
         priority: '',
-        tempChg: '',
-        minAlt: '',
+        enableMeridianFlip: TheSkyXInfos.findOne({text: 'defaultMeridianFlip'}),
+        startTime: TheSkyXInfos.findOne({text: 'defaultStartTime'}),
+        stopTime: TheSkyXInfos.findOne({text: 'defaultSopTime'}),
+        tempChg: TheSkyXInfos.findOne({text: 'defaultFocusTempDiff'}),
+        minAlt: TheSkyXInfos.findOne({text: 'defaultMinAlt'}),
         completed: false,
         createdAt: new Date(),
       }
@@ -147,13 +149,20 @@ class TargetSessionMenu extends Component {
 
       return (
         <div>
-          <Button.Group basic size='small'>
-            <Button icon='linkify' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
-            <Button icon='settings' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
-            <Button icon='find' onClick={this.chkTestData.bind(this)}/>
-            <Button icon='add' onClick={this.addEntry.bind(this)}/>
-            <Button icon='upload' />
-          </Button.Group>
+          <Segment>
+            <Button.Group basic size='small'>
+              <Button icon='linkify' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
+              <Button icon='settings' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
+              <Button icon='find' onClick={this.chkTestData.bind(this)}/>
+              <Button icon='add' onClick={this.addEntry.bind(this)}/>
+              <Button icon='upload' />
+            </Button.Group>
+            <Button.Group icon>
+              <Button icon='play'  onClick={this.show.bind(this)}/>
+              <Button icon='pause'  />
+              <Button icon='stop'  />
+            </Button.Group>
+          </Segment>
           <Modal
             open={this.state.addModalOpen}
             onClose={this.handleAddModalClose}
@@ -165,11 +174,6 @@ class TargetSessionMenu extends Component {
               </Modal.Description>
             </Modal.Content>
           </Modal>
-          <Button.Group icon>
-            <Button icon='play'  onClick={this.show.bind(this)}/>
-            <Button icon='pause'  />
-            <Button icon='stop'  />
-          </Button.Group>
           <Item.Group divided>
           <Confirm
             header='Start an imaging session'
