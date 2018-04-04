@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
+import { Seriess } from '../api/seriess.js';
 import { TargetSessions } from '../api/targetSessions.js';
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 import TakeSeriesTemplateEditor from './TakeSeriesTemplateEditor.js';
@@ -125,10 +126,7 @@ class TargetEditor extends Component {
       coolingTemp: this.props.target.coolingTemp,
       targetFindName: this.props.target.targetFindName,
       targetImage: this.props.target.targetImage,
-      seriesTemplate: {
-        _id: this.props.target.series._id,
-        text: this.props.target.series.text,
-      },
+      seriesTemplate: this.props.target.series.text,
       seriesDropDown: this.getTakeSeriesTemplates(),
       ra: this.props.target.ra,
       dec: this.props.target.dec,
@@ -158,8 +156,16 @@ class TargetEditor extends Component {
 
     // what is needed for the "dropdown values"
     // series needs an "ID", and so include text value
-    var series = this.state.seriesTemplate;
+    var series = this.state.seriesTemplate; // name in the field
+
     // filter needs an index and text value...
+    var seriesId; // get the matching key value
+    for (var i = 0; i < this.state.seriesDropDown.length; i++) {
+      if( series == this.state.seriesDropDown[i].value ) {
+        seriesId = this.state.seriesDropDown[i].key;
+      }
+    }
+
     var filter = this.state.focusFilter;
 
     TargetSessions.update(this.props.target._id, {
@@ -171,8 +177,8 @@ class TargetEditor extends Component {
         targetFindName: this.state.targetFindName,
         targetImage: this.state.targetImage,
         series: {
-          _id: this.state.seriesTemplate._id,
-          text: this.state.seriesTemplate.text,
+          _id: seriesId,
+          text: this.state.seriesTemplate,
         },
         ra: this.state.ra,
         dec: this.state.dec,
@@ -195,8 +201,8 @@ class TargetEditor extends Component {
     var filters = [
       { key: 'Static LUM', text: 'Static LUM', value: 'Static LUM'},
       { key: 'Static R', text: 'Static R', value: 'Static R' },
-      { key: 'Static G', text: 'Static B', value: 'Static G' },
-      { key: 'Static B', text: 'Static G', value: 'Static B' },
+      { key: 'Static G', text: 'Static G', value: 'Static G' },
+      { key: 'Static B', text: 'Static B', value: 'Static B' },
     ];
     return filters;
   }
@@ -210,7 +216,7 @@ class TargetEditor extends Component {
     this.props.takeSeriesTemplates1.forEach((series) => {
       //      { key: 0, text: 'Static LUM', value: 0 },
       // options.push({key:series._id, text:series.name, value: { _id:series._id, text:series.name, value:series.name }});
-      options.push({key:series._id, text:series.name, value: {_id:series._id, text:series.name} });
+      options.push({key:series._id, text:series.name, value: series.name });
       count++;
       console.log(`Found series._id: ${series._id}, name: ${series.name}`);
     });
@@ -280,6 +286,7 @@ class TargetEditor extends Component {
     // const {} = this.state;
     var t1 = this.state.focusFilter;
     var t2 = this.state.seriesTemplate;
+    var t3 = this.props.target.series;
     const filters = this.renderDropDownFilters();
     const takeSeries = this.getTakeSeriesTemplates();
     const hideStartOnInit = (calendarInstance) => calendarInstance.hide();
@@ -311,7 +318,7 @@ class TargetEditor extends Component {
                   label='Series'
                   options={takeSeries}
                   placeholder='Series to use for Imaging'
-                  text={this.state.seriesTemplate.textIP}
+                  text={this.state.seriesTemplate}
                   onChange={this.seriesTemplateChange}/>
               </Form.Group>
             {/* </Form> */}
