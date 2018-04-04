@@ -260,6 +260,9 @@ class TargetEditor extends Component {
         // targetSession.ra = result.split('|')[1].trim();
         // targetSession.dec = result.split('|')[2].trim();
         // targetSession.description = result.split('|')[3].trim();
+        // this.forceUpdate();
+        // const text = ReactDOM.findDOMNode(this.refs.ra).value.trim();
+        // console.log(text);
 
       }
     });
@@ -298,8 +301,16 @@ class TargetEditor extends Component {
 
     // *******************************
     // DROP DOWN CONSTANTS
-    const filters = this.renderDropDownFilters();
-    const takeSeries = this.getTakeSeriesTemplates();
+    var filters = this.renderDropDownFilters();
+    var takeSeries = this.getTakeSeriesTemplates();
+
+    // *******************************
+    // var for ra and DATEPICKER
+    var targetRa = `${this.state.ra}`;
+    var targetDec = `${this.state.dec}`;
+    var targetAngle = `${this.state.angle}`;
+    var targetDesc = `${this.state.description}`;
+
     // *******************************
     // this is not the render return... scroll down...
     const panes = [
@@ -346,19 +357,19 @@ class TargetEditor extends Component {
               label='Ra'
               name='ra'
               placeholder='RA'
-              defaultValue={this.state.ra}
+              value={this.state.ra}
               onChange={this.handleChange}/>
             <Form.Input
               label='Dec'
               name='dec'
               placeholder='DEC'
-              defaultValue={this.state.dec}
+              value={this.state.dec}
               onChange={this.handleChange}/>
             <Form.Input
               label='Angle'
               name='angle'
               placeholder='Angle'
-              defaultValue={this.state.angle}
+              value={this.state.angle}
               onChange={this.handleChange}/>
           </Form.Group>
         </Segment>
@@ -368,20 +379,20 @@ class TargetEditor extends Component {
               label='Target Name'
               name='targetFindName'
               placeholder='Name to search for'
-              defaultValue={this.state.targetFindName}
+              value={this.state.targetFindName}
               onChange={this.handleChange}/>
             <Button onClick={this.getTargetRaDec.bind(this)}>Find</Button>
             <Form.Input
               label='Image to load'
               name='targetImage'
               placeholder='Filename to load on server'
-              defaultValue={this.state.targetImage}
+              value={this.state.targetImage}
               onChange={this.handleChange}
             />
             <Button onClick={this.findTarget.bind(this)}>Solve</Button>
         </Form.Group>
-      </Segment>
-    </Tab.Pane> },
+        </Segment>
+      </Tab.Pane> },
 
       { menuItem: 'Constraints', render: () =>
       <Tab.Pane>
