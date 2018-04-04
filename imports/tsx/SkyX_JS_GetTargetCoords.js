@@ -6,31 +6,31 @@
 // where the mount is currently pointing.
 //
 // Ken Sturrock January 15, 2017
-//
+// Stephen Townsend - 2018-04-03
 
 //
 // Define variables and set known initial values
 //
 var targetName = "$000";
-var CoordsHMSNow = "";
-var CoordsHMS2k = "";
 
 sky6StarChart.Find(targetName);
-var dec2000 = sky6StarChart.Declination;
-var ra2000 = sky6StarChart.RightAscension;
+sky6ObjectInformation.Property(59); // altitude
+altitude = sky6ObjectInformation.ObjInfoPropOut;
+var altitude = altitude.toFixed(1);
 
-sky6Utils.PrecessNowTo2000(ra2000, dec2000, 5);
+sky6ObjectInformation.Property(58); // azimuth
+var azimuth = sky6ObjectInformation.ObjInfoPropOut;
 
-//var CoordsHMS2000 = sky6Utils.strOut;
+sky6ObjectInformation.Property(54);  // RA				// Pull the RA value
+var targetRA = sky6ObjectInformation.ObjInfoPropOut; 		// Stuff RA into variable
 
-sky6Utils.PrecessNowTo2000( sky6RASCOMTele.dRa, sky6RASCOMTele.dDec);
+sky6ObjectInformation.Property(55); // DEC			// Pull the DEC value
+var targetDEC = sky6ObjectInformation.ObjInfoPropOut; 		// Stuff DEC into variable
 
-sky6Utils.ConvertEquatorialToString(sky6Utils.dOut0, sky6Utils.dOut1, 5);
-
-CoordsHMS2k = sky6Utils.strOut;
+/* Socket End Packet */
 
 
-Out = 'Success|' + ra2000 + '|' + dec2000+ '|' + CoordsHMS2000 + '|';			// Form the output string
+Out = 'Success|' + targetRA + '|' + targetDEC+ '|' + altitude + '|'+ azimuth ;			// Form the output string
 //Out = ra2000 + '|' + dec2000+ '|';// + CoordsHMS2000 + '|';			// Form the output string
 
 /* Socket End Packet */
