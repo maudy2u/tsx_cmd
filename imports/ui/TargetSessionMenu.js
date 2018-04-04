@@ -19,6 +19,7 @@ class TargetSessionMenu extends Component {
       _id:'',
     },
   }
+
   handleAddModalOpen = () => this.setState({ addModalOpen: true })
   handleAddModalClose = () => this.setState({ addModalOpen: false })
 

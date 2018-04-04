@@ -46,8 +46,8 @@ class TargetEditor extends Component {
     dec: "",
     angle: "",
     priority: '',
-    clsFliter: '',
-    focusFliter: '',
+    clsFilter: '',
+    focusFilter: {},
     foccusSamples: '',
     focusBin: '',
     guideExposure: '',
@@ -56,12 +56,15 @@ class TargetEditor extends Component {
     startTime: '',
     stopTime: '',
     coolingTemp: '',
+    coolingTime: '',
     value: false,
     openModal: false,
     templates: [],
     checked: false,
     template_id: '',
     tempChg: '',
+    filterDropDown:[],
+    seriesDropDown:[],
   };
 
   handleOpen = () => this.setState({ modalOpen: true })
@@ -71,18 +74,21 @@ class TargetEditor extends Component {
   nameChange = (e, { value }) => this.setState({ name: value.trim() });
   descriptionChange = (e, { value }) => this.setState({ description: value.trim() });
   coolingTempChange = (e, { value }) => this.setState({ coolingTemp: value });
+  coolingTimeChange = (e, { value }) => this.setState({ coolingTime: value });
   targetFindNameChange = (e, { value }) => this.setState({ targetFindName: value.trim() });
   targetImageChange = (e, { value }) => this.setState({ targetImage: value.trim() });
   startTimeChange = (e, { value }) => this.setState({ startTime: value });
   stopTimeChange = (e, { value }) => this.setState({ stopTime: value });
   raChange = (e, { value }) => this.setState({ ra: value });
-  decChange = (e, { value }) => this.setState({ ra: value });
-  angleChange = (e, { value }) => this.setState({ ra: value });
-  seriesTemplateChange = (e, { value }) => this.setState({ seriesTemplate: value });
+  decChange = (e, { value }) => this.setState({ dec: value });
+  angleChange = (e, { value }) => this.setState({ angle: value });
+  seriesTemplateChange = (e, { value }) => this.setState({ seriesTemplate: value});
+  // seriesTemplateChange = (e, { value }) => this.setState({ seriesTemplate: {key:value.key, text:value.text, value:value.value} });
   priorityChange = (e, { value }) => this.setState({ priority: value });
   minAltChange = (e, { value }) => this.setState({ minAlt: value });
-  clsFliterChange = (e, { value }) => this.setState({ clsFliter: value });
-  focusFliterChange = (e, { value }) => this.setState({ focusFliter: value });
+  clsFilterChange = (e, { value }) => this.setState({ clsFilter: value });
+  focusFilterChange = (e, { value }) => this.setState({ focusFilter: value });
+  // focusFilterChange = (e, { value }) => this.setState({ focusFilter: {key:value.key, text:value.text, value:value.value} });
   foccusSamplesChange = (e, { value }) => this.setState({ foccusSamples: value });
   focusBinChange = (e, { value }) => this.setState({ focusBin: value });
   guideExposureChange = (e, { value }) => this.setState({ guideExposure: value });
@@ -119,7 +125,11 @@ class TargetEditor extends Component {
       coolingTemp: this.props.target.coolingTemp,
       targetFindName: this.props.target.targetFindName,
       targetImage: this.props.target.targetImage,
-      seriesTemplate: this.props.target.series,
+      seriesTemplate: {
+        _id: this.props.target.series._id,
+        text: this.props.target.series.text,
+      },
+      seriesDropDown: this.getTakeSeriesTemplates(),
       ra: this.props.target.ra,
       dec: this.props.target.dec,
       angle: this.props.target.angle,
@@ -129,8 +139,9 @@ class TargetEditor extends Component {
       stopTime: this.props.target.stopTime,
       priority: this.props.target.priority,
       minAlt: this.props.target.minAlt,
-      clsFliter: this.props.target.clsFliter,
-      focusFliter: this.props.target.focusFliter,
+      clsFilter: this.props.target.clsFilter,
+      focusFilter: this.props.target.focusFilter,
+      filterDropDown: this.renderDropDownFilters(),
       foccusSamples: this.props.target.foccusSamples,
       focusBin: this.props.target.focusBin,
       guideExposure: this.props.target.guideExposure,
@@ -144,7 +155,12 @@ class TargetEditor extends Component {
     var d = new Date();
     var n = d.getHours();
     var n = d.getMinutes();
+
+    // what is needed for the "dropdown values"
+    // series needs an "ID", and so include text value
     var series = this.state.seriesTemplate;
+    // filter needs an index and text value...
+    var filter = this.state.focusFilter;
 
     TargetSessions.update(this.props.target._id, {
       $set: {
@@ -154,7 +170,10 @@ class TargetEditor extends Component {
         coolingTemp: this.state.coolingTemp,
         targetFindName: this.state.targetFindName,
         targetImage: this.state.targetImage,
-        series: this.state.seriesTemplate,
+        series: {
+          _id: this.state.seriesTemplate._id,
+          text: this.state.seriesTemplate.text,
+        },
         ra: this.state.ra,
         dec: this.state.dec,
         angle: this.state.angle,
@@ -162,8 +181,8 @@ class TargetEditor extends Component {
         stopTime: this.state.stopTime,
         priority: this.state.priority,
         minAlt: this.state.minAlt,
-        clsFliter: this.state.clsFliter,
-        focusFliter: this.state.focusFliter,
+        clsFilter: this.state.clsFilter,
+        focusFilter: this.state.focusFilter,
         foccusSamples: this.state.foccusSamples,
         focusBin: this.state.focusBin,
         guideExposure: this.state.guideExposure,
@@ -173,12 +192,13 @@ class TargetEditor extends Component {
   }
 
   renderDropDownFilters() {
-    return [
-      { key: 'l', text: 'Static LUM', value: 'LUM' },
-      { key: 'r', text: 'Static R', value: 'R' },
-      { key: 'g', text: 'Static B', value: 'G' },
-      { key: 'b', text: 'Static G', value: 'B' },
+    var filters = [
+      { key: 'Static LUM', text: 'Static LUM', value: 'Static LUM'},
+      { key: 'Static R', text: 'Static R', value: 'Static R' },
+      { key: 'Static G', text: 'Static B', value: 'Static G' },
+      { key: 'Static B', text: 'Static G', value: 'Static B' },
     ];
+    return filters;
   }
 
   // Get all the current values from the TaeSeriesTemplate collections
@@ -189,7 +209,8 @@ class TargetEditor extends Component {
     var count =0;
     this.props.takeSeriesTemplates1.forEach((series) => {
       //      { key: 0, text: 'Static LUM', value: 0 },
-      options.push({key:series._id, text:series.name, value: { _id:series._id, text:series.name, value:series.name }});
+      // options.push({key:series._id, text:series.name, value: { _id:series._id, text:series.name, value:series.name }});
+      options.push({key:series._id, text:series.name, value: {_id:series._id, text:series.name} });
       count++;
       console.log(`Found series._id: ${series._id}, name: ${series.name}`);
     });
@@ -197,14 +218,13 @@ class TargetEditor extends Component {
   }
 
   getTargetRaDec() {
-    console.log('tsx_TargetRaDec');
-    Meteor.call("tsx_TargetRaDec", this.props.target, function (error, result) {
+    console.log('tsx_GetTargetRaDec');
+    Meteor.call("tsx_GetTargetRaDec", this.props.target, (error, result) => {
       // identify the error
-      console.log('Search for target: ' + this.props.target.targetFindName);
       console.log('Error: ' + error);
       console.log('result: ' + result);
-      for (var i = 0; i < tsx_return.split('|').length; i++) {
-        var txt = tsx_return.split('|')[0].trim();
+      for (var i = 0; i < result.split('|').length; i++) {
+        var txt = result.split('|')[i].trim();
         console.log('Found: ' + txt);
       }
       if (error && error.error === "logged-out") {
@@ -215,9 +235,16 @@ class TargetEditor extends Component {
         // if success then TheSkyX has made this point the target...
         // now get the coordinates
         cmdSuccess = true;
-        targetSession.ra = tsx_return.split('|')[1].trim();
-        targetSession.dec = tsx_return.split('|')[2].trim();
-        targetSession.description = tsx_return.split('|')[3].trim();
+        var ra = result.split('|')[1].trim();
+        var dec = result.split('|')[2].trim();
+        var description = result.split('|')[3].trim();
+        this.setState({ra: ra});
+        this.setState({dec: dec});
+        this.setState({description: description});
+        this.render();
+        // targetSession.ra = result.split('|')[1].trim();
+        // targetSession.dec = result.split('|')[2].trim();
+        // targetSession.description = result.split('|')[3].trim();
 
       }
     });
@@ -237,7 +264,7 @@ class TargetEditor extends Component {
         Session.set("errorMessage", "Please confirm TSX is active.\nerror.error");
       }
       else {
-        this.getTargetRaDec();
+        // not sure... this is to find target to start imaging...
       }
     });
 
@@ -250,6 +277,11 @@ class TargetEditor extends Component {
       defaultDate: new Date(),
     };
 
+    // const {} = this.state;
+    var t1 = this.state.focusFilter;
+    var t2 = this.state.seriesTemplate;
+    const filters = this.renderDropDownFilters();
+    const takeSeries = this.getTakeSeriesTemplates();
     const hideStartOnInit = (calendarInstance) => calendarInstance.hide();
     const hideStopOnInit = (calendarInstance) => calendarInstance.hide();
     // *******************************
@@ -275,11 +307,11 @@ class TargetEditor extends Component {
                   placeholder='Describe the session'
                   defaultValue={this.state.description}
                   onChange={this.descriptionChange}/>
-                <Form.Select
+                <Form.Field control={Dropdown}
                   label='Series'
-                  options={this.getTakeSeriesTemplates()}
+                  options={takeSeries}
                   placeholder='Series to use for Imaging'
-                  text={this.state.seriesTemplate.text}
+                  text={this.state.seriesTemplate.textIP}
                   onChange={this.seriesTemplateChange}/>
               </Form.Group>
             {/* </Form> */}
@@ -322,7 +354,7 @@ class TargetEditor extends Component {
               placeholder='Name to search for'
               defaultValue={this.state.targetFindName}
               onChange={this.handleChange}/>
-            <Button onClick={this.findTarget.bind(this)}>Find</Button>
+            <Button onClick={this.getTargetRaDec.bind(this)}>Find</Button>
             <Form.Input
               label='Image to load'
               name='targetImage'
@@ -387,41 +419,64 @@ class TargetEditor extends Component {
             />
           </Form.Group>
       </Tab.Pane> },
-
+//
+// These are the focus settings of interest
+//
       { menuItem: 'Focus', render: () =>
       <Tab.Pane>
-        <Form.Group>
+        <Segment.Group>
+          <Segment>
             <h3 className="ui header">Focus</h3>
-            <Form.Input
-                label='Focusing Temp Delta'
-                name='tempChg'
-                placeholder='change diff.'
-                defaultValue={this.state.tempChg}
-                onChange={this.handleChange}
-              />
-              <Form.Select
-                floating
-                label='Filter'
-                options={this.renderDropDownFilters()}
-                placeholder='Filter for focusing'
-                selection={this.state.focusFilter}
-                onChange={this.handleChange}
-              />
-        </Form.Group>
+              <Form.Group widths='equal'>
+                <Form.Field control={Input}
+                  label='Focusing Temp Delta'
+                  placeholder='change diff.'
+                  defaultValue={this.state.tempChg}
+                  onChange={this.tempChgChange}/>
+                <Form.Field control={Dropdown}
+                  label='Filter'
+                  options={filters}
+                  placeholder='Filter for focusing'
+                  text={this.state.focusFilter}
+                  onChange={this.focusFilterChange}/>
+                {/* <Form.Select
+                  label='Filter'
+                  options={this.renderDropDownFilters()}
+                  placeholder='Filter for focusing'
+                  text={this.state.focusFilter.text}
+                  onChange={this.focusFilterChange}/> */}
+                {/* <Form.Select
+                  label='Filter'
+                  options={this.getTakeSeriesTemplates()}
+                  placeholder='Filter for focusing'
+                  text={this.state.seriesTemplate.text}
+                  onChange={this.seriesTemplateChange}/> */}
+              </Form.Group>
+          </Segment>
+        </Segment.Group>
       </Tab.Pane> },
-
+//
+// THis is the imaging constraints... currently only the temp setting
+//
       { menuItem: 'Imaging', render: () =>
       <Tab.Pane>
-      <Form.Group>
-          <h3 className="ui header">Imaging Series</h3>
-          <Form.Input
-            label='Cooling temp'
-            name='coolingTemp'
-            placeholder='Imaging temperature'
-            defaultValue={this.state.coolingTemp}
-            onChange={this.coolingTempChange}
-          />
-        </Form.Group>
+        <Segment.Group>
+          <Segment>
+            <h3 className="ui header">Imaging Series</h3>
+              <Form.Group widths='equal'>
+                <Form.Field control={Input}
+                  label='Cooling temp'
+                  placeholder='Imaging temperature'
+                  defaultValue={this.state.coolingTemp}
+                  onChange={this.coolingTempChange}/>
+                <Form.Field control={Input}
+                  label='Warm up/down over how many minutes'
+                  placeholder='Number of minutes'
+                  defaultValue={this.state.coolingTime}
+                  onChange={this.coolingTimeChange}/>
+              </Form.Group>
+          </Segment>
+        </Segment.Group>
       </Tab.Pane> },
     ]
 // *******************************
