@@ -18,6 +18,7 @@ class TakeSeriesTemplateEditor extends Component {
     description: '',
     seriesProcess: "",
     seriesContainer: [],
+    repeatSeries: false,
   };
 
   nameChange = (e, { value }) => this.setState({ name: value });
@@ -25,6 +26,11 @@ class TakeSeriesTemplateEditor extends Component {
   seriesProcessChange = (e, { value }) => this.setState({ seriesProcess: value });
   updateSeriesContainer = (e, { value }) => this.setState({ seriesContainer: value });
 
+  onChangeChecked() {
+    this.setState({repeatSeries: !this.state.repeatSeries});
+  }
+
+  nameChange = (e, { value }) => this.setState({ name: value });
   componentWillMount() {
     // do not modify the state directly
     this.setState({name: this.props.template.name});
@@ -59,7 +65,7 @@ class TakeSeriesTemplateEditor extends Component {
       newSeries.set("exposure", 1 );
       newSeries.set("binning",  1 );
       newSeries.set("frame", 'Light' );
-      newSeries.set("filter", 0 );
+      newSeries.set("filter", 'LUM' );
       newSeries.set("repeat", 1 );
       newSeries.set("taken", 0);
       // add the new map to the end, with correct order
@@ -105,7 +111,14 @@ class TakeSeriesTemplateEditor extends Component {
           <Form.Group inline>
             <Form.Field control={Radio} label='Per series' value='per series' checked={this.state.seriesProcess === "per series"} onChange={this.seriesProcessChange} />
             <Form.Field control={Radio} label='Across series' value='across series' checked={this.state.seriesProcess === "across series"} onChange={this.seriesProcessChange} />
-            <Form.Field control={Radio} label='Repeat series' value='repeat' checked={this.state.seriesProcess === "repeat"} onChange={this.seriesProcessChange} />
+            <Form.Checkbox
+              label='Repeat series until stopped'
+              toggle
+              name='repeatSeries'
+              checked={this.state.repeatSeries}
+              onChange={this.onChangeChecked.bind(this)}
+            />
+            {/* <Form.Checkbox onChange={this.seriesProcessChange} /> */}
           </Form.Group>
         </Form>
         <Grid columns={6} centered divided='vertically'>

@@ -33,30 +33,29 @@ class TakeSeriesEditor extends Component {
     id: '',
     order: 0,
     exposure: 0,
-    frame: 'Light',
-    filter: 0,
+    frame: 'Frame',
+    filter: 'Filter',
     repeat: 0,
     binning: 0,
     taken: 0,
   };
 
-  handleChange = (e, { name, value }) => this.setState({ [name]: value });
+  // // change states
+  handleChange = (e, { name, value }) => {
 
-  // change states
-  exposureChange = (e, { value }) => {
-    this.setState({ exposure: value });
-    this.props.definedSeries.exposure = value;
-
-// can the tempalte edirot that callss this use tracter properties and so
-// that this issue of changes and savins goes away...
-
-
+    this.setState({ [name]: value });
+    Seriess.update( {_id: this.props.series_id}, {
+      $set:{
+        order: this.state.order,
+        exposure: this.state.exposure,
+        frame: this.state.frame,
+        filter: this.state.filter,
+        repeat: this.state.repeat,
+        binning: this.state.binning,
+        taken: this.state.taken,
+      }
+    });
   };
-  // frameChange = (e, { value }) => this.setState({ frame: value });
-  // filterChange = (e, { value }) => this.setState({ filter: value });
-  // repeatChange = (e, { value }) => this.setState({ repeat: value });
-  // binningChange = (e, { value }) => this.setState({ binning: value });
-  // takenChange = (e, { value }) => this.setState({ taken: value });
 
   // Initialize states
   componentWillMount() {
@@ -66,8 +65,8 @@ class TakeSeriesEditor extends Component {
       id: this.props.series_id,
       order: definedSeries.order,
       exposure: definedSeries.exposure,
-      frame: { text: definedSeries.frame},
-      filter: { text: definedSeries.filter},
+      frame: definedSeries.frame,
+      filter: definedSeries.filter,
       repeat: definedSeries.repeat,
       binning: definedSeries.binning,
       taken: definedSeries.taken,
@@ -81,7 +80,7 @@ class TakeSeriesEditor extends Component {
     // NEED TO RETRIEVE FROM TSX....
     var filterArray = [];
     for (var i = 0; i < filters.length; i++) {
-      filterArray.push({ key: i, text: filters[i], value: filters[i] });
+      filterArray.push({ key: filters[i], text: filters[i], value: filters[i] });
     }
     return filterArray;
   }
@@ -92,11 +91,10 @@ class TakeSeriesEditor extends Component {
 
     var frameArray = [];
     for (var i = 0; i < frames.length; i++) {
-      frameArray.push({ key: i, text: frames[i], value: frames[i] });
+      frameArray.push({ key: frames[i], text: frames[i], value: frames[i] });
     }
     return frameArray;
   }
-
 
   deleteEntry() {
 
@@ -140,12 +138,6 @@ class TakeSeriesEditor extends Component {
 
   render() {
 
-    var exposure = `${this.state.exposure}`;
-    var frame = `${this.state.frame.text}`;
-    var filter = `${this.state.filter.text}`;
-    var repeat = `${this.state.repeat}`;
-    var binning = `${this.state.binning}`;
-    
     return (
       <Grid.Row>
         <Grid.Column>
@@ -153,8 +145,8 @@ class TakeSeriesEditor extends Component {
             fluid
             placeholder='Exposure'
             name='exposure'
-            value={exposure}
-            onChange={this.exposureChange}
+            value={this.state.exposure}
+            onChange={this.handleChange}
           />
         </Grid.Column>
         <Grid.Column>
@@ -163,7 +155,7 @@ class TakeSeriesEditor extends Component {
             name='frame'
             options={this.renderDropDownFrames()}
             placeholder='Frame'
-            text={frame}
+            text={this.state.frame}
             onChange={this.handleChange}
           />
         </Grid.Column>
@@ -173,7 +165,7 @@ class TakeSeriesEditor extends Component {
               name='filter'
               options={this.renderDropDownFilters()}
               placeholder='Filter'
-              text={filter}
+              text={this.state.filter}
               onChange={this.handleChange}
             />
           </Grid.Column>
@@ -182,7 +174,7 @@ class TakeSeriesEditor extends Component {
             fluid
             placeholder='Repeat'
             name='repeat'
-            value={repeat}
+            value={this.state.repeat}
             onChange={this.handleChange}
           />
         </Grid.Column>
@@ -191,7 +183,7 @@ class TakeSeriesEditor extends Component {
             fluid
             placeholder='Binning'
             name='binning'
-            value={binning}
+            value={this.state.binning}
             onChange={this.handleChange}
           />
         </Grid.Column>

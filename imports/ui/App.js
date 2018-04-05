@@ -16,7 +16,7 @@ import { TargetSessions } from '../api/targetSessions.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 
 // Import the UI
-import ModalInput from './ModalInput.js';
+import Monitor from './Monitor.js';
 import TargetSessionMenu from './TargetSessionMenu.js';
 import SessionTemplate from './SessionTemplate.js';
 import Filter from './Filter.js';
@@ -44,7 +44,12 @@ class App extends Component {
     defaultMeridianFlip: true,
     defaultStartTime: 21,
     defaultStopTime: 6,
-};
+
+    showMonitor: false, // this needs to be a server session variable
+  };
+
+  handleToggle = (e, { name, value }) => this.setState({ [name]: !eval('this.state.'+name) })
+
   handleMenuItemClick = (e, { name }) => this.setState({ activeItem: name });
   saveServerFailedOpen = () => this.setState({ saveServerFailed: true });
   saveServerFailedClose = () => this.setState({ saveServerFailed: false });
@@ -287,6 +292,14 @@ class App extends Component {
 
   // *******************************
   //
+  renderMonitor() {
+    return  (
+      <Monitor  />
+    );
+  }
+
+  // *******************************
+  //
   tsxUpdateFilterNames() {
 
     // on the client
@@ -316,11 +329,6 @@ class App extends Component {
           <Button icon='settings' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
           <Button icon='find' onClick={this.chkTestData.bind(this)}/>
           <Button icon='upload' />
-        </Button.Group>
-        <Button.Group labeled icon>
-          <Button icon='play'  onClick={this.testTakeImage.bind(this)}/>
-          <Button icon='pause'  />
-          <Button icon='stop'  />
         </Button.Group>
       <Table celled selectable>
         <Table.Header>
@@ -690,11 +698,105 @@ class App extends Component {
 
   }
 
+  renderMenu() {
+    const { activeItem } = this.state;
+
+
+    return(
+      <div>
+        <Menu pointing secondary>
+          <Menu.Item name='Targets' active={activeItem === 'Targets'} onClick={this.handleMenuItemClick} />
+          <Menu.Item name='Series' active={activeItem === 'Series'} onClick={this.handleMenuItemClick} />
+          <Menu.Item name='Devices' active={activeItem === 'Devices'} onClick={this.handleMenuItemClick} />
+          <Menu.Item name='Settings' active={activeItem === 'Settings'} onClick={this.handleMenuItemClick} />
+          <Menu.Menu position='right'>
+            <Menu.Item name='tests' active={activeItem === 'tests'} onClick={this.handleMenuItemClick} />
+            <Menu.Item name='logout' active={activeItem === 'logout'} onClick={this.handleMenuItemClick} />
+          </Menu.Menu>
+        </Menu>
+        <Segment raised>
+          {this.renderMenuSegments()}
+        </Segment>
+      </div>
+    )
+  }
+
+  renderIPEditor() {
+    return (
+      <Modal
+        open={this.state.modalEnterIp}
+        onClose={this.modalEnterIpClose.bind(this)}
+        basic
+        size='small'
+        closeIcon>
+        <Modal.Header>TSX Server IP</Modal.Header>
+        <Modal.Content>
+          <h3>Enter the IP to use to connect to the TSX Server.</h3>
+        </Modal.Content>
+        <Modal.Description>
+          <Input
+            label='IP:'
+            defaultValue=
+            {this.state.ip}
+            onChange={this.ipChange}/>
+        </Modal.Description>
+        <Modal.Actions>
+          <Button onClick={this.modalEnterIpClose.bind(this)} inverted>
+            <Icon name='cancel' />Cancel
+          </Button>
+          <Button onClick={this.modalEnterIpClose.bind(this)} inverted>
+            <Icon name='save' />Save
+          </Button>
+        </Modal.Actions>
+      </Modal>
+    )
+  }
+
+  renderPortEditor() {
+    return (
+      <Modal
+        open={this.state.modalEnterPort}
+        onClose={this.modalEnterPortClose.bind(this)}
+        basic
+        size='small'
+        closeIcon>
+        <Modal.Header>TSX Server TCP Port</Modal.Header>
+        <Modal.Content>
+          <h3>Enter the TCP Port to use to connect to the TSX Server.</h3>
+        </Modal.Content>
+        <Modal.Description>
+          <Input
+            label='Port:'
+            defaultValue=
+            {this.state.port}
+            onChange={this.portChange}/>
+        </Modal.Description>
+        <Modal.Actions>
+          <Button onClick={this.modalEnterPortClose.bind(this)} inverted>
+            <Icon name='cancel' />Cancel
+          </Button>
+          <Button onClick={this.modalEnterPortClose.bind(this)} inverted>
+            <Icon name='save' />Save
+          </Button>
+        </Modal.Actions>
+      </Modal>
+    )
+  }
+
+  showMain() {
+
+//    if( !Session.get( 'showMonitor' ) {
+    if( !this.state.showMonitor ) {
+      return this.renderMenu();
+    }
+    else {
+      return this.renderMonitor();
+    }
+  }
+
   render() {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
     */
-
-    const { activeItem } = this.state;
 
     return (
       <div className="container">
@@ -702,6 +804,7 @@ class App extends Component {
           <h1>Image Sessions</h1>
           <div>
             <Segment>
+              <Button name='showMonitor' icon='dashboard' onClick={this.handleToggle.bind(this)}/>
               <Button icon='refresh' onClick={this.connectToTSX.bind(this)}/>
               <Button icon='exchange' onClick={this.serverTest.bind(this)}/>
               <Label>TSX ip:
@@ -709,85 +812,16 @@ class App extends Component {
                   {this.state.ip}
                 </Label.Detail>
               </Label>
-              <Modal
-                open={this.state.modalEnterIp}
-                onClose={this.modalEnterIpClose.bind(this)}
-                basic
-                size='small'
-                closeIcon>
-                <Modal.Header>TSX Server IP</Modal.Header>
-                <Modal.Content>
-                  <h3>Enter the IP to use to connect to the TSX Server.</h3>
-                </Modal.Content>
-                <Modal.Description>
-                  <Input
-                    label='IP:'
-                    defaultValue=
-                    {this.state.ip}
-                    onChange={this.ipChange}/>
-                </Modal.Description>
-                <Modal.Actions>
-                  <Button onClick={this.modalEnterIpClose.bind(this)} inverted>
-                    <Icon name='cancel' />Cancel
-                  </Button>
-                  <Button onClick={this.modalEnterIpClose.bind(this)} inverted>
-                    <Icon name='save' />Save
-                  </Button>
-                </Modal.Actions>
-              </Modal>
+               {this.renderIPEditor()}
               <Label>
                 TSX port:
                 <Label.Detail onClick={this.modalEnterPortOpen.bind(this)}>
                   {this.state.port}
                 </Label.Detail>
               </Label>
-              <Modal
-                open={this.state.modalEnterPort}
-                onClose={this.modalEnterPortClose.bind(this)}
-                basic
-                size='small'
-                closeIcon>
-                <Modal.Header>TSX Server TCP Port</Modal.Header>
-                <Modal.Content>
-                  <h3>Enter the TCP Port to use to connect to the TSX Server.</h3>
-                </Modal.Content>
-                <Modal.Description>
-                  <Input
-                    label='Port:'
-                    defaultValue=
-                    {this.state.port}
-                    onChange={this.portChange}/>
-                </Modal.Description>
-                <Modal.Actions>
-                  <Button onClick={this.modalEnterPortClose.bind(this)} inverted>
-                    <Icon name='cancel' />Cancel
-                  </Button>
-                  <Button onClick={this.modalEnterPortClose.bind(this)} inverted>
-                    <Icon name='save' />Save
-                  </Button>
-                </Modal.Actions>
-              </Modal>
+               {this.renderPortEditor()}
             </Segment>
-{/*
-            <button className="circular ui icon button" onClick={this.loadTestDataMeteorMethod.bind(this)}>
-              <i class="icon settings"></i>
-            </button>
- */}
-            {/* <Button primary onClick={this.addNewTemplate()}>Add</Button> */}
-            {/* <button onClick={this.addNewTemplate()}>Click me</button> */}
-            <Menu pointing secondary>
-              <Menu.Item name='Targets' active={activeItem === 'Targets'} onClick={this.handleMenuItemClick} />
-              <Menu.Item name='Series' active={activeItem === 'Series'} onClick={this.handleMenuItemClick} />
-              <Menu.Item name='Devices' active={activeItem === 'Devices'} onClick={this.handleMenuItemClick} />
-              <Menu.Item name='Settings' active={activeItem === 'Settings'} onClick={this.handleMenuItemClick} />
-              <Menu.Menu position='right'>
-                <Menu.Item name='tests' active={activeItem === 'tests'} onClick={this.handleMenuItemClick} />
-                <Menu.Item name='logout' active={activeItem === 'logout'} onClick={this.handleMenuItemClick} />
-              </Menu.Menu>
-            </Menu>
-            <Segment raised>
-                {this.renderMenuSegments()}
-            </Segment>
+             { this.showMain() }
           </div>
         </header>
       </div>

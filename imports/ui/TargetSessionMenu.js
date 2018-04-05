@@ -67,40 +67,6 @@ class TargetSessionMenu extends Component {
     });
   }
 
-  testTakeImage() {
-    // var a = this.props.targets;
-    // var a1 = this.props.targets[0];
-    // var a2 = this.props.targets[0].name;
-    // var b = this.props.targets[0].takeSeries;
-    // var b2 = this.props.targets[0].takeSeries.name;
-    // var c = this.props.targets[0].takeSeries.series;
-    var d = this.props.targets[0].takeSeries.series[0];
-    var f = d.frame;
-    var e = d.filter;
-    var e1 = d.repeat;
-    var e2 = d.taken;
-    var cmd = tsxCmdTakeImage(e,d.exposure);
-
-    var remainingImages = d.repeat - d.taken;
-
-    if( (remainingImages < d.repeat) && (remainingImages > 0) ) {
-      console.log('Launching take image for: ' + d.filter + ' at ' + d.exposure + ' seconds');
-      // var res = this.takeImage(series.filter,series.exposure);
-      console.log('Taken image: ' +series.taken);
-      series.taken++;
-      console.log('Taken image: ' +series.taken);
-    }
-    // return;
-    // on the client
-    Meteor.call("startImaging", this.props.targets[0], function (error) {
-      // identify the error
-      if (error && error.error === "logged-out") {
-        // show a nice error message
-        Session.set("errorMessage", "Please log in to post a comment.");
-      }
-    });
-  }
-
   addEntry() {
     console.log('In the TargetSessionMenu addEntry');
 
@@ -155,12 +121,6 @@ class TargetSessionMenu extends Component {
               <Button icon='settings' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
               <Button icon='find' onClick={this.chkTestData.bind(this)}/>
               <Button icon='add' onClick={this.addEntry.bind(this)}/>
-              <Button icon='upload' />
-            </Button.Group>
-            <Button.Group icon>
-              <Button icon='play'  onClick={this.show.bind(this)}/>
-              <Button icon='pause'  />
-              <Button icon='stop'  />
             </Button.Group>
           </Segment>
           <Modal
@@ -175,13 +135,6 @@ class TargetSessionMenu extends Component {
             </Modal.Content>
           </Modal>
           <Item.Group divided>
-          <Confirm
-            header='Start an imaging session'
-            open={this.state.open}
-            content='Do you wish to continue and start an imaging session?'
-            onCancel={this.close}
-            onConfirm={this.testTakeImage.bind(this)}
-          />
             {this.props.targets.map( (target)=>{
               return <Target key={target._id} target={target} />
             })}

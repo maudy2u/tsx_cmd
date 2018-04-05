@@ -17,6 +17,7 @@ class TakeSeriesTemplateMenu extends Component {
         name: "New Take Series",
         description: "EDIT ME",
         processSeries: 'across series',
+        repeatSeries: false,
         createdAt: new Date(),
         series: [],
       }

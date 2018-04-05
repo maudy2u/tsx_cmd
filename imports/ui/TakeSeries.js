@@ -10,7 +10,12 @@ import TakeSeriesTemplateEditor from './TakeSeriesTemplateEditor.js';
 
 class TakeSeries extends Component {
 
-  state = { editOpen: false, deleteFailed: false, targetsPreventingDelete: [], }
+  state = {
+    editOpen: false,
+    deleteFailed: false,
+    targetsPreventingDelete: [],
+  }
+
   editOpen = () => this.setState({ editOpen: true })
   editClose = () => this.setState({ editOpen: false })
   deleteFailedOpen = () => this.setState({ deleteFailed: true })
@@ -50,6 +55,7 @@ class TakeSeries extends Component {
         name: orgSeries.name + ' Duplicated',
         description: orgSeries.description,
         processSeries: orgSeries.processSeries,
+        repeatSeries: orgSeries.repeatSeries,
         createdAt: new Date(),
         series: [],
       }
