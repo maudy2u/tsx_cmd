@@ -8,89 +8,56 @@ import { TargetSessions } from '../api/targetSessions.js';
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 import TakeSeriesTemplateEditor from './TakeSeriesTemplateEditor.js';
 
-import { Form, Label, Tab, Segment, Button, Radio, Input, Table, Dropdown, Checkbox, } from 'semantic-ui-react'
+import { Form, Label, Tab, Segment, Button, Radio, Input, Table, Dropdown, Checkbox, } from 'semantic-ui-react';
 
-// import {datetimepicker} from 'meteor/tsega:bootstrap3-datetimepicker'
-//import { DateTimePicker, DateTimePickerStore, } from 'meteor/alonoslav:react-datetimepicker';
-// import { DateTimePicker, DateTimePickerStore, } from 'meteor/alonoslav:react-datetimepicker-new';
-
-// const STARTTIME_ID = 'startTimeId';
-// const startInstance = DateTimePickerStore.getInstanceById(STARTTIME_ID);
-// const setStartTime = (date) => {
-//   console.log(STARTTIME_ID);
-//   // set a new date
-//   startInstance.data=date;
-// };
-//
-// const STOPTIME_ID = 'stopTimeId';
-// const stopInstance = DateTimePickerStore.getInstanceById(STOPTIME_ID);
-// const setStopTime = (date) => {
-//   console.log(STOPTIME_ID);
-//   // set a new date
-//   stopInstance.data=date;
-// };
+import Timekeeper from 'react-timekeeper';
+import ReactSimpleRange from 'react-simple-range';
 
 class TargetEditor extends Component {
 
   state = {
-    enabledActive: false,
-    name: '',
-    targetImage: '',
-    targetFindName: '',
-    description: '',
-    seriesTemplate: {},
-    ra: "",
-    dec: "",
+    enabledActive: false,   // whether the target is active or not
+    name: '',               // name of the target
+    targetImage: '',        // image file name of the target - future
+    targetFindName: '',     // Name to look up in TheSkyX
+    description: '',        // SOmething to say
+    seriesTemplate: {},     // The take series to use
+    ra: "",                 // Target RA
+    dec: "",                // Target DEC
     angle: "",
-    priority: '',
+    priority: 10,           // Priority: 1 is highest
     clsFilter: '',
     focusFilter: {},
     foccusSamples: '',
     focusBin: '',
     guideExposure: '',
     guideDelay: '',
-    minAlt: '',
-    startTime: '',
-    stopTime: '',
-    coolingTemp: '',
-    coolingTime: '',
+    minAlt: 29.5,
+    startTime: '20:00',
+    stopTime: '06:00',
+    coolingTemp: -19,
+    coolingTime: 5,
     value: false,
     openModal: false,
     templates: [],
     checked: false,
     template_id: '',
-    tempChg: '',
+    tempChg: 0.7,
     filterDropDown:[],
     seriesDropDown:[],
   };
 
-  handleOpen = () => this.setState({ modalOpen: true })
-  handleClose = () => this.setState({ modalOpen: false })
-  handleChange = (e, { name, value }) => this.setState({ [name]: value })
+  handleOpen = () => this.setState({ modalOpen: true });
+  handleClose = () => this.setState({ modalOpen: false });
+  handleChange = (e, { name, value }) => this.setState({ [name]: value });
 
-  // nameChange = (e, { value }) => this.setState({ name: value.trim() });
-  // descriptionChange = (e, { value }) => this.setState({ description: value.trim() });
-  // coolingTempChange = (e, { value }) => this.setState({ coolingTemp: value });
-  // coolingTimeChange = (e, { value }) => this.setState({ coolingTime: value });
-  // targetFindNameChange = (e, { value }) => this.setState({ targetFindName: value.trim() });
-  // targetImageChange = (e, { value }) => this.setState({ targetImage: value.trim() });
-  // startTimeChange = (e, { value }) => this.setState({ startTime: value });
-  // stopTimeChange = (e, { value }) => this.setState({ stopTime: value });
-  // raChange = (e, { value }) => this.setState({ ra: value });
-  // decChange = (e, { value }) => this.setState({ dec: value });
-  // angleChange = (e, { value }) => this.setState({ angle: value });
-  // seriesTemplateChange = (e, { value }) => this.setState({ seriesTemplate: value});
-  // // seriesTemplateChange = (e, { value }) => this.setState({ seriesTemplate: {key:value.key, text:value.text, value:value.value} });
-  // priorityChange = (e, { value }) => this.setState({ priority: value });
-  // minAltChange = (e, { value }) => this.setState({ minAlt: value });
-  // clsFilterChange = (e, { value }) => this.setState({ clsFilter: value });
-  // focusFilterChange = (e, { value }) => this.setState({ focusFilter: value });
-  // // focusFilterChange = (e, { value }) => this.setState({ focusFilter: {key:value.key, text:value.text, value:value.value} });
-  // foccusSamplesChange = (e, { value }) => this.setState({ foccusSamples: value });
-  // focusBinChange = (e, { value }) => this.setState({ focusBin: value });
-  // guideExposureChange = (e, { value }) => this.setState({ guideExposure: value });
-  // guideDelayChange = (e, { value }) => this.setState({ guideDelay: value });
-  // tempChgChange = (e, { value }) => this.setState({ tempChg: value });
+  handleStartChange = ( value ) => this.setState({startTime: value.formatted24 });
+  handleStopChange = ( value ) => this.setState({stopTime: value.formatted24 });
+  handlePriorityChange = ( value ) => this.setState({priority: value.value });
+  handleCoolingTempChange = ( value ) => this.setState({coolingTemp: value.value });
+  handleCoolingTimeChange = ( value ) => this.setState({coolingTime: value.value });
+  handleFocusTempChange = ( value ) => this.setState({tempChg: value.value });
+  handleMinAltChange = ( value ) => this.setState({minAlt: value.value });
 
   onChangeChecked() {
     this.setState({enabledActive: !this.state.enabledActive});
@@ -131,6 +98,8 @@ class TargetEditor extends Component {
       openModal: false,
       priority: this.props.target.priority,
       minAlt: this.props.target.minAlt,
+      startTime: this.props.target.startTime,
+      stopTime: this.props.target.stopTime,
       clsFilter: this.props.target.clsFilter,
       focusFilter: this.props.target.focusFilter,
       filterDropDown: this.renderDropDownFilters(),
@@ -140,16 +109,6 @@ class TargetEditor extends Component {
       guideDelay: this.props.target.guideDelay,
       tempChg: this.props.target.tempChg,
     });
-
-    // set a new date
-    if( this.props.target.stopTime != '') {
-      stopInstance.date(this.props.target.stopTime);
-    }
-    if( this.props.target.startTime != '') {
-    // set a new date
-      startInstance.date(this.props.target.startTime);
-    }
-
   }
 
   saveEntry() {
@@ -171,9 +130,6 @@ class TargetEditor extends Component {
     }
 
     var filter = this.state.focusFilter;
-    var s1 = stopInstance.date;
-    var s2 = startInstance.date;
-
     TargetSessions.update(this.props.target._id, {
       $set: {
         enabledActive: this.state.enabledActive,
@@ -189,8 +145,8 @@ class TargetEditor extends Component {
         ra: this.state.ra,
         dec: this.state.dec,
         angle: this.state.angle,
-        startTime: startInstance.date,
-        stopTime: stopInstance.date,
+        startTime: this.state.startTime,
+        stopTime: this.state.stopTime,
         priority: this.state.priority,
         minAlt: this.state.minAlt,
         clsFilter: this.state.clsFilter,
@@ -230,8 +186,8 @@ class TargetEditor extends Component {
   }
 
   getTargetRaDec() {
-    console.log('tsx_GetTargetRaDec: ' + this.state.targetFindName );
-    Meteor.call("tsx_GetTargetRaDec", this.state.targetFindName , (error, result) => {
+    console.log('targetEditorFind: ' + this.state.targetFindName );
+    Meteor.call("targetEditorFind", this.state.targetFindName , (error, result) => {
       // identify the error
       console.log('Error: ' + error);
       console.log('result: ' + result);
@@ -249,17 +205,8 @@ class TargetEditor extends Component {
         cmdSuccess = true;
         var ra = result.split('|')[1].trim();
         var dec = result.split('|')[2].trim();
-        var description = result.split('|')[3].trim();
         this.setState({ra: ra});
         this.setState({dec: dec});
-        this.setState({description: description});
-        // targetSession.ra = result.split('|')[1].trim();
-        // targetSession.dec = result.split('|')[2].trim();
-        // targetSession.description = result.split('|')[3].trim();
-        // this.forceUpdate();
-        // const text = ReactDOM.findDOMNode(this.refs.ra).value.trim();
-        // console.log(text);
-
       }
     });
   }
@@ -400,49 +347,46 @@ class TargetEditor extends Component {
       { menuItem: 'Constraints', render: () =>
       <Tab.Pane>
         <h3 className="ui header">Constraints</h3>
-          <Form.Group widths='equal'>
-            {/*
-              https://github.com/vadym-vorobel/react-datetimepicker
-              const instance = DateTimePickerStore.getInstanceById(DATEPICKER_ID);
-              e.g.
-              var startTime = DateTimePickerStore.getInstanceById(STARTTIME_ID);
-
-              THIS STILL SEEMS THE BEST SOURCE:
-              http://eonasdan.github.io/bootstrap-datetimepicker/
-
-
-              */}
-            {/* <Label>Start Time</Label>
-            <DateTimePicker
-              id="STARTTIME_ID"
-              onDateChanged={setStartTime}
-              options={timeOptions}
-              dateTimePickerMount={hideTimeOnInit}
+        <Segment>
+          <h4 className="ui header">Priority: {this.state.priority}</h4>
+          <ReactSimpleRange
+            label
+            step={1}
+            min={1}
+            max={19}
+            value={this.state.priority}
+            sliderSize={12}
+            thumbSize={18}
+            onChange={this.handlePriorityChange}
+          />
+        </Segment>
+        <Segment>
+          <h4 className="ui header">Minimum Altitude: {this.state.minAlt}</h4>
+          <ReactSimpleRange
+            label
+            step={.5}
+            min={0}
+            max={90}
+            value={this.state.minAlt}
+            sliderSize={12}
+            thumbSize={18}
+            onChange={this.handleMinAltChange}
+          />
+        </Segment>
+          <Segment>
+            <h4 className="ui header">Start Time</h4>
+            <Timekeeper
+              time={this.state.startTime}
+              onChange={this.handleStartChange}
             />
-            <Label>Stop Time</Label>
-            <DateTimePicker
-              id="STOPTIME_ID"
-              onDateChanged={setStopTime}
-              options={timeOptions}
-              dateTimePickerMount={hideTimeOnInit}
-            /> */}
-          </Form.Group>
-          <Form.Group widths='equal'>
-            <Form.Input
-              label='Priority'
-              name='priority'
-              placeholder='Priority'
-              value={this.state.priority}
-              onChange={this.handleChange}
+          </Segment>
+          <Segment>
+            <h4 className="ui header">Stop Time</h4>
+            <Timekeeper
+              time={this.state.stopTime}
+              onChange={this.handleStartChange}
             />
-            <Form.Input
-              label='Minimum Altitude:'
-              name='minAlt'
-              placeholder='Minimum Altitude'
-              value={this.state.minAlt}
-              onChange={this.handleChange}
-            />
-          </Form.Group>
+          </Segment>
       </Tab.Pane> },
 //
 // These are the focus settings of interest
@@ -451,13 +395,6 @@ class TargetEditor extends Component {
       <Tab.Pane>
             <h3 className="ui header">Focus</h3>
               <Form.Group widths='equal'>
-                <Form.Input
-                  label='Focusing Temp Delta'
-                  name='tempChg'
-                  placeholder='change diff.'
-                  value={this.state.tempChg}
-                  onChange={this.handleChange}
-                />
                 <Form.Field control={Dropdown}
                   label='Filter'
                   options={filters}
@@ -465,6 +402,19 @@ class TargetEditor extends Component {
                   text={this.state.focusFilter}
                   onChange={this.focusFilterChange}/>
               </Form.Group>
+              <Segment>
+                <h4 className="ui header">Focus Temperature Delta: {this.state.tempChg}</h4>
+                <ReactSimpleRange
+                  label
+                  step={.1}
+                  min={0}
+                  max={2}
+                  value={this.state.tempChg}
+                  sliderSize={12}
+                  thumbSize={18}
+                  onChange={this.handleFocusTempChange}
+                />
+              </Segment>
       </Tab.Pane> },
 //
 // THis is the imaging constraints... currently only the temp setting
@@ -472,21 +422,32 @@ class TargetEditor extends Component {
       { menuItem: 'Imaging', render: () =>
       <Tab.Pane>
         <h3 className="ui header">Imaging Series</h3>
-        <Form.Group widths='equal'>
-          <Form.Input
-            label='Cooling temp'
-            name='coolingTemp'
-            placeholder='Imaging temperature'
+        <Segment>
+          <h4 className="ui header">Cooling temp: {this.state.coolingTemp}</h4>
+          <ReactSimpleRange
+            label
+            step={1}
+            min={-30}
+            max={0}
             value={this.state.coolingTemp}
-            onChange={this.handleChange}
+            sliderSize={12}
+            thumbSize={18}
+            onChange={this.handleCoolingTempChange}
           />
-          <Form.Input
-            label='Warm up/down over how many minutes'
-            name='coolingTime'
-            placeholder='Number of minutes'
+        </Segment>
+        <Segment>
+          <h4 className="ui header">Cooling Time (minutes): {this.state.coolingTime}</h4>
+          <ReactSimpleRange
+            label
+            step={1}
+            min={0}
+            max={19}
             value={this.state.coolingTime}
-            onChange={this.handleChange}/>
-        </Form.Group>
+            sliderSize={12}
+            thumbSize={18}
+            onChange={this.handleCoolingTimeChange}
+          />
+        </Segment>
       </Tab.Pane> },
     ]
 // *******************************

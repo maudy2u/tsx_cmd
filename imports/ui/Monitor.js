@@ -71,6 +71,12 @@ class Monitor extends Component {
     // any remaining images
     var target = getTargetSession();
 
+    if( typeof target == 'undefined') {
+      // no target found... report and exit
+      var msg = 'No target found. Review targets, and concstraints.'
+      console.log(msg);
+    }
+
     var percent = calcTargetProgress(target._id);
 
     Meteor.call("tsx_Test", function (error, result) {

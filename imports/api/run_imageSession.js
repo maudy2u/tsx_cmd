@@ -593,6 +593,12 @@ Meteor.methods({
 
   },
 
+  // Used to pass RA/DEC to target editors
+  targetEditorFind(targetFindName) {
+    return tsx_GetTargetRaDec(targetFindName);
+
+  },
+
   tsx_TryTargetToImage(targetSession) {
     // *******************************
     //    B. Slew to target
