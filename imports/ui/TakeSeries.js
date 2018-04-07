@@ -79,7 +79,7 @@ class TakeSeries extends Component {
     var seriesArray = template.series;
     var details = "";
     for (var i = 0; i < seriesArray.length; i++) {
-      series = seriesArray[i];
+      series = Seriess.findOne({_id:seriesArray[i].id});
       if(details != "") { details += ", "};
       details += series.frame +'-' + series.filter + ' for ' + series.repeat + 'x' + series.exposure + 's';
     }

@@ -11,6 +11,7 @@ class TakeSeriesTemplateMenu extends Component {
 
 
   newTemplate = '';
+
   addNewTemplate() {
     const id = TakeSeriesTemplates.insert(
       {

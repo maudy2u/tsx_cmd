@@ -29,8 +29,7 @@ takeSeries1.set( "order", 0);
 takeSeries1.set("exposure", lrgbExposure );
 takeSeries1.set("binning",  1 );
 takeSeries1.set("frame", 'Light' );
-takeSeries1.set("filter", 0 );
-takeSeries1.set("filterLabel", 'LUM' );
+takeSeries1.set("filter", 'LUM' );
 takeSeries1.set("repeat", 33 );
 takeSeries1.set("taken", 0);
 // R Imaging
@@ -39,8 +38,7 @@ takeSeries2.set( "order", 1);
 takeSeries2.set("exposure", lrgbExposure );
 takeSeries2.set("binning",  1 );
 takeSeries2.set("frame", 'Light' );
-takeSeries2.set("filter", 1 );
-takeSeries1.set("filterLabel", 'R' );
+takeSeries1.set("filter", 'R' );
 takeSeries2.set("repeat", 33 );
 takeSeries2.set("taken", 0);
 // G
@@ -49,8 +47,7 @@ takeSeries3.set( "order", 2);
 takeSeries3.set("exposure", lrgbExposure );
 takeSeries3.set("binning",  1 );
 takeSeries3.set("frame", 'Light' );
-takeSeries3.set("filter", 2 );
-takeSeries3.set("filterLabel", 'G' );
+takeSeries3.set("filter", 'G' );
 takeSeries3.set("repeat", 33 );
 takeSeries3.set("taken", 0);
 // B
@@ -59,8 +56,7 @@ takeSeries4.set( "order", 3);
 takeSeries4.set("exposure", lrgbExposure );
 takeSeries4.set("binning",  1 );
 takeSeries4.set("frame", 'Light' );
-takeSeries4.set("filter", 3 );
-takeSeries3.set("filterLabel", 'B' );
+takeSeries3.set("filter", 'B' );
 takeSeries4.set("repeat", 33 );
 takeSeries4.set("taken", 0);
 // Ha
@@ -69,8 +65,7 @@ takeSeries5.set( "order", 0);
 takeSeries5.set("exposure", nBExposure );
 takeSeries5.set("binning",  1 );
 takeSeries5.set("frame", 'Light' );
-takeSeries5.set("filter", 4 );
-takeSeries3.set("filterLabel", 'Ha' );
+takeSeries3.set("filter", 'Ha' );
 takeSeries5.set("repeat", 33 );
 takeSeries5.set("taken", 0);
 // OIII
@@ -79,8 +74,7 @@ takeSeries6.set( "order", 1);
 takeSeries6.set("exposure", nBExposure );
 takeSeries6.set("binning",  1 );
 takeSeries6.set("frame", 'Light' );
-takeSeries6.set("filter", 5 );
-takeSeries3.set("filterLabel", 'OIII' );
+takeSeries3.set("filter", 'OIII' );
 takeSeries6.set("repeat", 33 );
 takeSeries6.set("taken", 0);
 // SII
@@ -89,8 +83,7 @@ takeSeries7.set( "order", 2);
 takeSeries7.set("exposure", nBExposure );
 takeSeries7.set("binning",  1 );
 takeSeries7.set("frame", 'Light' );
-takeSeries7.set("filter", 6 );
-takeSeries3.set("filterLabel", 'SII' );
+takeSeries3.set("filter", 'SII' );
 takeSeries7.set("repeat", 33 );
 takeSeries7.set("taken", 0);
 
@@ -210,7 +203,6 @@ function loadTestDataAllTakeSeriesTemplates() {
           binning: seriesMap.get("binning"),
           frame: seriesMap.get("frame"),
           filter: seriesMap.get("filter"),
-          filterLabel: seriesMap.get("filterLabel"),
           repeat: seriesMap.get("repeat"),
           taken: seriesMap.get("taken"),
         }
@@ -225,11 +217,8 @@ function loadTestDataAllTakeSeriesTemplates() {
 
 function tsxServerIsOnline() {
   var success = 'Error|';
-  if( ip == '' || port == '' ) {
-    return success;
-  }
   var cmd = tsxHeader + tsxFooter;
-  tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+  tsx_feeder( cmd, Meteor.bindEnvironment((tsx_return) => {
     if( tsx_return == 'undefined|No error. Error = 0.') {
       success = 'Success|';
     }
@@ -242,9 +231,12 @@ Meteor.startup(() => {
   console.log(' ******************');
   console.log(' RESTARTED');
   console.log(' ******************');
+  TheSkyXInfos.upsert({name: 'currentStage'}, {
+    $set: { value: 'waiting'}
+  });
+
   var dbIp = TheSkyXInfos.findOne({name:'ip'});
   var dbPort = TheSkyXInfos.findOne({name:'port'});
-
   if( (typeof dbIp != 'undefined') && (typeof dbPort != 'undefined') ) {
     ip = dbIp.text;
     console.log('TSX server set to IP: ' +ip );
@@ -316,6 +308,29 @@ var ip;// = 'localhost';
 
  Meteor.methods({
 
+   updateSeriesIdWith(
+     id,
+     order,
+     exposure,
+     frame,
+     filter,
+     repeat,
+     binning,
+     taken,
+   ) {
+     var res = Seriess.update( {_id: id }, {
+       $set:{
+         order: order,
+         exposure: exposure,
+         frame: frame,
+         filter: filter,
+         repeat: repeat,
+         binning: binning,
+         taken: taken,
+       }
+     });
+   },
+
    serverSideText() {
      console.log(
        '*******************************'
@@ -362,8 +377,8 @@ var ip;// = 'localhost';
      var rotator = { model: '', manufacturer: '' };
      var focuser = { model: '', manufacturer: '' };
 
-// *******************************
-//  GET THE CONNECTED EQUIPEMENT
+      // *******************************
+      //  GET THE CONNECTED EQUIPEMENT
      var cmd = '\
      Out =\
      "aMan|"+ SelectedHardware.autoguiderCameraManufacturer +"\
@@ -380,7 +395,7 @@ var ip;// = 'localhost';
      |rotMod|"+ SelectedHardware.rotatorModel +"\
      ";'
      var success;
-     tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+     tsx_feeder( cmd, Meteor.bindEnvironment((tsx_return) => {
 
           if( tsx_return.split('|')[24].trim() === "No error. Error = 0.") {
              success = true;
@@ -471,7 +486,7 @@ var ip;// = 'localhost';
            scale: testData[i].get("scale"),
            coolingTemp: testData[i].get("coolingTemp"),
            clsFliter: testData[i].get("clsFliter"),
-           focusFliter: testData[i].get("focusFliter"),
+           focusFilter: '',
            foccusSamples: testData[i].get("foccusSamples"),
            focusBin: testData[i].get("focusBin"),
            guideExposure: testData[i].get("guideExposure"),

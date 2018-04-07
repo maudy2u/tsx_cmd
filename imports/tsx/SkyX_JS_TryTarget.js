@@ -9,11 +9,11 @@
 //
 
 var Target	= "$000";	// tsxfeeder replaces $000 with a command line parameter
-var FindStatus	= "Success";	// Preload value for success.
 var altLimit	= $001;	// Really a constant for the altitude limit
 var altitude 	= 0;
 var azimuth 	= 0;
 var out 	= "";
+var FindStatus	= "Success";	// Preload value for success.
 
 try
 //

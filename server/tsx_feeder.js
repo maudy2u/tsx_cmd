@@ -2,26 +2,79 @@ import { Meteor } from 'meteor/meteor';
 import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
 
 var tsx_waiting = false;
-var ip = 0;
-var port = 0;
 
 export function tsx_is_waiting() {
   return tsx_waiting;
 }
 
-function loadPortAndIP(){
-  // TheSlyXInfo... get map parameter
-  // port
-  //ip
-
-}
-
 var tsxHeader =  '/* Java Script *//* Socket Start Packet */';
 var tsxFooter = '/* Socket End Packet */';
 
+function tsx_GetPortAndIP() {
+  var ip = TheSkyXInfos.findOne({name: 'ip'}).text;
+  var port = TheSkyXInfos.findOne({name: 'port'}).text;
+  return { ip, port };
+}
+
 // *******************************
 // test of generic write method...
-export function tsx_feeder( ip, port, cmd, callback ) {
+export function tsx_feeder( cmd, callback ) {
+  const {ip, port } = tsx_GetPortAndIP();
+
+    console.log('Started tsx_feeder.');
+     var Out;
+     var net = require('net');
+     var tsx = new net.Socket({writeable: true}); //writeable true does not appear to help
+     tsx.setEncoding(); // used to set the string type of return
+
+     tsx.on('close', function() {
+         console.log('Connection closed.');
+     });
+
+     tsx.on('write', function() {
+         console.log('Writing to TheSkyX.');
+     });
+
+     tsx.on('error', function(err) {
+          console.log(" ******************************* ");
+          console.log(cmd);
+         console.error('Connection error: ' + err);
+         console.error(new Error().stack);
+     });
+
+     tsx.on('data', (chunk) => {
+      console.log(`Received ${chunk.length} bytes of data.`);
+      console.log('Received: '  + chunk);
+      Out = chunk;
+      callback(Out);
+      tsx_waiting = false;
+     });
+
+     tsx.connect(Number(port), ip, function() {
+       console.log('Connected to: ' + ip +':' + port );
+     });
+
+     tsx_waiting = true;
+
+     tsx.write(cmd, (err) => {
+       // console.log('Sending tsxCmd: ' + cmd);
+       // console.log('Sending err: ' + err);
+     });
+
+
+     // need a TSX WAIT FOR SCRIPT DONE...
+     // https://www.w3schools.com/js/js_timing.asp
+     while( tsx_waiting ) {
+      tsx.reads;
+      Meteor.sleep( 1000 );
+     }
+     tsx.close;
+     console.log('Finished function tsx_feeder.');
+};
+
+
+export function tsx_feeder_old( ip, port, cmd, callback ) {
+
     if( ip ==0 && port == 0 ) {
       loadPortAndIP();
     }

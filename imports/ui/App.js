@@ -809,7 +809,7 @@ class App extends Component {
               <Button icon='exchange' onClick={this.serverTest.bind(this)}/>
               <Label>TSX ip:
                 <Label.Detail onClick={this.modalEnterIpOpen.bind(this)}>
-                  {this.state.ip}
+                  {this.props.tsxIP.value}
                 </Label.Detail>
               </Label>
                {this.renderIPEditor()}

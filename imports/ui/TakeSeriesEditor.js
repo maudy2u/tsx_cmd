@@ -44,15 +44,32 @@ class TakeSeriesEditor extends Component {
   handleChange = (e, { name, value }) => {
 
     this.setState({ [name]: value });
-    Seriess.update( {_id: this.props.series_id}, {
-      $set:{
-        order: this.state.order,
-        exposure: this.state.exposure,
-        frame: this.state.frame,
-        filter: this.state.filter,
-        repeat: this.state.repeat,
-        binning: this.state.binning,
-        taken: this.state.taken,
+    // Seriess.update( {id: this.props.series_id}, {
+    //   $set:{
+    //     order: this.state.order,
+    //     exposure: this.state.exposure,
+    //     frame: this.state.frame,
+    //     filter: this.state.filter,
+    //     repeat: this.state.repeat,
+    //     binning: this.state.binning,
+    //     taken: this.state.taken,
+    //   }
+    // });
+    Meteor.call( 
+      'updateSeriesIdWith',
+      this.props.series_id ,
+      this.state.order,
+      this.state.exposure,
+      this.state.frame,
+      this.state.filter,
+      this.state.repeat,
+      this.state.binning,
+      this.state.taken,
+      function (error) {
+      // identify the error
+      if (error && error.error === "logged-out") {
+        // show a nice error message
+        Session.set("errorMessage", "Please log edit.");
       }
     });
   };
@@ -61,6 +78,9 @@ class TakeSeriesEditor extends Component {
   componentWillMount() {
     var definedSeries = Seriess.findOne({_id:this.props.series_id.id});
     // // do not modify the state directly
+    if( typeof definedSeries == 'undefined') {
+      return;
+    }
     this.setState({
       id: this.props.series_id,
       order: definedSeries.order,
@@ -101,6 +121,10 @@ class TakeSeriesEditor extends Component {
     // Get remove form Seriess
     var removeID = this.props.series_id.id;
     var removedSeries = Seriess.findOne({_id:removeID})
+    if( typeof removedSeries == 'undefined') {
+      return;
+    }
+
     // Recreate the series with ID removed
     // then delete the entry
     var takeSeries = this.props.template;
@@ -109,6 +133,9 @@ class TakeSeriesEditor extends Component {
     for (var i = 0; i < seriesDb.length; i++) {
       if( seriesDb[i].id != removeID ) {
         var tmp = Seriess.findOne({_id:seriesDb[i].id});
+        if( typeof tmp == 'undefined') {
+          continue;
+        }
         // redo order
         if( tmp.order > removedSeries.order ) {
           tmp.order = tmp.order-1;

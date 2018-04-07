@@ -26,11 +26,11 @@
 //
 
 var Target 		= "$000";		// tsxfeeder replaces $000 with a command line parameter
-var Filter		= $001;		// the filter to use. Set by run_target, no effect if no wheel
+var Filter		= "$001";		// the filter to use. Set by run_target, no effect if no wheel
 var repErr		= "";			// Throw-away error message for the try/catch tests
 var targetRA		= "";			// Right Assention of target - used for mount synch
 var targetDEC		= "";			// Declination of target - used for mount synch
-var CLSStatus 		= "Success";
+var CLSStatus 		= "Success|";
 var myMount		= SelectedHardware.mountModel;
 var iScale		= 0			// Holds the calculated Image Scale
 
@@ -271,14 +271,14 @@ if (( CLSStatus !== "Failed" ) || ( ccdsoftCamera.ImageUseDigitizedSkySurvey == 
 
 		iScale = ImageLinkResults.imageScale;
 
-		out = Target + " " + "success (" + iScale + " AS/pixel).";
+		out = "Success" +"|"+ Target + " " + " (" + iScale + " AS/pixel).";
 
 		if ( ccdsoftCamera.ImageUseDigitizedSkySurvey == "1" )
 		//
 		// Since we skip the genuine CLS on the simulator, give some fake love.
 		//
 		{
-			out = Target + " " + "success (Simulated)";
+			out = "Success" +"|"+ Target + " (Simulated)";
 		}
 
 } else {

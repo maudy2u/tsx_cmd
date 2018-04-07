@@ -12,7 +12,7 @@
 //	January 13, 2018
 //
 
-var lumFilter = $000;
+var aFilter = $000;
 
 while (!ccdsoftCamera.State == 0)
 //
@@ -35,7 +35,7 @@ if ( SelectedHardware.filterWheelModel !== "<No Filter Wheel Selected>" )
 //
 {
 	ccdsoftCamera.filterWheelConnect();		// Probably redundant.
-	ccdsoftCamera.FilterIndexZeroBased = lumFilter;	// Pick a filter (up to eight), set by first parameter from tsxfeeder.
+	ccdsoftCamera.FilterIndexZeroBased = aFilter;	// Pick a filter (up to eight), set by first parameter from tsxfeeder.
 }
 
 if (ccdsoftCamera.PropStr("m_csObserver") == "Ken Sturrock")

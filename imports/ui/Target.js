@@ -5,6 +5,8 @@ import { withTracker } from 'meteor/react-meteor-data';
 
 import { Item, Button, Modal, Header, Icon, Table, Checkbox, Progress } from 'semantic-ui-react'
 
+import { calcTargetProgress } from '../api/sessionTools.js';
+
 import { TargetSessions } from '../api/targetSessions.js';
 import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
 import { Seriess } from '../api/seriess.js';
@@ -36,27 +38,6 @@ class TargetSession extends Component {
   componentWillMount() {
     // do not modify the state directly
   }
-
-  calcTargetProgress() {
-      var totalPlannedImages = 0;
-      var totalTakenImages = 0;
-      var template = TakeSeriesTemplates.findOne(
-        {_id:this.props.target.series._id});
-
-      if( typeof template == "undefined") {
-        return 0;
-      }
-
-      var series = template.series;
-      for (var i = 0; i < series.length; i++) {
-        var a = series[i];
-        var item = Seriess.findOne({_id:series[i].id}); //.fetch();
-        totalTakenImages += item.taken;
-        totalPlannedImages += item.repeat;
-      }
-
-      return totalTakenImages/totalPlannedImages;
-  };
 
   deleteEntry() {
       TargetSessions.remove(this.props.target._id);
@@ -125,7 +106,7 @@ class TargetSession extends Component {
           {this.props.target.description}
         </Item.Meta>
         <Item.Description>
-          <Progress percent={this.calcTargetProgress()} progress />
+          <Progress percent={calcTargetProgress(this.props.target._id)} progress />
         </Item.Description>
         <Item.Extra>
           <Button.Group basic size='small'>

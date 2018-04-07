@@ -1,72 +1,75 @@
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 
+import { TargetSessions } from './targetSessions.js';
+import { TakeSeriesTemplates } from './takeSeriesTemplates.js';
+import { Seriess } from './seriess.js';
+import { TheSkyXInfos } from './theSkyXInfos.js';
+
+//Tools
+import { tsx_ServerStates } from './serverStates.js'
+import {
+  canTargetSessionStart,
+  getTargetSession,
+  calcTargetProgress,
+} from './sessionTools.js';
+
 import {tsx_feeder, tsx_is_waiting} from '../../server/tsx_feeder.js'
 
+import {shelljs} from 'meteor/akasha:shelljs';
+
 var forceAbort = false;
-var port = 3040;
-var ip = 'localhost';
 
-import {tsxCmdSetTargetRaDec} from '../tsx/SkyX_JS_TryTarget.js'
-import {tsxCmdSlewRaDec} from '../tsx/SkyX_JS_Slew.js'
-import {tsxCmdCLS} from '../tsx/SkyX_JS_CLS.js'
-import {tsxCmdGetTwilight} from '../tsx/SkyX_JS_Twilight.js'
-
-import {tsxCmdFindGuideStar} from '../tsx/SkyX_JS_FindGuideStar.js'
-import {tsxCmdFocus3} from '../tsx/SkyX_JS_Focus-3.js'
-import {tsxCmdFrameAndGuide} from '../tsx/SkyX_JS_FrameAndGuide.js'
-import {tsxCmdGetFocusTemp} from '../tsx/SkyX_JS_GetFocTemp.js'
-import {tsxCmdMatchAngle} from '../tsx/SkyX_JS_MatchAngle.js'
-import {tsxCmdTakeGuiderImage} from '../tsx/SkyX_JS_TakeGuideImage.js'
-import {tsxCmdFindTargetWithRaDecAlt} from '../tsx/SkyX_JS_TryTarget.js'
-import {tsxCmdTakeImage} from '../tsx/SkyX_JS_TakeImage.js'
-
-// More advance with image supplied... perhaps save an image with the target...
-import {tsxCmdImageLink} from '../tsx/SkyX_JS_ImageLink.js'
-
-// *******************************
-// Get Target Series
-// 1. Target - image, RA/DEC, Name
-// 2. priority - in the case more than one session is ready...
-// 3. Minimum Altitude - start or stop... for now
-// 4. start Time
-// 5. Stop time
-// 6. Temp to check focus
-// 7. Meridian Flip
-// 8. Image Camera Temp
-function getTargetSession(targetSessions) {
-
-  var foundSession = false;
-  var numSessions = targetSession.length;
-  var validSession = false;
-
-  for (var i = 0; i < numSessions; i++) {
-    var canStart = canTargetSessionStart( targetSessions[i]);
-    if( canStart ) {
-      validSession = targetSessions[i];
-      foundSession = true;
-      break;
-    }
-  }
-
-  if( foundSession ) {
-    for (var i = 0; i < numSessions; i++) {
-      if( validSession != targetSessions[i] ) {
-        chk = targetSession[i];
-        if( canTargetSessionStart( chk ) ) {
-            if( validSession.priority < chk.priority  ) {
-              if( validSession.minAlt > chk.minAlt  ) {
-                if( validSession.startTime > chk.startTime  ) {
-                  validSession = chk;
-                }
-              }
-            }
-          }
+function updateSeries(series) {
+  return Seriess.update( {_id: series._id}, {
+        $set:{
+          order: series.order,
+          exposure: series.exposure,
+          frame: series.frame,
+          filter: series.filter,
+          repeat: series.repeat,
+          binning: series.binning,
+          taken: series.taken,
         }
-      }
-    }
-  return validSession;
+      });
+}
+
+
+/* *******************************
+initialFocusTemp: 0,
+initialMountDirection: "east",
+initialMountAltitude: 30,
+initialMountAzimuth:0,
+ ******************************* */
+export function tsx_SetServerState( name, value) {
+  TheSkyXInfos.upsert( {name: name }, {
+    $set: { value: value }
+  })
 };
+
+export function tsx_GetServerState( name ) {
+  var val = TheSkyXInfos.findOne( {name: name });
+  return val;
+};
+
+var shell = require('shelljs');
+
+// import {tsxCmdSetTargetRaDec} from '../tsx/SkyX_JS_TryTarget.js'
+// import {tsxCmdSlewRaDec} from '../tsx/SkyX_JS_Slew.js'
+// import {tsxCmdCLS} from '../tsx/SkyX_JS_CLS.js'
+// import {tsxCmdGetTwilight} from '../tsx/SkyX_JS_Twilight.js'
+//
+// import {tsxCmdFindGuideStar} from '../tsx/SkyX_JS_FindGuideStar.js'
+// import {tsxCmdFocus3} from '../tsx/SkyX_JS_Focus-3.js'
+// import {tsxCmdFrameAndGuide} from '../tsx/SkyX_JS_FrameAndGuide.js'
+// import {tsxCmdGetFocusTemp} from '../tsx/SkyX_JS_GetFocTemp.js'
+// import {tsxCmdMatchAngle} from '../tsx/SkyX_JS_MatchAngle.js'
+// import {tsxCmdTakeGuiderImage} from '../tsx/SkyX_JS_TakeGuideImage.js'
+// import {tsxCmdFindTargetWithRaDecAlt} from '../tsx/SkyX_JS_TryTarget.js'
+// import {tsxCmdTakeImage} from '../tsx/SkyX_JS_TakeImage.js'
+//
+// // More advance with image supplied... perhaps save an image with the target...
+// import {tsxCmdImageLink} from '../tsx/SkyX_JS_ImageLink.js'
 
 // *******************************
 // Substrung replacement routine for the loading of tsx.js library
@@ -77,48 +80,42 @@ function getTargetSession(targetSessions) {
 //
 // src: https://stackoverflow.com/questions/252924/javascript-how-to-replace-a-sub-string
 //
-function string_replace(haystack, find, sub) {
+export function string_replace(haystack, find, sub) {
     return haystack.split(find).join(sub);
 }
 
-// *******************************
-// Check target... altitude ok, time okay,
-function canTargetSessionStart(targetSession) {
-  var canStart = false;
-  var currentTime = new Time();
-  var currentAlt = 21;
-  var eveningTwighlight = 10;
-  var morningTwighlight = 5;
-
-  // Is it dark enough
-  if( currentTime >= eveningTwighlight ) {
-    // Has end time passed
-    if( targetSession.endTime < currentTime ) {
-      // Has start time passed
-      if( targetSession.startTime >= currentTime ) {
-        // are we at least at the min altitude
-        if( targetSession.minAlt >= currentAlt) {
-          // are we before morning Altitude
-          if( currentTime < morningTwighlight ) {
-            canStart = true;
-          }
-        }
-      }
-    }
-  }
-  return canStart;
-};
+function tsx_cmd(script) {
+  console.log('Creating tsx_cmd: ' + script);
+  // var src =
+  var path = Npm.require('path');
+  var rootPath = path.resolve('.');
+  var src = rootPath.split(path.sep + '.meteor')[0];
+  // var c = Meteor.absolutePath;
+  console.log('Root: ' + src);
+  return src +'/imports/tsx/'+ script+'.js';
+}
 
 // *******************************
-function takeImage( filter, exposure ) {
+function tsx_takeImage( filterNum, exposure ) {
+
   console.log('Starting image');
   var success = false;
-  var cmd = tsxCmdTakeImage(filter,exposure);
-  tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+  // var cmd = tsxCmdTakeImage(filter,exposure);
+  var cmd = shell.cat(tsx_cmd('SkyX_JS_TakeImage'));
+
+  console.log('Load cmd: ' + cmd);
+  // testStr =  string_replace(testStr, '$0000', 'hi');
+  cmd = cmd.replace('$000', Number(filterNum) ); // set filter
+  cmd = cmd.replace('$001', Number(exposure) ); // set exposure
+
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         var result = tsx_return.split('|')[0].trim();
         console.log('Image: ' + result);
         if( result === "Sucess") {
           success = true;
+        }
+        else {
+          console.log('Image failed: ' + tsx_return);
         }
       }
     )
@@ -169,6 +166,404 @@ nErr = ClosedLoopSlew.exec();\
 //
 var imagingSession;
 
+function tsx_AbortGuider() {
+  var dts = new Date();
+  console.log(String(dts) + ': Aborting guider... ');
+  var success = false;
+  // var cmd = tsxCmdTakeImage(filter,exposure);
+  var cmd = shell.cat(tsx_cmd('SkyX_JS_Abort'));
+  // console.log('Load cmd: ' + cmd);
+  // // testStr =  string_replace(testStr, '$0000', 'hi');
+  // cmd = cmd.replace('$000', filterNum ); // set filter
+  // cmd = cmd.replace('$001', exposure ); // set exposure
+
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+        var result = tsx_return.split('|')[0].trim();
+      }
+    )
+  )
+  while( tsx_is_waiting() ) {
+   Meteor.sleep( 1000 );
+  }
+  return true;
+}
+
+// *******************************
+// Try tot find the target
+function tsx_TryTarget(targetSession) {
+  var dts = new Date();
+  console.log(String(dts) + ': Trying Target... ');
+  var cmd = shell.cat(tsx_cmd('SkyX_JS_TryTarget'));
+
+  cmd = cmd.replace("$000", targetSession.targetFindName ); // set filter
+  cmd = cmd.replace("$001", targetSession.minAlt ); // set filter
+  // cmd = cmd.replace("$001", 30 ); // set exposure
+  // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
+  var Out;
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+        var success = tsx_return.split('|')[0].trim();
+        console.log('Any error?: ' + tsx_return);
+        if( success != 'Success') {
+          forceAbort = true;
+          console.log('SkyX_JS_TryTarget Failed. Error: ' + tsx_return);
+          return;
+        }
+        Out = success;
+      }
+    )
+  )
+  return Out;
+}
+
+// *******************************
+//    B. CLS to target
+function tsx_CLS(targetSession) {
+
+  var clsSuccess = false;
+  if( !forceAbort ) {
+    // var cmd = tsxCmdCLS();
+    var cmd = shell.cat(tsx_cmd('SkyX_JS_CLS'));
+    cmd = cmd.replace('$000', targetSession.targetFindName ); // set filter
+    cmd = cmd.replace('$001', targetSession.focusFilter); // set exposure
+
+    tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+          var result = tsx_return.split('|')[0].trim();
+          console.log('Any error?: ' + result);
+          if( result != 'Success') {
+            forceAbort = true;
+            console.log('CLS Failed. Error: ' + result);
+          }
+          clsSuccess = true;
+        }
+      )
+    )
+  }
+  while( tsx_is_waiting() ) {
+   Meteor.sleep( 1000 );
+  }
+
+  return clsSuccess;
+}
+
+
+function tsx_InitialFocus(targetSession) {
+  var dts = new Date();
+  console.log(String(dts) + ': Geting intial @focus3... ');
+
+  var focusFilter = getFilterIndexFor(targetSession.focusFilter);
+
+  var cmd = shell.cat(tsx_cmd('SkyX_JS_Focus-3'));
+  cmd = cmd.replace("$000", focusFilter ); // set filter
+  cmd = cmd.replace("$001", "No" ); // set filter
+  // cmd = cmd.replace("$001", 30 ); // set exposure
+  // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
+  var Out;
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+        var success = tsx_return.split('|')[0].trim();
+        console.log('SkyX_JS_Focus result check: ' + tsx_return);
+        // if( success != 'Success') {
+        //   forceAbort = true;
+        //   console.log('SkyX_JS_Focus Failed. Error: ' + tsx_return);
+        //   return;
+        // }
+        Out = success;
+      }
+    )
+  )
+  while( tsx_is_waiting() ) {
+   Meteor.sleep( 1000 );
+  }
+
+  return Out;
+}
+
+function tsx_focusTemperature() {
+  var dts = new Date();
+  console.log(String(dts) + ': Geting focus temperature... ');
+
+  var cmd = shell.cat(tsx_cmd('SkyX_JS_GetFocTemp'));
+  // cmd = cmd.replace("$000", focusFilter ); // set filter
+  // cmd = cmd.replace("$001", "No" ); // set filter
+  // cmd = cmd.replace("$001", 30 ); // set exposure
+  // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
+  var Out;
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+        var success = tsx_return.split('|')[0].trim();
+        console.log('SkyX_JS_GetFocTemp result check: ' + tsx_return);
+        Out = success;
+      }
+    )
+  )
+  return Out;
+}
+
+function tsx_GetMountCoords() {
+  var dts = new Date();
+  console.log(String(dts) + ': Geting mount coordinates... ');
+
+  var cmd = shell.cat(tsx_cmd('SkyX_JS_GetMntCoords'));
+  // cmd = cmd.replace("$000", focusFilter ); // set filter
+  // cmd = cmd.replace("$001", "No" ); // set filter
+  // cmd = cmd.replace("$001", 30 ); // set exposure
+  // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
+  var Out;
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+        console.log('SkyX_JS_GetFocTemp result check: ' + tsx_return);
+        //Out = ra2000 + '|' + dec2000+ '|' + CoordsHMS2000 + '|';			// Form the output string
+
+        Out = {
+          ra: tsx_return.split('|')[0].trim(),
+          dec: tsx_return.split('|')[1].trim(),
+          hms: tsx_return.split('|')[2].trim(),
+        }
+      }
+    )
+  )
+  return Out;
+}
+
+function tsx_GetMountOrientation() {
+  var dts = new Date();
+  console.log(String(dts) + ': Geting mount orientiation... ');
+
+  var cmd = shell.cat(tsx_cmd('SkyX_JS_GetMntOrient'));
+  // cmd = cmd.replace("$000", focusFilter ); // set filter
+  // cmd = cmd.replace("$001", "No" ); // set filter
+  // cmd = cmd.replace("$001", 30 ); // set exposure
+  // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
+  var Out;
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+        console.log('SkyX_JS_GetFocTemp result check: ' + tsx_return);
+        //Out = ra2000 + '|' + dec2000+ '|' + CoordsHMS2000 + '|';			// Form the output string
+
+        Out = {
+          direction: tsx_return.split('|')[0].trim(),
+          altitude: tsx_return.split('|')[1].trim(),
+        }
+      }
+    )
+  )
+  return Out;
+}
+
+function SetUpForImagingRun(targetSession)
+//#
+//# Call the Closed-Loop-Slew function to point the mount to the target, record the mount's
+//# starting location for future comparisons, find a decent guide star and start autoguiding
+//#
+{
+	//# Kill the guider in case it's still running.
+  tsx_SetServerState( 'currentStage', "Start: " + targetSession.name );
+  Meteor.sleep(3000); // pause 3 seconds
+  tsx_SetServerState( 'currentStage', "Stopping autoguider" );
+  tsx_AbortGuider();
+
+  tsx_SetServerState( 'currentStage', "Confirm target" );
+	tsx_TryTarget(targetSession);					// If Target can't be found, exit.
+
+  tsx_SetServerState( 'currentStage', "CLS to target" );
+	tsx_CLS(targetSession) 						//# Call the Closed-Loop-Slew function to go to the target
+
+  Meteor.sleep( 500 );						// Shouldn't be needed but give SkyX a chance to catch its breath.
+
+  // needs initial focus temp
+  tsx_SetServerState( 'currentStage', "Recording intial temp" );
+  var initTemp = tsx_InitialFocus();   //# Force a starting focus in case of mirror shift or because I forgot to.
+  tsx_SetServerState( 'initialFocusTemperature', initTemp );
+
+  // needs intial Atl and Az
+	var mntCoords = tsx_GetMntAltAz();				// Get & Display the mount's current altitude and direction
+  tsx_SetServerState( 'initialMntRA', mntCoords.ra );
+  tsx_SetServerState( 'initialMntDEC', mntCoords.dec );
+  tsx_SetServerState( 'initialMntMHS', mntCoords.mhs );
+
+  var mntOrient = tsx_GetMountOrientation();
+  tsx_SetServerState( 'initialMntDir', mntCoords.direction );
+  tsx_SetServerState( 'initialMntAlt', mntCoords.altitude );
+
+  tsx_SetServerState( 'currentStage', "Setup guider" );
+	tsx_SetUpAutoGuiding();			// Setup & Start Auto-Guiding.
+
+  tsx_SetServerState( 'currentStage', "Parking mount" );
+  var lumFilter = 0;
+	tsx_MntPark(lumFilter);
+  tsx_SetServerState( 'currentStage', "All stopped" );
+}
+
+function tsx_SetUpAutoGuiding(targetSession) {
+  var guideImageSuccess = false;
+  if( !forceAbort ) {
+    // var cmd = tsxCmdTakeGuiderImage(targetSession.guideExposure, targetSession.guideDelay);
+    var cmd = shell.cat(tsx_cmd('SkyX_JS_TakeGuideImage'));
+    cmd = cmd.replace('$000', targetSession.guideExposure );
+    // cmd = cmd.replace('$001', targetSession.scale);
+    // cmd = cmd.replace('$002', targetSession.exposure);
+
+    tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+          guideImageSuccess = true;
+          tsx_SetServerState( 'currentStage', "Processing guider image" );
+
+        }
+      )
+    )
+  }
+  while( tsx_is_waiting() ) {
+   Meteor.sleep( 1000 );
+  }
+
+  var guideStarSuccess = false;
+  var guideStarX = 0;
+  var guideStarY = 0;
+  if( !forceAbort ) {
+    // var cmd = tsxCmdFindGuideStar();
+    var cmd = shell.cat(tsx_cmd('SkyX_JS_FindAutoGuideStar'));
+    // cmd = cmd.replace('$000', targetSession.guideExposure );
+    // cmd = cmd.replace('$001', targetSession.scale);
+    // cmd = cmd.replace('$002', targetSession.exposure);
+    tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+          console.log('Any error?: ' + result);
+          guideStarSuccess = true;
+          guideStarX = tsx_return.split('|')[1].trim();
+          guideStarY = tsx_return.split('|')[2].trim();
+          tsx_SetServerState( 'currentStage', "Best guide star candidate: "+guideStarX+", "+guideStarY );
+        }
+      )
+    )
+  }
+
+  if( !forceAbort ) {
+    // var cmd = tsxCmdFindGuideStar();
+    var cmd = shell.cat(tsx_cmd('SkyX_JS_FrameAndGuide'));
+    cmd = cmd.replace('$000', guideStarX );
+    cmd = cmd.replace('$001', guideStarY );
+    // cmd = cmd.replace('$002', targetSession.exposure);
+    tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+        }
+      )
+    )
+  }
+  tsx_SetServerState( 'currentStage', "Autoguiding started" );
+}
+
+function tsx_MntPark(lumFilter) {
+  var dts = new Date();
+  console.log(String(dts) + ': Geting mount orientiation... ');
+
+  var cmd = shell.cat(tsx_cmd('SkyX_JS_ParkMount'));
+  cmd = cmd.replace("$000", lumFilter ); // set filter
+  // cmd = cmd.replace("$001", "No" ); // set filter
+  // cmd = cmd.replace("$001", 30 ); // set exposure
+  var Out;
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+        console.log('SkyX_JS_GetFocTemp result check: ' + tsx_return);
+
+      }
+    )
+  )
+  return Out;
+}
+
+// *******************************
+// Used to find the RA/DEC in the TargetEditor Details Tab
+export function tsx_GetTargetRaDec(targetFindName) {
+  console.log('tsx_GetTargetRaDec: ' + targetFindName);
+  var file = tsx_cmd('SkyX_JS_GetTargetCoords');
+  // console.log('File: ' + file );
+  var cmd = shell.cat(file);
+  cmd = cmd.replace("$000", targetFindName ); // set filter
+  // cmd = cmd.replace("$001", 30 ); // set exposure
+  // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
+  var Out = "Error|Target not found.";
+
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+      var success = tsx_return.split('|')[0].trim();
+      console.log('Any error?: ' + tsx_return);
+      if( success != 'Success') {
+        console.log('tsx_GetTargetRaDec Failed. Error: ' + tsx_return);
+        return;
+      }
+      // Out = 'Success|' + targetRA + '|' + targetDEC+ '|' + altitude + '|'+ azimuth ;			// Form the output string
+      tsx_SetServerState( 'targetRA', tsx_return.split('|')[1].trim() );
+      tsx_SetServerState( 'targetDEC', tsx_return.split('|')[2].trim() );
+      tsx_SetServerState( 'targetATL', tsx_return.split('|')[3].trim() );
+      tsx_SetServerState( 'targetAZ', tsx_return.split('|')[3].trim() );
+
+      Out = tsx_return;
+      })
+    )
+
+  return Out;
+}
+
+// NEED A METHOD TO ADD TEMP SAMPLES INTO Database
+// NEED A METHOD TO RESET THE TEMP DATA IN DATABASE
+// *******************************
+// *******************************
+// Find a session
+// *******************************
+// *******************************
+  //    - check start time
+  //    - check for dark time... is darkenough
+  //    - check start altitude
+  //    - check priority
+  //    - check for end times
+  //    - check end alitudes
+  //    - check morning sunrise
+function getValidTargetSession() {
+  var imagingSession = getTargetSession();
+
+  // *******************************
+  // 1. Get target's Ra/Dec to Slew, options:
+  //  a) Object name to find
+  //  b) Image
+  //  c) Ra/Dec
+  if( typeof imagingSession == 'undefined') {
+    console.log('Failed to find a valid target session.');
+    return;
+  }
+  else {
+    console.log('Found: ' + imagingSession.name);
+  }
+
+  if( !forceAbort ) {
+    var cmd = tsx_GetTargetRaDec (imagingSession.targetFindName);
+    tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+        var result = tsx_return.split('|')[0].trim();
+        console.log('Target: ' + result);
+        if( result === "Found") {
+          targetFound = true;
+          tsx_SetServerState( tsx_ServerStates.currentStage, 'Found target' );
+          return imagingSession;
+          }
+        }
+      )
+    )
+  }
+  else {
+    return;
+  }
+}
+
+function takeSeriesImage(series) {
+  console.log('Entered : takeSeriesImage');
+  console.log('Procesing filter: ' + series.filter);
+  console.log('Series repeat: ' + series.repeat);
+  console.log('Series taken: ' + series.taken);
+  var remainingImages = series.repeat - series.taken;
+  console.log('number of images remaining: ' + remainingImages);
+  if( (remainingImages <= series.repeat) && (remainingImages > 0) ) {
+    console.log('Launching take image for: ' + series.filter + ' at ' + series.exposure + ' seconds');
+
+    // need to look up the filters in TSX
+
+    var res = tsx_takeImage(0,series.exposure);
+    console.log('Taken image: ' +res);
+    series.taken++;
+    updateSeries(series);
+  }
+}
+
+
 // *******************************
 // Utilities:
 // 1. CLS
@@ -184,6 +579,54 @@ var imagingSession;
 
 Meteor.methods({
 
+  tsx_Test() {
+    console.log('Get a valid session');
+    var imagingSession = getValidTargetSession();
+    if (typeof imagingSession == 'undefined') {
+      console.log('*** No session found');
+
+    } else {
+
+    }
+    console.log('Starting the autoguide');
+    tsx_SetUpAutoGuiding(imagingSession);
+
+  },
+
+  tsx_TryTargetToImage(targetSession) {
+    // *******************************
+    //    B. Slew to target
+    var cmdSuccess = false;
+    if( !forceAbort ) {
+      var file = tsx_cmd('SkyX_JS_TryTarget');
+      // console.log('File: ' + file );
+      var cmd = shell.cat(file);
+      // console.log('Initial cmd: ' + cmd);
+      // console.log('Target name: ' + targetSession.targetFindName );
+      console.log('Hardcoded minAlt: ' + 30 );
+      // console.log('minAlt: ' + targetSession.minAlt );
+      cmd = cmd.replace("$000", targetSession.targetFindName ); // set filter
+      cmd = cmd.replace("$001", 30 ); // set exposure
+      // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
+      // console.log('Initial cmd: ' + cmd);
+
+      tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+            var result = tsx_return.split('|')[0].trim();
+            console.log('Any error?: ' + result);
+            if( result != 'Success') {
+              forceAbort = true;
+              console.log('SkyX_JS_TryTarget Failed. Error: ' + result);
+            }
+            // if success then TheSkyX has made this point the target...
+            // now get the coordinates
+            cmdSuccess = true;
+          }
+        )
+      )
+    }
+  },
+
+
   // Assumed balanced RA/DEC
   // Assumed Date/Time/Long/Lat correct
   // Assumed Homed
@@ -192,43 +635,6 @@ Meteor.methods({
   // Assume TPoint recalibration done
   // Assumed Accurate Polar Alignment (APA) done
   // Do not assume Autoguider calibrated, will be done once guide star found
-
-  // NEED A METHOD TO ADD TEMP SAMPLES INTO Database
-  // NEED A METHOD TO RESET THE TEMP DATA IN DATABASE
-  // *******************************
-  // *******************************
-  // Find a session
-  // *******************************
-  // *******************************
-    //    - check start time
-    //    - check for dark time... is darkenough
-    //    - check start altitude
-    //    - check priority
-    //    - check for end times
-    //    - check end alitudes
-    //    - check morning sunrise
-  getImageSeries(targetSessions) {
-    imagingSession = getTargetSession(targetSessions);
-
-    // *******************************
-    // 1. Get target's Ra/Dec to Slew, options:
-    //  a) Object name to find
-    //  b) Image
-    //  c) Ra/Dec
-    var targetFound = false;
-    if( !forceAbort && imageSession != '' ) {
-      var cmd = tsxCmdSetTargetRaDec (imageSession.ra,imageSession.dec);
-      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
-          var result = tsx_return.split('|')[0].trim();
-          console.log('Target: ' + result);
-          if( result === "Found") {
-            targetFound = true;
-            }
-          }
-        )
-      )
-    }
-  },
 
   // *******************************
   // *******************************
@@ -240,8 +646,13 @@ Meteor.methods({
     //    B. Slew to target
     var slewSuccess = false;
     if( !forceAbort && targetFound ) {
-      var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
-      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+
+      var cmd = shell.cat(tsx_cmd('SkyX_JS_Slew'));
+      cmd = cmd.replace('$000', targetSession.ra ); // set filter
+      cmd = cmd.replace('$001', targetSession.dec ); // set exposure
+      // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
+
+      tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
             var result = tsx_return.split('|')[0].trim();
             console.log('Any error?: ' + result);
             if( result != 'Success') {
@@ -258,8 +669,12 @@ Meteor.methods({
     // 3. refine Focus - @Focus3
     var focusSuccess = false;
     if( !forceAbort && slewSuccess ) {
-      var cmd = tsxCmdFocus3(targetSession.focusFilter,targetSession.focusBin,targetSession.focusSamples);
-      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+      // var cmd = tsxCmdFocus3(targetSession.focusFilter,targetSession.focusBin,targetSession.focusSamples);
+      var cmd = shell.cat(tsx_cmd('SkyX_JS_Focus-3'));
+      cmd = cmd.replace('$000', targetSession.focusFilter ); // set filter
+      cmd = cmd.replace('$001', targetSession.focusBin); // set exposure
+
+      tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
             var result = tsx_return.split('|')[0].trim();
             console.log('Any error?: ' + result);
             if( result != 'Success') {
@@ -275,8 +690,12 @@ Meteor.methods({
     var lastFocusTemp = 0;
     var getFocusTempSuccess = false;
     if( !forceAbort && slewSuccess ) {
-      var cmd = tsxCmdGetFocusTemp();
-      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+      // var cmd = tsxCmdGetFocusTemp();
+      var cmd = shell.cat(tsx_cmd('SkyX_JS_GetFocTemp'));
+      // cmd = cmd.replace('$000', targetSession.focusFilter ); // set filter
+      // cmd = cmd.replace('$001', targetSession.focusBin); // set exposure
+
+      tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
             var result = tsx_return.split('|')[0].trim();
             console.log('Any error?: ' + result);
             if( result != 'Success') {
@@ -291,30 +710,18 @@ Meteor.methods({
     }
 
     // *******************************
-    //    B. CLS to target
-    var clsSuccess = false;
-    if( !forceAbort && focusSuccess ) {
-      var cmd = tsxCmdCLS();
-      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
-            var result = tsx_return.split('|')[0].trim();
-            console.log('Any error?: ' + result);
-            if( result != 'Success') {
-              forceAbort = true;
-              console.log('CLS Failed. Error: ' + result);
-            }
-            clsSuccess = true;
-          }
-        )
-      )
-    }
-    // *******************************
     //    C. Match Rotation/Angle if provided:
     //      a) if entered for session
     //      b) obtained from image
     var rotateSucess = false;
     if( !forceAbort && clsSuccess ) {
-      var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale);
-      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+      // var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale, target.expos);
+      var cmd = shell.cat(tsx_cmd('SkyX_JS_MatchAngle'));
+      cmd = cmd.replace('$000', targetSession.angle );
+      cmd = cmd.replace('$001', targetSession.scale);
+      cmd = cmd.replace('$002', targetSession.exposure);
+
+      tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
             var result = tsx_return.split('|')[0].trim();
             console.log('Any error?: ' + result);
             if( result != 'Success') {
@@ -329,45 +736,15 @@ Meteor.methods({
 
     // *******************************
     // 4. Get Guidestar
-    var guideImageSuccess = false;
-    if( !forceAbort && rotateSucess ) {
-      var cmd = tsxCmdTakeGuiderImage(targetSession.guideExposure, targetSession.guideDelay);
-      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
-            var result = tsx_return.split('|')[0].trim();
-            console.log('Any error?: ' + result);
-            if( result != 'Success') {
-              forceAbort = true;
-              console.log('Rotate Failed. Error: ' + result);
-            }
-            guideImageSuccess = true;
-          }
-        )
-      )
-    }
-    var guideStarSuccess = false;
-    var guideStarX = 0;
-    var guideStarY = 0;
-    if( !forceAbort && rotateSucess ) {
-      var cmd = tsxCmdFindGuideStar();
-      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
-            var result = tsx_return.split('|')[0].trim();
-            console.log('Any error?: ' + result);
-            if( result != 'Success') {
-              forceAbort = true;
-              console.log('Guider Image Failed. Error: ' + result);
-            }
-            guideStarSuccess = true;
-            guideStarX = tsx_return.split('|')[1].trim();
-            guideStarY = tsx_return.split('|')[2].trim();
-          }
-        )
-      )
-    }
-
     var guidingSuccess = false;
     if( !forceAbort && guideStarSuccess ) {
-      var cmd = tsxCmdFrameAndGuide(guideStarX,guideStarY,subFrameStar );
-      tsx_feeder(ip, port, cmd, Meteor.bindEnvironment((tsx_return) => {
+      // var cmd = tsxCmdFrameAndGuide(guideStarX,guideStarY,subFrameStar );
+      var cmd = shell.cat(tsx_cmd('SkyX_JS_FindAutoGuideStar'));
+      cmd = cmd.replace('$000', guideStarX );
+      cmd = cmd.replace('$001', guideStarY);
+      // cmd = cmd.replace('$002', targetSession.exposure);
+
+      tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
             var result = tsx_return.split('|')[0];
             console.log('Any error?: ' + result);
             if( result != 'Success') {
@@ -400,7 +777,7 @@ Meteor.methods({
     var remainingImages = series.repeat - series.taken;
     console.log('number of images remaining: ' + remainingImages);
     console.log('Launching take image for: ' + series.filter + ' at ' + series.exposure + ' seconds');
-    var res = takeImage(series.filter,series.exposure);
+    var res = tsx_takeImage(series.filter,series.exposure);
     console.log('Taken image: ' +res);
 
     return;
@@ -408,81 +785,72 @@ Meteor.methods({
 
   startImaging(targetSession) {
     // process for each filter
-    var seriesProcess = targetSession.takeSeries.processSeries;
+    var template = TakeSeriesTemplates.findOne( {_id:targetSession.series._id});
+    var seriesProcess = template.processSeries;
     console.log('Imaging process: ' + seriesProcess );
 
-    var numFilters = targetSession.takeSeries.series.length;
+    var numFilters = template.series.length;
     console.log('Number of filters: ' + numFilters );
-    for (var i = 0; i < numFilters; i++) {
-      // this will loop through each seriess
 
-      if ( seriesProcess === 'repeat series' ) {
-        console.log('Entered ' + seriesProcess);
-        // use length and cycle until a stop condition
-        for (var repeatSeries = 0; repeatSeries < targetSession.takeSeries.series.length; repeatSeries++) {
-          // take image
-          var series = targetSession.takeSeries.series[repeatSeries];
-          var res = takeImage(series.filter,series.exposure);
-          console.log('Take image: ' +res);
-          series.taken++;
-          // check end conditions
-        }
-        // check end conditions... if okay
-        // allow to repeat
-          i=0;
+    // load the filters
+    var takeSeries = [];
+    for (var i = 0; i < template.series.length; i++) {
+      var series = Seriess.findOne({_id:template.series[i].id});
+      console.log('Got series - ' + template.series[i].id + ', ' + series.filter);
+      if( typeof series != 'undefined') {
+        takeSeries.push(series);
       }
-      // similar to continual repeat... except allow to exit without end condition
-      else if( seriesProcess === 'across series' ) {
-        console.log('Entered ' + seriesProcess);
+    }
+    console.log('Number of series: ' + takeSeries.length);
+    // sort the by the order.
+    takeSeries.sort(function(a, b){return b.order-a.order});
+    console.log('Sorted series: ' + takeSeries.length);
+    // set up for the cycle through the filters
+    for (var i = 0; i < takeSeries.length; i++) {
+
+      // do we go across the set of filters once and then repear
+      if( seriesProcess === 'across series' ) {
         // use length and cycle until a stop condition
-        for (var acrossSeries = 0; acrossSeries < targetSession.takeSeries.series.length; acrossSeries++) {
+        var remainingImages = false;
+        for (var acrossSeries = 0; acrossSeries < takeSeries.length; acrossSeries++) {
           // take image
-          var series = targetSession.takeSeries.series[acrossSeries];
-          console.log('\nProcesing filter: ' + series.filter);
-          console.log('Series repeat: ' + series.repeat);
-          console.log('Series taken: ' + series.taken);
-          var remainingImages = series.repeat - series.taken;
-          console.log('number of images remaining: ' + remainingImages);
-          if( (remainingImages <= series.repeat) && (remainingImages > 0) ) {
-            console.log('Launching take image for: ' + series.filter + ' at ' + series.exposure + ' seconds');
-            var res = takeImage(series.filter,series.exposure);
-            console.log('Taken image: ' +res);
-            series.taken++;
+          var series = takeSeries[acrossSeries]; // get the first in the order
+
+          // take image
+          var res = takeSeriesImage(series);
+          console.log('Took image: ' +res);
+
+          // check end conditions
+          if( !remainingImages && series.taken < series.repeat ) {
+            remainingImages = true;
           }
-          // check end conditions
         }
-        // similar to repeat series, except do not reset i...
+        // reset to check across series again
+        if( remainingImages ) {
+          i=0;
+        }
       }
+
+      // do we do one whole filter first.
       else if ( seriesProcess === 'per series' ) {
-        console.log('Entered ' + seriesProcess);
         // use i to lock to the current filter
-        var numImages = targetSession.takeSeries.series[i].repeat - targetSession.takeSeries.series[i].taken;
+        var series = takeSeries[i]; // get the first in the order
+
+        var numImages = series.repeat - series.taken;
         for (var perSeries = 0; perSeries < numImages; repeatSeries++) {
+
           // take image
-          var res = takeImage(targetSession.takeSeries.series[i].filter,targetSession.takeSeries.series[i].exposure);
-          console.log('Take image: ' +res);
-          // check end conditions
-          targetSession.takeSeries.series[i].taken++;
+          var res = takeSeriesImage(series);
+          console.log('Took image: ' +res);
+
         }
+        // now switch to next filter
       }
       else {
         console.log('*** FAILED to process seriess');
       }
-      // do we RESET to repeat and check each series
-      if( i+1 >= targetSession.takeSeries.series.length ) {
-        for (var chk = 0; chk < targetSession.takeSeries.series.length; chk++) {
-          if( targetSession.takeSeries.series[i].taken < targetSession.takeSeries.series[i].repeat ) {
-            i=0;
-            console.log('Reset - more images for : ' + targetSession.takeSeries.series[i].filter );
-            break;
-          }
-          else {
-            console.log('Filter done : ' + targetSession.takeSeries.series[i].filter );
-          }
-        }
-      }
     }
-    // takeImage(exposure, filter)
+    // tsx_takeImage(exposure, filter)
     // check Twilight - force stop
     // check minAlt - stop - find next
     // check stopTime - stop - find next

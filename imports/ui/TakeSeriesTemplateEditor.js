@@ -31,6 +31,7 @@ class TakeSeriesTemplateEditor extends Component {
   }
 
   nameChange = (e, { value }) => this.setState({ name: value });
+
   componentWillMount() {
     // do not modify the state directly
     this.setState({name: this.props.template.name});
@@ -50,31 +51,25 @@ class TakeSeriesTemplateEditor extends Component {
   }
 
   addEntry() {
-    if( this.props.targetEditor == false ) {
+    // get the current map
+    var tid = this.props.template._id;
+    var order = this.props.template.series.length;
 
-      // get the current map
-      var seriesMap = this.props.template.series;
-      console.log('current series size: ' + seriesMap.length);
-      // get the end of the array
-      var append = seriesMap.length+1;
-      console.log('Increased series size to: ' + append);
+    const sid = Seriess.insert(
+      {
+        order: order,
+        exposure: 1,
+        binning: 1,
+        frame: 'Light',
+        filter: 'LUM',
+        repeat: 1,
+        taken: 0,
+      }
+    );
 
-      // create a new map to add
-      var newSeries = new Map();
-      newSeries.set( "order", append);
-      newSeries.set("exposure", 1 );
-      newSeries.set("binning",  1 );
-      newSeries.set("frame", 'Light' );
-      newSeries.set("filter", 'LUM' );
-      newSeries.set("repeat", 1 );
-      newSeries.set("taken", 0);
-      // add the new map to the end, with correct order
-      seriesMap.push(newSeries);
-      // update
-      TakeSeriesTemplates.update({_id: this.props.template._id}, {
-        $push: { 'series': seriesMap },
-      });
-    }
+    TakeSeriesTemplates.update({_id: tid}, {
+      $push: { 'series': {id: sid} }
+    });
   }
 
 

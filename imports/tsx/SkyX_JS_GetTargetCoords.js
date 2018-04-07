@@ -31,6 +31,5 @@ var targetDEC = sky6ObjectInformation.ObjInfoPropOut; 		// Stuff DEC into variab
 
 
 Out = 'Success|' + targetRA + '|' + targetDEC+ '|' + altitude + '|'+ azimuth ;			// Form the output string
-//Out = ra2000 + '|' + dec2000+ '|';// + CoordsHMS2000 + '|';			// Form the output string
 
 /* Socket End Packet */

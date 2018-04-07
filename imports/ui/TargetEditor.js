@@ -12,23 +12,23 @@ import { Form, Label, Tab, Segment, Button, Radio, Input, Table, Dropdown, Check
 
 // import {datetimepicker} from 'meteor/tsega:bootstrap3-datetimepicker'
 //import { DateTimePicker, DateTimePickerStore, } from 'meteor/alonoslav:react-datetimepicker';
-import { DateTimePicker, DateTimePickerStore, } from 'meteor/alonoslav:react-datetimepicker-new';
+// import { DateTimePicker, DateTimePickerStore, } from 'meteor/alonoslav:react-datetimepicker-new';
 
-const STARTTIME_ID = 'startTimeId';
-const startInstance = DateTimePickerStore.getInstanceById(STARTTIME_ID);
-const setStartTime = (date) => {
-  console.log(STARTTIME_ID);
-  // set a new date
-  startInstance.date=date;
-};
-
-const STOPTIME_ID = 'stopTimeId';
-const stopInstance = DateTimePickerStore.getInstanceById(STOPTIME_ID);
-const setStopTime = (date) => {
-  console.log(STOPTIME_ID);
-  // set a new date
-  stopInstance.date(date);
-};
+// const STARTTIME_ID = 'startTimeId';
+// const startInstance = DateTimePickerStore.getInstanceById(STARTTIME_ID);
+// const setStartTime = (date) => {
+//   console.log(STARTTIME_ID);
+//   // set a new date
+//   startInstance.data=date;
+// };
+//
+// const STOPTIME_ID = 'stopTimeId';
+// const stopInstance = DateTimePickerStore.getInstanceById(STOPTIME_ID);
+// const setStopTime = (date) => {
+//   console.log(STOPTIME_ID);
+//   // set a new date
+//   stopInstance.data=date;
+// };
 
 class TargetEditor extends Component {
 
@@ -264,6 +264,8 @@ class TargetEditor extends Component {
     });
   }
 
+
+  // *******************************
   findTarget() {
     // on the client
     console.log('tsx_TargetFind');
@@ -284,6 +286,7 @@ class TargetEditor extends Component {
 
   }
 
+  // *******************************
   render() {
     // *******************************
     // TIME DATEPICKER OPTIONS
@@ -409,7 +412,7 @@ class TargetEditor extends Component {
 
 
               */}
-            <Label>Start Time</Label>
+            {/* <Label>Start Time</Label>
             <DateTimePicker
               id="STARTTIME_ID"
               onDateChanged={setStartTime}
@@ -418,11 +421,11 @@ class TargetEditor extends Component {
             />
             <Label>Stop Time</Label>
             <DateTimePicker
-              id="STARTTIME_ID"
+              id="STOPTIME_ID"
               onDateChanged={setStopTime}
               options={timeOptions}
               dateTimePickerMount={hideTimeOnInit}
-            />
+            /> */}
           </Form.Group>
           <Form.Group widths='equal'>
             <Form.Input
