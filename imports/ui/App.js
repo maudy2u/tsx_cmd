@@ -662,21 +662,17 @@ class App extends Component {
   connectToTSX() {
 
     // these are all working methods
-    var getIp = TheSkyXInfos.find().fetch();
-    var pid = TheSkyXInfos.findOne({name: 'ip'});
-    var prt = TheSkyXInfos.findOne({name: 'port'});
-    var i1 = TheSkyXInfos.findOne().ip().text;
-    var i2 = this.props.tsxIP.text;
+    var pid = this.props.tsxIP.text;
+    var prt = this.props.tsxPort.text;
 
     // var portId = TheSkyXInfos.findOne({name: 'port'});
     if( typeof pid != 'undefined' ) { //}&& (typeof portId != 'undefined') ) {
-      ip = pid.text;
-      this.setState({ ip: pid.text.trim() });
+      this.setState({ ip: pid.trim() });
     }
     // var portId = TheSkyXInfos.findOne({name: 'port'});
     if( typeof prt != 'undefined' ) { //}&& (typeof portId != 'undefined') ) {
       ip = prt.text;
-      this.setState({ port: prt.text.trim() });
+      this.setState({ port: prt.trim() });
     }
 
     // on the client
@@ -716,8 +712,7 @@ class App extends Component {
   }
 
   renderMenu() {
-    const { activeItem } = this.state;
-
+    const { activeItem  } = this.state;
 
     return(
       <div>
@@ -753,8 +748,7 @@ class App extends Component {
         <Modal.Description>
           <Input
             label='IP:'
-            defaultValue=
-            {this.state.ip}
+            value={this.state.ip}
             onChange={this.ipChange}/>
         </Modal.Description>
         <Modal.Actions>
@@ -784,8 +778,7 @@ class App extends Component {
         <Modal.Description>
           <Input
             label='Port:'
-            defaultValue=
-            {this.state.port}
+            value={this.state.port}
             onChange={this.portChange}/>
         </Modal.Description>
         <Modal.Actions>
@@ -822,6 +815,7 @@ class App extends Component {
   render() {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
     */
+    const { activeItem, ip, port,  } = this.state;
 
     return (
       <div className="container">
@@ -834,14 +828,14 @@ class App extends Component {
               <Button icon='exchange' onClick={this.serverTest.bind(this)}/>
               <Label>TSX ip:
                 <Label.Detail onClick={this.modalEnterIpOpen.bind(this)}>
-                  {this.props.tsxIP.value}
+                  {ip}
                 </Label.Detail>
               </Label>
                {this.renderIPEditor()}
               <Label>
                 TSX port:
                 <Label.Detail onClick={this.modalEnterPortOpen.bind(this)}>
-                  {this.state.port}
+                  {port}
                 </Label.Detail>
               </Label>
               <Label>Status <Label.Detail>{this.tsxStat()}</Label.Detail></Label>
@@ -1041,7 +1035,7 @@ class App extends Component {
     return {
       tsxStatus: TheSkyXInfos.findOne({name: 'currentStage' }),
       tsxInfo: TheSkyXInfos.find({}).fetch(),
-      tsxIP: TheSkyXInfos.find({name: 'ip' }).fetch(),
+      tsxIP: TheSkyXInfos.findOne({name: 'ip' }),
       tsxPort: TheSkyXInfos.findOne({name: 'port' }),
       seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
       filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),

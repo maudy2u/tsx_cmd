@@ -266,7 +266,7 @@ Meteor.startup(() => {
   initServerStates();
   console.log(' RESTARTED');
   console.log(' ******************');
-  tsx_SetServerState(tsx_ServerStates.currentStage, 'waiting');
+  tsx_SetServerState(tsx_ServerStates.currentStage, 'idle');
 
   var dbIp = TheSkyXInfos.findOne({name:'ip'});
   var dbPort = TheSkyXInfos.findOne({name:'port'});
