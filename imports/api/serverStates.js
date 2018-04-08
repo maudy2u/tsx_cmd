@@ -31,8 +31,8 @@ export function tsx_SetServerState( name, value) {
   })
 };
 
-export function tsx_UpdateDevice( name, mod, man) {
-  TheSkyXInfos.update( {name: name }, {
+export function tsx_UpdateDevice( name, man, mod) {
+  TheSkyXInfos.upsert( {name: name }, {
     $set: {
       model: mod,
       manufacturer: man,

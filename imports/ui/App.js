@@ -492,79 +492,32 @@ class App extends Component {
     ip = tsxInfo.ip;
     port = tsxInfo.port;
 
-    var mount = TheSkyXInfos.findOne({name:'mount'});
-    var mountInfo;
-    if( (typeof mount.mount.manufacturer != 'undefined') && (typeof mount.mount.model != 'undefined') ) {
-      mountInfo = mount.mount.manufacturer + '|' + mount.mount.model;
-    }
-    else {
-      mountInfo = 'Not connected';
-    }
-
-    var camera = TheSkyXInfos.findOne({name:'camera'});
-    var cameraInfo;
-    if( (typeof camera.camera.manufacturer != 'undefined') && (typeof camera.camera.model != 'undefined') ) {
-      cameraInfo = camera.camera.manufacturer + '|' + camera.camera.model;
-    }
-    else {
-      cameraInfo = 'Not connected';
-    }
-
-    var guider = TheSkyXInfos.findOne({name:'guider'});
-    var guiderInfo;
-    if( (typeof guider.guider.manufacturer != 'undefined') && (typeof guider.guider.model != 'undefined') ) {
-      guiderInfo = guider.guider.manufacturer + '|' + guider.guider.model;
-    }
-    else {
-      guiderInfo = 'Not connected';
-    }
-
-    var rotator = TheSkyXInfos.findOne({name:'rotator'});
-    var rotatorInfo;
-    if( (typeof rotator.rotator.manufacturer != 'undefined') && (typeof rotator.rotator.model != 'undefined') ) {
-      rotatorInfo = rotator.rotator.manufacturer + '|' + rotator.rotator.model;
-    }
-    else {
-      rotatorInfo = 'Not connected';
-    }
-
-    var efw = TheSkyXInfos.findOne({name:'efw'});
-    var efwInfo;
-    if( (typeof efw.efw.manufacturer != 'undefined') && (typeof efw.efw.model != 'undefined') ) {
-      efwInfo = efw.efw.manufacturer + '|' + efw.efw.model;
-    }
-    else {
-      efwInfo = 'Not connected';
-    }
-
-    var focuser = TheSkyXInfos.findOne({name:'focuser'});
-    var focuserInfo;
-    if( (typeof focuser.focuser.manufacturer != 'undefined') && (typeof focuser.focuser.model != 'undefined') ) {
-      focuserInfo = focuser.focuser.manufacturer + '|' + focuser.focuser.model;
-    }
-    else {
-      focuserInfo = 'Not connected';
-    }
+    var mount = TheSkyXInfos.findOne().mount();
+    var camera = TheSkyXInfos.findOne().camera();
+    var guider = TheSkyXInfos.findOne().guider();
+    var rotator = TheSkyXInfos.findOne().rotator();
+    var efw = TheSkyXInfos.findOne().efw();
+    var focuser = TheSkyXInfos.findOne().focuser();
 
     return (
         <Segment.Group>
           <Segment><Label>Mount<Label.Detail>
-            {mountInfo}
+            {mount.manufacturer + ' | ' + mount.model}
           </Label.Detail></Label></Segment>
           <Segment><Label>Camera<Label.Detail>
-            {cameraInfo}
+            {camera.manufacturer + ' | ' + camera.model}
           </Label.Detail></Label></Segment>
           <Segment><Label>Autoguider<Label.Detail>
-            {guiderInfo}
+            {guider.manufacturer + ' | ' + guider.model}
           </Label.Detail></Label></Segment>
           <Segment><Label>Filter Wheel<Label.Detail>
-            {efwInfo}
+            {efw.manufacturer + ' | ' + efw.model}
           </Label.Detail></Label></Segment>
           <Segment><Label>Focuser<Label.Detail>
-            {focuserInfo}
+            {focuser.manufacturer + ' | ' + focuser.model}
           </Label.Detail></Label></Segment>
           <Segment><Label>Rotator<Label.Detail>
-            {rotatorInfo}
+            {rotator.manufacturer + ' | ' + rotator.model}
           </Label.Detail></Label></Segment>
         </Segment.Group>
     );
@@ -835,8 +788,7 @@ class App extends Component {
                 </Label.Detail>
               </Label>
               <Label>Status <Label.Detail>{this.tsxStat()}</Label.Detail></Label>
-
-               {this.renderPortEditor()}
+              {this.renderPortEditor()}
             </Segment>
             {/* { this.tsxConnectionFailed() } */}
             { this.showMain() }

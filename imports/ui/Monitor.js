@@ -151,7 +151,7 @@ class Monitor extends Component {
           }
 
         }
-      });
+      }.bind(this));
   }
 
   getValidSession() {

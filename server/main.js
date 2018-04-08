@@ -267,13 +267,21 @@ Meteor.startup(() => {
   initServerStates();
   console.log(' RESTARTED');
   console.log(' ******************');
+
+  // Initialze the server on startup
   tsx_SetServerState(tsx_ServerStates.currentStage, 'idle');
+  tsx_UpdateDevice('mount', 'Not connected ', '' );
+  tsx_UpdateDevice('camera', 'Not connected ', '' );
+  tsx_UpdateDevice('guider', 'Not connected ', '' );
+  tsx_UpdateDevice('rotator', 'Not connected ', '' );
+  tsx_UpdateDevice('efw', 'Not connected ', '' );
+  tsx_UpdateDevice('focuser', 'Not connected ', '' );
 
   var dbIp = TheSkyXInfos.findOne().ip() ;
   var dbPort = TheSkyXInfos.findOne().port();
   if( (typeof dbIp != 'undefined') && (typeof dbPort != 'undefined') ) {
-    console.log('TSX server set to IP: ' + dbIp.value );
-    console.log('TSX server set to port: ' + dbPort.value );
+    console.log('TSX server set to IP: ' + dbIp );
+    console.log('TSX server set to port: ' + dbPort );
   };
 
 
@@ -396,14 +404,14 @@ var forceAbort = false;
 
    connectTsx() {
 
+     console.log(' ******************************* ');
      var isOnline = tsxServerIsOnline();
      console.log('tsxServerIsOnline: ' + isOnline);
-     if( isOnline ) {
-       return "Error|";
-     }
 
       // *******************************
       //  GET THE CONNECTED EQUIPEMENT
+      console.log(' ******************************* ');
+      console.log('Loading devices');
      var cmd = '\
      Out =\
      "aMan|"+ SelectedHardware.autoguiderCameraManufacturer +"\
@@ -419,6 +427,8 @@ var forceAbort = false;
      |rotMan|"+ SelectedHardware.rotatorManufacturer +"\
      |rotMod|"+ SelectedHardware.rotatorModel +"\
      ";'
+     var cmd = tsxHeader + cmd + tsxFooter;
+
      var success;
      tsx_feeder( cmd, Meteor.bindEnvironment((tsx_return) => {
 
@@ -456,7 +466,6 @@ var forceAbort = false;
             tsx_return.split('|')[19].trim(),
           );
 
-           rotator.manufacturer = tsx_return.split('|')[21].trim();
            tsx_UpdateDevice(
              'rotator',
              tsx_return.split('|')[21].trim(),
@@ -466,9 +475,7 @@ var forceAbort = false;
        )
      )
 
- // *******************************
- //  GET THE CONNECTED EQUIPEMENT
-      var detais;
+      var details;
 
    },
 
