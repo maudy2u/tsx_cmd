@@ -16,13 +16,64 @@ if (Meteor.isServer) {
   // });
 }
 
+// used to help Helpers return the device, or init
+function initDevice(devName) {
+  var dev = TheSkyXInfos.findOne({name: devName});
+  if( typeof dev == 'undefined') {
+    var did = TheSkyXInfos.upsert({name: devName}, {
+      $set: {
+        model: '',
+        manufacturer: '',
+      }
+    });
+    dev = TheSkyXInfos.findOne({_id: did});
+  }
+  return dev;
+}
+
+function initParam(paramName) {
+  var param = TheSkyXInfos.findOne({name: paramName});
+  if( typeof param == 'undefined') {
+    var did = TheSkyXInfos.upsert({name: paramName}, {
+      $set: {
+        value: '',
+      }
+    });
+    param = TheSkyXInfos.findOne({_id: did});
+  }
+  else {
+    console.log('Found ' + paramName +': ' + param.value);
+  }
+  return param;
+}
+
 TheSkyXInfos.helpers({
 
   ip: function() {
-    return TheSkyXInfos.findOne({name: 'ip'});
+    return initParam('ip').value;
   },
+
   port: function() {
-    return TheSkyXInfos.findOne({name: 'port'});
+    return initParam('port').value;
+  },
+
+  mount: function() {
+    return initDevice('mount');
+  },
+  camera: function() {
+    return initDevice('camera');
+  },
+  efw: function() {
+    return initDevice('efw');
+  },
+  guider: function() {
+    return initDevice('guider');
+  },
+  rotator: function() {
+    return initDevice('rotator');
+  },
+  focuser: function() {
+    return initDevice('focuser');
   },
 
 });

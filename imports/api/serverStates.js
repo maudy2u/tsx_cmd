@@ -30,6 +30,16 @@ export function tsx_SetServerState( name, value) {
     $set: { value: value }
   })
 };
+
+export function tsx_UpdateDevice( name, mod, man) {
+  TheSkyXInfos.update( {name: name }, {
+    $set: {
+      model: mod,
+      manufacturer: man,
+     }
+  })
+};
+
 export function tsx_UpdateServerState( name, value) {
   var tsx = tsx_GetServerState( name );
   TheSkyXInfos.update( {_id: tsx._id }, {

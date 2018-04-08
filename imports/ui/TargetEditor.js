@@ -144,7 +144,7 @@ class TargetEditor extends Component {
         targetImage: this.state.targetImage,
         series: {
           _id: seriesId,
-          text: this.state.seriesTemplate,
+          value: this.state.seriesTemplate,
         },
         ra: this.state.ra,
         dec: this.state.dec,

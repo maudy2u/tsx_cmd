@@ -133,7 +133,7 @@ class Target extends Component {
         enabledActive: false,
         series: {
           _id: orgTarget.series._id,
-          text: orgTarget.series.text,
+          value: orgTarget.series.text,
         },
         ra: orgTarget.ra,
         dec: orgTarget.dec,

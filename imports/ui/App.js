@@ -28,7 +28,7 @@ import TheSkyXInfo from './TheSkyXInfo.js';
 
 import {
   tsx_ServerStates,
-  // tsx_UpdateServerState,
+  tsx_UpdateServerState,
   // tsx_GetServerState,
 } from  '../api/serverStates.js';
 
@@ -55,6 +55,7 @@ class App extends Component {
     defaultStopTime: 6,
 
     showMonitor: false, // this needs to be a server session variable
+    modalConnectionFailed: false,
   };
 
   handleToggle = (e, { name, value }) => this.setState({ [name]: !eval('this.state.'+name) })
@@ -70,6 +71,8 @@ class App extends Component {
   modalEnterIpClose = () => this.setState({ modalEnterIp: false });
   modalEnterPortOpen = () => this.setState({ modalEnterPort: true });
   modalEnterPortClose = () => this.setState({ modalEnterPort: false });
+  modalConnectionFailedOpen = () => this.setState({ modalConnectionFailed: true });
+  modalConnectionFailedClose = () => this.setState({ modalConnectionFailed: false });
 
   defaultMeridianFlipChange() {
     this.setState({defaultMeridianFlip: !this.state.defaultMeridianFlip});
@@ -81,43 +84,43 @@ class App extends Component {
   // TargetSessions.update({_id: this.props.target._id}, {
   //   $set: { enabledActive: !this.props.target.enabledActive },
   // })
+  saveTSXServerIp() {
+    this.modalEnterIpClose();
+    if( this.state.ip == ""  ) {
+      this.saveServerFailedOpen();
+    }
+    else {
+      this.saveDefaultState('ip');
+    };
+
+  };
+
+  saveTSXServerPort() {
+    this.modalEnterPortClose();
+    if( this.state.port == ""  ) {
+      this.saveServerFailedOpen();
+    }
+    else {
+      this.saveDefaultState('port');
+    };
+
+  };
+
   saveTSXServerConnection() {
 
     if( this.state.port == "" || this.state.ip == ""  ) {
       this.saveServerFailedOpen();
     }
     else {
-      var portId = TheSkyXInfos.findOne({name: 'port'});
-      if ( typeof portId == 'undefined' ) {
-        TheSkyXInfos.insert({
-          name: 'port',
-          text: this.state.port
-        });
-      }
-      else {
-        TheSkyXInfos.update( {_id: portId._id}, {
-          $set: { text: this.state.port}
-        });
-      }
-      var pID = TheSkyXInfos.findOne({name: 'ip'});
-      if ( typeof pID == 'undefined' ) {
-        TheSkyXInfos.insert({
-          name: 'ip',
-          text: this.state.ip
-        });
-      }
-      else {
-        TheSkyXInfos.update( {_id: pID._id }, {
-          $set: { text: this.state.ip}
-        });
-      }
+      this.saveDefaultState('ip');
+      this.saveDefaultState('port');
     };
   };
 
   componentWillMount() {
     // do not modify the state directly
     // console.log('End initialization');
-
+    console.log('Component mounted');
   };
 
   // *******************************
@@ -192,17 +195,17 @@ class App extends Component {
     return (
       <Segment>
         <Form>
-          <Form.Group widths='equal' onSubmit={this.connectTSX.bind(this)}>
+          <Form.Group widths='equal' onSubmit={this.saveTSXServerConnection.bind(this)}>
             <Form.Input
               label='IP Address'
               className='textIP'
               placeholder="Enter TSX address"
-              defaultValue={this.state.ip}
+              value={this.state.ip}
               onChange={this.ipChange}/>
             <Form.Input
               label='Port'
               placeholder="Enter TSX port"
-              defaultValue={this.state.port}
+              value={this.state.port}
               onChange={this.portChange}/>
           </Form.Group>
         </Form>
@@ -228,19 +231,6 @@ class App extends Component {
            </Modal>
       </Segment>
     );
-  }
-
-  // *******************************
-  //
-  connectTSX(event) {
-
-    TheSkyXInfos.upsert({
-      name: 'TheSkyX_connection',
-      connection: {
-        address: tsx_ip, // current time
-        port: tsx_port,
-      },
-    });
   }
 
   // *******************************
@@ -410,21 +400,12 @@ class App extends Component {
 
 
   saveDefaultState( param ) {
-    var paramId = TheSkyXInfos.findOne({name: param});
-    if ( typeof paramId == 'undefined' ) {
-      TheSkyXInfos.insert({
-        name: param,
-        text: eval("this.state."+param)
-      });
-    }
-    else {
-      TheSkyXInfos.update( {_id: paramId._id}, {
-        $set: { text: eval("this.state."+param)}
-      });
-    }
+    tsx_UpdateServerState(param, eval("this.state."+param));
   }
 
   saveDefaults(){
+    this.saveDefaultState('ip');
+    this.saveDefaultState('port');
     this.saveDefaultState('defaultMinAlt');
     this.saveDefaultState('defaultCoolTemp');
     this.saveDefaultState('defaultFocusTempDiff');
@@ -448,8 +429,8 @@ class App extends Component {
       <Segment.Group>
         <Segment>
           <Button  icon='settings' onClick={this.tsxUpdateFilterNames.bind(this)} />
-          <Button icon='save' onClick={this.saveTSXServerConnection.bind(this)}/>
-          <Button onClick={this.saveDefaults.bind(this)}>Save Defaults</Button>
+          <Button icon='save' onClick={this.saveDefaults.bind(this)}> All </Button>
+          <Button icon='save' onClick={this.saveTSXServerConnection.bind(this)}> Save Connection </Button>
           {this.renderTSXConnetion()}
         </Segment>
         <Segment>
@@ -600,10 +581,7 @@ class App extends Component {
   //
   renderMenuSegments(){
 
-    console.log('Found state: ' + this.state.activeItem);
-
     if (this.state.activeItem == 'Targets' ) {
-      console.log('Running state: ' + this.state.activeItem);
       return (
         <TargetSessionMenu />
       )
@@ -618,7 +596,6 @@ class App extends Component {
       return this.renderDefaultSettings();
 
     } else if (this.state.activeItem == 'tests') {
-      console.log('Running state: ' + this.state.activeItem);
       return this.renderTestSegement();
 
     } else if (this.state.activeItem == 'logout') {
@@ -655,47 +632,19 @@ class App extends Component {
     return;
   }
 
-  saveTSXServerIp() {
-
-  }
-
   connectToTSX() {
 
     // these are all working methods
-    var pid = this.props.tsxIP.text;
-    var prt = this.props.tsxPort.text;
-
-    // var portId = TheSkyXInfos.findOne({name: 'port'});
-    if( typeof pid != 'undefined' ) { //}&& (typeof portId != 'undefined') ) {
-      this.setState({ ip: pid.trim() });
-    }
-    // var portId = TheSkyXInfos.findOne({name: 'port'});
-    if( typeof prt != 'undefined' ) { //}&& (typeof portId != 'undefined') ) {
-      ip = prt.text;
-      this.setState({ port: prt.trim() });
-    }
-
     // on the client
-    Meteor.call("connectTsx", function (error) {
+    Meteor.call("connectTsx", function (error, result) {
       // identify the error
-      if (error && error.error === "logged-out") {
+      if (error && error.reason === "Internal server error") {
         // show a nice error message
-        Session.set("errorMessage", "Please log in to post a comment.");
+        this.setState({modalConnectionFailed: true});
+
       }
-    });
+    }.bind(this));
 
-  }
-
-  getTsxIp() {
-    var found = this.props.tsxIP.name;
-    if( typeof found == 'undefined') {
-      found = 'Click to enter IP'
-    }
-    return (
-        <div>
-          {found}
-        </div>
-    )
   }
 
   serverTest() {
@@ -755,7 +704,7 @@ class App extends Component {
           <Button onClick={this.modalEnterIpClose.bind(this)} inverted>
             <Icon name='cancel' />Cancel
           </Button>
-          <Button onClick={this.modalEnterIpClose.bind(this)} inverted>
+          <Button onClick={this.saveTSXServerIp.bind(this)} inverted>
             <Icon name='save' />Save
           </Button>
         </Modal.Actions>
@@ -785,7 +734,7 @@ class App extends Component {
           <Button onClick={this.modalEnterPortClose.bind(this)} inverted>
             <Icon name='cancel' />Cancel
           </Button>
-          <Button onClick={this.modalEnterPortClose.bind(this)} inverted>
+          <Button onClick={this.saveTSXServerPort.bind(this)} inverted>
             <Icon name='save' />Save
           </Button>
         </Modal.Actions>
@@ -804,6 +753,22 @@ class App extends Component {
     }
   }
 
+  getTsxIp() {
+    // return TheSkyXInfos.findOne({name: tsx_ServerStates.currentStage });
+    if( typeof this.props.tsxIP == 'undefined') {
+      return 'Not connected';
+    }
+    return this.props.tsxIP.value;
+  }
+
+  getTsxPort() {
+    // return TheSkyXInfos.findOne({name: tsx_ServerStates.currentStage });
+    if( typeof this.props.tsxPort == 'undefined') {
+      return 'Not connected';
+    }
+    return this.props.tsxPort.value;
+  }
+
   tsxStat() {
     // return TheSkyXInfos.findOne({name: tsx_ServerStates.currentStage });
     if( typeof this.props.tsxStatus == 'undefined') {
@@ -811,6 +776,37 @@ class App extends Component {
     }
     return this.props.tsxStatus.value;
   }
+
+  tsxConnectionFailed() {
+    return (
+      <Modal
+        open={this.state.modalConnectionFailed}
+        onClose={this.modalConnectionFailedClose.bind(this)}
+        basic
+        size='small'
+        closeIcon>
+        <Modal.Header>TSX Connection Failed</Modal.Header>
+        <Modal.Content>
+          <h3>Check that TheSkyX server is available, and the IP and Port to use to connect to the TSX Server.</h3>
+        </Modal.Content>
+        <Modal.Description>
+          <Input
+            label='IP:'
+            value={this.state.ip}
+          />
+          <Input
+            label='Port:'
+            value={this.state.port}
+          />
+        </Modal.Description>
+        <Modal.Actions>
+          <Button onClick={this.modalConnectionFailedClose.bind(this)} inverted>
+            <Icon name='stop' />Stop
+          </Button>
+        </Modal.Actions>
+      </Modal>
+    )
+  };
 
   render() {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
@@ -842,7 +838,34 @@ class App extends Component {
 
                {this.renderPortEditor()}
             </Segment>
-             { this.showMain() }
+            {/* { this.tsxConnectionFailed() } */}
+            { this.showMain() }
+            <Modal
+              open={this.state.modalConnectionFailed}
+              onClose={this.modalConnectionFailedClose.bind(this)}
+              basic
+              size='small'
+              closeIcon>
+              <Modal.Header>TSX Connection Failed</Modal.Header>
+              <Modal.Content>
+                <h3>Check that TheSkyX server is available, and the IP and Port to use to connect to the TSX Server.</h3>
+              </Modal.Content>
+              <Modal.Description>
+                <Input
+                  label='IP:'
+                  value={this.state.ip}
+                />
+                <Input
+                  label='Port:'
+                  value={this.state.port}
+                />
+              </Modal.Description>
+              <Modal.Actions>
+                <Button onClick={this.modalConnectionFailedClose.bind(this)} inverted>
+                  <Icon name='stop' />Stop
+                </Button>
+              </Modal.Actions>
+            </Modal>
           </div>
         </header>
       </div>

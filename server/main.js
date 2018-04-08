@@ -11,6 +11,7 @@ import {
   tsx_ServerStates,
   tsx_SetServerState,
   tsx_GetServerState,
+  tsx_UpdateDevice,
 } from '../imports/api/serverStates.js';
 
 import {string_replace} from './run_imageSession.js';
@@ -268,13 +269,11 @@ Meteor.startup(() => {
   console.log(' ******************');
   tsx_SetServerState(tsx_ServerStates.currentStage, 'idle');
 
-  var dbIp = TheSkyXInfos.findOne({name:'ip'});
-  var dbPort = TheSkyXInfos.findOne({name:'port'});
+  var dbIp = TheSkyXInfos.findOne().ip() ;
+  var dbPort = TheSkyXInfos.findOne().port();
   if( (typeof dbIp != 'undefined') && (typeof dbPort != 'undefined') ) {
-    ip = dbIp.text;
-    console.log('TSX server set to IP: ' +ip );
-    port = dbPort.text;
-    console.log('TSX server set to port: ' + port );
+    console.log('TSX server set to IP: ' + dbIp.value );
+    console.log('TSX server set to port: ' + dbPort.value );
   };
 
 
@@ -323,8 +322,8 @@ Meteor.startup(() => {
 var tsxHeader =  '/* Java Script *//* Socket Start Packet */';
 var tsxFooter = '/* Socket End Packet */';
 var forceAbort = false;
-var port;// = 3040;
-var ip;// = 'localhost';
+// var port;// = 3040;
+// var ip;// = 'localhost';
 
 // var tsxHeader = '/* Java Script *//* Socket Start Packet */';
 // var tsxFooter = '/* Socket End Packet */';
@@ -403,13 +402,6 @@ var ip;// = 'localhost';
        return "Error|";
      }
 
-     var camera = { model: '', manufacturer: '' };
-     var guider = { model: '', manufacturer: '' };
-     var mount = { model: '', manufacturer: '' };
-     var efw = { model: '', manufacturer: '' };
-     var rotator = { model: '', manufacturer: '' };
-     var focuser = { model: '', manufacturer: '' };
-
       // *******************************
       //  GET THE CONNECTED EQUIPEMENT
      var cmd = '\
@@ -434,53 +426,42 @@ var ip;// = 'localhost';
              success = true;
           }
 
-          guider.manufacturer = tsx_return.split('|')[1].trim();
-          guider.model = tsx_return.split('|')[3].trim();
-          TheSkyXInfos.upsert({name: 'guider'}, {
-            $set: {
-              guider: guider
-            }
-          });
+          tsx_UpdateDevice(
+            'guider',
+            tsx_return.split('|')[1].trim(),
+            tsx_return.split('|')[3].trim(),
+          );
 
-           camera.manufacturer = tsx_return.split('|')[5].trim();
-           camera.model = tsx_return.split('|')[7].trim();
-           TheSkyXInfos.upsert({name: 'camera'}, {
-             $set: {
-               camera: camera
-             }
-           });
+          tsx_UpdateDevice(
+            'camera',
+            tsx_return.split('|')[5].trim(),
+            tsx_return.split('|')[7].trim(),
+          );
 
-           efw.manufacturer = tsx_return.split('|')[9].trim();
-           efw.model = tsx_return.split('|')[11].trim();
-           TheSkyXInfos.upsert({name: 'efw'}, {
-             $set: {
-               efw: efw
-             }
-           });
+          tsx_UpdateDevice(
+            'efw',
+            tsx_return.split('|')[9].trim(),
+            tsx_return.split('|')[11].trim(),
+          );
 
-           focuser.manufacturer = tsx_return.split('|')[13].trim();
-           focuser.model = tsx_return.split('|')[15].trim();
-           TheSkyXInfos.upsert({name: 'focuser'}, {
-             $set: {
-               focuser: focuser
-             }
-           });
+          tsx_UpdateDevice(
+            'focuser',
+            tsx_return.split('|')[13].trim(),
+            tsx_return.split('|')[15].trim(),
+          );
 
-           mount.manufacturer = tsx_return.split('|')[17].trim();
-           mount.model = tsx_return.split('|')[19].trim();
-           TheSkyXInfos.upsert({name: 'mount'}, {
-             $set: {
-               mount: mount
-             }
-           });
+          tsx_UpdateDevice(
+            'mount',
+            tsx_return.split('|')[17].trim(),
+            tsx_return.split('|')[19].trim(),
+          );
 
            rotator.manufacturer = tsx_return.split('|')[21].trim();
-           rotator.model = tsx_return.split('|')[23].trim();
-           TheSkyXInfos.upsert({name: 'rotator'}, {
-             $set: {
-               rotator: rotator
-             }
-           });
+           tsx_UpdateDevice(
+             'rotator',
+             tsx_return.split('|')[21].trim(),
+             tsx_return.split('|')[23].trim(),
+           );
          }
        )
      )
@@ -539,7 +520,7 @@ var ip;// = 'localhost';
 
        TargetSessions.update({_id: id}, {
          // $set: { 'series': { _id:series[i]._id } },
-         $set: { 'series': { _id:series[i]._id, text:series[i].name } },
+         $set: { 'series': { _id:series[i]._id, value:series[i].name } },
        });
 
        const tSession = TargetSessions.findOne({_id: id});
