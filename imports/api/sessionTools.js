@@ -5,7 +5,81 @@ import { TheSkyXInfos } from './theSkyXInfos.js';
 
 import {
   tsx_ServerStates,
-  } from './serverStates.js'
+  tsx_SetServerState,
+  tsx_GetServerState,
+} from './serverStates.js'
+
+export function getTotalPlannedImages(id) {
+    var totalPlannedImages = 0;
+    var totalTakenImages = 0;
+    var template = TargetSessions.findOne(
+      {_id:id}
+    );
+
+    if( typeof template == "undefined") {
+      return 100; // do not try to process
+    }
+
+    var seriesId = template.series._id;
+    var takeSeries = TakeSeriesTemplates.findOne({_id:seriesId});
+
+    if( typeof takeSeries == "undefined") {
+      return 100; // do not try to process
+    }
+
+    for (var i = 0; i < takeSeries.series.length; i++) {
+      var series = takeSeries.series[i];
+
+      if( typeof series == "undefined") {
+        return 100; // do not try to process
+      }
+
+      var item = Seriess.findOne({_id:series.id}); //.fetch();
+      if( typeof item == "undefined") {
+        return 100; // do not try to process
+      }
+      totalTakenImages += item.taken;
+      totalPlannedImages += item.repeat;
+    }
+
+    return totalTakenImages/totalPlannedImages;
+};
+
+export function getTotalTakenImages(id) {
+    var totalPlannedImages = 0;
+    var totalTakenImages = 0;
+    var template = TargetSessions.findOne(
+      {_id:id}
+    );
+
+    if( typeof template == "undefined") {
+      return 100; // do not try to process
+    }
+
+    var seriesId = template.series._id;
+    var takeSeries = TakeSeriesTemplates.findOne({_id:seriesId});
+
+    if( typeof takeSeries == "undefined") {
+      return 100; // do not try to process
+    }
+
+    for (var i = 0; i < takeSeries.series.length; i++) {
+      var series = takeSeries.series[i];
+
+      if( typeof series == "undefined") {
+        return 100; // do not try to process
+      }
+
+      var item = Seriess.findOne({_id:series.id}); //.fetch();
+      if( typeof item == "undefined") {
+        return 100; // do not try to process
+      }
+      totalTakenImages += item.taken;
+      totalPlannedImages += item.repeat;
+    }
+
+    return totalTakenImages;
+};
 
 export function calcTargetProgress(id) {
     var totalPlannedImages = 0;
@@ -54,7 +128,7 @@ export function calcTargetProgress(id) {
 // 7. Meridian Flip
 // 8. Image Camera Temp
 export function getTargetSession() {
-
+  console.log('getTargetSession');
   var targetSessions = TargetSessions.find({}).fetch();
   var foundSession = false;
   var numSessions = targetSessions.length;
@@ -73,12 +147,15 @@ export function getTargetSession() {
   if( foundSession ) {
     for (var i = 0; i < numSessions; i++) {
       if( validSession != targetSessions[i] ) {
-        var chk = targetSessions[i];
-        if( canTargetSessionStart( chk ) ) {
-            if( validSession.priority < chk.priority  ) {
+        var chkSession = targetSessions[i];
+        if( canTargetSessionStart( chkSession ) ) {
+            var valPriority = Number(validSession.priority);
+            var chkPriority = Number(chkSession.priority);
+            var chk = valPriority - chkPriority;
+            if( (chk > 0) ) {
               // if( validSession.minAlt > chk.minAlt  ) {
                 // if( validSession.startTime > chk.startTime  ) {
-                  validSession = chk;
+                  validSession = chkSession;
                 // }
               // }
             }

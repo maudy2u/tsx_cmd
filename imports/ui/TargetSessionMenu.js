@@ -97,6 +97,7 @@ class TargetSessionMenu extends Component {
         stopTime: TheSkyXInfos.findOne({text: 'defaultSopTime'}),
         tempChg: TheSkyXInfos.findOne({text: 'defaultFocusTempDiff'}),
         minAlt: TheSkyXInfos.findOne({text: 'defaultMinAlt'}),
+        currentAlt: 0, // set to zero for now.
         completed: false,
         createdAt: new Date(),
       }

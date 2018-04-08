@@ -10,8 +10,9 @@ import TakeSeriesTemplateEditor from './TakeSeriesTemplateEditor.js';
 
 import { Form, Label, Tab, Segment, Button, Radio, Input, Table, Dropdown, Checkbox, } from 'semantic-ui-react';
 
-import Timekeeper from 'react-timekeeper';
 import ReactSimpleRange from 'react-simple-range';
+import { DateTime } from 'react-datetime-bootstrap';
+import Timekeeper from 'react-timekeeper';
 
 class TargetEditor extends Component {
 
@@ -33,6 +34,7 @@ class TargetEditor extends Component {
     guideExposure: '',
     guideDelay: '',
     minAlt: 29.5,
+    currentAlt:0,
     startTime: '20:00',
     stopTime: '06:00',
     coolingTemp: -19,
@@ -45,6 +47,7 @@ class TargetEditor extends Component {
     tempChg: 0.7,
     filterDropDown:[],
     seriesDropDown:[],
+    testDate: '',
   };
 
   handleOpen = () => this.setState({ modalOpen: true });
@@ -58,7 +61,7 @@ class TargetEditor extends Component {
   handleCoolingTimeChange = ( value ) => this.setState({coolingTime: value.value });
   handleFocusTempChange = ( value ) => this.setState({tempChg: value.value });
   handleMinAltChange = ( value ) => this.setState({minAlt: value.value });
-
+  onStopTimeChange = (value) => this.setState({testDate: value});
   onChangeChecked() {
     this.setState({enabledActive: !this.state.enabledActive});
   }
@@ -86,7 +89,7 @@ class TargetEditor extends Component {
       enabledActive: this.props.target.enabledActive,
       name: this.props.target.name,
       description: this.props.target.description,
-      coolingTemp: this.props.target.coolingTemp,
+      coolingTemp: Number(this.props.target.coolingTemp),
       targetFindName: this.props.target.targetFindName,
       targetImage: this.props.target.targetImage,
       seriesTemplate: this.props.target.series.text,
@@ -96,8 +99,9 @@ class TargetEditor extends Component {
       angle: this.props.target.angle,
       value: false,
       openModal: false,
-      priority: this.props.target.priority,
-      minAlt: this.props.target.minAlt,
+      priority: Number(this.props.target.priority),
+      minAlt: Number(this.props.target.minAlt),
+      currentAlt: Number(this.props.target.currentAlt),
       startTime: this.props.target.startTime,
       stopTime: this.props.target.stopTime,
       clsFilter: this.props.target.clsFilter,
@@ -107,7 +111,7 @@ class TargetEditor extends Component {
       focusBin: this.props.target.focusBin,
       guideExposure: this.props.target.guideExposure,
       guideDelay: this.props.target.guideDelay,
-      tempChg: this.props.target.tempChg,
+      tempChg: Number(this.props.target.tempChg),
     });
   }
 
@@ -149,6 +153,7 @@ class TargetEditor extends Component {
         stopTime: this.state.stopTime,
         priority: this.state.priority,
         minAlt: this.state.minAlt,
+        currentAlt: this.state.currentAlt,
         clsFilter: this.state.clsFilter,
         focusFilter: this.state.focusFilter,
         foccusSamples: this.state.foccusSamples,
@@ -186,8 +191,8 @@ class TargetEditor extends Component {
   }
 
   getTargetRaDec() {
-    console.log('targetEditorFind: ' + this.state.targetFindName );
-    Meteor.call("targetEditorFind", this.state.targetFindName , (error, result) => {
+    console.log('targetFind: ' + this.state.targetFindName );
+    Meteor.call("targetFind", this.state.targetFindName , (error, result) => {
       // identify the error
       console.log('Error: ' + error);
       console.log('result: ' + result);
@@ -215,35 +220,19 @@ class TargetEditor extends Component {
   // *******************************
   findTarget() {
     // on the client
-    console.log('tsx_TargetFind');
-    var found = false;
-    Meteor.call("tsx_TargetFind", this.props.target, function (error, result) {
-      // identify the error
-      var success = result.split('|')[0].trim();
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-      if (success != "Success") {
-        // show a nice error message
-        Session.set("errorMessage", "Please confirm TSX is active.\nerror.error");
-      }
-      else {
-        // not sure... this is to find target to start imaging...
-      }
-    });
 
   }
 
   // *******************************
   render() {
     // *******************************
-    // TIME DATEPICKER OPTIONS
-    const hideTimeOnInit = (calendarInstance) => calendarInstance.hide();
-    // const hideStartOnInit = (calendarInstance) => calendarInstance.hide();
-    // const hideStopOnInit = (calendarInstance) => calendarInstance.hide();
+
     const timeOptions = {
       //inline: true,
-      format: 'HH:mm',
-      defaultDate: new Date(),
+      format: 'YYYY-MM-DD HH:mm',
+      sideBySide: true,
+      // icons: time,
+      // minDate: new Date(),
     };
 
     // *******************************
@@ -348,6 +337,14 @@ class TargetEditor extends Component {
       <Tab.Pane>
         <h3 className="ui header">Constraints</h3>
         <Segment>
+          <h4 className="ui header">Stop Time</h4>
+          <DateTime
+            value={this.state.testDate}
+            pickerOptions={timeOptions}
+            onChange={this.onStopTimeChange}
+          />
+        </Segment>
+        <Segment>
           <h4 className="ui header">Priority: {this.state.priority}</h4>
           <ReactSimpleRange
             label
@@ -382,6 +379,7 @@ class TargetEditor extends Component {
           </Segment>
           <Segment>
             <h4 className="ui header">Stop Time</h4>
+            {/* <DateTime />pickerOptions={{format:"LL"}} value="2017-04-20"/> */}
             <Timekeeper
               time={this.state.stopTime}
               onChange={this.handleStartChange}

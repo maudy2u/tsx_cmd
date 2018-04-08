@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { Item, Button, Modal, Header, Icon, Table, Checkbox, Progress } from 'semantic-ui-react'
+import { Item, Label, Button, Modal, Header, Icon, Table, Checkbox, Progress } from 'semantic-ui-react'
 
 import { calcTargetProgress } from '../api/sessionTools.js';
 
@@ -19,11 +19,17 @@ function totalImages (target) {
 }
 
 // export default
-class TargetSession extends Component {
+class Target extends Component {
   state = {
     modalOpen: false,
     checked: false ,
+    ra: '0',
+    dec: '0',
+    altitude: '0',
+    azimuth: '0',
+    description: '',
   }
+
   handleOpen = () => this.setState({ modalOpen: true })
   handleClose = () => this.setState({ modalOpen: false })
 
@@ -39,6 +45,12 @@ class TargetSession extends Component {
     // do not modify the state directly
   }
 
+  componentDidMount() {
+
+    this.getCurrentCoordinates();
+
+  }
+
   deleteEntry() {
       TargetSessions.remove(this.props.target._id);
   }
@@ -46,6 +58,64 @@ class TargetSession extends Component {
   editEntry() {
     console.log('In the DefineTemplate editEntry');
     this.handleOpen();
+  }
+
+  getCurrentCoordinates() {
+    var done = false;
+
+    Meteor.call("targetFind", this.props.target.targetFindName , (error, result) => {
+      // identify the error
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+      for (var i = 0; i < result.split('|').length; i++) {
+        var txt = result.split('|')[i].trim();
+        console.log('Found: ' + txt);
+      }
+      if (error && error.error === "logged-out") {
+        // show a nice error message
+        Session.set("errorMessage", "Please log in to post a comment.");
+      }
+      else {
+        // if success then TheSkyX has made this point the target...
+        // now get the coordinates
+        cmdSuccess = true;
+        var altitude = result.split('|')[3].trim();
+        this.setState({altitude: altitude});
+        var ra = result.split('|')[1].trim();
+        var dec = result.split('|')[2].trim();
+        this.setState({ra: ra});
+        this.setState({dec: dec});
+        var azimuth = result.split('|')[4].trim();
+        if (azimuth < 179)
+        //
+        // Simplify the azimuth value to simple east/west
+        //
+        {
+          this.setState({azimuth: "East"});
+        } else {
+          this.setState({azimuth: "West"});
+        }
+      }
+    });
+
+
+    // Meteor.call("getCurrentCoordinates", this.props.target, function (error, result) {
+    //     // identify the error
+    //     console.log('Error: ' + error);
+    //     console.log('result: ' + result);
+    //     if (error && error.error === "logged-out") {
+    //       // show a nice error message
+    //       Session.set("errorMessage", "Please log in.");
+    //     }
+    //     ra = result.split('|')[1].trim();
+    //     dec= result.split('|')[2].trim();
+    //     alt = result.split('|')[3].trim();
+    //     az = result.split('|')[4].trim();
+    //
+    //     done = true;
+    //     this.setState({currentAlt: alt});
+    //   }
+    // );
   }
 
   copyEntry() {
@@ -80,6 +150,7 @@ class TargetSession extends Component {
         stopTime: orgTarget.stopTime,
         priority: orgTarget.priority,
         tempChg: orgTarget.tempChg,
+        currentAlt: orgTarget.currentAlt,
         minAlt: orgTarget.minAlt,
         completed: orgTarget.completed,
         createdAt: orgTarget.createdAt,
@@ -106,6 +177,7 @@ class TargetSession extends Component {
           {this.props.target.description}
         </Item.Meta>
         <Item.Description>
+          <Label>Current: <Label.Detail>{this.state.altitude}, {this.state.azimuth}</Label.Detail></Label>
           <Progress percent={calcTargetProgress(this.props.target._id)} progress />
         </Item.Description>
         <Item.Extra>
@@ -136,4 +208,5 @@ export default withTracker(() => {
     return {
       targets2: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
   };
-})(TargetSession);
+
+})(Target);

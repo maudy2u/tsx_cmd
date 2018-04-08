@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Session } from 'meteor/session'
 
+
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
@@ -23,6 +24,14 @@ import Filter from './Filter.js';
 import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 import TheSkyXInfo from './TheSkyXInfo.js';
+
+
+import {
+  tsx_ServerStates,
+  // tsx_UpdateServerState,
+  // tsx_GetServerState,
+} from  '../api/serverStates.js';
+
 
 // Examples
 import Task from './Task.js';
@@ -427,6 +436,14 @@ class App extends Component {
   // *******************************
   //
   renderDefaultSettings() {
+    const timeOptions = {
+      //inline: true,
+      format: 'YYYY-MM-DD HH:mm',
+      sideBySide: true,
+      // icons: time,
+      // minDate: new Date(),
+    };
+
     return (
       <Segment.Group>
         <Segment>
@@ -794,6 +811,14 @@ class App extends Component {
     }
   }
 
+  tsxStat() {
+    // return TheSkyXInfos.findOne({name: tsx_ServerStates.currentStage });
+    if( typeof this.props.tsxStatus == 'undefined') {
+      return 'idle';
+    }
+    return this.props.tsxStatus.value;
+  }
+
   render() {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
     */
@@ -819,6 +844,8 @@ class App extends Component {
                   {this.state.port}
                 </Label.Detail>
               </Label>
+              <Label>Status <Label.Detail>{this.tsxStat()}</Label.Detail></Label>
+
                {this.renderPortEditor()}
             </Segment>
              { this.showMain() }
@@ -1012,6 +1039,7 @@ class App extends Component {
   export default withTracker(() => {
 
     return {
+      tsxStatus: TheSkyXInfos.findOne({name: 'currentStage' }),
       tsxInfo: TheSkyXInfos.find({}).fetch(),
       tsxIP: TheSkyXInfos.find({name: 'ip' }).fetch(),
       tsxPort: TheSkyXInfos.findOne({name: 'port' }),

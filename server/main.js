@@ -6,8 +6,14 @@ import { TargetSessions } from '../imports/api/targetSessions.js';
 import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
 import { Seriess } from '../imports/api/seriess.js';
 import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
-import '../imports/api/run_imageSession.js';
-import {string_replace} from '../imports/api/run_imageSession.js';
+
+import {
+  tsx_ServerStates,
+  tsx_SetServerState,
+  tsx_GetServerState,
+} from '../imports/api/serverStates.js';
+
+import {string_replace} from './run_imageSession.js';
 import {tsx_feeder, tsx_is_waiting} from './tsx_feeder.js';
 import {shelljs} from 'meteor/akasha:shelljs';
 // import {xregex} from 'meteor/smoiz:xregexp';
@@ -137,9 +143,9 @@ target1.set("foccusSamples", 3);
 target1.set("focusBin", '4');
 target1.set("guideExposure", '9');
 target1.set("guideDelay", '2');
-target1.set("startTime", '');
-target1.set("stopTime", '');
-target1.set("priority", 0);
+target1.set("startTime", '22:00');
+target1.set("stopTime", '06:00');
+target1.set("priority", 5);
 target1.set("tempChg", 0.7);
 target1.set("minAlt", 30);
 target1.set("completed", false);
@@ -161,8 +167,8 @@ target2.set("foccusSamples", 3);
 target2.set("focusBin", '4');
 target2.set("guideExposure", '9');
 target2.set("guideDelay", '2');
-target2.set("startTime", '');
-target2.set("stopTime", '');
+target2.set("startTime", '22:00');
+target2.set("stopTime", '06:00');
 target2.set("priority", 1);
 target2.set("tempChg", 0.7);
 target2.set("minAlt", 30);
@@ -226,14 +232,41 @@ function tsxServerIsOnline() {
   return success;
 }
 
+/*
+tsx_SetServerState
+currentStage: 'currentStage', // this is a status line update for the dashboard
+initialFocusTemperature: 'initialFocusTemperature',
+initialRA: 'initialRA',
+initialDEC: 'initialDEC',
+initialMHS: 'initialMHS',
+initialMntDir: 'initialMntDir',
+initialMntAlt: 'initialMntAlt',
+targetRA: 'targetRA',
+targetDEC: 'targetDEC',
+targetATL: 'targetATL',
+targetAZ: 'targetAZ',
+
+currentTargetSession: 'currentTargetSession', // use to report current imaging targets
+isCurrentlyImaging: 'isCurrentlyImaging',
+*/
+
+function initServerStates() {
+  for (var m in tsx_ServerStates){
+    var isDefined = TheSkyXInfos.findOne({name: tsx_ServerStates[m]});
+    if( typeof isDefined == 'undefined') {
+      console.log('Setup :' + tsx_ServerStates[m]);
+      tsx_SetServerState(tsx_ServerStates[m], '');
+    }
+  }
+}
+
 Meteor.startup(() => {
   // code to run on server at startup
   console.log(' ******************');
+  initServerStates();
   console.log(' RESTARTED');
   console.log(' ******************');
-  TheSkyXInfos.upsert({name: 'currentStage'}, {
-    $set: { value: 'waiting'}
-  });
+  tsx_SetServerState(tsx_ServerStates.currentStage, 'waiting');
 
   var dbIp = TheSkyXInfos.findOne({name:'ip'});
   var dbPort = TheSkyXInfos.findOne({name:'port'});
@@ -496,6 +529,7 @@ var ip;// = 'localhost';
            priority: testData[i].get("priority"),
            tempChg: testData[i].get("tempChg"),
            minAlt: testData[i].get("minAlt"),
+           currentAlt: 0,
            completed: testData[i].get("completed"),
            createdAt: testData[i].get("createdAt"),
          }

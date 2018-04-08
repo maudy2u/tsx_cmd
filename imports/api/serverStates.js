@@ -1,3 +1,5 @@
+import { TheSkyXInfos } from './theSkyXInfos.js';
+
 export const tsx_ServerStates = {
   currentStage: 'currentStage', // this is a status line update for the dashboard
   initialFocusTemperature: 'initialFocusTemperature',
@@ -6,8 +8,36 @@ export const tsx_ServerStates = {
   initialMHS: 'initialMHS',
   initialMntDir: 'initialMntDir',
   initialMntAlt: 'initialMntAlt',
+
+  curentTargetName: 'curentTargetName',
   targetRA: 'targetRA',
   targetDEC: 'targetDEC',
-  targetATL: 'targetATL',
+  targetALT: 'targetALT',
   targetAZ: 'targetAZ',
+  isCurrentlyImaging: 'isCurrentlyImaging',
+
+  currentImagingName: 'currentImagingName',
+  imagingSessionId: 'imagingSessionId',
+  imagingSession: 'imagingSession', // use to report current imaging targets
+  imagingRA: 'imagingRA',
+  imagingDEC: 'imagingDEC',
+  imagingALT: 'imagingALT',
+  imagingAZ: 'imagingAZ',
+};
+
+export function tsx_SetServerState( name, value) {
+  TheSkyXInfos.upsert( {name: name }, {
+    $set: { value: value }
+  })
+};
+export function tsx_UpdateServerState( name, value) {
+  var tsx = tsx_GetServerState( name );
+  TheSkyXInfos.update( {_id: tsx._id }, {
+    $set: { value: value }
+  })
+};
+
+export function tsx_GetServerState( name ) {
+  var val = TheSkyXInfos.findOne( {name: name });
+  return val;
 };

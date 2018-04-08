@@ -12,7 +12,15 @@ import {
   canTargetSessionStart,
   getTargetSession,
   calcTargetProgress,
+  getTotalTakenImages,
+  getTotalPlannedImages,
 } from '../api/sessionTools.js';
+
+import {
+  tsx_ServerStates,
+  tsx_UpdateServerState,
+  tsx_GetServerState,
+} from  '../api/serverStates.js';
 
 // Import the API Model
 import { SessionTemplates } from '../api/sessionTemplates.js';
@@ -34,6 +42,13 @@ class Monitor extends Component {
 
     state = {
 
+      currentTarget: 'None',
+      ra: '0',
+      monDec: '0',
+      monAltitude: '0',
+      monAzimuth: '0',
+      monitorStatus: '',
+
       monitorDisplay: true,
       confirmOpen: false,
 
@@ -50,10 +65,15 @@ class Monitor extends Component {
       defaultMeridianFlip: true,
       defaultStartTime: 21,
       defaultStopTime: 6,
+      noFoundSession: false,
+      noFoundSessions: [],
+
   };
 
   handleChange = (e, { name, value }) => this.setState({ [name]: value })
   handleToggle = (e, { name, value }) => this.setState({ [name]: !value })
+  noFoundSessionOpen = () => this.setState({ noFoundSession: true })
+  noFoundSessionClose = () => this.setState({ noFoundSession: false })
 
   componentWillMount() {
     // do not modify the state directly
@@ -69,33 +89,35 @@ class Monitor extends Component {
     var ip = TheSkyXInfos.findOne({name: 'ip'});
     var port = TheSkyXInfos.findOne({name: 'port'});
     // any remaining images
-    var target = getTargetSession();
+    //var target = getTargetSession();
 
-    if( typeof target == 'undefined') {
-      // no target found... report and exit
-      var msg = 'No target found. Review targets, and concstraints.'
-      console.log(msg);
-    }
-
-    var percent = calcTargetProgress(target._id);
-
-    Meteor.call("tsx_Test", function (error, result) {
-      // identify the error
+    Meteor.call("tsxGetTargetSession", function (error, result) {
       console.log('Error: ' + error);
       console.log('result: ' + result);
-    });
-  }
+      for (var i = 0; i < result.split('|').length; i++) {
+        var txt = result.split('|')[i].trim();
+        console.log('Found: ' + txt);
+      }
+      if (error && error.error === "logged-out") {
+        // show a nice error message
+        this.noFoundSessionOpen();
+
+        Session.set("errorMessage", "Please log in to post a comment.");
+      }
+      else {
+        // if success then TheSkyX has made this point the target...
+        // now get the coordinates
+        cmdSuccess = true;
+    }
+  });
+}
 
   // *******************************
   // This is effectively a test methods
   // In the end everything is on the server.
+  getTargetDetails(target) {
 
-  getValidSession() {
-    // on the client
-    console.log('getValidSession');
-    var validSession = getTargetSession();
-    var found = false;
-    Meteor.call("getValidSession", function (error, result) {
+    Meteor.call("targetFind", target.targetFindName, function (error, result) {
         // identify the error
         console.log('Error: ' + error);
         console.log('result: ' + result);
@@ -113,13 +135,29 @@ class Monitor extends Component {
           cmdSuccess = true;
           var ra = result.split('|')[1].trim();
           var dec = result.split('|')[2].trim();
-          var description = result.split('|')[3].trim();
+          var altitude = result.split('|')[3].trim();
           this.setState({ra: ra});
           this.setState({dec: dec});
-          this.setState({description: description});
+          this.setState({altitude: atl});
+          var azimuth = result.split('|')[4].trim();
+          if (azimuth < 179)
+          //
+          // Simplify the azimuth value to simple east/west
+          //
+          {
+            this.setState({az: "East"});
+          } else {
+            this.setState({az: "West"});
+          }
 
         }
       });
+  }
+
+  getValidSession() {
+    // on the client
+    console.log('getValidSession');
+    var validSession = getTargetSession();
    }
 
   // *******************************
@@ -230,8 +268,77 @@ class Monitor extends Component {
     this.setState({monitorDisplay: false});
   }
 
-  tsxStat() {
-    return this.props.tsxStatus.value;
+/*
+currentStage: 'currentStage', // this is a status line update for the dashboard
+initialFocusTemperature: 'initialFocusTemperature',
+initialRA: 'initialRA',
+initialDEC: 'initialDEC',
+initialMHS: 'initialMHS',
+initialMntDir: 'initialMntDir',
+initialMntAlt: 'initialMntAlt',
+targetRA: 'targetRA',
+targetDEC: 'targetDEC',
+targetATL: 'targetATL',
+targetAZ: 'targetAZ',
+
+currentTargetSession: 'currentTargetSession', // use to report current imaging targets
+isCurrentlyImaging: 'isCurrentlyImaging',
+*/
+
+  tsxStopSession() {
+
+    tsx_UpdateServerState(tsx_ServerStates.currentImagingName, 'None');
+    tsx_UpdateServerState(tsx_ServerStates.imagingDEC, '');
+    tsx_UpdateServerState(tsx_ServerStates.imagingRA, '');
+    tsx_UpdateServerState(tsx_ServerStates.imagingALT, '');
+    tsx_UpdateServerState(tsx_ServerStates.imagingAZ, '');
+    tsx_UpdateServerState(tsx_ServerStates.currentStage, 'Stopped');
+  }
+
+  tsxImagingName() {
+    return this.props.tsxImageName.value;
+  }
+
+  tsxImagingDEC() {
+    if(this.props.tsxImageDEC.value != '') {
+      return Number(this.props.tsxImageDEC.value).toFixed(4);
+    }
+    return this.props.tsxImageDEC.value;
+  }
+
+  tsxImagingRA() {
+    if(this.props.tsxImageRA.value != '') {
+      return Number(this.props.tsxImageRA.value).toFixed(4);
+    }
+    return this.props.tsxImageRA.value;
+  }
+
+  tsxImagingALT() {
+    if(this.props.tsxImageALT.value != '') {
+      return Number(this.props.tsxImageALT.value).toFixed(4);
+    }
+    return this.props.tsxImageALT.value;
+  }
+
+  tsxImagingAZ() {
+    return this.props.tsxImageAZ.value;
+  }
+
+  tsxSessionId() {
+    return this.props.tsxImageSessionId.value;
+  }
+
+  totalTaken() {
+    if( this.tsxSessionId() == '' ) {
+      return 0;
+    }
+    return TargetSessions.findOne({_id:this.tsxSessionId()}).totalImagesTaken();
+  }
+  totalPlanned() {
+    if( this.tsxSessionId() == '' ) {
+      return 0;
+    }
+    return TargetSessions.findOne({_id:this.tsxSessionId()}).totalImagesPlanned();
   }
 
   render() {
@@ -240,22 +347,24 @@ class Monitor extends Component {
 
     return (
       <Segment.Group>
-        <Label>Target <Label.Detail>M1</Label.Detail></Label>
-        <Label>RA <Label.Detail>3.2.1.1.1</Label.Detail></Label>
-        <Label>DEC <Label.Detail>123,1231,23123,</Label.Detail></Label>
+        <Label>Target <Label.Detail>{this.tsxImagingName()}</Label.Detail></Label>
+        <Label>RA <Label.Detail>{this.tsxImagingRA()}</Label.Detail></Label>
+        <Label>DEC <Label.Detail>{this.tsxImagingDEC()}</Label.Detail></Label>
+        <Label>Atl <Label.Detail>{this.tsxImagingALT()}</Label.Detail></Label>
+        <Label>Az <Label.Detail>{this.tsxImagingAZ()}</Label.Detail></Label>
         <Label>Angle <Label.Detail>123</Label.Detail></Label>
         <Label>HA <Label.Detail>0.2</Label.Detail></Label>
-        <Label>Status <Label.Detail>{this.tsxStat()}</Label.Detail></Label>
         <Segment>
           <Button.Group icon>
             <Button icon='play'  onClick={this.startSessions.bind(this)}/>
             <Button icon='pause'  />
-            <Button icon='stop'  />
+            <Button icon='stop' onClick={this.tsxStopSession.bind(this)} />
             <Button onClick={this.textTSX.bind(this)}>Test</Button>
           </Button.Group>
         </Segment>
         <Segment>
           <h3>Target</h3>
+          <Progress value={this.totalTaken()} total={this.totalPlanned()} progress='ratio' progress />
         </Segment>
         <Segment>
           <h3>Focuser</h3>
@@ -282,6 +391,24 @@ class Monitor extends Component {
           onCancel={this.handleToggle}
           onConfirm={this.startSessions.bind(this)}
         />
+        <Modal
+          open={this.state.noFoundSession}
+          onClose={this.noFoundSessionClose.bind(this)}
+          basic
+          size='small'
+          closeIcon>
+          <Modal.Header>Could not find a session</Modal.Header>
+          <Modal.Content>
+            <h3>content='There were no sessions that could be run. Please check the constraints on the sessions and that at least on is enabled.'
+            </h3>
+          </Modal.Content>
+          <Modal.Actions>
+            <Button color='red' onClick={this.noFoundSessionClose.bind(this)} inverted>
+              <Icon name='stop' /> Try again!
+            </Button>
+          </Modal.Actions>
+        </Modal>
+
       </Segment.Group>
     )
   }
@@ -289,7 +416,12 @@ class Monitor extends Component {
 export default withTracker(() => {
 
   return {
-    tsxStatus: TheSkyXInfos.findOne({name: 'currentStage' }),
+    tsxImageSessionId: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingSessionId }),
+    tsxImageName: TheSkyXInfos.findOne({ name: tsx_ServerStates.currentImagingName }),
+    tsxImageDEC: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingDEC }),
+    tsxImageRA: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingRA }),
+    tsxImageALT: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingALT }),
+    tsxImageAZ: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingAZ }),
     tsxIP: TheSkyXInfos.find({name: 'ip' }).fetch(),
     tsxPort: TheSkyXInfos.findOne({name: 'port' }),
     tsxInfos: TheSkyXInfos.find({}).fetch(),
