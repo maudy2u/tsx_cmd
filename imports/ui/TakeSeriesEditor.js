@@ -44,33 +44,19 @@ class TakeSeriesEditor extends Component {
   handleChange = (e, { name, value }) => {
 
     this.setState({ [name]: value });
-    // Seriess.update( {id: this.props.series_id}, {
-    //   $set:{
-    //     order: this.state.order,
-    //     exposure: this.state.exposure,
-    //     frame: this.state.frame,
-    //     filter: this.state.filter,
-    //     repeat: this.state.repeat,
-    //     binning: this.state.binning,
-    //     taken: this.state.taken,
-    //   }
-    // });
-    Meteor.call( 
+
+    var id = this.props.series_id.id;
+    Meteor.call(
       'updateSeriesIdWith',
-      this.props.series_id ,
-      this.state.order,
-      this.state.exposure,
-      this.state.frame,
-      this.state.filter,
-      this.state.repeat,
-      this.state.binning,
-      this.state.taken,
+      id ,
+      name,
+      value,
       function (error) {
-      // identify the error
-      if (error && error.error === "logged-out") {
-        // show a nice error message
-        Session.set("errorMessage", "Please log edit.");
-      }
+        // identify the error
+        if (error && error.error === "logged-out") {
+          // show a nice error message
+          Session.set("errorMessage", "Please log edit.");
+        }
     });
   };
 

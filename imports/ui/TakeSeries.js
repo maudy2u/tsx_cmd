@@ -78,13 +78,17 @@ class TakeSeries extends Component {
     var template = this.props.seriesTemplate;
     var seriesArray = template.series;
     var details = "";
+    var repeating = '';
+    if( template.repeatSeries ) {
+      repeating = 'Repeating: ';
+    }
     for (var i = 0; i < seriesArray.length; i++) {
       series = Seriess.findOne({_id:seriesArray[i].id});
       if(details != "") { details += ", "};
-      details += series.frame +'-' + series.filter + ' for ' + series.repeat + 'x' + series.exposure + 's';
+      details += series.frame +':' + series.filter + '@' + series.exposure + 'sec x'  + series.repeat;
     }
 
-    return details
+    return repeating + details;
   }
 
   render() {

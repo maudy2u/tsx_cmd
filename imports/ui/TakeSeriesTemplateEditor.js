@@ -38,6 +38,7 @@ class TakeSeriesTemplateEditor extends Component {
     this.setState({description: this.props.template.description});
     this.setState({seriesProcess: this.props.template.processSeries});
     this.setState({seriesContainer: this.props.template.series});
+    this.setState({repeatSeries: this.props.template.repeatSeries});
   }
 
   saveEntry() {
@@ -45,7 +46,8 @@ class TakeSeriesTemplateEditor extends Component {
       $set: {
         name: this.state.name,
         description: this.state.description,
-        processSeries: this.state.processSeries,
+        processSeries: this.state.seriesProcess,
+        repeatSeries: this.state.repeatSeries,
        },
     });
   }
@@ -107,7 +109,7 @@ class TakeSeriesTemplateEditor extends Component {
             <Form.Field control={Radio} label='Per series' value='per series' checked={this.state.seriesProcess === "per series"} onChange={this.seriesProcessChange} />
             <Form.Field control={Radio} label='Across series' value='across series' checked={this.state.seriesProcess === "across series"} onChange={this.seriesProcessChange} />
             <Form.Checkbox
-              label='Repeat series until stopped'
+              label=' Repeat series until stopped '
               toggle
               name='repeatSeries'
               checked={this.state.repeatSeries}

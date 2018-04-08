@@ -111,6 +111,7 @@ testTakeSeriesTemplate1.set("description", "Example test");
 testTakeSeriesTemplate1.set("processSeries", "across series");
 testTakeSeriesTemplate1.set("createdAt", new Date()); // current time
 testTakeSeriesTemplate1.set("series", testTakeSeries1); // current time
+testTakeSeriesTemplate1.set("repeatSeries", false); // current time
 
 var testTakeSeriesTemplate2 = new Map();
 testTakeSeriesTemplate2.set("name", "SHO - Example");
@@ -118,6 +119,7 @@ testTakeSeriesTemplate2.set("description", "Used as a test to show");
 testTakeSeriesTemplate2.set("processSeries", "per series");
 testTakeSeriesTemplate2.set("createdAt", new Date()); // current time
 testTakeSeriesTemplate2.set("series", testTakeSeries2); // current time
+testTakeSeriesTemplate2.set("repeatSeries", false); // current time
 
 
 var testAllTakeSeriesTemplates = [];
@@ -195,6 +197,7 @@ function loadTestDataAllTakeSeriesTemplates() {
         description: takeSeries.get("description"),
         processSeries: testData[i].get("processSeries"),
         createdAt: takeSeries.get("createdAt"),
+        repeatSeries: takeSeries.get("repeatSeries"),
         series: [],
       }
     )
@@ -350,25 +353,68 @@ var forceAbort = false;
 
    updateSeriesIdWith(
      id,
-     order,
-     exposure,
-     frame,
-     filter,
-     repeat,
-     binning,
-     taken,
+     name,
+     value,
    ) {
-     var res = Seriess.update( {_id: id }, {
-       $set:{
-         order: order,
-         exposure: exposure,
-         frame: frame,
-         filter: filter,
-         repeat: repeat,
-         binning: binning,
-         taken: taken,
-       }
-     });
+
+     console.log(' ******************************* ');
+     console.log(' updateSeriesIdWith: ' + id + ', ' + name + ", " + value);
+     if( name == 'order ') {
+       console.log('1');
+       var res = Seriess.update( {_id: id }, {
+         $set:{
+           order: value,
+         }
+       });
+     }
+     else if (name == 'exposure' ) {
+       console.log('2');
+       var res = Seriess.update( {_id: id }, {
+         $set:{
+           exposure: value,
+         }
+       });
+     }
+     else if (name == 'frame') {
+       console.log('3');
+       var res = Seriess.update( {_id: id }, {
+         $set:{
+           frame: value,
+         }
+       });
+     }
+     else if (name=='filter') {
+       console.log('4');
+       var res = Seriess.update( {_id: id }, {
+         $set:{
+           filter: value,
+         }
+       });
+     }
+     else if (name=='repeat') {
+       console.log('5');
+       var res = Seriess.update( {_id: id }, {
+         $set:{
+           repeat: value,
+         }
+       });
+     }
+     else if (name=='binning') {
+       console.log('6');
+       var res = Seriess.update( {_id: id }, {
+         $set:{
+           binning: value,
+         }
+       });
+     }
+     else if (name=='taken') {
+       console.log('7');
+       var res = Seriess.update( {_id: id }, {
+         $set:{
+           taken: value,
+         }
+       });
+     }
    },
 
    serverSideText() {
