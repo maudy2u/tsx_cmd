@@ -149,6 +149,30 @@ class TakeSeriesEditor extends Component {
   }
 
   moveUpEntry() {
+
+    var seriesID = this.props.series_id;
+    var seriesInit = Seriess.findOne({_id: seriesID.id});
+    var initOrder = seriesInit.order; // current order position
+    var newOrder = initOrder - 1; // negative goes up to zero
+    var seriesIds = this.props.template.series;
+    for (var i = 0; i < seriesIds.length; i++) {
+      var curSeries = Seriess.findOne({_id: seriesIds[i].id});
+      if( curSeries._id != seriesInit._id ) {
+        if( curSeries.order == newOrder ) {
+          Seriess.update( {_id:curSeries._id}, {
+            $set: {
+              order: initOrder,
+            }
+          });
+          // TakeSeriesTemplate.update({_id})
+          Seriess.update( {_id:seriesID.id}, {
+            $set: {
+              order: newOrder,
+            }
+          });
+        }
+      }
+    }
   }
   moveDownEntry() {
   }

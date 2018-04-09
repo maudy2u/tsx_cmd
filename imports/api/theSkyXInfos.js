@@ -40,6 +40,7 @@ function initParam(paramName) {
       }
     });
     param = TheSkyXInfos.findOne({_id: did});
+    console.log('Created ' + paramName +': ' + param.value);
   }
   else {
     console.log('Found ' + paramName +': ' + param.value);
