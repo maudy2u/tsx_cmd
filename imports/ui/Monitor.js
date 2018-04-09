@@ -347,7 +347,7 @@ isCurrentlyImaging: 'isCurrentlyImaging',
 
     return (
       <Segment.Group>
-        <Label>Target <Label.Detail>{this.tsxImagingName()}</Label.Detail></Label>
+        {/* <Label>Target <Label.Detail>{this.tsxImagingName()}</Label.Detail></Label> */}
         <Label>RA <Label.Detail>{this.tsxImagingRA()}</Label.Detail></Label>
         <Label>DEC <Label.Detail>{this.tsxImagingDEC()}</Label.Detail></Label>
         <Label>Atl <Label.Detail>{this.tsxImagingALT()}</Label.Detail></Label>
@@ -355,33 +355,29 @@ isCurrentlyImaging: 'isCurrentlyImaging',
         <Label>Angle <Label.Detail>123</Label.Detail></Label>
         <Label>HA <Label.Detail>0.2</Label.Detail></Label>
         <Segment>
+        </Segment>
+        <Segment>
+          <h3>Target {this.tsxImagingName()}</h3>
           <Button.Group icon>
             <Button icon='play'  onClick={this.startSessions.bind(this)}/>
             <Button icon='pause'  />
             <Button icon='stop' onClick={this.tsxStopSession.bind(this)} />
             <Button onClick={this.textTSX.bind(this)}>Test</Button>
           </Button.Group>
+          <Progress value={this.totalTaken()} total={this.totalPlanned()} progress='ratio' progress>Total Images</Progress>
         </Segment>
         <Segment>
-          <h3>Target</h3>
-          <Progress value={this.totalTaken()} total={this.totalPlanned()} progress='ratio' progress />
-        </Segment>
-        <Segment>
-          <h3>Focuser</h3>
-          <Label>Temp<Label.Detail>-20</Label.Detail></Label>
+          <h3>Focuser  <Label>Temp<Label.Detail>-20</Label.Detail></Label>
           <Label>Position<Label.Detail>1231424</Label.Detail></Label>
+          </h3>
         </Segment>
         <Segment>
-          <h3>Camera</h3>
-          <Label>Temp<Label.Detail>-20</Label.Detail></Label>
-          <Label>Exposure<Label.Detail>'Information goes here'</Label.Detail>
-            <Progress percent='50' progress />
-          </Label>
-          <Label>Filter<Label.Detail>LUM</Label.Detail></Label>
-          <Label>Binning<Label.Detail>1x1</Label.Detail></Label>
-          <Label>1 of 20 <Label.Detail>'Information goes here'</Label.Detail>
-            <Progress percent='50' progress />
-          </Label>
+          <h3>Camera <Label>Temp<Label.Detail>-20</Label.Detail></Label>
+            <Label>Filter<Label.Detail>LUM</Label.Detail></Label>
+            <Label>Binning<Label.Detail>1x1</Label.Detail></Label>
+          </h3>
+          <Progress percent='50' progress>Current Exposure</Progress>
+          <Progress value='3' total='5' progress='ratio'>Frames per Filter</Progress>
         </Segment>
         <Confirm
           header='Start an imaging session'

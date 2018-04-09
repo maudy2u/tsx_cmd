@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Session } from 'meteor/session'
 
-
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
@@ -24,7 +23,6 @@ import Filter from './Filter.js';
 import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 import TheSkyXInfo from './TheSkyXInfo.js';
-
 
 import {
   tsx_ServerStates,
@@ -74,16 +72,22 @@ class App extends Component {
   modalConnectionFailedOpen = () => this.setState({ modalConnectionFailed: true });
   modalConnectionFailedClose = () => this.setState({ modalConnectionFailed: false });
 
+  componentWillMount() {
+    // do not modify the state directly
+    // console.log('End initialization');
+    console.log('Component mounted');
+    if( typeof this.props.tsxPort != 'undefined') {
+      this.setState({port: this.props.tsxPort.value});
+    }
+    if( typeof this.props.tsxPort != 'undefined') {
+      this.setState({ip: this.props.tsxIP.value});
+    }
+  };
+
   defaultMeridianFlipChange() {
     this.setState({defaultMeridianFlip: !this.state.defaultMeridianFlip});
   }
 
-
-
-  //    this.setState({port: this.state.port});
-  // TargetSessions.update({_id: this.props.target._id}, {
-  //   $set: { enabledActive: !this.props.target.enabledActive },
-  // })
   saveTSXServerIp() {
     this.modalEnterIpClose();
     if( this.state.ip == ""  ) {
@@ -117,12 +121,6 @@ class App extends Component {
     };
   };
 
-  componentWillMount() {
-    // do not modify the state directly
-    // console.log('End initialization');
-    console.log('Component mounted');
-  };
-
   // *******************************
   //
   getImageSessions() {
@@ -132,31 +130,6 @@ class App extends Component {
       { _id: 3, description: 'This is task 3' },
     ];
   };
-
-  // *******************************
-  //
-  // Default creation of sessions using above method
-  renderTargetSessions() {
-
-/*
-  If there is no content in the map then use the test data to create a samples
-
-*/
-    // var chkTargetSize = testTargetSessions.length;
-    // console.log('Number of Target Sessions found in Test data: ' + chkTargetSize);
-    //
-    // var chkSeriesSize = testAllTakeSeriesTemplates.length;
-    // console.log('Number of Series Templates found in Test data: ' + chkSeriesSize);
-
-    var chkDBSize = Object.keys(this.props.targetSessions).length;
-    console.log('Number of Sessions found in Mongo DB: ' + chkDBSize);
-
-    // switch "this.props.targetSessions" to "testTargetSessions" if trying to
-    // load the test data instead... should be able to remove if the load is right
-    return this.props.targetSessions.map((targetSession) => (
-      <TargetSession key={targetSession._id} targetSession={targetSession} />
-    ));
-  }
 
   // *******************************
   //
@@ -273,23 +246,6 @@ class App extends Component {
   }
 
   // *******************************
-  getTasks() {
-    return [
-      { _id: 1, text: 'This is task 1' },
-      { _id: 2, text: 'This is task 2' },
-      { _id: 3, text: 'This is task 3' },
-    ];
-  }
-
-  // *******************************
-  //
-  renderTasks() {
-    return this.getTasks().map((task) => (
-      <Task key={task._id} task={task} />
-    ));
-  }
-
-  // *******************************
   //
   renderMonitor() {
     return  (
@@ -310,94 +266,6 @@ class App extends Component {
       }
     });
   }
-
-  // *******************************
-  //
-  renderTargetSequences(){
-
-    // need to retrieve the process for the session, and for the series...
-
-    var cImage = 10;
-    var tImage = 33;
-    var iNum = (cImage/tImage*100).toFixed(0);
-    console.log( 'Percent complete: ' + iNum);
-
-    return (
-      <div>
-        <Button.Group basic size='small'>
-          <Button icon='settings' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
-          <Button icon='find' onClick={this.chkTestData.bind(this)}/>
-          <Button icon='upload' />
-        </Button.Group>
-      <Table celled selectable>
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell>Name</Table.HeaderCell>
-            <Table.HeaderCell>Description</Table.HeaderCell>
-            <Table.HeaderCell>Progress</Table.HeaderCell>
-            <Table.HeaderCell>Actions</Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
-
-        <Table.Body>
-            {this.renderTargetSessions()}
-        </Table.Body>
-      </Table>
-      </div>
-    );
-  }
-
-  renderModalSeriesTable() {
-    return (
-      <div>
-      </div>
-    );
-  }
-
-  /*
-  <Dropdown placeholder='Select Filter' fluid selection options={this.renderDropDownFiltersTest()} />
-  <table className="ui selectable celled table">
-    <thead>
-      <tr>
-        <th>Series#</th>
-        <th>Frame/Action</th>
-        <th>Exposure/Time/Temp</th>
-        <th>Binning</th>
-        <th>Filter</th>
-        <th>Repeat</th>
-        <th>Calibration</th>
-        <th>Progress</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          <div className="ui checked checkbox">
-            <input type="checkbox" checked="" name="series1" readOnly="" tabIndex="0" />
-            <label>This checkbox comes pre-checked</label>
-          </div>
-          1
-        </td>
-        <td>Light</td>
-        <td>300</td>
-        <td>1x1</td>
-        <td>Lum</td>
-        <td>33</td>
-        <td>None</td>
-        <td><Progress percent={0} progress /></td>
-      </tr>
-    </tbody>
-  </table>
-   */
-
-
-  // *******************************
-  //
-  //aSeriesForm = EditorSeriesForm.render();
-
-  renderTakeSeriesTemplates() {
-  }
-
 
   saveDefaultState( param ) {
     tsx_UpdateServerState(param, eval("this.state."+param));
@@ -429,9 +297,9 @@ class App extends Component {
       <Segment.Group>
         <Segment>
           <Button  icon='settings' onClick={this.tsxUpdateFilterNames.bind(this)} />
-          <Button icon='save' onClick={this.saveDefaults.bind(this)}> All </Button>
-          <Button icon='save' onClick={this.saveTSXServerConnection.bind(this)}> Save Connection </Button>
-          {this.renderTSXConnetion()}
+          <Button icon='save' onClick={this.saveDefaults.bind(this)} />
+          {/* <Button icon='save' onClick={this.saveTSXServerConnection.bind(this)}> Save Connection </Button>
+          {this.renderTSXConnetion()} */}
         </Segment>
         <Segment>
           <Form.Group>
@@ -548,9 +416,6 @@ class App extends Component {
     } else if (this.state.activeItem == 'Settings') {
       return this.renderDefaultSettings();
 
-    } else if (this.state.activeItem == 'tests') {
-      return this.renderTestSegement();
-
     } else if (this.state.activeItem == 'logout') {
       return this.renderLogout();
 
@@ -624,7 +489,7 @@ class App extends Component {
           <Menu.Item name='Devices' active={activeItem === 'Devices'} onClick={this.handleMenuItemClick} />
           <Menu.Item name='Settings' active={activeItem === 'Settings'} onClick={this.handleMenuItemClick} />
           <Menu.Menu position='right'>
-            <Menu.Item name='tests' active={activeItem === 'tests'} onClick={this.handleMenuItemClick} />
+            {/* <Menu.Item name='tests' active={activeItem === 'tests'} onClick={this.handleMenuItemClick} /> */}
             <Menu.Item name='logout' active={activeItem === 'logout'} onClick={this.handleMenuItemClick} />
           </Menu.Menu>
         </Menu>
@@ -711,6 +576,7 @@ class App extends Component {
     if( typeof this.props.tsxIP == 'undefined') {
       return 'Not connected';
     }
+    // this.setState({ip: this.props.tsxIP.value}); // fails here.
     return this.props.tsxIP.value;
   }
 
@@ -777,14 +643,14 @@ class App extends Component {
               <Button icon='exchange' onClick={this.serverTest.bind(this)}/>
               <Label>TSX ip:
                 <Label.Detail onClick={this.modalEnterIpOpen.bind(this)}>
-                  {ip}
+                  {this.getTsxIp()}
                 </Label.Detail>
               </Label>
                {this.renderIPEditor()}
               <Label>
                 TSX port:
                 <Label.Detail onClick={this.modalEnterPortOpen.bind(this)}>
-                  {port}
+                  {this.getTsxPort()}
                 </Label.Detail>
               </Label>
               <Label>Status <Label.Detail>{this.tsxStat()}</Label.Detail></Label>
@@ -823,282 +689,20 @@ class App extends Component {
       </div>
     );
   }
-
-  renderTestSegement() {
-          return (
-            <div>
-              Filters found:
-              <ul>
-                {this.renderFilters()}
-              </ul>
-              Task:
-              <ul>
-                {this.renderTasks()}
-              </ul>
-              <br/>
-              <div className="ui relaxed divided list">
-                <div className="item">
-                  <i className="large github middle aligned icon"></i>
-                  <div className="content">
-                    <a className="header">Semantic-Org/Semantic-UI</a>
-                    <div className="description">Updated 10 mins ago</div>
-                  </div>
-                </div>
-                <div className="item">
-                  <i className="large github middle aligned icon"></i>
-                  <div className="content">
-                    <a className="header">Semantic-Org/Semantic-UI-Docs</a>
-                    <div className="description">        <div className="ui indicating progress" data-value="1" data-total="200" id="example1">
-                      <div className="bar"></div>
-                      <div className="label">Funding</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="item">
-                <i className="large github middle aligned icon"></i>
-                <div className="content">
-                  <a className="header">Semantic-Org/Semantic-UI-Meteor</a>
-                  <div className="description">Updated 34 mins ago</div>
-                </div>
-              </div>
-            </div>
-            <br/>
-            <div className="ui checked checkbox">
-              <input type="checkbox" checked="" className="hidden" readOnly="" tabIndex="0" />
-              <label>This checkbox comes pre-checked</label>
-            </div>
-            <div className="ui vertical menu">
-              <div className="item">Home</div>
-              <div role="listbox" aria-expanded="false" className="ui left pointing dropdown link item" tabIndex="0">
-                <div className="text" role="alert" aria-live="polite">Messages</div>
-                <i aria-hidden="true" className="dropdown icon"></i>
-                <div className="menu transition">
-                  <div role="option" className="item">Inbox</div>
-                  <div role="option" className="item">Starred</div>
-                  <div role="option" className="item">Sent Mail</div>
-                  <div role="option" className="item">Drafts (143)</div>
-                  <div className="divider">
-                  </div>
-                  <div role="option" className="item">Spam (1009)</div>
-                  <div role="option" className="item">Trash</div>
-                </div>
-              </div>
-              <div className="item">Browse</div>
-              <div className="item">Help</div>
-            </div>
-            <div className="ui fitted toggle checkbox">
-              <input type="checkbox" className="hidden" readOnly="" tabIndex="0" />
-              <label></label>
-            </div>
-            <div className="ui radio checkbox">
-              <input type="checkbox" className="hidden" readOnly="" tabIndex="0" />
-              <label>Radio choice</label>
-            </div>
-            <div className="ui indicating progress">
-              <div className="bar"></div>
-              <div className="label">Funding</div>
-            </div>
-            <div className="ui progress success">
-              <div className="bar">
-                <div className="progress"></div>
-              </div>
-              <div className="label">Everything worked, your file is all ready.</div>
-            </div>
-            <div className="ui progress">
-              <div className="bar">
-                <div className="progress"></div>
-              </div>
-              <div className="label">Uploading Files</div>
-            </div>
-            <form className="ui form">
-              <div className="field">Selected value: <b>
-              </b>
-            </div>
-            <div className="field">
-              <div className="ui radio checkbox">
-                <input type="checkbox" className="hidden" name="checkboxRadioGroup" readOnly="" tabIndex="0" value="this" />
-                <label>Choose this</label>
-              </div>
-            </div>
-            <div className="field">
-              <div className="ui radio checkbox">
-                <input type="checkbox" className="hidden" name="checkboxRadioGroup" readOnly="" tabIndex="0" value="that" />
-                <label>Or that</label>
-              </div>
-            </div>
-          </form>
-          <table className="ui striped table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Date Joined</th>
-                <th>E-mail</th>
-                <th>Called</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>John Lilki</td>
-                <td>September 14, 2013</td>
-                <td>jhlilk22@yahoo.com</td>
-                <td>No</td>
-              </tr>
-              <tr>
-                <td>Jamie Harington</td>
-                <td>January 11, 2014</td>
-                <td>jamieharingonton@yahoo.com</td>
-                <td>Yes</td>
-              </tr>
-              <tr>
-                <td>Jill Lewis</td>
-                <td>May 11, 2014</td>
-                <td>jilsewris22@yahoo.com</td>
-                <td>Yes</td>
-              </tr>
-              <tr>
-                <td>John Lilki</td>
-                <td>September 14, 2013</td>
-                <td>jhlilk22@yahoo.com</td>
-                <td>No</td>
-              </tr>
-              <tr>
-                <td>John Lilki</td>
-                <td>September 14, 2013</td>
-                <td>jhlilk22@yahoo.com</td>
-                <td>No</td>
-              </tr>
-              <tr>
-                <td>Jamie Harington</td>
-                <td>January 11, 2014</td>
-                <td>jamieharingonton@yahoo.com</td>
-                <td>Yes</td>
-              </tr>
-              <tr>
-                <td>Jill Lewis</td>
-                <td>May 11, 2014</td>
-                <td>jilsewris22@yahoo.com</td>
-                <td>Yes</td>
-              </tr>
-              <tr>
-                <td>John Lilki</td>
-                <td>September 14, 2013</td>
-                <td>
-                  <div className="ui indicating progress" data-value="1" data-total="200" id="example5">
-                  <div className="bar"></div>
-                  <div className="label">Funding</div>
-                </div>
-              </td>
-              <td>
-                <div className="ui checked checkbox">
-                <input type="checkbox" checked="" className="hidden" readOnly="" tabIndex="0" />
-                <label>This checkbox comes pre-checked</label>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      </div>
-      );
-    }
-  }
-  // *******************************
-  // THIS IS THE DEFAULT EXPORT AND IS WHERE THE LOADING OF THE COMPONENT STARTS
-  // USE THIS POINT TO GRAB THE FILTERS
-  export default withTracker(() => {
+}
+// *******************************
+// THIS IS THE DEFAULT EXPORT AND IS WHERE THE LOADING OF THE COMPONENT STARTS
+// USE THIS POINT TO GRAB THE FILTERS
+export default withTracker(() => {
 
     return {
       tsxStatus: TheSkyXInfos.findOne({name: 'currentStage' }),
-      tsxInfo: TheSkyXInfos.find({}).fetch(),
       tsxIP: TheSkyXInfos.findOne({name: 'ip' }),
       tsxPort: TheSkyXInfos.findOne({name: 'port' }),
+      tsxInfo: TheSkyXInfos.find({}).fetch(),
       seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
       filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
       targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
   };
 })(App);
-/*
-<table className="ui selectable celled table">
-  <thead>
-    <tr>
-      <th>Series#</th>
-      <th>Frame/Action</th>
-      <th>Exposure/Time/Temp</th>
-      <th>Binning</th>
-      <th>Filter</th>
-      <th>Repeat</th>
-      <th>Calibration</th>
-      <th>Progress</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
-        <div className="ui checked checkbox">
-          <input type="checkbox" checked="" className="hidden" readonly="" tabIndex="0" />
-          <label>This checkbox comes pre-checked</label>
-        </div>
-        1
-      </td>
-      <td>Light</td>
-      <td>300</td>
-      <td>1x1</td>
-      <td>Lum</td>
-      <td>33</td>
-      <td>None</td>
-      <td><Progress percent={0} progress /></td>
-    </tr>
-    <tr>
-      <td>Focus</td>
-      <td>Light</td>
-      <td>300</td>
-      <td>1x1</td>
-      <td>Lum</td>
-      <td>33</td>
-      <td>None</td>
-      <td><Progress percent={0} progress /></td>
-    </tr>
-    <tr>
-      <td>Jill</td>
-      <td>Light</td>
-      <td>300</td>
-      <td>1x1</td>
-      <td>Lum</td>
-      <td>33</td>
-      <td>None</td>
-      <td><Progress percent={0} progress /></td>
-    </tr>
-    <tr class="warning">
-      <td>John</td>
-      <td>Light</td>
-      <td>300</td>
-      <td>1x1</td>
-      <td>Lum</td>
-      <td>33</td>
-      <td>None</td>
-      <td><Progress percent={0} progress /></td>
-    </tr>
-    <tr>
-      <td>Jamie</td>
-      <td class="positive">Light</td>
-      <td class="warning">300</td>
-      <td>1x1</td>
-      <td>Lum</td>
-      <td>33</td>
-      <td>None</td>
-      <td><Progress percent={0} progress /></td>
-    </tr>
-    <tr>
-      <td>Jill</td>
-      <td class="negative">Light</td>
-      <td>300</td>
-      <td>1x1</td>
-      <td>Lum</td>
-      <td>33</td>
-      <td>None</td>
-      <td><Progress percent={0} progress /></td>
-    </tr>
-  </tbody>
-</table>
-*/

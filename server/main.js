@@ -1,10 +1,9 @@
 import { Meteor } from 'meteor/meteor';
 
-// import { Ping } from 'frpz';
-
 import { TargetSessions } from '../imports/api/targetSessions.js';
 import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
 import { Seriess } from '../imports/api/seriess.js';
+import { Filters } from '../imports/api/filters.js';
 import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
 
 import {
@@ -14,10 +13,13 @@ import {
   tsx_UpdateDevice,
 } from '../imports/api/serverStates.js';
 
-import {string_replace} from './run_imageSession.js';
-import {tsx_feeder, tsx_is_waiting} from './tsx_feeder.js';
+import {
+  string_replace,
+} from './run_imageSession.js';
+
+import { tsx_feeder } from './tsx_feeder.js';
+
 import {shelljs} from 'meteor/akasha:shelljs';
-// import {xregex} from 'meteor/smoiz:xregexp';
 
 // *******************************
 // Filter Series
@@ -225,17 +227,6 @@ function loadTestDataAllTakeSeriesTemplates() {
   }
 }
 
-function tsxServerIsOnline() {
-  var success = 'Error|';
-  var cmd = tsxHeader + tsxFooter;
-  tsx_feeder( cmd, Meteor.bindEnvironment((tsx_return) => {
-    if( tsx_return == 'undefined|No error. Error = 0.') {
-      success = 'Success|';
-    }
-  }));
-  return success;
-}
-
 /*
 tsx_SetServerState
 currentStage: 'currentStage', // this is a status line update for the dashboard
@@ -302,52 +293,9 @@ Meteor.startup(() => {
 
 });
 
-/*
-  THERE ARE SEVERAL SERVER STATES TO MAINTAIN FOR TSX:
-  . MOUNT Connected: Y/N/PARKED/HOMED/SLEWING...
-  . CAMERA CONNECTED: Y/N
-  . Autoguide CONNECTED: Y/N
-  . FILTERWHEEL CONNECTED: Y/N
-  . FOCUSER CONNECTED: Y/N
-  . ROTATOR CONNECTED: Y/N
-
-
-  var CoordsHMSNow = "";
-  var CoordsHMS2k = "";
-
-  sky6RASCOMTele.GetRaDec();
-
-  sky6Utils.ConvertEquatorialToString(sky6RASCOMTele.dRa, sky6RASCOMTele.dDec, 5);
-
-  CoordsHMSNow = sky6Utils.strOut;
-
-  sky6Utils.PrecessNowTo2000( sky6RASCOMTele.dRa, sky6RASCOMTele.dDec);
-
-  sky6Utils.ConvertEquatorialToString(sky6Utils.dOut0, sky6Utils.dOut1, 5);
-
-  CoordsHMS2k = sky6Utils.strOut;
-  Out = "^          Now - " + CoordsHMSNow + "\n" + "          j2k - " + CoordsHMS2k;			// Form the output string
-
- */
-
 var tsxHeader =  '/* Java Script *//* Socket Start Packet */';
 var tsxFooter = '/* Socket End Packet */';
 var forceAbort = false;
-// var port;// = 3040;
-// var ip;// = 'localhost';
-
-// var tsxHeader = '/* Java Script *//* Socket Start Packet */';
-// var tsxFooter = '/* Socket End Packet */';
-
-// String.prototype.replaceAll = function(search, replacement) {
-//     var target = this;
-//     return target.split(search).join(replacement);
-// };
-
-// String.prototype.replaceAll = function(search, replacement) {
-//     var target = this;
-//     return target.replace(new RegExp(search, 'g'), replacement);
-// };
 
  Meteor.methods({
 
@@ -428,8 +376,9 @@ var forceAbort = false;
     filename = '/Users/stephen/Documents/code/tsx_cmd/imports/tsx/SkyX_JS_CLS.js';
 
 
-     var shell = require('shelljs');
      console.log('Loading file: ' + filename);
+     var shell = require('shelljs');
+
      var str = shell.cat(filename);
      // console.log(str);
      // console.log(filename);
@@ -446,83 +395,6 @@ var forceAbort = false;
      console.log(
       '*******************************'
     );
-   },
-
-   connectTsx() {
-
-     console.log(' ******************************* ');
-     var isOnline = tsxServerIsOnline();
-     console.log('tsxServerIsOnline: ' + isOnline);
-
-      // *******************************
-      //  GET THE CONNECTED EQUIPEMENT
-      console.log(' ******************************* ');
-      console.log('Loading devices');
-     var cmd = '\
-     Out =\
-     "aMan|"+ SelectedHardware.autoguiderCameraManufacturer +"\
-     |aMod|"+ SelectedHardware.autoguiderCameraModel +"\
-     |cMan|"+ SelectedHardware.cameraManufacturer +"\
-     |cMod|"+ SelectedHardware.cameraModel +"\
-     |efwMan|"+ SelectedHardware.filterWheelManufacturer +"\
-     |efwMod|"+ SelectedHardware.filterWheelModel +"\
-     |focMan|"+ SelectedHardware.focuserManufacturer +"\
-     |focMod|"+ SelectedHardware.focuserModel +"\
-     |mntMan|"+ SelectedHardware.mountManufacturer +"\
-     |mntMod|"+ SelectedHardware.mountModel +"\
-     |rotMan|"+ SelectedHardware.rotatorManufacturer +"\
-     |rotMod|"+ SelectedHardware.rotatorModel +"\
-     ";'
-     var cmd = tsxHeader + cmd + tsxFooter;
-
-     var success;
-     tsx_feeder( cmd, Meteor.bindEnvironment((tsx_return) => {
-
-          if( tsx_return.split('|')[24].trim() === "No error. Error = 0.") {
-             success = true;
-          }
-
-          tsx_UpdateDevice(
-            'guider',
-            tsx_return.split('|')[1].trim(),
-            tsx_return.split('|')[3].trim(),
-          );
-
-          tsx_UpdateDevice(
-            'camera',
-            tsx_return.split('|')[5].trim(),
-            tsx_return.split('|')[7].trim(),
-          );
-
-          tsx_UpdateDevice(
-            'efw',
-            tsx_return.split('|')[9].trim(),
-            tsx_return.split('|')[11].trim(),
-          );
-
-          tsx_UpdateDevice(
-            'focuser',
-            tsx_return.split('|')[13].trim(),
-            tsx_return.split('|')[15].trim(),
-          );
-
-          tsx_UpdateDevice(
-            'mount',
-            tsx_return.split('|')[17].trim(),
-            tsx_return.split('|')[19].trim(),
-          );
-
-           tsx_UpdateDevice(
-             'rotator',
-             tsx_return.split('|')[21].trim(),
-             tsx_return.split('|')[23].trim(),
-           );
-         }
-       )
-     )
-
-      var details;
-
    },
 
    loadTestDataTargetSessions() {

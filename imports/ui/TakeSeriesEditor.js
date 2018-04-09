@@ -6,6 +6,7 @@ import { withTracker } from 'meteor/react-meteor-data';
 
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 import { Seriess } from '../api/seriess.js';
+import { Filters } from '../api/filters.js';
 
 import { Form, Grid, Input, Table, Button, Dropdown, } from 'semantic-ui-react'
 
@@ -16,15 +17,15 @@ var frames = [
   'Bias',
 ];
 
-var filters = [
-  'Static LUM',
-  'Static R',
-  'Static G',
-  'Static B',
-  'Static Ha',
-  'Static OIII',
-  'Static SII',
-];
+// var filters = [
+//   'Static LUM',
+//   'Static R',
+//   'Static G',
+//   'Static B',
+//   'Static Ha',
+//   'Static OIII',
+//   'Static SII',
+// ];
 
 class TakeSeriesEditor extends Component {
 
@@ -83,12 +84,15 @@ class TakeSeriesEditor extends Component {
   // Get the filters from TheSkyX
   renderDropDownFilters() {
 
-    // NEED TO RETRIEVE FROM TSX....
     var filterArray = [];
-    for (var i = 0; i < filters.length; i++) {
-      filterArray.push({ key: filters[i], text: filters[i], value: filters[i] });
+    for (var i = 0; i < this.props.filters.length; i++) {
+      filterArray.push({
+        key: this.props.filters[i]._id,
+        text: this.props.filters[i].name,
+        value: this.props.filters[i].name });
     }
     return filterArray;
+    // return Filters.find().renderDropDownFilters();
   }
 
   // *******************************
@@ -215,7 +219,7 @@ export default withTracker(() => {
     return {
       // tsxInfo: TheSkyXInfos.find().fetch(),
       seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
-      // filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
+      filters: Filters.find({}, { sort: { order: 1 } }).fetch(),
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
       // targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
   };

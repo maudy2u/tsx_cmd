@@ -4,10 +4,12 @@ import { Mongo } from 'meteor/mongo';
 import { TargetSessions } from '../imports/api/targetSessions.js';
 import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
 import { Seriess } from '../imports/api/seriess.js';
+import { Filters } from '../imports/api/filters.js';
 import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
 
 //Tools
 import {
+  tsx_UpdateDevice,
   tsx_ServerStates,
   tsx_SetServerState,
   tsx_GetServerState,
@@ -23,7 +25,10 @@ import {tsx_feeder, tsx_is_waiting} from './tsx_feeder.js'
 
 
 import {shelljs} from 'meteor/akasha:shelljs';
+var shell = require('shelljs');
 
+var tsxHeader =  '/* Java Script *//* Socket Start Packet */';
+var tsxFooter = '/* Socket End Packet */';
 var forceAbort = false;
 
 function updateSeries(series) {
@@ -41,32 +46,6 @@ function updateSeries(series) {
 }
 
 
-/* *******************************
-initialFocusTemp: 0,
-initialMountDirection: "east",
-initialMountAltitude: 30,
-initialMountAzimuth:0,
- ******************************* */
-
-var shell = require('shelljs');
-
-// import {tsxCmdSetTargetRaDec} from '../tsx/SkyX_JS_TryTarget.js'
-// import {tsxCmdSlewRaDec} from '../tsx/SkyX_JS_Slew.js'
-// import {tsxCmdCLS} from '../tsx/SkyX_JS_CLS.js'
-// import {tsxCmdGetTwilight} from '../tsx/SkyX_JS_Twilight.js'
-//
-// import {tsxCmdFindGuideStar} from '../tsx/SkyX_JS_FindGuideStar.js'
-// import {tsxCmdFocus3} from '../tsx/SkyX_JS_Focus-3.js'
-// import {tsxCmdFrameAndGuide} from '../tsx/SkyX_JS_FrameAndGuide.js'
-// import {tsxCmdGetFocusTemp} from '../tsx/SkyX_JS_GetFocTemp.js'
-// import {tsxCmdMatchAngle} from '../tsx/SkyX_JS_MatchAngle.js'
-// import {tsxCmdTakeGuiderImage} from '../tsx/SkyX_JS_TakeGuideImage.js'
-// import {tsxCmdFindTargetWithRaDecAlt} from '../tsx/SkyX_JS_TryTarget.js'
-// import {tsxCmdTakeImage} from '../tsx/SkyX_JS_TakeImage.js'
-//
-// // More advance with image supplied... perhaps save an image with the target...
-// import {tsxCmdImageLink} from '../tsx/SkyX_JS_ImageLink.js'
-
 // *******************************
 // Substrung replacement routine for the loading of tsx.js library
 // replace the given strings with values...
@@ -80,7 +59,7 @@ export function string_replace(haystack, find, sub) {
     return haystack.split(find).join(sub);
 }
 
-function tsx_cmd(script) {
+export function tsx_cmd(script) {
   console.log('Creating tsx_cmd: ' + script);
   // var src =
   var path = Npm.require('path');
@@ -649,6 +628,108 @@ function tsx_TryTarget(targetSession) {
   }
 }
 
+function tsx_DeviceInfo() {
+
+  var cmd = shell.cat(tsx_cmd('SkyX_JS_DeviceInfo'));
+  // cmd = cmd.replace('$000', Number(filterNum) ); // set filter
+  // cmd = cmd.replace('$001', Number(exposure) ); // set exposure
+
+  var success;
+  tsx_feeder( String(cmd), Meteor.bindEnvironment((tsx_return) => {
+
+      var errIndex = tsx_return.split('|').length-1;
+      if( tsx_return.split('|')[errIndex].trim() === "No error. Error = 0.") {
+         success = true;
+      }
+      console.log(1);
+      tsx_UpdateDevice(
+        'guider',
+        tsx_return.split('|')[1].trim(),
+        tsx_return.split('|')[3].trim(),
+      );
+      console.log(2);
+
+      tsx_UpdateDevice(
+        'camera',
+        tsx_return.split('|')[5].trim(),
+        tsx_return.split('|')[7].trim(),
+      );
+      console.log(3);
+
+      tsx_UpdateDevice(
+        'efw',
+        tsx_return.split('|')[9].trim(),
+        tsx_return.split('|')[11].trim(),
+      );
+      console.log(4);
+
+      tsx_UpdateDevice(
+        'focuser',
+        tsx_return.split('|')[13].trim(),
+        tsx_return.split('|')[15].trim(),
+      );
+
+      tsx_UpdateDevice(
+        'mount',
+        tsx_return.split('|')[17].trim(),
+        tsx_return.split('|')[19].trim(),
+      );
+
+       tsx_UpdateDevice(
+         'rotator',
+         tsx_return.split('|')[21].trim(),
+         tsx_return.split('|')[23].trim(),
+       );
+
+       var numBins = tsx_return.split('|')[25].trim();
+       tsx_SetServerState(
+         'numberOfBins',
+         numBins
+       );
+       var numFilters = tsx_return.split('|')[27].trim();
+       tsx_SetServerState(
+         'numberOfFilters',
+         numFilters
+       );
+       console.log(5);
+
+       // if too many filters... reduce to matching
+       // if not enough then upsert will clean up
+       var filters = Filters.find({}, { sort: { order: 1 } }).fetch();
+       if( filters.length > numFilters ) {
+         // need to reduce the filters
+         for (var i = 0; i < filters.length; i++) {
+           if( filters[i].order > numberFilters-1) {
+              Filters.remove(filters[i]._id);
+           }
+         }
+       }
+
+       var index = 28; // the next position after the numFilters
+       for (var i = 0; i < numFilters; i++) {
+         var name = tsx_return.split('|')[index+i].trim();
+         Filters.upsert( {order: i }, {
+           $set: {
+             name: name,
+            }
+         });
+       }
+     }
+  ));
+}
+
+function tsx_ServerIsOnline() {
+  var success = 'Error|';
+  var cmd = tsxHeader + tsxFooter;
+  tsx_feeder( cmd, Meteor.bindEnvironment((tsx_return) => {
+    if( tsx_return == 'undefined|No error. Error = 0.') {
+      success = 'Success|';
+    }
+  }));
+  return success;
+}
+
+
 
 // *******************************
 // Utilities:
@@ -665,11 +746,23 @@ function tsx_TryTarget(targetSession) {
 
 Meteor.methods({
 
+  connectTsx() {
+    console.log(' ******************************* ');
+    var isOnline = tsx_ServerIsOnline();
+    console.log('tsx_ServerIsOnline: ' + isOnline);
+    // *******************************
+    //  GET THE CONNECTED EQUIPEMENT
+    console.log(' ******************************* ');
+    console.log('Loading devices');
+
+    var out = tsx_DeviceInfo();
+
+   },
+
   tsxGetTargetSession() {
     console.log('************************');
     console.log('tsxGetTargetSession');
     var target = getTargetSession();
-    console.log(target.name);
 
     if( typeof target == 'undefined') {
       target = 'No target found. Check constraints.'
@@ -677,6 +770,7 @@ Meteor.methods({
       tsx_SetServerState( 'currentStage', "Selecting failed: "+ target);
     }
     else {
+      console.log(target.name);
       TheSkyXInfos.upsert( {name: tsx_ServerStates.imagingSessionId }, {
         $set: { value: target._id }
       });

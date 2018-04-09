@@ -84,7 +84,13 @@ class TargetSessionMenu extends Component {
         dec: '',
         angle: '',
         scale: '',
-        coolingTemp: TheSkyXInfos.findOne({name: 'defaultCoolTemp'}),
+        coolingTemp: '',
+
+/*
+*******************************
+#todo Need to work on the loading of the defaults properly
+*/
+        // coolingTemp: TheSkyXInfos.findOne({name: 'defaultCoolTemp'}),
         clsFliter: '',
         focusFliter: '',
         foccusSamples: '',
@@ -93,10 +99,14 @@ class TargetSessionMenu extends Component {
         guideDelay: '',
         priority: '',
         enableMeridianFlip: TheSkyXInfos.findOne({name: 'defaultMeridianFlip'}),
-        startTime: TheSkyXInfos.findOne({name: 'defaultStartTime'}),
-        stopTime: TheSkyXInfos.findOne({name: 'defaultSopTime'}),
-        tempChg: TheSkyXInfos.findOne({name: 'defaultFocusTempDiff'}),
-        minAlt: TheSkyXInfos.findOne({name: 'defaultMinAlt'}),
+        startTime: '',
+        stopTime: '',
+        // startTime: TheSkyXInfos.findOne({name: 'defaultStartTime'}),
+        // stopTime: TheSkyXInfos.findOne({name: 'defaultSopTime'}),
+        tempChg: '',
+        minAlt: '',
+        // tempChg: TheSkyXInfos.findOne({name: 'defaultFocusTempDiff'}),
+        // minAlt: TheSkyXInfos.findOne({name: 'defaultMinAlt'}),
         currentAlt: 0, // set to zero for now.
         completed: false,
         createdAt: new Date(),

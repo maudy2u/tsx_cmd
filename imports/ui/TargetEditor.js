@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import { withTracker } from 'meteor/react-meteor-data';
 
 import { Seriess } from '../api/seriess.js';
+import { Filters } from '../api/filters.js';
 import { TargetSessions } from '../api/targetSessions.js';
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 import TakeSeriesTemplateEditor from './TakeSeriesTemplateEditor.js';
@@ -28,7 +29,7 @@ class TargetEditor extends Component {
     angle: "",
     priority: 10,           // Priority: 1 is highest
     clsFilter: '',
-    focusFilter: {},
+    focusFilter: '',
     foccusSamples: '',
     focusBin: '',
     guideExposure: '',
@@ -36,7 +37,7 @@ class TargetEditor extends Component {
     minAlt: 29.5,
     currentAlt:0,
     startTime: '20:00',
-    stopTime: '06:00',
+    stopTime: '6:00',
     coolingTemp: -19,
     coolingTime: 5,
     value: false,
@@ -60,6 +61,7 @@ class TargetEditor extends Component {
   handleCoolingTempChange = ( value ) => this.setState({coolingTemp: value.value });
   handleCoolingTimeChange = ( value ) => this.setState({coolingTime: value.value });
   handleFocusTempChange = ( value ) => this.setState({tempChg: value.value });
+  handleFocusFilterChange = ( value ) => this.setState({focusFilter: value });
   handleMinAltChange = ( value ) => this.setState({minAlt: value.value });
   onStopTimeChange = (value) => this.setState({testDate: value});
   onChangeChecked() {
@@ -92,7 +94,13 @@ class TargetEditor extends Component {
       coolingTemp: Number(this.props.target.coolingTemp),
       targetFindName: this.props.target.targetFindName,
       targetImage: this.props.target.targetImage,
-      seriesTemplate: this.props.target.series.text,
+
+      seriesTemplate: this.props.target.series.value,
+      // series: {
+      //   _id: orgTarget.series._id,
+      //   value: orgTarget.series.text,
+      // },
+
       seriesDropDown: this.getTakeSeriesTemplates(),
       ra: this.props.target.ra,
       dec: this.props.target.dec,
@@ -106,7 +114,6 @@ class TargetEditor extends Component {
       stopTime: this.props.target.stopTime,
       clsFilter: this.props.target.clsFilter,
       focusFilter: this.props.target.focusFilter,
-      filterDropDown: this.renderDropDownFilters(),
       foccusSamples: this.props.target.foccusSamples,
       focusBin: this.props.target.focusBin,
       guideExposure: this.props.target.guideExposure,
@@ -133,7 +140,6 @@ class TargetEditor extends Component {
       }
     }
 
-    var filter = this.state.focusFilter;
     TargetSessions.update(this.props.target._id, {
       $set: {
         enabledActive: this.state.enabledActive,
@@ -165,13 +171,16 @@ class TargetEditor extends Component {
   }
 
   renderDropDownFilters() {
-    var filters = [
-      { key: 'Static LUM', text: 'Static LUM', value: 'Static LUM'},
-      { key: 'Static R', text: 'Static R', value: 'Static R' },
-      { key: 'Static G', text: 'Static G', value: 'Static G' },
-      { key: 'Static B', text: 'Static B', value: 'Static B' },
-    ];
-    return filters;
+
+    var filterArray = [];
+    for (var i = 0; i < this.props.filters.length; i++) {
+      filterArray.push({
+        key: this.props.filters[i]._id,
+        text: this.props.filters[i].name,
+        value: this.props.filters[i].name });
+    }
+    return filterArray;
+    // return Filters.find().renderDropDownFilters();
   }
 
   // Get all the current values from the TaeSeriesTemplate collections
@@ -237,7 +246,6 @@ class TargetEditor extends Component {
 
     // *******************************
     // DROP DOWN CONSTANTS
-    var filters = this.renderDropDownFilters();
     var takeSeries = this.getTakeSeriesTemplates();
 
     // *******************************
@@ -370,6 +378,10 @@ class TargetEditor extends Component {
             onChange={this.handleMinAltChange}
           />
         </Segment>
+        {/*
+          Still working on the different TIME formats...
+          Need to find another bootstrap3 version of the date picker
+            */}
           <Segment>
             <h4 className="ui header">Start Time</h4>
             <Timekeeper
@@ -382,7 +394,7 @@ class TargetEditor extends Component {
             {/* <DateTime />pickerOptions={{format:"LL"}} value="2017-04-20"/> */}
             <Timekeeper
               time={this.state.stopTime}
-              onChange={this.handleStartChange}
+              onChange={this.handleStopChange}
             />
           </Segment>
       </Tab.Pane> },
@@ -395,10 +407,10 @@ class TargetEditor extends Component {
               <Form.Group widths='equal'>
                 <Form.Field control={Dropdown}
                   label='Filter'
-                  options={filters}
+                  options={this.renderDropDownFilters()}
                   placeholder='Filter for focusing'
                   text={this.state.focusFilter}
-                  onChange={this.focusFilterChange}/>
+                  onChange={this.handleFocusFilterChange}/>
               </Form.Group>
               <Segment>
                 <h4 className="ui header">Focus Temperature Delta: {this.state.tempChg}</h4>
@@ -471,6 +483,7 @@ class TargetEditor extends Component {
 
 export default withTracker(() => {
     return {
+      filters: Filters.find({}, { sort: { order: 1 } }).fetch(),
       targets1: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
       takeSeriesTemplates1: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
   };
