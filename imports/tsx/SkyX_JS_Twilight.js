@@ -4,7 +4,7 @@
 //
 // Script will check to to see if it is twilight.
 //
-// Ken Sturrock 
+// Ken Sturrock
 // January 13, 2018
 //
 
@@ -12,18 +12,18 @@ var Target 	= "$000";	// tsxfeeder replaces $000 with the current target name.
 
 
 // Find the sun and figure out how high it is.
-sky6StarChart.Find("sun"); 
-sky6ObjectInformation.Property(59);  
+sky6StarChart.Find("sun");
+sky6ObjectInformation.Property(59);
 var altitude = sky6ObjectInformation.ObjInfoPropOut;
 
 // Refind where we were.
-sky6StarChart.Find(Target); 
-    
-if (altitude > -15) 
+sky6StarChart.Find(Target);
+
+if (altitude > -15)
 //
 // If the sun is above -15 degrees, use the "Light." keyword
 //
-// This is technically not as dark as "astronomical twilight" (-18 degrees)  
+// This is technically not as dark as "astronomical twilight" (-18 degrees)
 // but it's an hour before/after the sun crosses the horizon.
 //
 {
@@ -32,15 +32,14 @@ if (altitude > -15)
 	simpErr = "Dark. " + altitude;
 }
 
-if (ccdsoftCamera.ImageUseDigitizedSkySurvey == 1)
-//
-// If using the simulator, then tell us this so we know 
-// to ignore the check.
-//
-{
-	simpErr = "Simulator. " + altitude;
-}
+// if (ccdsoftCamera.ImageUseDigitizedSkySurvey == 1)
+// //
+// // If using the simulator, then tell us this so we know
+// // to ignore the check.
+// //
+// {
+// 	simpErr = "Simulator. " + altitude;
+// }
 
 
 /* Socket End Packet */
-

@@ -195,45 +195,6 @@ class App extends Component {
 
   // *******************************
   //
-  // Used to put the filter line into the table
-  renderFilters() {
-    // "filters" ise created in the withTracker loading at the bottom
-    return this.props.filters.map((obj) => (
-      <Filter key={obj._id} filter={obj} />
-    ));
-  }
-
-  // *******************************
-  //
-  renderDropDownFiltersTest() {
-    return [
-      { text: 'Static Lum', value: 0 },
-      { text: 'Static R', value: 1 },
-      { text: 'Static G', value: 2 },
-    ];
-  }
-  renderDropDownFilters() {
-    // Get the filters
-    return [
-      { name: 'Static Lum', value: 0 },
-      { name: 'Static R', value: 1 },
-      { name: 'Static G', value: 2 },
-    ];
-  }
-
-  // *******************************
-  // This is used to populate drop down frame lists
-  renderDropDownFrames() {
-    return [
-      { type: 'Light', value: 0 },
-      { type: 'Dark', value: 1 },
-      { type: 'Flat', value: 2 },
-      { type: 'Bias', value: 2 },
-    ];
-  }
-
-  // *******************************
-  //
   renderMonitor() {
     return  (
       <Monitor  />

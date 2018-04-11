@@ -23,6 +23,9 @@ export const tsx_ServerStates = {
   imagingDEC: 'imagingDEC',
   imagingALT: 'imagingALT',
   imagingAZ: 'imagingAZ',
+
+  defaultMinAltitude: 'defaultMinAltitude',
+
 };
 
 export function tsx_SetServerState( name, value) {

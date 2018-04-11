@@ -249,7 +249,7 @@ export default withTracker(() => {
     return {
       // tsxInfo: TheSkyXInfos.find().fetch(),
       seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
-      filters: Filters.find({}, { sort: { order: 1 } }).fetch(),
+      filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
       // targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
   };

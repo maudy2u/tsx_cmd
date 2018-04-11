@@ -6,31 +6,47 @@ import { Seriess } from './seriess.js'
 // Used to store the sessions for a Target - the actual imaging
 export const TargetSessions = new Mongo.Collection('targetSessions');
 
-// TargetSessions.schema = new SimpleSchema({
-//   name: {type: String},
-//   targetFindName: {type: String},
-//   targetImage: {type: String},
-//   description: {type: String},
-//   takeSeries: {type: Array},
-//   ra: {type: Number, defaultValue: 0},
-//   dec: {type: Number, defaultValue: 0},
-//   angle: {type: Number, defaultValue: 0},
-//   scale: {type: Number, defaultValue: 0},
-//   coolingTemp: {type: Number, defaultValue: 0},
-//   clsFliter: {type: String},
-//   focusFliter: {type: String},
-//   focusSamples: {type: Number, defaultValue: 0},
-//   focusBin: {type: Number, defaultValue: 0},
-//   guideExposure: {type: Number, defaultValue: 0},
-//   guideDelay: {type: Number, defaultValue: 0},
-//   startTime: {type: Date, defaultValue: 0},
-//   stopTime: {type: Date, defaultValue: 0},
-//   priority: {type: Number, defaultValue: 0},
-//   tempChg: {type: Number, defaultValue: 0},
-//   minAlt: {type: Number, defaultValue: 0},
-//   completed: {type: Boolean, defaultValue: 0},
-//   createdAt: {type: Date, defaultValue: 0},
-// });
+/*
+name: '',
+targetFindName: '',
+targetImage: '',
+description: '',
+enabledActive: false,
+series: {
+},
+progress: [
+//            {_id: seriesId, taken:0},
+],
+ra: '',
+dec: '',
+angle: '',
+scale: '',
+coolingTemp: '',
+
+*******************************
+#todo Need to work on the loading of the defaults properly
+// coolingTemp: TheSkyXInfos.findOne({name: 'defaultCoolTemp'}),
+clsFliter: '',
+focusFliter: '',
+foccusSamples: '',
+focusBin: '',
+guideExposure: '',
+guideDelay: '',
+priority: '',
+enableMeridianFlip: TheSkyXInfos.findOne({name: 'defaultMeridianFlip'}),
+startTime: '',
+stopTime: '',
+// startTime: TheSkyXInfos.findOne({name: 'defaultStartTime'}),
+// stopTime: TheSkyXInfos.findOne({name: 'defaultSopTime'}),
+tempChg: '',
+minAlt: '',
+// tempChg: TheSkyXInfos.findOne({name: 'defaultFocusTempDiff'}),
+// minAlt: TheSkyXInfos.findOne({name: 'defaultMinAlt'}),
+currentAlt: 0, // set to zero for now.
+completed: false,
+createdAt: new Date(),
+
+ */
 
 TargetSessions.helpers({
 
@@ -122,6 +138,27 @@ TargetSessions.helpers({
         break;
       }
     }
+    return taken;
+  },
+
+  incrementTakenFor: function(seriesId) {
+    var taken = 0;
+    var progress = this.progress;
+    if( typeof progress != 'undefined') {
+      // increment
+      for (var i = 0; i < progress.length; i++) {
+        if (progress[i]._id == seriesId ) {
+          progress[i].taken = progress[i].taken + 1;
+          taken = progress[i].taken;
+          TargetSessions.update({_id: this._id}, {
+            $set: {
+              progress: progress[i],
+            }
+          });
+        }
+      }
+    }
+
     return taken;
   }
 

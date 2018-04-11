@@ -482,7 +482,7 @@ class TargetEditor extends Component {
 
 export default withTracker(() => {
     return {
-      filters: Filters.find({}, { sort: { order: 1 } }).fetch(),
+      filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
       targets1: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
       takeSeriesTemplates1: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
   };

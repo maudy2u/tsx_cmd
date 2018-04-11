@@ -40,7 +40,23 @@ function initParam(paramName) {
       }
     });
     param = TheSkyXInfos.findOne({_id: did});
-    console.log('Created ' + paramName +': ' + param.value);
+    console.log('Created ' + paramName);
+  }
+  else {
+    console.log('Found ' + paramName +': ' + param.value);
+  }
+  return param;
+}
+
+function initParamWith(paramName, paramValue) {
+  var param = TheSkyXInfos.findOne({name: paramName});
+  if( typeof param == 'undefined') {
+    var did = TheSkyXInfos.upsert({name: paramName}, {
+      $set: {
+        value: paramValue,
+      }
+    });
+    console.log('Created ' + paramName );
   }
   else {
     console.log('Found ' + paramName +': ' + param.value);
@@ -56,6 +72,10 @@ TheSkyXInfos.helpers({
 
   port: function() {
     return initParam('port').value;
+  },
+
+  defaultMinAltitude: function() {
+    return initParamWith('minAlt', 30).value;
   },
 
   mount: function() {

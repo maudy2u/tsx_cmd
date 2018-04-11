@@ -19,4 +19,9 @@ Filters.helpers({
     }
     return filterArray;
   },
+  getFilterIndexFor: function(filterName) {
+    var filter = Filters.find({name: filterName}).fetch();
+    return filter.slot;
+  },
+
 });

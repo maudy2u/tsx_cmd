@@ -1,6 +1,9 @@
 /* Java Script */
 /* Socket Start Packet */
 
+var aFilter = $000;
+var aExpTime = $001;
+
 //
 //	This JavaScript code simply connects to the imaging camera and takes a picture.
 //
@@ -12,7 +15,6 @@
 //	January 13, 2018
 //
 
-var aFilter = $000;
 
 while (!ccdsoftCamera.State == 0)
 //
@@ -23,7 +25,7 @@ while (!ccdsoftCamera.State == 0)
 }
 
 ccdsoftCamera.Asynchronous = false;		// We are going to wait for it
-ccdsoftCamera.ExposureTime = $001;		// Set the exposure time based on the second parameter from tsxfeeder
+ccdsoftCamera.ExposureTime = aExpTime;		// Set the exposure time based on the second parameter from tsxfeeder
 ccdsoftCamera.AutoSaveOn = true;		// Keep the image
 ccdsoftCamera.ImageReduction = 0;		// Don't do autodark, change this if you do want some other calibration (1=AD, 2=full)
 ccdsoftCamera.Frame = 1;			// It's a light frame
