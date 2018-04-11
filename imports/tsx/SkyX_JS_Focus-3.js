@@ -15,11 +15,11 @@
 //
 
 var CCDSC		= ccdsoftCamera;
-var initExp 		= CCDSC.ExposureTime;			// How long of an exposure does the camera use?
-var focusingFilter = "$000";
-var binFactor 		= "$001";
-var initialBinX		= CCDSC.BinX;
-var initialBinY		= CCDSC.BinY;
+var focusingFilter = 0;
+var binFactor 		= "No";
+var initExp 		= ccdsoftCamera.ExposureTime;			// How long of an exposure does the camera use?
+var initialBinX		= ccdsoftCamera.getPropLng("m_nXBin");
+var initialBinY		= ccdsoftCamera.getPropLng("m_nYBin");
 
 if ( Application.build >= 11177 )
 {
@@ -94,8 +94,8 @@ if ( Application.build >= 11177 )
 			// If we binned the camera for focusing, put it back.
 			//
 			{
-				ccdsoftCamera.setPropLng("m_nXBin", "initialBinX" );
-				ccdsoftCamera.setPropLng("m_nYBin", "initialBinY" );
+				ccdsoftCamera.setPropLng("m_nXBin", initialBinX ); // removed quotes
+				ccdsoftCamera.setPropLng("m_nYBin", initialBinY ); // removed quotes
 			}
 		}
 
