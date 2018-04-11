@@ -78,24 +78,7 @@ export default withTracker(() => {
   }
 
   componentWillMount() {
-    // NEED TO UPDATE THE NAME GIVEN TO THE SERIES...
-    // var series = this.props.target.series;
-    // if( series != 'undefined') {
-    //   var update = TakeSeriesTemplates.findOne({_id: series._id});
-    //
-    //   var item = update.series;
-    //   for (var i = 0; i < item.length; i++) {
-    //     var a = item[i];
-    //     var image = Seriess.findOne({_id:item[i].id}); //.fetch();
-    //     totalTakenImages += image.taken;
-    //     totalPlannedImages += image.repeat;
-    //   }
-    //
-    //   series.text = update.name;
-    //   this.props.target.series = series;
-    // }
-
-    // // do not modify the state directly
+    // do not modify the state directly
     this.setState({
       enabledActive: this.props.target.enabledActive,
       name: this.props.target.name,

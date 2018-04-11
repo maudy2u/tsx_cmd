@@ -26,7 +26,6 @@ import {shelljs} from 'meteor/akasha:shelljs';
 // 1. Filter name
 // 2. Exposure
 // 3. Quantity
-// 4. taken - number of images obtained
 // LUM Imaging
 
 var nBExposure = 8;
@@ -40,7 +39,6 @@ takeSeries1.set("binning",  1 );
 takeSeries1.set("frame", 'Light' );
 takeSeries1.set("filter", 'LUM' );
 takeSeries1.set("repeat", 33 );
-takeSeries1.set("taken", 0);
 // R Imaging
 var takeSeries2 = new Map();
 takeSeries2.set( "order", 1);
@@ -49,7 +47,6 @@ takeSeries2.set("binning",  1 );
 takeSeries2.set("frame", 'Light' );
 takeSeries1.set("filter", 'R' );
 takeSeries2.set("repeat", 33 );
-takeSeries2.set("taken", 0);
 // G
 var takeSeries3 = new Map();
 takeSeries3.set( "order", 2);
@@ -58,7 +55,6 @@ takeSeries3.set("binning",  1 );
 takeSeries3.set("frame", 'Light' );
 takeSeries3.set("filter", 'G' );
 takeSeries3.set("repeat", 33 );
-takeSeries3.set("taken", 0);
 // B
 var takeSeries4 = new Map();
 takeSeries4.set( "order", 3);
@@ -67,7 +63,6 @@ takeSeries4.set("binning",  1 );
 takeSeries4.set("frame", 'Light' );
 takeSeries3.set("filter", 'B' );
 takeSeries4.set("repeat", 33 );
-takeSeries4.set("taken", 0);
 // Ha
 var takeSeries5 = new Map();
 takeSeries5.set( "order", 0);
@@ -76,7 +71,6 @@ takeSeries5.set("binning",  1 );
 takeSeries5.set("frame", 'Light' );
 takeSeries3.set("filter", 'Ha' );
 takeSeries5.set("repeat", 33 );
-takeSeries5.set("taken", 0);
 // OIII
 var takeSeries6 = new Map();
 takeSeries6.set( "order", 1);
@@ -85,7 +79,6 @@ takeSeries6.set("binning",  1 );
 takeSeries6.set("frame", 'Light' );
 takeSeries3.set("filter", 'OIII' );
 takeSeries6.set("repeat", 33 );
-takeSeries6.set("taken", 0);
 // SII
 var takeSeries7 = new Map();
 takeSeries7.set( "order", 2);
@@ -94,7 +87,6 @@ takeSeries7.set("binning",  1 );
 takeSeries7.set("frame", 'Light' );
 takeSeries3.set("filter", 'SII' );
 takeSeries7.set("repeat", 33 );
-takeSeries7.set("taken", 0);
 
 var testTakeSeries1 = [];
 testTakeSeries1.push(takeSeries1);
@@ -216,7 +208,6 @@ function loadTestDataAllTakeSeriesTemplates() {
           frame: seriesMap.get("frame"),
           filter: seriesMap.get("filter"),
           repeat: seriesMap.get("repeat"),
-          taken: seriesMap.get("taken"),
         }
       );
 
@@ -352,14 +343,6 @@ var forceAbort = false;
        var res = Seriess.update( {_id: id }, {
          $set:{
            binning: value,
-         }
-       });
-     }
-     else if (name=='taken') {
-       console.log('7');
-       var res = Seriess.update( {_id: id }, {
-         $set:{
-           taken: value,
          }
        });
      }

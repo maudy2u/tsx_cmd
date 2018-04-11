@@ -18,7 +18,6 @@ import {
 import {
   canTargetSessionStart,
   getTargetSession,
-  calcTargetProgress,
 } from '../imports/api/sessionTools.js';
 
 import {tsx_feeder, tsx_is_waiting} from './tsx_feeder.js'
@@ -40,11 +39,30 @@ function updateSeries(series) {
           filter: series.filter,
           repeat: series.repeat,
           binning: series.binning,
-          taken: series.taken,
         }
       });
 }
 
+function incrementTakenFor( target, seriesId ) {
+
+  if( typeof target == 'undefined' || typeof series == 'undefined' ) {
+    throw 'Error in incrementTakenFor';
+  }
+
+  var progress = target.progress;
+  for (var i = 0; i < progress.length; i++) {
+    if( progress[i]._id == seriesId ) {
+      progress[i].taken = progress[i].taken + 1;
+      break;
+    }
+  }
+
+  TargetSessions.upsert({_id: targetId }, {
+    $set: {
+      progress: progress,
+      }
+  });
+}
 
 // *******************************
 // Substrung replacement routine for the loading of tsx.js library
@@ -133,7 +151,6 @@ nErr = ClosedLoopSlew.exec();\
 // 1. Filter name
 // 2. Exposure
 // 3. Quantity
-// 4. taken - number of images obtained
 
 
 // *******************************
@@ -284,7 +301,7 @@ function tsx_focusTemperature() {
   // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
   var Out;
   var tsx_is_waiting = true;
-  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+  tsx_feeder(String(cmd), Meteor.bindEnvironment((tsx_return) => {
         var success = tsx_return.split('|')[0].trim();
         console.log('SkyX_JS_GetFocTemp result check: ' + tsx_return);
         Out = success;
@@ -310,9 +327,6 @@ function tsx_GetMountCoords() {
   var Out;
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        console.log('SkyX_JS_GetFocTemp result check: ' + tsx_return);
-        //Out = ra2000 + '|' + dec2000+ '|' + CoordsHMS2000 + '|';			// Form the output string
-
         Out = {
           ra: tsx_return.split('|')[0].trim(),
           dec: tsx_return.split('|')[1].trim(),
@@ -340,8 +354,6 @@ function tsx_GetMountOrientation() {
   var Out;
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        console.log('SkyX_JS_GetFocTemp result check: ' + tsx_return);
-        //Out = ra2000 + '|' + dec2000+ '|' + CoordsHMS2000 + '|';			// Form the output string
 
         Out = {
           direction: tsx_return.split('|')[0].trim(),
@@ -478,7 +490,6 @@ function tsx_MntPark(lumFilter) {
   // cmd = cmd.replace("$001", 30 ); // set exposure
   var Out;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        console.log('SkyX_JS_GetFocTemp result check: ' + tsx_return);
 
       }
     )
@@ -490,6 +501,44 @@ function tsx_MntPark(lumFilter) {
 // Used to find the RA/DEC in the TargetEditor Details Tab
 export function tsx_GetTargetRaDec(targetFindName) {
   console.log('tsx_GetTargetRaDec: ' + targetFindName);
+  var file = tsx_cmd('SkyX_JS_GetTargetCoords');
+  // console.log('File: ' + file );
+  var cmd = shell.cat(file);
+  cmd = cmd.replace("$000", targetFindName ); // set filter
+  // cmd = cmd.replace("$001", 30 ); // set exposure
+  // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
+  var Out = "Error|Target not found.";
+  var tsx_is_waiting = true;
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+      var success = tsx_return.split('|')[0].trim();
+      console.log('Any error?: ' + tsx_return);
+      if( success != 'Success') {
+        console.log('tsx_GetTargetRaDec Failed. Error: ' + tsx_return);
+      }
+      else {
+        // Out = 'Success|' + targetRA + '|' + targetDEC+ '|' + altitude + '|'+ azimuth ;			// Form the output string
+        tsx_SetServerState( 'targetRA', tsx_return.split('|')[1].trim() );
+        tsx_SetServerState( 'targetDEC', tsx_return.split('|')[2].trim() );
+        tsx_SetServerState( 'targetATL', tsx_return.split('|')[3].trim() );
+        tsx_SetServerState( 'targetAZ', tsx_return.split('|')[4].trim() );
+
+        Out = tsx_return;
+      }
+      tsx_is_waiting = false;
+      }
+    )
+  )
+  while( tsx_is_waiting ) {
+   Meteor.sleep( 1000 );
+  }
+
+  return Out;
+}
+
+// *******************************
+//
+export function tsx_GetFocusTemp() {
+  console.log('tsx_GetFocusTemp: ' + targetFindName);
   var file = tsx_cmd('SkyX_JS_GetTargetCoords');
   // console.log('File: ' + file );
   var cmd = shell.cat(file);
@@ -589,8 +638,9 @@ function takeSeriesImage(series) {
 
     // need to look up the filters in TSX
 
-    var res = tsx_takeImage(0,series.exposure);
-    console.log('Taken image: ' +res);
+    // var res = tsx_takeImage(0,series.exposure);
+    // console.log('Taken image: ' +res);
+    console.log('Taken image');
     series.taken++;
     updateSeries(series);
   }
@@ -757,6 +807,62 @@ Meteor.methods({
 
     var out = tsx_DeviceInfo();
 
+   },
+
+   // this from the monitor
+   // it is used to test the image session
+/*
+
+Use this to set the last focus
+
+*/
+   //
+   tsxTestImageSession() {
+
+     console.log('************************');
+     console.log('tsxGetTargetSession');
+     var target = getTargetSession();
+
+     if( typeof target == 'undefined') {
+       target = 'No target found. Check constraints.'
+       console.log(target);
+       tsx_SetServerState( 'currentStage', "Selecting failed: "+ target);
+     }
+     else {
+       console.log(target.name);
+       TheSkyXInfos.upsert( {name: tsx_ServerStates.imagingSessionId }, {
+         $set: { value: target._id }
+       });
+       tsx_SetServerState( tsx_ServerStates.currentStage, "Selected Target: "+ target.name);
+
+
+       console.log(' ****tsx_GetTargetRaDec');
+       var result = tsx_GetTargetRaDec(target.targetFindName);
+       var altitude = result.split('|')[3].trim();
+       var ra = result.split('|')[1].trim();
+       var dec = result.split('|')[2].trim();
+       var azimuth = result.split('|')[4].trim();
+       if (azimuth < 179)
+       //
+       // Simplify the azimuth value to simple east/west
+       //
+       {
+         tsx_SetServerState(tsx_ServerStates.imagingAZ, 'East');
+       } else {
+         tsx_SetServerState(tsx_ServerStates.imagingAZ, 'West');
+       }
+
+       tsx_SetServerState(tsx_ServerStates.imagingRA, ra);
+       tsx_SetServerState(tsx_ServerStates.imagingDEC, dec);
+       tsx_SetServerState(tsx_ServerStates.imagingALT, altitude);
+       tsx_SetServerState( tsx_ServerStates.currentImagingName, target.targetFindName);
+
+       var initFocusTemp = tsx_focusTemperature();
+       tsx_SetServerState('focusTempLast', initFocusTemp);
+
+       return target._id +'|';
+
+     }
    },
 
   tsxGetTargetSession() {
@@ -1026,21 +1132,24 @@ Meteor.methods({
     return;
   },
 
-  startImaging(targetSession) {
+  startImaging(targetSessionId) {
     // process for each filter
+    var targetSession = TargetSessions.findOne({_id:targetSessionId});
+    console.log('Found session: ' + targetSession.name );
+    console.log('Loading TakeSeriesTemplate:' + targetSession.series._id );
     var template = TakeSeriesTemplates.findOne( {_id:targetSession.series._id});
     var seriesProcess = template.processSeries;
     console.log('Imaging process: ' + seriesProcess );
 
-    var numFilters = template.series.length;
-    console.log('Number of filters: ' + numFilters );
+    var numSeries = template.series.length;
+    console.log('Number of series: ' + numSeries );
 
     // load the filters
     var takeSeries = [];
-    for (var i = 0; i < template.series.length; i++) {
+    for (var i = 0; i < numSeries; i++) {
       var series = Seriess.findOne({_id:template.series[i].id});
-      console.log('Got series - ' + template.series[i].id + ', ' + series.filter);
       if( typeof series != 'undefined') {
+        console.log('Got series - ' + template.series[i].name + ', ' + series.filter);
         takeSeries.push(series);
       }
     }

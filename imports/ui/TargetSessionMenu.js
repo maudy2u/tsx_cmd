@@ -80,6 +80,9 @@ class TargetSessionMenu extends Component {
         enabledActive: false,
         series: {
         },
+        progress: [
+//            {_id: seriesId, taken:0},
+        ],
         ra: '',
         dec: '',
         angle: '',

@@ -11,9 +11,6 @@ import { Confirm, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Pr
 import {
   canTargetSessionStart,
   getTargetSession,
-  calcTargetProgress,
-  getTotalTakenImages,
-  getTotalPlannedImages,
 } from '../api/sessionTools.js';
 
 import {
@@ -23,7 +20,6 @@ import {
 } from  '../api/serverStates.js';
 
 // Import the API Model
-import { SessionTemplates } from '../api/sessionTemplates.js';
 import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
 import { Seriess } from '../api/seriess.js';
 import { Filters } from '../api/filters.js';
@@ -32,7 +28,6 @@ import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 
 // Import the UI
 import TargetSessionMenu from './TargetSessionMenu.js';
-import SessionTemplate from './SessionTemplate.js';
 import Filter from './Filter.js';
 import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
@@ -79,6 +74,32 @@ class Monitor extends Component {
     // do not modify the state directly
   }
 
+  textTSX2() {
+
+
+    // *******************************
+    // get a session to use
+    Meteor.call("tsxTestImageSession", function (error, result) {
+      if ( error ) {
+        // show a nice error message
+        this.noFoundSessionOpen();
+        Session.set("errorMessage", "Please check connection and constraints.");
+      }
+      else {
+
+        // *******************************
+        // START AN IMAGE SERIES
+        // if success then TheSkyX has made this point the target...
+        // now get the coordinates
+        var sessionId = result.split('|')[0].trim();
+        Meteor.call("startImaging", sessionId, function (error, result) {
+
+
+        }.bind(this));
+      }
+    }.bind(this));
+  }
+
   textTSX() {
     //var d = new Date(year, month, day, hours, minutes, seconds, milliseconds);
     var currentTime = new Date();
@@ -91,7 +112,7 @@ class Monitor extends Component {
     // any remaining images
     //var target = getTargetSession();
 
-    Meteor.call("tsxGetTargetSession", function (error, result) {
+    Meteor.call("tsxTestImageSession", function (error, result) {
       console.log('Error: ' + error);
       console.log('result: ' + result);
       for (var i = 0; i < result.split('|').length; i++) {
@@ -109,7 +130,7 @@ class Monitor extends Component {
         // now get the coordinates
         cmdSuccess = true;
     }
-  });
+  }.bind(this));
 }
 
   // *******************************
@@ -238,7 +259,8 @@ class Monitor extends Component {
         // use i to lock to the current filter
         var series = takeSeries[i]; // get the first in the order
 
-        var numImages = series.repeat - series.taken;
+        var taken = targetSession.imagesTakenFor(series._id);
+        var numImages = series.repeat - taken;
         for (var perSeries = 0; perSeries < numImages; repeatSeries++) {
 
           // take image
@@ -363,6 +385,7 @@ isCurrentlyImaging: 'isCurrentlyImaging',
             <Button icon='pause'  />
             <Button icon='stop' onClick={this.tsxStopSession.bind(this)} />
             <Button onClick={this.textTSX.bind(this)}>Test</Button>
+            <Button onClick={this.textTSX2.bind(this)}>Test2</Button>
           </Button.Group>
           <Progress value={this.totalTaken()} total={this.totalPlanned()} progress='ratio' progress>Total Images</Progress>
         </Segment>

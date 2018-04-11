@@ -65,7 +65,6 @@ class TakeSeriesTemplateEditor extends Component {
         frame: 'Light',
         filter: 'LUM',
         repeat: 1,
-        taken: 0,
       }
     );
 

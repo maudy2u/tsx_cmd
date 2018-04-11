@@ -29,7 +29,7 @@ class TargetEditor extends Component {
     angle: "",
     priority: 10,           // Priority: 1 is highest
     clsFilter: '',
-    focusFilter: '',
+    focusFilter: 'Filter',
     foccusSamples: '',
     focusBin: '',
     guideExposure: '',
@@ -61,7 +61,6 @@ class TargetEditor extends Component {
   handleCoolingTempChange = ( value ) => this.setState({coolingTemp: value.value });
   handleCoolingTimeChange = ( value ) => this.setState({coolingTime: value.value });
   handleFocusTempChange = ( value ) => this.setState({tempChg: value.value });
-  handleFocusFilterChange = ( value ) => this.setState({focusFilter: value });
   handleMinAltChange = ( value ) => this.setState({minAlt: value.value });
   onStopTimeChange = (value) => this.setState({testDate: value});
   onChangeChecked() {
@@ -78,7 +77,6 @@ class TargetEditor extends Component {
     //   for (var i = 0; i < item.length; i++) {
     //     var a = item[i];
     //     var image = Seriess.findOne({_id:item[i].id}); //.fetch();
-    //     totalTakenImages += image.taken;
     //     totalPlannedImages += image.repeat;
     //   }
     //
@@ -406,11 +404,12 @@ class TargetEditor extends Component {
             <h3 className="ui header">Focus</h3>
               <Form.Group widths='equal'>
                 <Form.Field control={Dropdown}
-                  label='Filter'
+                  fluid
                   options={this.renderDropDownFilters()}
                   placeholder='Filter for focusing'
-                  text={this.state.focusFilter}
-                  onChange={this.handleFocusFilterChange}/>
+                  value={this.state.focusFilter}
+                  onChange={this.handleChange}
+                />
               </Form.Group>
               <Segment>
                 <h4 className="ui header">Focus Temperature Delta: {this.state.tempChg}</h4>

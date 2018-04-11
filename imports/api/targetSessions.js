@@ -37,9 +37,9 @@ TargetSessions.helpers({
   totalImagesPlanned: function() {
     var totalPlannedImages = 0;
     var totalTakenImages = 0;
-    var template = TargetSessions.findOne(this._id);
+    var target = this;
 
-    var seriesId = template.series._id;
+    var seriesId = target.series._id;
     var takeSeries = TakeSeriesTemplates.findOne({_id:seriesId});
 
     if( typeof takeSeries == "undefined") {
@@ -57,7 +57,7 @@ TargetSessions.helpers({
       if( typeof item == "undefined") {
         return 100; // do not try to process
       }
-      totalTakenImages += item.taken;
+
       totalPlannedImages += item.repeat;
     }
 
@@ -67,9 +67,9 @@ TargetSessions.helpers({
   totalImagesTaken: function() {
     var totalPlannedImages = 0;
     var totalTakenImages = 0;
-    var template = TargetSessions.findOne(this._id);
+    var target = this;
 
-    var seriesId = template.series._id;
+    var seriesId = target.series._id;
     var takeSeries = TakeSeriesTemplates.findOne({_id:seriesId});
 
     if( typeof takeSeries == "undefined") {
@@ -87,11 +87,42 @@ TargetSessions.helpers({
       if( typeof item == "undefined") {
         return 100; // do not try to process
       }
-      totalTakenImages += item.taken;
-      totalPlannedImages += item.repeat;
+
+      var progress = target.progress;
+      if( typeof progress == 'undefined') {
+        continue;
+      }
+      for (var j = 0; j < progress.length; j++) {
+        if( progress[j]._id == series.id ) {
+            totalTakenImages = totalTakenImages + progress[j].taken;
+        }
+      }
     }
 
     return totalTakenImages;
   },
+
+  calcProgress: function() {
+    var taken = this.totalImagesTaken();
+    var planned = this.totalImagesPlanned();
+
+    return taken/planned;
+
+  },
+
+  takenImagesFor: function(seriesId) {
+    var taken = 0;
+    var progress = this.progress;
+    if( typeof progress == 'undefined') {
+      return taken;
+    }
+    for (var i = 0; i < progress.length; i++) {
+      if (progress[i]._id == seriesId ) {
+        taken = progress[i].taken;
+        break;
+      }
+    }
+    return taken;
+  }
 
 });

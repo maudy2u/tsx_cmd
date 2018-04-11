@@ -38,7 +38,6 @@ class TakeSeriesEditor extends Component {
     filter: 'Filter',
     repeat: 0,
     binning: 0,
-    taken: 0,
   };
 
   // // change states
@@ -76,7 +75,6 @@ class TakeSeriesEditor extends Component {
       filter: definedSeries.filter,
       repeat: definedSeries.repeat,
       binning: definedSeries.binning,
-      taken: definedSeries.taken,
     });
   }
 

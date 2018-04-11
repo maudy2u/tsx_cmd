@@ -8,7 +8,6 @@ import { withTracker } from 'meteor/react-meteor-data';
 import { Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
 
 // Import the API Model
-import { SessionTemplates } from '../api/sessionTemplates.js';
 import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
 import { Seriess } from '../api/seriess.js';
 import { Filters } from '../api/filters.js';
@@ -18,7 +17,6 @@ import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 // Import the UI
 import Monitor from './Monitor.js';
 import TargetSessionMenu from './TargetSessionMenu.js';
-import SessionTemplate from './SessionTemplate.js';
 import Filter from './Filter.js';
 import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
@@ -30,9 +28,6 @@ import {
   // tsx_GetServerState,
 } from  '../api/serverStates.js';
 
-
-// Examples
-import Task from './Task.js';
 
 // App component - represents the whole app
 class App extends Component {
@@ -123,14 +118,6 @@ class App extends Component {
 
   // *******************************
   //
-  getImageSessions() {
-    return [
-      { _id: 1, description: 'M1: 33 Lumx300s, 33 Rx300s, 33 Bx300s, 33 Gx300s' },
-      { _id: 2, description: 'This is task 2' },
-      { _id: 3, description: 'This is task 3' },
-    ];
-  };
-
   // *******************************
   //
   addNewFilter(event) {

@@ -5,8 +5,6 @@ import { withTracker } from 'meteor/react-meteor-data';
 
 import { Item, Label, Button, Modal, Header, Icon, Table, Checkbox, Progress } from 'semantic-ui-react'
 
-import { calcTargetProgress } from '../api/sessionTools.js';
-
 import { TargetSessions } from '../api/targetSessions.js';
 import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
 import { Seriess } from '../api/seriess.js';
@@ -135,6 +133,9 @@ class Target extends Component {
           _id: orgTarget.series._id,
           value: orgTarget.series.text,
         },
+        progress: [
+//            {_id: seriesId, taken:0},
+        ],
         ra: orgTarget.ra,
         dec: orgTarget.dec,
         angle: orgTarget.angle,
@@ -156,6 +157,7 @@ class Target extends Component {
         createdAt: orgTarget.createdAt,
       }
     )
+    // do not copy series progress
   }
 
   render() {
@@ -178,7 +180,7 @@ class Target extends Component {
         </Item.Meta>
         <Item.Description>
           <Label>Current: <Label.Detail>{this.state.altitude}, {this.state.azimuth}</Label.Detail></Label>
-          <Progress percent={calcTargetProgress(this.props.target._id)} progress />
+          <Progress percent={this.props.target.calcProgress()} progress />
         </Item.Description>
         <Item.Extra>
           <Button.Group basic size='small'>
