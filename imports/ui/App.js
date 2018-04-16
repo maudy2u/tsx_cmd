@@ -463,7 +463,7 @@ class App extends Component {
         <Modal.Description>
           <Input
             label='IP:'
-            value={this.state.ip}
+            value={this.getTsxIp()}
             onChange={this.ipChange}/>
         </Modal.Description>
         <Modal.Actions>
@@ -493,7 +493,7 @@ class App extends Component {
         <Modal.Description>
           <Input
             label='Port:'
-            value={this.state.port}
+            value={this.getTsxPort()}
             onChange={this.portChange}/>
         </Modal.Description>
         <Modal.Actions>
