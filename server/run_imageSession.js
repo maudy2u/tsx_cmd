@@ -235,15 +235,10 @@ function tsx_CLS(targetSession) {
 }
 
 
-function tsx_InitialFocus(targetSession) {
-  var dts = new Date();
-  console.log(String(dts) + ': Geting intial @focus3... ');
-
-focusFliter
-
+function tsx_RunFocus3() {
   var focusFilter = getFilterSlot(targetSession.focusFilter);
 
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_Focus-3'));
+  var cmd = String(shell.cat(tsx_cmd('SkyX_JS_Focus-3')) );
   cmd = cmd.replace("$000", focusFilter ); // set filter
   cmd = cmd.replace("$001", "No" ); // set Bin
   // cmd = cmd.replace("$001", 30 ); // set exposure
@@ -253,12 +248,8 @@ focusFliter
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         var success = tsx_return.split('|')[0].trim();
-        console.log('SkyX_JS_Focus result check: ' + tsx_return);
-        // if( success != 'Success') {
-        //   forceAbort = true;
-        //   console.log('SkyX_JS_Focus Failed. Error: ' + tsx_return);
-        //   return;
-        // }
+        console.log('SkyX_JS_Focus-3 result check: ' + tsx_return);
+
         Out = success;
         tsx_is_waiting = false;
       }
@@ -271,25 +262,43 @@ focusFliter
   return Out;
 }
 
-function tsx_focusTemperature() {
+function tsx_InitialFocus(targetSession) {
   var dts = new Date();
-  console.log(String(dts) + ': Geting focus temperature... ');
+  console.log(String(dts) + ': Geting intial @focus3... ');
+  var result = tsx_RunFocus3();
+  var temp = tsx_GetFocusTemp();
+  tsx_SetServerState( 'lastFocusTemp', temp );
+}
 
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_GetFocTemp'));
-
-  var Out;
+export function tsx_GetFocusTemp() {
+  console.log('tsx_GetFocusTemp: ' + targetFindName);
+  var file = tsx_cmd('SkyX_JS_GetFocTemp');
+  // console.log('File: ' + file );
+  var cmd = String(shell.cat(file));
+  // cmd = cmd.replace("$001", 30 ); // set exposure
+  // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
+  var Out = "Error|Focuser not found.";
   var tsx_is_waiting = true;
-  tsx_feeder(String(cmd), Meteor.bindEnvironment((tsx_return) => {
-        var success = tsx_return.split('|')[0].trim();
-        console.log('SkyX_JS_GetFocTemp result check: ' + tsx_return);
-        Out = success;
-        tsx_is_waiting = false;
+  var lastFocusTemp = 0;
+  var lastFocusPos = 0;
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+      console.log('Any error?: ' + tsx_return);
+      if( success == 'Error') {
+        console.log('SkyX_JS_GetFocTemp Failed. Error: ' + tsx_return);
+      }
+      else {
+        lastFocusTemp = tsx_return.split('|')[0].trim();
+        lastFocusPos = tsx_return.split('|')[1].trim();
+        Out = tsx_return;
+      }
+      tsx_is_waiting = false;
       }
     )
   )
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
+
   return Out;
 }
 
@@ -506,42 +515,6 @@ export function tsx_GetTargetRaDec(targetFindName) {
 
 // *******************************
 //
-export function tsx_GetFocusTemp() {
-  console.log('tsx_GetFocusTemp: ' + targetFindName);
-  var file = tsx_cmd('SkyX_JS_GetTargetCoords');
-  // console.log('File: ' + file );
-  var cmd = shell.cat(file);
-  cmd = cmd.replace("$000", targetFindName );
-  // cmd = cmd.replace("$001", 30 ); // set exposure
-  // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
-  var Out = "Error|Target not found.";
-  var tsx_is_waiting = true;
-  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-      var success = tsx_return.split('|')[0].trim();
-      console.log('Any error?: ' + tsx_return);
-      if( success != 'Success') {
-        console.log('tsx_GetTargetRaDec Failed. Error: ' + tsx_return);
-      }
-      else {
-        // Out = 'Success|' + targetRA + '|' + targetDEC+ '|' + altitude + '|'+ azimuth ;			// Form the output string
-        tsx_SetServerState( 'targetRA', tsx_return.split('|')[1].trim() );
-        tsx_SetServerState( 'targetDEC', tsx_return.split('|')[2].trim() );
-        tsx_SetServerState( 'targetATL', tsx_return.split('|')[3].trim() );
-        tsx_SetServerState( 'targetAZ', tsx_return.split('|')[4].trim() );
-
-        Out = tsx_return;
-      }
-      tsx_is_waiting = false;
-      }
-    )
-  )
-  while( tsx_is_waiting ) {
-   Meteor.sleep( 1000 );
-  }
-
-  return Out;
-}
-
 // NEED A METHOD TO ADD TEMP SAMPLES INTO Database
 // NEED A METHOD TO RESET THE TEMP DATA IN DATABASE
 // *******************************
@@ -772,6 +745,7 @@ function tsx_CheckForTwight(target) {
 }
 
 function tsx_CheckEndConditions(target) {
+  // *******************************
   // tsx_takeImage(exposure, filter)
   // check Twilight - force stop
   var result = tsx_CheckForTwight(target);
@@ -781,7 +755,7 @@ function tsx_CheckEndConditions(target) {
   else if( result == 'Error|Target not found.') {
     return result;
   }
-
+  // *******************************
   // check minAlt - stop - find next
   var targetMinAlt = target.minAlt;
   if( typeof targetMinAlt == 'undefined' ) {
@@ -793,12 +767,40 @@ function tsx_CheckEndConditions(target) {
   if( curAlt < targetMinAlt ) {
     return 'Stop|Minimum Altitude Crossed'
   }
-
-
+  // *******************************
   // check stopTime - stop - find next
-  // check reFocusTemp - refocus
+  /*
+  cur_time=datetime.datetime.now().hour+datetime.datetime.now().minute/60.
+  if (cur_time < 8) : cur_time=cur_time+24
+  if cur_time > end_time : break
+  */
+
+
+  // *******************************
   // if not meridian - dither...
   // if meridian  - flip/slew... - preRun: focus - CLS - rotation - guidestar - guiding...
+  var lastFocusTemp = tsx_GetServerState( 'lastHA' );
+//  var getHA
+
+  // *******************************
+  // check reFocusTemp - refocus
+  /*
+  // Java Script
+  focPos = ccdsoftCamera.focPosition;
+  focTemp = ccdsoftCamera.focTemperature;
+  out = focPos + '|' + focTemp + '|(position,temp)';
+  */
+  result  = tsx_GetFocusTemp();
+  var lastFocusTemp = tsx_GetServerState( 'lastFocusTemp' );
+  var focusDiff = result - lastFocusTemp;
+  var focusTemp = target.focusTemp;
+  if( focusDiff >= focusTemp ) {
+    // run @Focus3
+  }
+  tsx_SetServerState( 'lastFocusTemp', result );
+  console.log('Stored last focusTemp: ' + result);
+
+
   // if targetDone/stopped... find next
   // *******************************
   //  8. Image done... next?
@@ -829,6 +831,29 @@ function tsx_CheckEndConditions(target) {
 //    numFilters = lNumberFilters | filterName = ccdsoftCamera::szFilterName
 //    ignore the offset for now... assume TSX will manage
 
+function tsx_matchAngle( targetSession ) {
+  var rotateSucess = false;
+  // var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale, target.expos);
+  var cmd = shell.cat(tsx_cmd('SkyX_JS_MatchAngle'));
+  cmd = cmd.replace('$000', targetSession.angle );
+  cmd = cmd.replace('$001', targetSession.scale);
+  cmd = cmd.replace('$002', targetSession.exposure);
+
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+        var result = tsx_return.split('|')[0].trim();
+        console.log('Any error?: ' + result);
+        if( result != 'Success') {
+          forceAbort = true;
+          console.log('CLS Failed. Error: ' + result);
+        }
+        rotateSucess = true;
+      }
+    )
+  );
+  return rotateSucess;
+}
+
+// ********************************
 Meteor.methods({
 
   connectTsx() {
@@ -892,7 +917,7 @@ Use this to set the last focus
        tsx_SetServerState(tsx_ServerStates.imagingALT, altitude);
        tsx_SetServerState( tsx_ServerStates.currentImagingName, target.targetFindName);
 
-       var initFocusTemp = tsx_focusTemperature();
+       var initFocusTemp = tsx_GetFocusTemp();
        tsx_SetServerState('focusTempLast', initFocusTemp);
 
        return target._id +'|';
@@ -1074,7 +1099,10 @@ Use this to set the last focus
     }
 
     var lastFocusTemp = 0;
+    var lastFocusPos = 0;
     var getFocusTempSuccess = false;
+    lastFocusTemp = tsx_GetFocusTemp();
+
     if( !forceAbort && slewSuccess ) {
       // var cmd = tsxCmdGetFocusTemp();
       var cmd = shell.cat(tsx_cmd('SkyX_JS_GetFocTemp'));
@@ -1087,7 +1115,8 @@ Use this to set the last focus
               console.log('Focus Temp Failed. Error: ' + result);
             }
             getFocusTempSuccess = true;
-            lastFocusTemp = tsx_return.split('|')[1].trim();
+            lastFocusTemp = tsx_return.split('|')[0].trim();
+            lastFocusPos = tsx_return.split('|')[1].trim();
           }
         )
       )
@@ -1098,25 +1127,7 @@ Use this to set the last focus
     //      a) if entered for session
     //      b) obtained from image
     var rotateSucess = false;
-    if( !forceAbort && clsSuccess ) {
-      // var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale, target.expos);
-      var cmd = shell.cat(tsx_cmd('SkyX_JS_MatchAngle'));
-      cmd = cmd.replace('$000', targetSession.angle );
-      cmd = cmd.replace('$001', targetSession.scale);
-      cmd = cmd.replace('$002', targetSession.exposure);
-
-      tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-            var result = tsx_return.split('|')[0].trim();
-            console.log('Any error?: ' + result);
-            if( result != 'Success') {
-              forceAbort = true;
-              console.log('CLS Failed. Error: ' + result);
-            }
-            rotateSucess = true;
-          }
-        )
-      )
-    }
+    rotateSucess = tsx_matchRotation( targetSession );
 
     // *******************************
     // 4. Get Guidestar

@@ -54,3 +54,8 @@ export function tsx_GetServerState( name ) {
   var val = TheSkyXInfos.findOne( {name: name });
   return val;
 };
+
+export function tsx_GetServerStateValue( name ) {
+  var val = TheSkyXInfos.findOne( {name: name });
+  return val.value;
+};

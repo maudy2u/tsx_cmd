@@ -75,7 +75,11 @@ TheSkyXInfos.helpers({
   },
 
   defaultMinAltitude: function() {
-    return initParamWith('minAlt', 30).value;
+    return initParamWith('defautMinAlt', 30).value;
+  },
+
+  defaultFocusTempDiff: function() {
+    return initParamWith('defaultFocusTemp', 0.7).value;
   },
 
   mount: function() {

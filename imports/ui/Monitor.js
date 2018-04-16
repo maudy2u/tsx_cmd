@@ -362,6 +362,26 @@ isCurrentlyImaging: 'isCurrentlyImaging',
     return TargetSessions.findOne({_id:this.tsxSessionId()}).totalImagesPlanned();
   }
 
+  playScheduler() {
+    // this.startSessions();
+    Meteor.call("startScheduler", function (error, result) {
+        // identify the error
+      }.bind(this));
+  }
+
+  pauseScheduler() {
+    Meteor.call("pauseScheduler", function (error, result) {
+        // identify the error
+      }.bind(this));
+  }
+
+  stopScheduler() {
+    // this.tsxStopSession();
+    Meteor.call("stopScheduler", function (error, result) {
+        // identify the error
+      }.bind(this));
+  }
+
   render() {
 
 // sample data: 	echo "`date "+%H:%M:%S"` Mount Direction: $mntDir, Altitude: $mntAlt degrees "
@@ -380,9 +400,9 @@ isCurrentlyImaging: 'isCurrentlyImaging',
         <Segment>
           <h3>Target {this.tsxImagingName()}</h3>
           <Button.Group icon>
-            <Button icon='play'  onClick={this.startSessions.bind(this)}/>
-            <Button icon='pause'  />
-            <Button icon='stop' onClick={this.tsxStopSession.bind(this)} />
+            <Button icon='play'  onClick={this.playScheduler.bind(this)}/>
+            <Button icon='pause' onClick={this.pauseScheduler.bind(this)}  />
+            <Button icon='stop' onClick={this.stopScheduler.bind(this)} />
             <Button onClick={this.textTSX.bind(this)}>Test</Button>
             <Button onClick={this.textTSX2.bind(this)}>Test2</Button>
           </Button.Group>

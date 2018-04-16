@@ -179,7 +179,7 @@ class Target extends Component {
           {this.props.target.description}
         </Item.Meta>
         <Item.Description>
-          <Label>Current: <Label.Detail>{this.state.altitude}, {this.state.azimuth}</Label.Detail></Label>
+          <Label>Altitude: <Label.Detail>{this.state.altitude}, {this.state.azimuth}</Label.Detail></Label>
           <Progress percent={this.props.target.calcProgress()} progress />
         </Item.Description>
         <Item.Extra>

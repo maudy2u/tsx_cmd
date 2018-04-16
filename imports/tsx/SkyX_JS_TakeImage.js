@@ -56,7 +56,7 @@ if (ccdsoftCamera.PropStr("m_csObserver") == "Ken Sturrock")
 	ccdsoftCamera.Delay = 1;			// Set delay to one second on all my cameras
 }
 
-	ccdsoftCamera.TakeImage();
+ccdsoftCamera.TakeImage();
 
 
 if (ccdsoftCamera.PropStr("m_csObserver") == "Ken Sturrock")

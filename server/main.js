@@ -1,4 +1,5 @@
 import { Meteor } from 'meteor/meteor';
+import { ServerSession } from 'meteor/matteodem:server-session' ;
 
 import { TargetSessions } from '../imports/api/targetSessions.js';
 import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
@@ -11,6 +12,7 @@ import {
   tsx_SetServerState,
   tsx_GetServerState,
   tsx_UpdateDevice,
+  tsx_GetServerStateValue,
 } from '../imports/api/serverStates.js';
 
 import {
@@ -289,7 +291,103 @@ var tsxHeader =  '/* Java Script *//* Socket Start Packet */';
 var tsxFooter = '/* Socket End Packet */';
 var forceAbort = false;
 
- Meteor.methods({
+var schedulerRunning = 'Stop';
+var isSchedulerRunning = true;
+
+function getSchedulerState() {
+  // return ServerSession.get('SchedulerState');
+  return schedulerRunning;
+}
+
+function setSchedulerState( value ) {
+  // ServerSession.set('SchedulerState', value);
+  schedulerRunning = value;
+}
+
+function isSchedulerRunning() {
+  // return ServerSession.get('isSchedulerRunning');
+  return isSchedulerRunning;
+}
+
+export function srvPlayScheduler ( callback ) {
+  console.log('Scheduler STARTING' );
+  callback();
+}
+
+export function srvPauseScheduler() {
+  var dummyVar;
+  setSchedulerState('Pause' );
+  console.log('Manually PAUSED scheduler');
+}
+
+export function srvStopScheduler() {
+  var dummyVar;
+  setSchedulerState('Stop' );
+  console.log('Manually STOPPED scheduler');
+}
+
+Meteor.methods({
+
+   startScheduler() {
+     console.log('Found scheduler state: ' + isSchedulerRunning );
+     if(
+       // If PAUSED... reset state to Running
+       getSchedulerState() == 'Pause'
+       && isSchedulerRunning == true
+     ) {
+       setSchedulerState('Running' );
+     }
+      // if already running, just return and update state
+     else if(  isSchedulerRunning == true ) {
+       console.log('Server is alreadying running. Nothing to do.');
+       setSchedulerState( 'Running' );
+       return;
+     }
+     else if( isSchedulerRunning == false ) {
+
+       srvPlayScheduler( function () {
+          setSchedulerState('Running' );
+          // ServerSession.set('isSchedulerRunning', true );
+          isSchedulerRunning = true;
+
+          console.log('Scheduler is running.');
+
+          // Start up the scheduler's search for something to do
+          while( getSchedulerState() == 'Running') {
+            // Find a session
+            console.log('Scheduler seeking valid targetSession');
+
+            Meteor.sleep(2000); // Sleep for one minute
+            if(getSchedulerState() == 'Paused') {
+              while(getSchedulerState() == 'Paused') {
+                Meteor.sleep(1000); // Sleep for one minute
+              }
+            }
+            else {
+              console.log('Found state: ' + getSchedulerState());
+            }
+          }
+
+          // While ended... exit process
+          // ServerSession.set('isSchedulerRunning', false );
+          isSchedulerRunning = false;
+       });
+     }
+     else {
+       console.log('Invalid state found for scheduler.');
+     }
+     console.log('Scheduler Started');
+   },
+
+   pauseScheduler() {
+     console.log('Pausing');
+     srvPauseScheduler();
+   },
+
+   stopScheduler() {
+     console.log('Stopping');
+     srvStopScheduler();
+   },
 
    updateSeriesIdWith(
      id,

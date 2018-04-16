@@ -589,15 +589,15 @@ class App extends Component {
               <Button name='showMonitor' icon='dashboard' onClick={this.handleToggle.bind(this)}/>
               <Button icon='refresh' onClick={this.connectToTSX.bind(this)}/>
               <Button icon='exchange' onClick={this.serverTest.bind(this)}/>
-              <Label>TSX ip:
-                <Label.Detail onClick={this.modalEnterIpOpen.bind(this)}>
+              <Label onClick={this.modalEnterIpOpen.bind(this)}>TSX ip:
+                <Label.Detail>
                   {this.getTsxIp()}
                 </Label.Detail>
               </Label>
                {this.renderIPEditor()}
-              <Label>
+              <Label onClick={this.modalEnterPortOpen.bind(this)}>
                 TSX port:
-                <Label.Detail onClick={this.modalEnterPortOpen.bind(this)}>
+                <Label.Detail>
                   {this.getTsxPort()}
                 </Label.Detail>
               </Label>

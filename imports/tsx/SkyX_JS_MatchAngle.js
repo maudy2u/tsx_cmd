@@ -1,6 +1,10 @@
+/* Java Script */
+/* Socket Start Packet */
+
 var targetAng= $000;
 var knownImageScale =$001;
 var exposure = $002;
+var accuracy = 1; // acceptable difference between target angle and ImageLink angle
 var Out="";
 
 function calcNewPostion( imageLinkAng, rotPos, targetAng)  {
@@ -25,7 +29,6 @@ function calcNewPostion( imageLinkAng, rotPos, targetAng)  {
 }
 function rotate(targetAng, imageScale ) {
   var ccd = ccdsoftCamera;
-  var accuracy = 1;
   ccd.Connect();
   ccd.AutoSaveOn = 1;
   ccd.ExposureTime=exposure;
@@ -49,4 +52,6 @@ function rotate(targetAng, imageScale ) {
 }
 rotate( targetAng, knownImageScale ); // using 1.17 and CCW=false for simulator
 RunJavaScriptOutput.writeLine ("DONE");
-Out;
+Out = Out;
+
+/* Socket End Packet */
