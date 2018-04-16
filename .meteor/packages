@@ -27,6 +27,6 @@ akasha:shelljs
 session
 meteortoys:allthings
 semantic:ui@2.2.6_4
-matteodem:server-session
 less
 juliancwirko:postcss
+vsivsi:job-collection

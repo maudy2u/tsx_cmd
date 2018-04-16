@@ -1,5 +1,5 @@
 import { Meteor } from 'meteor/meteor';
-import { ServerSession } from 'meteor/matteodem:server-session' ;
+import { JobCollection } from 'meteor/vsivsi:job-collection';
 
 import { TargetSessions } from '../imports/api/targetSessions.js';
 import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
@@ -22,13 +22,6 @@ import {
 import { tsx_feeder } from './tsx_feeder.js';
 
 import {shelljs} from 'meteor/akasha:shelljs';
-
-// *******************************
-// Filter Series
-// 1. Filter name
-// 2. Exposure
-// 3. Quantity
-// LUM Imaging
 
 var nBExposure = 8;
 var lrgbExposure = 3;
@@ -248,10 +241,25 @@ function initServerStates() {
   }
 }
 
+// *******************************
+// Create the scheduler Queue
+var scheduler = JobCollection('theScheduler');
+//scheduler.setLogStream(process.stdout);
+
 Meteor.startup(() => {
   // code to run on server at startup
   console.log(' ******************');
-  initServerStates();
+  var ip = TheSkyXInfos.findOne().ip();
+  var port = TheSkyXInfos.findOne().port();
+  if( // only load if there is an IP configured
+    typeof ip != 'undefined'
+    && typeof port != 'undefined'
+    && ip != ''
+    && port != ''
+   )
+   {
+     initServerStates();
+   }
   console.log(' RESTARTED');
   console.log(' ******************');
 
@@ -270,20 +278,114 @@ Meteor.startup(() => {
   if( (typeof dbIp != 'undefined') && (typeof dbPort != 'undefined') ) {
     console.log('TSX server set to IP: ' + dbIp );
     console.log('TSX server set to port: ' + dbPort );
+
   };
 
+  // get rid of any old processes/jobs
+  var jobs = scheduler.find().fetch();
+  console.log('Number of Jobs found: ' + jobs.length);
+  for (var i = 0; i < jobs.length; i++) {
+    if( typeof jobs[i] != 'undefined') {
+      // JobCollection.remove(jobs[i]._id);
+      // jobs[i].cancel();
+      // jobs[i].remove();
+    }
+  }
+
+  // We're in!
+  // Create a worker to get sendMail jobs from 'myJobQueue'
+  // This will keep running indefinitely, obtaining new work
+  // from the server whenever it is available.
+  // Note: If this worker was running within the Meteor environment,
+  // Then only the call below is necessary to setup a worker!
+  // However in that case processJobs is a method on the JobCollection
+  // object, and not Job.
+  var workers = scheduler.processJobs( 'runScheduler',
+    function (job, cb) {
+      var schedule = job.data; // Only one email per job
+      // This will only be called if a
+      // 'runScheduler' job is obtained
+      setSchedulerState('Running' );
+      isSchedulerRunning = true;
+      console.log('Scheduler is running.');
+      job.log("Entered the scheduler process",
+        {level: 'warning'});
 
 
-  // imports/tsx/SkyX_JS_GetMntCoords.js
-  // This does load the script
-  //var mount = require('../imports/tsx/SkyX_JS_GetMntCoords.js');
+      // Start up the scheduler's search for something to do
+      // This is a sample of the returning issues if the scheduler
+      // fails. The assumption is the scheduler processing the
+      // tsx_ functions.
+      // runScheduler(schedule.startTime,
+      //   function(err) {
+      //     if (err) {
+      //       job.log("Sending failed with error" + err,
+      //         {level: 'warning'});
+      //       job.fail("" + err);
+      //     } else {
+      //       job.done();
+      //     }
+      while( getSchedulerState() == 'Running') {
+        // Find a session
+        console.log('Scheduler seeking valid targetSession');
+        job.log("Started the scheduler",
+          {level: 'warning'});
 
-  // connect MOUNT
-  // connect camera, filterwheel, focuser, rotator
-  // connect guider
-  // get filters
-  // set camera temp
+        Meteor.sleep(2000); // Sleep for one minute
+        if(getSchedulerState() == 'Paused') {
+          while(getSchedulerState() == 'Paused') {
+            Meteor.sleep(1000); // Sleep for one minute
+          }
+        }
+        else {
+          console.log('Found state: ' + getSchedulerState());
+          job.log("Still running",
+            {level: 'warning'});
+        }
+      }
 
+      // While ended... exit process
+      isSchedulerRunning = false;
+      job.done();
+
+      // Be sure to invoke the callback
+      // when work on this job has finished
+      cb();
+    }
+  );
+
+  /*
+    var javx = new Job(scheduler, 'cleanup', {})
+         .repeat({ schedule: scheduler.later.parse.text("every 5 minutes") })
+         .save({cancelRepeats: true});
+
+      var cleaning = scheduler.processJobs( 'cleanup', { pollInterval: false, workTimeout: 60*1000 },
+      function (job, cb) {
+         var current = new Date();
+         current.setMinutes(current.getMinutes() - 5);
+         var ids = scheduler.find({
+            status:
+               $in: Job.jobStatusRemovable,
+            updated:
+               $lt: current},
+            {fields: { _id: 1 }}).map (d) -> d._id
+         if (ids.length > 0) {
+           myJobs.removeJobs(ids)
+         }
+         # console.warn "Removed #{ids.length} old jobs"
+         job.done("Removed #{ids.length} old jobs");
+         cb();
+       });
+
+
+      myJobs.find({ type: 'cleanup', status: 'ready' })
+         .observe
+            added: () ->
+               q.trigger()
+  */
+
+  // start server for scheduler and wait
+  return scheduler.startJobServer();
 
 });
 
@@ -295,17 +397,14 @@ var schedulerRunning = 'Stop';
 var isSchedulerRunning = true;
 
 function getSchedulerState() {
-  // return ServerSession.get('SchedulerState');
   return schedulerRunning;
 }
 
 function setSchedulerState( value ) {
-  // ServerSession.set('SchedulerState', value);
   schedulerRunning = value;
 }
 
 function isSchedulerRunning() {
-  // return ServerSession.get('isSchedulerRunning');
   return isSchedulerRunning;
 }
 
@@ -315,19 +414,65 @@ export function srvPlayScheduler ( callback ) {
 }
 
 export function srvPauseScheduler() {
-  var dummyVar;
+  var job = new Job(scheduler, scheduler.findOne({}));
+
+  job.pause(function (err, result) {
+    console.log('scheduler Paused job');
+    if (result) {
+      // Status updated
+      console.log('Result ' + result);
+    }
+    if (err) {
+      // Status updated
+      console.log('Error ' + err);
+    }
+  }); // assumes it is the take series that is being PAUSED
+
   setSchedulerState('Pause' );
   console.log('Manually PAUSED scheduler');
 }
 
 export function srvStopScheduler() {
   var dummyVar;
+  // Any job document from myJobs can be turned into a Job object
   setSchedulerState('Stop' );
+  var job = new Job(scheduler, scheduler.findOne({}));
+  job.cancel(function (err, result) {
+    console.log('scheduler canceled job');
+    if (result) {
+      // Status updated
+      console.log('Cancel Result ' + result);
+    }
+    if (err) {
+      // Status updated
+      console.log('Cancel Error ' + err);
+    }
+  });
+  job.remove(function (err, result) {
+    console.log('scheduler removed job');
+    if (result) {
+      // Status updated
+      console.log('Remove Result ' + result);
+    }
+    if (err) {
+      // Status updated
+      console.log('Remove Error ' + err);
+    }
+  });
   console.log('Manually STOPPED scheduler');
 }
 
 Meteor.methods({
 
+   // the question with the scheduler is...
+   // how to pause the "takeseries"
+   // and allow the other functions to run...
+   // do I need to create other "Jobs"
+   // 1. CLS?
+   // 2. focus?
+   // 3. autoguide?
+   // 4. start/end checks... ???
+   // or KISS and one big sequenital function...
    startScheduler() {
      console.log('Found scheduler state: ' + isSchedulerRunning );
      if(
@@ -335,43 +480,38 @@ Meteor.methods({
        getSchedulerState() == 'Pause'
        && isSchedulerRunning == true
      ) {
-       setSchedulerState('Running' );
+       var job = new Job(scheduler, scheduler.findOne({}));
+       job.resume();
+       setSchedulerState( 'Running' );
      }
       // if already running, just return and update state
-     else if(  isSchedulerRunning == true ) {
+     else if(
+       getSchedulerState() == 'Running'
+       && isSchedulerRunning == true ) {
        console.log('Server is alreadying running. Nothing to do.');
-       setSchedulerState( 'Running' );
        return;
      }
-     else if( isSchedulerRunning == false ) {
+     else if(
+       getSchedulerState() == 'Stop'
+       || isSchedulerRunning == false ) {
 
-       srvPlayScheduler( function () {
-          setSchedulerState('Running' );
-          // ServerSession.set('isSchedulerRunning', true );
-          isSchedulerRunning = true;
+       // Create a job:
+       var job = new Job(scheduler, 'runScheduler', // type of job
+      // Job data that you define, including anything the job
+      // needs to complete. May contain links to files, etc...
+        {
+          startTime: new Date(),
+        }
+      );
 
-          console.log('Scheduler is running.');
-
-          // Start up the scheduler's search for something to do
-          while( getSchedulerState() == 'Running') {
-            // Find a session
-            console.log('Scheduler seeking valid targetSession');
-
-            Meteor.sleep(2000); // Sleep for one minute
-            if(getSchedulerState() == 'Paused') {
-              while(getSchedulerState() == 'Paused') {
-                Meteor.sleep(1000); // Sleep for one minute
-              }
-            }
-            else {
-              console.log('Found state: ' + getSchedulerState());
-            }
-          }
-
-          // While ended... exit process
-          // ServerSession.set('isSchedulerRunning', false );
-          isSchedulerRunning = false;
-       });
+      // Set some properties of the job and then submit it
+      // the same submit the start time to the scheduler...
+      // at this time could add a tweet :)
+      job.priority('normal')
+        .retry({ retries: 5,
+          wait: 5*60*1000 }) //15*60*1000 })  // 15 minutes between attempts
+        .delay(0)// 60*60*1000)     // Wait an hour before first try
+        .save();               // Commit it to the server
      }
      else {
        console.log('Invalid state found for scheduler.');
@@ -380,13 +520,23 @@ Meteor.methods({
    },
 
    pauseScheduler() {
-     console.log('Pausing');
-     srvPauseScheduler();
+     if( getSchedulerState() != 'Stop') {
+       console.log('Pausing');
+       srvPauseScheduler();
+     }
+     else {
+       console.log('Do nothing - not Paused');
+     }
    },
 
    stopScheduler() {
-     console.log('Stopping');
-     srvStopScheduler();
+     if( getSchedulerState() != 'Stop' ) {
+       console.log('Stopping');
+       srvStopScheduler();
+     }
+     else {
+       console.log('Do nothing - not Stopped');
+     }
    },
 
    updateSeriesIdWith(
