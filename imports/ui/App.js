@@ -5,7 +5,7 @@ import { Session } from 'meteor/session'
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
+import { Form, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Radio } from 'semantic-ui-react'
 
 // Import the API Model
 import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
@@ -28,30 +28,39 @@ import {
   // tsx_GetServerState,
 } from  '../api/serverStates.js';
 
+import ReactSimpleRange from 'react-simple-range';
+import Timekeeper from 'react-timekeeper';
 
 // App component - represents the whole app
 class App extends Component {
 
   state = {
     activeItem: 'Targets',
-    ip: 'Not connected',
-    port: 'Not connected',
     saveServerFailed: false,
     modalEnterIp: false,
     modalEnterPort: false,
+    modalConnectionFailed: false,
+    showMonitor: false, // this needs to be a server session variable
 
+    ip: 'Not connected',
+    port: 'Not connected',
     defaultMinAlt: 30,
     defaultCoolTemp: -20,
     defaultFocusTempDiff: 0.7,
     defaultMeridianFlip: true,
-    defaultStartTime: 21,
-    defaultStopTime: 6,
-
-    showMonitor: false, // this needs to be a server session variable
-    modalConnectionFailed: false,
+    defaultSoftPark: false,
+    defaultStartTime: '20:00',
+    defaultStopTime: '6:00',
+    defaultPriority: 9,
+    currentStage: '',
   };
 
-  handleToggle = (e, { name, value }) => this.setState({ [name]: !eval('this.state.'+name) })
+  handleToggle = (e, { name, value }) => this.setState({ [name]: Boolean(!eval('this.state.'+name)) })
+  handleChange = (e, { name, value }) => this.setState({ [name]: value.trim() });
+
+  handleStartChange = ( value ) => this.setState({defaultStartTime: value.formatted24 });
+  handleStopChange = ( value ) => this.setState({defaultStopTime: value.formatted24 });
+  handlePriorityChange = ( value ) => this.setState({defaultPriority: value.value });
 
   handleMenuItemClick = (e, { name }) => this.setState({ activeItem: name });
   saveServerFailedOpen = () => this.setState({ saveServerFailed: true });
@@ -67,22 +76,47 @@ class App extends Component {
   modalConnectionFailedOpen = () => this.setState({ modalConnectionFailed: true });
   modalConnectionFailedClose = () => this.setState({ modalConnectionFailed: false });
 
-  componentWillMount() {
-    // do not modify the state directly
-    // console.log('End initialization');
-    console.log('Component mounted');
-    if( typeof this.props.tsxPort != 'undefined') {
-      this.setState({port: this.props.tsxPort.value});
-    }
-    if( typeof this.props.tsxPort != 'undefined') {
-      this.setState({ip: this.props.tsxIP.value});
-    }
-  };
-
-  defaultMeridianFlipChange() {
-    this.setState({defaultMeridianFlip: !this.state.defaultMeridianFlip});
+  componentWillReceiveProps(nextProps) {
+    this.updateDefaults(nextProps);
   }
 
+  updateDefaults(nextProps) {
+    this.setState({
+      ip: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'ip';
+      }).value,
+      port: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'port';
+      }).value,
+      defaultCoolTemp: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultCoolTemp';
+      }).value,
+      defaultFocusTempDiff: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultFocusTempDiff';
+      }).value,
+      defaultMeridianFlip: Boolean(nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultMeridianFlip';
+      }).value),
+      defaultStartTime: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultStartTime';
+      }).value,
+      defaultStopTime: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultStopTime';
+      }).value,
+      defaultPriority: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultPriority';
+      }).value,
+      currentStage: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'currentStage';
+      }).value,
+      defaultSoftPark: Boolean(nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultSoftPark';
+      }).value),
+      defaultMinAlt: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultMinAlt';
+      }).value,
+    });
+  }
   saveTSXServerIp() {
     this.modalEnterIpClose();
     if( this.state.ip == ""  ) {
@@ -137,36 +171,22 @@ class App extends Component {
   //
   renderTSXConnetion() {
 
-    // var pID = TheSkyXInfos.findOne( { name: 'ip'} );
-    // if( typeof pID == 'undefined') {
-    //   TheSkyXInfos.insert(
-    //     name: 'ip',
-    //     text: ""
-    //   );
-    // }
-    // var portID = TheSkyXInfos.findOne( { name: 'port'} );
-    // if( typeof portID == 'undefined') {
-    //   TheSkyXInfos.insert(
-    //     name: 'port',
-    //     text: ""
-    //   );
-    // }
-
     return (
       <Segment>
         <Form>
           <Form.Group widths='equal' onSubmit={this.saveTSXServerConnection.bind(this)}>
             <Form.Input
               label='IP Address'
-              className='textIP'
+              name='ip'
               placeholder="Enter TSX address"
               value={this.state.ip}
-              onChange={this.ipChange}/>
+              onChange={this.handleChange}/>
             <Form.Input
               label='Port'
+              name='port'
               placeholder="Enter TSX port"
               value={this.state.port}
-              onChange={this.portChange}/>
+              onChange={this.handleChange}/>
           </Form.Group>
         </Form>
 
@@ -201,25 +221,31 @@ class App extends Component {
     );
   }
 
-  // *******************************
-  //
-  tsxUpdateFilterNames() {
 
-    // on the client
-    Meteor.call("tsx_updateFilterNames", function (error) {
-      // identify the error
-      if (error && error.error === "logged-out") {
-        // show a nice error message
-        Session.set("errorMessage", "Please log in to post a comment.");
-      }
-    });
-  }
-
+  // Generic Method to determine default to save.
   saveDefaultState( param ) {
-    tsx_UpdateServerState(param, eval("this.state."+param));
+    var value = eval("this.state."+param);
+    tsx_UpdateServerState(param, value);
   }
 
+  getDefault( name ) {
+    var found;
+    var result;
+    try {
+      found = this.props.tsxInfo.find(function(element) {
+        return element.name == name;
+      });
+      result = found.value;
+    } catch (e) {
+      result = '';
+    } finally {
+      return result;
+    }
+  }
+
+  // Use this method to save any defaults gathered
   saveDefaults(){
+
     this.saveDefaultState('ip');
     this.saveDefaultState('port');
     this.saveDefaultState('defaultMinAlt');
@@ -228,6 +254,8 @@ class App extends Component {
     this.saveDefaultState('defaultMeridianFlip');
     this.saveDefaultState('defaultStartTime');
     this.saveDefaultState('defaultStopTime');
+    this.saveDefaultState('defaultPriority');
+    this.saveDefaultState('defaultSoftPark');
 
   }
   // *******************************
@@ -242,16 +270,34 @@ class App extends Component {
     };
 
     return (
+      <Form>
       <Segment.Group>
         <Segment>
-          <Button  icon='settings' onClick={this.tsxUpdateFilterNames.bind(this)} />
           <Button icon='save' onClick={this.saveDefaults.bind(this)} />
           {/* <Button icon='save' onClick={this.saveTSXServerConnection.bind(this)}> Save Connection </Button>
           {this.renderTSXConnetion()} */}
         </Segment>
         <Segment>
+          <h3 className="ui header">Defaults</h3>
           <Form.Group>
-            <h3 className="ui header">Defaults</h3>
+            <Form.Checkbox
+              label='Meridian Flip Enabled '
+              name='defaultMeridianFlip'
+              toggle
+              placeholder= 'Enable auto meridian flip'
+              checked={this.state.defaultMeridianFlip}
+              onChange={this.handleToggle.bind(this)}
+            />
+            <Form.Checkbox
+              label='Soft Park Enabled (Stop tracking) '
+              name='defaultSoftPark'
+              toggle
+              placeholder= 'Enable soft parking'
+              checked={this.state.defaultSoftPark}
+              onChange={this.handleToggle.bind(this)}
+            />
+          </Form.Group>
+          <Form.Group>
             <Form.Input
               label='Minimum Altitude '
               name='defaultMinAlt'
@@ -260,53 +306,56 @@ class App extends Component {
               onChange={this.handleChange}
             />
             <Form.Input
-              label='Cooling Temperature '
+              label='Focusing Temperature '
+              name='defaultFocusTempDiff'
+              placeholder='Temp diff to run auto focus'
+              value={this.state.defaultFocusTempDiff}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='Cooling Temperature: '
               name='defaultCoolTemp'
               placeholder='-20'
               value={this.state.defaultCoolTemp}
               onChange={this.handleChange}
             />
-            <Form.Input
-              label='Focusing Temperature'
-              name='defaultCoolTemp'
-              placeholder='Temp diff to run auto focus'
-              value={this.state.defaultFocusTempDiff}
-              onChange={this.handleChange}
-            />
-            <Form.Checkbox
-              label='Meridian Flip Enabled'
-              name='merdianFlip'
-              toggle
-              placeholder= 'Enable auto meridian flip'
-              checked={this.state.defaultMeridianFlip}
-              onChange={this.defaultMeridianFlipChange.bind(this)}
-            />
-            <Form.Input
-              label='Start Time'
-              name='defaultStartTime'
-              placeholder= 'Enter time to start'
-              value={this.state.defaultStartTime}
-              onChange={this.handleChange}
-            />
-            <Form.Input
-              label='Stop Time'
-              name='defaultStopTime'
-              placeholder= 'Enter time to stop'
-              value={this.state.defaultStopTime}
-              onChange={this.handleChange}
-            />
           </Form.Group>
         </Segment>
+        <Segment>
+            <h4 className="ui header">Priority: {this.state.defaultPriority}</h4>
+            <ReactSimpleRange
+              label
+              step={1}
+              min={1}
+              max={19}
+              value={this.state.defaultPriority}
+              sliderSize={12}
+              thumbSize={18}
+              onChange={this.handlePriorityChange}
+            />
+        </Segment>
+        <Segment>
+            <h4 className="ui header">Set Default START time</h4>
+            <Timekeeper
+              time={this.state.defaultStartTime}
+              onChange={this.handleStartChange}
+            />
+          </Segment>
+          <Segment>
+            <h4 className="ui header">Set Default STOP time</h4>
+            {/* <DateTime />pickerOptions={{format:"LL"}} value="2017-04-20"/> */}
+            <Timekeeper
+              time={this.state.defaultStopTime}
+              onChange={this.handleStopChange}
+            />
+          </Segment>
       </Segment.Group>
+    </Form>
+
     );
   }
 
   renderDevices() {
-
-    var tsxInfo = this.props.tsxInfo;
-    //    var tsxInfo = TheSkyXInfos.find().fetch();
-    ip = tsxInfo.ip;
-    port = tsxInfo.port;
 
     var mount = TheSkyXInfos.findOne().mount();
     var camera = TheSkyXInfos.findOne().camera();
@@ -450,8 +499,9 @@ class App extends Component {
         <Modal.Description>
           <Input
             label='IP:'
-            value={this.getTsxIp()}
-            onChange={this.ipChange}/>
+            name='ip'
+            value={this.state.ip}
+            onChange={this.handleChange}/>
         </Modal.Description>
         <Modal.Actions>
           <Button onClick={this.modalEnterIpClose.bind(this)} inverted>
@@ -480,8 +530,9 @@ class App extends Component {
         <Modal.Description>
           <Input
             label='Port:'
-            value={this.getTsxPort()}
-            onChange={this.portChange}/>
+            name='port'
+            value={this.state.port}
+            onChange={this.handleChange}/>
         </Modal.Description>
         <Modal.Actions>
           <Button onClick={this.modalEnterPortClose.bind(this)} inverted>
@@ -504,31 +555,6 @@ class App extends Component {
     else {
       return this.renderMonitor();
     }
-  }
-
-  getTsxIp() {
-    // return TheSkyXInfos.findOne({name: tsx_ServerStates.currentStage });
-    if( typeof this.props.tsxIP == 'undefined') {
-      return 'Not connected';
-    }
-    // this.setState({ip: this.props.tsxIP.value}); // fails here.
-    return this.props.tsxIP.value;
-  }
-
-  getTsxPort() {
-    // return TheSkyXInfos.findOne({name: tsx_ServerStates.currentStage });
-    if( typeof this.props.tsxPort == 'undefined') {
-      return 'Not connected';
-    }
-    return this.props.tsxPort.value;
-  }
-
-  tsxStat() {
-    // return TheSkyXInfos.findOne({name: tsx_ServerStates.currentStage });
-    if( typeof this.props.tsxStatus == 'undefined') {
-      return 'idle';
-    }
-    return this.props.tsxStatus.value;
   }
 
   tsxConnectionFailed() {
@@ -565,7 +591,6 @@ class App extends Component {
   render() {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
     */
-    const { activeItem, ip, port,  } = this.state;
 
     return (
       <div className="container">
@@ -577,21 +602,25 @@ class App extends Component {
               <Button icon='refresh' onClick={this.connectToTSX.bind(this)}/>
               <Label onClick={this.modalEnterIpOpen.bind(this)}>TSX ip:
                 <Label.Detail>
-                  {this.getTsxIp()}
+                  {this.state.ip}
                 </Label.Detail>
               </Label>
                {this.renderIPEditor()}
               <Label onClick={this.modalEnterPortOpen.bind(this)}>
                 TSX port:
                 <Label.Detail>
-                  {this.getTsxPort()}
+                  {this.state.port}
                 </Label.Detail>
               </Label>
-              <Label>Status <Label.Detail>{this.tsxStat()}</Label.Detail></Label>
+              <Label>Status <Label.Detail>{this.state.currentStage}</Label.Detail></Label>
               {this.renderPortEditor()}
             </Segment>
             {/* { this.tsxConnectionFailed() } */}
             { this.showMain() }
+            {/* *******************************
+
+            THIS IS FOR A FAILED CONNECTION TO TSX
+            *******************************             */}
             <Modal
               open={this.state.modalConnectionFailed}
               onClose={this.modalConnectionFailedClose.bind(this)}
@@ -630,9 +659,6 @@ class App extends Component {
 export default withTracker(() => {
 
     return {
-      tsxStatus: TheSkyXInfos.findOne({name: 'currentStage' }),
-      tsxIP: TheSkyXInfos.findOne({name: 'ip' }),
-      tsxPort: TheSkyXInfos.findOne({name: 'port' }),
       tsxInfo: TheSkyXInfos.find({}).fetch(),
       seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
       filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),

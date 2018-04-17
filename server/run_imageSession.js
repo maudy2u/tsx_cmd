@@ -151,15 +151,14 @@ function tsxCmdTestCLS() {
 //
 var imagingSession;
 
-/*
-tsx_SetServerState( 'currentStage', "Parking mount" );
-var filter = getFilterSlot(targetSession.focusFilter);
-tsx_MntPark(filter);
-tsx_SetServerState( 'currentStage', "All stopped" );
- */
-
-export function tsx_MntPark(lumFilter, softPark) {
+export function tsx_MntPark(defaultFilter, softPark) {
   var dts = new Date();
+  var slot = 0;
+
+  if( defaultFilter != '' ) {
+    slot = getFilterSlot(defaultFilter);
+  }
+
   if( softPark ) {
     // if true just set filter and turn off tracking
     console.log(String(dts) + ': Soft park... ');
@@ -168,7 +167,7 @@ export function tsx_MntPark(lumFilter, softPark) {
     console.log(String(dts) + ': Full Park... ');
   }
   var cmd = shell.cat(tsx_cmd('SkyX_JS_ParkMount'));
-  cmd = cmd.replace("$000", lumFilter ); // set filter
+  cmd = cmd.replace("$000", slot ); // set filter
   cmd = cmd.replace("$001", softPark ); // set filter
 
   var Out;
@@ -519,16 +518,26 @@ export function tsx_GetTargetRaDec(targetFindName) {
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       var success = tsx_return.split('|')[0].trim();
-      console.log('Any error?: ' + tsx_return);
+      // console.log('Any error?: ' + tsx_return);
       if( success != 'Success') {
         console.log('tsx_GetTargetRaDec Failed. Error: ' + tsx_return);
       }
       else {
-        // Out = 'Success|' + targetRA + '|' + targetDEC+ '|' + altitude + '|'+ azimuth ;			// Form the output string
-        tsx_SetServerState( 'targetRA', tsx_return.split('|')[1].trim() );
-        tsx_SetServerState( 'targetDEC', tsx_return.split('|')[2].trim() );
-        tsx_SetServerState( 'targetATL', tsx_return.split('|')[3].trim() );
-        tsx_SetServerState( 'targetAZ', tsx_return.split('|')[4].trim() );
+        tsx_SetServerState( tsx_ServerStates.targetRA, tsx_return.split('|')[1].trim() );
+        tsx_SetServerState( tsx_ServerStates.targetDEC, tsx_return.split('|')[2].trim() );
+        tsx_SetServerState( tsx_ServerStates.targetALT, tsx_return.split('|')[3].trim() );
+
+        // Simplify the azimuth value to simple east/west
+        var azimuth = result.split('|')[4].trim();
+        if (azimuth < 179)
+        {
+          tsx_SetServerState(tsx_ServerStates.targetAZ, 'East');
+        } else {
+          tsx_SetServerState(tsx_ServerStates.targetAZ, 'West');
+        }
+        tsx_SetServerState( tsx_ServerStates.targetHA, tsx_return.split('|')[5].trim() );
+        tsx_SetServerState( tsx_ServerStates.targetTransit, tsx_return.split('|')[6].trim() );
+        tsx_SetServerState( tsx_ServerStates.targetName, targetFindName);
 
         Out = tsx_return;
       }
@@ -560,37 +569,22 @@ export function tsx_GetTargetRaDec(targetFindName) {
   //    - check end alitudes
   //    - check morning sunrise
 export function getValidTargetSession() {
-  var imagingSession = findTargetSession();
+  var target = findTargetSession();
 
   // *******************************
   // 1. Get target's Ra/Dec to Slew, options:
   //  a) Object name to find
   //  b) Image
-  //  c) Ra/Dec
-  if( typeof imagingSession == 'undefined') {
+  //  c) Ra/Dec/Atl/Az/Transit/HA
+  if( typeof target == 'undefined') {
     console.log('Failed to find a valid target session.');
   }
   else {
-    console.log('Found: ' + imagingSession.name);
+    console.log('Found: ' + target.name);
     var tsx_is_waiting = true;
-    var cmd = tsx_GetTargetRaDec (imagingSession.targetFindName);
-    tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        var result = tsx_return.split('|')[0].trim();
-        console.log('Target: ' + result);
-        if( result === "Found") {
-          targetFound = true;
-          tsx_SetServerState( tsx_ServerStates.currentStage, 'Found target' );
-          return imagingSession;
-          }
-          tsx_is_waiting = false;
-        }
-      )
-    )
-    while( tsx_is_waiting ) {
-     Meteor.sleep( 1000 );
-    }
+    var result = tsx_GetTargetRaDec (target.targetFindName);
   }
-  return imagingSession;
+  return target;
 }
 
 function takeSeriesImage(target, series) {
@@ -858,24 +852,6 @@ export function prepareTargetForImaging( target ) {
 
     console.log(' ****tsx_GetTargetRaDec');
     var result = tsx_GetTargetRaDec(target.targetFindName);
-    var altitude = result.split('|')[3].trim();
-    var ra = result.split('|')[1].trim();
-    var dec = result.split('|')[2].trim();
-    var azimuth = result.split('|')[4].trim();
-    if (azimuth < 179)
-    //
-    // Simplify the azimuth value to simple east/west
-    //
-    {
-      tsx_SetServerState(tsx_ServerStates.imagingAZ, 'East');
-    } else {
-      tsx_SetServerState(tsx_ServerStates.imagingAZ, 'West');
-    }
-
-    tsx_SetServerState(tsx_ServerStates.imagingRA, ra);
-    tsx_SetServerState(tsx_ServerStates.imagingDEC, dec);
-    tsx_SetServerState(tsx_ServerStates.imagingALT, altitude);
-    tsx_SetServerState( tsx_ServerStates.currentImagingName, target.targetFindName);
 
     SetUpForImagingRun( target);
 

@@ -245,9 +245,11 @@ class TargetEditor extends Component {
     // DROP DOWN CONSTANTS
     var takeSeries = this.getTakeSeriesTemplates();
     var filters = this.getDropDownFilters();
+    var targetPriority = `${this.state.priority}`;
 
     // *******************************
     // var for ra and DATEPICKER
+    var minimumAlt = `${this.state.minAlt}`;
     var targetRa = `${this.state.ra}`;
     var targetDec = `${this.state.dec}`;
     var targetAngle = `${this.state.angle}`;
@@ -323,10 +325,14 @@ class TargetEditor extends Component {
             <Form.Input
               label='Target Name'
               name='targetFindName'
-              placeholder='Name to search for'
+              placeholder='Catalogue name, or RA/DEC Values, e.g.: 11h 33m 48s, 55d 57m 18s'
               value={this.state.targetFindName}
               onChange={this.handleChange}/>
             <Button onClick={this.getTargetRaDec.bind(this)}>Find</Button>
+          </Form.Group>
+          <Form.Group widths='equal'>
+          </Form.Group>
+          <Form.Group widths='equal'>
             <Form.Input
               label='Image to load'
               name='targetImage'
@@ -351,26 +357,26 @@ class TargetEditor extends Component {
           />
         </Segment> */}
         <Segment>
-          <h4 className="ui header">Priority: {this.state.priority}</h4>
+          <h4 className="ui header">Priority: {targetPriority}</h4>
           <ReactSimpleRange
             label
             step={1}
             min={1}
             max={19}
-            value={this.state.priority}
+            value={targetPriority}
             sliderSize={12}
             thumbSize={18}
             onChange={this.handlePriorityChange}
           />
         </Segment>
         <Segment>
-          <h4 className="ui header">Minimum Altitude: {this.state.minAlt}</h4>
+          <h4 className="ui header">Minimum Altitude: {minimumAlt}</h4>
           <ReactSimpleRange
             label
             step={.5}
             min={0}
             max={90}
-            value={this.state.minAlt}
+            value={minimumAlt}
             sliderSize={12}
             thumbSize={18}
             onChange={this.handleMinAltChange}

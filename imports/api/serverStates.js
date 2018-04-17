@@ -1,7 +1,10 @@
 import { TheSkyXInfos } from './theSkyXInfos.js';
 
 export const tsx_ServerStates = {
+  ip: 'ip',
+  port: 'port',
   currentStage: 'currentStage', // this is a status line update for the dashboard
+
   initialFocusTemperature: 'initialFocusTemperature',
   initialRA: 'initialRA',
   initialDEC: 'initialDEC',
@@ -9,22 +12,29 @@ export const tsx_ServerStates = {
   initialMntDir: 'initialMntDir',
   initialMntAlt: 'initialMntAlt',
 
-  curentTargetName: 'curentTargetName',
+  targetName: 'targetName',
   targetRA: 'targetRA',
   targetDEC: 'targetDEC',
   targetALT: 'targetALT',
   targetAZ: 'targetAZ',
-  isCurrentlyImaging: 'isCurrentlyImaging',
-
+  targetHA: 'targetHA',
+  targetTransit: 'targetTransit',
+  curentTargetName: 'curentTargetName',
   currentImagingName: 'currentImagingName',
+
+  isCurrentlyImaging: 'isCurrentlyImaging',
   imagingSessionId: 'imagingSessionId',
   imagingSession: 'imagingSession', // use to report current imaging targets
-  imagingRA: 'imagingRA',
-  imagingDEC: 'imagingDEC',
-  imagingALT: 'imagingALT',
-  imagingAZ: 'imagingAZ',
 
-  defaultMinAltitude: 'defaultMinAltitude',
+  defaultFilter: 'defaultFilter',
+  defaultMinAlt: 'defaultMinAlt',
+  defaultCoolTemp: 'defaultCoolTemp',
+  defaultFocusTempDiff: 'defaultFocusTempDiff',
+  defaultMeridianFlip: 'defaultMeridianFlip',
+  defaultStartTime: 'defaultStartTime',
+  defaultStopTime: 'defaultStopTime',
+  defaultPriority: 'defaultPriority',
+  defaultSoftPark: 'defaultSoftPark',
 
 };
 
@@ -45,7 +55,7 @@ export function tsx_UpdateDevice( name, man, mod) {
 
 export function tsx_UpdateServerState( name, value) {
   var tsx = tsx_GetServerState( name );
-  TheSkyXInfos.update( {_id: tsx._id }, {
+  var id = TheSkyXInfos.update( {_id: tsx._id }, {
     $set: { value: value }
   })
 };

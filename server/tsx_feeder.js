@@ -37,10 +37,10 @@ export function tsx_feeder( cmd, callback ) {
    });
 
    tsx.on('error', function(err) {
-        console.log(" ******************************* ");
-        console.log(cmd);
-       console.error('Connection error: ' + err);
-       console.error(new Error().stack);
+    console.log(" ******************************* ");
+    console.log(cmd);
+    console.error('Connection error: ' + err);
+    console.error(new Error().stack);
    });
 
    tsx.on('data', (chunk) => {

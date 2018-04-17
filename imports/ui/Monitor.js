@@ -37,21 +37,19 @@ class Monitor extends Component {
     state = {
 
       currentTarget: 'None',
-      ra: '0',
-      monDec: '0',
-      monAltitude: '0',
-      monAzimuth: '0',
-      monitorStatus: '',
+      monRA: '_',
+      monDEC: '_',
+      monALT: '_',
+      monAZ: '_',
+      monAngle: '_',
+      monHA: '_',
+      monTransit: '_',
+      monitorStatus: '_',
 
       monitorDisplay: true,
       confirmOpen: false,
 
       activeItem: 'Targets',
-      ip: 'Not connected',
-      port: 'Not connected',
-      saveServerFailed: false,
-      modalEnterIp: false,
-      modalEnterPort: false,
 
       defaultMinAlt: 30,
       defaultCoolTemp: -20,
@@ -62,6 +60,12 @@ class Monitor extends Component {
       noFoundSession: false,
       noFoundSessions: [],
 
+      focusTemp: '_',
+      focusPos: '_',
+      cameraTemp: '_',
+      filter: '_',
+      binning: '_',
+
   };
 
   handleChange = (e, { name, value }) => this.setState({ [name]: value })
@@ -69,8 +73,8 @@ class Monitor extends Component {
   noFoundSessionOpen = () => this.setState({ noFoundSession: true })
   noFoundSessionClose = () => this.setState({ noFoundSession: false })
 
-  componentWillMount() {
-    // do not modify the state directly
+  componentWillReceiveProps(nextProps) {
+    this.updateMonitor();
   }
 
   textTSX2() {
@@ -156,18 +160,18 @@ class Monitor extends Component {
           var ra = result.split('|')[1].trim();
           var dec = result.split('|')[2].trim();
           var altitude = result.split('|')[3].trim();
-          this.setState({ra: ra});
-          this.setState({dec: dec});
-          this.setState({altitude: atl});
+          this.setState({monRA: ra});
+          this.setState({monDEC: dec});
+          this.setState({monALT: atl});
           var azimuth = result.split('|')[4].trim();
           if (azimuth < 179)
           //
           // Simplify the azimuth value to simple east/west
           //
           {
-            this.setState({az: "East"});
+            this.setState({monAZ: "East"});
           } else {
-            this.setState({az: "West"});
+            this.setState({monAZ: "West"});
           }
 
         }
@@ -306,47 +310,37 @@ currentTargetSession: 'currentTargetSession', // use to report current imaging t
 isCurrentlyImaging: 'isCurrentlyImaging',
 */
 
-  tsxStopSession() {
-
-    tsx_UpdateServerState(tsx_ServerStates.currentImagingName, 'None');
-    tsx_UpdateServerState(tsx_ServerStates.imagingDEC, '');
-    tsx_UpdateServerState(tsx_ServerStates.imagingRA, '');
-    tsx_UpdateServerState(tsx_ServerStates.imagingALT, '');
-    tsx_UpdateServerState(tsx_ServerStates.imagingAZ, '');
-    tsx_UpdateServerState(tsx_ServerStates.currentStage, 'Stopped');
-  }
-
   tsxImagingName() {
-    return this.props.tsxImageName.value;
+    return this.props.targetImageName.value;
   }
 
   tsxImagingDEC() {
-    if(this.props.tsxImageDEC.value != '') {
-      return Number(this.props.tsxImageDEC.value).toFixed(4);
+    if(this.props.targetImageDEC.value != '') {
+      return Number(this.props.targetImageDEC.value).toFixed(4);
     }
-    return this.props.tsxImageDEC.value;
+    return this.props.targetImageDEC.value;
   }
 
   tsxImagingRA() {
-    if(this.props.tsxImageRA.value != '') {
-      return Number(this.props.tsxImageRA.value).toFixed(4);
+    if(this.props.targetImageRA.value != '') {
+      return Number(this.props.targetImageRA.value).toFixed(4);
     }
-    return this.props.tsxImageRA.value;
+    return this.props.targetImageRA.value;
   }
 
   tsxImagingALT() {
-    if(this.props.tsxImageALT.value != '') {
-      return Number(this.props.tsxImageALT.value).toFixed(4);
+    if(this.props.targetImageALT.value != '') {
+      return Number(this.props.targetImageALT.value).toFixed(4);
     }
-    return this.props.tsxImageALT.value;
+    return this.props.targetImageALT.value;
   }
 
   tsxImagingAZ() {
-    return this.props.tsxImageAZ.value;
+    return this.props.targetImageAZ.value;
   }
 
   tsxSessionId() {
-    return this.props.tsxImageSessionId.value;
+    return this.props.targetSessionId.value;
   }
 
   totalTaken() {
@@ -362,16 +356,40 @@ isCurrentlyImaging: 'isCurrentlyImaging',
     return TargetSessions.findOne({_id:this.tsxSessionId()}).totalImagesPlanned();
   }
 
+  updateMonitor(nextProps) {
+    this.setState({
+      targetRA: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'targetRA';
+      }).value,
+      targetDEC: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'targetDEC';
+      }).value,
+      targetALT: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'targetALT';
+      }).value,
+      targetAZ: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'targetAZ';
+      }).value,
+      targetHA: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'targetHA';
+      }).value,
+      targetTransit: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'targetTransit';
+      }).value,
+      currentStage: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'currentStage';
+      }).value,
+    });
+  }
+
   playScheduler() {
     // this.startSessions();
     Meteor.call("startScheduler", function (error, result) {
-        // identify the error
       }.bind(this));
   }
 
   pauseScheduler() {
     Meteor.call("pauseScheduler", function (error, result) {
-        // identify the error
       }.bind(this));
   }
 
@@ -379,6 +397,15 @@ isCurrentlyImaging: 'isCurrentlyImaging',
     // this.tsxStopSession();
     Meteor.call("stopScheduler", function (error, result) {
         // identify the error
+        tsx_UpdateServerState(tsx_ServerStates.currentImagingName, 'None');
+        tsx_UpdateServerState(tsx_ServerStates.targetDEC, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetRA, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetALT, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetAZ, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetHA, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetTransit, '_');
+        tsx_UpdateServerState(tsx_ServerStates.currentStage, 'Stopped');
+
       }.bind(this));
   }
 
@@ -389,12 +416,13 @@ isCurrentlyImaging: 'isCurrentlyImaging',
     return (
       <Segment.Group>
         {/* <Label>Target <Label.Detail>{this.tsxImagingName()}</Label.Detail></Label> */}
-        <Label>RA <Label.Detail>{this.tsxImagingRA()}</Label.Detail></Label>
-        <Label>DEC <Label.Detail>{this.tsxImagingDEC()}</Label.Detail></Label>
-        <Label>Atl <Label.Detail>{this.tsxImagingALT()}</Label.Detail></Label>
-        <Label>Az <Label.Detail>{this.tsxImagingAZ()}</Label.Detail></Label>
-        <Label>Angle <Label.Detail>123</Label.Detail></Label>
-        <Label>HA <Label.Detail>0.2</Label.Detail></Label>
+        <Label>RA <Label.Detail>{this.state.targetRA}</Label.Detail></Label>
+        <Label>DEC <Label.Detail>{this.state.targetDEC}</Label.Detail></Label>
+        <Label>Atl <Label.Detail>{this.state.targetALT}</Label.Detail></Label>
+        <Label>Az <Label.Detail>{this.state.targetAZ}</Label.Detail></Label>
+        <Label>Angle <Label.Detail>{this.state.targetAngle}</Label.Detail></Label>
+        <Label>HA <Label.Detail>{this.state.targetHA}</Label.Detail></Label>
+        <Label>Transit <Label.Detail>{this.state.targetTransit}</Label.Detail></Label>
         <Segment>
         </Segment>
         <Segment>
@@ -409,14 +437,14 @@ isCurrentlyImaging: 'isCurrentlyImaging',
           <Progress value={this.totalTaken()} total={this.totalPlanned()} progress='ratio' progress>Total Images</Progress>
         </Segment>
         <Segment>
-          <h3>Focuser  <Label>Temp<Label.Detail>-20</Label.Detail></Label>
-          <Label>Position<Label.Detail>1231424</Label.Detail></Label>
+          <h3>Focuser  <Label>Temp<Label.Detail>{this.state.focusTemp}</Label.Detail></Label>
+          <Label>Position<Label.Detail>{this.state.focusPos}</Label.Detail></Label>
           </h3>
         </Segment>
         <Segment>
-          <h3>Camera <Label>Temp<Label.Detail>-20</Label.Detail></Label>
-            <Label>Filter<Label.Detail>LUM</Label.Detail></Label>
-            <Label>Binning<Label.Detail>1x1</Label.Detail></Label>
+          <h3>Camera <Label>Temp<Label.Detail>{this.state.cameraTemp}</Label.Detail></Label>
+            <Label>Filter<Label.Detail>{this.state.filter}</Label.Detail></Label>
+            <Label>Binning<Label.Detail>{this.state.binning}</Label.Detail></Label>
           </h3>
           <Progress percent='50' progress>Current Exposure</Progress>
           <Progress value='3' total='5' progress='ratio'>Frames per Filter</Progress>
@@ -454,14 +482,14 @@ isCurrentlyImaging: 'isCurrentlyImaging',
 export default withTracker(() => {
 
   return {
-    tsxImageSessionId: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingSessionId }),
-    tsxImageName: TheSkyXInfos.findOne({ name: tsx_ServerStates.currentImagingName }),
-    tsxImageDEC: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingDEC }),
-    tsxImageRA: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingRA }),
-    tsxImageALT: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingALT }),
-    tsxImageAZ: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingAZ }),
-    tsxIP: TheSkyXInfos.find({name: 'ip' }).fetch(),
-    tsxPort: TheSkyXInfos.findOne({name: 'port' }),
+    targetSessionId: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingSessionId }),
+    targetImageName: TheSkyXInfos.findOne({ name: tsx_ServerStates.currentImagingName }),
+    targetImageDEC: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingDEC }),
+    targetImageRA: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingRA }),
+    targetImageALT: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingALT }),
+    targetImageAZ: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingAZ }),
+    targetHA: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetHA }),
+    targetTransit: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetTransit }),
     tsxInfos: TheSkyXInfos.find({}).fetch(),
     seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
     takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),

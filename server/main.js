@@ -236,9 +236,15 @@ isCurrentlyImaging: 'isCurrentlyImaging',
 
 function initServerStates() {
   for (var m in tsx_ServerStates){
-    var isDefined = TheSkyXInfos.findOne({name: tsx_ServerStates[m]});
-    if( typeof isDefined == 'undefined') {
-      tsx_SetServerState(tsx_ServerStates[m], '');
+    var state = tsx_ServerStates[m];
+    try {
+      var isDefined = TheSkyXInfos.findOne({name: state });
+      console.log(state +'='+ isDefined.value);
+    } catch (e) {
+        console.log('Initialized: ' + state);
+        tsx_SetServerState(state, '');
+    } finally {
+      console.log('Ready: ' + state);
     }
   }
 }
@@ -333,26 +339,25 @@ Meteor.startup(() => {
         job.log("Started the scheduler",
           {level: 'warning'});
 
+        // Get the target to shoot
         var target = getValidTargetSession(); // no return
 
         if (typeof target != 'undefined') {
           isParked = false;
 
+          // Point, Focus, Guide
           prepareTargetForImaging( target );
 
+          // target images per Take Series
           processTarget( target );
 
-          // if(getSchedulerState() == 'Paused') {
-          //   while(getSchedulerState() == 'Paused') {
-          //     Meteor.sleep(1000); // Sleep for one minute
-          //   }
-          // }
         }
         else {
           if( !isParked ) {
             console.log('No valid sessions - parking');
-            var lumFilter = 0;
-            tsx_MntPark(lumFilter, softPark);
+            var defaultFilter = tsx_GetServerStateValue('defaultFilter');
+            var softPark = Boolean(tsx_GetServerStateValue('defaultSoftPark'));
+            tsx_MntPark(defaultFilter, softPark);
           }
           isParked = true;
           Meteor.sleep(5000); // Sleep for five minutes

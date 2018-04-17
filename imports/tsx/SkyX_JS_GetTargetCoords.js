@@ -27,9 +27,15 @@ var targetRA = sky6ObjectInformation.ObjInfoPropOut; 		// Stuff RA into variable
 sky6ObjectInformation.Property(55); // DEC			// Pull the DEC value
 var targetDEC = sky6ObjectInformation.ObjInfoPropOut; 		// Stuff DEC into variable
 
+sky6ObjectInformation.Property(70); // HA			// Pull the Hour Angle value
+var targetHA = sky6ObjectInformation.ObjInfoPropOut; 		// Stuff DEC into variable
+
+sky6ObjectInformation.Property(68); // TransitTime			// Pull the transitTime value
+var targetTransit = sky6ObjectInformation.ObjInfoPropOut; 		// Stuff DEC into variable
+
 /* Socket End Packet */
 
 
-Out = 'Success|' + targetRA + '|' + targetDEC+ '|' + altitude + '|'+ azimuth ;			// Form the output string
+Out = 'Success|' + targetRA + '|' + targetDEC+ '|' + altitude + '|'+ azimuth +'|'+targetHA +'|'+ targetTransit;			// Form the output string
 
 /* Socket End Packet */
