@@ -413,19 +413,6 @@ class App extends Component {
 
   }
 
-  serverTest() {
-
-    // on the client
-    Meteor.call("serverSideText", function (error) {
-      // identify the error
-      if (error && error.error === "logged-out") {
-        // show a nice error message
-        Session.set("errorMessage", "Please log in to post a comment.");
-      }
-    });
-
-  }
-
   renderMenu() {
     const { activeItem  } = this.state;
 
@@ -588,7 +575,6 @@ class App extends Component {
             <Segment>
               <Button name='showMonitor' icon='dashboard' onClick={this.handleToggle.bind(this)}/>
               <Button icon='refresh' onClick={this.connectToTSX.bind(this)}/>
-              <Button icon='exchange' onClick={this.serverTest.bind(this)}/>
               <Label onClick={this.modalEnterIpOpen.bind(this)}>TSX ip:
                 <Label.Detail>
                   {this.getTsxIp()}

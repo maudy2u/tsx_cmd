@@ -27,6 +27,7 @@ function initDevice(devName) {
       }
     });
     dev = TheSkyXInfos.findOne({_id: did});
+    console.log('Setup: ' + devName );
   }
   return dev;
 }
@@ -40,7 +41,7 @@ function initParam(paramName) {
       }
     });
     param = TheSkyXInfos.findOne({_id: did});
-    console.log('Created ' + paramName);
+    console.log('Setup: ' + paramName );
   }
   else {
     console.log('Found ' + paramName +': ' + param.value);
@@ -56,7 +57,8 @@ function initParamWith(paramName, paramValue) {
         value: paramValue,
       }
     });
-    console.log('Created ' + paramName );
+    param = TheSkyXInfos.findOne({_id:did});
+    console.log('Setup: ' + paramName );
   }
   else {
     console.log('Found ' + paramName +': ' + param.value);

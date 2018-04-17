@@ -10,7 +10,6 @@
     "meteor-node-stubs": "^0.3.2",
     "react": "^15.6.2",
     "react-bootstrap": "^0.31.5",
-    "react-datetime-bootstrap": "^1.4.5",
     "react-datetimepicker-bootstrap": "^1.1.2",
     "react-dom": "^15.6.2",
     "react-simple-range": "^1.6.0",

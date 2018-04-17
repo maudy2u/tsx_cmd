@@ -8,6 +8,7 @@
 //	Jaunary 13, 2018
 //
 var lumFilter = $000;
+var softPark =$001;
 var errMsgs = "";	//Initialize variable to store any shutdown error messages.
 var cr 			= "\n";
 
@@ -115,6 +116,8 @@ try
 // command a slew, you'll need to turn tracking back on under the telescope tab.
 //
 
+if (!softPark) {
+
 
 sky6StarChart.DocumentProperty(0);
 var latitude = sky6StarChart.DocPropOut
@@ -172,7 +175,7 @@ if (latitude < 0)
 		}
 
 }
-
+}
 
 if ( SelectedHardware.mountModel !== "Telescope Mount Simulator")
 //

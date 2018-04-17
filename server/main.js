@@ -16,7 +16,10 @@ import {
 } from '../imports/api/serverStates.js';
 
 import {
+  getValidTargetSession,
   string_replace,
+  prepareTargetForImaging,
+  tsx_MntPark,
 } from './run_imageSession.js';
 
 import { tsx_feeder } from './tsx_feeder.js';
@@ -235,7 +238,6 @@ function initServerStates() {
   for (var m in tsx_ServerStates){
     var isDefined = TheSkyXInfos.findOne({name: tsx_ServerStates[m]});
     if( typeof isDefined == 'undefined') {
-      console.log('Setup :' + tsx_ServerStates[m]);
       tsx_SetServerState(tsx_ServerStates[m], '');
     }
   }
@@ -249,17 +251,8 @@ var scheduler = JobCollection('theScheduler');
 Meteor.startup(() => {
   // code to run on server at startup
   console.log(' ******************');
-  var ip = TheSkyXInfos.findOne().ip();
-  var port = TheSkyXInfos.findOne().port();
-  if( // only load if there is an IP configured
-    typeof ip != 'undefined'
-    && typeof port != 'undefined'
-    && ip != ''
-    && port != ''
-   )
-   {
-     initServerStates();
-   }
+
+  initServerStates();
   console.log(' RESTARTED');
   console.log(' ******************');
 
@@ -292,26 +285,25 @@ Meteor.startup(() => {
     }
   }
 
-  // We're in!
-  // Create a worker to get sendMail jobs from 'myJobQueue'
-  // This will keep running indefinitely, obtaining new work
-  // from the server whenever it is available.
-  // Note: If this worker was running within the Meteor environment,
-  // Then only the call below is necessary to setup a worker!
-  // However in that case processJobs is a method on the JobCollection
-  // object, and not Job.
+  // Assumed balanced RA/DEC
+  // Assumed Date/Time/Long/Lat correct
+  // Assumed Homed
+  // Assume Polar aligned (rough, or with Polemaster)
+  // Assumed initial focus is done
+  // Assume TPoint recalibration done
+  // Assumed Accurate Polar Alignment (APA) done
+  // Do not assume Autoguider calibrated, will be done once guide star found
   var workers = scheduler.processJobs( 'runScheduler',
     function (job, cb) {
       var schedule = job.data; // Only one email per job
       // This will only be called if a
       // 'runScheduler' job is obtained
       setSchedulerState('Running' );
-      isSchedulerRunning = true;
       console.log('Scheduler is running.');
       job.log("Entered the scheduler process",
         {level: 'warning'});
 
-
+      /*
       // Start up the scheduler's search for something to do
       // This is a sample of the returning issues if the scheduler
       // fails. The assumption is the scheduler processing the
@@ -325,27 +317,49 @@ Meteor.startup(() => {
       //     } else {
       //       job.done();
       //     }
-      while( getSchedulerState() == 'Running') {
+
+
+
+
+      Question: how to handle processing and waiting for a validSession...
+
+      */
+      var isParked = false;
+      while(
+        getSchedulerState() == 'Running'
+      ) {
         // Find a session
         console.log('Scheduler seeking valid targetSession');
         job.log("Started the scheduler",
           {level: 'warning'});
 
-        Meteor.sleep(2000); // Sleep for one minute
-        if(getSchedulerState() == 'Paused') {
-          while(getSchedulerState() == 'Paused') {
-            Meteor.sleep(1000); // Sleep for one minute
-          }
+        var target = getValidTargetSession(); // no return
+
+        if (typeof target != 'undefined') {
+          isParked = false;
+
+          prepareTargetForImaging( target );
+
+          processTarget( target );
+
+          // if(getSchedulerState() == 'Paused') {
+          //   while(getSchedulerState() == 'Paused') {
+          //     Meteor.sleep(1000); // Sleep for one minute
+          //   }
+          // }
         }
         else {
-          console.log('Found state: ' + getSchedulerState());
-          job.log("Still running",
-            {level: 'warning'});
+          if( !isParked ) {
+            console.log('No valid sessions - parking');
+            var lumFilter = 0;
+            tsx_MntPark(lumFilter, softPark);
+          }
+          isParked = true;
+          Meteor.sleep(5000); // Sleep for five minutes
         }
       }
 
       // While ended... exit process
-      isSchedulerRunning = false;
       job.done();
 
       // Be sure to invoke the callback

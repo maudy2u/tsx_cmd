@@ -19,13 +19,14 @@ import {
 // 6. Temp to check focus
 // 7. Meridian Flip
 // 8. Image Camera Temp
-export function getTargetSession() {
-  console.log('getTargetSession');
+export function findTargetSession() {
+  console.log('findTargetSession');
   var targetSessions = TargetSessions.find({}).fetch();
   var foundSession = false;
   var numSessions = targetSessions.length;
   var validSession;
 
+  // get first validSession
   for (var i = 0; i < numSessions; i++) {
     var canStart = canTargetSessionStart( targetSessions[i]);
     if( canStart ) {
@@ -35,7 +36,8 @@ export function getTargetSession() {
     }
   }
 
-
+  // now iterate the sessions to find anyting with higher
+  // priotiry
   if( foundSession ) {
     for (var i = 0; i < numSessions; i++) {
       if( validSession != targetSessions[i] ) {

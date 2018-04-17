@@ -12,7 +12,7 @@ import TakeSeriesTemplateEditor from './TakeSeriesTemplateEditor.js';
 import { Form, Label, Tab, Segment, Button, Radio, Input, Table, Dropdown, Checkbox, } from 'semantic-ui-react';
 
 import ReactSimpleRange from 'react-simple-range';
-import { DateTime } from 'react-datetime-bootstrap';
+// import { DateTime } from 'react-datetime-bootstrap';
 import Timekeeper from 'react-timekeeper';
 
 class TargetEditor extends Component {
@@ -168,7 +168,7 @@ class TargetEditor extends Component {
     });
   }
 
-  renderDropDownFilters() {
+  getDropDownFilters() {
 
     var filterArray = [];
     for (var i = 0; i < this.props.filters.length; i++) {
@@ -178,7 +178,6 @@ class TargetEditor extends Component {
         value: this.props.filters[i].name });
     }
     return filterArray;
-    // return Filters.find().renderDropDownFilters();
   }
 
   // Get all the current values from the TaeSeriesTemplate collections
@@ -245,6 +244,7 @@ class TargetEditor extends Component {
     // *******************************
     // DROP DOWN CONSTANTS
     var takeSeries = this.getTakeSeriesTemplates();
+    var filters = this.getDropDownFilters();
 
     // *******************************
     // var for ra and DATEPICKER
@@ -342,14 +342,14 @@ class TargetEditor extends Component {
       { menuItem: 'Constraints', render: () =>
       <Tab.Pane>
         <h3 className="ui header">Constraints</h3>
-        <Segment>
+        {/* <Segment>
           <h4 className="ui header">Stop Time</h4>
           <DateTime
             value={this.state.testDate}
             pickerOptions={timeOptions}
             onChange={this.onStopTimeChange}
           />
-        </Segment>
+        </Segment> */}
         <Segment>
           <h4 className="ui header">Priority: {this.state.priority}</h4>
           <ReactSimpleRange
@@ -401,13 +401,26 @@ class TargetEditor extends Component {
 //
       { menuItem: 'Focus', render: () =>
       <Tab.Pane>
+        <Form.Group widths='equal'>
+          <Form.Field control={Dropdown}
+            fluid
+            label='ClosedLoopSlew Filter'
+            name='clsFilter'
+            options={filters}
+            placeholder='Filter for Close Loop Slew'
+            text={this.state.clsFilter}
+            onChange={this.handleChange}
+          />
+        </Form.Group>
             <h3 className="ui header">Focus</h3>
               <Form.Group widths='equal'>
                 <Form.Field control={Dropdown}
                   fluid
-                  options={this.renderDropDownFilters()}
+                  label='Focus Filter'
+                  name='focusFilter'
+                  options={filters}
                   placeholder='Filter for focusing'
-                  value={this.state.focusFilter}
+                  text={this.state.focusFilter}
                   onChange={this.handleChange}
                 />
               </Form.Group>
