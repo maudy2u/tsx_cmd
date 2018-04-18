@@ -15,21 +15,18 @@ var azimuth 	= 0;
 var out 	= "";
 var FindStatus	= "Success";	// Preload value for success.
 
-try
+try {
 //
 // Try to find the target and catch the error if it fails.
 //
-{
 		sky6StarChart.Find(Target);
 }
-
-	catch (repErr)
+catch (repErr) {
 	//
 	//	If error, report it.
 	//
-	{
-		FindStatus = "fail";
-	}
+	FindStatus = "fail";
+}
 
 
 if ( FindStatus == "fail" )
@@ -40,37 +37,36 @@ if ( FindStatus == "fail" )
 } else {
 
 	sky6ObjectInformation.Property(59);
-    	altitude = sky6ObjectInformation.ObjInfoPropOut;
-
+  altitude = sky6ObjectInformation.ObjInfoPropOut;
 	altitude = altitude.toFixed(1);
 
 	sky6ObjectInformation.Property(58);
-    	azimuth = sky6ObjectInformation.ObjInfoPropOut;
+  azimuth = sky6ObjectInformation.ObjInfoPropOut;
 
 	out = "Success|";
 
-	if (azimuth < 179)
+	// if (azimuth < 179)
+	// //
+	// //
+	// //
+	// {
+	// 		if ((altitude < altLimit) && ( ! ccdsoftCamera.ImageUseDigitizedSkySurvey == "1" ))
+	// 		{
+	// 			out = "Error|is below " + altLimit + " degrees. Currently: " + altitude + " degrees." ;
+	// 		}
 	//
+	// 		if (altitude < altLimit )
+	// 		{
+	// 	 		out = "iError|s below the horizon: " + altitude + " degrees.";
+	// 		}
 	//
-	//
-	{
-			if ((altitude < altLimit) && ( ! ccdsoftCamera.ImageUseDigitizedSkySurvey == "1" ))
-			{
-				out = "Error|is below " + altLimit + " degrees. Currently: " + altitude + " degrees." ;
-			}
-
-			if (altitude < 0)
-			{
-		 		out = "iError|s below the horizon: " + altitude + " degrees.";
-			}
-
-	} else {
+	// } else {
 
 			if (altitude < altLimit)
 			{
-				out = "Error|has sunk too low." ;
+				out = "Error|has sunk below: " +  altLimit;
 			}
-	}
+	// }
 }
 
 /* Socket End Packet */

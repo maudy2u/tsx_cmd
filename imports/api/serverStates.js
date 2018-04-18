@@ -36,6 +36,7 @@ export const tsx_ServerStates = {
   defaultPriority: 'defaultPriority',
   defaultSoftPark: 'defaultSoftPark',
   defaultSleepTime: 'defaultSleepTime',
+  defaultGuideExposure: 'defaultGuideExposure',
 
   isTwilightEnabled: 'isTwilightEnabled',
   isFocus3Enabled: 'isFocus3Enabled',

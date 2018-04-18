@@ -20,6 +20,7 @@ import {
   string_replace,
   prepareTargetForImaging,
   tsx_MntPark,
+  processTarget,
 } from './run_imageSession.js';
 
 import { tsx_feeder } from './tsx_feeder.js';
@@ -526,7 +527,7 @@ Meteor.methods({
      }
      else if(
        getSchedulerState() == 'Stop'
-       || isSchedulerRunning == false ) { 
+       || isSchedulerRunning == false ) {
 
        // Create a job:
        var job = new Job(scheduler, 'runScheduler', // type of job

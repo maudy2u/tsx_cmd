@@ -198,38 +198,37 @@ function tsx_AbortGuider() {
 
 function tsx_SetUpAutoGuiding(targetSession) {
   console.log(' *** tsx_SetUpAutoGuiding: ' + targetSession.targetFindName);
-  var guideImageSuccess = false;
-  // var cmd = tsxCmdTakeGuiderImage(targetSession.guideExposure, targetSession.guideDelay);
+
   var cmd = shell.cat(tsx_cmd('SkyX_JS_TakeGuideImage'));
-  cmd = cmd.replace('$000', targetSession.guideExposure );
+  var exp = tsx_GetServerState('defaultGuideExposure');
+
+  cmd = cmd.replace('$000', exp );
+  cmd = cmd.replace('$001', exp );
 
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        guideImageSuccess = true;
         UpdateStatus( "Processing guider image" );
         tsx_is_waiting = false;
       }
     )
   );
 
-  while( tsx_is_waiting() ) {
+  while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
 
-  var tsx_is_waiting = true;
-  var guideStarSuccess = false;
+  tsx_is_waiting = true;
   var guideStarX = 0;
   var guideStarY = 0;
   // var cmd = tsxCmdFindGuideStar();
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_FindAutoGuideStar'));
+  var cmd = String( shell.cat(tsx_cmd('SkyX_JS_FindAutoGuideStar')) );
   // cmd = cmd.replace('$000', targetSession.guideExposure );
   // cmd = cmd.replace('$001', targetSession.scale);
   // cmd = cmd.replace('$002', targetSession.exposure);
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        console.log('Any error?: ' + result);
-        guideStarSuccess = true;
-        guideStarX = tsx_return.split('|')[1].trim();
-        guideStarY = tsx_return.split('|')[2].trim();
+        // console.log('Any error?: ' + tsx_return);
+        guideStarX = tsx_return.split('|')[0].trim();
+        guideStarY = tsx_return.split('|')[1].trim();
         UpdateStatus(  "Best guide star candidate: "+guideStarX+", "+guideStarY );
         tsx_is_waiting = false;
       }
@@ -239,12 +238,29 @@ function tsx_SetUpAutoGuiding(targetSession) {
    Meteor.sleep( 1000 );
   }
 
+  //
+  tsx_is_waiting = true;
+  // var cmd = tsxCmdFindGuideStar();
+  var cmd = shell.cat(tsx_cmd('SkyX_JS_AutoguideCalibrate'));
+  cmd = cmd.replace('$000', guideStarX );
+  cmd = cmd.replace('$001', guideStarY );
+
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+    tsx_is_waiting = false;
+      }
+    )
+  )
+  while( tsx_is_waiting ) {
+   Meteor.sleep( 1000 );
+  }
+
+  // star guiding
+  tsx_is_waiting = true;
   // var cmd = tsxCmdFindGuideStar();
   var cmd = shell.cat(tsx_cmd('SkyX_JS_FrameAndGuide'));
   cmd = cmd.replace('$000', guideStarX );
   cmd = cmd.replace('$001', guideStarY );
-  var tsx_is_waiting = true;
-  // cmd = cmd.replace('$002', targetSession.exposure);
+
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     tsx_is_waiting = false;
       }
@@ -414,15 +430,17 @@ export function tsx_GetFocusTemp( target ) {
   return Out;
 }
 
-function tsx_GetMountCoords() {
+function tsx_GetMountCoords(target) {
   var dts = new Date();
   console.log(String(dts) + ': Geting mount coordinates... ');
 
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_GetMntCoords'));
+  var cmd = String(shell.cat(tsx_cmd('SkyX_JS_GetMntCoords')));
 
   var Out;
+  cmd = cmd.replace("$000", target.targetFindName ); // set filter
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+      // console.log(tsx_return);
         Out = {
           ra: tsx_return.split('|')[0].trim(),
           dec: tsx_return.split('|')[1].trim(),
@@ -442,7 +460,7 @@ function tsx_GetMountOrientation() {
   var dts = new Date();
   console.log(String(dts) + ': Geting mount orientiation... ');
 
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_GetMntOrient'));
+  var cmd = String(shell.cat(tsx_cmd('SkyX_JS_GetMntOrient')) );
 
   var Out;
   var tsx_is_waiting = true;
@@ -478,23 +496,28 @@ function SetUpForImagingRun(targetSession) {
 	tsx_TryTarget(targetSession.targetFindName, targetSession.minAlt);					// If Target can't be found, exit.
 
   UpdateStatus(  "CLS to target" );
-	tsx_CLS(targetSession) 						//# Call the Closed-Loop-Slew function to go to the target
+
+  console.log(' *******************************');
+  console.log(' *******************************');
+  console.log(' ******CLS Disabled**************');
+  console.log(' *******************************');
+	// tsx_CLS(targetSession) 						//# Call the Closed-Loop-Slew function to go to the target
 
   Meteor.sleep( 500 );						// Shouldn't be needed but give SkyX a chance to catch its breath.
 
   // needs initial focus temp
   UpdateStatus( 'currentStage', "Recording intial temp" );
-  tsx_InitialFocus( targetSession );   //# Force a starting focus in case of mirror shift or because I forgot to.
+  // tsx_InitialFocus( targetSession );   //# Force a starting focus in case of mirror shift or because I forgot to.
 
   // needs intial Atl and Az
-	var mntCoords = tsx_GetMountCoords();				// Get & Display the mount's current altitude and direction
+	var mntCoords = tsx_GetMountCoords(targetSession);
   tsx_SetServerState( 'initialMntRA', mntCoords.ra );
   tsx_SetServerState( 'initialMntDEC', mntCoords.dec );
-  tsx_SetServerState( 'initialMntMHS', mntCoords.mhs );
+  tsx_SetServerState( 'initialMntMHS', mntCoords.hms );
 
   var mntOrient = tsx_GetMountOrientation();
-  tsx_SetServerState( 'initialMntDir', mntCoords.direction );
-  tsx_SetServerState( 'initialMntAlt', mntCoords.altitude );
+  tsx_SetServerState( 'initialMntDir', mntOrient.direction );
+  tsx_SetServerState( 'initialMntAlt', mntOrient.altitude );
 
   // *******************************
   //    C. Match Rotation/Angle if provided:
@@ -502,10 +525,10 @@ function SetUpForImagingRun(targetSession) {
   //      b) obtained from image
   var rotateSucess = false;
   UpdateStatus( "Rotating to target angle" );
-  rotateSucess = tsx_MatchRotation( targetSession );
+  // rotateSucess = tsx_MatchRotation( targetSession );
 
   UpdateStatus( "Setup guider" );
-	tsx_SetUpAutoGuiding();			// Setup & Start Auto-Guiding.
+	tsx_SetUpAutoGuiding( targetSession );			// Setup & Start Auto-Guiding.
 
 }
 
@@ -916,7 +939,7 @@ export function processTarget( target ) {
         }
 
         // check end conditions
-        stopTarget = tsx_EndConditionFound();
+        stopTarget = tsx_EndConditionFound(target);
       }
       // reset to check across series again
       if( remainingImages ) {
@@ -941,7 +964,7 @@ export function processTarget( target ) {
         var taken = target.takenImagesFor(series._id);
 
         // check end conditions
-        stopTarget = tsx_EndConditionFound();
+        stopTarget = tsx_EndConditionFound(target);
 
       }
       // now switch to next filter
@@ -1000,44 +1023,6 @@ Use this to set the last focus
     console.log(' *** targetFind: ' + targetFindName);
     return tsx_GetTargetRaDec(targetFindName);
 
-  },
-
-  tsx_TryTargetToImage(targetSession) {
-    // *******************************
-    //    B. Slew to target
-    console.log(' *** tsx_TryTargetToImage: ' + targetSession.targetFindName);
-    var cmdSuccess = false;
-    if( !forceAbort ) {
-      var file = tsx_cmd('SkyX_JS_TryTarget');
-      // console.log('File: ' + file );
-      var cmd = shell.cat(file);
-      // console.log('Initial cmd: ' + cmd);
-      // console.log('Target name: ' + targetSession.targetFindName );
-      console.log('Hardcoded minAlt: ' + 30 );
-      // console.log('minAlt: ' + targetSession.minAlt );
-      cmd = cmd.replace("$000", targetSession.targetFindName );
-      cmd = cmd.replace("$001", targetSession.minAlt ); // set exposure
-      // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
-      // console.log('Initial cmd: ' + cmd);
-      var tsx_is_waiting = true;
-      tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-            var result = tsx_return.split('|')[0].trim();
-            console.log('Any error?: ' + result);
-            if( result != 'Success') {
-              forceAbort = true;
-              console.log('SkyX_JS_TryTarget Failed. Error: ' + result);
-            }
-            // if success then TheSkyX has made this point the target...
-            // now get the coordinates
-            cmdSuccess = true;
-            tsx_is_waiting = false;
-          }
-        )
-      )
-      while( tsx_is_waiting ) {
-       Meteor.sleep( 1000 );
-      }
-    }
   },
 
   // *******************************
@@ -1138,7 +1123,7 @@ export function canTargetSessionStart( target ) {
   var result = tsxSays.split('|')[0].trim();
   if( result != 'Success') {
     UpdateStatus( target.targetFindName + tsxSays.split('|')[1].trim() );
-    console.log(target.targetFindName + ' sunk too low.');
+    console.log(target.targetFindName + ' sunk below: ' + target.minAlt);
     return false;
   }
 

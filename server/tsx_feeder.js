@@ -19,7 +19,8 @@ function tsx_GetPortAndIP() {
 // *******************************
 // test of generic write method...
 export function tsx_feeder( cmd, callback ) {
-  Meteor.sleep(3*1000);  // arbitary sleep for 2sec.
+  cmd = String(cmd);
+  Meteor.sleep(3*1000);  // arbitary sleep for 3sec.
   const { ip, port } = tsx_GetPortAndIP();
 
   // console.log('Started tsx_feeder.');

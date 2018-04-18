@@ -9,22 +9,22 @@
 // the session to determine if the mount has crossed the zenith and, if it has,
 // if the mount needs to be flipped to avoid a collision.
 //
-// Ken Sturrock 
+// Ken Sturrock
 // January 13, 2018
 //
 
 //
 // Define variables and set known initial values
 //
-var mntAz = 0;	
-var mntAlt = 0; 	
+var mntAz = 0;
+var mntAlt = 0;
 var mntDir = "";
 
 sky6RASCOMTele.GetAzAlt();			// Ask the SkyX for pointing coordinates
 	mntAz = sky6RASCOMTele.dAz;		// Put the value into the Az value
 	mntAlt = sky6RASCOMTele.dAlt;		// Do same for altitude
-    
-if (mntAz < 179) 
+
+if (mntAz < 179)
 //
 // Simplify the azimuth value to simple east/west
 //
@@ -34,10 +34,6 @@ if (mntAz < 179)
 	mntDir = "West";
 }
 
-Out = mntDir + "," + mntAlt;			// Form the output string
+Out = mntDir + "|" + mntAlt;			// Form the output string
 
 /* Socket End Packet */
-
-
-
-

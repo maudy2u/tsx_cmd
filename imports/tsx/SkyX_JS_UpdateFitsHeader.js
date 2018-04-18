@@ -2,11 +2,6 @@
 /* Socket Start Packet */
 
 //
-//	Get the focuser temperature
-//
-//	Ken Sturrock
-//	January 13, 2018
-//
 
 var Out = '';			// Form the output string
 var targetName = "$000";
@@ -22,7 +17,7 @@ tsxi.setFITSKeyword("OBJECT", targetName);
 
 //Enter the rotator angle
 var tsxc = ccdsoftCamera;
-if( tsxc.focIsConnected ) {}
+if( tsxc.focIsConnected ) {
   tsxi.setFITSKeyword("ROTATOR_ANG", tsxc.rotatorPositionAngle().ToString());
   tsxi.setFITSKeyword("ROTATOR_POS", tsxc.focPosition);
 }

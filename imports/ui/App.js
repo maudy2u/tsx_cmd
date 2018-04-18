@@ -57,6 +57,7 @@ class App extends Component {
     isTwilightEnabled: true,
     isFocus3Enabled: false,
     isFocus3Binned: false,
+    defaultGuideExposure: 7,
   };
 
   handleToggle = (e, { name, value }) => this.setState({ [name]: Boolean(!eval('this.state.'+name)) })
@@ -134,6 +135,10 @@ class App extends Component {
       isFocus3Binned: nextProps.tsxInfo.find(function(element) {
         return element.name == 'isFocus3Binned';
       }).value,
+      defaultGuideExposure: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultGuideExposure';
+      }).value,
+
     });
 
   }
@@ -280,6 +285,7 @@ class App extends Component {
     this.saveDefaultState('isTwilightEnabled');
     this.saveDefaultState('isFocus3Enabled');
     this.saveDefaultState('isFocus3Binned');
+    this.saveDefaultState('defaultGuideExposure');
 
   }
   // *******************************
@@ -320,6 +326,8 @@ class App extends Component {
               checked={this.state.defaultSoftPark}
               onChange={this.handleToggle.bind(this)}
             />
+          </Form.Group>
+          <Form.Group>
             <Form.Checkbox
               label='Twilight Check Enabled '
               name='isTwilightEnabled'
@@ -347,6 +355,13 @@ class App extends Component {
           </Form.Group>
           <Form.Group>
             <Form.Input
+              label='AutoGuide Exposure '
+              name='defaultGuideExposure'
+              placeholder='Enter number seconds'
+              value={this.state.defaultGuideExposure}
+              onChange={this.handleChange}
+            />
+            <Form.Input
               label='Minimum Altitude '
               name='defaultMinAlt'
               placeholder='Enter Minimum Altitude to start/stop'
@@ -360,6 +375,8 @@ class App extends Component {
               value={this.state.defaultFocusTempDiff}
               onChange={this.handleChange}
             />
+          </Form.Group>
+          <Form.Group>
             <Form.Input
               label='Cooling Temperature: '
               name='defaultCoolTemp'

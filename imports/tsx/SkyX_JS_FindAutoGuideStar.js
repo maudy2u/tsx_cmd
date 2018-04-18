@@ -2,10 +2,10 @@
 /* Socket Start Packet */
 
 //
-// Try to find a decent guide star using a mash-up of code from Colin McGill, Kym Haines and Ken Sturrock. 
-// 
+// Try to find a decent guide star using a mash-up of code from Colin McGill, Kym Haines and Ken Sturrock.
+//
 // This is the compressed version for use by the script. If you're trying to figure this script out
-// or reverse engineer it, please look at the "diagnostic" version which is meant to run from the 
+// or reverse engineer it, please look at the "diagnostic" version which is meant to run from the
 // SkyX's JS environment.
 //
 // Ken Sturrock
@@ -149,7 +149,7 @@ medFWHM = medFWHM.toFixed(2);
 Mag[Brightest] = Mag[Brightest].toFixed(2);
 newMedMag = medMag.toFixed(2);
 path = CAGI.Path;
-out = "X=" + newX + ",";
-out += "Y=" + newY + ",,,,,;";
-out += "Path=" + path + "\n";
+out = newX + "|";
+out += newY + "|";
+out += path;
 /* Socket End Packet */
