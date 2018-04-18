@@ -35,7 +35,13 @@ export const tsx_ServerStates = {
   defaultStopTime: 'defaultStopTime',
   defaultPriority: 'defaultPriority',
   defaultSoftPark: 'defaultSoftPark',
+  defaultSleepTime: 'defaultSleepTime',
 
+  isTwilightEnabled: 'isTwilightEnabled',
+  isFocus3Enabled: 'isFocus3Enabled',
+  isFocus3Binned: 'isFocus3Binned',
+  lastFocusPos: 'lastFocusPos',
+  lastFocusTemp: 'lastFocusTemp',
 };
 
 export function tsx_SetServerState( name, value) {

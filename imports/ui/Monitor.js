@@ -7,12 +7,6 @@ import { withTracker } from 'meteor/react-meteor-data';
 
 import { Confirm, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
 
-//Tools
-import {
-  canTargetSessionStart,
-  getTargetSession,
-} from '../api/sessionTools.js';
-
 import {
   tsx_ServerStates,
   tsx_UpdateServerState,
@@ -74,7 +68,7 @@ class Monitor extends Component {
   noFoundSessionClose = () => this.setState({ noFoundSession: false })
 
   componentWillReceiveProps(nextProps) {
-    this.updateMonitor();
+    this.updateMonitor(nextProps);
   }
 
   textTSX2() {
@@ -113,7 +107,6 @@ class Monitor extends Component {
     var ip = TheSkyXInfos.findOne({name: 'ip'});
     var port = TheSkyXInfos.findOne({name: 'port'});
     // any remaining images
-    //var target = getTargetSession();
 
     Meteor.call("tsxTestImageSession", function (error, result) {
       console.log('Error: ' + error);
@@ -178,35 +171,11 @@ class Monitor extends Component {
       }.bind(this));
   }
 
-  getValidSession() {
-    // on the client
-    console.log('getValidSession');
-    var validSession = getTargetSession();
-   }
-
   // *******************************
 
   startSessions() {
-    var validSession = getTargetSession();
-    // on the client
-    console.log('startImaging');
-    var found = false;
-    // this.debugStartImaging(validSession);
-    // return;
-    Meteor.call("startImaging", validSession, function (error, result) {
-      // identify the error
-      var success = result.split('|')[0].trim();
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-      if (success != "Success") {
-        // show a nice error message
-        Session.set("errorMessage", "Please confirm TSX is active.\nerror.error");
-      }
-      else {
-        // not sure... this is to find target to start imaging...
-      }
-    });
-
+    Meteor.call("startScheduler", function (error, result) {
+      }.bind(this));
   }
 
   debugStartImaging(targetSession) {
@@ -310,35 +279,6 @@ currentTargetSession: 'currentTargetSession', // use to report current imaging t
 isCurrentlyImaging: 'isCurrentlyImaging',
 */
 
-  tsxImagingName() {
-    return this.props.targetImageName.value;
-  }
-
-  tsxImagingDEC() {
-    if(this.props.targetImageDEC.value != '') {
-      return Number(this.props.targetImageDEC.value).toFixed(4);
-    }
-    return this.props.targetImageDEC.value;
-  }
-
-  tsxImagingRA() {
-    if(this.props.targetImageRA.value != '') {
-      return Number(this.props.targetImageRA.value).toFixed(4);
-    }
-    return this.props.targetImageRA.value;
-  }
-
-  tsxImagingALT() {
-    if(this.props.targetImageALT.value != '') {
-      return Number(this.props.targetImageALT.value).toFixed(4);
-    }
-    return this.props.targetImageALT.value;
-  }
-
-  tsxImagingAZ() {
-    return this.props.targetImageAZ.value;
-  }
-
   tsxSessionId() {
     return this.props.targetSessionId.value;
   }
@@ -358,6 +298,9 @@ isCurrentlyImaging: 'isCurrentlyImaging',
 
   updateMonitor(nextProps) {
     this.setState({
+      targetName: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'targetName';
+      }).value,
       targetRA: nextProps.tsxInfo.find(function(element) {
         return element.name == 'targetRA';
       }).value,
@@ -382,8 +325,11 @@ isCurrentlyImaging: 'isCurrentlyImaging',
     });
   }
 
+  confirmPlayScheduler() {
+    this.setState({confirmOpen: true});
+  }
+
   playScheduler() {
-    // this.startSessions();
     Meteor.call("startScheduler", function (error, result) {
       }.bind(this));
   }
@@ -397,7 +343,7 @@ isCurrentlyImaging: 'isCurrentlyImaging',
     // this.tsxStopSession();
     Meteor.call("stopScheduler", function (error, result) {
         // identify the error
-        tsx_UpdateServerState(tsx_ServerStates.currentImagingName, 'None');
+        tsx_UpdateServerState(tsx_ServerStates.targetName, 'None');
         tsx_UpdateServerState(tsx_ServerStates.targetDEC, '_');
         tsx_UpdateServerState(tsx_ServerStates.targetRA, '_');
         tsx_UpdateServerState(tsx_ServerStates.targetALT, '_');
@@ -415,18 +361,17 @@ isCurrentlyImaging: 'isCurrentlyImaging',
 
     return (
       <Segment.Group>
-        {/* <Label>Target <Label.Detail>{this.tsxImagingName()}</Label.Detail></Label> */}
-        <Label>RA <Label.Detail>{this.state.targetRA}</Label.Detail></Label>
-        <Label>DEC <Label.Detail>{this.state.targetDEC}</Label.Detail></Label>
-        <Label>Atl <Label.Detail>{this.state.targetALT}</Label.Detail></Label>
+        <Label>RA <Label.Detail>{Number(this.state.targetRA).toFixed(4)}</Label.Detail></Label>
+        <Label>DEC <Label.Detail>{Number(this.state.targetDEC).toFixed(4)}</Label.Detail></Label>
+        <Label>Atl <Label.Detail>{Number(this.state.targetALT).toFixed(4)}</Label.Detail></Label>
         <Label>Az <Label.Detail>{this.state.targetAZ}</Label.Detail></Label>
-        <Label>Angle <Label.Detail>{this.state.targetAngle}</Label.Detail></Label>
-        <Label>HA <Label.Detail>{this.state.targetHA}</Label.Detail></Label>
-        <Label>Transit <Label.Detail>{this.state.targetTransit}</Label.Detail></Label>
+        <Label>Angle <Label.Detail>{Number(this.state.targetAngle).toFixed(4)}</Label.Detail></Label>
+        <Label>HA <Label.Detail>{Number(this.state.targetHA).toFixed(4)}</Label.Detail></Label>
+        <Label>Transit <Label.Detail>{Number(this.state.targetTransit).toFixed(4)}</Label.Detail></Label>
         <Segment>
         </Segment>
         <Segment>
-          <h3>Target {this.tsxImagingName()}</h3>
+          <h3>Target {this.state.targetName}</h3>
           <Button.Group icon>
             <Button icon='play'  onClick={this.playScheduler.bind(this)}/>
             <Button icon='pause' onClick={this.pauseScheduler.bind(this)}  />
@@ -483,14 +428,14 @@ export default withTracker(() => {
 
   return {
     targetSessionId: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingSessionId }),
-    targetImageName: TheSkyXInfos.findOne({ name: tsx_ServerStates.currentImagingName }),
-    targetImageDEC: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingDEC }),
-    targetImageRA: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingRA }),
-    targetImageALT: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingALT }),
-    targetImageAZ: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingAZ }),
+    targetImageName: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetName }),
+    targetImageDEC: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetDEC }),
+    targetImageRA: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetRA }),
+    targetImageALT: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetALT }),
+    targetImageAZ: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetAZ }),
     targetHA: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetHA }),
     targetTransit: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetTransit }),
-    tsxInfos: TheSkyXInfos.find({}).fetch(),
+    tsxInfo: TheSkyXInfos.find({}).fetch(),
     seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
     takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
     targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),

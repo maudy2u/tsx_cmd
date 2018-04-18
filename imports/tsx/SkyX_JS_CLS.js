@@ -30,7 +30,8 @@ var Filter		= "$001";		// the filter to use. Set by run_target, no effect if no 
 var repErr		= "";			// Throw-away error message for the try/catch tests
 var targetRA		= "";			// Right Assention of target - used for mount synch
 var targetDEC		= "";			// Declination of target - used for mount synch
-var CLSStatus 		= "Success";
+var CLSStatus 		= "Success|";
+var Out;
 var myMount		= SelectedHardware.mountModel;
 var iScale		= 0			// Holds the calculated Image Scale
 
@@ -86,8 +87,8 @@ try
 //
 {
 		ClosedLoopSlew.exec();
+		Out = "Success|";
 }
-
 	catch (repErr)
 	//
 	// We're going to use our throw away variable repErr to
@@ -95,7 +96,7 @@ try
 	// failure message.
 	//
 	{
-		CLSStatus = "Failed";
+		Out = "Failed|";
 	}
-
+Out
 /* Socket End Packet */

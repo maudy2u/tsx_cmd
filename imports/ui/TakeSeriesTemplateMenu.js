@@ -35,7 +35,7 @@ class TakeSeriesTemplateMenu extends Component {
         // show a nice error message
         Session.set("errorMessage", "Please log in to post a comment.");
       }
-    });
+    }.bind(this));
   }
 
   chkTestData() {

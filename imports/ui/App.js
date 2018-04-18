@@ -52,7 +52,11 @@ class App extends Component {
     defaultStartTime: '20:00',
     defaultStopTime: '6:00',
     defaultPriority: 9,
+    defaultSleepTime: 5,
     currentStage: '',
+    isTwilightEnabled: true,
+    isFocus3Enabled: false,
+    isFocus3Binned: false,
   };
 
   handleToggle = (e, { name, value }) => this.setState({ [name]: Boolean(!eval('this.state.'+name)) })
@@ -115,7 +119,23 @@ class App extends Component {
       defaultMinAlt: nextProps.tsxInfo.find(function(element) {
         return element.name == 'defaultMinAlt';
       }).value,
+      defaultSleepTime: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultSleepTime';
+      }).value,
+      defaultPriority: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultPriority';
+      }).value,
+      isTwilightEnabled: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'isTwilightEnabled';
+      }).value,
+      isFocus3Enabled: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'isFocus3Enabled';
+      }).value,
+      isFocus3Binned: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'isFocus3Binned';
+      }).value,
     });
+
   }
   saveTSXServerIp() {
     this.modalEnterIpClose();
@@ -256,6 +276,10 @@ class App extends Component {
     this.saveDefaultState('defaultStopTime');
     this.saveDefaultState('defaultPriority');
     this.saveDefaultState('defaultSoftPark');
+    this.saveDefaultState('defaultSleepTime');
+    this.saveDefaultState('isTwilightEnabled');
+    this.saveDefaultState('isFocus3Enabled');
+    this.saveDefaultState('isFocus3Binned');
 
   }
   // *******************************
@@ -296,6 +320,30 @@ class App extends Component {
               checked={this.state.defaultSoftPark}
               onChange={this.handleToggle.bind(this)}
             />
+            <Form.Checkbox
+              label='Twilight Check Enabled '
+              name='isTwilightEnabled'
+              toggle
+              placeholder= 'Enable twilight check'
+              checked={this.state.isTwilightEnabled}
+              onChange={this.handleToggle.bind(this)}
+            />
+            <Form.Checkbox
+              label='Checking Focus Enabled (@Focus3) '
+              name='isFocus3Enabled'
+              toggle
+              placeholder= 'Enable focus checking'
+              checked={this.state.isFocus3Enabled}
+              onChange={this.handleToggle.bind(this)}
+            />
+            <Form.Checkbox
+              label='Bin 2x2 Focus Enabled '
+              name='isFocus3Binned'
+              toggle
+              placeholder= 'Enable to bin when focusing'
+              checked={this.state.isFocus3Binned}
+              onChange={this.handleToggle.bind(this)}
+            />
           </Form.Group>
           <Form.Group>
             <Form.Input
@@ -317,6 +365,13 @@ class App extends Component {
               name='defaultCoolTemp'
               placeholder='-20'
               value={this.state.defaultCoolTemp}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='Time to sleep when no target '
+              name='defaultSleepTime'
+              placeholder='Minutes to sleep'
+              value={this.state.defaultSleepTime}
               onChange={this.handleChange}
             />
           </Form.Group>

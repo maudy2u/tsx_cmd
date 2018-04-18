@@ -44,7 +44,7 @@ function initParam(paramName) {
     console.log('Setup: ' + paramName );
   }
   else {
-    console.log('Found ' + paramName +': ' + param.value);
+    // console.log('Found ' + paramName +': ' + param.value);
   }
   return param;
 }
@@ -61,7 +61,7 @@ function initParamWith(paramName, paramValue) {
     console.log('Setup: ' + paramName );
   }
   else {
-    console.log('Found ' + paramName +': ' + param.value);
+    // console.log('Found ' + paramName +': ' + param.value);
   }
   return param;
 }

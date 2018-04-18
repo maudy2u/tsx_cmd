@@ -19,21 +19,21 @@ function tsx_GetPortAndIP() {
 // *******************************
 // test of generic write method...
 export function tsx_feeder( cmd, callback ) {
-
+  Meteor.sleep(3*1000);  // arbitary sleep for 2sec.
   const { ip, port } = tsx_GetPortAndIP();
 
-  console.log('Started tsx_feeder.');
+  // console.log('Started tsx_feeder.');
    var Out;
    var net = require('net');
    var tsx = new net.Socket({writeable: true}); //writeable true does not appear to help
    tsx.setEncoding(); // used to set the string type of return
 
    tsx.on('close', function() {
-       console.log('Connection closed.');
+       // console.log('Connection closed.');
    });
 
    tsx.on('write', function() {
-       console.log('Writing to TheSkyX.');
+       // console.log('Writing to TheSkyX.');
    });
 
    tsx.on('error', function(err) {
@@ -44,15 +44,15 @@ export function tsx_feeder( cmd, callback ) {
    });
 
    tsx.on('data', (chunk) => {
-    console.log(`Received ${chunk.length} bytes of data.`);
-    console.log('Received: '  + chunk);
+    // console.log(`Received ${chunk.length} bytes of data.`);
+    // console.log('Received: '  + chunk);
     Out = chunk;
     callback(Out);
     tsx_waiting = false;
    });
 
    tsx.connect(port, ip, function() {
-     console.log('Connected to: ' + ip +':' + port );
+     // console.log('Connected to: ' + ip +':' + port );
    });
 
    tsx_waiting = true;
@@ -70,7 +70,7 @@ export function tsx_feeder( cmd, callback ) {
     Meteor.sleep( 1000 );
    }
    tsx.close;
-   console.log('Finished function tsx_feeder.');
+   // console.log('Finished function tsx_feeder.');
 };
 
 

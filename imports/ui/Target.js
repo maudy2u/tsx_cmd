@@ -61,7 +61,7 @@ class Target extends Component {
   getCurrentCoordinates() {
     var done = false;
 
-    Meteor.call("targetFind", this.props.target.targetFindName , (error, result) => {
+    Meteor.call( 'targetFind', this.props.target.targetFindName , function(error, result) {
       // identify the error
       console.log('Error: ' + error);
       console.log('result: ' + result);
@@ -94,26 +94,8 @@ class Target extends Component {
           this.setState({azimuth: "West"});
         }
       }
-    });
+    }.bind(this));
 
-
-    // Meteor.call("getCurrentCoordinates", this.props.target, function (error, result) {
-    //     // identify the error
-    //     console.log('Error: ' + error);
-    //     console.log('result: ' + result);
-    //     if (error && error.error === "logged-out") {
-    //       // show a nice error message
-    //       Session.set("errorMessage", "Please log in.");
-    //     }
-    //     ra = result.split('|')[1].trim();
-    //     dec= result.split('|')[2].trim();
-    //     alt = result.split('|')[3].trim();
-    //     az = result.split('|')[4].trim();
-    //
-    //     done = true;
-    //     this.setState({currentAlt: alt});
-    //   }
-    // );
   }
 
   copyEntry() {

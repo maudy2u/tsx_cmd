@@ -57,7 +57,7 @@ class TakeSeriesEditor extends Component {
           // show a nice error message
           Session.set("errorMessage", "Please log edit.");
         }
-    });
+    }.bind(this));
   };
 
   // Initialize states

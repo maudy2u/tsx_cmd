@@ -244,7 +244,14 @@ function initServerStates() {
         console.log('Initialized: ' + state);
         tsx_SetServerState(state, '');
     } finally {
-      console.log('Ready: ' + state);
+      // console.log('Ready: ' + state);
+      tsx_SetServerState('targetName', '');
+      tsx_SetServerState('targetRA', '');
+      tsx_SetServerState('targetDEC', '');
+      tsx_SetServerState('targetALT', '');
+      tsx_SetServerState('targetAZ', '');
+      tsx_SetServerState('targetHA', '');
+      tsx_SetServerState('targetTransit', '');
     }
   }
 }
@@ -336,14 +343,17 @@ Meteor.startup(() => {
       ) {
         // Find a session
         console.log('Scheduler seeking valid targetSession');
+        // console.log('job: ' + job.doc.created);
         job.log("Started the scheduler",
           {level: 'warning'});
 
         // Get the target to shoot
+        tsx_SetServerState(tsx_ServerStates.currentStage, 'Searching...');
         var target = getValidTargetSession(); // no return
 
         if (typeof target != 'undefined') {
           isParked = false;
+          tsx_SetServerState(tsx_ServerStates.currentStage, 'Found...');
 
           // Point, Focus, Guide
           prepareTargetForImaging( target );
@@ -357,10 +367,17 @@ Meteor.startup(() => {
             console.log('No valid sessions - parking');
             var defaultFilter = tsx_GetServerStateValue('defaultFilter');
             var softPark = Boolean(tsx_GetServerStateValue('defaultSoftPark'));
+            tsx_SetServerState(tsx_ServerStates.currentStage, 'Parking...');
             tsx_MntPark(defaultFilter, softPark);
           }
           isParked = true;
-          Meteor.sleep(5000); // Sleep for five minutes
+          console.log('about to sleep');
+          var sleepTime = tsx_GetServerStateValue('defaultSleepTime');
+          console.log('Waiting...: ' + sleepTime);
+          tsx_SetServerState(tsx_ServerStates.currentStage, 'Waiting...');
+          Meteor.sleep(sleepTime*60*1000); // Sleep for ms
+          console.log('Finished sleep');
+          tsx_SetServerState(tsx_ServerStates.currentStage, 'Checking...');
         }
       }
 
@@ -373,35 +390,32 @@ Meteor.startup(() => {
     }
   );
 
-  /*
-    var javx = new Job(scheduler, 'cleanup', {})
-         .repeat({ schedule: scheduler.later.parse.text("every 5 minutes") })
-         .save({cancelRepeats: true});
 
-      var cleaning = scheduler.processJobs( 'cleanup', { pollInterval: false, workTimeout: 60*1000 },
-      function (job, cb) {
-         var current = new Date();
-         current.setMinutes(current.getMinutes() - 5);
-         var ids = scheduler.find({
-            status:
-               $in: Job.jobStatusRemovable,
-            updated:
-               $lt: current},
-            {fields: { _id: 1 }}).map (d) -> d._id
-         if (ids.length > 0) {
-           myJobs.removeJobs(ids)
-         }
-         # console.warn "Removed #{ids.length} old jobs"
-         job.done("Removed #{ids.length} old jobs");
-         cb();
-       });
+  var javx = new Job(scheduler, 'cleanup', {})
+       .repeat({ schedule: scheduler.later.parse.text("every 5 minutes") })
+       .save({cancelRepeats: true});
 
-
-      myJobs.find({ type: 'cleanup', status: 'ready' })
-         .observe
-            added: () ->
-               q.trigger()
-  */
+  var cleaning = scheduler.processJobs( 'cleanup', { pollInterval: false, workTimeout: 60*1000 },
+    function (job, cb) {
+       var current = new Date();
+       current.setMinutes(current.getMinutes() - 5);
+       var ids = scheduler.find({
+          status: Job.jobStatusRemovable,
+          updated: current},
+          {fields: { _id: 1 }}).map((d) =>{
+            return d._id;
+          });
+       if (ids.length > 0) {
+         scheduler.removeJobs(ids)
+       }
+       //console.warn "Removed #{ids.length} old jobs"
+       job.done("Removed #{ids.length} old jobs");
+       cb();
+  });
+  scheduler.find({ type: 'cleanup', status: 'ready' })
+       .observe
+          added: () =>
+             q.trigger();
 
   // start server for scheduler and wait
   return scheduler.startJobServer();
@@ -507,12 +521,12 @@ Meteor.methods({
      else if(
        getSchedulerState() == 'Running'
        && isSchedulerRunning == true ) {
-       console.log('Server is alreadying running. Nothing to do.');
+       console.log('Scheduler is alreadying running. Nothing to do.');
        return;
      }
      else if(
        getSchedulerState() == 'Stop'
-       || isSchedulerRunning == false ) {
+       || isSchedulerRunning == false ) { 
 
        // Create a job:
        var job = new Job(scheduler, 'runScheduler', // type of job

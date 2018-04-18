@@ -39,7 +39,7 @@ class TargetSessionMenu extends Component {
         // show a nice error message
         Session.set("errorMessage", "Please log in to post a comment.");
       }
-    });
+    }.bind(this));
   }
 
   loadTestDataMeteorMethod() {
@@ -51,7 +51,7 @@ class TargetSessionMenu extends Component {
         // show a nice error message
         Session.set("errorMessage", "Please log in to post a comment.");
       }
-    });
+    }.bind(this));
   }
 
   chkTestData() {
@@ -64,7 +64,7 @@ class TargetSessionMenu extends Component {
         // show a nice error message
         Session.set("errorMessage", "Please log in to post a comment.");
       }
-    });
+    }.bind(this));
   }
 
   addEntry() {
@@ -100,15 +100,14 @@ class TargetSessionMenu extends Component {
         focusBin: '',
         guideExposure: '',
         guideDelay: '',
-        priority: TheSkyXInfos.findOne({name: 'defaultPriority'}),
-        enableMeridianFlip: TheSkyXInfos.findOne({name: 'defaultMeridianFlip'}),
+        priority: TheSkyXInfos.findOne({name: 'defaultPriority'}).value,
+        enableMeridianFlip: TheSkyXInfos.findOne({name: 'defaultMeridianFlip'}).value,
         // startTime: '',
         // stopTime: '',
-        startTime: TheSkyXInfos.findOne({name: 'defaultStartTime'}),
-        stopTime: TheSkyXInfos.findOne({name: 'defaultStopTime'}),
-        tempChg: '',
-        minAlt: TheSkyXInfos.findOne({name: 'defaultMinAltitude'}),
-        tempChg: TheSkyXInfos.findOne({name: 'defaultFocusTempDiff'}),
+        startTime: TheSkyXInfos.findOne({name: 'defaultStartTime'}).value,
+        stopTime: TheSkyXInfos.findOne({name: 'defaultStopTime'}).value,
+        tempChg: TheSkyXInfos.findOne({name: 'defaultFocusTempDiff'}).value,
+        minAlt: TheSkyXInfos.findOne({name: 'defaultMinAlt'}).value,
 
         currentAlt: 0, // set to zero for now.
         completed: false,

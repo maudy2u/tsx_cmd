@@ -47,7 +47,7 @@ if ( FindStatus == "fail" )
 	sky6ObjectInformation.Property(58);
     	azimuth = sky6ObjectInformation.ObjInfoPropOut;
 
-	out = "Success";
+	out = "Success|";
 
 	if (azimuth < 179)
 	//
@@ -56,19 +56,19 @@ if ( FindStatus == "fail" )
 	{
 			if ((altitude < altLimit) && ( ! ccdsoftCamera.ImageUseDigitizedSkySurvey == "1" ))
 			{
-				out = "is below " + altLimit + " degrees. Currently: " + altitude + " degrees." ;
+				out = "Error|is below " + altLimit + " degrees. Currently: " + altitude + " degrees." ;
 			}
 
 			if (altitude < 0)
 			{
-		 		out = "is below the horizon: " + altitude + " degrees.";
+		 		out = "iError|s below the horizon: " + altitude + " degrees.";
 			}
 
 	} else {
 
 			if (altitude < altLimit)
 			{
-				out = "has sunk too low." ;
+				out = "Error|has sunk too low." ;
 			}
 	}
 }

@@ -8,7 +8,7 @@
 // January 13, 2018
 //
 
-var Target 	= "$000";	// tsxfeeder replaces $000 with the current target name.
+var target 	= "$000";	// tsxfeeder replaces $000 with the current target name.
 
 
 // Find the sun and figure out how high it is.
@@ -17,7 +17,7 @@ sky6ObjectInformation.Property(59);
 var altitude = sky6ObjectInformation.ObjInfoPropOut;
 
 // Refind where we were.
-sky6StarChart.Find(Target);
+sky6StarChart.Find(target); 
 
 if (altitude > -15)
 //
@@ -27,9 +27,9 @@ if (altitude > -15)
 // but it's an hour before/after the sun crosses the horizon.
 //
 {
-	simpErr = "Light. " + altitude;
+	simpErr = "Light|" + altitude;
 } else {
-	simpErr = "Dark. " + altitude;
+	simpErr = "Dark|" + altitude;
 }
 
 // if (ccdsoftCamera.ImageUseDigitizedSkySurvey == 1)

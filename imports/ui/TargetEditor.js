@@ -198,7 +198,12 @@ class TargetEditor extends Component {
 
   getTargetRaDec() {
     console.log('targetFind: ' + this.state.targetFindName );
-    Meteor.call("targetFind", this.state.targetFindName , (error, result) => {
+    Meteor.call(
+      'targetFind',
+      this.state.targetFindName ,
+      function ( error, result ) {
+
+//    Meteor.call("targetFind", this.state.targetFindName , function(error, result) {
       // identify the error
       console.log('Error: ' + error);
       console.log('result: ' + result);
@@ -219,7 +224,7 @@ class TargetEditor extends Component {
         this.setState({ra: ra});
         this.setState({dec: dec});
       }
-    });
+    }.bind(this));
   }
 
 

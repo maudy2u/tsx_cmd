@@ -15,11 +15,12 @@
 //
 
 var CCDSC		= ccdsoftCamera;
-var focusingFilter = 0;
-var binFactor 		= "No";
+var focusingFilter = $000;
+var bin 		= $001;
+var binFactor = $002;
 var initExp 		= ccdsoftCamera.ExposureTime;			// How long of an exposure does the camera use?
-var initialBinX		= ccdsoftCamera.getPropLng("m_nXBin");
-var initialBinY		= ccdsoftCamera.getPropLng("m_nYBin");
+var initialBinX		= ccdsoftCamera.BinX;
+var initialBinY		= ccdsoftCamera.BinY;
 
 if ( Application.build >= 11177 )
 {
@@ -72,13 +73,13 @@ if ( Application.build >= 11177 )
 			CCDSC.ExposureTime = initExp;		// Restore camera duration time. It'll get set later anyway...
 
 
-			if ( binFactor == "Yes" )
+			if ( bin  )
 			//
 			// Are we binning 2x2 for a OSC camera? This probably doesn't work, but has been reported.
 			//
 			{
-				ccdsoftCamera.setPropLng("m_nXBin", "2" );
-				ccdsoftCamera.setPropLng("m_nYBin", "2" );
+				ccdsoftCamera.BinX = binFactor;
+				ccdsoftCamera.BinY = binFactor;
 			}
 
 
@@ -89,13 +90,13 @@ if ( Application.build >= 11177 )
 			out = CCDSC.AtFocus3(3, true);
 
 
-			if ( binFactor == "Yes" )
+			if ( bin  )
 			//
 			// If we binned the camera for focusing, put it back.
 			//
 			{
-				ccdsoftCamera.setPropLng("m_nXBin", initialBinX ); // removed quotes
-				ccdsoftCamera.setPropLng("m_nYBin", initialBinY ); // removed quotes
+				ccdsoftCamera.BinX = initialBinX; // removed quotes
+				ccdsoftCamera.BinY = initialBinY; // removed quotes
 			}
 		}
 
