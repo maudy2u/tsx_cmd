@@ -210,6 +210,9 @@ function tsx_AbortGuider() {
 }
 
 // **************************************************************
+// Breakup into reusable sections...
+// tsx_ will send TSX commands
+// non-tsx_ functions are higher level
 function tsx_SetUpAutoGuiding(targetSession) {
   console.log(' *** tsx_SetUpAutoGuiding: ' + targetSession.targetFindName);
 
@@ -804,6 +807,18 @@ function tsx_reachedMinAlt( target ) {
 }
 
 // **************************************************************
+function isPriorityTarget( target ) {
+  console.log('************************');
+  console.log(' *** isPriorityTarget: ' + target.targetFindName);
+
+  var priority = getHigherPriorityTarget( target );
+  if( priority._id != target._id ) {
+    return false;
+  }
+  return true;
+}
+
+// **************************************************************
 /*
 cur_time=datetime.datetime.now().hour+datetime.datetime.now().minute/60.
 if (cur_time < 8) : cur_time=cur_time+24
@@ -850,6 +865,9 @@ function tsx_flipTime( target ) {
     if( tarDir == 'West') {
       // we need to flip
       console.log( ' *** Flip: Mount East & target ' + tarDir );
+
+      // call CLS???
+
       return true;
     }
   }
@@ -858,6 +876,13 @@ function tsx_flipTime( target ) {
   }
 }
 
+// **************************************************************
+/*
+// Java Script
+focPos = ccdsoftCamera.focPosition;
+focTemp = ccdsoftCamera.focTemperature;
+out = focPos + '|' + focTemp + '|(position,temp)';
+*/
 function tsx_checkFocus(target) {
   console.log('************************');
   console.log(' *** tsx_checkFocus: ' + target.targetFindName);
@@ -875,16 +900,35 @@ function tsx_checkFocus(target) {
 }
 
 // **************************************************************
-function tsx_CheckEndConditions(target) {
+// if targetDone/stopped... find next
+// *******************************
+//  8. Image done... next?
+//    - check priority - is there another target to take over
+//    - check for meridian flip
+//    - check end time
+//    - check end Altitude
+//    - Report for next image... step 6
+//      - do we dither?
+//      - did temp change to refocus?
+
+// *******************************
+// 8. End session activities
+// return TRUE if reached end condition
+function hasReachedEndCondition(target) {
 	// *******************************
 	// check Twilight - force stop
 	var continueWithSeries = false;
-  console.log(' *** tsx_CheckEndConditions: ' + target.targetFindName);
+  console.log(' *** hasReachedEndCondition: ' + target.targetFindName);
 
 	var isDark = tsx_isDarkEnough(target);
 	if(!isDark ) {
 		return true;
 	}
+
+  var isPriority = isPriorityTarget( target );
+  if( !isPriority ) {
+    return true;
+  }
 
   var minAlt = tsx_reachedMinAlt( target );
   if( minAlt ) {
@@ -912,35 +956,24 @@ function tsx_CheckEndConditions(target) {
 
 	// *******************************
 	// check reFocusTemp - refocus
-	/*
-	// Java Script
-	focPos = ccdsoftCamera.focPosition;
-	focTemp = ccdsoftCamera.focTemperature;
-	out = focPos + '|' + focTemp + '|(position,temp)';
-	*/
   var runFocus3 = tsx_checkFocus( target );
   if( runFocus3) {
     tsx_RunFocus3(target);
     return false;
   }
 
-  var targetsDither = tsx_GetServerState('targetDither').value;
+  // #TODO: Finshed Dither
+  console.log(' *******************************');
+  console.log(' *******************************');
+  console.log(' Finish dither');
+  console.log(' *******************************');
+  console.log(' *******************************');
+  // var ditherTarget = tsx_GetServerState('targetDither').value;
+  // if( ditherTarget ) {
+  //   var dither = tsx_dither( target );
+  // }
 
-	// if targetDone/stopped... find next
-	// *******************************
-	//  8. Image done... next?
-	//    - check priority - is there another target to take over
-	//    - check for meridian flip
-	//    - check end time
-	//    - check end Altitude
-	//    - Report for next image... step 6
-	//      - do we dither?
-	//      - did temp change to refocus?
-
-	// *******************************
-	// 8. End session activities
-
-
+  return false;
 }
 
 // **************************************************************
@@ -1075,6 +1108,7 @@ function tsx_takeImage( filterNum, exposure, frame ) {
         }
         Meteor.sleep( 500 ); // needs a sleep before next image
         tsx_is_waiting = false;
+
       }
     )
   )
@@ -1084,6 +1118,24 @@ function tsx_takeImage( filterNum, exposure, frame ) {
   return success;
 };
 
+// **************************************************************
+function tsx_UpdateFITS( target ) {
+  var cmd = shell.cat(tsx_cmd('SkyX_JS_UpdateFitsHeader'));
+  cmd = cmd.replace("$000", target.targetFindName ); // set filter
+
+  var tsx_is_waiting = true;
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+        console.log('Image: ' + tsx_return);
+
+        tsx_is_waiting = false;
+      }
+    )
+  )
+  while( tsx_is_waiting ) {
+    Meteor.sleep( 1000 );
+  }
+  Meteor.sleep( 500 ); // needs a sleep before next image
+}
 
 // **************************************************************
 function takeSeriesImage(target, series) {
@@ -1098,14 +1150,21 @@ function takeSeriesImage(target, series) {
   if( (remainingImages <= series.repeat) && (remainingImages > 0) ) {
     console.log('Series: ' + series.filter + ' at ' + series.exposure + ' seconds');
 
-    var slot = getFilterSlot(series.filter);
-    //  cdLight =1, cdBias, cdDark, cdFlat
-    var frame = getFrame(series.frame);
-    tsx_takeImage(slot,series.exposure, frame);
-    // console.log('Taken image: ' +res);
+    // *******************************
+    // Take the image
+    var slot = getFilterSlot( series.filter );
+    var frame = getFrame( series.frame );//  cdLight =1, cdBias, cdDark, cdFlat
+    tsx_takeImage( slot, series.exposure, frame );
+    // *******************************
+    // Update progress
     console.log(' *** Image taken: ' + series.filter + ' at ' + series.exposure + ' seconds');
-    incrementTakenFor(target, series._id);
-    out = true;
+    incrementTakenFor( target, series._id );
+
+    // *******************************
+    // ADD THE FOCUS AND ROTATOR POSITIONS INTO THE FITS HEADER
+    tsx_UpdateFITS( target );
+
+    out = true; // need to return something
   }
   else {
     console.log(' *** Completed: ' + series.filter + ' at ' + series.exposure + ' seconds');
@@ -1169,7 +1228,7 @@ export function processTargetTakeSeries( target ) {
 
         // check end conditions
         console.log(' *******************************\nSkipping end conditions');
-        // stopTarget = tsx_CheckEndConditions(target);
+        stopTarget = hasReachedEndCondition(target);
 
       }
       // reset to check across series again
@@ -1200,7 +1259,7 @@ export function processTargetTakeSeries( target ) {
 
         // check end conditions
         console.log(' *******************************\nSkipping end conditions');
-        // stopTarget = tsx_CheckEndConditions(target);
+        stopTarget = hasReachedEndCondition(target);
 
       }
       // now switch to next filter
@@ -1327,6 +1386,8 @@ Use this to set the last focus
     console.log(' *** startImaging: ' + target.name );
     tsx_SetServerState( tsx_ServerStates.imagingSessionId, target._id );
     tsx_GetTargetRaDec (target.targetFindName);
+
+    // Will process target until end condition found
     processTargetTakeSeries( target );
   },
 
@@ -1351,7 +1412,7 @@ Use this to set the last focus
     }
     else {
       console.log('Found: ' + target.targetFindName);
-      var endCond = tsx_CheckEndConditions( target );
+      var endCond = hasReachedEndCondition( target );
       console.log(target.targetFindName + ' ending=' + endCond );
     }
   },
@@ -1392,28 +1453,38 @@ export function findTargetSession() {
   // now iterate the sessions to find anyting with higher
   // priotiry
   if( foundSession ) {
-    for (var i = 0; i < numSessions; i++) {
-      var chkSession = targetSessions[i];
-      if( validSession._id != chkSession._id ) {
-        var canStart = canTargetSessionStart( chkSession );
-        console.log( 'canStart ' + chkSession.targetFindName + ': ' + canStart);
-        if( canStart ) {
-            var valPriority = Number(validSession.priority);
-            var chkPriority = Number(chkSession.priority);
-            var chk = valPriority - chkPriority;
-            if( (chk > 0) ) {
-              // if( validSession.minAlt > chk.minAlt  ) {
-                // if( validSession.startTime > chk.startTime  ) {
-                  validSession = chkSession;
-                  console.log( 'New Candidate ' + validSession.targetFindName + ' - priority');
-                // }
-              // }
-            }
-          }
+    validSession = getHigherPriorityTarget( validSession );
+  }
+  return validSession;
+}
+
+// **************************************************************
+function getHigherPriorityTarget( validSession ) {
+  var targetSessions = TargetSessions.find({}).fetch();
+  var numSessions = targetSessions.length;
+
+  for (var i = 0; i < numSessions; i++) {
+    var chkSession = targetSessions[i];
+    if( validSession._id != chkSession._id ) {
+      var canStart = canTargetSessionStart( chkSession );
+      console.log( 'canStart ' + chkSession.targetFindName + ': ' + canStart);
+      if( canStart ) {
+        var valPriority = Number(validSession.priority);
+        var chkPriority = Number(chkSession.priority);
+        var chk = valPriority - chkPriority;
+        if( (chk > 0) ) {
+          // if( validSession.minAlt > chk.minAlt  ) {
+            // if( validSession.startTime > chk.startTime  ) {
+              validSession = chkSession;
+              console.log( 'New Candidate ' + validSession.targetFindName + ' - priority');
+            // }
+          // }
         }
       }
     }
+  }
   return validSession;
+
 }
 
 // **************************************************************
@@ -1427,6 +1498,34 @@ function isTargetComplete( target ) {
   return true;
 }
 // *************************** ***********************************
+
+function hasTargetStartTimePassed( target ) {
+  console.log('************************');
+  console.log(' *** canTargetStart: ' + target.targetFindName);
+  var cur_dts = new Date();
+  var cur_time = cur_dts.getHours()+(cur_dts.getMinutes()/60);
+  console.log('Current time: ' + cur_time );
+
+  // add 24 to the morning time so that
+  ((cur_time < 8) ? cur_time=cur_time+24 : cur_time);
+
+  var start_time = target.start_time;
+  console.log('Start time: ' + start_time );
+  var hrs = start_time.split(':')[0].trim();
+  console.log('Start hrs: ' + hrs );
+  var min = start_time.split(':')[1].trim();
+  console.log('Start min: ' + min );
+  start_time = Number(hrs)+ 24 + Number(min/60);
+  console.log(' *** is cur_time ' + cur_time + '>'+ ' start_time ' + start_time );
+  var canStart = ((cur_time > start_time) ? false : true);
+  if( canStart ){
+    return true;
+  }
+  return false;
+
+}
+
+// *************************** ***********************************
 // Check target... altitude ok, time okay,
 export function canTargetSessionStart( target ) {
   console.log(' *** canTargetSessionStart: ' + target.targetFindName);
@@ -1437,8 +1536,15 @@ export function canTargetSessionStart( target ) {
     return false; // the session is disabled
   }
 
+  // check for target not ready
   if( isTargetComplete( target ) ) {
     console.log( target.targetFindName + ': is completed');
+    return false;
+  }
+
+  // check start time pasted
+  if( !hasTargetStartTimePassed( target ) ) {
+    console.log( target.targetFindName + ': too early to start');
     return false;
   }
 

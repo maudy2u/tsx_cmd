@@ -4,11 +4,11 @@
 //
 
 var Out = '';			// Form the output string
-var targetName = "$000";
+var targetName = "$001";
 
 //open TSX camera and get the last image
-var tsxi = ccdsoftImage;
-var sucess = tsxi.AttachToActiveImager();
+var tsxi = ccdsoftCameraImage;
+var success = tsxi.AttachToActiveImager();
 
 //Add some FITSKeywords for future reference
 
@@ -18,19 +18,17 @@ tsxi.setFITSKeyword("OBJECT", targetName);
 //Enter the rotator angle
 var tsxc = ccdsoftCamera;
 if( tsxc.focIsConnected ) {
-  tsxi.setFITSKeyword("ROTATOR_ANG", tsxc.rotatorPositionAngle().ToString());
-  tsxi.setFITSKeyword("ROTATOR_POS", tsxc.focPosition);
+  tsxi.setFITSKeyword("FOCUS_POS", tsxc.focPosition);
 }
-//Enter Image Position Angle as saved
-
-tsxi.setFITSKeyword("ORIENTAT", tplan.GetItem(TargetPlan.sbTargetPAName));
+if( tsxc.rotatorIsConnected ) {
+  tsxi.setFITSKeyword("ROTATOR_POS", tsxc.rotatorPositionAngle());
+}
 
 //Set save path and save
-
-tsxi.Path = targetImageDataPath;
+//tsxi.Path = targetImageDataPath;
 
 tsxi.Save();
 
-Out;
+Out = tsxi.Path;
 
 /* Socket End Packet */
