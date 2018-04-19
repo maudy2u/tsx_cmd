@@ -265,11 +265,11 @@ class Monitor extends Component {
 /*
 currentStage: 'currentStage', // this is a status line update for the dashboard
 initialFocusTemperature: 'initialFocusTemperature',
-initialRA: 'initialRA',
-initialDEC: 'initialDEC',
-initialMHS: 'initialMHS',
-initialMntDir: 'initialMntDir',
-initialMntAlt: 'initialMntAlt',
+mntRA: 'mntRA',
+mntDEC: 'mntDEC',
+mntMHS: 'mntMHS',
+mntMntDir: 'mntMntDir',
+mntMntAlt: 'mntMntAlt',
 targetRA: 'targetRA',
 targetDEC: 'targetDEC',
 targetATL: 'targetATL',
@@ -279,21 +279,22 @@ currentTargetSession: 'currentTargetSession', // use to report current imaging t
 isCurrentlyImaging: 'isCurrentlyImaging',
 */
 
-  tsxSessionId() {
-    return this.props.targetSessionId.value;
+  totalTaken() {
+    try {
+      return TargetSessions.findOne({_id: this.props.target._id}).totalImagesTaken();
+    } catch (e) {
+      // Do nothing
+    }
+    return 0;
   }
 
-  totalTaken() {
-    if( this.tsxSessionId() == '' ) {
-      return 0;
-    }
-    return TargetSessions.findOne({_id:this.tsxSessionId()}).totalImagesTaken();
-  }
   totalPlanned() {
-    if( this.tsxSessionId() == '' ) {
-      return 0;
+    try {
+      return TargetSessions.findOne({_id: this.props.target._id}).totalImagesPlanned();
+    } catch (e) {
+      // Do nothing
     }
-    return TargetSessions.findOne({_id:this.tsxSessionId()}).totalImagesPlanned();
+    return 0;
   }
 
   updateMonitor(nextProps) {
@@ -343,6 +344,7 @@ isCurrentlyImaging: 'isCurrentlyImaging',
     // this.tsxStopSession();
     Meteor.call("stopScheduler", function (error, result) {
         // identify the error
+        tsx_UpdateServerState(tsx_ServerStates.imagingSessionId, '' );
         tsx_UpdateServerState(tsx_ServerStates.targetName, 'None');
         tsx_UpdateServerState(tsx_ServerStates.targetDEC, '_');
         tsx_UpdateServerState(tsx_ServerStates.targetRA, '_');
@@ -353,6 +355,20 @@ isCurrentlyImaging: 'isCurrentlyImaging',
         tsx_UpdateServerState(tsx_ServerStates.currentStage, 'Stopped');
 
       }.bind(this));
+  }
+
+  testPicking() {
+    Meteor.call( 'testTargetPicking', function(error, result) {
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+    }.bind(this));
+  }
+
+  testEndConditions() {
+    Meteor.call( 'testEndConditions', function(error, result) {
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+    }.bind(this));
   }
 
   render() {
@@ -376,10 +392,21 @@ isCurrentlyImaging: 'isCurrentlyImaging',
             <Button icon='play'  onClick={this.playScheduler.bind(this)}/>
             <Button icon='pause' onClick={this.pauseScheduler.bind(this)}  />
             <Button icon='stop' onClick={this.stopScheduler.bind(this)} />
+            {/*
+
             <Button onClick={this.textTSX.bind(this)}>Test</Button>
             <Button onClick={this.textTSX2.bind(this)}>Test2</Button>
+            imagesTaken: TargetSessions.findOne({_id: this.props.target._id}).totalImagesTaken(),
+            imagesPlanned: TargetSessions.findOne({_id:this.props.target._id}).totalImagesPlanned(),
+
+            */}
           </Button.Group>
-          <Progress value={this.totalTaken()} total={this.totalPlanned()} progress='ratio' progress>Total Images</Progress>
+          <Button icon='checkmark box' onClick={this.testPicking.bind(this)} />
+          <Button icon='move' onClick={this.testEndConditions.bind(this)} />
+          <Progress
+            value={this.totalTaken()}
+            total={this.totalPlanned()}
+            progress='ratio'>Images Taken</Progress>
         </Segment>
         <Segment>
           <h3>Focuser  <Label>Temp<Label.Detail>{this.state.focusTemp}</Label.Detail></Label>

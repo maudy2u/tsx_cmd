@@ -26,6 +26,7 @@ class Target extends Component {
     altitude: '0',
     azimuth: '0',
     description: '',
+    priority: 10,
   }
 
   handleOpen = () => this.setState({ modalOpen: true })
@@ -46,6 +47,14 @@ class Target extends Component {
   componentDidMount() {
 
     this.getCurrentCoordinates();
+
+  }
+
+  eraseProgress() {
+    var progress = [];
+    TargetSessions.update({_id:this.props.target._id},{
+      $set:{ progress: progress }
+    });
 
   }
 
@@ -142,6 +151,13 @@ class Target extends Component {
     // do not copy series progress
   }
 
+  startImaging() {
+    Meteor.call( 'startImaging', this.props.target, function(error, result) {
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+    }.bind(this));
+  }
+
   render() {
 // Use the image for a stretched image in the Future
 //       <Item.Image size='tiny' src='' />
@@ -150,26 +166,33 @@ class Target extends Component {
     <Item>
       <Item.Content>
         <Item.Header as='a'>
-          {this.props.target.name}
-        </Item.Header>
-        <Item.Meta>
           <Checkbox
+            label='  '
             toggle
             checked={this.props.target.enabledActive}
             onChange={this.onChangeChecked.bind(this)}
           />
+          {this.props.target.name}
+        </Item.Header>
+        <Item.Meta>
           {this.props.target.description}
         </Item.Meta>
         <Item.Description>
-          <Label>Altitude: <Label.Detail>{this.state.altitude}, {this.state.azimuth}</Label.Detail></Label>
-          <Progress percent={this.props.target.calcProgress()} progress />
+          <Label>Priority: <Label.Detail>{this.props.target.priority}</Label.Detail></Label>
+          <Label>Start time: <Label.Detail>{this.props.target.startTime}</Label.Detail></Label>
+          <Label>Stop time: <Label.Detail>{this.props.target.stopTime}</Label.Detail></Label>
+          <Label>Altitude: <Label.Detail>{this.state.altitude}</Label.Detail></Label>
+          <Label>Direction: <Label.Detail>{this.state.azimuth}</Label.Detail></Label>
+          <Progress value={this.props.target.totalImagesTaken()} total={this.props.target.totalImagesPlanned()} progress='ratio'>Images Taken</Progress>
         </Item.Description>
         <Item.Extra>
           <Button.Group basic size='small'>
             <Button icon='edit' onClick={this.editEntry.bind(this)}/>
             <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
             <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
+            <Button icon='retweet' onClick={this.eraseProgress.bind(this)}/>
           </Button.Group>
+          <Button icon='play' onClick={this.startImaging.bind(this)}/>
           <Modal
             open={this.state.modalOpen}
             onClose={this.handleClose}

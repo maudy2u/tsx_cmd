@@ -4,13 +4,15 @@ export const tsx_ServerStates = {
   ip: 'ip',
   port: 'port',
   currentStage: 'currentStage', // this is a status line update for the dashboard
+  SchedulerStatus: 'SchedulerStatus',
+  currentJob: 'currentJob',
 
   initialFocusTemperature: 'initialFocusTemperature',
-  initialRA: 'initialRA',
-  initialDEC: 'initialDEC',
-  initialMHS: 'initialMHS',
-  initialMntDir: 'initialMntDir',
-  initialMntAlt: 'initialMntAlt',
+  mntRA: 'mntRA',
+  mntDEC: 'mntDEC',
+  mntMHS: 'mntMHS',
+  mntMntDir: 'mntMntDir',
+  mntMntAlt: 'mntMntAlt',
 
   targetName: 'targetName',
   targetRA: 'targetRA',
@@ -19,6 +21,7 @@ export const tsx_ServerStates = {
   targetAZ: 'targetAZ',
   targetHA: 'targetHA',
   targetTransit: 'targetTransit',
+  targetDither: 'targetDither',
   curentTargetName: 'curentTargetName',
   currentImagingName: 'currentImagingName',
 
@@ -37,6 +40,7 @@ export const tsx_ServerStates = {
   defaultSoftPark: 'defaultSoftPark',
   defaultSleepTime: 'defaultSleepTime',
   defaultGuideExposure: 'defaultGuideExposure',
+  defaultDithering: 'defaultDithering',
 
   isTwilightEnabled: 'isTwilightEnabled',
   isFocus3Enabled: 'isFocus3Enabled',

@@ -12,8 +12,8 @@ ccdsoftAutoguider.Connect();
 ccdsoftAutoguider.Asynchronous = false;
 ccdsoftAutoguider.Frame = 1;
 ccdsoftAutoguider.Subframe = false;
-ccdsoftAutoguider.ExposureTime = 7;		// Set the normal exposure duration for "regular" images (from main script)
-ccdsoftAutoguider.AutoguiderExposureTime = 7;	// Set the guide exposure duration to the same to preserve my sanity.
+ccdsoftAutoguider.ExposureTime = $000;		// Set the normal exposure duration for "regular" images (from main script)
+ccdsoftAutoguider.AutoguiderExposureTime = $001;	// Set the guide exposure duration to the same to preserve my sanity.
 ccdsoftAutoguider.AutoSaveOn = true;			// This must be set for the image analysis routine to work later.
 
 if (SelectedHardware.autoguiderCameraModel == "SBIG ST-i")

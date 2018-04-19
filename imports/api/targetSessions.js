@@ -74,47 +74,24 @@ TargetSessions.helpers({
         return 100; // do not try to process
       }
 
-      totalPlannedImages += item.repeat;
+      totalPlannedImages = totalPlannedImages + Number(item.repeat);
     }
-
+    // console.log('Planned: ' + totalPlannedImages);
     return totalPlannedImages;
   },
 
   totalImagesTaken: function() {
-    var totalPlannedImages = 0;
     var totalTakenImages = 0;
     var target = this;
 
-    var seriesId = target.series._id;
-    var takeSeries = TakeSeriesTemplates.findOne({_id:seriesId});
-
-    if( typeof takeSeries == "undefined") {
-      return 100; // do not try to process
+    var progress = target.progress;
+    if( typeof progress == 'undefined') {
+      return 0;
     }
-
-    for (var i = 0; i < takeSeries.series.length; i++) {
-      var series = takeSeries.series[i];
-
-      if( typeof series == "undefined") {
-        return 100; // do not try to process
-      }
-
-      var item = Seriess.findOne({_id:series.id}); //.fetch();
-      if( typeof item == "undefined") {
-        return 100; // do not try to process
-      }
-
-      var progress = target.progress;
-      if( typeof progress == 'undefined') {
-        continue;
-      }
-      for (var j = 0; j < progress.length; j++) {
-        if( progress[j]._id == series.id ) {
-            totalTakenImages = totalTakenImages + progress[j].taken;
-        }
-      }
+    for (var j = 0; j < progress.length; j++) {
+      totalTakenImages = totalTakenImages + progress[j].taken;
     }
-
+    // console.log('Taken: ' + totalTakenImages);
     return totalTakenImages;
   },
 

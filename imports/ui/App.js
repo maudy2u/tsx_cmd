@@ -53,6 +53,7 @@ class App extends Component {
     defaultStopTime: '6:00',
     defaultPriority: 9,
     defaultSleepTime: 5,
+    defaultDithering: 1,
     currentStage: '',
     isTwilightEnabled: true,
     isFocus3Enabled: false,
@@ -138,7 +139,9 @@ class App extends Component {
       defaultGuideExposure: nextProps.tsxInfo.find(function(element) {
         return element.name == 'defaultGuideExposure';
       }).value,
-
+      defaultDithering: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultDithering';
+      }).value,
     });
 
   }
@@ -286,7 +289,7 @@ class App extends Component {
     this.saveDefaultState('isFocus3Enabled');
     this.saveDefaultState('isFocus3Binned');
     this.saveDefaultState('defaultGuideExposure');
-
+    this.saveDefaultState('defaultDithering');
   }
   // *******************************
   //
@@ -377,6 +380,13 @@ class App extends Component {
             />
           </Form.Group>
           <Form.Group>
+            <Form.Input
+              label='Dither after: '
+              name='defaultDithering'
+              placeholder='Images before dither'
+              value={this.state.defaultDithering}
+              onChange={this.handleChange}
+            />
             <Form.Input
               label='Cooling Temperature: '
               name='defaultCoolTemp'

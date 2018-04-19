@@ -3,7 +3,8 @@
 
 var aFilter = $000;
 var aExpTime = $001;
-
+var aFrame = $002; //  cdLight =1, cdBias, cdDark, cdFlat
+var Out = 'Success|';
 //
 //	This JavaScript code simply connects to the imaging camera and takes a picture.
 //
@@ -28,7 +29,7 @@ ccdsoftCamera.Asynchronous = false;		// We are going to wait for it
 ccdsoftCamera.ExposureTime = aExpTime;		// Set the exposure time based on the second parameter from tsxfeeder
 ccdsoftCamera.AutoSaveOn = true;		// Keep the image
 ccdsoftCamera.ImageReduction = 0;		// Don't do autodark, change this if you do want some other calibration (1=AD, 2=full)
-ccdsoftCamera.Frame = 1;			// It's a light frame
+ccdsoftCamera.Frame = aFrame;			// It's a light frame
 ccdsoftCamera.Subframe = false;			// Not a subframe
 
 if ( SelectedHardware.filterWheelModel !== "<No Filter Wheel Selected>" )
@@ -74,4 +75,5 @@ if (ccdsoftCamera.PropStr("m_csObserver") == "Ken Sturrock")
 	}
 }
 
+Out;
 /* Socket End Packet */

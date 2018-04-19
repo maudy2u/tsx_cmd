@@ -17,16 +17,6 @@ var frames = [
   'Bias',
 ];
 
-// var filters = [
-//   'Static LUM',
-//   'Static R',
-//   'Static G',
-//   'Static B',
-//   'Static Ha',
-//   'Static OIII',
-//   'Static SII',
-// ];
-
 class TakeSeriesEditor extends Component {
 
 // Setup states

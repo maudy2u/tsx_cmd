@@ -19,6 +19,7 @@ class TakeSeriesTemplateEditor extends Component {
     seriesProcess: "",
     seriesContainer: [],
     repeatSeries: false,
+    defaultDithering: 1,
   };
 
   nameChange = (e, { value }) => this.setState({ name: value });
@@ -35,6 +36,7 @@ class TakeSeriesTemplateEditor extends Component {
   componentWillMount() {
     // do not modify the state directly
     this.setState({name: this.props.template.name});
+    this.setState({description: this.props.template.defaultDithering});
     this.setState({description: this.props.template.description});
     this.setState({seriesProcess: this.props.template.processSeries});
     this.setState({seriesContainer: this.props.template.series});
@@ -48,6 +50,7 @@ class TakeSeriesTemplateEditor extends Component {
         description: this.state.description,
         processSeries: this.state.seriesProcess,
         repeatSeries: this.state.repeatSeries,
+        defaultDithering: this.state.defaultDithering,
        },
     });
   }
@@ -62,8 +65,8 @@ class TakeSeriesTemplateEditor extends Component {
         order: order,
         exposure: 1,
         binning: 1,
-        frame: 'Light',
-        filter: 'LUM',
+        frame: '',
+        filter: '',
         repeat: 1,
       }
     );
@@ -115,6 +118,13 @@ class TakeSeriesTemplateEditor extends Component {
               onChange={this.onChangeChecked.bind(this)}
             />
             {/* <Form.Checkbox onChange={this.seriesProcessChange} /> */}
+            <Form.Input
+              label='Dither after: '
+              name='defaultDithering'
+              placeholder='Images before dither'
+              value={this.state.defaultDithering}
+              onChange={this.handleChange}
+            />
           </Form.Group>
         </Form>
         <Grid columns={6} centered divided='vertically'>

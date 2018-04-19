@@ -6,6 +6,12 @@ var tsx_waiting = false;
 export function tsx_is_waiting() {
   return tsx_waiting;
 }
+export function stop_tsx_is_waiting() {
+  tsx_waiting = false;
+}
+function start_tsx_is_waiting() {
+  tsx_waiting = true;
+}
 
 var tsxHeader =  '/* Java Script *//* Socket Start Packet */';
 var tsxFooter = '/* Socket End Packet */';
@@ -30,7 +36,7 @@ export function tsx_feeder( cmd, callback ) {
    tsx.setEncoding(); // used to set the string type of return
 
    tsx.on('close', function() {
-       // console.log('Connection closed.');
+       console.log('tsx_done');
    });
 
    tsx.on('write', function() {
@@ -42,6 +48,7 @@ export function tsx_feeder( cmd, callback ) {
     console.log(cmd);
     console.error('Connection error: ' + err);
     console.error(new Error().stack);
+    stop_tsx_is_waiting();
    });
 
    tsx.on('data', (chunk) => {
@@ -49,14 +56,14 @@ export function tsx_feeder( cmd, callback ) {
     // console.log('Received: '  + chunk);
     Out = chunk;
     callback(Out);
-    tsx_waiting = false;
+    stop_tsx_is_waiting();
    });
 
    tsx.connect(port, ip, function() {
      // console.log('Connected to: ' + ip +':' + port );
    });
 
-   tsx_waiting = true;
+   start_tsx_is_waiting();
 
    tsx.write(cmd, (err) => {
      // console.log('Sending tsxCmd: ' + cmd);
@@ -66,12 +73,15 @@ export function tsx_feeder( cmd, callback ) {
 
    // need a TSX WAIT FOR SCRIPT DONE...
    // https://www.w3schools.com/js/js_timing.asp
-   while( tsx_waiting ) {
+   var waiting = 0; // create arbitarty timeout
+  while( tsx_waiting  ) { //}&& forceExit > 2*60*sec ) {
     tsx.reads;
-    Meteor.sleep( 1000 );
-   }
-   tsx.close;
-   // console.log('Finished function tsx_feeder.');
+    var sec = 1000;
+    Meteor.sleep( sec );
+    waiting = waiting + sec;
+    console.log('tsx_waiting (sec): ' + waiting /sec );
+  }
+  tsx.close;
 };
 
 
@@ -100,6 +110,7 @@ export function tsx_feeder_old( ip, port, cmd, callback ) {
           console.log(cmd);
          console.error('Connection error: ' + err);
          console.error(new Error().stack);
+         stop_tsx_is_waiting();
      });
 
      tsx.on('data', (chunk) => {
@@ -107,14 +118,14 @@ export function tsx_feeder_old( ip, port, cmd, callback ) {
       console.log('Received: '  + chunk);
       Out = chunk;
       callback(Out);
-      tsx_waiting = false;
+      stop_tsx_is_waiting();
      });
 
      tsx.connect(port, ip, function() {
        console.log('Connected to: ' + ip +':' + port );
      });
 
-     tsx_waiting = true;
+     start_tsx_is_waiting();
 
      tsx.write(cmd, (err) => {
        // console.log('Sending tsxCmd: ' + cmd);

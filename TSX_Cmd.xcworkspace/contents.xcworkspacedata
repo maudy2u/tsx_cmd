@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Workspace
    version = "1.0">
+   <Group
+      location = "container:"
+      name = "Metor Files">
+      <FileRef
+         location = "group:.meteor/platforms">
+      </FileRef>
+      <FileRef
+         location = "group:.meteor/versions">
+      </FileRef>
+      <FileRef
+         location = "group:.meteor/packages">
+      </FileRef>
+   </Group>
    <FileRef
       location = "group:client">
    </FileRef>
