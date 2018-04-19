@@ -17,7 +17,7 @@ sky6ObjectInformation.Property(59);
 var altitude = sky6ObjectInformation.ObjInfoPropOut;
 
 // Refind where we were.
-sky6StarChart.Find(target); 
+sky6StarChart.Find(target);
 
 if (altitude > -15)
 //
@@ -41,5 +41,6 @@ if (altitude > -15)
 // 	simpErr = "Simulator. " + altitude;
 // }
 
+return simpleErr;
 
 /* Socket End Packet */

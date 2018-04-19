@@ -234,6 +234,11 @@ class TargetEditor extends Component {
 
   }
 
+  getImageLinkAngle() {
+    console.log('defed functionality');
+    return 0;
+  }
+
   // *******************************
   render() {
     // *******************************
@@ -273,12 +278,13 @@ class TargetEditor extends Component {
             <h3 className="ui header">Session</h3>
             {/* <Form> */}
               <Form.Group widths='equal'>
-                <Form.Field control={Input}
-                  label='Name'
-                  name='name'
-                  placeholder='Name for session'
-                  value={this.state.name}
-                  onChange={this.handleChange}/>
+                <Form.Input
+                    label='Target Name'
+                    name='targetFindName'
+                    placeholder='Catalogue name, or RA/DEC Values, e.g.: 11h 33m 48s, 55d 57m 18s'
+                    value={this.state.targetFindName}
+                    onChange={this.handleChange}/>
+                  <Button onClick={this.getTargetRaDec.bind(this)}>Find</Button>
                 <Form.Field control={Input}
                   label='Description'
                   name='description'
@@ -323,18 +329,10 @@ class TargetEditor extends Component {
               placeholder='Angle'
               value={this.state.angle}
               onChange={this.handleChange}/>
+              <Button onClick={this.getImageLinkAngle.bind(this)}>FromImageLink</Button>
           </Form.Group>
         </Segment>
         <Segment>
-          <Form.Group widths='equal'>
-            <Form.Input
-              label='Target Name'
-              name='targetFindName'
-              placeholder='Catalogue name, or RA/DEC Values, e.g.: 11h 33m 48s, 55d 57m 18s'
-              value={this.state.targetFindName}
-              onChange={this.handleChange}/>
-            <Button onClick={this.getTargetRaDec.bind(this)}>Find</Button>
-          </Form.Group>
           <Form.Group widths='equal'>
           </Form.Group>
           <Form.Group widths='equal'>

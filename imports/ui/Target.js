@@ -72,12 +72,9 @@ class Target extends Component {
 
     Meteor.call( 'targetFind', this.props.target.targetFindName , function(error, result) {
       // identify the error
+
       console.log('Error: ' + error);
       console.log('result: ' + result);
-      for (var i = 0; i < result.split('|').length; i++) {
-        var txt = result.split('|')[i].trim();
-        console.log('Found: ' + txt);
-      }
       if (error && error.error === "logged-out") {
         // show a nice error message
         Session.set("errorMessage", "Please log in to post a comment.");
@@ -86,22 +83,11 @@ class Target extends Component {
         // if success then TheSkyX has made this point the target...
         // now get the coordinates
         cmdSuccess = true;
-        var altitude = result.split('|')[3].trim();
-        this.setState({altitude: altitude});
-        var ra = result.split('|')[1].trim();
-        var dec = result.split('|')[2].trim();
-        this.setState({ra: ra});
-        this.setState({dec: dec});
-        var azimuth = result.split('|')[4].trim();
-        if (azimuth < 179)
-        //
-        // Simplify the azimuth value to simple east/west
-        //
-        {
-          this.setState({azimuth: "East"});
-        } else {
-          this.setState({azimuth: "West"});
-        }
+        this.setState({altitude: result.alt});
+        this.setState({ra: result.ra});
+        this.setState({dec: result.dec});
+        this.setState({azimuth: result.direction});
+
       }
     }.bind(this));
 
@@ -118,7 +104,7 @@ class Target extends Component {
         name: orgTarget.name + ' Duplicated',
         targetFindName: orgTarget.targetFindName,
         targetImage: orgTarget.targetImage,
-        description: orgTarget.description,
+        description: 'DUPLICATED: ' + orgTarget.description,
         enabledActive: false,
         series: {
           _id: orgTarget.series._id,
@@ -172,7 +158,7 @@ class Target extends Component {
             checked={this.props.target.enabledActive}
             onChange={this.onChangeChecked.bind(this)}
           />
-          {this.props.target.name}
+          {this.props.target.targetFindName}
         </Item.Header>
         <Item.Meta>
           {this.props.target.description}

@@ -586,14 +586,7 @@ function SetUpForImagingRun(targetSession) {
 	tsx_TryTarget(targetSession.targetFindName, targetSession.minAlt);					// If Target can't be found, exit.
 
   UpdateStatus(  "CLS to target" );
-
-  console.log(' *******************************');
-  console.log(' *******************************');
-  console.log(' ******CLS Disabled**************');
-  console.log(' *******************************');
-	// tsx_CLS(targetSession) 						//# Call the Closed-Loop-Slew function to go to the target
-
-  Meteor.sleep( 500 );						// Shouldn't be needed but give SkyX a chance to catch its breath.
+	tsx_CLS(targetSession); 						//# Call the Closed-Loop-Slew function to go to the target
 
   // needs initial focus temp
   UpdateStatus( 'currentStage', "Recording intial temp" );
@@ -887,7 +880,7 @@ function tsx_checkFocus(target) {
   console.log('************************');
   console.log(' *** tsx_checkFocus: ' + target.targetFindName);
   var lastFocusTemp = tsx_GetServerState( 'lastFocusTemp' ).value; // get last temp
-  tsx_GetFocusTemp(); // read new temp
+  tsx_GetFocusTemp( target ); // read new temp
   var curFocusTemp = tsx_GetServerState( 'lastFocusTemp' ).value; // get new temp
   var focusDiff = Math.abs(curFocusTemp - lastFocusTemp);
   var targetDiff = target.focusTemp; // diff for this target
@@ -1510,6 +1503,9 @@ function hasTargetStartTimePassed( target ) {
   ((cur_time < 8) ? cur_time=cur_time+24 : cur_time);
 
   var start_time = target.start_time;
+  if( typeof start_time == 'undefined') {
+    start_time = tsx_GetServerState('defaultStartTime').value;
+  }
   console.log('Start time: ' + start_time );
   var hrs = start_time.split(':')[0].trim();
   console.log('Start hrs: ' + hrs );
@@ -1557,16 +1553,11 @@ export function canTargetSessionStart( target ) {
     return false;
   }
 
-  var chkTwilight = tsx_GetServerState('isTwilightEnabled').value;
-  if( chkTwilight ) {
-    tsxSays = tsx_isDarkEnough( target );
+  if( !tsx_isDarkEnough( target ) ) {
     // console.log(tsxSays);
-    var isDark = tsxSays.split('|')[0].trim();
-    if( isDark == 'Light') {
-      UpdateStatus( tsxSays.split('|')[1].trim() );
-      console.log('Not dark enough');
-      return false;
-    }
+    UpdateStatus( tsxSays.split('|')[1].trim() );
+    console.log('Not dark enough');
+    return false;
   }
   var currentTime = new Date();
 
