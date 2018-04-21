@@ -28,6 +28,12 @@ sky6Utils.ConvertEquatorialToString(sky6Utils.dOut0, sky6Utils.dOut1, 5);
 CoordsHMS2000 = sky6Utils.strOut;
 
 
-Out = mntRa + '|' + mntDec+ '|' + CoordsHMS2000;			// Form the output string
+Out = {
+  ra: mntRa,
+  dec: mntDec,
+  hms: CoordsHMS2000,
+};			// Form the output string
+
+Out = Out.ra +'|'+Out.dec+'|'+Out.hms
 
 /* Socket End Packet */

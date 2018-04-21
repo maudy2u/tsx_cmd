@@ -44,6 +44,7 @@ class App extends Component {
 
     ip: 'Not connected',
     port: 'Not connected',
+    defaultMinSunAlt: -15,
     defaultMinAlt: 30,
     defaultCoolTemp: -20,
     defaultFocusTempDiff: 0.7,
@@ -142,6 +143,10 @@ class App extends Component {
       defaultDithering: nextProps.tsxInfo.find(function(element) {
         return element.name == 'defaultDithering';
       }).value,
+      defaultMinSunAlt: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultMinSunAlt';
+      }).value,
+
     });
 
   }
@@ -290,6 +295,8 @@ class App extends Component {
     this.saveDefaultState('isFocus3Binned');
     this.saveDefaultState('defaultGuideExposure');
     this.saveDefaultState('defaultDithering');
+    this.saveDefaultState('defaultMinSunAlt');
+
   }
   // *******************************
   //
@@ -332,14 +339,6 @@ class App extends Component {
           </Form.Group>
           <Form.Group>
             <Form.Checkbox
-              label='Twilight Check Enabled '
-              name='isTwilightEnabled'
-              toggle
-              placeholder= 'Enable twilight check'
-              checked={this.state.isTwilightEnabled}
-              onChange={this.handleToggle.bind(this)}
-            />
-            <Form.Checkbox
               label='Checking Focus Enabled (@Focus3) '
               name='isFocus3Enabled'
               toggle
@@ -354,6 +353,23 @@ class App extends Component {
               placeholder= 'Enable to bin when focusing'
               checked={this.state.isFocus3Binned}
               onChange={this.handleToggle.bind(this)}
+            />
+          </Form.Group>
+          <Form.Group>
+            <Form.Checkbox
+              label='Twilight Check Enabled '
+              name='isTwilightEnabled'
+              toggle
+              placeholder= 'Enable twilight check'
+              checked={this.state.isTwilightEnabled}
+              onChange={this.handleToggle.bind(this)}
+            />
+            <Form.Input
+              label='Twilight Alittude for Sun '
+              name='defaultMinSunAlt'
+              placeholder='Enter negative degrees below horizon'
+              value={this.state.defaultMinSunAlt}
+              onChange={this.handleChange}
             />
           </Form.Group>
           <Form.Group>

@@ -34,6 +34,10 @@ if (mntAz < 179)
 	mntDir = "West";
 }
 
-Out = mntDir + "|" + mntAlt;			// Form the output string
+Out = {
+	direction: mntDir,
+	altitude: mntAlt,
+};			// Form the output string
+Out = Out.direction + '|' + Out.altitude;
 
 /* Socket End Packet */

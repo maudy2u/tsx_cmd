@@ -357,6 +357,13 @@ isCurrentlyImaging: 'isCurrentlyImaging',
       }.bind(this));
   }
 
+  testTryTarget() {
+    Meteor.call( 'testTryTarget', function(error, result) {
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+    }.bind(this));
+  }
+
   testPicking() {
     Meteor.call( 'testTargetPicking', function(error, result) {
       console.log('Error: ' + error);
@@ -390,7 +397,7 @@ isCurrentlyImaging: 'isCurrentlyImaging',
           <h3>Target {this.state.targetName}</h3>
           <Button.Group icon>
             <Button icon='play'  onClick={this.playScheduler.bind(this)}/>
-            <Button icon='pause' onClick={this.pauseScheduler.bind(this)}  />
+            {/* <Button icon='pause' onClick={this.pauseScheduler.bind(this)}  /> */}
             <Button icon='stop' onClick={this.stopScheduler.bind(this)} />
             {/*
 
@@ -403,6 +410,7 @@ isCurrentlyImaging: 'isCurrentlyImaging',
           </Button.Group>
           <Button icon='checkmark box' onClick={this.testPicking.bind(this)} />
           <Button icon='move' onClick={this.testEndConditions.bind(this)} />
+          <Button icon='go' onClick={this.testTryTarget.bind(this)} />
           <Progress
             value={this.totalTaken()}
             total={this.totalPlanned()}

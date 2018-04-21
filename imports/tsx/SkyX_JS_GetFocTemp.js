@@ -10,8 +10,11 @@
 
 var temp = ccdsoftCamera.focTemperature.toFixed(1);
 var pos = ccdsoftCamera.focPosition;
-var Out = temp + '|' + pos;			// Form the output string
+var Out = {
+  focusTemp: temp,
+  focPosition: pos,
+};			// Form the output string
 
-Out;
+Out = Out.focusTemp +'|'+Out.focPosition;
 
 /* Socket End Packet */

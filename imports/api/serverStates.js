@@ -42,6 +42,8 @@ export const tsx_ServerStates = {
   defaultGuideExposure: 'defaultGuideExposure',
   defaultDithering: 'defaultDithering',
 
+  defaultMinSunAlt: 'defaultMinSunAlt',
+  lastCheckMinSunAlt: 'lastCheckMinSunAlt',
   isTwilightEnabled: 'isTwilightEnabled',
   isFocus3Enabled: 'isFocus3Enabled',
   isFocus3Binned: 'isFocus3Binned',
@@ -78,5 +80,10 @@ export function tsx_GetServerState( name ) {
 
 export function tsx_GetServerStateValue( name ) {
   var val = TheSkyXInfos.findOne( {name: name });
-  return val.value;
+  if( typeof val != 'undefined' ) {
+    if( typeof val.value != 'undefined' ) {
+      return val.value;
+    }
+  }
+  return '';
 };

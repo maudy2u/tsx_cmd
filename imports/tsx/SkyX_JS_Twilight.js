@@ -9,7 +9,8 @@
 //
 
 var target 	= "$000";	// tsxfeeder replaces $000 with the current target name.
-
+var minSunAlt = $001;
+var Out;
 
 // Find the sun and figure out how high it is.
 sky6StarChart.Find("sun");
@@ -19,7 +20,7 @@ var altitude = sky6ObjectInformation.ObjInfoPropOut;
 // Refind where we were.
 sky6StarChart.Find(target);
 
-if (altitude > -15)
+if (altitude > minSunAlt )
 //
 // If the sun is above -15 degrees, use the "Light." keyword
 //
@@ -27,9 +28,9 @@ if (altitude > -15)
 // but it's an hour before/after the sun crosses the horizon.
 //
 {
-	simpErr = "Light|" + altitude;
+	Out = "Light|" + altitude;
 } else {
-	simpErr = "Dark|" + altitude;
+	Out = "Dark|" + altitude;
 }
 
 // if (ccdsoftCamera.ImageUseDigitizedSkySurvey == 1)
@@ -38,9 +39,9 @@ if (altitude > -15)
 // // to ignore the check.
 // //
 // {
-// 	simpErr = "Simulator. " + altitude;
+// 	Out = "Simulator. " + altitude;
 // }
 
-return simpleErr;
+Out
 
 /* Socket End Packet */

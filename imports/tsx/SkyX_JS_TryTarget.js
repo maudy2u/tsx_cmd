@@ -12,8 +12,11 @@ var Target	= "$000";	// tsxfeeder replaces $000 with a command line parameter
 var altLimit	= $001;	// Really a constant for the altitude limit
 var altitude 	= 0;
 var azimuth 	= 0;
-var out 	= "";
-var FindStatus	= "Success";	// Preload value for success.
+var out 	= {
+	ready: true,
+	msg: 'Did nothing',
+};
+var FindStatus	= true;	// Preload value for success.
 
 try {
 //
@@ -25,14 +28,17 @@ catch (repErr) {
 	//
 	//	If error, report it.
 	//
-	FindStatus = "fail";
+	FindStatus = false;
 }
 
 
-if ( FindStatus == "fail" )
+if ( !FindStatus )
 {
 
-	out = "cannot be found.";
+	out 	= {
+		ready: false,
+		msg: 'Not found',
+	};
 
 } else {
 
@@ -43,30 +49,20 @@ if ( FindStatus == "fail" )
 	sky6ObjectInformation.Property(58);
   azimuth = sky6ObjectInformation.ObjInfoPropOut;
 
-	out = "Success|";
-
-	// if (azimuth < 179)
-	// //
-	// //
-	// //
-	// {
-	// 		if ((altitude < altLimit) && ( ! ccdsoftCamera.ImageUseDigitizedSkySurvey == "1" ))
-	// 		{
-	// 			out = "Error|is below " + altLimit + " degrees. Currently: " + altitude + " degrees." ;
-	// 		}
-	//
-	// 		if (altitude < altLimit )
-	// 		{
-	// 	 		out = "iError|s below the horizon: " + altitude + " degrees.";
-	// 		}
-	//
-	// } else {
-
-			if (altitude < altLimit)
-			{
-				out = "Error|has sunk below: " +  altLimit;
-			}
-	// }
+	if (altitude < altLimit)
+	{
+	 	out 	= {
+			ready: false,
+			msg: "Has sunk below: " +  altLimit,
+		};
+	}
+	else {
+		out 	= {
+			ready: true,
+			msg: 'Found and above minAlt',
+		};
+	}
 }
 
+out = out.ready + '|'+out.msg;
 /* Socket End Packet */
