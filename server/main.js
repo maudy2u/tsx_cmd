@@ -180,15 +180,16 @@ Meteor.startup(() => {
           }
           isParked = true;
           var sleepTime = tsx_GetServerStateValue('defaultSleepTime');
-          Meteor._debug(' Waiting...: ' + sleepTime + 'min');
           UpdateStatus( ' Waiting...: ' + sleepTime + 'min');
           var timeout = 0;
-          while( timeout < sleepTime*60*1000) {
-            if( tsx_GetServerStateValue('currentJob') != '' ) {
+          var msSleep = Number(sleepTime*60*1000);
+          while( timeout < msSleep) {
+            if( tsx_GetServerStateValue('currentJob') == '' ) {
+              UpdateStatus( ' Canceled sessions');
               break;
-            } 
+            }
             Meteor.sleep(1000); // Sleep for ms
-            timeout = timeout+1000;
+            timeout = timeout+1;
           }
           Meteor._debug('Finished sleep');
         }
