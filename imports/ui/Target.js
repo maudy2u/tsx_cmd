@@ -144,6 +144,13 @@ class Target extends Component {
     }.bind(this));
   }
 
+  clsTarget() {
+    Meteor.call( 'centreTarget', this.props.target, function(error, result) {
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+    }.bind(this));
+  }
+
   render() {
 // Use the image for a stretched image in the Future
 //       <Item.Image size='tiny' src='' />
@@ -178,7 +185,7 @@ class Target extends Component {
             <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
             <Button icon='retweet' onClick={this.eraseProgress.bind(this)}/>
           </Button.Group>
-          <Button icon='play' onClick={this.startImaging.bind(this)}/>
+          <Button icon='unhide' onClick={this.clsTarget.bind(this)}/>
           <Modal
             open={this.state.modalOpen}
             onClose={this.handleClose}

@@ -54,6 +54,19 @@ isCurrentlyImaging: 'isCurrentlyImaging',
 */
 
 function initServerStates() {
+  tsx_SetServerState('mntMntDir', '');
+  tsx_SetServerState('mntMntAlt', '');
+  tsx_SetServerState('targetName', '');
+  tsx_SetServerState('targetRA', '');
+  tsx_SetServerState('targetDEC', '');
+  tsx_SetServerState('targetALT', '');
+  tsx_SetServerState('targetAZ', '');
+  tsx_SetServerState('targetHA', '');
+  tsx_SetServerState('targetTransit', '');
+  tsx_SetServerState('lastTargetDirection', '');
+  tsx_SetServerState('lastCheckMinSunAlt', '');
+  tsx_SetServerState('lastFocusPos', '');
+  tsx_SetServerState('lastFocusTemp', '');
   for (var m in tsx_ServerStates){
     var state = tsx_ServerStates[m];
     try {
@@ -63,14 +76,6 @@ function initServerStates() {
         Meteor._debug('Initialized: ' + state);
         tsx_SetServerState(state, '');
     } finally {
-      // Meteor._debug('Ready: ' + state);
-      tsx_SetServerState('targetName', '');
-      tsx_SetServerState('targetRA', '');
-      tsx_SetServerState('targetDEC', '');
-      tsx_SetServerState('targetALT', '');
-      tsx_SetServerState('targetAZ', '');
-      tsx_SetServerState('targetHA', '');
-      tsx_SetServerState('targetTransit', '');
     }
   }
 }
@@ -176,13 +181,21 @@ Meteor.startup(() => {
           isParked = true;
           var sleepTime = tsx_GetServerStateValue('defaultSleepTime');
           Meteor._debug(' Waiting...: ' + sleepTime + 'min');
-          UpdateStatus( 'Waiting...');
-          Meteor.sleep(sleepTime*60*1000); // Sleep for ms
+          UpdateStatus( ' Waiting...: ' + sleepTime + 'min');
+          var timeout = 0;
+          while( timeout < sleepTime*60*1000) {
+            if( tsx_GetServerStateValue('currentJob') != '' ) {
+              break;
+            } 
+            Meteor.sleep(1000); // Sleep for ms
+            timeout = timeout+1000;
+          }
           Meteor._debug('Finished sleep');
         }
       }
 
       // While ended... exit process
+      UpdateStatus( ' Idle');
       job.done();
 
       // Be sure to invoke the callback

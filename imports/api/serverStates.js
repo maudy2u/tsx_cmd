@@ -43,10 +43,12 @@ export const tsx_ServerStates = {
   defaultDithering: 'defaultDithering',
 
   defaultMinSunAlt: 'defaultMinSunAlt',
-  lastCheckMinSunAlt: 'lastCheckMinSunAlt',
   isTwilightEnabled: 'isTwilightEnabled',
   isFocus3Enabled: 'isFocus3Enabled',
   isFocus3Binned: 'isFocus3Binned',
+
+  lastTargetDirection: 'lastTargetDirection',
+  lastCheckMinSunAlt: 'lastCheckMinSunAlt',
   lastFocusPos: 'lastFocusPos',
   lastFocusTemp: 'lastFocusTemp',
 };

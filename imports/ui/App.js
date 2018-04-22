@@ -397,7 +397,7 @@ class App extends Component {
           </Form.Group>
           <Form.Group>
             <Form.Input
-              label='Dither after: '
+              label='Dither after (0 disables): '
               name='defaultDithering'
               placeholder='Images before dither'
               value={this.state.defaultDithering}
