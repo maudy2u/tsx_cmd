@@ -197,6 +197,9 @@ class TargetEditor extends Component {
   }
 
   getTargetRaDec() {
+    this.setState({ra: ''});
+    this.setState({dec: ''});
+
     console.log('targetFind: ' + this.state.targetFindName );
     Meteor.call(
       'targetFind',
@@ -207,23 +210,11 @@ class TargetEditor extends Component {
       // identify the error
       console.log('Error: ' + error);
       console.log('result: ' + result);
-      for (var i = 0; i < result.split('|').length; i++) {
-        var txt = result.split('|')[i].trim();
-        console.log('Found: ' + txt);
-      }
-      if (error && error.error === "logged-out") {
-        // show a nice error message
-        Session.set("errorMessage", "Please log in to post a comment.");
-      }
-      else {
-        // if success then TheSkyX has made this point the target...
-        // now get the coordinates
-        cmdSuccess = true;
-        var ra = result.split('|')[1].trim();
-        var dec = result.split('|')[2].trim();
-        this.setState({ra: ra});
-        this.setState({dec: dec});
-      }
+      // if success then TheSkyX has made this point the target...
+      // now get the coordinates
+      cmdSuccess = true;
+      this.setState({ra: result.ra});
+      this.setState({dec: result.dec});
     }.bind(this));
   }
 
@@ -276,7 +267,8 @@ class TargetEditor extends Component {
         <Segment.Group>
           <Segment>
             <h3 className="ui header">Session</h3>
-            {/* <Form> */}
+            {/* <Form>
+              */}
               <Form.Group widths='equal'>
                 <Form.Input
                     label='Target Name'
@@ -284,13 +276,24 @@ class TargetEditor extends Component {
                     placeholder='Catalogue name, or RA/DEC Values, e.g.: 11h 33m 48s, 55d 57m 18s'
                     value={this.state.targetFindName}
                     onChange={this.handleChange}/>
-                  <Button onClick={this.getTargetRaDec.bind(this)}>Find</Button>
                 <Form.Field control={Input}
                   label='Description'
                   name='description'
                   placeholder='Describe the session'
                   value={this.state.description}
                   onChange={this.handleChange}/>
+              </Form.Group>
+              <Form.Group>
+                <Button onClick={this.getTargetRaDec.bind(this)}>Find</Button>
+                <Label>RA <Label.Detail>{Number(this.state.ra).toFixed(4)}</Label.Detail></Label>
+                <Label>DEC <Label.Detail>{Number(this.state.dec).toFixed(4)}</Label.Detail></Label>
+                {/* <Label>Atl <Label.Detail>{Number(this.state.targetALT).toFixed(4)}</Label.Detail></Label>
+                <Label>Az <Label.Detail>{this.state.targetAZ}</Label.Detail></Label>
+                <Label>Angle <Label.Detail>{Number(this.state.targetAngle).toFixed(4)}</Label.Detail></Label>
+                <Label>HA <Label.Detail>{Number(this.state.targetHA).toFixed(4)}</Label.Detail></Label>
+                <Label>Transit <Label.Detail>{Number(this.state.targetTransit).toFixed(4)}</Label.Detail></Label> */}
+              </Form.Group>
+              <Form.Group>
                 <Form.Field control={Dropdown}
                   label='Series'
                   name='seriesTemplate'
@@ -299,6 +302,21 @@ class TargetEditor extends Component {
                   text={this.state.seriesTemplate}
                   onChange={this.handleChange}/>
               </Form.Group>
+              {/* <Form.Group> */}
+              {/* <Form.Group widths='equal'>
+                <Form.Input
+                  label='Ra'
+                  name='ra'
+                  placeholder='RA'
+                  value={this.state.ra}
+                  onChange={this.handleChange}/>
+                <Form.Input
+                  label='Dec'
+                  name='dec'
+                  placeholder='DEC'
+                  value={this.state.dec}
+                  onChange={this.handleChange}/>
+              </Form.Group> */}
             {/* </Form> */}
           </Segment>
         </Segment.Group>
@@ -311,18 +329,6 @@ class TargetEditor extends Component {
         <Segment>
           <h3 className="ui header">Details</h3>
           <Form.Group widths='equal'>
-            <Form.Input
-              label='Ra'
-              name='ra'
-              placeholder='RA'
-              value={this.state.ra}
-              onChange={this.handleChange}/>
-            <Form.Input
-              label='Dec'
-              name='dec'
-              placeholder='DEC'
-              value={this.state.dec}
-              onChange={this.handleChange}/>
             <Form.Input
               label='Angle'
               name='angle'

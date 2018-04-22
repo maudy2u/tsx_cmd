@@ -28,6 +28,7 @@ export const tsx_ServerStates = {
   isCurrentlyImaging: 'isCurrentlyImaging',
   imagingSessionId: 'imagingSessionId',
   imagingSession: 'imagingSession', // use to report current imaging targets
+  imagingSessionName: 'imagingSessionName',
 
   defaultFilter: 'defaultFilter',
   defaultMinAlt: 'defaultMinAlt',

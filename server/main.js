@@ -56,7 +56,7 @@ isCurrentlyImaging: 'isCurrentlyImaging',
 function initServerStates() {
   tsx_SetServerState('mntMntDir', '');
   tsx_SetServerState('mntMntAlt', '');
-  tsx_SetServerState('targetName', '');
+  // tsx_SetServerState('targetName', '');
   tsx_SetServerState('targetRA', '');
   tsx_SetServerState('targetDEC', '');
   tsx_SetServerState('targetALT', '');
@@ -143,6 +143,7 @@ Meteor.startup(() => {
         {level: 'info'});
 
       var isParked = false;
+      tsx_Connect();
       while(
         tsx_GetServerStateValue('currentJob') != ''
       ) {
@@ -151,7 +152,6 @@ Meteor.startup(() => {
 
         // Get the target to shoot
         UpdateStatus( ' Checking Targets...');
-        tsx_Connect();
         var target = getValidTargetSession(); // no return
 
         if (typeof target != 'undefined') {
@@ -176,11 +176,11 @@ Meteor.startup(() => {
             var softPark = Boolean(tsx_GetServerStateValue('defaultSoftPark'));
             UpdateStatus( 'Parking...');
             tsx_MntPark(defaultFilter, softPark);
-            tsx_Disconnect();
           }
           isParked = true;
           var sleepTime = tsx_GetServerStateValue('defaultSleepTime');
           UpdateStatus( ' Waiting...: ' + sleepTime + 'min');
+          Meteor._debug( ' Waiting...: ' + sleepTime + 'min');
           var timeout = 0;
           var msSleep = Number(sleepTime*60*1000);
           while( timeout < msSleep) {
@@ -197,6 +197,7 @@ Meteor.startup(() => {
 
       // While ended... exit process
       UpdateStatus( ' Idle');
+      tsx_Disconnect();
       job.done();
 
       // Be sure to invoke the callback
@@ -285,6 +286,8 @@ export function srvStopScheduler() {
   var jid = tsx_GetServerStateValue('currentJob');
   scheduler.remove( jid );
   tsx_SetServerState('currentJob', '');
+  tsx_SetServerState( tsx_ServerStates.imagingSessionName, '');
+
 
   Meteor._debug('Manually STOPPED scheduler');
 }

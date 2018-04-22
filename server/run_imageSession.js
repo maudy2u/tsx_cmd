@@ -365,7 +365,7 @@ function tsx_TryTarget( target ) {
       })
          */
 
-        console.log( targetFindName + ' is ' + Out.ready);
+        console.log( target.targetFindName + ' is ' + Out.ready);
         tsx_is_waiting = false;
       }
     )
@@ -605,7 +605,6 @@ export function tsx_GetTargetRaDec(targetFindName) {
         tsx_SetServerState(tsx_ServerStates.targetAZ, dir );
         tsx_SetServerState( tsx_ServerStates.targetHA, tsx_return.split('|')[5].trim() );
         tsx_SetServerState( tsx_ServerStates.targetTransit, tsx_return.split('|')[6].trim() );
-        tsx_SetServerState( tsx_ServerStates.targetName, targetFindName);
 
         Out = {
           ra: tsx_return.split('|')[1].trim(),
@@ -647,7 +646,7 @@ function SetUpForImagingRun(targetSession) {
     return false;
   };
 
-  UpdateStatus(  " CLS to target: "+ targetSession.targetFindName );
+  UpdateStatus(  " Centring target: "+ targetSession.targetFindName );
 	tsx_CLS(targetSession); 						//# Call the Closed-Loop-Slew function to go to the target
 
   // needs initial focus temp
@@ -910,7 +909,7 @@ if cur_time > end_time : break
 function hasStopTimePassed( target ) {
 
   var end_time = target.stopTime;
-  var needToStop = !(isTimeBeforeCurrentTime( end_time ));
+  var needToStop = isTimeBeforeCurrentTime( end_time );
   return needToStop;
 
 }
@@ -920,9 +919,10 @@ function isMeridianFlipNeed( target ) {
   Meteor._debug('************************');
   Meteor._debug(' *** isMeridianFlipNeed: ');// + target.targetFindName);
   // do we need to flip
-  var lastDir = tsx_GetServerState('lastTargetDirection');
+  var lastDir = tsx_GetServerStateValue('lastTargetDirection');
   var targetCoords = tsx_GetTargetRaDec( target.targetFindName );
   var curDir = targetCoords.direction;
+  tsx_SetServerState('lastTargetDirection', curDir);
   Meteor._debug( ' *** Target pointing: ' + lastDir + ' vs ' + curDir);
   if( curDir == 'West' && lastDir == 'East') {
     // we need to flip
@@ -1008,7 +1008,8 @@ function hasReachedEndCondition(target) {
   var doFlip = isMeridianFlipNeed( target );
   if( doFlip ) {
     // okay we have a lot to do...
-    // execute the pre-run...
+    // prepare target of imaging again...
+    prepareTargetForImaging( target ) ;
 
     return false;
   }
@@ -1144,7 +1145,6 @@ function tsx_takeImage( filterNum, exposure, frame ) {
   cmd = cmd.replace("$000", filterNum ); // set filter
   cmd = cmd.replace("$001", exposure ); // set exposure
   cmd = cmd.replace("$002", frame ); // set exposure
-
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         var result = tsx_return.split('|')[0].trim();
@@ -1202,7 +1202,10 @@ function takeSeriesImage(target, series) {
     // Take the image
     var slot = getFilterSlot( series.filter );
     var frame = getFrame( series.frame );//  cdLight =1, cdBias, cdDark, cdFlat
+
+    UpdateStatus( 'Taking: ' + series.filter + '@' + series.exposure );
     tsx_takeImage( slot, series.exposure, frame );
+    UpdateStatus( 'Finished: ' + series.filter + '@' + series.exposure );
     // *******************************
     // Update progress
     Meteor._debug(' *** Image taken: ' + series.filter + ' at ' + series.exposure + ' seconds');
@@ -1228,8 +1231,12 @@ export function processTargetTakeSeries( target ) {
   // process for each filter
   Meteor._debug('************************');
   Meteor._debug(' *** processTargetTakeSeries: ' + target.targetFindName);
-  Meteor._debug('Loading TakeSeriesTemplate:' + target.series._id );
+  Meteor._debug('Loading TakeSeriesTemplates:' + target.series._id );
   var template = TakeSeriesTemplates.findOne( {_id:target.series._id});
+  if( typeof template == 'undefined') {
+    UpdateStatus('Failed - check series for: ' + target.targetFindName);
+    return;
+  }
   var seriesProcess = template.processSeries;
   Meteor._debug('Imaging process: ' + seriesProcess );
 
@@ -1253,7 +1260,11 @@ export function processTargetTakeSeries( target ) {
 
   // set up for the cycle through the filters
   var stopTarget = false; // #IDEA #TODO can use the current jobId to potentially top
-  for (var i = 0; i < takeSeries.length && !stopTarget; i++) {
+  var process = tsx_GetServerStateValue( tsx_ServerStates.imagingSessionName );
+
+  for (var i = 0; i < takeSeries.length && !stopTarget && (process !=''); i++) {
+    // #TODO do we check here for a session_id... or target name
+    // id so that we continue or stop???
 
     // do we go across the set of filters once and then repear
     if( seriesProcess === 'across series' ) {
@@ -1279,6 +1290,7 @@ export function processTargetTakeSeries( target ) {
 
         // check end conditions
         stopTarget = hasReachedEndCondition(target);
+        process = tsx_GetServerStateValue( tsx_ServerStates.imagingSessionName );
 
       }
       // reset to check across series again
@@ -1309,6 +1321,7 @@ export function processTargetTakeSeries( target ) {
 
         // check end conditions
         stopTarget = hasReachedEndCondition(target);
+        process = tsx_GetServerStateValue( tsx_ServerStates.imagingSessionName );
 
       }
       // now switch to next filter
@@ -1331,9 +1344,12 @@ export function prepareTargetForImaging( target ) {
   else {
     tsx_SetServerState( tsx_ServerStates.imagingSessionId, target._id );
     UpdateStatus( "Selected Target: "+ target.name);
+    tsx_SetServerState( tsx_ServerStates.imagingSessionName, target.targetFindName);
 
-
-    var result = tsx_GetTargetRaDec(target.targetFindName);
+    var targetCoords = tsx_GetTargetRaDec( target.targetFindName );
+    var curDir = targetCoords.direction;
+    tsx_SetServerState('lastTargetDirection', curDir);
+    UpdateStatus( "Target: "+ target.name + ", points " + curDir);
 
     var ready = SetUpForImagingRun( target);
 
@@ -1481,7 +1497,10 @@ Use this to set the last focus
   },
 
   centreTarget( target ) {
-    return tsx_CLS( target);
+    UpdateStatus( ' Centring : ' + target.targetFindName );
+    var result = tsx_CLS( target);
+    UpdateStatus( ' Centred : ' + target.targetFindName );
+    return result;
   }
 
 });
@@ -1564,7 +1583,7 @@ function isTargetComplete( target ) {
 
 function hasStartTimePassed( target ) {
   var start_time = target.startTime;
-  var canStart = !(isTimeBeforeCurrentTime( start_time ));
+  var canStart = isTimeBeforeCurrentTime( start_time );
   // do not start if undefined
   return canStart;
 }
@@ -1595,8 +1614,8 @@ function isTimeBeforeCurrentTime( ts ) {
   // Meteor._debug('Start min: ' + min );
   ts = Number(hrs) + Number(min/60);
   ((ts < 8) ? ts=ts+24 : ts);
-
-  var curBefore = ((cur_time > ts) ? true : false);
+  // Meteor._debug('curtime: ' + cur_time + ' vs ' + ts);
+  var curBefore = ((ts < cur_time ) ? true : false);
   return curBefore;
 }
 
@@ -1618,7 +1637,7 @@ export function canTargetSessionStart( target ) {
   }
 
   // check start time pasted
-  if( !hasStartTimePassed( target ) ) {
+  if( !(hasStartTimePassed( target )) ) {
     UpdateStatus( target.targetFindName + ': too early ' + target.startTime );
     Meteor._debug( target.targetFindName + ': too early');
     return false;

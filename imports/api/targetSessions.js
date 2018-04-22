@@ -6,6 +6,17 @@ import { Seriess } from './seriess.js'
 // Used to store the sessions for a Target - the actual imaging
 export const TargetSessions = new Mongo.Collection('targetSessions');
 
+
+// This code only runs on the server
+// Meteor.publish('tsx.ip', function tsxIpPublication() {
+//   var ip = TheSkyXInfos.findOne().ip().text;
+//   console.log('FOund ip: ' + ip);
+//   return ip;
+// });
+// Meteor.publish('tsxPort', function tsxPortPublication() {
+//   return TheSkyXInfos.findOne().port().text;
+// });
+
 /*
 name: '',
 targetFindName: '',

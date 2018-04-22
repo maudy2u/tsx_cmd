@@ -299,8 +299,8 @@ isCurrentlyImaging: 'isCurrentlyImaging',
 
   updateMonitor(nextProps) {
     this.setState({
-      targetName: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'targetName';
+      targetImageName: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'targetImageName';
       }).value,
       targetRA: nextProps.tsxInfo.find(function(element) {
         return element.name == 'targetRA';
@@ -345,7 +345,7 @@ isCurrentlyImaging: 'isCurrentlyImaging',
     Meteor.call("stopScheduler", function (error, result) {
         // identify the error
         tsx_UpdateServerState(tsx_ServerStates.imagingSessionId, '' );
-        tsx_UpdateServerState(tsx_ServerStates.targetName, 'None');
+        tsx_UpdateServerState(tsx_ServerStates.targetImageName, 'None');
         tsx_UpdateServerState(tsx_ServerStates.targetDEC, '_');
         tsx_UpdateServerState(tsx_ServerStates.targetRA, '_');
         tsx_UpdateServerState(tsx_ServerStates.targetALT, '_');
@@ -378,6 +378,14 @@ isCurrentlyImaging: 'isCurrentlyImaging',
     }.bind(this));
   }
 
+  testTakeSeries() {
+
+    Meteor.call( 'startImaging', this.props.targetImageName, function(error, result) {
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+    }.bind(this));
+  }
+
   render() {
 
 // sample data: 	echo "`date "+%H:%M:%S"` Mount Direction: $mntDir, Altitude: $mntAlt degrees "
@@ -394,7 +402,7 @@ isCurrentlyImaging: 'isCurrentlyImaging',
         <Segment>
         </Segment>
         <Segment>
-          <h3>Target {this.state.targetName}</h3>
+          <h3>Target {this.state.targetImageName}</h3>
           <Button.Group icon>
             <Button icon='play'  onClick={this.playScheduler.bind(this)}/>
             {/* <Button icon='pause' onClick={this.pauseScheduler.bind(this)}  /> */}
@@ -410,7 +418,8 @@ isCurrentlyImaging: 'isCurrentlyImaging',
           </Button.Group>
           <Button icon='checkmark box' onClick={this.testPicking.bind(this)} />
           <Button icon='move' onClick={this.testEndConditions.bind(this)} />
-          <Button icon='go' onClick={this.testTryTarget.bind(this)} />
+          <Button icon='find' onClick={this.testTryTarget.bind(this)} />
+          <Button icon='camera' onClick={this.testTryTarget.bind(this)} />
           <Progress
             value={this.totalTaken()}
             total={this.totalPlanned()}
@@ -463,7 +472,7 @@ export default withTracker(() => {
 
   return {
     targetSessionId: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingSessionId }),
-    targetImageName: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetName }),
+    targetImageName: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingSessionName }),
     targetImageDEC: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetDEC }),
     targetImageRA: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetRA }),
     targetImageALT: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetALT }),

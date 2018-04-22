@@ -1,5 +1,10 @@
 import { Meteor } from 'meteor/meteor';
 import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
+import { JobCollection } from 'meteor/vsivsi:job-collection';
+
+// *******************************
+// Create the scheduler Queue
+var tsxQueue = JobCollection('tsxCmds');
 
 var tsx_waiting = false;
 
@@ -29,45 +34,45 @@ export function tsx_feeder( cmd, callback ) {
   Meteor.sleep(3*1000);  // arbitary sleep for 3sec.
   const { ip, port } = tsx_GetPortAndIP();
 
-  // console.log('Started tsx_feeder.');
+  // Meteor._debug('Started tsx_feeder.');
    var Out;
    var net = require('net');
    var tsx = new net.Socket({writeable: true}); //writeable true does not appear to help
    tsx.setEncoding(); // used to set the string type of return
 
    tsx.on('close', function() {
-       console.log('tsx_done');
+       Meteor._debug('tsx_done');
    });
 
    tsx.on('write', function() {
-       // console.log('Writing to TheSkyX.');
+       // Meteor._debug('Writing to TheSkyX.');
    });
 
    tsx.on('error', function(err) {
-    console.log(" ******************************* ");
-    console.log(cmd);
+    Meteor._debug(" ******************************* ");
+    Meteor._debug(cmd);
     console.error('Connection error: ' + err);
     console.error(new Error().stack);
     stop_tsx_is_waiting();
    });
 
    tsx.on('data', (chunk) => {
-    // console.log(`Received ${chunk.length} bytes of data.`);
-    // console.log('Received: '  + chunk);
+    // Meteor._debug(`Received ${chunk.length} bytes of data.`);
+    // Meteor._debug('Received: '  + chunk);
     Out = chunk;
     callback(Out);
     stop_tsx_is_waiting();
    });
 
    tsx.connect(port, ip, function() {
-     // console.log('Connected to: ' + ip +':' + port );
+     // Meteor._debug('Connected to: ' + ip +':' + port );
    });
 
    start_tsx_is_waiting();
 
    tsx.write(cmd, (err) => {
-     // console.log('Sending tsxCmd: ' + cmd);
-     // console.log('Sending err: ' + err);
+     // Meteor._debug('Sending tsxCmd: ' + cmd);
+     // Meteor._debug('Sending err: ' + err);
    });
 
 
@@ -79,7 +84,7 @@ export function tsx_feeder( cmd, callback ) {
     var sec = 1000;
     Meteor.sleep( sec );
     waiting = waiting + sec;
-    console.log('tsx_waiting (sec): ' + waiting /sec );
+    Meteor._debug('tsx_waiting (sec): ' + waiting /sec );
   }
   tsx.close;
 };
@@ -91,45 +96,45 @@ export function tsx_feeder_old( ip, port, cmd, callback ) {
       loadPortAndIP();
     }
 
-    console.log('Started tsx_feeder.');
+    Meteor._debug('Started tsx_feeder.');
      var Out;
      var net = require('net');
      var tsx = new net.Socket({writeable: true}); //writeable true does not appear to help
      tsx.setEncoding(); // used to set the string type of return
 
      tsx.on('close', function() {
-         console.log('Connection closed.');
+         Meteor._debug('Connection closed.');
      });
 
      tsx.on('write', function() {
-         console.log('Writing to TheSkyX.');
+         Meteor._debug('Writing to TheSkyX.');
      });
 
      tsx.on('error', function(err) {
-          console.log(" ******************************* ");
-          console.log(cmd);
+          Meteor._debug(" ******************************* ");
+          Meteor._debug(cmd);
          console.error('Connection error: ' + err);
          console.error(new Error().stack);
          stop_tsx_is_waiting();
      });
 
      tsx.on('data', (chunk) => {
-      console.log(`Received ${chunk.length} bytes of data.`);
-      console.log('Received: '  + chunk);
+      Meteor._debug(`Received ${chunk.length} bytes of data.`);
+      Meteor._debug('Received: '  + chunk);
       Out = chunk;
       callback(Out);
       stop_tsx_is_waiting();
      });
 
      tsx.connect(port, ip, function() {
-       console.log('Connected to: ' + ip +':' + port );
+       Meteor._debug('Connected to: ' + ip +':' + port );
      });
 
      start_tsx_is_waiting();
 
      tsx.write(cmd, (err) => {
-       // console.log('Sending tsxCmd: ' + cmd);
-       // console.log('Sending err: ' + err);
+       // Meteor._debug('Sending tsxCmd: ' + cmd);
+       // Meteor._debug('Sending err: ' + err);
      });
 
 
@@ -140,5 +145,5 @@ export function tsx_feeder_old( ip, port, cmd, callback ) {
       Meteor.sleep( 1000 );
      }
      tsx.close;
-     console.log('Finished function tsx_feeder.');
+     Meteor._debug('Finished function tsx_feeder.');
  };
