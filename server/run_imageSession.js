@@ -949,16 +949,16 @@ function isFocusingNeeded(target) {
   Meteor._debug('************************');
   Meteor._debug(' *** isFocusingNeeded: ' + target.targetFindName);
   var lastFocusTemp = tsx_GetServerState( 'initialFocusTemperature' ).value; // get last temp
-  tsx_GetFocusTemp( target ); // read new temp
-  var curFocusTemp = tsx_GetServerState( 'lastFocusTemp' ).value; // get new temp
-  if( typeof curFocusTemp == 'undefined' || curFocusTemp.trim() =='') {
-    curFocusTemp = tsx_GetServerState('defaultFocusTempDiff').value;
+
+  var curFocusTemp = tsx_GetFocusTemp( target ); // read new temp
+  if( typeof curFocusTemp == 'undefined' ) {
+    curFocusTemp = tsx_GetServerState('initialFocusTemperature').value;
   }
-  var focusDiff = Math.abs(curFocusTemp - lastFocusTemp);
+  var focusDiff = Math.abs(curFocusTemp.focusTemp - lastFocusTemp);
   var targetDiff = target.tempChg; // diff for this target
-  Meteor._debug('Focus diff: ' + focusDiff + '='+curFocusTemp+'-'+lastFocusTemp);
+  Meteor._debug('Focus diff: ' + focusDiff + '='+curFocusTemp.focusTemp+'-'+lastFocusTemp);
   if( focusDiff >= targetDiff ) {
-  // returning true tell caller to run  @Focus3
+  // returning true tell caller to run  @Focus3 
     return true;
   }
   return false;
