@@ -560,6 +560,20 @@ class App extends Component {
 
   }
 
+  park() {
+
+    // these are all working methods
+    // on the client
+    Meteor.call("park", function (error, result) {
+      // identify the error
+      if (error && error.reason === "Internal server error") {
+        // show a nice error message
+        this.setState({modalConnectionFailed: true});
+      }
+    }.bind(this));
+
+  }
+
   renderMenu() {
     const { activeItem  } = this.state;
 
@@ -698,6 +712,7 @@ class App extends Component {
             <Segment>
               <Button name='showMonitor' icon='dashboard' onClick={this.handleToggle.bind(this)}/>
               <Button icon='refresh' onClick={this.connectToTSX.bind(this)}/>
+              <Button icon='car' onClick={this.park.bind(this)}/>
               <Label onClick={this.modalEnterIpOpen.bind(this)}>TSX ip:
                 <Label.Detail>
                   {this.state.ip}
@@ -710,7 +725,7 @@ class App extends Component {
                   {this.state.port}
                 </Label.Detail>
               </Label>
-              <Label>Status <Label.Detail>{this.state.currentStage}</Label.Detail></Label>
+              <Label>Status: <Label.Detail>{this.state.currentStage}</Label.Detail></Label>
               {this.renderPortEditor()}
             </Segment>
             {/* { this.tsxConnectionFailed() } */}

@@ -14,6 +14,7 @@ import {
   tsx_SetServerState,
   tsx_GetServerState,
   tsx_GetServerStateValue,
+  UpdateStatus,
  } from '../imports/api/serverStates.js'
 
 import { tsx_feeder } from './tsx_feeder.js'
@@ -24,11 +25,6 @@ var shell = require('shelljs');
 var tsxHeader =  '/* Java Script *//* Socket Start Packet */';
 var tsxFooter = '/* Socket End Packet */';
 var forceAbort = false;
-
-// **************************************************************
-export function UpdateStatus( status ) {
-  tsx_SetServerState( 'currentStage', status );
-}
 
 // **************************************************************
 function getFilterSlot(filterName) {
@@ -163,6 +159,9 @@ export function tsx_MntPark(defaultFilter, softPark) {
 
   if( defaultFilter != '' ) {
     slot = getFilterSlot(defaultFilter);
+  }
+  else {
+    slot = 0;
   }
 
   if( softPark ) {
@@ -432,42 +431,46 @@ function tsx_CLS(targetSession) {
 
 // **************************************************************
 function tsx_RunFocus3( target ) {
-
-  var focusFilter = getFilterSlot(target.focusFilter);
-
-  var cmd = String(shell.cat(tsx_cmd('SkyX_JS_Focus-3')) );
-
-  var bin;
-  try {
-    bin = tsx_GetServerStateValue('isFocus3Binned').value;
-  } catch (e) {
-    bin = false;
-  } finally {
-    // nothing
-  }
-
-  cmd = cmd.replace("$000", focusFilter ); // set filter
-  cmd = cmd.replace("$001", bin ); // set Bin
-  cmd = cmd.replace("$002", 2 ); // set BinFactor
-  // cmd = cmd.replace("$001", 30 ); // set exposure
-  // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
   var Out;
-  var tsx_is_waiting = true;
+  var enabled = tsx_GetServerStateValue('isFocus3Enabled');
+  if( enabled == true  ) {
+    var focusFilter = getFilterSlot(target.focusFilter);
 
-  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        var success = tsx_return.split('|')[0].trim();
-        // Meteor._debug('SkyX_JS_Focus-3 result check: ' + tsx_return);
+    var cmd = String(shell.cat(tsx_cmd('SkyX_JS_Focus-3')) );
 
-        Out = success;
-        tsx_is_waiting = false;
-      }
+    var bin;
+    try {
+      bin = tsx_GetServerStateValue('isFocus3Binned').value;
+    } catch (e) {
+      bin = false;
+    } finally {
+      // nothing
+    }
+
+    cmd = cmd.replace("$000", focusFilter ); // set filter
+    cmd = cmd.replace("$001", bin ); // set Bin
+    cmd = cmd.replace("$002", 1 ); // set BinFactor
+    // cmd = cmd.replace("$001", 30 ); // set exposure
+    // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
+    var tsx_is_waiting = true;
+
+    tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+          var success = tsx_return.split('|')[0].trim();
+          // Meteor._debug('SkyX_JS_Focus-3 result check: ' + tsx_return);
+
+          Out = success;
+          tsx_is_waiting = false;
+        }
+      )
     )
-  )
-  while( tsx_is_waiting ) {
-   Meteor.sleep( 1000 );
-  }
+    while( tsx_is_waiting ) {
+     Meteor.sleep( 1000 );
+    }
 
-  return Out;
+    return Out;
+  }
+  Meteor._debug(' *** @Focus3 diabled');
+  return Out = 'Succes';
 }
 
 // **************************************************************
@@ -475,6 +478,7 @@ function InitialFocus( target ) {
   Meteor._debug(' *** Initial @Focus3: ' + target.targetFindName);
   var result = tsx_RunFocus3( target ); // need to get the focus position
   var temp = tsx_GetFocusTemp( target ); // temp and position set inside
+  tsx_SetServerState( 'initialFocusTemperature', temp.focusTemp);
 }
 
 // **************************************************************
@@ -701,7 +705,7 @@ export function getValidTargetSession() {
 // **************************************************************
 function tsx_DeviceInfo() {
 
-  tsx_Connect();
+  // tsx_Connect();
   var cmd = shell.cat(tsx_cmd('SkyX_JS_DeviceInfo'));
   // cmd = cmd.replace('$000', Number(filterNum) ); // set filter
   // cmd = cmd.replace('$001', Number(exposure) ); // set exposure
@@ -944,17 +948,17 @@ out = focPos + '|' + focTemp + '|(position,temp)';
 function isFocusingNeeded(target) {
   Meteor._debug('************************');
   Meteor._debug(' *** isFocusingNeeded: ' + target.targetFindName);
-  var lastFocusTemp = tsx_GetServerState( 'lastFocusTemp' ).value; // get last temp
+  var lastFocusTemp = tsx_GetServerState( 'initialFocusTemperature' ).value; // get last temp
   tsx_GetFocusTemp( target ); // read new temp
   var curFocusTemp = tsx_GetServerState( 'lastFocusTemp' ).value; // get new temp
   if( typeof curFocusTemp == 'undefined' || curFocusTemp.trim() =='') {
     curFocusTemp = tsx_GetServerState('defaultFocusTempDiff').value;
   }
   var focusDiff = Math.abs(curFocusTemp - lastFocusTemp);
-  var targetDiff = target.focusTemp; // diff for this target
+  var targetDiff = target.tempChg; // diff for this target
+  Meteor._debug('Focus diff: ' + focusDiff + '='+curFocusTemp+'-'+lastFocusTemp);
   if( focusDiff >= targetDiff ) {
-  // run @Focus3
-    // tsx_RunFocus3(target);
+  // returning true tell caller to run  @Focus3
     return true;
   }
   return false;
@@ -986,10 +990,10 @@ function hasReachedEndCondition(target) {
 		return true;
 	}
 
-  var isPriority = isPriorityTarget( target );
-  if( !isPriority ) {
-    return true;
-  }
+  // var isPriority = isPriorityTarget( target );
+  // if( !isPriority ) {
+  //   return true;
+  // }
 
   var minAlt = tsx_reachedMinAlt( target );
   if( minAlt ) {
@@ -1003,16 +1007,16 @@ function hasReachedEndCondition(target) {
     return true;
   }
 
-	// *******************************
-	// if meridian  - flip/slew... - preRun: focus - CLS - rotation - guidestar - guiding...
-  var doFlip = isMeridianFlipNeed( target );
-  if( doFlip ) {
-    // okay we have a lot to do...
-    // prepare target of imaging again...
-    prepareTargetForImaging( target ) ;
-
-    return false;
-  }
+	// // *******************************
+	// // if meridian  - flip/slew... - preRun: focus - CLS - rotation - guidestar - guiding...
+  // var doFlip = isMeridianFlipNeed( target );
+  // if( doFlip ) {
+  //   // okay we have a lot to do...
+  //   // prepare target of imaging again...
+  //   prepareTargetForImaging( target ) ;
+  //
+  //   return false;
+  // }
 
   // NOW CONTINUE ON WITH CURRENT SPOT...
   // FOCUS AND DITHER IF NEEDED
@@ -1021,15 +1025,14 @@ function hasReachedEndCondition(target) {
 	// check reFocusTemp - refocus
   var runFocus3 = isFocusingNeeded( target );
   if( runFocus3) {
-    tsx_RunFocus3(target);
-
+    InitialFocus( target );
     // no need to return false... can keep going.
   }
 
-  var ditherTarget = tsx_GetServerState('defaultDithering').value;
-  if( ditherTarget ) {
-    var dither = tsx_dither( target );
-  }
+  // var ditherTarget = tsx_GetServerState('defaultDithering').value;
+  // if( ditherTarget ) {
+  //   var dither = tsx_dither( target );
+  // }
 
   return false;
 }
@@ -1045,16 +1048,16 @@ function tsx_dither( target ) {
         var result = tsx_return.split('|')[0].trim();
         Meteor._debug('Any error?: ' + result);
         if( result != 'Success') {
-          Meteor._debug('SkyX_JS_MatchAngle Failed. Error: ' + result);
+          Meteor._debug('SkyX_JS_NewDither Failed. Error: ' + result);
         }
         else {
           UpdateStatus('Dither success');
         }
-        rotateSucess = true;
+        Out = true;
       }
     )
   );
-  return rotateSucess;
+  return Out;
 
 }
 
@@ -1261,6 +1264,7 @@ export function processTargetTakeSeries( target ) {
   // set up for the cycle through the filters
   var stopTarget = false; // #IDEA #TODO can use the current jobId to potentially top
   var process = tsx_GetServerStateValue( tsx_ServerStates.imagingSessionName );
+  InitialFocus( target );
 
   for (var i = 0; i < takeSeries.length && !stopTarget && (process !=''); i++) {
     // #TODO do we check here for a session_id... or target name
@@ -1501,7 +1505,16 @@ Use this to set the last focus
     var result = tsx_CLS( target);
     UpdateStatus( ' Centred : ' + target.targetFindName );
     return result;
+  },
+
+  park( ) {
+    UpdateStatus( ' Parking...' );
+    var filter = tsx_GetServerStateValue('defaultFilter');
+    var result = tsx_MntPark(filter, false ); // use default filter
+    UpdateStatus( ' Parked' );
+    return result;
   }
+
 
 });
 

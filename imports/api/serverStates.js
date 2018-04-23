@@ -90,3 +90,8 @@ export function tsx_GetServerStateValue( name ) {
   }
   return '';
 };
+
+// **************************************************************
+export function UpdateStatus( status ) {
+  tsx_SetServerState( 'currentStage', status );
+};

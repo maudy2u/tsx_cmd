@@ -8,6 +8,7 @@ import { Item, Label, Button, Modal, Header, Icon, Table, Checkbox, Progress } f
 import { TargetSessions } from '../api/targetSessions.js';
 import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
 import { Seriess } from '../api/seriess.js';
+import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 
 import TargetEditor from './TargetEditor.js';
 
@@ -151,6 +152,18 @@ class Target extends Component {
     }.bind(this));
   }
 
+  startTakeSeries() {
+    var session = TheSkyXInfos.findOne({name: 'imagingSessionName'});
+
+    TheSkyXInfos.update( {_id: session._id }, {
+        $set: { value: this.props.target.targetFindName }
+    });
+    Meteor.call( 'startImaging', this.props.target, function(error, result) {
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+    }.bind(this));
+  }
+
   render() {
 // Use the image for a stretched image in the Future
 //       <Item.Image size='tiny' src='' />
@@ -186,6 +199,7 @@ class Target extends Component {
             <Button icon='retweet' onClick={this.eraseProgress.bind(this)}/>
           </Button.Group>
           <Button icon='unhide' onClick={this.clsTarget.bind(this)}/>
+          <Button icon='camera' onClick={this.startTakeSeries.bind(this)}/>
           <Modal
             open={this.state.modalOpen}
             onClose={this.handleClose}

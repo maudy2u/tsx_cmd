@@ -13,6 +13,7 @@ import {
   tsx_GetServerState,
   tsx_UpdateDevice,
   tsx_GetServerStateValue,
+  UpdateStatus,
 } from '../imports/api/serverStates.js';
 
 import {
@@ -22,7 +23,6 @@ import {
   getValidTargetSession,
   prepareTargetForImaging,
   processTargetTakeSeries,
-  UpdateStatus,
 } from './run_imageSession.js';
 
 import { tsx_feeder, stop_tsx_is_waiting } from './tsx_feeder.js';
@@ -143,7 +143,7 @@ Meteor.startup(() => {
         {level: 'info'});
 
       var isParked = false;
-      tsx_Connect();
+      // tsx_Connect();
       while(
         tsx_GetServerStateValue('currentJob') != ''
       ) {
@@ -197,7 +197,7 @@ Meteor.startup(() => {
 
       // While ended... exit process
       UpdateStatus( ' Idle');
-      tsx_Disconnect();
+      // tsx_Disconnect();
       job.done();
 
       // Be sure to invoke the callback
@@ -351,6 +351,7 @@ Meteor.methods({
        Meteor._debug('Invalid state found for scheduler.');
      }
      Meteor._debug('Scheduler Started');
+     UpdateStatus('Scheduler Started');
    },
 
    pauseScheduler() {
