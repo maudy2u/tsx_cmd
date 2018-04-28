@@ -16,14 +16,6 @@ ccdsoftAutoguider.ExposureTime = $000;		// Set the normal exposure duration for 
 ccdsoftAutoguider.AutoguiderExposureTime = $001;	// Set the guide exposure duration to the same to preserve my sanity.
 ccdsoftAutoguider.AutoSaveOn = true;			// This must be set for the image analysis routine to work later.
 
-if (SelectedHardware.autoguiderCameraModel == "SBIG ST-i")
-//
-//	If an ST-i is selected as the guider, then the AutoDark will be activated.
-//
-{
-	ccdsoftAutoguider.ImageReduction = 1;
-}
-
 ccdsoftAutoguider.TakeImage();
 
 /* Socket End Packet */

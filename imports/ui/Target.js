@@ -74,8 +74,6 @@ class Target extends Component {
     Meteor.call( 'targetFind', this.props.target.targetFindName , function(error, result) {
       // identify the error
 
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
       if (error && error.error === "logged-out") {
         // show a nice error message
         Session.set("errorMessage", "Please log in to post a comment.");
@@ -146,6 +144,12 @@ class Target extends Component {
   }
 
   clsTarget() {
+    var session = TheSkyXInfos.findOne({name: 'imagingSessionId'});
+
+    // set the session to the curretn target
+    TheSkyXInfos.update( {_id: session._id }, {
+        $set: { value: this.props.target._id }
+    });
     Meteor.call( 'centreTarget', this.props.target, function(error, result) {
       console.log('Error: ' + error);
       console.log('result: ' + result);
@@ -153,10 +157,14 @@ class Target extends Component {
   }
 
   startTakeSeries() {
-    var session = TheSkyXInfos.findOne({name: 'imagingSessionName'});
 
+    // get the session variable to store which target is Currently
+    // being imaged
+    var session = TheSkyXInfos.findOne({name: 'imagingSessionId'});
+
+    // set the session to the curretn target
     TheSkyXInfos.update( {_id: session._id }, {
-        $set: { value: this.props.target.targetFindName }
+        $set: { value: this.props.target._id }
     });
     Meteor.call( 'startImaging', this.props.target, function(error, result) {
       console.log('Error: ' + error);

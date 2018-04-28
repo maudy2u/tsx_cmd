@@ -958,7 +958,7 @@ function isFocusingNeeded(target) {
   var targetDiff = target.tempChg; // diff for this target
   Meteor._debug('Focus diff: ' + focusDiff + '='+curFocusTemp.focusTemp+'-'+lastFocusTemp);
   if( focusDiff >= targetDiff ) {
-  // returning true tell caller to run  @Focus3 
+  // returning true tell caller to run  @Focus3
     return true;
   }
   return false;
@@ -1262,8 +1262,8 @@ export function processTargetTakeSeries( target ) {
   Meteor._debug('Sorted series: ' + takeSeries.length);
 
   // set up for the cycle through the filters
-  var stopTarget = false; // #IDEA #TODO can use the current jobId to potentially top
-  var process = tsx_GetServerStateValue( tsx_ServerStates.imagingSessionName );
+  var stopTarget = false; // #IDEA #TODO can use the current jobId to potentially stop
+  var process = tsx_GetServerStateValue( tsx_ServerStates.imagingSessionId );
   InitialFocus( target );
 
   for (var i = 0; i < takeSeries.length && !stopTarget && (process !=''); i++) {
@@ -1294,7 +1294,7 @@ export function processTargetTakeSeries( target ) {
 
         // check end conditions
         stopTarget = hasReachedEndCondition(target);
-        process = tsx_GetServerStateValue( tsx_ServerStates.imagingSessionName );
+        process = tsx_GetServerStateValue( tsx_ServerStates.imagingSessionId );
 
       }
       // reset to check across series again
@@ -1325,7 +1325,7 @@ export function processTargetTakeSeries( target ) {
 
         // check end conditions
         stopTarget = hasReachedEndCondition(target);
-        process = tsx_GetServerStateValue( tsx_ServerStates.imagingSessionName );
+        process = tsx_GetServerStateValue( tsx_ServerStates.imagingSessionId );
 
       }
       // now switch to next filter
@@ -1348,7 +1348,6 @@ export function prepareTargetForImaging( target ) {
   else {
     tsx_SetServerState( tsx_ServerStates.imagingSessionId, target._id );
     UpdateStatus( "Selected Target: "+ target.name);
-    tsx_SetServerState( tsx_ServerStates.imagingSessionName, target.targetFindName);
 
     var targetCoords = tsx_GetTargetRaDec( target.targetFindName );
     var curDir = targetCoords.direction;
@@ -1457,6 +1456,7 @@ Use this to set the last focus
 
     // Will process target until end condition found
     processTargetTakeSeries( target );
+    tsx_AbortGuider();
   },
 
   testTargetPicking() {

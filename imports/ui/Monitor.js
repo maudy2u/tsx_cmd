@@ -7,6 +7,8 @@ import { withTracker } from 'meteor/react-meteor-data';
 
 import { Confirm, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
 
+import { Target } from './Target.js'
+
 import {
   tsx_ServerStates,
   tsx_UpdateServerState,
@@ -262,23 +264,6 @@ class Monitor extends Component {
     this.setState({monitorDisplay: false});
   }
 
-/*
-currentStage: 'currentStage', // this is a status line update for the dashboard
-initialFocusTemperature: 'initialFocusTemperature',
-mntRA: 'mntRA',
-mntDEC: 'mntDEC',
-mntMHS: 'mntMHS',
-mntMntDir: 'mntMntDir',
-mntMntAlt: 'mntMntAlt',
-targetRA: 'targetRA',
-targetDEC: 'targetDEC',
-targetATL: 'targetATL',
-targetAZ: 'targetAZ',
-
-currentTargetSession: 'currentTargetSession', // use to report current imaging targets
-isCurrentlyImaging: 'isCurrentlyImaging',
-*/
-
   totalTaken() {
     try {
       return TargetSessions.findOne({_id: this.props.target._id}).totalImagesTaken();
@@ -345,7 +330,7 @@ isCurrentlyImaging: 'isCurrentlyImaging',
     Meteor.call("stopScheduler", function (error, result) {
         // identify the error
         tsx_UpdateServerState(tsx_ServerStates.imagingSessionId, '' );
-        tsx_UpdateServerState(tsx_ServerStates.targetImageName, 'None');
+        tsx_UpdateServerState(tsx_ServerStates.targetImageName, '');
         tsx_UpdateServerState(tsx_ServerStates.targetDEC, '_');
         tsx_UpdateServerState(tsx_ServerStates.targetRA, '_');
         tsx_UpdateServerState(tsx_ServerStates.targetALT, '_');
@@ -384,6 +369,26 @@ isCurrentlyImaging: 'isCurrentlyImaging',
       console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
+  }
+
+  renderTarget() {
+    var target;
+    var target_id;
+    try {
+      var session = TheSkyXInfos.findOne({name: 'imagingSessionId'});
+      target_id = session.value;
+      if( typeof target_id != 'undefined' ){
+        target = TargetSessions.findOne({_id: target_id});
+      }
+      else {
+      }
+    } catch (e) {
+
+    } finally {
+    }
+    return (
+      <Target key={target._id} target={target} />
+    )
   }
 
   render() {
@@ -425,7 +430,11 @@ isCurrentlyImaging: 'isCurrentlyImaging',
             total={this.totalPlanned()}
             progress='ratio'>Images Taken</Progress>
         </Segment>
-        <Segment>
+        {this.props.targetSessionId.map( (target)=>{
+          return <Target key={target._id} target={target} />
+        })}
+        {/*  */}
+        {/* <Segment>
           <h3>Focuser  <Label>Temp<Label.Detail>{this.state.focusTemp}</Label.Detail></Label>
           <Label>Position<Label.Detail>{this.state.focusPos}</Label.Detail></Label>
           </h3>
@@ -437,7 +446,7 @@ isCurrentlyImaging: 'isCurrentlyImaging',
           </h3>
           <Progress percent='50' progress>Current Exposure</Progress>
           <Progress value='3' total='5' progress='ratio'>Frames per Filter</Progress>
-        </Segment>
+        </Segment> */}
         <Confirm
           header='Start an imaging session'
           name='confirmOpen'
@@ -471,8 +480,7 @@ isCurrentlyImaging: 'isCurrentlyImaging',
 export default withTracker(() => {
 
   return {
-    targetSessionId: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingSessionId }),
-    targetImageName: TheSkyXInfos.findOne({ name: tsx_ServerStates.imagingSessionName }),
+    targetSessionId: TheSkyXInfos.find({ _id: tsx_ServerStates.imagingSessionId }).fetch(),
     targetImageDEC: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetDEC }),
     targetImageRA: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetRA }),
     targetImageALT: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetALT }),

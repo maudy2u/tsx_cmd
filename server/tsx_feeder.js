@@ -80,12 +80,11 @@ export function tsx_feeder( cmd, callback ) {
      // Meteor._debug('Sending err: ' + err);
    });
 
-
    // need a TSX WAIT FOR SCRIPT DONE...
    // https://www.w3schools.com/js/js_timing.asp
    var waiting = 0; // create arbitarty timeout
    var imageChk = false;
-   var process = tsx_GetServerStateValue( 'imagingSessionName' );
+   var process = tsx_GetServerStateValue( 'imagingSessionId' );
    if( typeof process != 'undefined' || process != '') {
      imageChk = true;
    }
@@ -99,7 +98,7 @@ export function tsx_feeder( cmd, callback ) {
     waiting = waiting + sec;
     Meteor._debug('tsx_waiting (sec): ' + waiting /sec );
     if( imageChk ) {
-      process = tsx_GetServerStateValue( 'imagingSessionName' );
+      process = tsx_GetServerStateValue( 'imagingSessionId' );
       UpdateStatus( 'Stopped');
     }
   }

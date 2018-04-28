@@ -20,6 +20,7 @@ import {
   tsx_Connect,
   tsx_Disconnect,
   tsx_MntPark,
+  tsx_AbortGuider,
   getValidTargetSession,
   prepareTargetForImaging,
   processTargetTakeSeries,
@@ -175,6 +176,7 @@ Meteor.startup(() => {
             var defaultFilter = tsx_GetServerStateValue('defaultFilter');
             var softPark = Boolean(tsx_GetServerStateValue('defaultSoftPark'));
             UpdateStatus( 'Parking...');
+            tsx_AbortGuider();
             tsx_MntPark(defaultFilter, softPark);
           }
           isParked = true;
@@ -286,7 +288,7 @@ export function srvStopScheduler() {
   var jid = tsx_GetServerStateValue('currentJob');
   scheduler.remove( jid );
   tsx_SetServerState('currentJob', '');
-  tsx_SetServerState( tsx_ServerStates.imagingSessionName, '');
+  tsx_SetServerState( tsx_ServerStates.imagingSessionId, '');
 
 
   Meteor._debug('Manually STOPPED scheduler');

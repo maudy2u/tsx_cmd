@@ -2,7 +2,7 @@
 /* Socket Start Packet */
 
 //
-//	Check guiding quality. 
+//	Check guiding quality.
 //
 //	We want to make sure that the guider is pretty darned close before we kick off the regular settle
 //	routine in the bash script. Script reports both absolute as well as signed values.
@@ -17,7 +17,7 @@
 // 	Updated again to cut my EM-11, which guides like a drunk and is paired with a very high resolution
 //	camera, a little more slack.
 //
-//	Ken Sturrock 
+//	Ken Sturrock
 //	January 13, 2018
 //
 
@@ -40,40 +40,38 @@ if (( pixelLimit == "autoGC" ) || (pixelLimit == "autoGL" ))
 	//
 	// Try to connect to the camera image
 	//
-	{ 
+	{
 			ccdsoftCameraImage.AttachToActiveImager();
 	}
-	
-		catch (repErr)
-		//
-		//	If there's no picture, take a token picture - we just want the FITS header
-		// 
-		{
-	
-			ccdsoftCamera.Asynchronous = false;
-			ccdsoftCamera.Frame = 1;
-			ccdsoftCamera.Delay = 0;
-			ccdsoftCamera.Subframe = false;
-			ccdsoftCamera.ExposureTime = 1;
+	catch (repErr)
+	//
+	//	If there's no picture, take a token picture - we just want the FITS header
+	//
+	{
+
+		ccdsoftCamera.Asynchronous = false;
+		ccdsoftCamera.Frame = 1;
+		ccdsoftCamera.Delay = 0;
+		ccdsoftCamera.Subframe = false;
+		ccdsoftCamera.ExposureTime = 1;
+
+		ccdsoftCamera.TakeImage();
+		ccdsoftCameraImage.AttachToActiveImager();
+	}
 
 
-			ccdsoftCamera.TakeImage();
-			ccdsoftCameraImage.AttachToActiveImager(); 
-		} 
-	
-	
 	try
 	//
 	// Try to connect to the guider image
 	//
-	{ 
-			ccdsoftAutoguiderImage.AttachToActiveAutoguider(); 
+	{
+			ccdsoftAutoguiderImage.AttachToActiveAutoguider();
 	}
-	
+
 		catch (repErr)
 		//
-		//	If error, take a picture.	
-		// 
+		//	If error, take a picture.
+		//
 		{
 			ccdsoftAutoguider.Asynchronous = false;
 			ccdsoftAutoguider.Frame = 1;
@@ -81,10 +79,10 @@ if (( pixelLimit == "autoGC" ) || (pixelLimit == "autoGL" ))
 			ccdsoftAutoguider.ExposureTime = 1;
 
 			ccdsoftAutoguider.TakeImage();
-			ccdsoftAutoguiderImage.AttachToActiveAutoguider(); 
-		} 
+			ccdsoftAutoguiderImage.AttachToActiveAutoguider();
+		}
 
-	if ( ccdsoftCamera.ImageUseDigitizedSkySurvey == "0" ) 
+	if ( ccdsoftCamera.ImageUseDigitizedSkySurvey == "0" )
 	//
 	//	So, the simulator does have pixel size values but they are a different keyword than
 	//	SkyX inserts. Therefore, if using the simulator, skip this stuff because we'll
@@ -96,20 +94,20 @@ if (( pixelLimit == "autoGC" ) || (pixelLimit == "autoGL" ))
 	//	What a cluster....
 	//
 	{
-		
+
 
  		try
 		{
 			ccdsoftAutoguiderImage.FITSKeyword("XPIXSZ")
 		}
-			catch (repErr)
-			//
-			//	If error, report it. 	
-			// 
-			{
-				FITSProblem = "yes";
-			} 
-	
+		catch (repErr)
+		//
+		//	If error, report it.
+		//
+		{
+			FITSProblem = "yes";
+		}
+
 		try
 		//
 		//	Of course this glosses over idiocy like rectangular pixels in the Lodestar
@@ -119,35 +117,35 @@ if (( pixelLimit == "autoGC" ) || (pixelLimit == "autoGL" ))
 		}
 			catch (repErr)
 			//
-			//	If error, report it. 	
-			// 
+			//	If error, report it.
+			//
 			{
 				FITSProblem = "yes";
-			} 
-	
+			}
+
 		try
 		{
 			ccdsoftCameraImage.FITSKeyword("XPIXSZ")
 		}
 			catch (repErr)
 			//
-			//	If error, report it. 	
-			// 
+			//	If error, report it.
+			//
 			{
 				FITSProblem = "yes";
-			} 
-	
+			}
+
 		try
 		{
 			ccdsoftCameraImage.FITSKeyword("XBINNING")
 		}
 			catch (repErr)
 			//
-			//	If error, report it. 	
-			// 
+			//	If error, report it.
+			//
 			{
 				FITSProblem = "yes";
-			} 
+			}
 	}
 
 
@@ -157,8 +155,8 @@ if (( pixelLimit == "autoGC" ) || (pixelLimit == "autoGL" ))
 	//
 	{
 
-	
-		if ( ccdsoftCamera.ImageUseDigitizedSkySurvey == "1" ) 
+
+		if ( ccdsoftCamera.ImageUseDigitizedSkySurvey == "1" )
 		//
 		//	Imaging Camera Voodoo
 		//
@@ -166,79 +164,50 @@ if (( pixelLimit == "autoGC" ) || (pixelLimit == "autoGL" ))
 		//	just set the image scale without doing the math.
 		//
 		{
-		
-			var camImageScale = 1.70; 
-		
+
+			var camImageScale = 1.70;
+
 		} else {
-		
+
 			var camFocalLength = ccdsoftCameraImage.FITSKeyword ("FOCALLEN");
 			var camPixelSize = ccdsoftCameraImage.FITSKeyword ("XPIXSZ");
 			var camBinning = ccdsoftCameraImage.FITSKeyword ("XBINNING");
-		
+
 			var camImageScale = ( (camPixelSize * camBinning) / camFocalLength ) * 206.3;
-			
+
 			camImageScale = camImageScale.toFixed(2);
 		}
-		
-		if ( ccdsoftAutoguider.ImageUseDigitizedSkySurvey == "1" ) 
+
+		if ( ccdsoftAutoguider.ImageUseDigitizedSkySurvey == "1" )
 		//
 		// Guiding Camera Voodo
 		//
 		// Same as above, but for the guider
 		//
 		{
-	
-			var guiderImageScale = 1.70; 
-	
+
+			var guiderImageScale = 1.70;
+
 		} else {
-	
+
 			var guiderFocalLength = ccdsoftAutoguiderImage.FITSKeyword ("FOCALLEN");
 			var guiderPixelSize = ccdsoftAutoguiderImage.FITSKeyword ("XPIXSZ");
 			var guiderBinning = ccdsoftAutoguiderImage.FITSKeyword ("XBINNING");
-		
+
 			var guiderImageScale = ( (guiderPixelSize * guiderBinning) / guiderFocalLength ) * 206.3;
-			
+
 			guiderImageScale = guiderImageScale.toFixed(2);
 		}
-	
+
 		imageScaleRatio = (camImageScale / guiderImageScale);
 		imageScaleRatio = imageScaleRatio.toFixed(2);
-	
-		if (imageScaleRatio < 0.2)
-		//
-		// I have doubts about measuring this level of accuracy with
-		// a centroid calculation at such an undersampled image scale.
-		//
-		// Relax it a little. Maybe best for user to set in main script
-		//
-		{
-			imageScaleRatio = 0.2;
-		}
-	
-		if (ccdsoftCamera.PropStr("m_csObserver") == "Ken Sturrock")
-		//
-		// Is it me?
-		//
-		{
-			if (( SelectedHardware.mountModel == "EM-200 Temma PC" ) && (SelectedHardware.cameraModel == "ASICamera")) 
-			//
-			// This is the driver that I use for my EM-11 Temma M & hi-resolution ZWO
-			//
-			// Bump up the value a bit because the EM-11 will seldom meet the Auto-calculated settle limit and I don't 
-			// want to wait all night.
-			//
-			{
-				imageScaleRatio = 0.9;
-			}
-		}
 
-
-		if ( pixelLimit == "autoGL" ) 
+		if ( pixelLimit == "autoGL" )
 		//
 		// If we are asking if the guider is LOST, then bump up the value
 		//
 		{
-	
+
 			imageScaleRatio = (imageScaleRatio * 2.5);
 		}
 
@@ -246,10 +215,10 @@ if (( pixelLimit == "autoGC" ) || (pixelLimit == "autoGL" ))
 		// Set the limit if we calculated it from above
 		//
 		pixelLimit = imageScaleRatio
-	
+
 	}
 
-		
+
 }
 
 if ( FITSProblem !== "yes" )
@@ -258,7 +227,7 @@ if ( FITSProblem !== "yes" )
 	//
 	// Measure the error regardless of where the limit came from
 	//
-	
+
 	if ( (Math.abs(errorX) < pixelLimit) && (Math.abs(errorY) < pixelLimit)  )
 	{
 		Quality = "Good;" + errorX.toFixed(2) + ", " +  errorY.toFixed(2);
@@ -266,7 +235,7 @@ if ( FITSProblem !== "yes" )
 		Quality = "Poor;" + errorX.toFixed(2) + ", " +  errorY.toFixed(2);
 	}
 
-	if ( ccdsoftAutoguider.ImageUseDigitizedSkySurvey == "1" ) 
+	if ( ccdsoftAutoguider.ImageUseDigitizedSkySurvey == "1" )
 	//
 	// Test to see if we are using the simulator, if so, say everything is great.
 	//
@@ -278,5 +247,5 @@ if ( FITSProblem !== "yes" )
 
 		Quality = "Good;FITS Header Error - Set Close and Lost Values Manually"
 }
-	
+
 /* Socket End Packet */

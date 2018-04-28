@@ -51,10 +51,6 @@ if ( Application.build >= 11177 )
 
 		} else {
 
-
-
-
-			//
 			// The section below takes a throw-away light-frame with the chosen base filter.
 			// If you don't take a normal image then @Focus will not apply the focuser offset for
 			// the filter. This may mean the starting position will be "more bad" but it also means that,
@@ -73,31 +69,11 @@ if ( Application.build >= 11177 )
 			CCDSC.ExposureTime = initExp;		// Restore camera duration time. It'll get set later anyway...
 
 
-			if ( bin  )
-			//
-			// Are we binning 2x2 for a OSC camera? This probably doesn't work, but has been reported.
-			//
-			{
-				ccdsoftCamera.BinX = binFactor;
-				ccdsoftCamera.BinY = binFactor;
-			}
-
-
-
-			// Finally! Focus the camera!
+		// Finally! Focus the camera!
 			// Use three samples per point and let @F3 figure out the rest.
 			//
 			out = CCDSC.AtFocus3(3, true);
 
-
-			if ( bin  )
-			//
-			// If we binned the camera for focusing, put it back.
-			//
-			{
-				ccdsoftCamera.BinX = initialBinX; // removed quotes
-				ccdsoftCamera.BinY = initialBinY; // removed quotes
-			}
 		}
 
 	} else {

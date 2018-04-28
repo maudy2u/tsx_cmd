@@ -21,6 +21,9 @@
 // January 13, 2018
 //
 
+var minDitherFactor = 1.5;
+var maxDitherFactor = 3;
+
 var FITSProblem = "no";
 
 ccdsoftCameraImage.AttachToActiveImager();
@@ -43,43 +46,41 @@ if ( ccdsoftCamera.ImageUseDigitizedSkySurvey == "1" )
 	var imageScale = 1.70;
 
 } else {
-
-
-try
+	try
 	{
 		ccdsoftCameraImage.FITSKeyword("XPIXSZ")
 	}
-		catch (repErr)
-		//
-		//	If error, report it.
-		//
-		{
-			FITSProblem = "yes";
-		}
+	catch (repErr)
+	//
+	//	If error, report it.
+	//
+	{
+		FITSProblem = "yes";
+	}
 
-try
+	try
 	{
 		ccdsoftCamera.PropDbl("m_dTeleFocalLength");
 	}
-		catch (repErr)
-		//
-		//	If error, report it.
-		//
-		{
-			FITSProblem = "yes";
-		}
+	catch (repErr)
+	//
+	//	If error, report it.
+	//
+	{
+		FITSProblem = "yes";
+	}
 
 	try
 	{
 		ccdsoftCamera.PropLng("m_nXBin");
 	}
-		catch (repErr)
-		//
-		//	If error, report it.
-		//
-		{
-			FITSProblem = "yes";
-		}
+	catch (repErr)
+	//
+	//	If error, report it.
+	//
+	{
+		FITSProblem = "yes";
+	}
 
 
 	if ( FITSProblem == "yes" )
@@ -104,8 +105,8 @@ try
 
 // Change this if you want different min/max dither factors, but be cautious not to go
 // overboard.
-var minDither = imageScale * 2.5;
-var maxDither = imageScale * 7;
+var minDither = imageScale * minDitherFactor;
+var maxDither = imageScale * maxDitherFactor;
 
 
 // Generate our random numbers with the above min/max constraints and divide them by
