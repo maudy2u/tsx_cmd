@@ -35,19 +35,21 @@ class TakeSeriesEditor extends Component {
 
     this.setState({ [name]: value });
 
-    var id = this.props.series_id.id;
-    Meteor.call(
-      'updateSeriesIdWith',
-      id ,
-      name,
-      value,
-      function (error) {
+    var sid = this.props.series_id.id;
+    Meteor.call( 'updateSeriesIdWith', sid, name, value , function(error, result) {
+
+    // Meteor.call(
+    //   'updateSeriesIdWith',
+    //   sid ,
+    //   name,
+    //   value,
+    //   function(error, result)  {
         // identify the error
         if (error && error.error === "logged-out") {
           // show a nice error message
           Session.set("errorMessage", "Please log edit.");
         }
-    }.bind(this));
+    });//.bind(this));
   };
 
   // Initialize states

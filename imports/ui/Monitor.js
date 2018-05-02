@@ -7,8 +7,6 @@ import { withTracker } from 'meteor/react-meteor-data';
 
 import { Confirm, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
 
-import { Target } from './Target.js'
-
 import {
   tsx_ServerStates,
   tsx_UpdateServerState,
@@ -22,8 +20,9 @@ import { TargetSessions } from '../api/targetSessions.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 
 // Import the UI
+import Target  from './Target.js';
 import TargetSessionMenu from './TargetSessionMenu.js';
-import Filter from './Filter.js';
+// import Filter from './Filter.js';
 import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 import TheSkyXInfo from './TheSkyXInfo.js';
@@ -372,23 +371,21 @@ class Monitor extends Component {
   }
 
   renderTarget() {
+    var sid = this.props.targetSessionId;
+    var tid = sid[0].value;
     var target;
-    var target_id;
+    var str;
     try {
-      var session = TheSkyXInfos.findOne({name: 'imagingSessionId'});
-      target_id = session.value;
-      if( typeof target_id != 'undefined' ){
-        target = TargetSessions.findOne({_id: target_id});
-      }
-      else {
-      }
+      target = TargetSessions.findOne({_id:tid});
+      return (
+        <Target key={tid} target={target} />
+      )
     } catch (e) {
-
-    } finally {
+      console.log('error');
+      return (
+        <div/>
+      )
     }
-    return (
-      <Target key={target._id} target={target} />
-    )
   }
 
   render() {
@@ -397,17 +394,19 @@ class Monitor extends Component {
 
     return (
       <Segment.Group>
-        <Label>RA <Label.Detail>{Number(this.state.targetRA).toFixed(4)}</Label.Detail></Label>
-        <Label>DEC <Label.Detail>{Number(this.state.targetDEC).toFixed(4)}</Label.Detail></Label>
-        <Label>Atl <Label.Detail>{Number(this.state.targetALT).toFixed(4)}</Label.Detail></Label>
-        <Label>Az <Label.Detail>{this.state.targetAZ}</Label.Detail></Label>
-        <Label>Angle <Label.Detail>{Number(this.state.targetAngle).toFixed(4)}</Label.Detail></Label>
-        <Label>HA <Label.Detail>{Number(this.state.targetHA).toFixed(4)}</Label.Detail></Label>
-        <Label>Transit <Label.Detail>{Number(this.state.targetTransit).toFixed(4)}</Label.Detail></Label>
         <Segment>
+          <Label>RA <Label.Detail>{Number(this.state.targetRA).toFixed(4)}</Label.Detail></Label>
+          <Label>DEC <Label.Detail>{Number(this.state.targetDEC).toFixed(4)}</Label.Detail></Label>
+          <Label>Angle <Label.Detail>{Number(this.state.targetAngle).toFixed(4)}</Label.Detail></Label>
         </Segment>
         <Segment>
-          <h3>Target {this.state.targetImageName}</h3>
+          <Label>Atl <Label.Detail>{Number(this.state.targetALT).toFixed(4)}</Label.Detail></Label>
+          <Label>Az <Label.Detail>{this.state.targetAZ}</Label.Detail></Label>
+          <Label>HA <Label.Detail>{Number(this.state.targetHA).toFixed(4)}</Label.Detail></Label>
+          <Label>Transit <Label.Detail>{Number(this.state.targetTransit).toFixed(4)}</Label.Detail></Label>
+        </Segment>
+        <Segment>
+          <h3>Scheduler: </h3>
           <Button.Group icon>
             <Button icon='play'  onClick={this.playScheduler.bind(this)}/>
             {/* <Button icon='pause' onClick={this.pauseScheduler.bind(this)}  /> */}
@@ -420,19 +419,21 @@ class Monitor extends Component {
             imagesPlanned: TargetSessions.findOne({_id:this.props.target._id}).totalImagesPlanned(),
 
             */}
-          </Button.Group>
+        </Button.Group>
+        <Button.Group icon floated='right'>
           <Button icon='checkmark box' onClick={this.testPicking.bind(this)} />
           <Button icon='move' onClick={this.testEndConditions.bind(this)} />
           <Button icon='find' onClick={this.testTryTarget.bind(this)} />
           <Button icon='camera' onClick={this.testTryTarget.bind(this)} />
-          <Progress
+        </Button.Group>
+          {/* <Progress
             value={this.totalTaken()}
             total={this.totalPlanned()}
-            progress='ratio'>Images Taken</Progress>
+            progress='ratio'>Images Taken</Progress> */}
         </Segment>
-        {this.props.targetSessionId.map( (target)=>{
-          return <Target key={target._id} target={target} />
-        })}
+        <Segment>
+        {this.renderTarget()}
+        </Segment>
         {/*  */}
         {/* <Segment>
           <h3>Focuser  <Label>Temp<Label.Detail>{this.state.focusTemp}</Label.Detail></Label>
@@ -480,7 +481,7 @@ class Monitor extends Component {
 export default withTracker(() => {
 
   return {
-    targetSessionId: TheSkyXInfos.find({ _id: tsx_ServerStates.imagingSessionId }).fetch(),
+    targetSessionId: TheSkyXInfos.find({name: 'imagingSessionId'}).fetch(),
     targetImageDEC: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetDEC }),
     targetImageRA: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetRA }),
     targetImageALT: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetALT }),

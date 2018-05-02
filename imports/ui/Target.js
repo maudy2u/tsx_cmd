@@ -5,6 +5,7 @@ import { withTracker } from 'meteor/react-meteor-data';
 
 import { Item, Label, Button, Modal, Header, Icon, Table, Checkbox, Progress } from 'semantic-ui-react'
 
+import { TargetReports } from '../api/targetReports.js';
 import { TargetSessions } from '../api/targetSessions.js';
 import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
 import { Seriess } from '../api/seriess.js';
@@ -47,8 +48,6 @@ class Target extends Component {
 
   componentDidMount() {
 
-    this.getCurrentCoordinates();
-
   }
 
   eraseProgress() {
@@ -68,28 +67,42 @@ class Target extends Component {
     this.handleOpen();
   }
 
-  getCurrentCoordinates() {
+  getTargetReport() {
     var done = false;
 
-    Meteor.call( 'targetFind', this.props.target.targetFindName , function(error, result) {
-      // identify the error
+    try {
+//      Meteor.call( 'targetFind', this.props.target.targetFindName , function(error, result) {
+      Meteor.call( 'getTargetReport', this.props.target , function(error, result) {
 
-      if (error && error.error === "logged-out") {
-        // show a nice error message
-        Session.set("errorMessage", "Please log in to post a comment.");
-      }
-      else {
-        // if success then TheSkyX has made this point the target...
-        // now get the coordinates
-        cmdSuccess = true;
-        this.setState({altitude: result.alt});
-        this.setState({ra: result.ra});
-        this.setState({dec: result.dec});
-        this.setState({azimuth: result.direction});
+          // if success then TheSkyX has made this point the target...
+          // now get the coordinates
+          /*
+          angle: '',
+          scale: '',
+          isValid: isValid,
+          AZ: az,
+          ALT: alt,
+          RA:  ra,
+          DEC: dec,
+          HA: ha,
+          TRANSIT: transit,
+          isDark: isDark,
+          sunAltitude: sunAlt,
+          updatedAt: update,
+          */
+//          var report = TargetReports.findOne({_id: this.props.target.report_id });
+          if( typeof result != 'undefined') {
+            this.setState({altitude: result.ALT});
+            this.setState({ra: result.RA});
+            this.setState({dec: result.DEC});
+            this.setState({azimuth: result.AZ});
 
-      }
-    }.bind(this));
+            this.forceUpdate();
+          }
+      }.bind(this));
+    } catch (e) {
 
+    }
   }
 
   copyEntry() {
@@ -112,6 +125,7 @@ class Target extends Component {
         progress: [
 //            {_id: seriesId, taken:0},
         ],
+        report_d: orgTarget.report_id,
         ra: orgTarget.ra,
         dec: orgTarget.dec,
         angle: orgTarget.angle,
@@ -172,42 +186,96 @@ class Target extends Component {
     }.bind(this));
   }
 
+  setActive() {
+    var session = TheSkyXInfos.findOne({name: 'imagingSessionId'});
+
+    // set the session to the curretn target
+    TheSkyXInfos.update( {_id: session._id }, {
+        $set: { value: this.props.target._id }
+    });
+    this.forceUpdate();
+  }
+
+  setInactive() {
+    var session = TheSkyXInfos.findOne({name: 'imagingSessionId'});
+
+    // set the session to the curretn target
+    TheSkyXInfos.update( {_id: session._id }, {
+        $set: { value: '' }
+    });
+    this.forceUpdate();
+  }
+
+  renderTargeting() {
+    var session = TheSkyXInfos.findOne({name: 'imagingSessionId'});
+    var tid = session.value;
+    try {
+      if( this.props.target.enabledActive == true ) {
+        if( tid == this.props.target._id ) {
+          return (
+            <Button.Group basic size='small'  floated='right'>
+              <Button icon='location arrow' onClick={this.clsTarget.bind(this)}/>
+              <Button icon='toggle on' onClick={this.setInactive.bind(this)}/>
+            </Button.Group>
+          )
+        }
+        else {
+          return (
+            <Button.Group basic size='small'  floated='right'>
+              <Button icon='location arrow' onClick={this.clsTarget.bind(this)}/>
+              <Button icon='toggle off' onClick={this.setActive.bind(this)}/>
+            </Button.Group>
+          )
+        }
+      }
+    } catch (e) {
+      return (
+        <div/>
+      )
+    }
+  }
+
   render() {
 // Use the image for a stretched image in the Future
 //       <Item.Image size='tiny' src='' />
+    if( typeof this.props.target == 'undefined' ) {
+      return (
+        <div/>
+      )
+    }
 
     return (
     <Item>
       <Item.Content>
-        <Item.Header as='a'>
-          <Checkbox
-            label='  '
-            toggle
-            checked={this.props.target.enabledActive}
-            onChange={this.onChangeChecked.bind(this)}
-          />
+        <Checkbox
+          label='  '
+          toggle
+          checked={this.props.target.enabledActive}
+          onChange={this.onChangeChecked.bind(this)}
+        />
+        <Item.Header as='a' onClick={this.editEntry.bind(this)}>
           {this.props.target.targetFindName}
         </Item.Header>
-        <Item.Meta>
-          {this.props.target.description}
-        </Item.Meta>
+        <Button.Group basic size='small' floated='right'>
+          <Button icon='refresh' onClick={this.getTargetReport.bind(this)}/>
+          <Button icon='edit' onClick={this.editEntry.bind(this)}/>
+          <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
+          <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
+          <Button icon='retweet' onClick={this.eraseProgress.bind(this)}/>
+        </Button.Group>
+        {this.renderTargeting()}
         <Item.Description>
+          {this.props.target.description}
+        </Item.Description>
+        <Item.Meta>
+          <Progress value={this.props.target.totalImagesTaken()} total={this.props.target.totalImagesPlanned()} progress='ratio'>Images Taken</Progress>
+        </Item.Meta>
+        <Item.Extra>
           <Label>Priority: <Label.Detail>{this.props.target.priority}</Label.Detail></Label>
           <Label>Start time: <Label.Detail>{this.props.target.startTime}</Label.Detail></Label>
           <Label>Stop time: <Label.Detail>{this.props.target.stopTime}</Label.Detail></Label>
           <Label>Altitude: <Label.Detail>{this.state.altitude}</Label.Detail></Label>
           <Label>Direction: <Label.Detail>{this.state.azimuth}</Label.Detail></Label>
-          <Progress value={this.props.target.totalImagesTaken()} total={this.props.target.totalImagesPlanned()} progress='ratio'>Images Taken</Progress>
-        </Item.Description>
-        <Item.Extra>
-          <Button.Group basic size='small'>
-            <Button icon='edit' onClick={this.editEntry.bind(this)}/>
-            <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
-            <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
-            <Button icon='retweet' onClick={this.eraseProgress.bind(this)}/>
-          </Button.Group>
-          <Button icon='unhide' onClick={this.clsTarget.bind(this)}/>
-          <Button icon='camera' onClick={this.startTakeSeries.bind(this)}/>
           <Modal
             open={this.state.modalOpen}
             onClose={this.handleClose}

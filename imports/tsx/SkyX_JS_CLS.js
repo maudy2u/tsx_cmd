@@ -29,10 +29,14 @@ if ( SelectedHardware.filterWheelModel !== "<No Filter Wheel Selected>" ) {
 
 try {
 		ClosedLoopSlew.exec();
-		Out = "Success|";
+		var imageLinkAng=ImageLinkResults.imagePositionAngle; // the real sky position
+		Out = 'Success|' + imageLinkAng;
+		if( SelectedHardware.rotatorModel != '<No Rotator Selected>') {
+			Out = Out + '|' + ccdsoftCamera.rotatorPositionAngle(); // the real position
+		}
 }
 catch (repErr) 	{
-		Out = "Failed|";
+		Out = "Failed|" + repErr;
 }
 Out
 /* Socket End Packet */

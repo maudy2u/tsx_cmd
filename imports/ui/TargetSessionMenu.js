@@ -88,6 +88,7 @@ class TargetSessionMenu extends Component {
         angle: '',
         scale: '',
         coolingTemp: '',
+        report_d: '',
 
 /*
 *******************************
@@ -128,14 +129,14 @@ class TargetSessionMenu extends Component {
 
       return (
         <div>
-          <Segment>
+          <Button icon='add' onClick={this.addEntry.bind(this)}/>
+          {/* <Segment>
             <Button.Group basic size='small'>
               <Button icon='linkify' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
               <Button icon='settings' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
               <Button icon='find' onClick={this.chkTestData.bind(this)}/>
-              <Button icon='add' onClick={this.addEntry.bind(this)}/>
             </Button.Group>
-          </Segment>
+          </Segment> */}
           <Modal
             open={this.state.addModalOpen}
             onClose={this.handleAddModalClose}

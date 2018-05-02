@@ -379,8 +379,8 @@ Meteor.methods({
    updateSeriesIdWith(
        id,
        name,
-       value,
-     ) {
+       value
+      ) {
 
      Meteor._debug(' ******************************* ');
      Meteor._debug(' updateSeriesIdWith: ' + id + ', ' + name + ", " + value);

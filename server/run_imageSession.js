@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 
 import { TargetSessions } from '../imports/api/targetSessions.js';
+import { TargetReports } from '../imports/api/targetReports.js';
 import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
 import { Seriess } from '../imports/api/seriess.js';
 import { Filters } from '../imports/api/filters.js';
@@ -88,9 +89,9 @@ export function tsx_Connect() {
         tsx_is_waiting = false;
       }
     )
-  )
+  );
   while( tsx_is_waiting ) {
-   Meteor.sleep( 1000 );
+    Meteor.sleep( 1000 );
   }
   return true;
 }
@@ -105,9 +106,9 @@ export function tsx_Disconnect() {
         tsx_is_waiting = false;
       }
     )
-  )
+  );
   while( tsx_is_waiting ) {
-   Meteor.sleep( 1000 );
+    Meteor.sleep( 1000 );
   }
   return true;
 }
@@ -190,7 +191,7 @@ export function tsx_MntPark(defaultFilter, softPark) {
 }
 
 // **************************************************************
-function tsx_AbortGuider() {
+export function tsx_AbortGuider() {
   var success = false;
 
   var cmd = String(shell.cat(tsx_cmd('SkyX_JS_AbortGuider')));
@@ -307,7 +308,7 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
     )
   )
   while( tsx_is_waiting ) {
-   Meteor.sleep( 1000 );
+    Meteor.sleep( 1000 );
   }
   UpdateStatus(  "Autoguiding started" );
 }
@@ -384,6 +385,7 @@ function tsx_Slew( target ) {
     cmd = cmd.replace('$001', target.dec );
     // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
 
+    var tsx_waiting = true;
     tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       var result = tsx_return.split('|')[0].trim();
       // Meteor._debug('Any error?: ' + result);
@@ -391,9 +393,13 @@ function tsx_Slew( target ) {
         forceAbort = true;
         Meteor._debug('Slew Failed. Error: ' + result);
       }
-      slewSuccess = true;
+      tsx_is_waiting = false;
     }
   ));
+  while( tsx_is_waiting ) {
+   Meteor.sleep( 1000 );
+  }
+
 }
 
 // **************************************************************
@@ -492,9 +498,10 @@ export function tsx_GetFocusTemp( target ) {
     err: true,
     errmsg: 'Focuser not found',
   }
-  var tsx_is_waiting = true;
   var lastFocusTemp = 0;
   var lastFocusPos = 0;
+
+  var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       // Meteor._debug('Any error?: ' + tsx_return);
       lastFocusTemp = tsx_return.split('|')[0].trim();
@@ -585,6 +592,7 @@ export function tsx_GetTargetRaDec(targetFindName) {
   // cmd = cmd.replace("$001", 30 ); // set exposure
   // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
   var Out = "Error|Target not found.";
+
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       var success = tsx_return.split('|')[0].trim();
@@ -798,11 +806,18 @@ function tsx_DeviceInfo() {
 function tsx_ServerIsOnline() {
   var success = 'Error|';
   var cmd = tsxHeader + tsxFooter;
+  var tsx_is_waiting = true;
   tsx_feeder( cmd, Meteor.bindEnvironment((tsx_return) => {
     if( tsx_return == 'undefined|No error. Error = 0.') {
       success = 'Success|';
+
     }
+    tsx_is_waiting = false;
   }));
+  while( tsx_is_waiting ) {
+    Meteor.sleep( 3000 );
+  }
+
   return success;
 }
 
@@ -1044,6 +1059,7 @@ function tsx_dither( target ) {
   // var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale, target.expos);
   var cmd = shell.cat(tsx_cmd('SkyX_JS_NewDither'));
 
+  var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         var result = tsx_return.split('|')[0].trim();
         Meteor._debug('Any error?: ' + result);
@@ -1054,11 +1070,106 @@ function tsx_dither( target ) {
           UpdateStatus('Dither success');
         }
         Out = true;
+        tsx_is_waiting = false;
       }
     )
   );
+  while( tsx_is_waiting ) {
+    Meteor.sleep( 1000 );
+  }
+
   return Out;
 
+}
+
+// **************************************************************
+function tsx_TargetReport( target ) {
+
+  // var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale, target.expos);
+  var cmd = shell.cat(tsx_cmd('SkyX_JS_TargetReport'));
+  cmd = cmd.replace('$000', target.targetFindName );
+
+  // hard coded to ~ nautical twilight
+  // #TODO put the sun altitude into Settings
+  cmd = cmd.replace('$001', -15);
+  var Out;
+  var tsx_is_waiting = true;
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+        // e.g.
+        // false|6.812618943699146|
+        // true|West|42.2|5.593339690591149|22.023446766485247|3.4187695344846833|16.2723491463255240.0|0|
+        // No error. Error = 0.
+        var result = tsx_return.split('|')[0].trim();
+        if( result == 'TypeError: Object not found. Error = 250.') {
+          console.log(' !!! TargetReport failed.');
+          return false;
+        }
+
+        var isDark = tsx_return.split('|')[0].trim();
+        var sunAlt = tsx_return.split('|')[1].trim();
+        var isValid = tsx_return.split('|')[2].trim();
+        var az, alt, ra, dec, ha, transit, focTemp, focPostion;
+        if( isValid ) {
+            az = tsx_return.split('|')[3].trim();
+            alt = tsx_return.split('|')[4].trim();
+            ra = tsx_return.split('|')[5].trim();
+            dec = tsx_return.split('|')[6].trim();
+            ha = tsx_return.split('|')[7].trim();
+            transit = tsx_return.split('|')[8].trim();
+          try { // try to get focuser info
+            focTemp = tsx_return.split('|')[9].trim();
+            focPostion = tsx_return.split('|')[10].trim();
+          }
+          catch(e) {
+              // no need
+          }
+          var update = new Date();
+          Out = {
+            angle: '',
+            scale: '',
+            isValid: isValid,
+            AZ: az,
+            ALT: alt,
+            RA:  ra,
+            DEC: dec,
+            HA: ha,
+            TRANSIT: transit,
+            isDark: isDark,
+            sunAltitude: sunAlt,
+            updatedAt: update,
+          };
+
+          var rid = TargetReports.upsert( { target_id: target._id }, {
+
+            $set: {
+              angle: '',
+              scale: '',
+              isValid: isValid,
+              AZ: az,
+              ALT: alt,
+              RA:  ra,
+              DEC: dec,
+              HA: ha,
+              TRANSIT: transit,
+              isDark: isDark,
+              sunAltitude: sunAlt,
+              updatedAt: update,
+            }
+          });
+          TargetSessions.update({_id: target._id} , {
+            $set: {
+              report_id: rid,
+            }
+          });
+        }
+
+        tsx_is_waiting = false;
+  }));
+  while( tsx_is_waiting ) {
+    Meteor.sleep( 1000 );
+  }
+
+  return Out;
 }
 
 // **************************************************************
@@ -1071,6 +1182,7 @@ function tsx_MatchRotation( targetSession ) {
   cmd = cmd.replace('$001', targetSession.scale);
   cmd = cmd.replace('$002', targetSession.exposure);
 
+  var tsx_feeder = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         var result = tsx_return.split('|')[0].trim();
         Meteor._debug('Any error?: ' + result);
@@ -1079,9 +1191,14 @@ function tsx_MatchRotation( targetSession ) {
           Meteor._debug('SkyX_JS_MatchAngle Failed. Error: ' + result);
         }
         rotateSucess = true;
+        tsx_feeder = false;
       }
     )
   );
+  while( tsx_is_waiting ) {
+    Meteor.sleep( 1000 );
+  }
+
   return rotateSucess;
 }
 
@@ -1507,6 +1624,23 @@ Use this to set the last focus
     return result;
   },
 
+  getTargetReport( target ) {
+    UpdateStatus( ' Getting report : ' + target.targetFindName );
+    var result = tsx_TargetReport( target );
+    UpdateStatus( ' Received report' );
+    return result;
+  },
+
+  getTargetReports( targetArray ) {
+    UpdateStatus( ' Getting report : ' + target.targetFindName );
+    for (var i = 0; i < targetArray.length; i++) {
+      var target = targetArray[i];
+      var result = tsx_TargetReport( target );
+    }
+    UpdateStatus( ' Received report' );
+    return result;
+  },
+
   park( ) {
     UpdateStatus( ' Parking...' );
     var filter = tsx_GetServerStateValue('defaultFilter');
@@ -1530,7 +1664,7 @@ Use this to set the last focus
 // 8. Image Camera Temp
 export function findTargetSession() {
 
-  var targetSessions = TargetSessions.find({}).fetch();
+  var targetSessions = TargetSessions.find({ enabledActive: true }).fetch();
   var numSessions = targetSessions.length;
   Meteor._debug('Targets to check:' + numSessions);
 
@@ -1559,7 +1693,7 @@ export function findTargetSession() {
 
 // **************************************************************
 function getHigherPriorityTarget( validSession ) {
-  var targetSessions = TargetSessions.find({}).fetch();
+  var targetSessions = TargetSessions.find({enabledActive: true }).fetch();
   var numSessions = targetSessions.length;
 
   for (var i = 0; i < numSessions; i++) {
