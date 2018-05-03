@@ -129,7 +129,9 @@ class TargetSessionMenu extends Component {
 
       return (
         <div>
-          <Button icon='add' onClick={this.addEntry.bind(this)}/>
+          <Segment raised>
+            <Button icon='add' onClick={this.addEntry.bind(this)}/>
+          </Segment>
           {/* <Segment>
             <Button.Group basic size='small'>
               <Button icon='linkify' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
@@ -148,11 +150,13 @@ class TargetSessionMenu extends Component {
               </Modal.Description>
             </Modal.Content>
           </Modal>
-          <Item.Group divided>
+          <Segment raised>
+          <Item.Group divided unstackable>
             {this.props.targets.map( (target)=>{
               return <Target key={target._id} target={target} />
             })}
         </Item.Group>
+      </Segment>
       </div>
     )
   }

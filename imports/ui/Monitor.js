@@ -17,6 +17,7 @@ import {
 import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
 import { Seriess } from '../api/seriess.js';
 import { TargetSessions } from '../api/targetSessions.js';
+import { TargetReports } from '../api/targetReports.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 
 // Import the UI
@@ -39,6 +40,7 @@ class Monitor extends Component {
       monAngle: '_',
       monHA: '_',
       monTransit: '_',
+      monIsDark: '_',
       monitorStatus: '_',
 
       monitorDisplay: true,
@@ -73,8 +75,6 @@ class Monitor extends Component {
   }
 
   textTSX2() {
-
-
     // *******************************
     // get a session to use
     Meteor.call("tsxTestImageSession", function (error, result) {
@@ -110,33 +110,6 @@ class Monitor extends Component {
     // any remaining images
 
     Meteor.call("tsxTestImageSession", function (error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-      for (var i = 0; i < result.split('|').length; i++) {
-        var txt = result.split('|')[i].trim();
-        console.log('Found: ' + txt);
-      }
-      if (error && error.error === "logged-out") {
-        // show a nice error message
-        this.noFoundSessionOpen();
-
-        Session.set("errorMessage", "Please log in to post a comment.");
-      }
-      else {
-        // if success then TheSkyX has made this point the target...
-        // now get the coordinates
-        cmdSuccess = true;
-    }
-  }.bind(this));
-}
-
-  // *******************************
-  // This is effectively a test methods
-  // In the end everything is on the server.
-  getTargetDetails(target) {
-
-    Meteor.call("targetFind", target.targetFindName, function (error, result) {
-        // identify the error
         console.log('Error: ' + error);
         console.log('result: ' + result);
         for (var i = 0; i < result.split('|').length; i++) {
@@ -145,31 +118,16 @@ class Monitor extends Component {
         }
         if (error && error.error === "logged-out") {
           // show a nice error message
+          this.noFoundSessionOpen();
+
           Session.set("errorMessage", "Please log in to post a comment.");
         }
         else {
           // if success then TheSkyX has made this point the target...
           // now get the coordinates
           cmdSuccess = true;
-          var ra = result.split('|')[1].trim();
-          var dec = result.split('|')[2].trim();
-          var altitude = result.split('|')[3].trim();
-          this.setState({monRA: ra});
-          this.setState({monDEC: dec});
-          this.setState({monALT: atl});
-          var azimuth = result.split('|')[4].trim();
-          if (azimuth < 179)
-          //
-          // Simplify the azimuth value to simple east/west
-          //
-          {
-            this.setState({monAZ: "East"});
-          } else {
-            this.setState({monAZ: "West"});
-          }
-
-        }
-      }.bind(this));
+      }
+    }.bind(this));
   }
 
   // *******************************
@@ -178,86 +136,6 @@ class Monitor extends Component {
     Meteor.call("startScheduler", function (error, result) {
       }.bind(this));
   }
-
-  debugStartImaging(targetSession) {
-    // process for each filter
-    var template = TakeSeriesTemplates.findOne( {_id:targetSession.series._id});
-    var seriesProcess = template.processSeries;
-    console.log('Imaging process: ' + seriesProcess );
-
-    var numFilters = template.series.length;
-    console.log('Number of filters: ' + numFilters );
-
-    // load the filters
-    var takeSeries = [];
-    for (var i = 0; i < template.series.length; i++) {
-      var series = Seriess.findOne({_id:template.series[i].id});
-      console.log('Got series - ' + template.series[i].id + ', ' + series.filter);
-      if( typeof series != 'undefined') {
-        takeSeries.push(series);
-      }
-    }
-    console.log('Number of series: ' + takeSeries.length);
-    // sort the by the order.
-    takeSeries.sort(function(a, b){return b.order-a.order});
-    console.log('Sorted series: ' + takeSeries.length);
-    // set up for the cycle through the filters
-    for (var i = 0; i < takeSeries.length; i++) {
-
-      // do we go across the set of filters once and then repear
-      if( seriesProcess === 'across series' ) {
-        // use length and cycle until a stop condition
-        var remainingImages = false;
-        for (var acrossSeries = 0; acrossSeries < takeSeries.length; acrossSeries++) {
-          // take image
-          var series = takeSeries[acrossSeries]; // get the first in the order
-
-          // take image
-          // var res = takeSeriesImage(series);
-          console.log('Took image: ');// +res);
-
-          // check end conditions
-          if( !remainingImages && series.taken < series.repeat ) {
-            remainingImages = true;
-          }
-        }
-        // reset to check across series again
-        if( remainingImages ) {
-          i=0;
-        }
-      }
-
-      // do we do one whole filter first.
-      else if ( seriesProcess === 'per series' ) {
-        // use i to lock to the current filter
-        var series = takeSeries[i]; // get the first in the order
-
-        var taken = targetSession.imagesTakenFor(series._id);
-        var numImages = series.repeat - taken;
-        for (var perSeries = 0; perSeries < numImages; repeatSeries++) {
-
-          // take image
-          // var res = takeSeriesImage(series);
-          console.log('Took image: ' );
-
-        }
-        // now switch to next filter
-      }
-      else {
-        console.log('*** FAILED to process seriess');
-      }
-    }
-    // takeImage(exposure, filter)
-    // check Twilight - force stop
-    // check minAlt - stop - find next
-    // check stopTime - stop - find next
-    // check reFocusTemp - refocus
-    // if not meridian - dither...
-    // if meridian  - flip/slew... - preRun: focus - CLS - rotation - guidestar - guiding...
-    // if targetDone/stopped... find next
-
-  }
-
 
   closeMonitorDisplay() {
     this.setState({monitorDisplay: false});
@@ -282,31 +160,27 @@ class Monitor extends Component {
   }
 
   updateMonitor(nextProps) {
+
+    var tid;
+    var ttid = this.props.targetSessionId;//.value;
+    tid = ttid[0].value;
+    // reports
+    var report = TargetReports.findOne( {
+      target_id: tid
+    });
+
     this.setState({
-      targetImageName: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'targetImageName';
-      }).value,
-      targetRA: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'targetRA';
-      }).value,
-      targetDEC: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'targetDEC';
-      }).value,
-      targetALT: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'targetALT';
-      }).value,
-      targetAZ: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'targetAZ';
-      }).value,
-      targetHA: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'targetHA';
-      }).value,
-      targetTransit: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'targetTransit';
-      }).value,
-      currentStage: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'currentStage';
-      }).value,
+      monRA: report.RA,
+      monDEC: report.DEC,
+      monALT: report.ALT,
+      monAZ: report.AZ,
+      monHA: report.HA,
+      monTransit: report.TRANSIT,
+      monAngle: report.angle,
+      monIsDark: report.isDark,
+      // currentStage: nextProps.tsxInfo.find(function(element) {
+      //   return element.name == 'currentStage';
+      // }).value,
     });
   }
 
@@ -383,7 +257,9 @@ class Monitor extends Component {
     } catch (e) {
       console.log('error');
       return (
-        <div/>
+        // <div>
+          <h3>No active target</h3>
+        // </div>
       )
     }
   }
@@ -393,44 +269,47 @@ class Monitor extends Component {
 // sample data: 	echo "`date "+%H:%M:%S"` Mount Direction: $mntDir, Altitude: $mntAlt degrees "
 
     return (
+      <div>
+         <Segment raised>
+           <h3>Scheduler: </h3>
+           <Button.Group icon>
+             <Button icon='play'  onClick={this.playScheduler.bind(this)}/>
+             {/* <Button icon='pause' onClick={this.pauseScheduler.bind(this)}  /> */}
+             <Button icon='stop' onClick={this.stopScheduler.bind(this)} />
+             {/*
+
+             <Button onClick={this.textTSX.bind(this)}>Test</Button>
+             <Button onClick={this.textTSX2.bind(this)}>Test2</Button>
+             imagesTaken: TargetSessions.findOne({_id: this.props.target._id}).totalImagesTaken(),
+             imagesPlanned: TargetSessions.findOne({_id:this.props.target._id}).totalImagesPlanned(),
+
+             */}
+         </Button.Group>
+         <Button icon='refresh' onClick={this.updateMonitor.bind(this)}/>
+         <Button.Group icon floated='right'>
+           <Button icon='checkmark box' onClick={this.testPicking.bind(this)} />
+           <Button icon='move' onClick={this.testEndConditions.bind(this)} />
+           <Button icon='find' onClick={this.testTryTarget.bind(this)} />
+           <Button icon='camera' onClick={this.testTryTarget.bind(this)} />
+         </Button.Group>
+           {/* <Progress
+             value={this.totalTaken()}
+             total={this.totalPlanned()}
+             progress='ratio'>Images Taken</Progress> */}
+         </Segment>
       <Segment.Group>
         <Segment>
-          <Label>RA <Label.Detail>{Number(this.state.targetRA).toFixed(4)}</Label.Detail></Label>
-          <Label>DEC <Label.Detail>{Number(this.state.targetDEC).toFixed(4)}</Label.Detail></Label>
-          <Label>Angle <Label.Detail>{Number(this.state.targetAngle).toFixed(4)}</Label.Detail></Label>
+          <Label>RA <Label.Detail>{Number(this.state.monRA).toFixed(4)}</Label.Detail></Label>
+          <Label>DEC <Label.Detail>{Number(this.state.monDEC).toFixed(4)}</Label.Detail></Label>
+          <Label>Angle <Label.Detail>{Number(this.state.monAngle).toFixed(4)}</Label.Detail></Label>
         </Segment>
         <Segment>
-          <Label>Atl <Label.Detail>{Number(this.state.targetALT).toFixed(4)}</Label.Detail></Label>
-          <Label>Az <Label.Detail>{this.state.targetAZ}</Label.Detail></Label>
-          <Label>HA <Label.Detail>{Number(this.state.targetHA).toFixed(4)}</Label.Detail></Label>
-          <Label>Transit <Label.Detail>{Number(this.state.targetTransit).toFixed(4)}</Label.Detail></Label>
+          <Label>Atl <Label.Detail>{Number(this.state.monALT).toFixed(4)}</Label.Detail></Label>
+          <Label>Az <Label.Detail>{this.state.monAZ}</Label.Detail></Label>
+          <Label>HA <Label.Detail>{Number(this.state.monHA).toFixed(4)}</Label.Detail></Label>
+          <Label>Transit <Label.Detail>{Number(this.state.monTransit).toFixed(4)}</Label.Detail></Label>
         </Segment>
-        <Segment>
-          <h3>Scheduler: </h3>
-          <Button.Group icon>
-            <Button icon='play'  onClick={this.playScheduler.bind(this)}/>
-            {/* <Button icon='pause' onClick={this.pauseScheduler.bind(this)}  /> */}
-            <Button icon='stop' onClick={this.stopScheduler.bind(this)} />
-            {/*
-
-            <Button onClick={this.textTSX.bind(this)}>Test</Button>
-            <Button onClick={this.textTSX2.bind(this)}>Test2</Button>
-            imagesTaken: TargetSessions.findOne({_id: this.props.target._id}).totalImagesTaken(),
-            imagesPlanned: TargetSessions.findOne({_id:this.props.target._id}).totalImagesPlanned(),
-
-            */}
-        </Button.Group>
-        <Button.Group icon floated='right'>
-          <Button icon='checkmark box' onClick={this.testPicking.bind(this)} />
-          <Button icon='move' onClick={this.testEndConditions.bind(this)} />
-          <Button icon='find' onClick={this.testTryTarget.bind(this)} />
-          <Button icon='camera' onClick={this.testTryTarget.bind(this)} />
-        </Button.Group>
-          {/* <Progress
-            value={this.totalTaken()}
-            total={this.totalPlanned()}
-            progress='ratio'>Images Taken</Progress> */}
-        </Segment>
+      </Segment.Group>
         <Segment>
         {this.renderTarget()}
         </Segment>
@@ -473,21 +352,22 @@ class Monitor extends Component {
             </Button>
           </Modal.Actions>
         </Modal>
-
-      </Segment.Group>
+      {/* </Segment.Group> */}
+    </div>
     )
   }
 }
 export default withTracker(() => {
 
   return {
+    reports: TargetReports.find().fetch(),
     targetSessionId: TheSkyXInfos.find({name: 'imagingSessionId'}).fetch(),
-    targetImageDEC: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetDEC }),
-    targetImageRA: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetRA }),
-    targetImageALT: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetALT }),
-    targetImageAZ: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetAZ }),
-    targetHA: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetHA }),
-    targetTransit: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetTransit }),
+    // targetImageDEC: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetDEC }),
+    // targetImageRA: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetRA }),
+    // targetImageALT: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetALT }),
+    // targetImageAZ: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetAZ }),
+    // targetHA: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetHA }),
+    // targetTransit: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetTransit }),
     tsxInfo: TheSkyXInfos.find({}).fetch(),
     seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
     takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),

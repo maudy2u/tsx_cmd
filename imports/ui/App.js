@@ -589,9 +589,9 @@ class App extends Component {
             {/* <Menu.Item name='logout' active={activeItem === 'logout'} onClick={this.handleMenuItemClick} /> */}
           </Menu.Menu>
         </Menu>
-        <Segment raised>
+        {/* <Segment raised> */}
           {this.renderMenuSegments()}
-        </Segment>
+        {/* </Segment> */}
       </div>
     )
   }
@@ -709,6 +709,7 @@ class App extends Component {
         <header>
           <h1>Image Sessions</h1>
           <div>
+            <Segment.Group>
             <Segment>
               <Button name='showMonitor' icon='dashboard' onClick={this.handleToggle.bind(this)}/>
               <Button icon='refresh' onClick={this.connectToTSX.bind(this)}/>
@@ -725,9 +726,12 @@ class App extends Component {
                   {this.state.port}
                 </Label.Detail>
               </Label>
-              <Label>Status: <Label.Detail>{this.state.currentStage}</Label.Detail></Label>
               {this.renderPortEditor()}
             </Segment>
+            <Segment>
+              <Label>Status: <Label.Detail>{this.state.currentStage}</Label.Detail></Label>
+            </Segment>
+          </Segment.Group>
             {/* { this.tsxConnectionFailed() } */}
             { this.showMain() }
             {/* *******************************

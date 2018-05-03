@@ -50,6 +50,10 @@ class Target extends Component {
 
   }
 
+  componentWillReceiveProps(nextProps) {
+    this.updateMonitor(nextProps);
+  }
+
   eraseProgress() {
     var progress = [];
     TargetSessions.update({_id:this.props.target._id},{
@@ -91,6 +95,7 @@ class Target extends Component {
           updatedAt: update,
           */
 //          var report = TargetReports.findOne({_id: this.props.target.report_id });
+/*
           if( typeof result != 'undefined') {
             this.setState({altitude: result.ALT});
             this.setState({ra: result.RA});
@@ -99,10 +104,36 @@ class Target extends Component {
 
             this.forceUpdate();
           }
+          */
+          var nextProps;
+          this.updateMonitor(nextProps);
+
       }.bind(this));
     } catch (e) {
 
     }
+  }
+
+  updateMonitor(nextProps) {
+
+    var prop;
+    try {
+      prop = nextProps.target;
+    } catch (e) {
+      prop = this.props.target;
+    }
+
+    // reports
+    var report = TargetReports.findOne( {
+      target_id: prop._id,
+    });
+
+    this.setState({
+      ra: report.RA,
+      dec: report.DEC,
+      altitude: report.ALT,
+      azimuth: report.AZ,
+    });
   }
 
   copyEntry() {
@@ -297,6 +328,7 @@ class Target extends Component {
 export default withTracker(() => {
     return {
       targets2: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
+      report: TargetReports.find().fetch(),
   };
 
 })(Target);
