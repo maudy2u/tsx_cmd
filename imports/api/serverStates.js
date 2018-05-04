@@ -29,6 +29,12 @@ export const tsx_ServerStates = {
   imagingSessionId: 'imagingSessionId',
   imagingSession: 'imagingSession', // use to report current imaging targets
 
+  // Dithering related states
+  defaultDithering: 'defaultDithering',
+  imagingPixelSize: 'imagingPixelSize',
+  minDitherFactor: 'minDitherFactor',
+  maxDitherFactor: 'maxDitherFactor',
+
   defaultFilter: 'defaultFilter',
   defaultMinAlt: 'defaultMinAlt',
   defaultCoolTemp: 'defaultCoolTemp',
@@ -40,7 +46,6 @@ export const tsx_ServerStates = {
   defaultSoftPark: 'defaultSoftPark',
   defaultSleepTime: 'defaultSleepTime',
   defaultGuideExposure: 'defaultGuideExposure',
-  defaultDithering: 'defaultDithering',
 
   defaultMinSunAlt: 'defaultMinSunAlt',
   isTwilightEnabled: 'isTwilightEnabled',

@@ -15,6 +15,7 @@ import { TargetSessions } from '../api/targetSessions.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 
 // Import the UI
+import DefaultSettings from './DefaultSettings.js';
 import Monitor from './Monitor.js';
 import TargetSessionMenu from './TargetSessionMenu.js';
 import Filter from './Filter.js';
@@ -83,73 +84,6 @@ class App extends Component {
   modalConnectionFailedOpen = () => this.setState({ modalConnectionFailed: true });
   modalConnectionFailedClose = () => this.setState({ modalConnectionFailed: false });
 
-  componentWillReceiveProps(nextProps) {
-    this.updateDefaults(nextProps);
-  }
-
-  updateDefaults(nextProps) {
-    this.setState({
-      ip: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'ip';
-      }).value,
-      port: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'port';
-      }).value,
-      defaultCoolTemp: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultCoolTemp';
-      }).value,
-      defaultFocusTempDiff: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultFocusTempDiff';
-      }).value,
-      defaultMeridianFlip: Boolean(nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultMeridianFlip';
-      }).value),
-      defaultStartTime: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultStartTime';
-      }).value,
-      defaultStopTime: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultStopTime';
-      }).value,
-      defaultPriority: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultPriority';
-      }).value,
-      currentStage: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'currentStage';
-      }).value,
-      defaultSoftPark: Boolean(nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultSoftPark';
-      }).value),
-      defaultMinAlt: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultMinAlt';
-      }).value,
-      defaultSleepTime: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultSleepTime';
-      }).value,
-      defaultPriority: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultPriority';
-      }).value,
-      isTwilightEnabled: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'isTwilightEnabled';
-      }).value,
-      isFocus3Enabled: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'isFocus3Enabled';
-      }).value,
-      isFocus3Binned: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'isFocus3Binned';
-      }).value,
-      defaultGuideExposure: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultGuideExposure';
-      }).value,
-      defaultDithering: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultDithering';
-      }).value,
-      defaultMinSunAlt: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultMinSunAlt';
-      }).value,
-
-    });
-
-  }
   saveTSXServerIp() {
     this.modalEnterIpClose();
     if( this.state.ip == ""  ) {
@@ -261,198 +195,6 @@ class App extends Component {
     tsx_UpdateServerState(param, value);
   }
 
-  getDefault( name ) {
-    var found;
-    var result;
-    try {
-      found = this.props.tsxInfo.find(function(element) {
-        return element.name == name;
-      });
-      result = found.value;
-    } catch (e) {
-      result = '';
-    } finally {
-      return result;
-    }
-  }
-
-  // Use this method to save any defaults gathered
-  saveDefaults(){
-
-    this.saveDefaultState('ip');
-    this.saveDefaultState('port');
-    this.saveDefaultState('defaultMinAlt');
-    this.saveDefaultState('defaultCoolTemp');
-    this.saveDefaultState('defaultFocusTempDiff');
-    this.saveDefaultState('defaultMeridianFlip');
-    this.saveDefaultState('defaultStartTime');
-    this.saveDefaultState('defaultStopTime');
-    this.saveDefaultState('defaultPriority');
-    this.saveDefaultState('defaultSoftPark');
-    this.saveDefaultState('defaultSleepTime');
-    this.saveDefaultState('isTwilightEnabled');
-    this.saveDefaultState('isFocus3Enabled');
-    this.saveDefaultState('isFocus3Binned');
-    this.saveDefaultState('defaultGuideExposure');
-    this.saveDefaultState('defaultDithering');
-    this.saveDefaultState('defaultMinSunAlt');
-
-  }
-  // *******************************
-  //
-  renderDefaultSettings() {
-    const timeOptions = {
-      //inline: true,
-      format: 'YYYY-MM-DD HH:mm',
-      sideBySide: true,
-      // icons: time,
-      // minDate: new Date(),
-    };
-
-    return (
-      <Form>
-      <Segment.Group>
-        <Segment>
-          <Button icon='save' onClick={this.saveDefaults.bind(this)} />
-          {/* <Button icon='save' onClick={this.saveTSXServerConnection.bind(this)}> Save Connection </Button>
-          {this.renderTSXConnetion()} */}
-        </Segment>
-        <Segment>
-          <h3 className="ui header">Defaults</h3>
-          <Form.Group>
-            <Form.Checkbox
-              label='Meridian Flip Enabled '
-              name='defaultMeridianFlip'
-              toggle
-              placeholder= 'Enable auto meridian flip'
-              checked={this.state.defaultMeridianFlip}
-              onChange={this.handleToggle.bind(this)}
-            />
-            <Form.Checkbox
-              label='Soft Park Enabled (Stop tracking) '
-              name='defaultSoftPark'
-              toggle
-              placeholder= 'Enable soft parking'
-              checked={this.state.defaultSoftPark}
-              onChange={this.handleToggle.bind(this)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Checkbox
-              label='Checking Focus Enabled (@Focus3) '
-              name='isFocus3Enabled'
-              toggle
-              placeholder= 'Enable focus checking'
-              checked={this.state.isFocus3Enabled}
-              onChange={this.handleToggle.bind(this)}
-            />
-            <Form.Checkbox
-              label='Bin 2x2 Focus Enabled '
-              name='isFocus3Binned'
-              toggle
-              placeholder= 'Enable to bin when focusing'
-              checked={this.state.isFocus3Binned}
-              onChange={this.handleToggle.bind(this)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Checkbox
-              label='Twilight Check Enabled '
-              name='isTwilightEnabled'
-              toggle
-              placeholder= 'Enable twilight check'
-              checked={this.state.isTwilightEnabled}
-              onChange={this.handleToggle.bind(this)}
-            />
-            <Form.Input
-              label='Twilight Alittude for Sun '
-              name='defaultMinSunAlt'
-              placeholder='Enter negative degrees below horizon'
-              value={this.state.defaultMinSunAlt}
-              onChange={this.handleChange}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Input
-              label='AutoGuide Exposure '
-              name='defaultGuideExposure'
-              placeholder='Enter number seconds'
-              value={this.state.defaultGuideExposure}
-              onChange={this.handleChange}
-            />
-            <Form.Input
-              label='Minimum Altitude '
-              name='defaultMinAlt'
-              placeholder='Enter Minimum Altitude to start/stop'
-              value={this.state.defaultMinAlt}
-              onChange={this.handleChange}
-            />
-            <Form.Input
-              label='Focusing Temperature '
-              name='defaultFocusTempDiff'
-              placeholder='Temp diff to run auto focus'
-              value={this.state.defaultFocusTempDiff}
-              onChange={this.handleChange}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Input
-              label='Dither after (0 disables): '
-              name='defaultDithering'
-              placeholder='Images before dither'
-              value={this.state.defaultDithering}
-              onChange={this.handleChange}
-            />
-            <Form.Input
-              label='Cooling Temperature: '
-              name='defaultCoolTemp'
-              placeholder='-20'
-              value={this.state.defaultCoolTemp}
-              onChange={this.handleChange}
-            />
-            <Form.Input
-              label='Time to sleep when no target '
-              name='defaultSleepTime'
-              placeholder='Minutes to sleep'
-              value={this.state.defaultSleepTime}
-              onChange={this.handleChange}
-            />
-          </Form.Group>
-        </Segment>
-        <Segment>
-            <h4 className="ui header">Priority: {this.state.defaultPriority}</h4>
-            <ReactSimpleRange
-              label
-              step={1}
-              min={1}
-              max={19}
-              value={this.state.defaultPriority}
-              sliderSize={12}
-              thumbSize={18}
-              onChange={this.handlePriorityChange}
-            />
-        </Segment>
-        <Segment>
-            <h4 className="ui header">Set Default START time</h4>
-            <Timekeeper
-              time={this.state.defaultStartTime}
-              onChange={this.handleStartChange}
-            />
-          </Segment>
-          <Segment>
-            <h4 className="ui header">Set Default STOP time</h4>
-            {/* <DateTime />pickerOptions={{format:"LL"}} value="2017-04-20"/> */}
-            <Timekeeper
-              time={this.state.defaultStopTime}
-              onChange={this.handleStopChange}
-            />
-          </Segment>
-      </Segment.Group>
-    </Form>
-
-    );
-  }
-
   renderDevices() {
 
     var mount = TheSkyXInfos.findOne().mount();
@@ -509,7 +251,10 @@ class App extends Component {
       return this.renderDevices();
 
     } else if (this.state.activeItem == 'Settings') {
-      return this.renderDefaultSettings();
+      // return this.renderDefaultSettings();
+      return (
+        <DefaultSettings />
+      )
 
     } else if (this.state.activeItem == 'logout') {
       return this.renderLogout();
@@ -520,29 +265,6 @@ class App extends Component {
         <TargetSessionMenu />
       )
     }
-  }
-
-  // *******************************
-  //
-  addNewTemplate() {
-    TakeSeriesTemplates.insert({
-      name: "",
-      processSeries: "across series",
-      // series: {
-      //   order: 0,
-      //   checked: false,
-      //   series: [
-      //     { order: 'Order', value: 0 },
-      //     { exposure: 'Exposure', value: 1 },
-      //     { binning: 'Binning', value: 1 },
-      //     { frame: 'Frame', value: 'Light' },
-      //     { filter: 'LUM', value: 0 },
-      //     { repeat: 'Repeat', value: 1 },
-      //   ],
-      // },
-      createdAt: new Date(), // current time
-    });
-    return;
   }
 
   connectToTSX() {
@@ -660,7 +382,7 @@ class App extends Component {
 
   showMain() {
 
-//    if( !Session.get( 'showMonitor' ) {
+    //    if( !Session.get( 'showMonitor' ) {
     if( !this.state.showMonitor ) {
       return this.renderMenu();
     }

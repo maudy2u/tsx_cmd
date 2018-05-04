@@ -32,7 +32,7 @@ import ReactSimpleRange from 'react-simple-range';
 import Timekeeper from 'react-timekeeper';
 
 // App component - represents the whole app
-class Settings extends Component {
+class DefaultSettings extends Component {
 
   state = {
     activeItem: 'Targets',
@@ -319,12 +319,28 @@ class Settings extends Component {
           </Form.Group>
           <Form.Group>
             <Form.Input
-              label='Dither after (0 disables): '
+              label='Dither after X images (0 disables): '
               name='defaultDithering'
               placeholder='Images before dither'
               value={this.state.defaultDithering}
               onChange={this.handleChange}
             />
+            <Form.Input
+              label='Dithering Minimum Pixel Move '
+              name='minDitherFactor'
+              placeholder='Minimum number of pixels'
+              value={this.state.minDitherFactor}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='Dithering Maximum Pixel Move '
+              name='maxDitherFactor'
+              placeholder='Maximum number of pixels'
+              value={this.state.maxDitherFactor}
+              onChange={this.handleChange}
+            />
+          </Form.Group>
+          <Form.Group>
             <Form.Input
               label='Cooling Temperature: '
               name='defaultCoolTemp'
@@ -373,6 +389,7 @@ class Settings extends Component {
     </Form>
 
     );
+  }
 }
 // *******************************
 // THIS IS THE DEFAULT EXPORT AND IS WHERE THE LOADING OF THE COMPONENT STARTS
@@ -386,4 +403,4 @@ export default withTracker(() => {
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
       targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
   };
-})(Settings);
+})(DefaultSettings);

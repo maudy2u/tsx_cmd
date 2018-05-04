@@ -21,10 +21,12 @@
 // January 13, 2018
 //
 
-var minDitherFactor = 1.5;
-var maxDitherFactor = 3;
+var pixelSize = $000; // 3.8;
+var minDitherFactor = $001; // 3;
+var maxDitherFactor = $002;  // 7;
 
 var FITSProblem = "no";
+var FITSPixel;
 
 ccdsoftCameraImage.AttachToActiveImager();
 
@@ -48,14 +50,14 @@ if ( ccdsoftCamera.ImageUseDigitizedSkySurvey == "1" )
 } else {
 	try
 	{
-		ccdsoftCameraImage.FITSKeyword("XPIXSZ")
+		FITSPixel = ccdsoftCameraImage.FITSKeyword("XPIXSZ")
 	}
 	catch (repErr)
 	//
 	//	If error, report it.
 	//
 	{
-		FITSProblem = "yes";
+		FITSPixel = pixelSize;
 	}
 
 	try

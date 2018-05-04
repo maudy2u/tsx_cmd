@@ -1044,10 +1044,10 @@ function hasReachedEndCondition(target) {
     // no need to return false... can keep going.
   }
 
-  // var ditherTarget = tsx_GetServerState('defaultDithering').value;
-  // if( ditherTarget ) {
-  //   var dither = tsx_dither( target );
-  // }
+  var ditherTarget = tsx_GetServerStateValue('defaultDithering');
+  if( ditherTarget > 0 ) {
+    var dither = tsx_dither( target );
+  }
 
   return false;
 }
@@ -1058,6 +1058,14 @@ function tsx_dither( target ) {
   var Out = false;
   // var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale, target.expos);
   var cmd = shell.cat(tsx_cmd('SkyX_JS_NewDither'));
+
+  var pixelSize = tsx_GetServerStateValue('imagingPixelSize');
+  var minDitherFactor = tsx_GetServerStateValue('minDitherFactor');
+  var maxDitherFactor = tsx_GetServerStateValue('maxDitherFactor');
+
+  cmd = cmd.replace("$000", pixelSize ); // var pixelSize = $000; // 3.8;
+  cmd = cmd.replace("$001", minDitherFactor ); // var minDitherFactor = $001; // 3
+  cmd = cmd.replace("$002", maxDitherFactor ); // var maxDitherFactor = $002;  // 7;
 
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
