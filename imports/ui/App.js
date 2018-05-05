@@ -21,7 +21,7 @@ import TargetSessionMenu from './TargetSessionMenu.js';
 import Filter from './Filter.js';
 import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
-import TheSkyXInfo from './TheSkyXInfo.js';
+//import TheSkyXInfo from './TheSkyXInfo.js';
 
 import {
   tsx_ServerStates,
@@ -45,22 +45,7 @@ class App extends Component {
 
     ip: 'Not connected',
     port: 'Not connected',
-    defaultMinSunAlt: -15,
-    defaultMinAlt: 30,
-    defaultCoolTemp: -20,
-    defaultFocusTempDiff: 0.7,
-    defaultMeridianFlip: true,
-    defaultSoftPark: false,
-    defaultStartTime: '20:00',
-    defaultStopTime: '6:00',
-    defaultPriority: 9,
-    defaultSleepTime: 5,
-    defaultDithering: 1,
     currentStage: '',
-    isTwilightEnabled: true,
-    isFocus3Enabled: false,
-    isFocus3Binned: false,
-    defaultGuideExposure: 7,
   };
 
   handleToggle = (e, { name, value }) => this.setState({ [name]: Boolean(!eval('this.state.'+name)) })
@@ -119,6 +104,47 @@ class App extends Component {
 
   // *******************************
   //
+  componentWillReceiveProps(nextProps) {
+    this.updateDefaults(nextProps);
+  }
+
+  updateDefaults(nextProps) {
+    this.setState({
+      ip: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'ip';
+      }).value,
+      port: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'port';
+      }).value,
+      currentStage: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'currentStage';
+      }).value,
+    });
+
+  }
+
+  getDefault( name ) {
+    var found;
+    var result;
+    try {
+      found = this.props.tsxInfo.find(function(element) {
+        return element.name == name;
+      });
+      result = found.value;
+    } catch (e) {
+      result = '';
+    } finally {
+      return result;
+    }
+  }
+
+
+  // Use this method to save any defaults gathered
+  saveDefaults(){
+    this.saveDefaultState('ip');
+    this.saveDefaultState('port');
+  }
+
   // *******************************
   //
   addNewFilter(event) {

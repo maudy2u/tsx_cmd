@@ -20,7 +20,7 @@ import TargetSessionMenu from './TargetSessionMenu.js';
 import Filter from './Filter.js';
 import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
-import TheSkyXInfo from './TheSkyXInfo.js';
+//import TheSkyXInfo from './TheSkyXInfo.js';
 
 import {
   tsx_ServerStates,
@@ -60,6 +60,8 @@ class DefaultSettings extends Component {
     isFocus3Enabled: false,
     isFocus3Binned: false,
     defaultGuideExposure: 7,
+    minDitherFactor: 3,
+    maxDitherFactor: 7,
   };
 
   handleToggle = (e, { name, value }) => this.setState({ [name]: Boolean(!eval('this.state.'+name)) })
@@ -151,7 +153,12 @@ class DefaultSettings extends Component {
       defaultMinSunAlt: nextProps.tsxInfo.find(function(element) {
         return element.name == 'defaultMinSunAlt';
       }).value,
-
+      minDitherFactor: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'minDitherFactor';
+      }).value,
+      maxDitherFactor: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'maxDitherFactor';
+      }).value,
     });
 
   }
@@ -217,6 +224,8 @@ class DefaultSettings extends Component {
     this.saveDefaultState('defaultGuideExposure');
     this.saveDefaultState('defaultDithering');
     this.saveDefaultState('defaultMinSunAlt');
+    this.saveDefaultState('minDitherFactor');
+    this.saveDefaultState('maxDitherFactor');
 
   }
 

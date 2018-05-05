@@ -221,7 +221,7 @@ function SetUpAutoGuiding(targetSession) {
   var star = tsx_FindGuideStar();
 
   tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
-  //
+
   tsx_StartAutoGuide( star.guideStarX, star.guideStarY );
 }
 
@@ -1055,6 +1055,10 @@ function hasReachedEndCondition(target) {
 // **************************************************************
 function tsx_dither( target ) {
 
+  // first abort Guiding
+  tsx_AbortGuider();
+
+  //
   var Out = false;
   // var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale, target.expos);
   var cmd = shell.cat(tsx_cmd('SkyX_JS_NewDither'));
@@ -1085,6 +1089,9 @@ function tsx_dither( target ) {
   while( tsx_is_waiting ) {
     Meteor.sleep( 1000 );
   }
+
+  // now redo Autoguiding...
+  SetUpAutoGuiding( target );
 
   return Out;
 

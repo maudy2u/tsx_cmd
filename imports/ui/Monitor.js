@@ -26,7 +26,7 @@ import TargetSessionMenu from './TargetSessionMenu.js';
 // import Filter from './Filter.js';
 import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
-import TheSkyXInfo from './TheSkyXInfo.js';
+//import TheSkyXInfo from './TheSkyXInfo.js';
 
 class Monitor extends Component {
 
