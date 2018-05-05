@@ -115,7 +115,7 @@ class TakeSeriesTemplateEditor extends Component {
               toggle
               name='repeatSeries'
               checked={this.state.repeatSeries}
-              onChange={this.onChangeChecked.bind(this)}
+              onChange={this.onChangeChecked}
             />
             {/* <Form.Checkbox onChange={this.seriesProcessChange} /> */}
             <Form.Input

@@ -135,7 +135,7 @@ class TakeSeries extends Component {
               */}
             <Modal
               open={this.state.deleteFailed}
-              onClose={this.deleteFailedClose.bind(this)}
+              onClose={this.deleteFailedClose}
               basic
               size='small'
               closeIcon>

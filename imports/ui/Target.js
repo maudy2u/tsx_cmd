@@ -282,7 +282,7 @@ class Target extends Component {
           label='  '
           toggle
           checked={this.props.target.enabledActive}
-          onChange={this.onChangeChecked.bind(this)}
+          onChange={this.onChangeChecked}
         />
         <Item.Header as='a' onClick={this.editEntry.bind(this)}>
           {this.props.target.targetFindName}

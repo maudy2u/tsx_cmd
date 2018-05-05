@@ -65,19 +65,26 @@ class DefaultSettings extends Component {
     imagingPixelSize: 3.8,
   };
 
-  handleToggle = (e, { name, value }) => this.setState({ [name]: !Boolean(eval('this.state.' + name)) });
+  // requires the ".bind(this)", on the callers
+  handleToggle = (e, { name, value }) => {
+
+    var val = eval( 'this.state.' + name);
+
+    this.setState({
+      [name]: !val
+    });
+    this.saveDefaultState( name );
+  };
+
+  // handleToggle = (e, { name, value }) => {
+  //   Meteor.call( 'updateServerState', name, !value , function(error, result) {
+  //   });
+  // };
+
 //  handleChange = (e, { name, value }) => this.setState({ [name]: value.trim() });
   handleChange = (e, { name, value }) => {
-
     this.setState({ [name]: value.trim() });
     this.saveDefaultState( name );
-    // Meteor.call( 'updateServerState', name, value.trim() , function(error, result) {
-    //     // identify the error
-    //     if (error && error.error === "logged-out") {
-    //       // show a nice error message
-    //       Session.set("errorMessage", "Please log edit.");
-    //     }
-    // });//.bind(this));
   };
 
   handleChangeAndSave = (e, { name, value }) => this.setSaveState(name, value.trim());
@@ -273,6 +280,8 @@ class DefaultSettings extends Component {
       // minDate: new Date(),
     };
 
+    // const handleToggle = () => this.handleToggle;
+
     return (
       <Form>
       <Segment.Group>
@@ -290,7 +299,7 @@ class DefaultSettings extends Component {
               toggle
               placeholder= 'Enable auto meridian flip'
               checked={this.state.defaultMeridianFlip}
-              onChange={this.handleToggle}
+              onChange={this.handleToggle.bind(this)}
             />
             <Form.Checkbox
               label='Soft Park Enabled (Stop tracking) '
@@ -298,7 +307,7 @@ class DefaultSettings extends Component {
               toggle
               placeholder= 'Enable soft parking'
               checked={this.state.defaultSoftPark}
-              onChange={this.handleToggle}
+              onChange={this.handleToggle.bind(this)}
             />
           </Form.Group>
           <Form.Group>
@@ -308,7 +317,7 @@ class DefaultSettings extends Component {
               toggle
               placeholder= 'Enable focus checking'
               checked={this.state.isFocus3Enabled}
-              onChange={this.handleToggle}
+              onChange={this.handleToggle.bind(this)}
             />
             <Form.Checkbox
               label='Bin 2x2 Focus Enabled '
@@ -316,7 +325,7 @@ class DefaultSettings extends Component {
               toggle
               placeholder= 'Enable to bin when focusing'
               checked={this.state.isFocus3Binned}
-              onChange={this.handleToggle}
+              onChange={this.handleToggle.bind(this)}
             />
           </Form.Group>
           <Form.Group>
@@ -326,7 +335,7 @@ class DefaultSettings extends Component {
               toggle
               placeholder= 'Enable twilight check'
               checked={this.state.isTwilightEnabled}
-              onChange={this.handleToggle}
+              onChange={this.handleToggle.bind(this)}
             />
             <Form.Input
               label='Twilight Alittude for Sun '
