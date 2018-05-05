@@ -62,10 +62,24 @@ class DefaultSettings extends Component {
     defaultGuideExposure: 7,
     minDitherFactor: 3,
     maxDitherFactor: 7,
+    imagingPixelSize: 3.8,
   };
 
-  handleToggle = (e, { name, value }) => this.setState({ [name]: Boolean(!eval('this.state.'+name)) })
-  handleChange = (e, { name, value }) => this.setState({ [name]: value.trim() });
+  handleToggle = (e, { name, value }) => this.setState({ [name]: !Boolean(eval('this.state.' + name)) });
+//  handleChange = (e, { name, value }) => this.setState({ [name]: value.trim() });
+  handleChange = (e, { name, value }) => {
+
+    this.setState({ [name]: value.trim() });
+    this.saveDefaultState( name );
+    // Meteor.call( 'updateServerState', name, value.trim() , function(error, result) {
+    //     // identify the error
+    //     if (error && error.error === "logged-out") {
+    //       // show a nice error message
+    //       Session.set("errorMessage", "Please log edit.");
+    //     }
+    // });//.bind(this));
+  };
+
   handleChangeAndSave = (e, { name, value }) => this.setSaveState(name, value.trim());
   setSaveState( name, value ) {
     this.setState({ [name]: value });
@@ -90,11 +104,19 @@ class DefaultSettings extends Component {
   modalConnectionFailedOpen = () => this.setState({ modalConnectionFailed: true });
   modalConnectionFailedClose = () => this.setState({ modalConnectionFailed: false });
 
-  componentWillReceiveProps(nextProps) {
-    this.updateDefaults(nextProps);
+  componentDidMount() {
+    this.updateDefaults(this.props);
   }
 
   updateDefaults(nextProps) {
+    if( typeof nextProps == 'undefined'  ) {
+      return;
+    }
+
+    if( typeof nextProps.tsxInfo == 'undefined'  ) {
+      return;
+    }
+
     this.setState({
       ip: nextProps.tsxInfo.find(function(element) {
         return element.name == 'ip';
@@ -159,6 +181,9 @@ class DefaultSettings extends Component {
       maxDitherFactor: nextProps.tsxInfo.find(function(element) {
         return element.name == 'maxDitherFactor';
       }).value,
+      imagingPixelSize: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'imagingPixelSize';
+      }).value,
     });
 
   }
@@ -186,7 +211,14 @@ class DefaultSettings extends Component {
   // Generic Method to determine default to save.
   saveDefaultState( param ) {
     var value = eval("this.state."+param);
-    tsx_UpdateServerState(param, value);
+
+    Meteor.call( 'updateServerState', param, value , function(error, result) {
+
+        if (error && error.error === "logged-out") {
+          // show a nice error message
+          Session.set("errorMessage", "Please fix.");
+        }
+    });//.bind(this));
   }
 
   getDefault( name ) {
@@ -226,6 +258,7 @@ class DefaultSettings extends Component {
     this.saveDefaultState('defaultMinSunAlt');
     this.saveDefaultState('minDitherFactor');
     this.saveDefaultState('maxDitherFactor');
+    this.saveDefaultState('imagingPixelSize');
 
   }
 
@@ -257,7 +290,7 @@ class DefaultSettings extends Component {
               toggle
               placeholder= 'Enable auto meridian flip'
               checked={this.state.defaultMeridianFlip}
-              onChange={this.handleToggle.bind(this)}
+              onChange={this.handleToggle}
             />
             <Form.Checkbox
               label='Soft Park Enabled (Stop tracking) '
@@ -265,7 +298,7 @@ class DefaultSettings extends Component {
               toggle
               placeholder= 'Enable soft parking'
               checked={this.state.defaultSoftPark}
-              onChange={this.handleToggle.bind(this)}
+              onChange={this.handleToggle}
             />
           </Form.Group>
           <Form.Group>
@@ -275,7 +308,7 @@ class DefaultSettings extends Component {
               toggle
               placeholder= 'Enable focus checking'
               checked={this.state.isFocus3Enabled}
-              onChange={this.handleToggle.bind(this)}
+              onChange={this.handleToggle}
             />
             <Form.Checkbox
               label='Bin 2x2 Focus Enabled '
@@ -283,7 +316,7 @@ class DefaultSettings extends Component {
               toggle
               placeholder= 'Enable to bin when focusing'
               checked={this.state.isFocus3Binned}
-              onChange={this.handleToggle.bind(this)}
+              onChange={this.handleToggle}
             />
           </Form.Group>
           <Form.Group>
@@ -293,7 +326,7 @@ class DefaultSettings extends Component {
               toggle
               placeholder= 'Enable twilight check'
               checked={this.state.isTwilightEnabled}
-              onChange={this.handleToggle.bind(this)}
+              onChange={this.handleToggle}
             />
             <Form.Input
               label='Twilight Alittude for Sun '
@@ -335,6 +368,13 @@ class DefaultSettings extends Component {
               onChange={this.handleChange}
             />
             <Form.Input
+              label='Imaging Camera Pixel Size: '
+              name='imagingPixelSize'
+              placeholder='Pixel Size'
+              value={this.state.imagingPixelSize}
+              onChange={this.handleChange}
+            />
+            <Form.Input
               label='Dithering Minimum Pixel Move '
               name='minDitherFactor'
               placeholder='Minimum number of pixels'
@@ -355,7 +395,7 @@ class DefaultSettings extends Component {
               name='defaultCoolTemp'
               placeholder='-20'
               value={this.state.defaultCoolTemp}
-              onChange={this.handleChange}
+              onChange={this.handleChangeAndSave}
             />
             <Form.Input
               label='Time to sleep when no target '
