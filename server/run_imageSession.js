@@ -1054,6 +1054,8 @@ function hasReachedEndCondition(target) {
 
 // **************************************************************
 function tsx_dither( target ) {
+  Meteor._debug('************************');
+  Meteor._debug(' *** tsx_dither: ' + target.targetFindName);
 
   // first abort Guiding
   tsx_AbortGuider();
@@ -1064,8 +1066,11 @@ function tsx_dither( target ) {
   var cmd = shell.cat(tsx_cmd('SkyX_JS_NewDither'));
 
   var pixelSize = tsx_GetServerStateValue('imagingPixelSize');
+  Meteor._debug(' *** pixelSize: ' + pixelSize);
   var minDitherFactor = tsx_GetServerStateValue('minDitherFactor');
+  Meteor._debug(' *** minDitherFactor: ' + minDitherFactor);
   var maxDitherFactor = tsx_GetServerStateValue('maxDitherFactor');
+  Meteor._debug(' *** maxDitherFactor: ' + maxDitherFactor);
 
   cmd = cmd.replace("$000", pixelSize ); // var pixelSize = $000; // 3.8;
   cmd = cmd.replace("$001", minDitherFactor ); // var minDitherFactor = $001; // 3

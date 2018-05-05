@@ -285,8 +285,8 @@ class Monitor extends Component {
 
              */}
          </Button.Group>
-         <Button icon='refresh' onClick={this.updateMonitor.bind(this)}/>
          <Button.Group icon floated='right'>
+           <Button icon='refresh' onClick={this.updateMonitor.bind(this)}/>
            <Button icon='checkmark box' onClick={this.testPicking.bind(this)} />
            <Button icon='move' onClick={this.testEndConditions.bind(this)} />
            <Button icon='find' onClick={this.testTryTarget.bind(this)} />

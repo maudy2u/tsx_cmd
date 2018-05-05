@@ -479,13 +479,15 @@ class App extends Component {
             <Segment>
               <Label>Status: <Label.Detail>{this.state.currentStage}</Label.Detail></Label>
             </Segment>
-          </Segment.Group>
             {/* { this.tsxConnectionFailed() } */}
+              <Segment>
             { this.showMain() }
+            </Segment>
             {/* *******************************
 
             THIS IS FOR A FAILED CONNECTION TO TSX
             *******************************             */}
+          </Segment.Group>
             <Modal
               open={this.state.modalConnectionFailed}
               onClose={this.modalConnectionFailedClose.bind(this)}

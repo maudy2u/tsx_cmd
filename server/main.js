@@ -376,6 +376,12 @@ Meteor.methods({
      // }
    },
 
+   updateServerState( name, value ) {
+     var id = TheSkyXInfos.upsert( {name: name }, {
+       $set: { value: value }
+     })
+   },
+
    updateSeriesIdWith(
        id,
        name,
