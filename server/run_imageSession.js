@@ -1499,178 +1499,6 @@ export function prepareTargetForImaging( target ) {
   }
 }
 
-// **************************************************************
-// **************************************************************
-// **************************************************************
-Meteor.methods({
-
-  // **************************************************************
-  connectTsx() {
-    Meteor._debug(' ******************************* ');
-    var isOnline = tsx_ServerIsOnline();
-    Meteor._debug('tsx_ServerIsOnline: ' + isOnline);
-    // *******************************
-    //  GET THE CONNECTED EQUIPEMENT
-    Meteor._debug(' ******************************* ');
-    Meteor._debug('Loading devices');
-
-    var out = tsx_DeviceInfo();
-
-   },
-
-   // this from the monitor
-   // it is used to test the image session
-/*
-
-Use this to set the last focus
-
-*/
-   //
-   // **************************************************************
-   tsxTestImageSession() {
-     Meteor._debug('************************');
-     prepareTargetForImaging();
-   },
-
-   // **************************************************************
-  tsx_Test() {
-    Meteor._debug('************************');
-    Meteor._debug('tsx_Test');
-    var imagingSession = getValidTargetSession();
-    if (typeof imagingSession == 'undefined') {
-      Meteor._debug('*** No session found');
-
-    } else {
-
-    }
-    Meteor._debug('Starting the autoguide');
-    SetUpAutoGuiding(imagingSession);
-
-  },
-
-  // **************************************************************
-  // Used to pass RA/DEC to target editors
-  targetFind(targetFindName) {
-    Meteor._debug('************************');
-    Meteor._debug(' *** targetFind: ' + targetFindName);
-    return tsx_GetTargetRaDec(targetFindName);
-
-  },
-
-  // **************************************************************
-  // 7. Start session run:
-  //    - take image
-  startImagingTest(targetSession) {
-    Meteor._debug('************************');
-    Meteor._debug(' *** startImagingTest: ' + targetSession.targetFindName);
-    // use the order of the series
-    var series = targetSession.takeSeries.series[0];
-    Meteor._debug('\nProcesing filter: ' + series.filter);
-    Meteor._debug('Series repeat: ' + series.repeat);
-    Meteor._debug('Series taken: ' + series.taken);
-    var remainingImages = series.repeat - series.taken;
-    Meteor._debug('number of images remaining: ' + remainingImages);
-    Meteor._debug('Launching take image for: ' + series.filter + ' at ' + series.exposure + ' seconds');
-
-    var slot = getFilterSlot( series.filter );
-    //  cdLight =1, cdBias, cdDark, cdFlat
-    var frame = getFrame(series.frame);
-    out = tsx_takeImage(slot,series.exposure, frame);
-    Meteor._debug('Taken image: ' +res);
-
-    return;
-  },
-
-  // **************************************************************
-  // Manually start the imaging on the target...
-  // Something like a one target Only
-  // Assumes that CLS, Focus, Autoguide already running
-  startImaging(target) {
-    Meteor._debug('************************');
-    Meteor._debug(' *** startImaging: ' + target.name );
-    tsx_SetServerState( tsx_ServerStates.imagingSessionId, target._id );
-    tsx_GetTargetRaDec (target.targetFindName);
-
-    // Will process target until end condition found
-    processTargetTakeSeries( target );
-    tsx_AbortGuider();
-  },
-
-  testTargetPicking() {
-    Meteor._debug('************************');
-    Meteor._debug(' *** testTargetPicking' );
-    var target = findTargetSession();
-    if( typeof target == 'undefined') {
-      Meteor._debug('No target found');
-    }
-    else {
-      Meteor._debug('Found: ' + target.targetFindName);
-    }
-  },
-
-  testEndConditions() {
-    Meteor._debug('************************');
-    Meteor._debug(' *** testEndConditions' );
-    var target = findTargetSession();
-    if( typeof target == 'undefined') {
-      Meteor._debug('No target found');
-    }
-    else {
-      Meteor._debug('Found: ' + target.targetFindName);
-      var endCond = hasReachedEndCondition( target );
-      Meteor._debug(target.targetFindName + ' ending=' + endCond );
-    }
-  },
-
-  testTryTarget() {
-    Meteor._debug('************************');
-    Meteor._debug(' *** testEndConditions' );
-
-    // neeed to get a session here...
-    var targets = TargetSessions.find().fetch();
-    var target;
-    if( targets.length > 0 ) {
-      target = targets[0]; // get first target
-    }
-
-    return tsx_TryTarget( target );
-
-  },
-
-  centreTarget( target ) {
-    UpdateStatus( ' Centring : ' + target.targetFindName );
-    var result = tsx_CLS( target);
-    UpdateStatus( ' Centred : ' + target.targetFindName );
-    return result;
-  },
-
-  getTargetReport( target ) {
-    UpdateStatus( ' Getting report : ' + target.targetFindName );
-    var result = tsx_TargetReport( target );
-    UpdateStatus( ' Received report' );
-    return result;
-  },
-
-  getTargetReports( targetArray ) {
-    UpdateStatus( ' Getting report : ' + target.targetFindName );
-    for (var i = 0; i < targetArray.length; i++) {
-      var target = targetArray[i];
-      var result = tsx_TargetReport( target );
-    }
-    UpdateStatus( ' Received report' );
-    return result;
-  },
-
-  park( ) {
-    UpdateStatus( ' Parking...' );
-    var filter = tsx_GetServerStateValue('defaultFilter');
-    var result = tsx_MntPark(filter, false ); // use default filter
-    UpdateStatus( ' Parked' );
-    return result;
-  }
-
-
-});
 
 // **************************************************************
 // Get Target Series
@@ -1835,3 +1663,226 @@ export function canTargetSessionStart( target ) {
 
   return canStart;
 }
+
+// **************************************************************
+// **************************************************************
+// **************************************************************
+
+
+
+
+
+
+
+
+// **************************************************************
+// **************************************************************
+// **************************************************************
+Meteor.methods({
+
+  // **************************************************************
+  connectTsx() {
+    Meteor._debug(' ******************************* ');
+    var isOnline = tsx_ServerIsOnline();
+    Meteor._debug('tsx_ServerIsOnline: ' + isOnline);
+    // *******************************
+    //  GET THE CONNECTED EQUIPEMENT
+    Meteor._debug(' ******************************* ');
+    Meteor._debug('Loading devices');
+
+    var out = tsx_DeviceInfo();
+
+   },
+
+   // this from the monitor
+   // it is used to test the image session
+/*
+
+Use this to set the last focus
+
+*/
+   //
+   // **************************************************************
+   tsxTestImageSession() {
+     Meteor._debug('************************');
+     prepareTargetForImaging();
+   },
+
+   // **************************************************************
+  tsx_Test() {
+    Meteor._debug('************************');
+    Meteor._debug('tsx_Test');
+    var imagingSession = getValidTargetSession();
+    if (typeof imagingSession == 'undefined') {
+      Meteor._debug('*** No session found');
+
+    } else {
+
+    }
+    Meteor._debug('Starting the autoguide');
+    SetUpAutoGuiding(imagingSession);
+
+  },
+
+  // **************************************************************
+  // Used to pass RA/DEC to target editors
+  targetFind(targetFindName) {
+    Meteor._debug('************************');
+    Meteor._debug(' *** targetFind: ' + targetFindName);
+    return tsx_GetTargetRaDec(targetFindName);
+
+  },
+
+  // **************************************************************
+  // 7. Start session run:
+  //    - take image
+  startImagingTest(targetSession) {
+    Meteor._debug('************************');
+    Meteor._debug(' *** startImagingTest: ' + targetSession.targetFindName);
+    // use the order of the series
+    var series = targetSession.takeSeries.series[0];
+    Meteor._debug('\nProcesing filter: ' + series.filter);
+    Meteor._debug('Series repeat: ' + series.repeat);
+    Meteor._debug('Series taken: ' + series.taken);
+    var remainingImages = series.repeat - series.taken;
+    Meteor._debug('number of images remaining: ' + remainingImages);
+    Meteor._debug('Launching take image for: ' + series.filter + ' at ' + series.exposure + ' seconds');
+
+    var slot = getFilterSlot( series.filter );
+    //  cdLight =1, cdBias, cdDark, cdFlat
+    var frame = getFrame(series.frame);
+    out = tsx_takeImage(slot,series.exposure, frame);
+    Meteor._debug('Taken image: ' +res);
+
+    return;
+  },
+
+  // **************************************************************
+  // Manually start the imaging on the target...
+  // Something like a one target Only
+  // Assumes that CLS, Focus, Autoguide already running
+  startImaging(target) {
+    Meteor._debug('************************');
+    Meteor._debug(' *** startImaging: ' + target.name );
+    tsx_SetServerState( tsx_ServerStates.imagingSessionId, target._id );
+    tsx_GetTargetRaDec (target.targetFindName);
+
+    // Will process target until end condition found
+    processTargetTakeSeries( target );
+    tsx_AbortGuider();
+  },
+
+  testTargetPicking() {
+    Meteor._debug('************************');
+    Meteor._debug(' *** testTargetPicking' );
+    var target = findTargetSession();
+    if( typeof target == 'undefined') {
+      Meteor._debug('No target found');
+    }
+    else {
+      Meteor._debug('Found: ' + target.targetFindName);
+    }
+  },
+
+  testEndConditions() {
+    Meteor._debug('************************');
+    Meteor._debug(' *** testEndConditions' );
+    var target = findTargetSession();
+    if( typeof target == 'undefined') {
+      Meteor._debug('No target found');
+    }
+    else {
+      Meteor._debug('Found: ' + target.targetFindName);
+      var endCond = hasReachedEndCondition( target );
+      Meteor._debug(target.targetFindName + ' ending=' + endCond );
+    }
+  },
+
+  testTryTarget() {
+    Meteor._debug('************************');
+    Meteor._debug(' *** testEndConditions' );
+
+    // neeed to get a session here...
+    var targets = TargetSessions.find().fetch();
+    var target;
+    if( targets.length > 0 ) {
+      target = targets[0]; // get first target
+    }
+
+    return tsx_TryTarget( target );
+
+  },
+
+  testDither( target ) {
+    Meteor._debug('************************');
+    Meteor._debug(' *** testDither' );
+
+    return tsx_dither( target );
+
+  },
+
+  testGuide( target ) {
+    Meteor._debug('************************');
+    Meteor._debug(' *** testGuide' );
+
+    return SetUpAutoGuiding( target );
+
+  },
+
+  testAbortGuide( target ) {
+    Meteor._debug('************************');
+    Meteor._debug(' *** testAbortGuide' );
+
+    return tsx_AbortGuider();
+  },
+
+  testSolve( target ) {
+    Meteor._debug('************************');
+    Meteor._debug(' *** testSolve' );
+
+    return SetUpAutoGuiding( target );
+
+  },
+
+  testMatchRotation( target ) {
+    Meteor._debug('************************');
+    Meteor._debug(' *** testMatchRotation' );
+
+    return tsx_MatchRotation( target );
+
+  },
+
+  centreTarget( target ) {
+    UpdateStatus( ' Centring : ' + target.targetFindName );
+    var result = tsx_CLS( target);
+    UpdateStatus( ' Centred : ' + target.targetFindName );
+    return result;
+  },
+
+  getTargetReport( target ) {
+    UpdateStatus( ' Getting report : ' + target.targetFindName );
+    var result = tsx_TargetReport( target );
+    UpdateStatus( ' Received report' );
+    return result;
+  },
+
+  getTargetReports( targetArray ) {
+    UpdateStatus( ' Getting report : ' + target.targetFindName );
+    for (var i = 0; i < targetArray.length; i++) {
+      var target = targetArray[i];
+      var result = tsx_TargetReport( target );
+    }
+    UpdateStatus( ' Received report' );
+    return result;
+  },
+
+  park( ) {
+    UpdateStatus( ' Parking...' );
+    var filter = tsx_GetServerStateValue('defaultFilter');
+    var result = tsx_MntPark(filter, false ); // use default filter
+    UpdateStatus( ' Parked' );
+    return result;
+  }
+
+
+});

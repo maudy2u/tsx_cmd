@@ -74,30 +74,6 @@ class Monitor extends Component {
     this.updateMonitor(nextProps);
   }
 
-  textTSX2() {
-    // *******************************
-    // get a session to use
-    Meteor.call("tsxTestImageSession", function (error, result) {
-      if ( error ) {
-        // show a nice error message
-        this.noFoundSessionOpen();
-        Session.set("errorMessage", "Please check connection and constraints.");
-      }
-      else {
-
-        // *******************************
-        // START AN IMAGE SERIES
-        // if success then TheSkyX has made this point the target...
-        // now get the coordinates
-        var sessionId = result.split('|')[0].trim();
-        Meteor.call("startImaging", sessionId, function (error, result) {
-
-
-        }.bind(this));
-      }
-    }.bind(this));
-  }
-
   textTSX() {
     //var d = new Date(year, month, day, hours, minutes, seconds, milliseconds);
     var currentTime = new Date();
@@ -215,8 +191,17 @@ class Monitor extends Component {
       }.bind(this));
   }
 
+  getCurrentTarget() {
+    var tid = this.props.targetSessionId[0].value;
+    var target = TargetSessions.findOne({_id: tid });
+    // #TODO report no valid target
+
+
+    return target;
+  }
+
   testTryTarget() {
-    Meteor.call( 'testTryTarget', function(error, result) {
+    Meteor.call( 'testTryTarget', this.getCurrentTarget(), function(error, result) {
       console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
@@ -236,9 +221,49 @@ class Monitor extends Component {
     }.bind(this));
   }
 
-  testTakeSeries() {
+  startImaging() {
 
-    Meteor.call( 'startImaging', this.props.targetImageName, function(error, result) {
+    Meteor.call( 'startImaging', this.getCurrentTarget(), function(error, result) {
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+    }.bind(this));
+  }
+
+  testDither() {
+
+    Meteor.call( 'testDither', this.getCurrentTarget(),  function(error, result) {
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+    }.bind(this));
+  }
+
+  testGuide() {
+
+    Meteor.call( 'testGuide', this.getCurrentTarget(),  function(error, result) {
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+    }.bind(this));
+  }
+
+  testSolve() {
+
+    Meteor.call( 'testSolve', this.getCurrentTarget(),  function(error, result) {
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+    }.bind(this));
+  }
+
+  testAbortGuide () {
+
+    Meteor.call( 'testAbortGuide', this.getCurrentTarget(),  function(error, result) {
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+    }.bind(this));
+  }
+  
+  testMatchRotation() {
+
+    Meteor.call( 'testMatchRotation', this.getCurrentTarget(),  function(error, result) {
       console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
@@ -287,10 +312,15 @@ class Monitor extends Component {
          </Button.Group>
          <Button.Group icon floated='right'>
            <Button icon='refresh' onClick={this.updateMonitor.bind(this)}/>
-           <Button icon='checkmark box' onClick={this.testPicking.bind(this)} />
-           <Button icon='move' onClick={this.testEndConditions.bind(this)} />
-           <Button icon='find' onClick={this.testTryTarget.bind(this)} />
-           <Button icon='camera' onClick={this.testTryTarget.bind(this)} />
+           <Button onClick={this.testPicking.bind(this)}>Pick</Button>
+           <Button onClick={this.testEndConditions.bind(this)}>End</Button>
+           <Button onClick={this.testTryTarget.bind(this)}>TryTarget</Button>
+           <Button onClick={this.testDither.bind(this)}>Dither</Button>
+           <Button onClick={this.testGuide.bind(this)}>Guide</Button>
+           <Button onClick={this.testSolve.bind(this)}>Solve</Button>
+           <Button onClick={this.testMatchRotation.bind(this)}>Angle</Button>
+           <Button onClick={this.startImaging.bind(this)}>Series</Button>
+           <Button onClick={this.testAbortGuide.bind(this)}>AbortGuide</Button>
          </Button.Group>
            {/* <Progress
              value={this.totalTaken()}

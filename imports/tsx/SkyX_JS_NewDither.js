@@ -25,29 +25,26 @@ var pixelSize = $000; // 3.8;
 var minDitherFactor = $001; // 3;
 var maxDitherFactor = $002;  // 7;
 
+
 var FITSProblem = "no";
 var FITSPixel;
+var imageScale = 1.70;
+var focalLength;
+var binning;
 
-ccdsoftCameraImage.AttachToActiveImager();
+try {
+	ccdsoftCameraImage.AttachToActiveImager();
+}
+catch(e) {
+	var exp = ccdsoftCamera.ExposureTime;
+	ccdsoftCamera.ExposureTime = 3;
+	ccdsoftCamera.TakeImage();
+	ccdsoftCamera.ExposureTime = exp;
+	ccdsoftCameraImage.AttachToActiveImager();
 
-if ( ccdsoftCamera.ImageUseDigitizedSkySurvey == "1" )
-//
-// Test to see if we are using the simulator, set image scale to 1.7
-//
-// Otherwise extract metadata from the most recent image's FITS header
-// to calculate the image scale. This is used to adjust the distance moved
-// to compensate for different pixel sizes.
-//
-// If, however, you own a camera whose driver fails to provide the needed
-// data in the FITS header (cough, ZWO....) then just dither as if your image
-// scale is two AS/pixel. This is, of course, probably wrong but at least
-// it's something.
-//
-{
+}
 
-	var imageScale = 1.70;
-
-} else {
+if ( ccdsoftCamera.ImageUseDigitizedSkySurvey != "1" ) {
 	try
 	{
 		FITSPixel = ccdsoftCameraImage.FITSKeyword("XPIXSZ")
@@ -91,15 +88,15 @@ if ( ccdsoftCamera.ImageUseDigitizedSkySurvey == "1" )
 	// just make some shit up....
 	//
 	{
-		var imageScale = 2.0;
+		imageScale = 2.0;
 
 	} else {
 
-		var focalLength = ccdsoftCamera.PropDbl("m_dTeleFocalLength");;
-		var pixelSize = ccdsoftCameraImage.FITSKeyword ("XPIXSZ");
-		var binning = ccdsoftCamera.PropLng("m_nXBin");;
+		focalLength = ccdsoftCamera.PropDbl("m_dTeleFocalLength");;
+		pixelSize = ccdsoftCameraImage.FITSKeyword ("XPIXSZ");
+		binning = ccdsoftCamera.PropLng("m_nXBin");;
 
-		var imageScale = ( (pixelSize * binning) / focalLength ) * 206.3;
+		imageScale = ( (pixelSize * binning) / focalLength ) * 206.3;
 
 		imageScale = imageScale.toFixed(2);
 	}
@@ -118,10 +115,10 @@ var DitherY = (Math.floor(Math.random() * (maxDither - minDither +1)) + minDithe
 
 // Crude hack to try to compensate for high latitudes.
 sky6ObjectInformation.Property(55);
-	var targDec = sky6ObjectInformation.ObjInfoPropOut;
-	var targRads = (Math.abs(targDec) * (Math.PI / 180));
-	var out2 = Math.cos(targRads);
-	var DecFactor = (1 / Math.cos(targRads));
+var targDec = sky6ObjectInformation.ObjInfoPropOut;
+var targRads = (Math.abs(targDec) * (Math.PI / 180));
+var out2 = Math.cos(targRads);
+var DecFactor = (1 / Math.cos(targRads));
 
 	DitherY = DitherY * Math.abs(DecFactor);
 
@@ -176,6 +173,6 @@ while (!sky6RASCOMTele.IsSlewComplete)
 	sky6Web.Sleep(1000);
 }
 
-out= 'Success|'+ HMSX.toFixed(1) + "|NorS|" + HMSY.toFixed(1) + "|EorW";
+out= 'Success|'+ HMSX.toFixed(1) + "|NorS|" + HMSY.toFixed(1) + "|EorW" +'|'+focalLength+'|'+binning;
 
 /* Socket End Packet */

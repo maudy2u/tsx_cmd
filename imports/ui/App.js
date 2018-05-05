@@ -49,11 +49,10 @@ class App extends Component {
   };
 
   handleToggle = (e, { name, value }) => this.setState({ [name]: Boolean(!eval('this.state.'+name)) })
-  handleChange = (e, { name, value }) => this.setState({ [name]: value.trim() });
 
-  handleStartChange = ( value ) => this.setState({defaultStartTime: value.formatted24 });
-  handleStopChange = ( value ) => this.setState({defaultStopTime: value.formatted24 });
-  handlePriorityChange = ( value ) => this.setState({defaultPriority: value.value });
+  // handleStartChange = ( value ) => this.setState({defaultStartTime: value.formatted24 });
+  // handleStopChange = ( value ) => this.setState({defaultStopTime: value.formatted24 });
+  // handlePriorityChange = ( value ) => this.setState({defaultPriority: value.value });
 
   handleMenuItemClick = (e, { name }) => this.setState({ activeItem: name });
   saveServerFailedOpen = () => this.setState({ saveServerFailed: true });
@@ -104,21 +103,26 @@ class App extends Component {
 
   // *******************************
   //
+  componentDidMount() {
+    if( typeof this.props == 'undefined' ) {
+      return;
+    }
+
+    this.updateDefaults(this.props);
+  }
+
   componentWillReceiveProps(nextProps) {
-    this.updateDefaults(nextProps);
+    this.setState({
+      currentStage: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'currentStage';
+      }).value,
+    });
   }
 
   updateDefaults(nextProps) {
     this.setState({
-      ip: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'ip';
-      }).value,
-      port: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'port';
-      }).value,
-      currentStage: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'currentStage';
-      }).value,
+      ip: nextProps.tsxIP.value,
+      port: nextProps.tsxPort.value,
     });
 
   }
@@ -138,6 +142,11 @@ class App extends Component {
     }
   }
 
+  // Generic Method to determine default to save.
+  saveDefaultState( param ) {
+    var value = eval("this.state."+param);
+    tsx_UpdateServerState(param, value);
+  }
 
   // Use this method to save any defaults gathered
   saveDefaults(){
@@ -173,13 +182,13 @@ class App extends Component {
               name='ip'
               placeholder="Enter TSX address"
               value={this.state.ip}
-              onChange={this.handleChange}/>
+              onChange={this.ipChange}/>
             <Form.Input
               label='Port'
               name='port'
               placeholder="Enter TSX port"
               value={this.state.port}
-              onChange={this.handleChange}/>
+              onChange={this.portChange}/>
           </Form.Group>
         </Form>
 
@@ -214,12 +223,6 @@ class App extends Component {
     );
   }
 
-
-  // Generic Method to determine default to save.
-  saveDefaultState( param ) {
-    var value = eval("this.state."+param);
-    tsx_UpdateServerState(param, value);
-  }
 
   renderDevices() {
 
@@ -361,7 +364,7 @@ class App extends Component {
             label='IP:'
             name='ip'
             value={this.state.ip}
-            onChange={this.handleChange}/>
+            onChange={this.ipChange}/>
         </Modal.Description>
         <Modal.Actions>
           <Button onClick={this.modalEnterIpClose.bind(this)} inverted>
@@ -392,7 +395,7 @@ class App extends Component {
             label='Port:'
             name='port'
             value={this.state.port}
-            onChange={this.handleChange}/>
+            onChange={this.portChange}/>
         </Modal.Description>
         <Modal.Actions>
           <Button onClick={this.modalEnterPortClose.bind(this)} inverted>
@@ -451,6 +454,15 @@ class App extends Component {
   render() {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
     */
+    var IP;
+    var PORT;
+    try {
+      IP = this.props.tsxIP.value;
+      PORT = this.props.tsxPort.value;
+    } catch (e) {
+      IP = 'Not Connected';
+      PORT = 'Not Connected';
+    }
 
     return (
       <div className="container">
@@ -464,14 +476,14 @@ class App extends Component {
               <Button icon='car' onClick={this.park.bind(this)}/>
               <Label onClick={this.modalEnterIpOpen.bind(this)}>TSX ip:
                 <Label.Detail>
-                  {this.state.ip}
+                  {IP}
                 </Label.Detail>
               </Label>
                {this.renderIPEditor()}
               <Label onClick={this.modalEnterPortOpen.bind(this)}>
                 TSX port:
                 <Label.Detail>
-                  {this.state.port}
+                  {PORT}
                 </Label.Detail>
               </Label>
               {this.renderPortEditor()}
@@ -526,6 +538,8 @@ class App extends Component {
 export default withTracker(() => {
 
     return {
+      tsxIP: TheSkyXInfos.findOne({name: 'ip'}),
+      tsxPort: TheSkyXInfos.findOne({name: 'port'}),
       tsxInfo: TheSkyXInfos.find({}).fetch(),
       seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
       filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
