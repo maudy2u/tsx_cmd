@@ -220,7 +220,8 @@ function SetUpAutoGuiding(targetSession) {
 
   var star = tsx_FindGuideStar();
 
-  tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
+  // #TODO test out the Calibrate....
+  // tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
 
   tsx_StartAutoGuide( star.guideStarX, star.guideStarY );
 }
@@ -675,6 +676,11 @@ function SetUpForImagingRun(targetSession) {
   var rotateSucess = false;
   UpdateStatus( " Matching angle: " + targetSession.targetFindName );
   // rotateSucess = tsx_MatchRotation( targetSession );
+
+
+  // get initial focus....
+  InitialFocus( targetSession );
+
 
   UpdateStatus( " Setup guider: " + targetSession.targetFindName );
 	SetUpAutoGuiding( targetSession );			// Setup & Start Auto-Guiding.
@@ -1401,7 +1407,6 @@ export function processTargetTakeSeries( target ) {
   // set up for the cycle through the filters
   var stopTarget = false; // #IDEA #TODO can use the current jobId to potentially stop
   var process = tsx_GetServerStateValue( tsx_ServerStates.imagingSessionId );
-  InitialFocus( target );
 
   for (var i = 0; i < takeSeries.length && !stopTarget && (process !=''); i++) {
     // #TODO do we check here for a session_id... or target name
@@ -1818,6 +1823,14 @@ Use this to set the last focus
     Meteor._debug(' *** testDither' );
 
     return tsx_dither( target );
+
+  },
+
+  testFocus3( target ) {
+    Meteor._debug('************************');
+    Meteor._debug(' *** testFocus3' );
+
+    return tsx_RunFocus3( target );
 
   },
 

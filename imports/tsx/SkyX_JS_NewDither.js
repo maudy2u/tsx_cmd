@@ -93,7 +93,7 @@ if ( ccdsoftCamera.ImageUseDigitizedSkySurvey != "1" ) {
 	} else {
 
 		focalLength = ccdsoftCamera.PropDbl("m_dTeleFocalLength");;
-		pixelSize = ccdsoftCameraImage.FITSKeyword ("XPIXSZ");
+		pixelSize = FITSPixel;
 		binning = ccdsoftCamera.PropLng("m_nXBin");;
 
 		imageScale = ( (pixelSize * binning) / focalLength ) * 206.3;

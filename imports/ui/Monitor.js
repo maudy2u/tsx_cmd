@@ -253,6 +253,14 @@ class Monitor extends Component {
     }.bind(this));
   }
 
+  testFocus3 () {
+
+    Meteor.call( 'testFocus3', this.getCurrentTarget(),  function(error, result) {
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+    }.bind(this));
+  }
+
   testAbortGuide () {
 
     Meteor.call( 'testAbortGuide', this.getCurrentTarget(),  function(error, result) {
@@ -260,7 +268,7 @@ class Monitor extends Component {
       console.log('result: ' + result);
     }.bind(this));
   }
-  
+
   testMatchRotation() {
 
     Meteor.call( 'testMatchRotation', this.getCurrentTarget(),  function(error, result) {
@@ -314,7 +322,7 @@ class Monitor extends Component {
            <Button icon='refresh' onClick={this.updateMonitor.bind(this)}/>
            <Button onClick={this.testPicking.bind(this)}>Pick</Button>
            <Button onClick={this.testEndConditions.bind(this)}>End</Button>
-           <Button onClick={this.testTryTarget.bind(this)}>TryTarget</Button>
+           <Button onClick={this.testFocus3.bind(this)}>Focus3</Button>
            <Button onClick={this.testDither.bind(this)}>Dither</Button>
            <Button onClick={this.testGuide.bind(this)}>Guide</Button>
            <Button onClick={this.testSolve.bind(this)}>Solve</Button>
