@@ -22,7 +22,7 @@ function totalImages (target) {
 class Target extends Component {
   state = {
     modalOpen: false,
-    checked: false ,
+    enabledActive: false,
     ra: '0',
     dec: '0',
     altitude: '0',
@@ -34,13 +34,17 @@ class Target extends Component {
   handleOpen = () => this.setState({ modalOpen: true })
   handleClose = () => this.setState({ modalOpen: false })
 
-  onChangeChecked() {
-    // this.setState({checked: !this.props.target.enabledActive});
-    TargetSessions.update({_id: this.props.target._id}, {
-      $set: { enabledActive: !this.props.target.enabledActive },
-    })
-    this.props.target.enabledActive = !this.props.target.enabledActive;
-  }
+  handleToggleEnabled = (e, { name, checked }) => {
+    this.setState({
+      [name]: checked
+    });
+
+    TargetSessions.update({_id:this.props.target._id}, {
+      $set:{ enabledActive: checked }
+    });
+
+    this.forceUpdate();
+  };
 
   componentWillMount() {
     // do not modify the state directly
@@ -72,40 +76,12 @@ class Target extends Component {
   }
 
   getTargetReport() {
-    var done = false;
 
     try {
-//      Meteor.call( 'targetFind', this.props.target.targetFindName , function(error, result) {
+
       Meteor.call( 'getTargetReport', this.props.target , function(error, result) {
 
-          // if success then TheSkyX has made this point the target...
-          // now get the coordinates
-          /*
-          angle: '',
-          scale: '',
-          isValid: isValid,
-          AZ: az,
-          ALT: alt,
-          RA:  ra,
-          DEC: dec,
-          HA: ha,
-          TRANSIT: transit,
-          isDark: isDark,
-          sunAltitude: sunAlt,
-          updatedAt: update,
-          */
-//          var report = TargetReports.findOne({_id: this.props.target.report_id });
-/*
-          if( typeof result != 'undefined') {
-            this.setState({altitude: result.ALT});
-            this.setState({ra: result.RA});
-            this.setState({dec: result.DEC});
-            this.setState({azimuth: result.AZ});
-
-            this.forceUpdate();
-          }
-          */
-          var nextProps;
+          var nextProps; // send in dummy var
           this.updateMonitor(nextProps);
 
       }.bind(this));
@@ -275,14 +251,22 @@ class Target extends Component {
       )
     }
 
+    var ENABLEACTIVE;
+    try {
+      ENABLEACTIVE = this.props.target.enabledActive;
+    } catch (e) {
+      ENABLEACTIVE = this.state.enabledActive;
+    }
+
     return (
     <Item>
       <Item.Content>
         <Checkbox
           label='  '
+          name='enabledActive'
           toggle
-          checked={this.props.target.enabledActive}
-          onChange={this.onChangeChecked}
+          checked={ENABLEACTIVE}
+          onChange={this.handleToggleEnabled.bind(this)}
         />
         <Item.Header as='a' onClick={this.editEntry.bind(this)}>
           {this.props.target.targetFindName}

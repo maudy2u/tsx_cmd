@@ -1,6 +1,9 @@
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 
+import { Logger }     from 'meteor/ostrio:logger';
+import { LoggerFile } from 'meteor/ostrio:loggerfile';
+
 import { TargetSessions } from '../imports/api/targetSessions.js';
 import { TargetReports } from '../imports/api/targetReports.js';
 import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';

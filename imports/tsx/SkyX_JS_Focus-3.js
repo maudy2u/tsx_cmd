@@ -66,13 +66,13 @@ if ( Application.build >= 11177 )
 			CCDSC.TakeImage();			// Snap the throw-away
 
 			CCDSC.AutoSaveOn = true;		// Keep the images for the future
-			CCDSC.ExposureTime = initExp;		// Restore camera duration time. It'll get set later anyway...
 
 
 		// Finally! Focus the camera!
 			// Use three samples per point and let @F3 figure out the rest.
 			//
 			out = CCDSC.AtFocus3(3, true);
+			CCDSC.ExposureTime = initExp;		// Restore camera duration time. It'll get set later anyway...
 
 		}
 

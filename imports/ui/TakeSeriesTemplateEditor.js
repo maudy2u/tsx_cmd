@@ -129,6 +129,7 @@ class TakeSeriesTemplateEditor extends Component {
         </Form>
         <Grid columns={6} centered divided='vertically'>
           <Grid.Row >
+            <Grid.Column width={1}/>
             <Grid.Column>
             <b>Exposure</b>
             </Grid.Column>

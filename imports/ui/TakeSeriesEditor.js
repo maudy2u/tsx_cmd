@@ -179,6 +179,10 @@ class TakeSeriesEditor extends Component {
 
     return (
       <Grid.Row>
+        <Grid.Column width={1}>
+          <Button size='mini' icon='delete'  onClick={this.deleteEntry.bind(this)}/>
+          <b><label>{this.state.order}</label></b>
+        </Grid.Column>
         <Grid.Column>
           <Input
             fluid
@@ -227,8 +231,6 @@ class TakeSeriesEditor extends Component {
           />
         </Grid.Column>
         <Grid.Column>
-          <b><label>{this.state.order}</label></b>
-          <Button size='mini' icon='delete'  onClick={this.deleteEntry.bind(this)}/>
           <Button size='mini' icon='arrow up'  onClick={this.moveUpEntry.bind(this)}/>
           <Button size='mini' icon='arrow down'  onClick={this.moveDownEntry.bind(this)}/>
         </Grid.Column>

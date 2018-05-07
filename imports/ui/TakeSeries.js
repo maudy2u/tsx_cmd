@@ -96,7 +96,7 @@ class TakeSeries extends Component {
     return (
       <Item>
         <Item.Content>
-          <Item.Header as='a'>
+          <Item.Header as='a' onClick={this.editEntry.bind(this)}>
             {this.props.seriesTemplate.name}
           </Item.Header>
           <Item.Meta>

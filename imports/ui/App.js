@@ -2,6 +2,10 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Session } from 'meteor/session'
 
+// used for log files
+import { Logger }     from 'meteor/ostrio:logger';
+import { LoggerFile } from 'meteor/ostrio:loggerfile';
+
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
@@ -122,9 +126,10 @@ class App extends Component {
   updateDefaults(nextProps) {
     this.setState({
       ip: nextProps.tsxIP.value,
+    });
+    this.setState({
       port: nextProps.tsxPort.value,
     });
-
   }
 
   getDefault( name ) {
@@ -348,6 +353,16 @@ class App extends Component {
   }
 
   renderIPEditor() {
+    var IP;
+    var PORT;
+    try {
+      IP = this.props.tsxIP.value;
+      PORT = this.props.tsxPort.value;
+    } catch (e) {
+      IP = 'Not Connected';
+      PORT = 'Not Connected';
+    }
+
     return (
       <Modal
         open={this.state.modalEnterIp}
@@ -363,7 +378,7 @@ class App extends Component {
           <Input
             label='IP:'
             name='ip'
-            value={this.state.ip}
+            value={IP}
             onChange={this.ipChange}/>
         </Modal.Description>
         <Modal.Actions>
@@ -379,6 +394,16 @@ class App extends Component {
   }
 
   renderPortEditor() {
+    var IP;
+    var PORT;
+    try {
+      IP = this.props.tsxIP.value;
+      PORT = this.props.tsxPort.value;
+    } catch (e) {
+      IP = 'Not Connected';
+      PORT = 'Not Connected';
+    }
+
     return (
       <Modal
         open={this.state.modalEnterPort}
@@ -394,7 +419,7 @@ class App extends Component {
           <Input
             label='Port:'
             name='port'
-            value={this.state.port}
+            value={PORT}
             onChange={this.portChange}/>
         </Modal.Description>
         <Modal.Actions>

@@ -1,6 +1,9 @@
 import { Meteor } from 'meteor/meteor';
 import { JobCollection } from 'meteor/vsivsi:job-collection';
 
+import { Logger }     from 'meteor/ostrio:logger';
+import { LoggerFile } from 'meteor/ostrio:loggerfile';
+
 import { TargetSessions } from '../imports/api/targetSessions.js';
 import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
 import { Seriess } from '../imports/api/seriess.js';
