@@ -1,5 +1,4 @@
 import { Meteor } from 'meteor/meteor';
-import { JobCollection } from 'meteor/vsivsi:job-collection';
 
 import { Logger }     from 'meteor/ostrio:logger';
 import { LoggerFile } from 'meteor/ostrio:loggerfile';
@@ -9,6 +8,7 @@ import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
 import { Seriess } from '../imports/api/seriess.js';
 import { Filters } from '../imports/api/filters.js';
 import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
+import { scheduler } from '../imports/api/theProcessors.js';
 
 import {
   tsx_ServerStates,
@@ -84,11 +84,6 @@ function initServerStates() {
   }
 }
 
-// *******************************
-// Create the scheduler Queue
-var scheduler = JobCollection('theScheduler');
-//scheduler.setLogStream(process.stdout);
-
 Meteor.startup(() => {
   // code to run on server at startup
   Meteor._debug(' ******************');
@@ -128,6 +123,11 @@ Meteor.startup(() => {
   };
   Meteor._debug(' RESTARTED');
   Meteor._debug(' ******************');
+
+
+  // *******************************
+  //   Imaging processs
+  // *******************************
   // Assumed balanced RA/DEC
   // Assumed Date/Time/Long/Lat correct
   // Assumed Homed
@@ -210,37 +210,96 @@ Meteor.startup(() => {
       cb();
     }
   );
+  // *******************************
+  //   update client reports/status
+  // *******************************
+  workers = scheduler.processJobs( 'updateClientData',
+    function (job, cb) {
+      var info = job.data; // Only one email per job
+      // This will only be called if a
+      // 'runScheduler' job is obtained
+      Meteor._debug('updateClientData');
+      job.log("Entered updateClientData",
+        {level: 'info'});
+
+      // While ended... exit process
+      UpdateStatus( ' ' + info.status );
+      // tsx_Disconnect();
+      job.done();
+
+      // Be sure to invoke the callback
+      // when work on this job has finished
+      cb();
+    }
+  );
+  workers = scheduler.processJobs( 'updateProgressIncrement',
+    function (job, cb) {
+      var info = job.data; // Only one email per job
+      tsx_SetServerState('tsx_total', info.progress );
+      // tsx_Disconnect();
+      job.done();
+
+      // Be sure to invoke the callback
+      // when work on this job has finished
+      cb();
+    }
+  );
+  workers = scheduler.processJobs( 'updateProgressTotal',
+    function (job, cb) {
+      var info = job.data; // Only one email per job
+      tsx_SetServerState('tsx_progress', info.total );
+      // tsx_Disconnect();
+      job.done();
+
+      // Be sure to invoke the callback
+      // when work on this job has finished
+      cb();
+    }
+  );
+  // *******************************
+  //   Manage Cooling and Warming camera
+  // *******************************
+  workers = scheduler.processJobs( 'manageCameraTemp',
+    function (job, cb) {
+      var schedule = job.data; // Only one email per job
+      // This will only be called if a
+      // 'runScheduler' job is obtained
+      Meteor._debug('manageCameraTemp');
+      job.log("Entered manageCameraTemp",
+        {level: 'info'});
+
+      // tsx_Disconnect();
+      job.done();
+
+      // Be sure to invoke the callback
+      // when work on this job has finished
+      cb();
+    }
+  );
+  workers = scheduler.processJobs( 'PostImageProcessUpdate',
+    function (job, cb) {
+      var schedule = job.data; // Only one email per job
+      // This will only be called if a
+      // 'runScheduler' job is obtained
+      Meteor._debug('PostImageProcessUpdate');
+      job.log("Entered PostImageProcessUpdate",
+        {level: 'info'});
 
 
-  // var javx = new Job(scheduler, 'cleanup', {})
-  //      .repeat({ schedule: scheduler.later.parse.text("every 5 minutes") })
-  //      .save({cancelRepeats: true});
-  //
-  // var cleaning = scheduler.processJobs( 'cleanup', { pollInterval: false, workTimeout: 60*1000 },
-  //   function (job, cb) {
-  //      var current = new Date();
-  //      current.setMinutes(current.getMinutes() - 5);
-  //      var ids = scheduler.find({
-  //         status: Job.jobStatusRemovable,
-  //         updated: current},
-  //         {fields: { _id: 1 }}).map((d) =>{
-  //           return d._id;
-  //         });
-  //      if (ids.length > 0) {
-  //        scheduler.removeJobs(ids)
-  //      }
-  //      //console.warn "Removed #{ids.length} old jobs"
-  //      job.done("Removed #{ids.length} old jobs");
-  //      cb();
-  // });
-  // scheduler.find({ type: 'cleanup', status: 'ready' })
-  //      .observe
-  //         added: () =>
-  //            q.trigger();
+      // tsx_Disconnect();
+      job.done();
 
+      // Be sure to invoke the callback
+      // when work on this job has finished
+      cb();
+    }
+  );
+
+  // *******************************
+  //   Start processes
+  // *******************************
   // start server for scheduler and wait
   return scheduler.startJobServer();
-
 });
 
 function getSchedulerState() {
@@ -441,36 +500,6 @@ Meteor.methods({
          }
        });
      }
-   },
-
-   serverSideText() {
-     Meteor._debug(
-       '*******************************'
-     );
-
-     var filename = '/home/stellarmate/tsx_cmd/api/tsx/SkyX_JS_CLS.js';
-    filename = '../api/tsx/SkyX_JS_CLS.js';
-    filename = '~/tsx_cmd/api/tsx/SkyX_JS_CLS.js';
-    filename = '/Users/stephen/Documents/code/tsx_cmd/imports/tsx/SkyX_JS_CLS.js';
-
-
-     Meteor._debug('Loading file: ' + filename);
-     var shell = require('shelljs');
-
-     var str = shell.cat(filename);
-     // Meteor._debug(str);
-     // Meteor._debug(filename);
-
-     var testStr = new String("/* this is a test*/ var b=$0000;batman;$0001");
-     Meteor._debug('Test var: ' + testStr);
-     testStr = testStr.replace("$0000", "var=test;");
-     testStr = testStr.replace("$0001", '99999999999999');
-     Meteor._debug('Result:   ' + testStr);
-
-     //Meteor._debug(str);
-     Meteor._debug(
-      '*******************************'
-    );
    },
 
  });

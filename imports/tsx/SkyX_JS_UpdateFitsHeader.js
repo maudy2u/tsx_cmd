@@ -4,7 +4,7 @@
 //
 
 var Out = '';			// Form the output string
-var targetName = "$001";
+var targetName = "$000";
 
 //open TSX camera and get the last image
 var tsxi = ccdsoftCameraImage;

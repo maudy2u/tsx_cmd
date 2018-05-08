@@ -19,6 +19,8 @@ import {
   tsx_GetServerState,
   tsx_GetServerStateValue,
   UpdateStatus,
+  postProgressTotal,
+  postStatus,
  } from '../imports/api/serverStates.js'
 
 import { tsx_feeder } from './tsx_feeder.js'
@@ -476,7 +478,8 @@ function tsx_RunFocus3( target ) {
     while( tsx_is_waiting ) {
      Meteor.sleep( 1000 );
     }
-
+    Meteor._debug(' *** @Focus3 finished');
+    UpdateStatus(' Focusing finished.');
     return Out;
   }
   Meteor._debug(' *** @Focus3 diabled');
@@ -486,6 +489,7 @@ function tsx_RunFocus3( target ) {
 // **************************************************************
 function InitialFocus( target ) {
   Meteor._debug(' *** Initial @Focus3: ' + target.targetFindName);
+  tsx_AbortGuider( );
   var result = tsx_RunFocus3( target ); // need to get the focus position
   var temp = tsx_GetFocusTemp( target ); // temp and position set inside
   tsx_SetServerState( 'initialFocusTemperature', temp.focusTemp);
@@ -978,9 +982,9 @@ function isFocusingNeeded(target) {
   if( typeof curFocusTemp == 'undefined' ) {
     curFocusTemp = tsx_GetServerState('initialFocusTemperature').value;
   }
-  var focusDiff = Math.abs(curFocusTemp.focusTemp - lastFocusTemp);
+  var focusDiff = Math.abs(curFocusTemp.focusTemp - lastFocusTemp).toFixed(2);
   var targetDiff = target.tempChg; // diff for this target
-  Meteor._debug('Focus diff: ' + focusDiff + '='+curFocusTemp.focusTemp+'-'+lastFocusTemp);
+  Meteor._debug('Focus diff: ' + focusDiff + '='+curFocusTemp.focusTemp +'-'+lastFocusTemp );
   if( focusDiff >= targetDiff ) {
   // returning true tell caller to run  @Focus3
     return true;
@@ -1033,14 +1037,14 @@ function hasReachedEndCondition(target) {
 
 	// // *******************************
 	// // if meridian  - flip/slew... - preRun: focus - CLS - rotation - guidestar - guiding...
-  // var doFlip = isMeridianFlipNeed( target );
-  // if( doFlip ) {
-  //   // okay we have a lot to do...
-  //   // prepare target of imaging again...
-  //   prepareTargetForImaging( target ) ;
-  //
-  //   return false;
-  // }
+  var doFlip = isMeridianFlipNeed( target );
+  if( doFlip ) {
+    // okay we have a lot to do...
+    // prepare target of imaging again...
+    prepareTargetForImaging( target ) ;
+
+    return false;
+  }
 
   // NOW CONTINUE ON WITH CURRENT SPOT...
   // FOCUS AND DITHER IF NEEDED
@@ -1290,6 +1294,7 @@ function tsx_takeImage( filterNum, exposure, frame ) {
   var success = 'Failed';
 
   var cmd = shell.cat(tsx_cmd('SkyX_JS_TakeImage'));
+  postProgressTotal(exposure);
 
   cmd = cmd.replace("$000", filterNum ); // set filter
   cmd = cmd.replace("$001", exposure ); // set exposure

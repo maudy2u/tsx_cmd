@@ -63,6 +63,9 @@ class Monitor extends Component {
       filter: '_',
       binning: '_',
 
+      tsx_progress: 0,
+      tsx_total: 0,
+
   };
 
   handleChange = (e, { name, value }) => this.setState({ [name]: value })
@@ -154,9 +157,15 @@ class Monitor extends Component {
       monTransit: report.TRANSIT,
       monAngle: report.angle,
       monIsDark: report.isDark,
-      // currentStage: nextProps.tsxInfo.find(function(element) {
-      //   return element.name == 'currentStage';
-      // }).value,
+    });
+
+    this.setState({
+      tsx_total: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'tsx_total';
+      }).value,
+      tsx_progress: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'tsx_progress';
+      }).value,
     });
   }
 
@@ -347,6 +356,7 @@ class Monitor extends Component {
           <Label>HA <Label.Detail>{Number(this.state.monHA).toFixed(4)}</Label.Detail></Label>
           <Label>Transit <Label.Detail>{Number(this.state.monTransit).toFixed(4)}</Label.Detail></Label>
         </Segment>
+        <Progress value={this.state.tsx_progress} total={this.state.tsx_total} progress='ratio'>Processing</Progress>
       </Segment.Group>
         <Segment>
         {this.renderTarget()}
@@ -400,12 +410,6 @@ export default withTracker(() => {
   return {
     reports: TargetReports.find().fetch(),
     targetSessionId: TheSkyXInfos.find({name: 'imagingSessionId'}).fetch(),
-    // targetImageDEC: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetDEC }),
-    // targetImageRA: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetRA }),
-    // targetImageALT: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetALT }),
-    // targetImageAZ: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetAZ }),
-    // targetHA: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetHA }),
-    // targetTransit: TheSkyXInfos.findOne({ name: tsx_ServerStates.targetTransit }),
     tsxInfo: TheSkyXInfos.find({}).fetch(),
     seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
     takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),

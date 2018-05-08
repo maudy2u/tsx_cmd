@@ -146,7 +146,7 @@ class TakeSeriesTemplateEditor extends Component {
             <b>Bin</b>
             </Grid.Column>
             <Grid.Column>
-            <b>Tools</b>
+            <b>Order</b>
             </Grid.Column>
           </Grid.Row>
           {// this.props.template.series.. this is a series ID

@@ -353,15 +353,15 @@ class App extends Component {
   }
 
   renderIPEditor() {
-    var IP;
-    var PORT;
-    try {
-      IP = this.props.tsxIP.value;
-      PORT = this.props.tsxPort.value;
-    } catch (e) {
-      IP = 'Not Connected';
-      PORT = 'Not Connected';
-    }
+    // var IP;
+    // var PORT;
+    //
+    // try {
+    //   IP = this.state.ip;
+    // } catch (e) {
+    //   IP = 'Not Connected';
+    //   PORT = 'Not Connected';
+    // }
 
     return (
       <Modal
@@ -378,7 +378,7 @@ class App extends Component {
           <Input
             label='IP:'
             name='ip'
-            value={IP}
+            value={this.state.ip}
             onChange={this.ipChange}/>
         </Modal.Description>
         <Modal.Actions>
@@ -416,11 +416,13 @@ class App extends Component {
           <h3>Enter the TCP Port to use to connect to the TSX Server.</h3>
         </Modal.Content>
         <Modal.Description>
-          <Input
-            label='Port:'
+          <Form.Input
+            label='Port: '
             name='port'
+            placeholder='Minutes to sleep'
             value={PORT}
-            onChange={this.portChange}/>
+            onChange={this.portChange}
+          />
         </Modal.Description>
         <Modal.Actions>
           <Button onClick={this.modalEnterPortClose.bind(this)} inverted>
@@ -496,9 +498,13 @@ class App extends Component {
           <div>
             <Segment.Group>
             <Segment>
-              <Button name='showMonitor' icon='dashboard' onClick={this.handleToggle.bind(this)}/>
-              <Button icon='refresh' onClick={this.connectToTSX.bind(this)}/>
-              <Button icon='car' onClick={this.park.bind(this)}/>
+              <Button.Group size='small'>
+                <Button name='showMonitor' icon='dashboard' onClick={this.handleToggle.bind(this)}/>
+                <Button icon='refresh' onClick={this.connectToTSX.bind(this)}/>
+              </Button.Group>
+              <Button.Group basic size='small' floated='right'>
+                <Button icon='car' onClick={this.park.bind(this)}/>
+              </Button.Group>
               <Label onClick={this.modalEnterIpOpen.bind(this)}>TSX ip:
                 <Label.Detail>
                   {IP}

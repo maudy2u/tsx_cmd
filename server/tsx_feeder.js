@@ -1,15 +1,14 @@
 import { Meteor } from 'meteor/meteor';
 import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
-import { JobCollection } from 'meteor/vsivsi:job-collection';
+import { scheduler } from '../imports/api/theProcessors.js';
 
 import {
   tsx_GetServerStateValue,
   UpdateStatus,
+  postStatus,
+  postProgressTotal,
+  postProgressIncrement,
  } from '../imports/api/serverStates.js'
-
-// *******************************
-// Create the scheduler Queue
-var tsxQueue = JobCollection('tsxCmds');
 
 var tsx_waiting = false;
 
@@ -96,11 +95,15 @@ export function tsx_feeder( cmd, callback ) {
     var sec = 1000;
     Meteor.sleep( sec );
     waiting = waiting + sec;
-    Meteor._debug('tsx_waiting (sec): ' + waiting /sec );
+    var incr = waiting /sec;
+    postProgressIncrement( incr );
+    // postStatus( 'tsx_waiting (sec): ' + waiting /sec  );
+    // Meteor._debug('tsx_waiting (sec): ' + waiting /sec );
     if( imageChk ) {
       process = tsx_GetServerStateValue( 'imagingSessionId' );
-      UpdateStatus( 'Stopped');
     }
   }
+  postProgressTotal(0);
+  postProgressIncrement(0);
   tsx.close;
 };

@@ -1,4 +1,9 @@
 import { TheSkyXInfos } from './theSkyXInfos.js';
+import { scheduler } from './theProcessors.js';
+
+import { Logger }     from 'meteor/ostrio:logger';
+import { LoggerFile } from 'meteor/ostrio:loggerfile';
+
 
 export const tsx_ServerStates = {
   ip: 'ip',
@@ -6,6 +11,8 @@ export const tsx_ServerStates = {
   currentStage: 'currentStage', // this is a status line update for the dashboard
   SchedulerStatus: 'SchedulerStatus',
   currentJob: 'currentJob',
+  tsx_progress: 'tsx_progress', // used for minute increment
+  tsx_total: 'tsx_total', // use for total planned value
 
   initialFocusTemperature: 'initialFocusTemperature',
   mntRA: 'mntRA',
@@ -56,6 +63,69 @@ export const tsx_ServerStates = {
   lastCheckMinSunAlt: 'lastCheckMinSunAlt',
   lastFocusPos: 'lastFocusPos',
   lastFocusTemp: 'lastFocusTemp',
+};
+
+export function postStatus( info ) {
+  // Create a job:
+  var job = new Job(scheduler, 'updateClientData', // type of job
+ // Job data that you define, including anything the job
+ // needs to complete. May contain links to files, etc...
+   {
+     status: info,
+     reportedAt: new Date(),
+   }
+ );
+
+ // Set some properties of the job and then submit it
+ // the same submit the start time to the scheduler...
+ // at this time could add a tweet :)
+ job.priority('normal');
+   // .retry({ retries: 5,
+   //   wait: 5*60*1000 }) //15*60*1000 })  // 15 minutes between attempts
+   // .delay(0);// 60*60*1000)     // Wait an hour before first try
+ var jid = job.save();               // Commit it to the server
+};
+
+export function postProgressTotal( info ) {
+   // Create a job:
+   var job = new Job(scheduler, 'updateProgressTotal', // type of job
+  // Job data that you define, including anything the job
+  // needs to complete. May contain links to files, etc...
+    {
+      total: info,
+      reportedAt: new Date(),
+    }
+  );
+
+  // Set some properties of the job and then submit it
+  // the same submit the start time to the scheduler...
+  // at this time could add a tweet :)
+  job.priority('normal');
+    // .retry({ retries: 5,
+    //   wait: 5*60*1000 }) //15*60*1000 })  // 15 minutes between attempts
+    // .delay(0);// 60*60*1000)     // Wait an hour before first try
+  var jid = job.save();               // Commit it to the server
+};
+
+  export function postProgressIncrement( info ) {
+    // Create a job:
+    var job = new Job(scheduler, 'updateProgressIncrement', // type of job
+   // Job data that you define, including anything the job
+   // needs to complete. May contain links to files, etc...
+     {
+       progress: info,
+       reportedAt: new Date(),
+     }
+   );
+
+ // Set some properties of the job and then submit it
+ // the same submit the start time to the scheduler...
+ // at this time could add a tweet :)
+ job.priority('normal');
+   // .retry({ retries: 5,
+   //   wait: 5*60*1000 }) //15*60*1000 })  // 15 minutes between attempts
+   // .delay(0);// 60*60*1000)     // Wait an hour before first try
+ var jid = job.save();               // Commit it to the server
 };
 
 export function tsx_SetServerState( name, value) {
