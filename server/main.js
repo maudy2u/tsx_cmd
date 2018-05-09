@@ -235,7 +235,7 @@ Meteor.startup(() => {
   workers = scheduler.processJobs( 'updateProgressIncrement',
     function (job, cb) {
       var info = job.data; // Only one email per job
-      tsx_SetServerState('tsx_total', info.progress );
+      tsx_SetServerState('tsx_progress', info.progress );
       // tsx_Disconnect();
       job.done();
 
@@ -247,7 +247,7 @@ Meteor.startup(() => {
   workers = scheduler.processJobs( 'updateProgressTotal',
     function (job, cb) {
       var info = job.data; // Only one email per job
-      tsx_SetServerState('tsx_progress', info.total );
+      tsx_SetServerState('tsx_total', info.total );
       // tsx_Disconnect();
       job.done();
 

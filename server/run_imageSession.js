@@ -1013,6 +1013,36 @@ function hasReachedEndCondition(target) {
 	var continueWithSeries = false;
   Meteor._debug(' *** hasReachedEndCondition: ' + target.targetFindName);
 
+  // get the new target report...
+  // var rpt = tsx_TargetReport( target );
+  /*
+  Use the report to retrieve all data once into the
+  var rpt = TargetReport.findOne({target_id: target._id});
+  if( typeof rpt == 'undefined' ) {
+    // fall back to the old process...
+    //
+  } else {
+    // use the rpt.values...
+
+    angle: '',
+    scale: '',
+    isValid: isValid,
+    AZ: az,
+    ALT: alt,
+    RA:  ra,
+    DEC: dec,
+    HA: ha,
+    TRANSIT: transit,
+    isDark: isDark,
+    sunAltitude: sunAlt,
+    updatedAt: update,
+  }
+
+
+   */
+
+
+
 	var isDark = tsx_isDarkEnough(target);
 	if(!isDark ) {
 		return true;
