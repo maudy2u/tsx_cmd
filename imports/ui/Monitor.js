@@ -65,11 +65,12 @@ class Monitor extends Component {
 
       tsx_progress: 0,
       tsx_total: 0,
+      tsx_actions: '',
 
   };
 
-  handleChange = (e, { name, value }) => this.setState({ [name]: value })
-  handleToggle = (e, { name, value }) => this.setState({ [name]: !value })
+  handleChange = (e, { name, value }) => this.setState({ [name]: value });
+  handleToggle = (e, { name, value }) => this.setState({ [name]: !value });
   noFoundSessionOpen = () => this.setState({ noFoundSession: true })
   noFoundSessionClose = () => this.setState({ noFoundSession: false })
 
@@ -306,9 +307,101 @@ class Monitor extends Component {
     }
   }
 
+  getTsxActions() {
+
+    var actionArray = [];
+    actionArray.push({
+      key: 'Pick',
+      text: 'Pick',
+      value: 'Pick'
+    });
+    actionArray.push({
+      key: 'Test End',
+      text: 'Test End',
+      value: 'Test End'
+    });
+    actionArray.push({
+      key: '@Focus3',
+      text: '@Focus3',
+      value: '@Focus3'
+    });
+    actionArray.push({
+      key: 'Dither',
+      text: 'Dither',
+      value: 'Dither'
+    });
+    actionArray.push({
+      key: 'Guide',
+      text: 'Guide',
+      value: 'Guide'
+    });
+    actionArray.push({
+      key: 'Solve',
+      text: 'Solve',
+      value: 'Solve'
+    });
+    actionArray.push({
+      key: 'Test Angle',
+      text: 'Test Angle',
+      value: 'Test Angle'
+    });
+    actionArray.push({
+      key: 'Start Series',
+      text: 'Start Series',
+      value: 'Start Series'
+    });
+    actionArray.push({
+      key: 'AbortGuide',
+      text: 'AbortGuide',
+      value: 'AbortGuide'
+    });
+
+
+    return actionArray;
+  }
+
+  handleTsx_actionsChange = (e, { name, value }) => {
+    this.setState({ [name]: value })
+  };
+
+  dropDownAction() {
+
+    var value = this.state.tsx_action;
+
+    if( value == 'Pick' ) {
+      this.testPicking();
+    }
+    else if ( value == 'Test End' ) {
+      this.testEndConditions();
+    }
+    else if ( value == '@Focus3' ) {
+      this.testFocus3();
+    }
+    else if ( value == 'Dither' ) {
+      this.testDither();
+    }
+    else if ( value == 'Guide' ) {
+      this.testGuide();
+    }
+    else if ( value == 'Solve' ) {
+      this.testSolve();
+    }
+    else if ( value == 'Test Angle' ) {
+      this.testMatchRotation();
+    }
+    else if ( value == 'Start Series' ) {
+      this.startImaging();
+    }
+    else if ( value == 'AbortGuide' ) {
+      this.testAbortGuiding();
+    }
+
+  };
+
   render() {
 
-// sample data: 	echo "`date "+%H:%M:%S"` Mount Direction: $mntDir, Altitude: $mntAlt degrees "
+    var tsx_actions = this.getTsxActions();
+
 
     return (
       <div>
@@ -318,49 +411,43 @@ class Monitor extends Component {
              <Button icon='play'  onClick={this.playScheduler.bind(this)}/>
              {/* <Button icon='pause' onClick={this.pauseScheduler.bind(this)}  /> */}
              <Button icon='stop' onClick={this.stopScheduler.bind(this)} />
-             {/*
-
-             <Button onClick={this.textTSX.bind(this)}>Test</Button>
-             <Button onClick={this.textTSX2.bind(this)}>Test2</Button>
-             imagesTaken: TargetSessions.findOne({_id: this.props.target._id}).totalImagesTaken(),
-             imagesPlanned: TargetSessions.findOne({_id:this.props.target._id}).totalImagesPlanned(),
-
-             */}
-         </Button.Group>
-         <Button.Group icon floated='right'>
-           <Button icon='refresh' onClick={this.updateMonitor.bind(this)}/>
-           <Button onClick={this.testPicking.bind(this)}>Pick</Button>
-           <Button onClick={this.testEndConditions.bind(this)}>End</Button>
-           <Button onClick={this.testFocus3.bind(this)}>Focus3</Button>
-           <Button onClick={this.testDither.bind(this)}>Dither</Button>
-           <Button onClick={this.testGuide.bind(this)}>Guide</Button>
-           <Button onClick={this.testSolve.bind(this)}>Solve</Button>
-           <Button onClick={this.testMatchRotation.bind(this)}>Angle</Button>
-           <Button onClick={this.startImaging.bind(this)}>Series</Button>
-           <Button onClick={this.testAbortGuide.bind(this)}>AbortGuide</Button>
-         </Button.Group>
-           {/* <Progress
-             value={this.totalTaken()}
-             total={this.totalPlanned()}
-             progress='ratio'>Images Taken</Progress> */}
-         </Segment>
-      <Segment.Group>
-        <Segment>
-          <Label>RA <Label.Detail>{Number(this.state.monRA).toFixed(4)}</Label.Detail></Label>
-          <Label>DEC <Label.Detail>{Number(this.state.monDEC).toFixed(4)}</Label.Detail></Label>
-          <Label>Angle <Label.Detail>{Number(this.state.monAngle).toFixed(4)}</Label.Detail></Label>
+             <Button icon='refresh' onClick={this.updateMonitor.bind(this)}/>
+          </Button.Group>
+        {/* </Segment>
+           {/* <Segment> */}
+          {/* <Form.Group widths='equal'> */}
+            <Dropdown compact
+               label='Action '
+               name='tsx_action'
+               options={tsx_actions}
+               placeholder='Action for TheSkyX'
+               text={this.state.tsx_actions}
+               onChange={this.handleTsx_actionsChange}
+            />
+            <Button icon='toggle right' onClick={this.dropDownAction.bind(this)}/>
+         {/* </Form.Group> */}
+         {/* <Button.Group icon floated='right'>
+         </Button.Group> */}
         </Segment>
-        <Segment>
-          <Label>Atl <Label.Detail>{Number(this.state.monALT).toFixed(4)}</Label.Detail></Label>
-          <Label>Az <Label.Detail>{this.state.monAZ}</Label.Detail></Label>
-          <Label>HA <Label.Detail>{Number(this.state.monHA).toFixed(4)}</Label.Detail></Label>
-          <Label>Transit <Label.Detail>{Number(this.state.monTransit).toFixed(4)}</Label.Detail></Label>
-        </Segment>
-        <Progress value={this.state.tsx_progress} total={this.state.tsx_total} progress='ratio'>Processing</Progress>
-      </Segment.Group>
+           <Segment>
+             <Progress value={this.state.tsx_progress} total={this.state.tsx_total} progress='ratio'>Processing</Progress>
+           </Segment>
         <Segment>
         {this.renderTarget()}
         </Segment>
+        <Segment.Group>
+          <Segment>
+            <Label>RA <Label.Detail>{Number(this.state.monRA).toFixed(4)}</Label.Detail></Label>
+            <Label>DEC <Label.Detail>{Number(this.state.monDEC).toFixed(4)}</Label.Detail></Label>
+            <Label>Angle <Label.Detail>{Number(this.state.monAngle).toFixed(4)}</Label.Detail></Label>
+          </Segment>
+          <Segment>
+            <Label>Atl <Label.Detail>{Number(this.state.monALT).toFixed(4)}</Label.Detail></Label>
+            <Label>Az <Label.Detail>{this.state.monAZ}</Label.Detail></Label>
+            <Label>HA <Label.Detail>{Number(this.state.monHA).toFixed(4)}</Label.Detail></Label>
+            <Label>Transit <Label.Detail>{Number(this.state.monTransit).toFixed(4)}</Label.Detail></Label>
+          </Segment>
+        </Segment.Group>
         {/*  */}
         {/* <Segment>
           <h3>Focuser  <Label>Temp<Label.Detail>{this.state.focusTemp}</Label.Detail></Label>

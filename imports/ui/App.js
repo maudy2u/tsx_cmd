@@ -47,8 +47,8 @@ class App extends Component {
     modalConnectionFailed: false,
     showMonitor: false, // this needs to be a server session variable
 
-    ip: 'Not connected',
-    port: 'Not connected',
+    ip: 'localhost',
+    port: '3040',
     currentStage: '',
   };
 
@@ -394,15 +394,6 @@ class App extends Component {
   }
 
   renderPortEditor() {
-    var IP;
-    var PORT;
-    try {
-      IP = this.props.tsxIP.value;
-      PORT = this.props.tsxPort.value;
-    } catch (e) {
-      IP = 'Not Connected';
-      PORT = 'Not Connected';
-    }
 
     return (
       <Modal
@@ -420,7 +411,7 @@ class App extends Component {
             label='Port: '
             name='port'
             placeholder='Minutes to sleep'
-            value={PORT}
+            value={this.state.port}
             onChange={this.portChange}
           />
         </Modal.Description>
@@ -499,7 +490,6 @@ class App extends Component {
             <Segment.Group>
             <Segment>
               <Button.Group size='small'>
-                <Button name='showMonitor' icon='dashboard' onClick={this.handleToggle.bind(this)}/>
                 <Button icon='refresh' onClick={this.connectToTSX.bind(this)}/>
               </Button.Group>
               <Button.Group basic size='small' floated='right'>
@@ -520,6 +510,7 @@ class App extends Component {
               {this.renderPortEditor()}
             </Segment>
             <Segment>
+              <Button name='showMonitor' icon='dashboard' onClick={this.handleToggle.bind(this)}/>
               <Label>Status: <Label.Detail>{this.state.currentStage}</Label.Detail></Label>
             </Segment>
             {/* { this.tsxConnectionFailed() } */}

@@ -34,6 +34,7 @@ function tsx_GetPortAndIP() {
 // *******************************
 // test of generic write method...
 export function tsx_feeder( cmd, callback ) {
+  Meteor._debug(" ********** tsx_feeder ************ ");
   cmd = String(cmd);
   Meteor.sleep(3*1000);  // arbitary sleep for 3sec.
   const { ip, port } = tsx_GetPortAndIP();
@@ -45,7 +46,7 @@ export function tsx_feeder( cmd, callback ) {
    tsx.setEncoding(); // used to set the string type of return
 
    tsx.on('close', function() {
-       Meteor._debug('tsx_done');
+       Meteor._debug('tsx_close');
    });
 
    tsx.on('write', function() {

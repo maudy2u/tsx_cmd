@@ -198,6 +198,7 @@ export function tsx_MntPark(defaultFilter, softPark) {
 // **************************************************************
 export function tsx_AbortGuider() {
   var success = false;
+  Meteor._debug(' *** tsx_AbortGuider');
 
   var cmd = String(shell.cat(tsx_cmd('SkyX_JS_AbortGuider')));
 
@@ -1880,9 +1881,9 @@ Use this to set the last focus
 
   },
 
-  testAbortGuide( target ) {
+  testAbortGuiding( target ) {
     Meteor._debug('************************');
-    Meteor._debug(' *** testAbortGuide' );
+    Meteor._debug(' *** testAbortGuiding' );
 
     return tsx_AbortGuider();
   },

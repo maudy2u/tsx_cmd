@@ -17,6 +17,9 @@ import {
   tsx_UpdateDevice,
   tsx_GetServerStateValue,
   UpdateStatus,
+  postProgressTotal,
+  postProgressIncrement,
+  postProgressMessage,
 } from '../imports/api/serverStates.js';
 
 import {
@@ -32,9 +35,6 @@ import {
 import { tsx_feeder, stop_tsx_is_waiting } from './tsx_feeder.js';
 
 import {shelljs} from 'meteor/akasha:shelljs';
-
-var tsxHeader =  '/* Java Script *//* Socket Start Packet */';
-var tsxFooter = '/* Socket End Packet */';
 
 var schedulerRunning = 'Stop';
 var isSchedulerRunning = true;
@@ -71,6 +71,7 @@ function initServerStates() {
   tsx_SetServerState('lastCheckMinSunAlt', '');
   tsx_SetServerState('lastFocusPos', '');
   tsx_SetServerState('lastFocusTemp', '');
+
   for (var m in tsx_ServerStates){
     var state = tsx_ServerStates[m];
     try {
@@ -87,18 +88,28 @@ function initServerStates() {
 Meteor.startup(() => {
   // code to run on server at startup
   Meteor._debug(' ******************');
+
+  // *******************************
+  // Server restarts and it means no session
   // get rid of any old processes/jobs
   var jobs = scheduler.find().fetch();
   var jid = tsx_GetServerStateValue('currentJob');
   scheduler.remove( jid );
   tsx_SetServerState('currentJob', '');
+  tsx_SetServerState( tsx_ServerStates.imagingSessionId, '');
 
+  // Clean up the scheduler process collections...
+  // Persistence across reboots is not needed at this time.
   Meteor._debug('Number of Jobs found: ' + jobs.length);
   for (var i = 0; i < jobs.length; i++) {
     if( typeof jobs[i] != 'undefined') {
-      // JobCollection.remove(jobs[i]._id);
-      // jobs[i].cancel();
-      // jobs[i].remove();
+      scheduler.remove(jobs[i]._id);
+      // jobs[i].remove(function (err, result) {
+      //   if (result) {
+      //     // Job removed from server.
+      //     Meteor._debug('job removed');
+      //   }
+      // });
     }
   }
 
@@ -184,18 +195,26 @@ Meteor.startup(() => {
           }
           isParked = true;
           var sleepTime = tsx_GetServerStateValue('defaultSleepTime');
-          UpdateStatus( ' Waiting...: ' + sleepTime + 'min');
+          UpdateStatus( '  No valid target, waiting...');
           Meteor._debug( ' Waiting...: ' + sleepTime + 'min');
           var timeout = 0;
-          var msSleep = Number(sleepTime*60*1000);
+          var msSleep = Number(sleepTime*60);
+          postProgressTotal(sleepTime);
+          postProgressMessage('Waiting ~' + sleepTime + 'min.');
           while( timeout < msSleep) {
             if( tsx_GetServerStateValue('currentJob') == '' ) {
               UpdateStatus( ' Canceled sessions');
               break;
             }
-            Meteor.sleep(1000); // Sleep for ms
-            timeout = timeout+1;
+            var sec = 1000;
+            Meteor.sleep( sec );
+            timeout = timeout + sec;
+            var incr = timeout /sec;
+            postProgressIncrement( incr );
           }
+          postProgressTotal(0);
+          postProgressIncrement( 0 );
+          postProgressMessage('Processing');
           Meteor._debug('Finished sleep');
         }
       }
@@ -232,11 +251,24 @@ Meteor.startup(() => {
       cb();
     }
   );
+  workers = scheduler.processJobs( 'updateProgressMessage',
+    function (job, cb) {
+      var info = job.data; // Only one email per job
+      tsx_SetServerState('tsx_message', info.message );
+      Meteor._debug('updateProgressMessage');
+      // tsx_Disconnect();
+      job.done();
+
+      // Be sure to invoke the callback
+      // when work on this job has finished
+      cb();
+    }
+  );
   workers = scheduler.processJobs( 'updateProgressIncrement',
     function (job, cb) {
       var info = job.data; // Only one email per job
       tsx_SetServerState('tsx_progress', info.progress );
-      // tsx_Disconnect();
+      Meteor._debug('updateProgressIncrement');
       job.done();
 
       // Be sure to invoke the callback
@@ -248,6 +280,7 @@ Meteor.startup(() => {
     function (job, cb) {
       var info = job.data; // Only one email per job
       tsx_SetServerState('tsx_total', info.total );
+      Meteor._debug('updateProgressTotal');
       // tsx_Disconnect();
       job.done();
 
@@ -265,8 +298,8 @@ Meteor.startup(() => {
       // This will only be called if a
       // 'runScheduler' job is obtained
       Meteor._debug('manageCameraTemp');
-      job.log("Entered manageCameraTemp",
-        {level: 'info'});
+      // job.log("Entered manageCameraTemp",
+      //   {level: 'info'});
 
       // tsx_Disconnect();
       job.done();
@@ -282,8 +315,8 @@ Meteor.startup(() => {
       // This will only be called if a
       // 'runScheduler' job is obtained
       Meteor._debug('PostImageProcessUpdate');
-      job.log("Entered PostImageProcessUpdate",
-        {level: 'info'});
+      // job.log("Entered PostImageProcessUpdate",
+        // {level: 'info'});
 
 
       // tsx_Disconnect();
