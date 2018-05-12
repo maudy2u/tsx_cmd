@@ -237,7 +237,7 @@ Meteor.startup(() => {
       var info = job.data; // Only one email per job
       // This will only be called if a
       // 'runScheduler' job is obtained
-      Meteor._debug('updateClientData');
+      // Meteor._debug('updateClientData');
       job.log("Entered updateClientData",
         {level: 'info'});
 
@@ -255,7 +255,7 @@ Meteor.startup(() => {
     function (job, cb) {
       var info = job.data; // Only one email per job
       tsx_SetServerState('tsx_message', info.message );
-      Meteor._debug('updateProgressMessage');
+      // Meteor._debug('updateProgressMessage');
       // tsx_Disconnect();
       job.done();
 
@@ -268,7 +268,7 @@ Meteor.startup(() => {
     function (job, cb) {
       var info = job.data; // Only one email per job
       tsx_SetServerState('tsx_progress', info.progress );
-      Meteor._debug('updateProgressIncrement');
+      // Meteor._debug('updateProgressIncrement');
       job.done();
 
       // Be sure to invoke the callback
@@ -280,7 +280,7 @@ Meteor.startup(() => {
     function (job, cb) {
       var info = job.data; // Only one email per job
       tsx_SetServerState('tsx_total', info.total );
-      Meteor._debug('updateProgressTotal');
+      // Meteor._debug('updateProgressTotal');
       // tsx_Disconnect();
       job.done();
 
@@ -297,7 +297,7 @@ Meteor.startup(() => {
       var schedule = job.data; // Only one email per job
       // This will only be called if a
       // 'runScheduler' job is obtained
-      Meteor._debug('manageCameraTemp');
+      // Meteor._debug('manageCameraTemp');
       // job.log("Entered manageCameraTemp",
       //   {level: 'info'});
 

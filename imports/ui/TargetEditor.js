@@ -441,16 +441,14 @@ class TargetEditor extends Component {
               </Form.Group>
               <Segment>
                 <h4 className="ui header">Focus Temperature Delta: {this.state.tempChg}</h4>
-                <ReactSimpleRange
-                  label
-                  step={.1}
-                  min={0}
-                  max={2}
+                <Form.Input
+                  label='Delta in temp to focus'
+                  name='tempChg'
+                  placeholder='e.g. 0.7'
                   value={this.state.tempChg}
-                  sliderSize={12}
-                  thumbSize={18}
                   onChange={this.handleFocusTempChange}
                 />
+
               </Segment>
       </Tab.Pane> },
 //
