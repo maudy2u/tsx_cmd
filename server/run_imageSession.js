@@ -493,6 +493,7 @@ function InitialFocus( target ) {
   tsx_AbortGuider( );
   var result = tsx_RunFocus3( target ); // need to get the focus position
   var temp = tsx_GetFocusTemp( target ); // temp and position set inside
+  // tsx_CLS(target);
   tsx_SetServerState( 'initialFocusTemperature', temp.focusTemp);
 }
 
@@ -985,7 +986,7 @@ function isFocusingNeeded(target) {
   }
   var focusDiff = Math.abs(curFocusTemp.focusTemp - lastFocusTemp).toFixed(2);
   var targetDiff = target.tempChg; // diff for this target
-  Meteor._debug('Focus diff: ' + focusDiff + '='+curFocusTemp.focusTemp +'-'+lastFocusTemp );
+  Meteor._debug('Focus diff('+targetDiff+'): ' + focusDiff + '='+curFocusTemp.focusTemp +'-'+lastFocusTemp );
   if( focusDiff >= targetDiff ) {
   // returning true tell caller to run  @Focus3
     return true;
@@ -1869,7 +1870,7 @@ Use this to set the last focus
     Meteor._debug('************************');
     Meteor._debug(' *** testFocus3' );
 
-    return tsx_RunFocus3( target );
+    return InitialFocus( target );
 
   },
 

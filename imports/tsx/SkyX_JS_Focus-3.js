@@ -16,11 +16,7 @@
 
 var CCDSC		= ccdsoftCamera;
 var focusingFilter = $000;
-var bin 		= $001;
-var binFactor = $002;
 var initExp 		= ccdsoftCamera.ExposureTime;			// How long of an exposure does the camera use?
-var initialBinX		= ccdsoftCamera.BinX;
-var initialBinY		= ccdsoftCamera.BinY;
 
 if ( Application.build >= 11177 )
 {
@@ -61,8 +57,13 @@ if ( Application.build >= 11177 )
 			// OK, that makes little sense. Just pretend that you never read it.
 			//
 			CCDSC.AutoSaveOn = false;		// Toss the image for this one single frame
-			CCDSC.ExposureTime = 1;			// Set duration for a throw-away light frame
-
+			CCDSC.ExposureTime = 2;			// Set duration for a throw-away light frame
+			// var initBinX = CCDSC.BinX;
+			// var initBinY = CCDSC.BinY;
+			// CCDSC.BinX = 2;
+			// CCDSC.Biny = 2;
+			CCDSC.ImageReduction = 1;
+			//
 			CCDSC.TakeImage();			// Snap the throw-away
 
 			CCDSC.AutoSaveOn = true;		// Keep the images for the future
@@ -70,8 +71,11 @@ if ( Application.build >= 11177 )
 
 		// Finally! Focus the camera!
 			// Use three samples per point and let @F3 figure out the rest.
-			//
 			out = CCDSC.AtFocus3(3, true);
+			// out = CCDSC.AtFocus2();
+			CCDSC.ImageReduction = 0;
+			// CCDSC.BinX = initBinX;
+			// CCDSC.Biny = initBinY;
 			CCDSC.ExposureTime = initExp;		// Restore camera duration time. It'll get set later anyway...
 
 		}
