@@ -60,9 +60,11 @@ class DefaultSettings extends Component {
     isFocus3Enabled: false,
     isFocus3Binned: false,
     defaultGuideExposure: 7,
+    defaultFocusExposure: 1,
     minDitherFactor: 3,
     maxDitherFactor: 7,
     imagingPixelSize: 3.8,
+    defaultCLSEnabled: true,
   };
 
   // requires the ".bind(this)", on the callers
@@ -191,6 +193,12 @@ class DefaultSettings extends Component {
       imagingPixelSize: nextProps.tsxInfo.find(function(element) {
         return element.name == 'imagingPixelSize';
       }).value,
+      defaultFocusExposure: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'imagidefaultFocusExposurengPixelSize';
+      }).value,
+      defaultCLSEnabled: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultCLSEnabled';
+      }).value,
     });
 
   }
@@ -266,6 +274,8 @@ class DefaultSettings extends Component {
     this.saveDefaultState('minDitherFactor');
     this.saveDefaultState('maxDitherFactor');
     this.saveDefaultState('imagingPixelSize');
+    this.saveDefaultState('defaultFocusExposure');
+    this.saveDefaultState('defaultCLSEnabled');
 
   }
 
@@ -299,6 +309,14 @@ class DefaultSettings extends Component {
               toggle
               placeholder= 'Enable auto meridian flip'
               checked={this.state.defaultMeridianFlip}
+              onChange={this.handleToggle.bind(this)}
+            />
+            <Form.Checkbox
+              label='CLS Enabled '
+              name='defaultCLSEnabled'
+              toggle
+              placeholder= 'Enable CLS'
+              checked={this.state.defaultCLSEnabled}
               onChange={this.handleToggle.bind(this)}
             />
             <Form.Checkbox
@@ -365,6 +383,13 @@ class DefaultSettings extends Component {
               name='defaultFocusTempDiff'
               placeholder='Temp diff to run auto focus'
               value={this.state.defaultFocusTempDiff}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='Starting Focusing Exposure '
+              name='defaultFocusExposure'
+              placeholder='Enter seconds'
+              value={this.state.defaultFocusExposure}
               onChange={this.handleChange}
             />
           </Form.Group>

@@ -413,13 +413,24 @@ function tsx_Slew( target ) {
 //    B. CLS to target
 function tsx_CLS(targetSession) {
 
+  var doCLS = tsx_GetServerStateValue( 'defaultCLSEnabled' );
+  if( doCLS == false ) {
+    return false;
+  }
+
+  var clsSuccess = tsx_CLS_target( targetSession.targetFindName, targetSession.clsFilter );
+
+  return clsSuccess;
+}
+
+function tsx_CLS_target( target, filter ) {
   var clsSuccess = false;
   var tsx_is_waiting = true;
 
   // var cmd = tsxCmdCLS();
   var cmd = shell.cat(tsx_cmd('SkyX_JS_CLS'));
-  cmd = cmd.replace("$000", targetSession.targetFindName );
-  var slot = getFilterSlot(targetSession.clsFilter);
+  cmd = cmd.replace("$000", target );
+  var slot = getFilterSlot(filter);
   // Meteor._debug('Found slot: ' + slot);
   cmd = cmd.replace("$001", slot);
 
@@ -448,24 +459,20 @@ function tsx_RunFocus3( target ) {
   var enabled = tsx_GetServerStateValue('isFocus3Enabled');
   if( enabled == true  ) {
     var focusFilter = getFilterSlot(target.focusFilter);
+    var focusExp = target.focusExposure;
+    var focusTarget = target.focusTarget;
+    if( focusTarget != '' ) {
+      tsx_CLS_target( target.focusTarget, target.clsFilter)
+    }
 
     var cmd = String(shell.cat(tsx_cmd('SkyX_JS_Focus-3')) );
 
-    var bin;
-    try {
-      bin = tsx_GetServerStateValue('isFocus3Binned').value;
-    } catch (e) {
-      bin = false;
-    } finally {
-      // nothing
-    }
-
     cmd = cmd.replace("$000", focusFilter ); // set filter
-    cmd = cmd.replace("$001", bin ); // set Bin
-    cmd = cmd.replace("$002", 1 ); // set BinFactor
-    // cmd = cmd.replace("$001", 30 ); // set exposure
-    // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
+    cmd = cmd.replace("$001", focusExp ); // set Bin
+
     var tsx_is_waiting = true;
+    Meteor._debug(' *** @Focus3 started');
+    UpdateStatus(' Focusing started.');
 
     tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
           var success = tsx_return.split('|')[0].trim();
@@ -479,6 +486,10 @@ function tsx_RunFocus3( target ) {
     while( tsx_is_waiting ) {
      Meteor.sleep( 1000 );
     }
+    if( focusTarget != '' ) {
+      tsx_CLS_target( target.targetFindName, target.clsFilter)
+    }
+
     Meteor._debug(' *** @Focus3 finished');
     UpdateStatus(' Focusing finished.');
     return Out;

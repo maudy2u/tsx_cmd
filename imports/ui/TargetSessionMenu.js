@@ -83,12 +83,12 @@ class TargetSessionMenu extends Component {
         progress: [
 //            {_id: seriesId, taken:0},
         ],
+        report_d: '',
         ra: '',
         dec: '',
         angle: '',
         scale: '',
         coolingTemp: '',
-        report_d: '',
 
 /*
 *******************************
@@ -99,27 +99,28 @@ class TargetSessionMenu extends Component {
         focusFliter: '',
         foccusSamples: '',
         focusBin: '',
+        focusTarget: '',
         guideExposure: '',
         guideDelay: '',
+        startTime: TheSkyXInfos.findOne({name: 'defaultStartTime'}).value,
+        stopTime: TheSkyXInfos.findOne({name: 'defaultStopTime'}).value,
         priority: TheSkyXInfos.findOne({name: 'defaultPriority'}).value,
+        tempChg: TheSkyXInfos.findOne({name: 'defaultFocusTempDiff'}).value,
+        currentAlt: 0, // set to zero for now.
+        minAlt: TheSkyXInfos.findOne({name: 'defaultMinAlt'}).value,
+        completed: false,
+        createdAt: new Date(),
         enableMeridianFlip: TheSkyXInfos.findOne({name: 'defaultMeridianFlip'}).value,
         // startTime: '',
         // stopTime: '',
-        startTime: TheSkyXInfos.findOne({name: 'defaultStartTime'}).value,
-        stopTime: TheSkyXInfos.findOne({name: 'defaultStopTime'}).value,
-        tempChg: TheSkyXInfos.findOne({name: 'defaultFocusTempDiff'}).value,
-        minAlt: TheSkyXInfos.findOne({name: 'defaultMinAlt'}).value,
 
-        currentAlt: 0, // set to zero for now.
-        completed: false,
-        createdAt: new Date(),
       }
     );
 
-    this.setState({addModalOpen: true });
     this.setState({newTarget:
       TargetSessions.findOne({_id: newSession })
     });
+    this.setState({addModalOpen: true });
 
   }
 

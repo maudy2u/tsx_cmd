@@ -312,7 +312,7 @@ class Monitor extends Component {
     var actionArray = [];
     actionArray.push({
       key: 'Pick',
-      text: 'Pick',
+      text: 'test Picking target',
       value: 'Pick'
     });
     actionArray.push({

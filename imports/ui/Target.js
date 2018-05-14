@@ -63,16 +63,22 @@ class Target extends Component {
     TargetSessions.update({_id:this.props.target._id},{
       $set:{ progress: progress }
     });
+    this.forceUpdate();
+
 
   }
 
   deleteEntry() {
       TargetSessions.remove(this.props.target._id);
+      this.forceUpdate();
+
   }
 
   editEntry() {
     console.log('In the DefineTemplate editEntry');
     this.handleOpen();
+    this.forceUpdate();
+
   }
 
   getTargetReport() {
@@ -142,6 +148,8 @@ class Target extends Component {
         focusFliter: orgTarget.focusFliter,
         foccusSamples: orgTarget.foccusSamples,
         focusBin: orgTarget.focusBin,
+        focusTarget: orgTarget.focusTarget,
+        focusExposure: Number(this.props.target.focusExposure),
         guideExposure: orgTarget.guideExposure,
         guideDelay: orgTarget.guideDelay,
         startTime: orgTarget.startTime,
@@ -150,11 +158,14 @@ class Target extends Component {
         tempChg: orgTarget.tempChg,
         currentAlt: orgTarget.currentAlt,
         minAlt: orgTarget.minAlt,
+
         completed: orgTarget.completed,
         createdAt: orgTarget.createdAt,
       }
     )
     // do not copy series progress
+    this.forceUpdate();
+
   }
 
   startImaging() {

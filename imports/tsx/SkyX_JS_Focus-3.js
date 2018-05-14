@@ -16,6 +16,7 @@
 
 var CCDSC		= ccdsoftCamera;
 var focusingFilter = $000;
+var focusExp = $001;
 var initExp 		= ccdsoftCamera.ExposureTime;			// How long of an exposure does the camera use?
 
 if ( Application.build >= 11177 )
@@ -57,7 +58,7 @@ if ( Application.build >= 11177 )
 			// OK, that makes little sense. Just pretend that you never read it.
 			//
 			CCDSC.AutoSaveOn = false;		// Toss the image for this one single frame
-			CCDSC.ExposureTime = 2;			// Set duration for a throw-away light frame
+			CCDSC.ExposureTime = focusExp;			// Set duration for a throw-away light frame
 			// var initBinX = CCDSC.BinX;
 			// var initBinY = CCDSC.BinY;
 			// CCDSC.BinX = 2;

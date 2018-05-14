@@ -18,34 +18,41 @@ import Timekeeper from 'react-timekeeper';
 class TargetEditor extends Component {
 
   state = {
-    enabledActive: false,   // whether the target is active or not
     name: '',               // name of the target
     targetImage: '',        // image file name of the target - future
     targetFindName: '',     // Name to look up in TheSkyX
     description: '',        // SOmething to say
-    seriesTemplate: {},     // The take series to use
+    enabledActive: false,   // whether the target is active or not
+    series: {},     // The take series to use
+    progress: [],
+    report_id: '',
     ra: "",                 // Target RA
     dec: "",                // Target DEC
     angle: "",
-    priority: 10,           // Priority: 1 is highest
+    scale: '',
+    coolingTemp: -19,
+    coolingTime: 5,
     clsFilter: '',
     focusFilter: 'Filter',
     foccusSamples: '',
     focusBin: '',
+    focusTarget: '',
+    focusExposure: 1,
     guideExposure: '',
     guideDelay: '',
-    minAlt: 29.5,
-    currentAlt:0,
     startTime: '20:00',
     stopTime: '6:00',
-    coolingTemp: -19,
-    coolingTime: 5,
+    priority: 10,           // Priority: 1 is highest
+    tempChg: 0.7,
+    currentAlt:0,
+    minAlt: 29.5,
+
+    seriesTemplate: {},
     value: false,
     openModal: false,
     templates: [],
     checked: false,
     template_id: '',
-    tempChg: 0.7,
     filterDropDown:[],
     seriesDropDown:[],
     testDate: '',
@@ -86,37 +93,52 @@ class TargetEditor extends Component {
 
     // // do not modify the state directly
     this.setState({
-      enabledActive: this.props.target.enabledActive,
-      name: this.props.target.name,
-      description: this.props.target.description,
-      coolingTemp: Number(this.props.target.coolingTemp),
-      targetFindName: this.props.target.targetFindName,
-      targetImage: this.props.target.targetImage,
 
       seriesTemplate: this.props.target.series.value,
+      seriesDropDown: this.getTakeSeriesTemplates(),
+      value: false,
+      openModal: false,
+
+
+      name: this.props.target.name,
+      targetFindName: this.props.target.targetFindName,
+      targetImage: this.props.target.targetImage,
+      description: this.props.target.description,
+      enabledActive: this.props.target.enabledActive,
+      series: {
+        _id: this.props.target.series._id,
+        value: this.props.target.series.text,
+      },
+      progress: [
+//            {_id: seriesId, taken:0},
+      ],
+
       // series: {
       //   _id: orgTarget.series._id,
       //   value: orgTarget.series.text,
       // },
 
-      seriesDropDown: this.getTakeSeriesTemplates(),
+      report_d: this.props.target.report_id,
       ra: this.props.target.ra,
       dec: this.props.target.dec,
       angle: this.props.target.angle,
-      value: false,
-      openModal: false,
-      priority: Number(this.props.target.priority),
-      minAlt: Number(this.props.target.minAlt),
-      currentAlt: Number(this.props.target.currentAlt),
-      startTime: this.props.target.startTime,
-      stopTime: this.props.target.stopTime,
+      scale: this.props.target.scale,
+      coolingTemp: Number(this.props.target.coolingTemp),
       clsFilter: this.props.target.clsFilter,
       focusFilter: this.props.target.focusFilter,
       foccusSamples: this.props.target.foccusSamples,
       focusBin: this.props.target.focusBin,
-      guideExposure: this.props.target.guideExposure,
-      guideDelay: this.props.target.guideDelay,
+      focusTarget: this.props.target.focusTarget,
+      focusExposure: Number(this.props.target.focusExposure),
+      guideExposure: Number(this.props.target.guideExposure),
+      guideDelay: Number(this.props.target.guideDelay),
+      startTime: this.props.target.startTime,
+      stopTime: this.props.target.stopTime,
+      priority: Number(this.props.target.priority),
       tempChg: Number(this.props.target.tempChg),
+      currentAlt: Number(this.props.target.currentAlt),
+      minAlt: Number(this.props.target.minAlt),
+
     });
   }
 
@@ -140,30 +162,37 @@ class TargetEditor extends Component {
 
     TargetSessions.update(this.props.target._id, {
       $set: {
-        enabledActive: this.state.enabledActive,
         name: this.state.name,
-        description: this.state.description,
-        coolingTemp: this.state.coolingTemp,
         targetFindName: this.state.targetFindName,
         targetImage: this.state.targetImage,
+        description: this.state.description,
+        enabledActive: this.state.enabledActive,
         series: {
           _id: seriesId,
           value: this.state.seriesTemplate,
         },
+        //progress: [], // not part of editor
+        // report_d: this.state.report_id,
         ra: this.state.ra,
         dec: this.state.dec,
         angle: this.state.angle,
-        startTime: this.state.startTime,
-        stopTime: this.state.stopTime,
-        priority: this.state.priority,
-        minAlt: this.state.minAlt,
-        currentAlt: this.state.currentAlt,
+        scale: this.state.scale,
+        coolingTemp: this.state.coolingTemp,
         clsFilter: this.state.clsFilter,
         focusFilter: this.state.focusFilter,
         foccusSamples: this.state.foccusSamples,
         focusBin: this.state.focusBin,
+        focusTarget: this.state.focusTarget,
+        focusExposure: Number(this.state.focusExposure),
         guideExposure: this.state.guideExposure,
         guideDelay: this.state.guideDelay,
+        startTime: this.state.startTime,
+        stopTime: this.state.stopTime,
+        priority: this.state.priority,
+        tempChg: Number(this.state.tempChg),
+        currentAlt: this.state.currentAlt,
+        minAlt: this.state.minAlt,
+
        },
     });
   }
@@ -222,11 +251,12 @@ class TargetEditor extends Component {
   // *******************************
   findTarget() {
     // on the client
+    console.log('deferred functionality');
 
   }
 
   getImageLinkAngle() {
-    console.log('defed functionality');
+    console.log('deferred functionality');
     return 0;
   }
 
@@ -436,6 +466,20 @@ class TargetEditor extends Component {
                   options={filters}
                   placeholder='Filter for focusing'
                   text={this.state.focusFilter}
+                  onChange={this.handleChange}
+                />
+                <Form.Input
+                  label='Focusing Initial Exposure '
+                  name='focusExposure'
+                  placeholder='e.g. 0.7'
+                  value={this.state.focusExposure}
+                  onChange={this.handleChange}
+                />
+                <Form.Input
+                  label='Use a focusing target '
+                  name='focusTarget'
+                  placeholder='e.g. HIP 66004'
+                  value={this.state.focusTarget}
                   onChange={this.handleChange}
                 />
               </Form.Group>

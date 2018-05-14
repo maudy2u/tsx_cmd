@@ -47,6 +47,9 @@ export const tsx_ServerStates = {
   defaultMinAlt: 'defaultMinAlt',
   defaultCoolTemp: 'defaultCoolTemp',
   defaultFocusTempDiff: 'defaultFocusTempDiff',
+  defaultFocusExposure: 'defaultFocusExposure',
+
+  defaultCLSEnabled: 'defaultCLSEnabled',
   defaultMeridianFlip: 'defaultMeridianFlip',
   defaultStartTime: 'defaultStartTime',
   defaultStopTime: 'defaultStopTime',
