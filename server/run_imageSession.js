@@ -746,7 +746,7 @@ function tsx_DeviceInfo() {
 
   var success;
   tsx_feeder( String(cmd), Meteor.bindEnvironment((tsx_return) => {
-
+      console.log(tsx_return);
       var errIndex = tsx_return.split('|').length-1;
       if( tsx_return.split('|')[errIndex].trim() === "No error. Error = 0.") {
          success = true;
@@ -1737,7 +1737,7 @@ export function canTargetSessionStart( target ) {
 Meteor.methods({
 
   // **************************************************************
-  connectTsx() {
+  connectToTSX() {
     Meteor._debug(' ******************************* ');
     var isOnline = tsx_ServerIsOnline();
     Meteor._debug('tsx_ServerIsOnline: ' + isOnline);

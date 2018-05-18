@@ -20,6 +20,7 @@ Out =
 "|rotMod|" + SelectedHardware.rotatorModel;
 
 var ccd = ccdsoftCamera;
+ccd.Connect();
 while (!ccd.State == 0) { sky6Web.Sleep (1000); }
 
 var numBins = ccd.lNumberBins;

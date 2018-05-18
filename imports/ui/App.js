@@ -309,7 +309,7 @@ class App extends Component {
 
     // these are all working methods
     // on the client
-    Meteor.call("connectTsx", function (error, result) {
+    Meteor.call("connectToTSX", function (error, result) {
       // identify the error
       if (error && error.reason === "Internal server error") {
         // show a nice error message
