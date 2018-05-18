@@ -284,12 +284,11 @@ class Target extends Component {
         </Item.Header>
         <Button.Group basic size='small' floated='right'>
           <Button icon='refresh' onClick={this.getTargetReport.bind(this)}/>
-          <Button icon='edit' onClick={this.editEntry.bind(this)}/>
+          {/* <Button icon='edit' onClick={this.editEntry.bind(this)}/> */}
           <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
           <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
           <Button icon='retweet' onClick={this.eraseProgress.bind(this)}/>
         </Button.Group>
-        {this.renderTargeting()}
         <Item.Description>
           {this.props.target.description}
         </Item.Description>
@@ -297,6 +296,7 @@ class Target extends Component {
           <Progress value={this.props.target.totalImagesTaken()} total={this.props.target.totalImagesPlanned()} progress='ratio'>Images Taken</Progress>
         </Item.Meta>
         <Item.Extra>
+          {this.renderTargeting()}
           <Label>Priority: <Label.Detail>{this.props.target.priority}</Label.Detail></Label>
           <Label>Start time: <Label.Detail>{this.props.target.startTime}</Label.Detail></Label>
           <Label>Stop time: <Label.Detail>{this.props.target.stopTime}</Label.Detail></Label>

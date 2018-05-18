@@ -22,7 +22,7 @@ import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 import DefaultSettings from './DefaultSettings.js';
 import Monitor from './Monitor.js';
 import TargetSessionMenu from './TargetSessionMenu.js';
-import Filter from './Filter.js';
+// import Filter from './Filter.js';
 import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 //import TheSkyXInfo from './TheSkyXInfo.js';
@@ -124,12 +124,16 @@ class App extends Component {
   }
 
   updateDefaults(nextProps) {
-    this.setState({
-      ip: nextProps.tsxIP.value,
-    });
-    this.setState({
-      port: nextProps.tsxPort.value,
-    });
+    if( typeof nextProps.tsxIP.value != 'undefined') {
+      this.setState({
+        ip: nextProps.tsxIP.value,
+      });
+    }
+    if( typeof nextProps.tsxPort.value != 'undefined') {
+      this.setState({
+        port: nextProps.tsxPort.value,
+      });
+    }
   }
 
   getDefault( name ) {
@@ -159,20 +163,20 @@ class App extends Component {
     this.saveDefaultState('port');
   }
 
-  // *******************************
+  // // *******************************
+  // //
+  // addNewFilter(event) {
+  //   // Find the text field via the React ref
+  //   const text = ReactDOM.findDOMNode(this.refs.textInput).value.trim();
   //
-  addNewFilter(event) {
-    // Find the text field via the React ref
-    const text = ReactDOM.findDOMNode(this.refs.textInput).value.trim();
-
-    Filters.insert({
-      name: text,
-      createdAt: new Date(), // current time
-      offset: 0,
-    });
-    // Clear form
-    ReactDOM.findDOMNode(this.refs.textInput).value = '';
-  }
+  //   Filters.insert({
+  //     name: text,
+  //     createdAt: new Date(), // current time
+  //     offset: 0,
+  //   });
+  //   // Clear form
+  //   ReactDOM.findDOMNode(this.refs.textInput).value = '';
+  // }
 
   // *******************************
   //
@@ -556,7 +560,6 @@ class App extends Component {
 }
 // *******************************
 // THIS IS THE DEFAULT EXPORT AND IS WHERE THE LOADING OF THE COMPONENT STARTS
-// USE THIS POINT TO GRAB THE FILTERS
 export default withTracker(() => {
 
     return {

@@ -365,6 +365,7 @@ class TargetEditor extends Component {
               placeholder='Angle'
               value={this.state.angle}
               onChange={this.handleChange}/>
+              <Button icon='upload' onClick={this.getImageLinkAngle.bind(this)}/>
               <Button onClick={this.getImageLinkAngle.bind(this)}>FromImageLink</Button>
           </Form.Group>
         </Segment>

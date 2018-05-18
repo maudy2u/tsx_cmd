@@ -475,6 +475,7 @@ Meteor.methods({
      var id = TheSkyXInfos.upsert( {name: name }, {
        $set: { value: value }
      })
+     Meteor._debug('updated: ' +name+':'+value);
    },
 
    updateSeriesIdWith(
