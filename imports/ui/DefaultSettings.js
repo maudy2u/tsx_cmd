@@ -17,7 +17,7 @@ import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 // Import the UI
 import Monitor from './Monitor.js';
 import TargetSessionMenu from './TargetSessionMenu.js';
-import Filter from './Filter.js';
+// import Filter from './Filter.js';
 import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 //import TheSkyXInfo from './TheSkyXInfo.js';
@@ -42,8 +42,8 @@ class DefaultSettings extends Component {
     modalConnectionFailed: false,
     showMonitor: false, // this needs to be a server session variable
 
-    ip: 'Not connected',
-    port: 'Not connected',
+    // ip: 'Not connected',
+    // port: 'Not connected',
     defaultMinSunAlt: -15,
     defaultMinAlt: 30,
     defaultCoolTemp: -20,
@@ -104,14 +104,14 @@ class DefaultSettings extends Component {
   saveServerFailedClose = () => this.setState({ saveServerFailed: false });
 
   // Set TSX Server
-  ipChange = (e, { value }) => this.setState({ ip: value.trim() });
-  portChange = (e, { value }) => this.setState({ port: value.trim() });
-  modalEnterIpOpen = () => this.setState({ modalEnterIp: true });
-  modalEnterIpClose = () => this.setState({ modalEnterIp: false });
-  modalEnterPortOpen = () => this.setState({ modalEnterPort: true });
-  modalEnterPortClose = () => this.setState({ modalEnterPort: false });
-  modalConnectionFailedOpen = () => this.setState({ modalConnectionFailed: true });
-  modalConnectionFailedClose = () => this.setState({ modalConnectionFailed: false });
+  // // ipChange = (e, { value }) => this.setState({ ip: value.trim() });
+  // // portChange = (e, { value }) => this.setState({ port: value.trim() });
+  // modalEnterIpOpen = () => this.setState({ modalEnterIp: true });
+  // modalEnterIpClose = () => this.setState({ modalEnterIp: false });
+  // modalEnterPortOpen = () => this.setState({ modalEnterPort: true });
+  // modalEnterPortClose = () => this.setState({ modalEnterPort: false });
+  // modalConnectionFailedOpen = () => this.setState({ modalConnectionFailed: true });
+  // modalConnectionFailedClose = () => this.setState({ modalConnectionFailed: false });
 
   componentDidMount() {
     this.updateDefaults(this.props);
@@ -127,12 +127,12 @@ class DefaultSettings extends Component {
     }
 
     this.setState({
-      ip: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'ip';
-      }).value,
-      port: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'port';
-      }).value,
+      // ip: nextProps.tsxInfo.find(function(element) {
+      //   return element.name == 'ip';
+      // }).value,
+      // port: nextProps.tsxInfo.find(function(element) {
+      //   return element.name == 'port';
+      // }).value,
       defaultCoolTemp: nextProps.tsxInfo.find(function(element) {
         return element.name == 'defaultCoolTemp';
       }).value,
@@ -194,7 +194,7 @@ class DefaultSettings extends Component {
         return element.name == 'imagingPixelSize';
       }).value,
       defaultFocusExposure: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'imagidefaultFocusExposurengPixelSize';
+        return element.name == 'defaultFocusExposure';
       }).value,
       defaultCLSEnabled: nextProps.tsxInfo.find(function(element) {
         return element.name == 'defaultCLSEnabled';
@@ -202,26 +202,26 @@ class DefaultSettings extends Component {
     });
 
   }
-  saveTSXServerIp() {
-      this.saveDefaultState('ip');
-      this.modalEnterIpClose();
-  };
+  // saveTSXServerIp() {
+  //     this.saveDefaultState('ip');
+  //     this.modalEnterIpClose();
+  // };
+  //
+  // saveTSXServerPort() {
+  //   this.saveDefaultState('port');
+  //   this.modalEnterPortClose();
+  // };
 
-  saveTSXServerPort() {
-    this.saveDefaultState('port');
-    this.modalEnterPortClose();
-  };
-
-  saveTSXServerConnection() {
-
-    if( this.state.port == "" || this.state.ip == ""  ) {
-      this.saveServerFailedOpen();
-    }
-    else {
-      this.saveDefaultState('ip');
-      this.saveDefaultState('port');
-    };
-  };
+  // saveTSXServerConnection() {
+  //
+  //   if( this.state.port == "" || this.state.ip == ""  ) {
+  //     this.saveServerFailedOpen();
+  //   }
+  //   else {
+  //     this.saveDefaultState('ip');
+  //     this.saveDefaultState('port');
+  //   };
+  // };
 
   // Generic Method to determine default to save.
   saveDefaultState( param ) {
@@ -254,8 +254,8 @@ class DefaultSettings extends Component {
   // Use this method to save any defaults gathered
   saveDefaults(){
 
-    this.saveDefaultState('ip');
-    this.saveDefaultState('port');
+    // this.saveDefaultState('ip');
+    // this.saveDefaultState('port');
     this.saveDefaultState('defaultMinAlt');
     this.saveDefaultState('defaultCoolTemp');
     this.saveDefaultState('defaultFocusTempDiff');
