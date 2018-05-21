@@ -1104,7 +1104,6 @@ function hasReachedEndCondition(target) {
   if( ditherTarget > 0 ) {
     var dither = tsx_dither( target );
   }
-
   return false;
 }
 
@@ -1113,46 +1112,58 @@ function tsx_dither( target ) {
   Meteor._debug('************************');
   Meteor._debug(' *** tsx_dither: ' + target.targetFindName);
 
-  // first abort Guiding
-  tsx_AbortGuider();
-
-  //
+  var ditherTarget = tsx_GetServerStateValue('defaultDithering');
+  var lastDither = tsx_GetServerStateValue('imagingSessionDither');
   var Out = false;
-  // var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale, target.expos);
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_NewDither'));
 
-  var pixelSize = tsx_GetServerStateValue('imagingPixelSize');
-  Meteor._debug(' *** pixelSize: ' + pixelSize);
-  var minDitherFactor = tsx_GetServerStateValue('minDitherFactor');
-  Meteor._debug(' *** minDitherFactor: ' + minDitherFactor);
-  var maxDitherFactor = tsx_GetServerStateValue('maxDitherFactor');
-  Meteor._debug(' *** maxDitherFactor: ' + maxDitherFactor);
+  if( ditherTarget > 0 ) {
+    if( lastDither >= ditherTarget ) {
 
-  cmd = cmd.replace("$000", pixelSize ); // var pixelSize = $000; // 3.8;
-  cmd = cmd.replace("$001", minDitherFactor ); // var minDitherFactor = $001; // 3
-  cmd = cmd.replace("$002", maxDitherFactor ); // var maxDitherFactor = $002;  // 7;
+        // first abort Guiding
+        tsx_AbortGuider();
 
-  var tsx_is_waiting = true;
-  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        var result = tsx_return.split('|')[0].trim();
-        Meteor._debug('Any error?: ' + result);
-        if( result != 'Success') {
-          Meteor._debug('SkyX_JS_NewDither Failed. Error: ' + result);
+        var cmd = shell.cat(tsx_cmd('SkyX_JS_NewDither'));
+
+        var pixelSize = tsx_GetServerStateValue('imagingPixelSize');
+        Meteor._debug(' *** pixelSize: ' + pixelSize);
+        var minDitherFactor = tsx_GetServerStateValue('minDitherFactor');
+        Meteor._debug(' *** minDitherFactor: ' + minDitherFactor);
+        var maxDitherFactor = tsx_GetServerStateValue('maxDitherFactor');
+        Meteor._debug(' *** maxDitherFactor: ' + maxDitherFactor);
+
+        cmd = cmd.replace("$000", pixelSize ); // var pixelSize = $000; // 3.8;
+        cmd = cmd.replace("$001", minDitherFactor ); // var minDitherFactor = $001; // 3
+        cmd = cmd.replace("$002", maxDitherFactor ); // var maxDitherFactor = $002;  // 7;
+
+        var tsx_is_waiting = true;
+        tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+              var result = tsx_return.split('|')[0].trim();
+              Meteor._debug('Any error?: ' + result);
+              if( result != 'Success') {
+                Meteor._debug('SkyX_JS_NewDither Failed. Error: ' + result);
+              }
+              else {
+                UpdateStatus('Dither success');
+              }
+              Out = true;
+              tsx_is_waiting = false;
+            }
+          )
+        );
+        while( tsx_is_waiting ) {
+          Meteor.sleep( 1000 );
         }
-        else {
-          UpdateStatus('Dither success');
-        }
-        Out = true;
-        tsx_is_waiting = false;
-      }
-    )
-  );
-  while( tsx_is_waiting ) {
-    Meteor.sleep( 1000 );
+
+        // now redo Autoguiding...
+        SetUpAutoGuiding( target );
+
+
+      tsx_SetServerState('imagingSessionDither', 0);
+    }
+    else {
+      tsx_SetServerState('imagingSessionDither', lastDither+1);
+    }
   }
-
-  // now redo Autoguiding...
-  SetUpAutoGuiding( target );
 
   return Out;
 

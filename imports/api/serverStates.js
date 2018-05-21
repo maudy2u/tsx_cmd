@@ -36,6 +36,7 @@ export const tsx_ServerStates = {
   isCurrentlyImaging: 'isCurrentlyImaging',
   imagingSessionId: 'imagingSessionId',
   imagingSession: 'imagingSession', // use to report current imaging targets
+  imagingSessionDither: 'imagingSessionDither',
 
   // Dithering related states
   defaultDithering: 'defaultDithering',

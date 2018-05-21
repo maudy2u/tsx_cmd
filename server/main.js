@@ -71,6 +71,7 @@ function initServerStates() {
   tsx_SetServerState('lastCheckMinSunAlt', '');
   tsx_SetServerState('lastFocusPos', '');
   tsx_SetServerState('lastFocusTemp', '');
+  tsx_SetServerState('imagingSessionDither', 0);
 
   for (var m in tsx_ServerStates){
     var state = tsx_ServerStates[m];
@@ -198,19 +199,18 @@ Meteor.startup(() => {
           UpdateStatus( '  No valid target, waiting...');
           Meteor._debug( ' Waiting...: ' + sleepTime + 'min');
           var timeout = 0;
-          var msSleep = Number(sleepTime*60);
+          var msSleep = Number(sleepTime); // number of seconds
           postProgressTotal(sleepTime);
           postProgressMessage('Waiting ~' + sleepTime + 'min.');
-          while( timeout < msSleep) {
+          while( timeout < msSleep) { //
             if( tsx_GetServerStateValue('currentJob') == '' ) {
               UpdateStatus( ' Canceled sessions');
               break;
             }
-            var sec = 1000;
-            Meteor.sleep( sec );
-            timeout = timeout + sec;
-            var incr = timeout /sec;
-            postProgressIncrement( incr );
+            var min = 1000*60; // one minute in milliseconds
+            Meteor.sleep( min );
+            timeout = timeout + 1;
+            postProgressIncrement( timeout );
           }
           postProgressTotal(0);
           postProgressIncrement( 0 );
