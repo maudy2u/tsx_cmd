@@ -83,7 +83,10 @@ class TakeSeries extends Component {
       repeating = 'Repeating: ';
     }
     for (var i = 0; i < seriesArray.length; i++) {
-      series = Seriess.findOne({_id:seriesArray[i].id});
+      var series = Seriess.findOne({_id:seriesArray[i].id});
+      if( typeof series == 'undefined') {
+        continue;
+      }
       if(details != "") { details += ", "};
       details += series.frame +':' + series.filter + '@' + series.exposure + 'sec x'  + series.repeat;
     }

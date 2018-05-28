@@ -46,6 +46,7 @@ class TargetEditor extends Component {
     tempChg: 0.7,
     currentAlt:0,
     minAlt: 29.5,
+    report: '',
 
     seriesTemplate: {},
     value: false,
@@ -138,6 +139,7 @@ class TargetEditor extends Component {
       tempChg: Number(this.props.target.tempChg),
       currentAlt: Number(this.props.target.currentAlt),
       minAlt: Number(this.props.target.minAlt),
+      report: '',
 
     });
   }
@@ -192,6 +194,7 @@ class TargetEditor extends Component {
         tempChg: Number(this.state.tempChg),
         currentAlt: this.state.currentAlt,
         minAlt: this.state.minAlt,
+        report: '',
 
        },
     });

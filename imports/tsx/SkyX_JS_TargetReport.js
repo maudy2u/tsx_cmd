@@ -12,11 +12,13 @@ Returns:
  targetRA
  targetDEC
  targetHA
- targetTransit;
-
+ targetTransit
+ ready
+ readyMsg
+try { // try to get focuser info
  focTemp
  focPostion
-
+}
 */
 
 // name use to find
@@ -24,6 +26,7 @@ var targetName = "$000";
 //"astronomical twilight" (-18 degrees)
 //"nautical twilight" (-15 degrees)
 var twightlightAlt = $001;
+var altLimit	= $002;	// Really a constant for the altitude limit
 // data to return
 var report;
 
@@ -91,12 +94,69 @@ else {
     false;
 }
 
+// Verify target
+var altitude 	= 0;
+var azimuth 	= 0;
+var tryTarget 	= {
+	ready: true,
+	msg: 'Did nothing',
+};
+var FindStatus	= true;	// Preload value for success.
+
+try {
+//
+// Try to find the target and catch the error if it fails.
+//
+		sky6StarChart.Find(Target);
+}
+catch (repErr) {
+	//
+	//	If error, report it.
+	//
+	FindStatus = false;
+}
+
+
+if ( !FindStatus )
+{
+
+	tryTarget 	= {
+		ready: false,
+		msg: 'Not found',
+	};
+
+} else {
+
+	sky6ObjectInformation.Property(59);
+  altitude = sky6ObjectInformation.ObjInfoPropOut;
+	altitude = altitude.toFixed(1);
+
+	sky6ObjectInformation.Property(58);
+  azimuth = sky6ObjectInformation.ObjInfoPropOut;
+
+	if (altitude < altLimit)
+	{
+	 	tryTarget 	= {
+			ready: false,
+			msg: "Has sunk below: " +  altLimit,
+		};
+	}
+	else {
+		tryTarget 	= {
+			ready: true,
+			msg: 'Found and above minAlt',
+		};
+	}
+}
+
+report = report +'|'+ tryTarget.ready + '|'+tryTarget.msg;
+
+// add focuser info
 if( SelectedHardware.focuserModel != '<No Focuser Selected>') {
   var temp = ccdsoftCamera.focTemperature.toFixed(1);
   var pos = ccdsoftCamera.focPosition;
-  report = report + temp +'|'+ pos;
+  report = report +'|'+ temp +'|'+ pos;
 }
-
 
 report;
 

@@ -337,14 +337,14 @@ class DefaultSettings extends Component {
               checked={this.state.isFocus3Enabled}
               onChange={this.handleToggle.bind(this)}
             />
-            <Form.Checkbox
+            {/* <Form.Checkbox
               label='Bin 2x2 Focus Enabled '
               name='isFocus3Binned'
               toggle
               placeholder= 'Enable to bin when focusing'
               checked={this.state.isFocus3Binned}
               onChange={this.handleToggle.bind(this)}
-            />
+            /> */}
           </Form.Group>
           <Form.Group>
             <Form.Checkbox

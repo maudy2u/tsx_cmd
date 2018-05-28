@@ -1,16 +1,33 @@
 /* Java Script */
 /* Socket Start Packet */
+// SkyX_JS_CLS
 
 var Target 		= "$000";		// tsxfeeder replaces $000 with a command line parameter
 var Filter		= "$001";		// the filter to use. Set by run_target, no effect if no wheel
 var repErr		= "";			// Throw-away error message for the try/catch tests
 var Out;
 
-
+// *******************************
+// unpark if parked
 if ( SelectedHardware.mountModel !== "Telescope Mount Simulator") {
 	sky6RASCOMTele.Unpark();
 }
 
+// *******************************
+// End auto guide
+while (ccdsoftAutoguider.ExposureStatus == "DSS From Web")
+{
+	sky6Web.Sleep (500);	// Waste time if we are waiting for a DSS download
+}
+ccdsoftAutoguider.Abort();
+while (!ccdsoftAutoguider.State == 0)
+{
+	sky6Web.Sleep (500);
+}
+ccdsoftAutoguider.Subframe = false;
+
+// *******************************
+// Find target and start CLS
 sky6StarChart.Find(Target);				// This has been validated before calling this script
 
 ccdsoftCamera.Connect();

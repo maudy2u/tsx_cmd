@@ -176,6 +176,7 @@ class Monitor extends Component {
 
   playScheduler() {
     Meteor.call("startScheduler", function (error, result) {
+      this.forceUpdate();
       }.bind(this));
   }
 
@@ -435,16 +436,28 @@ class Monitor extends Component {
         <Segment>
         {this.renderTarget()}
         </Segment>
-        <Segment.Group>
+        <Segment.Group  size='mini' horizontal>
           <Segment>
             <Label>RA <Label.Detail>{Number(this.state.monRA).toFixed(4)}</Label.Detail></Label>
+          </Segment>
+            <Segment>
             <Label>DEC <Label.Detail>{Number(this.state.monDEC).toFixed(4)}</Label.Detail></Label>
+          </Segment>
+            <Segment>
             <Label>Angle <Label.Detail>{Number(this.state.monAngle).toFixed(4)}</Label.Detail></Label>
           </Segment>
+        </Segment.Group>
+        <Segment.Group size='mini' horizontal>
           <Segment>
             <Label>Atl <Label.Detail>{Number(this.state.monALT).toFixed(4)}</Label.Detail></Label>
+          </Segment>
+            <Segment>
             <Label>Az <Label.Detail>{this.state.monAZ}</Label.Detail></Label>
+          </Segment>
+            <Segment>
             <Label>HA <Label.Detail>{Number(this.state.monHA).toFixed(4)}</Label.Detail></Label>
+          </Segment>
+            <Segment>
             <Label>Transit <Label.Detail>{Number(this.state.monTransit).toFixed(4)}</Label.Detail></Label>
           </Segment>
         </Segment.Group>

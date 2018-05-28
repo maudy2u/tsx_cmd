@@ -1,6 +1,6 @@
 /* Java Script */
 /* Socket Start Packet */
-
+// SkyX_JS_Focus-3
 //
 // This is the experimental @F3 focusing module.
 //
@@ -72,7 +72,11 @@ if ( Application.build >= 11177 )
 
 		// Finally! Focus the camera!
 			// Use three samples per point and let @F3 figure out the rest.
-			out = CCDSC.AtFocus3(3, true);
+			var res1 = CCDSC.AtFocus3(3, true);
+			var temp = CCDSC.focTemperature.toFixed(1);
+			var pos = CCDSC.focPosition;
+			out = temp +'|'+pos +'|'+res1;
+
 			// out = CCDSC.AtFocus2();
 			CCDSC.ImageReduction = 0;
 			// CCDSC.BinX = initBinX;

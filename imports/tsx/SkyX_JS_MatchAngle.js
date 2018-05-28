@@ -1,5 +1,6 @@
 /* Java Script */
 /* Socket Start Packet */
+// SkyX_JS_MatchAngle
 
 var targetAng= $000;
 var knownImageScale =$001;
@@ -50,7 +51,12 @@ function rotate(targetAng, imageScale ) {
     rotate(targetAng, imageScale);
   }
 }
+var ccd = ccdsoftCamera;
+var xbin = ccd.BinX;
+var ybin = ccd.BinY;
 rotate( targetAng, knownImageScale ); // using 1.17 and CCW=false for simulator
+ccd.BinX = xbin;
+ccd.BinY = ybin;
 RunJavaScriptOutput.writeLine ("DONE");
 Out = Out;
 

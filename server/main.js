@@ -161,7 +161,10 @@ Meteor.startup(() => {
       var isParked = false;
       // tsx_Connect();
       while(
+// the job is used to run the scheduler.
         tsx_GetServerStateValue('currentJob') != ''
+// THis is used for the session... not for the job.
+//        && tsx_GetServerStateValue( tsx_ServerStates.imagingSessionId ) != ''
       ) {
         // Find a session
         Meteor._debug('Seeking target');

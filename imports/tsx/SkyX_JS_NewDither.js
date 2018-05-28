@@ -1,6 +1,6 @@
 /* Java Script */
 /* Socket Start Packet */
-
+// SkyX_JS_NewDither
 //
 // This is the second generation dithering script.
 //
@@ -31,23 +31,25 @@ var FITSPixel;
 var imageScale = 1.70;
 var focalLength;
 var binning;
+var CCDI = ccdsoftCameraImage;
+var CCD = ccdsoftCamera;
 
 try {
-	ccdsoftCameraImage.AttachToActiveImager();
+	CCDI.AttachToActiveImager();
 }
 catch(e) {
-	var exp = ccdsoftCamera.ExposureTime;
-	ccdsoftCamera.ExposureTime = 3;
-	ccdsoftCamera.TakeImage();
-	ccdsoftCamera.ExposureTime = exp;
-	ccdsoftCameraImage.AttachToActiveImager();
+	var exp = CCD.ExposureTime;
+	CCD.ExposureTime = 3;
+	CCD.TakeImage();
+	CCD.ExposureTime = exp;
+	CCDI.AttachToActiveImager();
 
 }
 
-if ( ccdsoftCamera.ImageUseDigitizedSkySurvey != "1" ) {
+if ( CCD.ImageUseDigitizedSkySurvey != "1" ) {
 	try
 	{
-		FITSPixel = ccdsoftCameraImage.FITSKeyword("XPIXSZ")
+		FITSPixel = CCDI.FITSKeyword("XPIXSZ")
 	}
 	catch (repErr)
 	//
@@ -59,7 +61,7 @@ if ( ccdsoftCamera.ImageUseDigitizedSkySurvey != "1" ) {
 
 	try
 	{
-		ccdsoftCamera.PropDbl("m_dTeleFocalLength");
+		CCD.PropDbl("m_dTeleFocalLength");
 	}
 	catch (repErr)
 	//
@@ -71,7 +73,7 @@ if ( ccdsoftCamera.ImageUseDigitizedSkySurvey != "1" ) {
 
 	try
 	{
-		ccdsoftCamera.PropLng("m_nXBin");
+		CCD.PropLng("m_nXBin");
 	}
 	catch (repErr)
 	//
@@ -92,9 +94,9 @@ if ( ccdsoftCamera.ImageUseDigitizedSkySurvey != "1" ) {
 
 	} else {
 
-		focalLength = ccdsoftCamera.PropDbl("m_dTeleFocalLength");;
+		focalLength = CCD.PropDbl("m_dTeleFocalLength");;
 		pixelSize = FITSPixel;
-		binning = ccdsoftCamera.PropLng("m_nXBin");;
+		binning = CCD.PropLng("m_nXBin");;
 
 		imageScale = ( (pixelSize * binning) / focalLength ) * 206.3;
 

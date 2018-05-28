@@ -158,6 +158,7 @@ class Target extends Component {
         tempChg: orgTarget.tempChg,
         currentAlt: orgTarget.currentAlt,
         minAlt: orgTarget.minAlt,
+        report: '',
 
         completed: orgTarget.completed,
         createdAt: orgTarget.createdAt,
@@ -297,11 +298,13 @@ class Target extends Component {
         </Item.Meta>
         <Item.Extra>
           {this.renderTargeting()}
-          <Label>Priority: <Label.Detail>{this.props.target.priority}</Label.Detail></Label>
-          <Label>Start time: <Label.Detail>{this.props.target.startTime}</Label.Detail></Label>
-          <Label>Stop time: <Label.Detail>{this.props.target.stopTime}</Label.Detail></Label>
-          {/* <Label>Altitude: <Label.Detail>{this.state.altitude}</Label.Detail></Label>
-          <Label>Direction: <Label.Detail>{this.state.azimuth}</Label.Detail></Label> */}
+          <Label.Group>
+            <Label>Priority: <Label.Detail>{this.props.target.priority}</Label.Detail></Label>
+            <Label>Start time: <Label.Detail>{this.props.target.startTime}</Label.Detail></Label>
+            <Label>Stop time: <Label.Detail>{this.props.target.stopTime}</Label.Detail></Label>
+            {/* <Label>Altitude: <Label.Detail>{this.state.altitude}</Label.Detail></Label>
+            <Label>Direction: <Label.Detail>{this.state.azimuth}</Label.Detail></Label> */}
+          </Label.Group>
           <Modal
             open={this.state.modalOpen}
             onClose={this.handleClose}
