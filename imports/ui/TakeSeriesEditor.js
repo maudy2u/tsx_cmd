@@ -183,7 +183,7 @@ class TakeSeriesEditor extends Component {
       <Grid.Row>
         <Grid.Column width={1}>
           <Button size='mini' icon='delete'  onClick={this.deleteEntry.bind(this)}/>
-          <b><label>{this.state.order}</label></b>
+          {/* <b><label>{this.state.order}</label></b> */}
         </Grid.Column>
         <Grid.Column>
           <Input

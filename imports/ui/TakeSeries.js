@@ -41,11 +41,12 @@ class TakeSeries extends Component {
 
   editEntry() {
     console.log('In the DefineTemplate editEntry');
+    // #TODO prevent editing the series if it is in use by scheduler
     this.editOpen();
   }
 
   copyEntry() {
-    console.log('In the DefineTemplate editEntry');
+    console.log('In the DefineTemplate copyEntry');
 
     orgSeries = this.props.seriesTemplate;
 
@@ -115,7 +116,7 @@ class TakeSeries extends Component {
           </Item.Description>
           <Item.Extra>
             <Button.Group basic size='small'>
-              <Button icon='edit' onClick={this.editEntry.bind(this)}/>
+              {/* <Button icon='edit' onClick={this.editEntry.bind(this)}/> */}
               <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
               <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
             </Button.Group>
