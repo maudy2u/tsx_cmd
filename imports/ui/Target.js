@@ -8,7 +8,6 @@ import { Item, Label, Button, Modal, Header, Icon, Table, Checkbox, Progress } f
 import { TargetReports } from '../api/targetReports.js';
 import { TargetSessions } from '../api/targetSessions.js';
 import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
-import { Seriess } from '../api/seriess.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 
 import TargetEditor from './TargetEditor.js';
@@ -232,7 +231,7 @@ class Target extends Component {
       if( this.props.target.enabledActive == true ) {
         if( tid == this.props.target._id ) {
           return (
-            <Button.Group basic size='small'  floated='right'>
+            <Button.Group basic size='mini'  floated='right'>
               <Button icon='location arrow' onClick={this.clsTarget.bind(this)}/>
               <Button icon='toggle on' onClick={this.setInactive.bind(this)}/>
             </Button.Group>
@@ -240,7 +239,7 @@ class Target extends Component {
         }
         else {
           return (
-            <Button.Group basic size='small'  floated='right'>
+            <Button.Group basic size='mini'  floated='right'>
               <Button icon='location arrow' onClick={this.clsTarget.bind(this)}/>
               <Button icon='toggle off' onClick={this.setActive.bind(this)}/>
             </Button.Group>
@@ -283,7 +282,7 @@ class Target extends Component {
         <Item.Header as='a' onClick={this.editEntry.bind(this)}>
           {this.props.target.targetFindName}
         </Item.Header>
-        <Button.Group basic size='small' floated='right'>
+        <Button.Group basic size='mini' floated='right'>
           <Button icon='refresh' onClick={this.getTargetReport.bind(this)}/>
           {/* <Button icon='edit' onClick={this.editEntry.bind(this)}/> */}
           <Button icon='copy' onClick={this.copyEntry.bind(this)}/>

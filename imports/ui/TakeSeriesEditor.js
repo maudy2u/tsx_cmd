@@ -28,6 +28,7 @@ class TakeSeriesEditor extends Component {
     filter: 'Filter',
     repeat: 0,
     binning: 0,
+    takeSeriesTemplate: '',
   };
 
   // // change states
@@ -67,6 +68,7 @@ class TakeSeriesEditor extends Component {
       filter: definedSeries.filter,
       repeat: definedSeries.repeat,
       binning: definedSeries.binning,
+      takeSeriesTemplate: definedSeries.takeSeriesTemplate,
     });
   }
 

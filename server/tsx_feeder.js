@@ -70,28 +70,26 @@ export function tsx_feeder( cmd, callback ) {
    });
 
    tsx.connect(port, ip, function() {
-     // Meteor._debug('Connected to: ' + ip +':' + port );
    });
 
    start_tsx_is_waiting();
 
    tsx.write(cmd, (err) => {
      // Meteor._debug('Sending tsxCmd: ' + cmd);
-     // Meteor._debug('Sending err: ' + err);
    });
 
    // need a TSX WAIT FOR SCRIPT DONE...
    // https://www.w3schools.com/js/js_timing.asp
    var waiting = 0; // create arbitarty timeout
    var imageChk = false;
-   var process = tsx_GetServerStateValue( 'imagingSessionId' );
-   if( typeof process != 'undefined' || process != '') {
+   var processId = tsx_GetServerStateValue( 'imagingSessionId' );
+   if( typeof processId != 'undefined' || processId != '') {
      imageChk = true;
    }
    else {
-     process = 'ignore';
+     processId = 'ignore';
    }
-  while( tsx_waiting && process > '' ) { //}&& forceExit > 2*60*sec ) {
+  while( tsx_waiting && processId > '' ) { //}&& forceExit > 2*60*sec ) {
     tsx.reads;
     var sec = 1000;
     Meteor.sleep( sec );
@@ -101,7 +99,7 @@ export function tsx_feeder( cmd, callback ) {
     // postStatus( 'tsx_waiting (sec): ' + waiting /sec  );
     // Meteor._debug('tsx_waiting (sec): ' + waiting /sec );
     if( imageChk ) {
-      process = tsx_GetServerStateValue( 'imagingSessionId' );
+      processId = tsx_GetServerStateValue( 'imagingSessionId' );
     }
   }
   postProgressTotal(0);

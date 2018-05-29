@@ -20,6 +20,7 @@ import {
   postProgressTotal,
   postProgressIncrement,
   postProgressMessage,
+  UpdateImagingSesionID,
 } from '../imports/api/serverStates.js';
 
 import {
@@ -30,6 +31,7 @@ import {
   getValidTargetSession,
   prepareTargetForImaging,
   processTargetTakeSeries,
+  tsx_ServerIsOnline,
 } from './run_imageSession.js';
 
 import { tsx_feeder, stop_tsx_is_waiting } from './tsx_feeder.js';
@@ -37,7 +39,6 @@ import { tsx_feeder, stop_tsx_is_waiting } from './tsx_feeder.js';
 import {shelljs} from 'meteor/akasha:shelljs';
 
 var schedulerRunning = 'Stop';
-var isSchedulerRunning = true;
 
 /*
 tsx_SetServerState
@@ -97,7 +98,7 @@ Meteor.startup(() => {
   var jid = tsx_GetServerStateValue('currentJob');
   scheduler.remove( jid );
   tsx_SetServerState('currentJob', '');
-  tsx_SetServerState( tsx_ServerStates.imagingSessionId, '');
+  UpdateImagingSesionID( '' );
 
   // Clean up the scheduler process collections...
   // Persistence across reboots is not needed at this time.
@@ -161,11 +162,11 @@ Meteor.startup(() => {
       var isParked = false;
       // tsx_Connect();
       while(
-// the job is used to run the scheduler.
+        // the job is used to run the scheduler.
         tsx_GetServerStateValue('currentJob') != ''
-// THis is used for the session... not for the job.
-//        && tsx_GetServerStateValue( tsx_ServerStates.imagingSessionId ) != ''
-      ) {
+        // THis is used for the session... not for the job.
+        //        && tsx_GetServerStateValue( tsx_ServerStates.imagingSessionId ) != ''
+       ) {
         // Find a session
         Meteor._debug('Seeking target');
 
@@ -346,10 +347,6 @@ function setSchedulerState( value ) {
   schedulerRunning = value;
 }
 
-function isSchedulerRunning() {
-  return isSchedulerRunning;
-}
-
 export function srvPlayScheduler ( callback ) {
   Meteor._debug('Scheduler STARTING' );
   callback();
@@ -386,8 +383,7 @@ export function srvStopScheduler() {
   var jid = tsx_GetServerStateValue('currentJob');
   scheduler.remove( jid );
   tsx_SetServerState('currentJob', '');
-  tsx_SetServerState( tsx_ServerStates.imagingSessionId, '');
-
+  UpdateImagingSesionID( '' );
 
   Meteor._debug('Manually STOPPED scheduler');
 }
@@ -405,53 +401,61 @@ Meteor.methods({
    // or KISS and one big sequenital function...
    startScheduler() {
      Meteor._debug('************************');
-     Meteor._debug('Found scheduler state: ' + isSchedulerRunning );
+     Meteor._debug('Found scheduler state: ' + getSchedulerState() );
      if(
        // If PAUSED... reset state to Running
        getSchedulerState() == 'Pause'
-       && isSchedulerRunning == true
      ) {
        var job = new Job(scheduler, scheduler.findOne({}));
        job.resume();
        setSchedulerState( 'Running' );
+       return;
      }
       // if already running, just return and update state
      else if(
        getSchedulerState() == 'Running'
-       && isSchedulerRunning == true ) {
+     ) {
        Meteor._debug('Scheduler is alreadying running. Nothing to do.');
        return;
      }
      else if(
-       getSchedulerState() == 'Stop'
-       || isSchedulerRunning == false ) {
+        getSchedulerState() == 'Stop'
+      ) {
 
-       // Create a job:
-       var job = new Job(scheduler, 'runScheduler', // type of job
-      // Job data that you define, including anything the job
-      // needs to complete. May contain links to files, etc...
-        {
-          startTime: new Date(),
+        // Confirm whether the there is a script running...
+        if( !tsx_ServerIsOnline() ) {
+          Meteor._debug('Check TSX... script running');
+          UpdateStatus('Check TSX... script running');
+          return;
         }
-      );
 
-      // Set some properties of the job and then submit it
-      // the same submit the start time to the scheduler...
-      // at this time could add a tweet :)
-      job.priority('normal');
+        // Create a job:
+        var job = new Job(scheduler, 'runScheduler', // type of job
+          // Job data that you define, including anything the job
+          // needs to complete. May contain links to files, etc...
+          {
+            startTime: new Date(),
+          }
+        );
+
+        // Set some properties of the job and then submit it
+        // the same submit the start time to the scheduler...
+        // at this time could add a tweet :)
+        job.priority('normal');
         // .retry({ retries: 5,
         //   wait: 5*60*1000 }) //15*60*1000 })  // 15 minutes between attempts
         // .delay(0);// 60*60*1000)     // Wait an hour before first try
-      var jid = job.save();               // Commit it to the server
+        var jid = job.save();               // Commit it to the server
 
-      Meteor._debug('Job id: ' + jid);
+        Meteor._debug('Job id: ' + jid);
         tsx_SetServerState('currentJob', jid);
+        Meteor._debug('Scheduler Started');
+        UpdateStatus('Scheduler Started');
+        return;
      }
      else {
        Meteor._debug('Invalid state found for scheduler.');
      }
-     Meteor._debug('Scheduler Started');
-     UpdateStatus('Scheduler Started');
    },
 
    pauseScheduler() {

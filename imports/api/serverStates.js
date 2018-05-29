@@ -193,3 +193,7 @@ export function tsx_GetServerStateValue( name ) {
 export function UpdateStatus( status ) {
   tsx_SetServerState( 'currentStage', status );
 };
+
+export function UpdateImagingSesionID( t_id ) {
+  tsx_SetServerState( 'imagingSessionId', t_id );
+};

@@ -20,6 +20,7 @@ class TakeSeriesTemplateEditor extends Component {
     seriesContainer: [],
     repeatSeries: false,
     defaultDithering: 1,
+    seriesOrderFix: '',
   };
 
   nameChange = (e, { value }) => this.setState({ name: value });
@@ -41,6 +42,17 @@ class TakeSeriesTemplateEditor extends Component {
     this.setState({seriesProcess: this.props.template.processSeries});
     this.setState({seriesContainer: this.props.template.series});
     this.setState({repeatSeries: this.props.template.repeatSeries});
+  }
+
+  componentWillReceiveProps(nextProps) {
+
+    // used to force a reload.... must be better way
+    this.setState({
+      seriesOrderFix: nextProps.seriess,
+      // targetSessionId: nextProps.tsxInfo.find(function(element) {
+      //   return element.name == 'imagingSessionId';
+      // }).value,
+    });
   }
 
   saveEntry() {
@@ -68,14 +80,34 @@ class TakeSeriesTemplateEditor extends Component {
         frame: '',
         filter: '',
         repeat: 1,
+        takeSeriesTemplate: tid,
       }
     );
 
     TakeSeriesTemplates.update({_id: tid}, {
       $push: { 'series': {id: sid} }
     });
+    this.forceUpdate();
   }
 
+  renderTakeSeries( container ) {
+    // this.props.template.series.. this is a series ID
+    // does not work:       this.props.template.series.map({sort: {order:1}}, (definedSeries)=>{
+    console.log(this.props.template.series);
+    return (
+      this.props.template.series.sort(
+        function(a, b) {
+          console.log(a.id);
+          console.log(b.id);
+          var aO = Seriess.findOne({_id: a.id});
+          var bO = Seriess.findOne({_id: b.id});
+          return aO.order- bO.order;
+        }
+      ).map((definedSeries)=>{
+       return  <TakeSeriesEditor key={definedSeries.id} template={this.props.template} series_id={definedSeries} />
+      })
+    )
+  }
 
   render() {
 
@@ -149,10 +181,7 @@ class TakeSeriesTemplateEditor extends Component {
             <b>Order</b>
             </Grid.Column>
           </Grid.Row>
-          {// this.props.template.series.. this is a series ID
-            this.props.template.series.map( (definedSeries)=>{
-             return  <TakeSeriesEditor key={definedSeries.id} template={this.props.template} series_id={definedSeries} />
-          })}
+          {this.renderTakeSeries(this.state.seriesOrderFix)}
         </Grid>
       </div>
     )
@@ -163,6 +192,8 @@ export default withTracker(() => {
     return {
       seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
       templates: TakeSeriesTemplates.find({} ).fetch(),
+      // does not work...
+//      templateTest: TakeSeriesTemplates.findOne({_id:this.props.key} ),
   };
 })(TakeSeriesTemplateEditor);
 

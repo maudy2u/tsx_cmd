@@ -13,7 +13,6 @@ import { Form, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progr
 
 // Import the API Model
 import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
-import { Seriess } from '../api/seriess.js';
 import { Filters } from '../api/filters.js';
 import { TargetSessions } from '../api/targetSessions.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
@@ -566,7 +565,6 @@ export default withTracker(() => {
       tsxIP: TheSkyXInfos.findOne({name: 'ip'}),
       tsxPort: TheSkyXInfos.findOne({name: 'port'}),
       tsxInfo: TheSkyXInfos.find({}).fetch(),
-      seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
       filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
       targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),

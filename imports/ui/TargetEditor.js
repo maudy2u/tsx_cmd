@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { Seriess } from '../api/seriess.js';
 import { Filters } from '../api/filters.js';
 import { TargetSessions } from '../api/targetSessions.js';
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';

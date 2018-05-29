@@ -10,5 +10,6 @@ binning: 1,
 frame: 'Light',
 filter: 'LUM',
 repeat: 1,
+takeSeriesTemplate: template._id,
 
  */

@@ -21,6 +21,7 @@ import {
   UpdateStatus,
   postProgressTotal,
   postStatus,
+  UpdateImagingSesionID,
  } from '../imports/api/serverStates.js'
 
 import { tsx_feeder } from './tsx_feeder.js'
@@ -237,13 +238,22 @@ function SetUpAutoGuiding(targetSession) {
   Meteor._debug(' *** SetUpAutoGuiding: ' + targetSession.targetFindName);
 
   tsx_TakeAutoGuideImage( targetSession );
+  if( isSchedulerStopped() ) {
+    return;
+  }
 
   var star = tsx_FindGuideStar();
+  if( isSchedulerStopped() ) {
+    return;
+  }
 
   // #TODO test out the Calibrate....
   // tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
 
   tsx_StartAutoGuide( star.guideStarX, star.guideStarY );
+  if( isSchedulerStopped() ) {
+    return;
+  }
 }
 
 // **************************************************************
@@ -537,7 +547,7 @@ function tsx_GetMountReport() {
 
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-      // Meteor._debug(tsx_return);
+       Meteor._debug(tsx_return);
         Out = {
           ra: tsx_return.split('|')[0].trim(),
           dec: tsx_return.split('|')[1].trim(),
@@ -583,12 +593,18 @@ function SetUpForImagingRun(targetSession) {
 
   UpdateStatus(  " Centring target: "+ targetSession.targetFindName );
 	tsx_CLS(targetSession); 						//# Call the Closed-Loop-Slew function to go to the target
+  if( isSchedulerStopped() ) {
+    return false; // exit
+  }
 
   // needs initial focus temp
   UpdateStatus( ' Target centred: '+ targetSession.targetFindName );
 
   // Get Mount Coords and Orientations
 	var mntOrient = tsx_GetMountReport();
+  if( isSchedulerStopped() ) {
+    return false; // exit
+  }
 
   // *******************************
   //    C. Match Rotation/Angle if provided:
@@ -598,13 +614,17 @@ function SetUpForImagingRun(targetSession) {
   UpdateStatus( " Matching angle: " + targetSession.targetFindName );
   // rotateSucess = tsx_MatchRotation( targetSession );
 
-
   // get initial focus....
   InitialFocus( targetSession );
-
+  if( isSchedulerStopped() ) {
+    return false; // exit
+  }
 
   UpdateStatus( " Setup guider: " + targetSession.targetFindName );
 	SetUpAutoGuiding( targetSession );			// Setup & Start Auto-Guiding.
+  if( isSchedulerStopped() ) {
+    return false; // exit
+  }
 
   return true;
 }
@@ -631,7 +651,7 @@ export function getValidTargetSession() {
     Meteor._debug('Failed to find a valid target session.');
   }
   else {
-    Meteor._debug('Found: ' + target.name);
+    Meteor._debug('Valid target: ' + target.targetFindName);
     var result = UpdateImagingTargetReport (target);
   }
   return target;
@@ -730,16 +750,20 @@ function tsx_DeviceInfo() {
 }
 
 // **************************************************************
-function tsx_ServerIsOnline() {
-  var success = 'Error|';
+export function tsx_ServerIsOnline() {
+  var success = false;
   var cmd = tsxHeader + tsxFooter;
   var tsx_is_waiting = true;
   tsx_feeder( cmd, Meteor.bindEnvironment((tsx_return) => {
-    if( tsx_return == 'undefined|No error. Error = 0.') {
-      success = 'Success|';
-
+    try{
+      var result = tsx_return.split('|')[0].trim();
+      if( result == 'undefined') {
+        success = true;
+      }
     }
-    tsx_is_waiting = false;
+    finally {
+      tsx_is_waiting = false;
+    }
   }));
   while( tsx_is_waiting ) {
     Meteor.sleep( 3000 );
@@ -1261,6 +1285,10 @@ function tsx_takeImage( filterNum, exposure, frame ) {
   )
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
+   if( isSchedulerStopped() ) {
+     tsx_is_waiting = false;
+     success = false;
+   }
   }
   return success;
 };
@@ -1302,16 +1330,18 @@ function takeSeriesImage(target, series) {
     var frame = getFrame( series.frame );//  cdLight =1, cdBias, cdDark, cdFlat
 
     UpdateStatus( 'Taking: ' + series.filter + '@' + series.exposure );
-    tsx_takeImage( slot, series.exposure, frame );
-    UpdateStatus( 'Finished: ' + series.filter + '@' + series.exposure );
-    // *******************************
-    // Update progress
-    Meteor._debug(' *** Image taken: ' + series.filter + ' at ' + series.exposure + ' seconds');
-    incrementTakenFor( target, series._id );
+    var res = tsx_takeImage( slot, series.exposure, frame );
+    if( res != false ) {
+      UpdateStatus( 'Finished: ' + series.filter + '@' + series.exposure );
+      // *******************************
+      // Update progress
+      Meteor._debug(' *** Image taken: ' + series.filter + ' at ' + series.exposure + ' seconds');
+      incrementTakenFor( target, series._id );
 
-    // *******************************
-    // ADD THE FOCUS AND ROTATOR POSITIONS INTO THE FITS HEADER
-    tsx_UpdateFITS( target );
+      // *******************************
+      // ADD THE FOCUS AND ROTATOR POSITIONS INTO THE FITS HEADER
+      tsx_UpdateFITS( target );
+    }
   }
   else {
     Meteor._debug(' *** Completed: ' + series.filter + ' at ' + series.exposure + ' seconds');
@@ -1319,6 +1349,7 @@ function takeSeriesImage(target, series) {
   var jid = tsx_GetServerState('currentJob');
   if( jid == '' ) {
     // the process was stopped...
+    console.log('Throwing in imaging...');
     throw(' *** END SESSIONS');
   }
   return;
@@ -1435,7 +1466,7 @@ export function prepareTargetForImaging( target ) {
     UpdateStatus( "Selecting failed: "+ target);
   }
   else {
-    tsx_SetServerState( tsx_ServerStates.imagingSessionId, target._id );
+    UpdateImagingSesionID( target._id );
     UpdateStatus( "Selected Target: "+ target.name);
 
     var targetCoords = UpdateImagingTargetReport( target );
@@ -1718,7 +1749,7 @@ Use this to set the last focus
   startImaging(target) {
     Meteor._debug('************************');
     Meteor._debug(' *** startImaging: ' + target.name );
-    tsx_SetServerState( tsx_ServerStates.imagingSessionId, target._id );
+    UpdateImagingSesionID( target._id )
     UpdateImagingTargetReport (target.targetFindName);
 
     // Will process target until end condition found

@@ -15,7 +15,6 @@ import {
 
 // Import the API Model
 import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
-import { Seriess } from '../api/seriess.js';
 import { TargetSessions } from '../api/targetSessions.js';
 import { TargetReports } from '../api/targetReports.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
@@ -66,6 +65,7 @@ class Monitor extends Component {
       tsx_progress: 0,
       tsx_total: 0,
       tsx_actions: '',
+      targetSessionId: '',
 
   };
 
@@ -141,33 +141,42 @@ class Monitor extends Component {
 
   updateMonitor(nextProps) {
 
-    var tid;
-    var ttid = this.props.targetSessionId;//.value;
-    tid = ttid[0].value;
-    // reports
-    var report = TargetReports.findOne( {
-      target_id: tid
-    });
+    try {
+      this.setState({ // use this to trigger reloading the Monitor Target
+        targetSessionId: nextProps.tsxInfo.find(function(element) {
+          return element.name == 'imagingSessionId';
+        }).value,
+      });
 
-    this.setState({
-      monRA: report.RA,
-      monDEC: report.DEC,
-      monALT: report.ALT,
-      monAZ: report.AZ,
-      monHA: report.HA,
-      monTransit: report.TRANSIT,
-      monAngle: report.angle,
-      monIsDark: report.isDark,
-    });
+      var tid = this.state.targetSessionId;//.value;
+      // reports
+      var report = TargetReports.findOne( {
+        target_id: tid
+      });
 
-    this.setState({
-      tsx_total: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'tsx_total';
-      }).value,
-      tsx_progress: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'tsx_progress';
-      }).value,
-    });
+      this.setState({
+        monRA: report.RA,
+        monDEC: report.DEC,
+        monALT: report.ALT,
+        monAZ: report.AZ,
+        monHA: report.HA,
+        monTransit: report.TRANSIT,
+        monAngle: report.angle,
+        monIsDark: report.isDark,
+      });
+
+      this.setState({
+        tsx_total: nextProps.tsxInfo.find(function(element) {
+          return element.name == 'tsx_total';
+        }).value,
+        tsx_progress: nextProps.tsxInfo.find(function(element) {
+          return element.name == 'tsx_progress';
+        }).value,
+      });
+    }
+    finally {
+
+    }
   }
 
   confirmPlayScheduler() {
@@ -288,22 +297,25 @@ class Monitor extends Component {
     }.bind(this));
   }
 
-  renderTarget() {
-    var sid = this.props.targetSessionId;
-    var tid = sid[0].value;
+  renderTarget( tid ) {
     var target;
     var str;
     try {
       target = TargetSessions.findOne({_id:tid});
-      return (
-        <Target key={tid} target={target} />
-      )
+      if( tid == '' ) {
+        return (
+          <Label>No active target</Label>
+        )
+      }
+      else {
+        return (
+          <Target key={tid} target={target} />
+        )
+      }
     } catch (e) {
       console.log('error');
       return (
-        // <div>
-          <h3>No active target</h3>
-        // </div>
+        <Label>No active target</Label>
       )
     }
   }
@@ -403,7 +415,6 @@ class Monitor extends Component {
 
     var tsx_actions = this.getTsxActions();
 
-
     return (
       <div>
          <Segment raised>
@@ -434,7 +445,7 @@ class Monitor extends Component {
              <Progress value={this.state.tsx_progress} total={this.state.tsx_total} progress='ratio'>Processing</Progress>
            </Segment>
         <Segment>
-        {this.renderTarget()}
+          {this.renderTarget( this.state.targetSessionId )}
         </Segment>
         <Segment.Group  size='mini' horizontal>
           <Segment>
@@ -509,9 +520,7 @@ export default withTracker(() => {
 
   return {
     reports: TargetReports.find().fetch(),
-    targetSessionId: TheSkyXInfos.find({name: 'imagingSessionId'}).fetch(),
     tsxInfo: TheSkyXInfos.find({}).fetch(),
-    seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
     takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
     targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
 };
