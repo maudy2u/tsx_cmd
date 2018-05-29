@@ -783,7 +783,6 @@ function tsx_isDarkEnough(target) {
     Meteor._debug(target.report);
     Meteor._debug('Twilight enabled - :' + target.targetFindName + ' isDark:' + target.report.isDark);
     return target.report.isDark;
-
 	}
   else {
     Meteor._debug('Twilight disabled');
@@ -903,15 +902,20 @@ function UpdateImagingTargetReport( target ) {
   var rpt;
   var tRprt = target.report;
   if( typeof tRprt == 'undefined' || tRprt == '') {
+    Meteor._debug('First report for: ' + target.targetFindName);
     tRprt = tsx_TargetReport( target );
   }
   var cTime = new Date();
-  var msecDiff = cTime - tRprt;
+  // console.log('Current time: ' + cTime );
+  var msecDiff = cTime - tRprt.updatedAt;
+  // console.log('Report time diff: ' + msecDiff);
   var mm = Math.floor(msecDiff / 1000 / 60);
   if( mm > 1 ) { // one minte passed so update report.
+    Meteor._debug('Renewing report for: ' + target.targetFindName);
     rpt = tsx_TargetReport( target );
   }
   else {
+    Meteor._debug('Reusing report for: ' + target.targetFindName);
     rpt = target.report;
   }
 
@@ -1078,8 +1082,6 @@ function tsx_TargetReport( target ) {
           return false;
         }
 
-        console.log(tsx_return);
-
         var isDark = tsx_return.split('|')[0].trim();
         var sunAlt = tsx_return.split('|')[1].trim();
         var isValid = tsx_return.split('|')[2].trim();
@@ -1155,8 +1157,9 @@ function tsx_TargetReport( target ) {
             }
           });
         // }
-        target.report = Out;
         Meteor._debug(Out);
+        target.report = Out;
+
         tsx_SetServerState( tsx_ServerStates.targetRA, ra );
         tsx_SetServerState( tsx_ServerStates.targetDEC, dec );
         tsx_SetServerState( tsx_ServerStates.targetALT, alt );
@@ -1330,6 +1333,8 @@ function takeSeriesImage(target, series) {
     var frame = getFrame( series.frame );//  cdLight =1, cdBias, cdDark, cdFlat
 
     UpdateStatus( 'Taking: ' + series.filter + '@' + series.exposure );
+    postStatus('Capturing: '+ series.filter + '@' + series.exposure);
+
     var res = tsx_takeImage( slot, series.exposure, frame );
     if( res != false ) {
       UpdateStatus( 'Finished: ' + series.filter + '@' + series.exposure );

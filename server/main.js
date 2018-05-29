@@ -155,7 +155,7 @@ Meteor.startup(() => {
       // This will only be called if a
       // 'runScheduler' job is obtained
       setSchedulerState('Running' );
-      Meteor._debug('Scheduler is running.');
+      // Meteor._debug('Finding');
       job.log("Entered the scheduler process",
         {level: 'info'});
 
@@ -401,7 +401,7 @@ Meteor.methods({
    // or KISS and one big sequenital function...
    startScheduler() {
      Meteor._debug('************************');
-     Meteor._debug('Found scheduler state: ' + getSchedulerState() );
+     // Meteor._debug('Found scheduler state: ' + getSchedulerState() );
      if(
        // If PAUSED... reset state to Running
        getSchedulerState() == 'Pause'
@@ -447,7 +447,7 @@ Meteor.methods({
         // .delay(0);// 60*60*1000)     // Wait an hour before first try
         var jid = job.save();               // Commit it to the server
 
-        Meteor._debug('Job id: ' + jid);
+        // Meteor._debug('Job id: ' + jid);
         tsx_SetServerState('currentJob', jid);
         Meteor._debug('Scheduler Started');
         UpdateStatus('Scheduler Started');
