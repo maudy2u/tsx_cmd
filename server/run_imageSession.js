@@ -485,7 +485,8 @@ function tsx_RunFocus3( target ) {
     return Out;
   }
   Meteor._debug(' *** @Focus3 diabled');
-  return Out = 'Succes';
+  Out = target.report.focusTemp;
+  return Out;
 }
 
 // **************************************************************
@@ -547,7 +548,7 @@ function tsx_GetMountReport() {
 
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-       Meteor._debug(tsx_return);
+       // Meteor._debug(tsx_return);
         Out = {
           ra: tsx_return.split('|')[0].trim(),
           dec: tsx_return.split('|')[1].trim(),
@@ -780,7 +781,7 @@ function tsx_isDarkEnough(target) {
   var tsx_is_waiting = true;
 	var Out = true; // Always assume to return true
 	if( chkTwilight ) {
-    Meteor._debug(target.report);
+    // Meteor._debug(target.report);
     Meteor._debug('Twilight enabled - :' + target.targetFindName + ' isDark:' + target.report.isDark);
     return target.report.isDark;
 	}
@@ -865,15 +866,14 @@ function isFocusingNeeded(target) {
   Meteor._debug('************************');
   Meteor._debug(' *** isFocusingNeeded: ' + target.targetFindName);
   var lastFocusTemp = tsx_GetServerState( 'initialFocusTemperature' ).value; // get last temp
-
 //  var curFocusTemp = tsx_GetFocusTemp( target ); // read new temp
   var curFocusTemp = target.report.focusTemp; // read new temp
   if( typeof curFocusTemp == 'undefined' ) {
     curFocusTemp = tsx_GetServerState('initialFocusTemperature').value;
   }
-  var focusDiff = Math.abs(curFocusTemp.focusTemp - lastFocusTemp).toFixed(2);
+  var focusDiff = Math.abs(curFocusTemp - lastFocusTemp).toFixed(2);
   var targetDiff = target.tempChg; // diff for this target
-  Meteor._debug('Focus diff('+targetDiff+'): ' + focusDiff + '='+curFocusTemp.focusTemp +'-'+lastFocusTemp );
+  Meteor._debug('Focus diff('+targetDiff+'): ' + focusDiff + '='+curFocusTemp +'-'+lastFocusTemp );
   if( focusDiff >= targetDiff ) {
   // returning true tell caller to run  @Focus3
     return true;
@@ -1069,6 +1069,9 @@ function tsx_TargetReport( target ) {
   var sunAlt = tsx_GetServerStateValue( 'defaultMinSunAlt');
   cmd = cmd.replace('$001', sunAlt);
   cmd = cmd.replace('$002', target.minAlt);
+  // console.log(target.targetFindName);
+  // console.log(sunAlt);
+  // console.log(target.minAlt);
   var Out;
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
@@ -1157,7 +1160,7 @@ function tsx_TargetReport( target ) {
             }
           });
         // }
-        Meteor._debug(Out);
+        // Meteor._debug(Out);
         target.report = Out;
 
         tsx_SetServerState( tsx_ServerStates.targetRA, ra );
@@ -1716,10 +1719,10 @@ Use this to set the last focus
 
   // **************************************************************
   // Used to pass RA/DEC to target editors
-  targetFind(targetFindName) {
+  targetFind(target) {
     Meteor._debug('************************');
-    Meteor._debug(' *** targetFind: ' + targetFindName);
-    return UpdateImagingTargetReport(targetFindName);
+    Meteor._debug(' *** targetFind: ' + target.targetFindName);
+    return UpdateImagingTargetReport(target);
 
   },
 

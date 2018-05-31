@@ -231,10 +231,10 @@ class TargetEditor extends Component {
     this.setState({ra: ''});
     this.setState({dec: ''});
 
-    console.log('targetFind: ' + this.state.targetFindName );
+    console.log('targetFind: ' + this.props.target.targetFindName );
     Meteor.call(
       'targetFind',
-      this.state.targetFindName ,
+      this.props.target ,
       function ( error, result ) {
 
 //    Meteor.call("targetFind", this.state.targetFindName , function(error, result) {
@@ -244,8 +244,8 @@ class TargetEditor extends Component {
       // if success then TheSkyX has made this point the target...
       // now get the coordinates
       cmdSuccess = true;
-      this.setState({ra: result.ra});
-      this.setState({dec: result.dec});
+      this.setState({ra: result.RA});
+      this.setState({dec: result.DEC});
     }.bind(this));
   }
 
