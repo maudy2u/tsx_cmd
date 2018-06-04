@@ -109,7 +109,7 @@ Meteor.startup(() => {
       // jobs[i].remove(function (err, result) {
       //   if (result) {
       //     // Job removed from server.
-      //     logCon.info('job removed');
+      //     tsxLog('job removed');
       //   }
       // });
     }
@@ -155,7 +155,7 @@ Meteor.startup(() => {
       // This will only be called if a
       // 'runScheduler' job is obtained
       setSchedulerState('Running' );
-      // logCon.info('Finding');
+      // tsxLog('Finding');
       job.log("Entered the scheduler process",
         {level: 'info'});
 
@@ -168,7 +168,7 @@ Meteor.startup(() => {
         //        && tsx_GetServerStateValue( tsx_ServerStates.imagingSessionId ) != ''
        ) {
         // Find a session
-        logCon.info('Seeking target');
+        tsxLog('Seeking target');
 
         // Get the target to shoot
         UpdateStatus( ' Checking Targets...');
@@ -191,7 +191,7 @@ Meteor.startup(() => {
         }
         else {
           if( !isParked ) {
-            logCon.info('No valid sessions - parking');
+            tsxLog('No valid sessions - parking');
             var defaultFilter = tsx_GetServerStateValue('defaultFilter');
             var softPark = Boolean(tsx_GetServerStateValue('defaultSoftPark'));
             UpdateStatus( 'Parking...');
@@ -201,7 +201,7 @@ Meteor.startup(() => {
           isParked = true;
           var sleepTime = tsx_GetServerStateValue('defaultSleepTime');
           UpdateStatus( '  No valid target, waiting...');
-          logCon.info( ' Waiting...: ' + sleepTime + 'min');
+          tsxLog( 'Waiting...: ' + sleepTime + 'min');
           var timeout = 0;
           var msSleep = Number(sleepTime); // number of seconds
           postProgressTotal(sleepTime);
@@ -219,7 +219,7 @@ Meteor.startup(() => {
           postProgressTotal(0);
           postProgressIncrement( 0 );
           postProgressMessage('Processing');
-          logCon.info('Finished sleep');
+          tsxLog('Finished sleep');
         }
       }
 
@@ -241,7 +241,7 @@ Meteor.startup(() => {
       var info = job.data; // Only one email per job
       // This will only be called if a
       // 'runScheduler' job is obtained
-      // logCon.info('updateClientData');
+      // tsxLog('updateClientData');
       job.log("Entered updateClientData",
         {level: 'info'});
 
@@ -259,7 +259,7 @@ Meteor.startup(() => {
     function (job, cb) {
       var info = job.data; // Only one email per job
       tsx_SetServerState('tsx_message', info.message );
-      // logCon.info('updateProgressMessage');
+      // tsxLog('updateProgressMessage');
       // tsx_Disconnect();
       job.done();
 
@@ -272,7 +272,7 @@ Meteor.startup(() => {
     function (job, cb) {
       var info = job.data; // Only one email per job
       tsx_SetServerState('tsx_progress', info.progress );
-      // logCon.info('updateProgressIncrement');
+      // tsxLog('updateProgressIncrement');
       job.done();
 
       // Be sure to invoke the callback
@@ -284,7 +284,7 @@ Meteor.startup(() => {
     function (job, cb) {
       var info = job.data; // Only one email per job
       tsx_SetServerState('tsx_total', info.total );
-      // logCon.info('updateProgressTotal');
+      // tsxLog('updateProgressTotal');
       // tsx_Disconnect();
       job.done();
 
@@ -301,7 +301,7 @@ Meteor.startup(() => {
       var schedule = job.data; // Only one email per job
       // This will only be called if a
       // 'runScheduler' job is obtained
-      // logCon.info('manageCameraTemp');
+      // tsxLog('manageCameraTemp');
       // job.log("Entered manageCameraTemp",
       //   {level: 'info'});
 
@@ -400,8 +400,8 @@ Meteor.methods({
    // 4. start/end checks... ???
    // or KISS and one big sequenital function...
    startScheduler() {
-     logCon.info('************************');
-     // logCon.info('Found scheduler state: ' + getSchedulerState() );
+     tsxLog(' ************************');
+     // tsxLog('Found scheduler state: ' + getSchedulerState() );
      if(
        // If PAUSED... reset state to Running
        getSchedulerState() == 'Pause'
@@ -415,7 +415,7 @@ Meteor.methods({
      else if(
        getSchedulerState() == 'Running'
      ) {
-       logCon.info('Scheduler is alreadying running. Nothing to do.');
+       tsxLog('Scheduler is alreadying running. Nothing to do.');
        return;
      }
      else if(
@@ -424,7 +424,7 @@ Meteor.methods({
 
         // Confirm whether the there is a script running...
         if( !tsx_ServerIsOnline() ) {
-          logCon.info('Check TSX... script running');
+          tsxLog('Check TSX... script running');
           UpdateStatus('Check TSX... script running');
           return;
         }
@@ -447,9 +447,9 @@ Meteor.methods({
         // .delay(0);// 60*60*1000)     // Wait an hour before first try
         var jid = job.save();               // Commit it to the server
 
-        // logCon.info('Job id: ' + jid);
+        // tsxLog('Job id: ' + jid);
         tsx_SetServerState('currentJob', jid);
-        logCon.info('Scheduler Started');
+        tsxLog('Scheduler Started');
         UpdateStatus('Scheduler Started');
         return;
      }

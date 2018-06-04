@@ -25,29 +25,44 @@ const filters = {
 };
 
 export function tsxErr( msg, data ) {
+  if( typeof data === 'undefined' ) {
+    data = '';
+  }
   logCon.error( msg, data );
   logSession.error( msg,  data );
   logDB.error( msg,  { info: data } );
 }
 
 export function tsxDebug( msg, data ) {
+  if( typeof data === 'undefined' ) {
+    data = '';
+  }
   logCon.debug( msg, data );
   logSession.debug( msg,  { info: data } );
   // logDB.debug( msg,  data );
 }
 export function tsxInfo( msg, data ) {
+  if( typeof data === 'undefined' ) {
+    data = '';
+  }
   logCon.info( msg, data );
   logSession.info( msg,  data );
   logDB.info( msg,  { info: data } );
 }
 
 export function tsxWarn( msg, data ) {
+  if( typeof data === 'undefined' ) {
+    data = '';
+  }
   logCon.warn( msg, data );
   logSession.warn( msg,  data );
   logDB.warn( msg,  { info: data } );
 }
 
 export function tsxLog( msg, data ) {
+  if( typeof data === 'undefined' ) {
+    data = '';
+  }
   logCon.log( msg, data );
   logSession.log( msg,  data );
   logDB.log( msg, { data: data } );
@@ -109,7 +124,7 @@ function fileNameDate( today ) {
 (new LoggerConsole(logCon, {
   collectionName: 'AppLogsCon',
   format(opts) {
-    var msgData= ((typeof opts.data == 'undefined') ? '' : (' = ' + opts.data));
+    var msgData= ((typeof opts.data === 'undefined') ? '' : (' = ' + opts.data));
     return ((Meteor.isServer) ? '[SERVER]' : "[CLIENT]")
     +'|'+(formatDate( opts.time ) + '|[' + opts.level + ']|'
     + opts.message
@@ -131,7 +146,7 @@ function fileNameDate( today ) {
       (Meteor.isServer) ? '[SERVER]' : "[CLIENT]")
       + '|' +(formatDate( time )
       + '|[' + level + ']|'
-      + message + ((typeof data == 'undefined') ? '' : (' = ' + data))) + '\r\n';
+      + message + ((typeof data === 'undefined') ? '' : (' = ' + data))) + '\r\n';
   }
 })).enable( filters );
 

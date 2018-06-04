@@ -1,9 +1,13 @@
 import { TheSkyXInfos } from './theSkyXInfos.js';
 import { scheduler } from './theProcessors.js';
 
-import { Logger }     from 'meteor/ostrio:logger';
-import { LoggerFile } from 'meteor/ostrio:loggerfile';
-
+import {
+  tsxInfo,
+  tsxLog,
+  tsxErr,
+  tsxWarn,
+  tsxDebug,
+} from './theLoggers.js';
 
 export const tsx_ServerStates = {
   ip: 'ip',
@@ -192,6 +196,7 @@ export function tsx_GetServerStateValue( name ) {
 // **************************************************************
 export function UpdateStatus( status ) {
   tsx_SetServerState( 'currentStage', status );
+  tsxLog( status );
 };
 
 export function UpdateImagingSesionID( t_id ) {
