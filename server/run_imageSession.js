@@ -1,8 +1,13 @@
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 
-import { Logger }     from 'meteor/ostrio:logger';
-import { LoggerFile } from 'meteor/ostrio:loggerfile';
+import {
+  tsxInfo,
+  tsxLog,
+  tsxErr,
+  tsxWarn,
+  tsxDebug,
+} from '../imports/api/theLoggers.js';
 
 import { TargetSessions } from '../imports/api/targetSessions.js';
 import { TargetReports } from '../imports/api/targetReports.js';
@@ -911,11 +916,11 @@ function UpdateImagingTargetReport( target ) {
   // console.log('Report time diff: ' + msecDiff);
   var mm = Math.floor(msecDiff / 1000 / 60);
   if( mm > 1 ) { // one minte passed so update report.
-    Meteor._debug('Renewing report for: ' + target.targetFindName);
+    tsxLog('TargetReport refreshed: ' + target.targetFindName);
     rpt = tsx_TargetReport( target );
   }
   else {
-    Meteor._debug('Reusing report for: ' + target.targetFindName);
+    tsxDebug('Reusing report for: ' + target.targetFindName);
     rpt = target.report;
   }
 

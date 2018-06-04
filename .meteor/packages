@@ -33,3 +33,5 @@ juliancwirko:postcss
 vsivsi:job-collection
 ostrio:logger
 ostrio:loggerfile
+ostrio:loggerconsole
+ostrio:loggermongo

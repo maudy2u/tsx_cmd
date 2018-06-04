@@ -1,14 +1,13 @@
 import { Meteor } from 'meteor/meteor';
 
-import { Logger }     from 'meteor/ostrio:logger';
-import { LoggerFile } from 'meteor/ostrio:loggerfile';
-
 import { TargetSessions } from '../imports/api/targetSessions.js';
 import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
 import { Seriess } from '../imports/api/seriess.js';
 import { Filters } from '../imports/api/filters.js';
 import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
 import { scheduler } from '../imports/api/theProcessors.js';
+
+import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug } from '../imports/api/theLoggers.js';
 
 import {
   tsx_ServerStates,
@@ -78,10 +77,11 @@ function initServerStates() {
     var state = tsx_ServerStates[m];
     try {
       var isDefined = TheSkyXInfos.findOne({name: state });
-      Meteor._debug(state +'='+ isDefined.value);
+      tsxDebug(state, isDefined.value);
+
     } catch (e) {
-        Meteor._debug('Initialized: ' + state);
-        tsx_SetServerState(state, '');
+      tsxWarn('Initialized: ', state);
+      tsx_SetServerState(state, '');
     } finally {
     }
   }
@@ -89,7 +89,7 @@ function initServerStates() {
 
 Meteor.startup(() => {
   // code to run on server at startup
-  Meteor._debug(' ******************');
+  tsxLog(' ******* TSX_CMD ONLINE ******', '');
 
   // *******************************
   // Server restarts and it means no session
@@ -102,14 +102,14 @@ Meteor.startup(() => {
 
   // Clean up the scheduler process collections...
   // Persistence across reboots is not needed at this time.
-  Meteor._debug('Number of Jobs found: ' + jobs.length);
+  tsxDebug('Number of Jobs found: ' + jobs.length);
   for (var i = 0; i < jobs.length; i++) {
     if( typeof jobs[i] != 'undefined') {
       scheduler.remove(jobs[i]._id);
       // jobs[i].remove(function (err, result) {
       //   if (result) {
       //     // Job removed from server.
-      //     Meteor._debug('job removed');
+      //     logCon.info('job removed');
       //   }
       // });
     }
@@ -130,12 +130,12 @@ Meteor.startup(() => {
   var dbPort = TheSkyXInfos.findOne().port();
   var dbMinAlt = TheSkyXInfos.findOne().defaultMinAltitude();
   if( (typeof dbIp != 'undefined') && (typeof dbPort != 'undefined') ) {
-    Meteor._debug('TSX server set to IP: ' + dbIp );
-    Meteor._debug('TSX server set to port: ' + dbPort );
+    tsxLog('TSX server   IP: ',  dbIp );
+    tsxLog('TSX server port: ', dbPort );
 
   };
-  Meteor._debug(' RESTARTED');
-  Meteor._debug(' ******************');
+  tsxLog('STARTED', '');
+  tsxLog(' ******************', '');
 
 
   // *******************************
@@ -155,7 +155,7 @@ Meteor.startup(() => {
       // This will only be called if a
       // 'runScheduler' job is obtained
       setSchedulerState('Running' );
-      // Meteor._debug('Finding');
+      // logCon.info('Finding');
       job.log("Entered the scheduler process",
         {level: 'info'});
 
@@ -168,7 +168,7 @@ Meteor.startup(() => {
         //        && tsx_GetServerStateValue( tsx_ServerStates.imagingSessionId ) != ''
        ) {
         // Find a session
-        Meteor._debug('Seeking target');
+        logCon.info('Seeking target');
 
         // Get the target to shoot
         UpdateStatus( ' Checking Targets...');
@@ -191,7 +191,7 @@ Meteor.startup(() => {
         }
         else {
           if( !isParked ) {
-            Meteor._debug('No valid sessions - parking');
+            logCon.info('No valid sessions - parking');
             var defaultFilter = tsx_GetServerStateValue('defaultFilter');
             var softPark = Boolean(tsx_GetServerStateValue('defaultSoftPark'));
             UpdateStatus( 'Parking...');
@@ -201,7 +201,7 @@ Meteor.startup(() => {
           isParked = true;
           var sleepTime = tsx_GetServerStateValue('defaultSleepTime');
           UpdateStatus( '  No valid target, waiting...');
-          Meteor._debug( ' Waiting...: ' + sleepTime + 'min');
+          logCon.info( ' Waiting...: ' + sleepTime + 'min');
           var timeout = 0;
           var msSleep = Number(sleepTime); // number of seconds
           postProgressTotal(sleepTime);
@@ -219,7 +219,7 @@ Meteor.startup(() => {
           postProgressTotal(0);
           postProgressIncrement( 0 );
           postProgressMessage('Processing');
-          Meteor._debug('Finished sleep');
+          logCon.info('Finished sleep');
         }
       }
 
@@ -241,7 +241,7 @@ Meteor.startup(() => {
       var info = job.data; // Only one email per job
       // This will only be called if a
       // 'runScheduler' job is obtained
-      // Meteor._debug('updateClientData');
+      // logCon.info('updateClientData');
       job.log("Entered updateClientData",
         {level: 'info'});
 
@@ -259,7 +259,7 @@ Meteor.startup(() => {
     function (job, cb) {
       var info = job.data; // Only one email per job
       tsx_SetServerState('tsx_message', info.message );
-      // Meteor._debug('updateProgressMessage');
+      // logCon.info('updateProgressMessage');
       // tsx_Disconnect();
       job.done();
 
@@ -272,7 +272,7 @@ Meteor.startup(() => {
     function (job, cb) {
       var info = job.data; // Only one email per job
       tsx_SetServerState('tsx_progress', info.progress );
-      // Meteor._debug('updateProgressIncrement');
+      // logCon.info('updateProgressIncrement');
       job.done();
 
       // Be sure to invoke the callback
@@ -284,7 +284,7 @@ Meteor.startup(() => {
     function (job, cb) {
       var info = job.data; // Only one email per job
       tsx_SetServerState('tsx_total', info.total );
-      // Meteor._debug('updateProgressTotal');
+      // logCon.info('updateProgressTotal');
       // tsx_Disconnect();
       job.done();
 
@@ -301,7 +301,7 @@ Meteor.startup(() => {
       var schedule = job.data; // Only one email per job
       // This will only be called if a
       // 'runScheduler' job is obtained
-      // Meteor._debug('manageCameraTemp');
+      // logCon.info('manageCameraTemp');
       // job.log("Entered manageCameraTemp",
       //   {level: 'info'});
 
@@ -318,7 +318,7 @@ Meteor.startup(() => {
       var schedule = job.data; // Only one email per job
       // This will only be called if a
       // 'runScheduler' job is obtained
-      Meteor._debug('PostImageProcessUpdate');
+      tsxDebug('PostImageProcessUpdate');
       // job.log("Entered PostImageProcessUpdate",
         // {level: 'info'});
 
@@ -348,7 +348,7 @@ function setSchedulerState( value ) {
 }
 
 export function srvPlayScheduler ( callback ) {
-  Meteor._debug('Scheduler STARTING' );
+  tsxDebug('Scheduler STARTING' );
   callback();
 }
 
@@ -358,21 +358,21 @@ export function srvPauseScheduler() {
   var jid = tsx_GetServerStateValue('currentJob');
   scheduler.getJob(jid, function (err, job) {
     job.pause(function (err, result) {
-      Meteor._debug('scheduler Paused job');
+      tsxDebug('scheduler Paused job');
       if (result) {
         // Status updated
-        Meteor._debug('Result ' + result);
+        tsxDebug('Result ' + result);
       }
       if (err) {
         // Status updated
-        Meteor._debug('Error ' + err);
+        tsxDebug('Error ' + err);
       }
     }); // assumes it is the take series that is being PAUSED
 
    });
 
   setSchedulerState('Pause' );
-  Meteor._debug('Manually PAUSED scheduler');
+  tsxDebug('Manually PAUSED scheduler');
 }
 
 export function srvStopScheduler() {
@@ -385,7 +385,7 @@ export function srvStopScheduler() {
   tsx_SetServerState('currentJob', '');
   UpdateImagingSesionID( '' );
 
-  Meteor._debug('Manually STOPPED scheduler');
+  tsxDebug('Manually STOPPED scheduler');
 }
 
 Meteor.methods({
@@ -400,8 +400,8 @@ Meteor.methods({
    // 4. start/end checks... ???
    // or KISS and one big sequenital function...
    startScheduler() {
-     Meteor._debug('************************');
-     // Meteor._debug('Found scheduler state: ' + getSchedulerState() );
+     logCon.info('************************');
+     // logCon.info('Found scheduler state: ' + getSchedulerState() );
      if(
        // If PAUSED... reset state to Running
        getSchedulerState() == 'Pause'
@@ -415,7 +415,7 @@ Meteor.methods({
      else if(
        getSchedulerState() == 'Running'
      ) {
-       Meteor._debug('Scheduler is alreadying running. Nothing to do.');
+       logCon.info('Scheduler is alreadying running. Nothing to do.');
        return;
      }
      else if(
@@ -424,7 +424,7 @@ Meteor.methods({
 
         // Confirm whether the there is a script running...
         if( !tsx_ServerIsOnline() ) {
-          Meteor._debug('Check TSX... script running');
+          logCon.info('Check TSX... script running');
           UpdateStatus('Check TSX... script running');
           return;
         }
@@ -447,34 +447,34 @@ Meteor.methods({
         // .delay(0);// 60*60*1000)     // Wait an hour before first try
         var jid = job.save();               // Commit it to the server
 
-        // Meteor._debug('Job id: ' + jid);
+        // logCon.info('Job id: ' + jid);
         tsx_SetServerState('currentJob', jid);
-        Meteor._debug('Scheduler Started');
+        logCon.info('Scheduler Started');
         UpdateStatus('Scheduler Started');
         return;
      }
      else {
-       Meteor._debug('Invalid state found for scheduler.');
+       logCon.error('Invalid state found for scheduler.');
      }
    },
 
    pauseScheduler() {
      if( getSchedulerState() != 'Stop') {
-       Meteor._debug('Pausing');
+       tsxDebug('Pausing');
        srvPauseScheduler();
      }
      else {
-       Meteor._debug('Do nothing - not Paused');
+       tsxDebug('Do nothing - not Paused');
      }
    },
 
    stopScheduler() {
      // if( getSchedulerState() != 'Stop' ) {
-       Meteor._debug('Stopping');
+       tsxDebug('Stopping');
        srvStopScheduler();
      // }
      // else {
-       // Meteor._debug('Do nothing - not Stopped');
+       // tsxDebug('Do nothing - not Stopped');
      // }
    },
 
@@ -482,7 +482,7 @@ Meteor.methods({
      var id = TheSkyXInfos.upsert( {name: name }, {
        $set: { value: value }
      })
-     // Meteor._debug('updated: ' +name+':'+value);
+     // tsxDebug('updated: ' +name+':'+value);
    },
 
    updateSeriesIdWith(
@@ -491,10 +491,10 @@ Meteor.methods({
        value
       ) {
 
-     Meteor._debug(' ******************************* ');
-     Meteor._debug(' updateSeriesIdWith: ' + id + ', ' + name + ", " + value);
+     tsxDebug(' ******************************* ');
+     tsxDebug(' updateSeriesIdWith: ' + id + ', ' + name + ", " + value);
      if( name == 'order ') {
-       Meteor._debug('1');
+       tsxDebug('1');
        var res = Seriess.update( {_id: id }, {
          $set:{
            order: value,
@@ -502,7 +502,7 @@ Meteor.methods({
        });
      }
      else if (name == 'exposure' ) {
-       Meteor._debug('2');
+       tsxDebug('2');
        var res = Seriess.update( {_id: id }, {
          $set:{
            exposure: value,
@@ -510,7 +510,7 @@ Meteor.methods({
        });
      }
      else if (name == 'frame') {
-       Meteor._debug('3');
+       tsxDebug('3');
        var res = Seriess.update( {_id: id }, {
          $set:{
            frame: value,
@@ -518,7 +518,7 @@ Meteor.methods({
        });
      }
      else if (name=='filter') {
-       Meteor._debug('4');
+       tsxDebug('4');
        var res = Seriess.update( {_id: id }, {
          $set:{
            filter: value,
@@ -526,7 +526,7 @@ Meteor.methods({
        });
      }
      else if (name=='repeat') {
-       Meteor._debug('5');
+       tsxDebug('5');
        var res = Seriess.update( {_id: id }, {
          $set:{
            repeat: value,
@@ -534,7 +534,7 @@ Meteor.methods({
        });
      }
      else if (name=='binning') {
-       Meteor._debug('6');
+       tsxDebug('6');
        var res = Seriess.update( {_id: id }, {
          $set:{
            binning: value,
