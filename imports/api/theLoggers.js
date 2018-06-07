@@ -25,7 +25,7 @@ const filters = {
 };
 
 export function tsxErr( msg, data ) {
-  if( typeof data === 'undefined' ) {
+  if( typeof data === 'undefined' || data == null ) {
     data = '';
   }
   logCon.error( msg, data );
@@ -34,7 +34,7 @@ export function tsxErr( msg, data ) {
 }
 
 export function tsxDebug( msg, data ) {
-  if( typeof data === 'undefined' ) {
+  if( typeof data === 'undefined' || data == null ) {
     data = '';
   }
   logCon.debug( msg, data );
@@ -42,7 +42,7 @@ export function tsxDebug( msg, data ) {
   // logDB.debug( msg,  data );
 }
 export function tsxInfo( msg, data ) {
-  if( typeof data === 'undefined' ) {
+  if( typeof data === 'undefined' || data == null ) {
     data = '';
   }
   logCon.info( msg, data );
@@ -51,7 +51,7 @@ export function tsxInfo( msg, data ) {
 }
 
 export function tsxWarn( msg, data ) {
-  if( typeof data === 'undefined' ) {
+  if( typeof data === 'undefined' || data == null ) {
     data = '';
   }
   logCon.warn( msg, data );
@@ -60,11 +60,11 @@ export function tsxWarn( msg, data ) {
 }
 
 export function tsxLog( msg, data ) {
-  if( typeof data === 'undefined' ) {
+  if( typeof data === 'undefined' || data == null ) {
     data = '';
   }
   logCon.log( msg, data );
-  logSession.log( msg,  data );
+  logSession.log( msg, data );
   logDB.log( msg, { data: data } );
 }
 
@@ -142,11 +142,14 @@ function fileNameDate( today ) {
   // path: '~/tsx_cmd_logs/', // Use absolute storage path
 
   format(time, level, message, data, userId) {
+    var msgData= ((typeof data === 'undefined' || data == null) ? '' : (' = ' + data));
     return (
       (Meteor.isServer) ? '[SERVER]' : "[CLIENT]")
       + '|' +(formatDate( time )
       + '|[' + level + ']|'
-      + message + ((typeof data === 'undefined') ? '' : (' = ' + data))) + '\r\n';
+      + message
+      + msgData + '\r\n'
+    )
   }
 })).enable( filters );
 
