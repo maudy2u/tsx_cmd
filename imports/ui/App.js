@@ -107,7 +107,7 @@ class App extends Component {
   // *******************************
   //
   componentDidMount() {
-    if( typeof this.props == 'undefined' ) {
+    if( typeof this.props.tsxIP == 'undefined' || typeof this.props.tsxPort == 'undefined' ) {
       return;
     }
 
@@ -128,6 +128,7 @@ class App extends Component {
         ip: nextProps.tsxIP.value,
       });
     }
+
     if( typeof nextProps.tsxPort.value != 'undefined') {
       this.setState({
         port: nextProps.tsxPort.value,
