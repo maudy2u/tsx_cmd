@@ -133,13 +133,20 @@ function fileNameDate( today ) {
 })).enable( filters );
 
 // Initialize LoggerFile:
+// var pathLog = Npm.require('path');
+// var rootPathLog = pathLog.resolve('.');
+// var srcPath = rootPathLog.split(pathLog.sep + '.meteor')[0];
+// // var c = Meteor.absolutePath;
+// // tsxDebug('Root: ' + src);
+// srcPath = srcPath +'/server/logs/';
+
 (new LoggerFile(logSession, {
   collectionName: 'AppLogsSession',
   fileNameFormat(time) {
     // Create log so that the name match the times for the "night" session
     return fileNameDate(time) + "_tsx_cmd.log";
   },
-  // path: '~/tsx_cmd_logs/', // Use absolute storage path
+  path: Meteor.absolutePath + '/logs/', // srcPath, //'~/tsx_cmd_logs/', // Use absolute storage path
 
   format(time, level, message, data, userId) {
     var msgData= ((typeof data === 'undefined' || data == null) ? '' : (' = ' + data));
