@@ -19,6 +19,7 @@ class TargetSessionMenu extends Component {
     newTarget: {
       _id:'',
     },
+    targetList: '',
   }
 
   handleAddModalOpen = () => this.setState({ addModalOpen: true })
@@ -28,6 +29,19 @@ class TargetSessionMenu extends Component {
 //  show = size => () => this.setState({ size, open: true })
   show = () => this.setState({ open: true })
   close = () => this.setState({ open: false })
+
+
+  componentWillReceiveProps(nextProps) {
+
+    // used to force a reload.... must be better way
+    this.setState({
+      targetList: nextProps.targets,
+      // targetSessionId: nextProps.tsxInfo.find(function(element) {
+      //   return element.name == 'imagingSessionId';
+      // }).value,
+    });
+  }
+
 
   //{this.testMeteorMethod.bind(this)}
   connectTsxMeteorMethod() {
@@ -55,7 +69,7 @@ class TargetSessionMenu extends Component {
   }
 
   chkTestData() {
-    var targets = this.props.targets;
+    var target1 = this.state.targetList;
     console.log('test');
     // on the client
     Meteor.call("loadTestDataAllTakeSeriesTemplates", function (error) {
@@ -95,11 +109,12 @@ class TargetSessionMenu extends Component {
 #todo Need to work on the loading of the defaults properly
 */
         // coolingTemp: TheSkyXInfos.findOne({name: 'defaultCoolTemp'}),
-        clsFliter: '',
-        focusFliter: '',
+        clsFilter: TheSkyXInfos.findOne({name: 'defaultFilter'}).value,
+        focusFilter: TheSkyXInfos.findOne({name: 'defaultFilter'}).value,
         foccusSamples: '',
         focusBin: '',
         focusTarget: '',
+        focusExposure: TheSkyXInfos.findOne({name: 'defaultFocusExposure'}).value,
         guideExposure: '',
         guideDelay: '',
         startTime: TheSkyXInfos.findOne({name: 'defaultStartTime'}).value,
@@ -123,6 +138,31 @@ class TargetSessionMenu extends Component {
     this.setState({addModalOpen: true });
 
   }
+
+  renderTargets() {
+
+    var list = {};
+    if( typeof this.props.targets != 'undefined' ) {
+      list = this.state.targetList;
+    }
+
+    return (
+      this.props.targets.map( (target)=>{
+        return <Target key={target._id} target={target} />
+      })
+    )
+  }
+
+  renderTargets( container ) {
+    // this.props.template.series.. this is a series ID
+    // does not work:       this.props.template.series.map({sort: {order:1}}, (definedSeries)=>{
+    return (
+      this.props.targets.map((target)=>{
+        return <Target key={target._id} target={target} />
+      })
+    )
+  }
+
 
   render() {
 
@@ -153,9 +193,7 @@ class TargetSessionMenu extends Component {
           </Modal>
           <Segment>
           <Item.Group divided unstackable>
-            {this.props.targets.map( (target)=>{
-              return <Target key={target._id} target={target} />
-            })}
+            {this.renderTargets(this.state.targetList)}
         </Item.Group>
       </Segment>
       </div>
@@ -164,6 +202,6 @@ class TargetSessionMenu extends Component {
 }
 export default withTracker(() => {
     return {
-      targets: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
+      targets: TargetSessions.find({}, { sort: { enabledActive: -1, targetFindName: 1, } }).fetch(),
   };
 })(TargetSessionMenu);

@@ -54,6 +54,7 @@ class DefaultSettings extends Component {
     defaultPriority: 9,
     defaultSleepTime: 5,
     defaultDithering: 1,
+    defaultFilter: '',
     currentStage: '',
     isTwilightEnabled: true,
     isFocus3Enabled: false,
@@ -198,6 +199,10 @@ class DefaultSettings extends Component {
       defaultCLSEnabled: nextProps.tsxInfo.find(function(element) {
         return element.name == 'defaultCLSEnabled';
       }).value,
+      defaultFilter: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultFilter';
+      }).value,
+
     });
 
   }
@@ -275,7 +280,20 @@ class DefaultSettings extends Component {
     this.saveDefaultState('imagingPixelSize');
     this.saveDefaultState('defaultFocusExposure');
     this.saveDefaultState('defaultCLSEnabled');
+    this.saveDefaultState('defaultFilter');
 
+  }
+
+  getDropDownFilters() {
+
+    var filterArray = [];
+    for (var i = 0; i < this.props.filters.length; i++) {
+      filterArray.push({
+        key: this.props.filters[i]._id,
+        text: this.props.filters[i].name,
+        value: this.props.filters[i].name });
+    }
+    return filterArray;
   }
 
   // *******************************
@@ -288,6 +306,7 @@ class DefaultSettings extends Component {
       // icons: time,
       // minDate: new Date(),
     };
+    var filters = this.getDropDownFilters();
 
     // const handleToggle = () => this.handleToggle;
 
@@ -393,6 +412,17 @@ class DefaultSettings extends Component {
             />
           </Form.Group>
           <Form.Group>
+            <Form.Field control={Dropdown}
+              fluid
+              label='Default Filter'
+              name='defaultFilter'
+              options={filters}
+              placeholder='Used CLS and Focusing'
+              text={this.state.defaultFilter}
+              onChange={this.handleChange}
+            />
+          </Form.Group>
+          <Form.Group>
             <Form.Input
               label='Dither after X images (0 disables): '
               name='defaultDithering'
@@ -423,13 +453,13 @@ class DefaultSettings extends Component {
             />
           </Form.Group>
           <Form.Group>
-            <Form.Input
+            {/* <Form.Input
               label='Cooling Temperature: '
               name='defaultCoolTemp'
               placeholder='-20'
               value={this.state.defaultCoolTemp}
               onChange={this.handleChangeAndSave}
-            />
+            /> */}
             <Form.Input
               label='Time to sleep when no target '
               name='defaultSleepTime'

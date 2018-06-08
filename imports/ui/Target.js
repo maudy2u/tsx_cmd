@@ -109,6 +109,10 @@ class Target extends Component {
       target_id: prop._id,
     });
 
+    // it is possible for a new target to not have a report
+    if( typeof report == 'undefined' ) {
+      return ;
+    }
     this.setState({
       ra: report.RA,
       dec: report.DEC,

@@ -32,7 +32,7 @@ class TargetEditor extends Component {
     coolingTemp: -19,
     coolingTime: 5,
     clsFilter: '',
-    focusFilter: 'Filter',
+    focusFilter: '',
     foccusSamples: '',
     focusBin: '',
     focusTarget: '',
@@ -67,7 +67,7 @@ class TargetEditor extends Component {
   handlePriorityChange = ( value ) => this.setState({priority: value.value });
   handleCoolingTempChange = ( value ) => this.setState({coolingTemp: value.value });
   handleCoolingTimeChange = ( value ) => this.setState({coolingTime: value.value });
-  handleFocusTempChange = ( value ) => this.setState({tempChg: value.value });
+  // handleFocusTempChange = ( value ) => this.setState({tempChg: value.value });
   handleMinAltChange = ( value ) => this.setState({minAlt: value.value });
   onStopTimeChange = (value) => this.setState({testDate: value});
   onChangeChecked() {
@@ -129,13 +129,13 @@ class TargetEditor extends Component {
       foccusSamples: this.props.target.foccusSamples,
       focusBin: this.props.target.focusBin,
       focusTarget: this.props.target.focusTarget,
-      focusExposure: Number(this.props.target.focusExposure),
+      focusExposure: this.props.target.focusExposure,
       guideExposure: Number(this.props.target.guideExposure),
       guideDelay: Number(this.props.target.guideDelay),
       startTime: this.props.target.startTime,
       stopTime: this.props.target.stopTime,
       priority: Number(this.props.target.priority),
-      tempChg: Number(this.props.target.tempChg),
+      tempChg: this.props.target.tempChg,
       currentAlt: Number(this.props.target.currentAlt),
       minAlt: Number(this.props.target.minAlt),
       report: '',
@@ -184,13 +184,13 @@ class TargetEditor extends Component {
         foccusSamples: this.state.foccusSamples,
         focusBin: this.state.focusBin,
         focusTarget: this.state.focusTarget,
-        focusExposure: Number(this.state.focusExposure),
+        focusExposure: this.state.focusExposure,
         guideExposure: this.state.guideExposure,
         guideDelay: this.state.guideDelay,
         startTime: this.state.startTime,
         stopTime: this.state.stopTime,
         priority: this.state.priority,
-        tempChg: Number(this.state.tempChg),
+        tempChg: this.state.tempChg,
         currentAlt: this.state.currentAlt,
         minAlt: this.state.minAlt,
         report: '',
@@ -288,6 +288,10 @@ class TargetEditor extends Component {
     var targetAngle = `${this.state.angle}`;
     var targetDesc = `${this.state.description}`;
 
+    var focFilter= `${this.state.focusFilter}`;
+    var focTemp= `${this.state.tempChg}`;
+    var focExp = `${this.state.focusExposure}`
+
     // *******************************
     // this is not the render return... scroll down...
     const panes = [
@@ -356,36 +360,36 @@ class TargetEditor extends Component {
       // *******************************
       // Details for the Target session
       // *******************************
-      { menuItem: 'Details', render: () =>
-      <Tab.Pane>
-        <Segment>
-          <h3 className="ui header">Details</h3>
-          <Form.Group widths='equal'>
-            <Form.Input
-              label='Angle'
-              name='angle'
-              placeholder='Angle'
-              value={this.state.angle}
-              onChange={this.handleChange}/>
-              <Button icon='upload' onClick={this.getImageLinkAngle.bind(this)}/>
-              <Button onClick={this.getImageLinkAngle.bind(this)}>FromImageLink</Button>
-          </Form.Group>
-        </Segment>
-        <Segment>
-          <Form.Group widths='equal'>
-          </Form.Group>
-          <Form.Group widths='equal'>
-            <Form.Input
-              label='Image to load'
-              name='targetImage'
-              placeholder='Filename to load on server'
-              value={this.state.targetImage}
-              onChange={this.handleChange}
-            />
-            <Button onClick={this.findTarget.bind(this)}>Solve</Button>
-        </Form.Group>
-        </Segment>
-      </Tab.Pane> },
+      // { menuItem: 'Details', render: () =>
+      // <Tab.Pane>
+      //   <Segment>
+      //     <h3 className="ui header">Details</h3>
+      //     <Form.Group widths='equal'>
+      //       <Form.Input
+      //         label='Angle'
+      //         name='angle'
+      //         placeholder='Angle'
+      //         value={this.state.angle}
+      //         onChange={this.handleChange}/>
+      //         <Button icon='upload' onClick={this.getImageLinkAngle.bind(this)}/>
+      //         <Button onClick={this.getImageLinkAngle.bind(this)}>FromImageLink</Button>
+      //     </Form.Group>
+      //   </Segment>
+      //   <Segment>
+      //     <Form.Group widths='equal'>
+      //     </Form.Group>
+      //     <Form.Group widths='equal'>
+      //       <Form.Input
+      //         label='Image to load'
+      //         name='targetImage'
+      //         placeholder='Filename to load on server'
+      //         value={this.state.targetImage}
+      //         onChange={this.handleChange}
+      //       />
+      //       <Button onClick={this.findTarget.bind(this)}>Solve</Button>
+      //   </Form.Group>
+      //   </Segment>
+      // </Tab.Pane> },
 
       { menuItem: 'Constraints', render: () =>
       <Tab.Pane>
@@ -468,7 +472,7 @@ class TargetEditor extends Component {
                   name='focusFilter'
                   options={filters}
                   placeholder='Filter for focusing'
-                  text={this.state.focusFilter}
+                  text={focFilter}
                   onChange={this.handleChange}
                 />
                 <Form.Input
@@ -493,7 +497,7 @@ class TargetEditor extends Component {
                   name='tempChg'
                   placeholder='e.g. 0.7'
                   value={this.state.tempChg}
-                  onChange={this.handleFocusTempChange}
+                  onChange={this.handleChange}
                 />
 
               </Segment>
@@ -501,36 +505,36 @@ class TargetEditor extends Component {
 //
 // THis is the imaging constraints... currently only the temp setting
 //
-      { menuItem: 'Imaging', render: () =>
-      <Tab.Pane>
-        <h3 className="ui header">Imaging Series</h3>
-        <Segment>
-          <h4 className="ui header">Cooling temp: {this.state.coolingTemp}</h4>
-          <ReactSimpleRange
-            label
-            step={1}
-            min={-30}
-            max={0}
-            value={this.state.coolingTemp}
-            sliderSize={12}
-            thumbSize={18}
-            onChange={this.handleCoolingTempChange}
-          />
-        </Segment>
-        <Segment>
-          <h4 className="ui header">Cooling Time (minutes): {this.state.coolingTime}</h4>
-          <ReactSimpleRange
-            label
-            step={1}
-            min={0}
-            max={19}
-            value={this.state.coolingTime}
-            sliderSize={12}
-            thumbSize={18}
-            onChange={this.handleCoolingTimeChange}
-          />
-        </Segment>
-      </Tab.Pane> },
+      // { menuItem: 'Imaging', render: () =>
+      // <Tab.Pane>
+      //   <h3 className="ui header">Imaging Series</h3>
+      //   <Segment>
+      //     <h4 className="ui header">Cooling temp: {this.state.coolingTemp}</h4>
+      //     <ReactSimpleRange
+      //       label
+      //       step={1}
+      //       min={-30}
+      //       max={0}
+      //       value={this.state.coolingTemp}
+      //       sliderSize={12}
+      //       thumbSize={18}
+      //       onChange={this.handleCoolingTempChange}
+      //     />
+      //   </Segment>
+      //   <Segment>
+      //     <h4 className="ui header">Cooling Time (minutes): {this.state.coolingTime}</h4>
+      //     <ReactSimpleRange
+      //       label
+      //       step={1}
+      //       min={0}
+      //       max={19}
+      //       value={this.state.coolingTime}
+      //       sliderSize={12}
+      //       thumbSize={18}
+      //       onChange={this.handleCoolingTimeChange}
+      //     />
+      //   </Segment>
+      // </Tab.Pane> },
     ]
 // *******************************
 // THIS IS THE ACTUAL RENDERING...
