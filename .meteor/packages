@@ -35,3 +35,4 @@ ostrio:logger
 ostrio:loggerfile
 ostrio:loggerconsole
 ostrio:loggermongo
+ostrio:meteor-root
