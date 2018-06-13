@@ -321,6 +321,17 @@ class DefaultSettings extends Component {
         <Segment>
           <h3 className="ui header">Defaults</h3>
           <Form.Group>
+            <Form.Field control={Dropdown}
+              fluid
+              label='Default Filter'
+              name='defaultFilter'
+              options={filters}
+              placeholder='Used CLS and Focusing'
+              text={this.state.defaultFilter}
+              onChange={this.handleChange}
+            />
+          </Form.Group>
+          <Form.Group>
             <Form.Checkbox
               label='Meridian Flip Enabled '
               name='defaultMeridianFlip'
@@ -408,17 +419,6 @@ class DefaultSettings extends Component {
               name='defaultFocusExposure'
               placeholder='Enter seconds'
               value={this.state.defaultFocusExposure}
-              onChange={this.handleChange}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Field control={Dropdown}
-              fluid
-              label='Default Filter'
-              name='defaultFilter'
-              options={filters}
-              placeholder='Used CLS and Focusing'
-              text={this.state.defaultFilter}
               onChange={this.handleChange}
             />
           </Form.Group>

@@ -192,10 +192,10 @@ export function tsx_MntPark(defaultFilter, softPark) {
 
   if( softPark ) {
     // if true just set filter and turn off tracking
-    tsxLog(' Soft park... ');
+    UpdateStatus(' Soft Parking... ');
   }
   else {
-    tsxLog(' Full Park... ');
+    UpdateStatus(' Full Parking... ');
   }
   var cmd = shell.cat(tsx_cmd('SkyX_JS_ParkMount'));
   cmd = cmd.replace("$000", slot ); // set filter
@@ -204,8 +204,15 @@ export function tsx_MntPark(defaultFilter, softPark) {
   var Out;
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        tsx_is_waiting = false;
+        if( typeof tsx_return != '' || tsx_return != '' ) {
+          Out = tsx_return;
+          UpdateStatus( ' !!! Parking err: ' + tsx_return );
+}
+        else {
+          UpdateStatus( ' Parked' );
+        }
 
+        tsx_is_waiting = false;
       }
     )
   );
@@ -955,10 +962,11 @@ function checkTargetConditions(target) {
 		return true;
 	}
 
-  // var isPriority = isPriorityTarget( target );
-  // if( !isPriority ) {
-  //   return true;
-  // }
+  // confirm same target...
+  var newTarget = getValidTargetSession(); // no return
+  if( newTarget.targetFindName != target.targetFindName ) {
+    return true;
+  }
 
   var minAlt = tsx_reachedMinAlt( target );
   if( minAlt ) {
@@ -1473,6 +1481,13 @@ export function processTargetTakeSeries( target ) {
       tsxLog('*** FAILED to process seriess');
     }
   }
+
+  UpdateStatus( " Target stopped: "+ target);
+  tsx_AbortGuider();
+  var filter = tsx_GetServerStateValue('defaultFilter');
+  var park = tsx_GetServerStateValue('defaultSoftPark');
+  var parked = tsx_MntPark(filter, park ); // use default filter
+  return result;
 }
 
 // **************************************************************
@@ -1889,10 +1904,8 @@ Use this to set the last focus
   },
 
   park( ) {
-    UpdateStatus( ' Parking...' );
     var filter = tsx_GetServerStateValue('defaultFilter');
     var result = tsx_MntPark(filter, false ); // use default filter
-    UpdateStatus( ' Parked' );
     return result;
   }
 
