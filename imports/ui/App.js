@@ -492,29 +492,31 @@ class App extends Component {
           <h1>Image Sessions</h1>
           <div>
             <Segment.Group>
+              <Segment>
+                <Label onClick={this.modalEnterIpOpen.bind(this)}>TSX ip:
+                  <Label.Detail>
+                    {IP}
+                  </Label.Detail>
+                </Label>
+                 {this.renderIPEditor()}
+                <Label onClick={this.modalEnterPortOpen.bind(this)}>
+                  TSX port:
+                  <Label.Detail>
+                    {PORT}
+                  </Label.Detail>
+                </Label>
+                {this.renderPortEditor()}
+              </Segment>
             <Segment>
               <Button.Group size='small'>
                 <Button icon='refresh' onClick={this.connectToTSX.bind(this)}/>
+                <Button name='showMonitor' icon='dashboard' onClick={this.handleToggle.bind(this)}/>
               </Button.Group>
               <Button.Group basic size='small' floated='right'>
                 <Button icon='car' onClick={this.park.bind(this)}/>
               </Button.Group>
-              <Label onClick={this.modalEnterIpOpen.bind(this)}>TSX ip:
-                <Label.Detail>
-                  {IP}
-                </Label.Detail>
-              </Label>
-               {this.renderIPEditor()}
-              <Label onClick={this.modalEnterPortOpen.bind(this)}>
-                TSX port:
-                <Label.Detail>
-                  {PORT}
-                </Label.Detail>
-              </Label>
-              {this.renderPortEditor()}
             </Segment>
             <Segment>
-              <Button name='showMonitor' icon='dashboard' onClick={this.handleToggle.bind(this)}/>
               <Label>Status: <Label.Detail>{this.state.currentStage}</Label.Detail></Label>
             </Segment>
             {/* { this.tsxConnectionFailed() } */}
