@@ -89,7 +89,9 @@ function initServerStates() {
 
 Meteor.startup(() => {
   // code to run on server at startup
-  tsxLog(' ******* TSX_CMD ONLINE ******', '');
+  tsxLog(' ******************', '');
+  tsxLog(' STARTED', '');
+  tsxLog(' ******************', '');
 
   // *******************************
   // Server restarts and it means no session
@@ -118,7 +120,7 @@ Meteor.startup(() => {
   initServerStates();
 
   // Initialze the server on startup
-  UpdateStatus( 'idle');
+  UpdateStatus( ' idle');
   tsx_UpdateDevice('mount', 'Not connected ', '' );
   tsx_UpdateDevice('camera', 'Not connected ', '' );
   tsx_UpdateDevice('guider', 'Not connected ', '' );
@@ -130,12 +132,11 @@ Meteor.startup(() => {
   var dbPort = TheSkyXInfos.findOne().port();
   var dbMinAlt = TheSkyXInfos.findOne().defaultMinAltitude();
   if( (typeof dbIp != 'undefined') && (typeof dbPort != 'undefined') ) {
-    tsxLog('TSX server   IP: ',  dbIp );
-    tsxLog('TSX server port: ', dbPort );
+    tsxLog(' TSX server   IP: ',  dbIp );
+    tsxLog(' TSX server port: ', dbPort );
 
   };
-  tsxLog('STARTED', '');
-  tsxLog(' ******************', '');
+  tsxLog(' ******* TSX_CMD ONLINE ******', '');
 
 
   // *******************************
@@ -168,8 +169,6 @@ Meteor.startup(() => {
         //        && tsx_GetServerStateValue( tsx_ServerStates.imagingSessionId ) != ''
        ) {
         // Find a session
-        tsxLog('Seeking target');
-
         // Get the target to shoot
         UpdateStatus( ' Checking Targets...');
         var target = getValidTargetSession(); // no return
@@ -191,17 +190,15 @@ Meteor.startup(() => {
         }
         else {
           if( !isParked ) {
-            tsxLog('No valid sessions - parking');
+            UpdateStatus(' No valid sessions - parking...');
             var defaultFilter = tsx_GetServerStateValue('defaultFilter');
             var softPark = Boolean(tsx_GetServerStateValue('defaultSoftPark'));
-            UpdateStatus( 'Parking...');
             tsx_AbortGuider();
             tsx_MntPark(defaultFilter, softPark);
           }
           isParked = true;
           var sleepTime = tsx_GetServerStateValue('defaultSleepTime');
-          UpdateStatus( '  No valid target, waiting...');
-          tsxLog( 'Waiting...: ' + sleepTime + 'min');
+          UpdateStatus( ' No valid target, waiting... '+ sleepTime + 'min');
           var timeout = 0;
           var msSleep = Number(sleepTime); // number of seconds
           postProgressTotal(sleepTime);
@@ -218,8 +215,8 @@ Meteor.startup(() => {
           }
           postProgressTotal(0);
           postProgressIncrement( 0 );
-          postProgressMessage('Processing');
-          tsxLog('Finished sleep');
+          postProgressMessage(' Processing');
+          UpdateStatus(' Finished sleep. Waking Up...');
         }
       }
 
@@ -449,8 +446,7 @@ Meteor.methods({
 
         // tsxLog('Job id: ' + jid);
         tsx_SetServerState('currentJob', jid);
-        tsxLog('Scheduler Started');
-        UpdateStatus('Scheduler Started');
+        UpdateStatus(' Scheduler Started');
         return;
      }
      else {

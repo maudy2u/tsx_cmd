@@ -4,7 +4,7 @@ import { Mongo } from 'meteor/mongo';
 export const TheSkyXInfos = new Mongo.Collection('theSkyXInfos');
 
 if (Meteor.isServer) {
-  console.log('In server');
+  // console.log('In server');
   // This code only runs on the server
   // Meteor.publish('tsx.ip', function tsxIpPublication() {
   //   var ip = TheSkyXInfos.findOne().ip().text;

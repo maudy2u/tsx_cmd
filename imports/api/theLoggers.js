@@ -75,7 +75,7 @@ function formatDate( today ) {
   var HH = today.getHours();
   var MM = today.getMinutes();
   var SS = today.getSeconds();
-  var mm = today.getMonth();
+  var mm = today.getMonth()+1; // month is zero based
   var dd = today.getDate();
   var yyyy = today.getFullYear();
 
@@ -93,7 +93,7 @@ function fileNameDate( today ) {
   var HH = today.getHours();
   var MM = today.getMinutes();
   var SS = today.getSeconds();
-  var mm = today.getMonth();
+  var mm = today.getMonth()+1; // month is zero based
   var dd = today.getDate();
   var yyyy = today.getFullYear();
 
@@ -124,7 +124,7 @@ function fileNameDate( today ) {
 (new LoggerConsole(logCon, {
   collectionName: 'AppLogsCon',
   format(opts) {
-    var msgData= ((typeof opts.data === 'undefined') ? '' : (' = ' + opts.data));
+    var msgData= ((typeof opts.data === 'undefined' || opts.data === null || opts.data === '') ? '' : (' = ' + opts.data));
     return ((Meteor.isServer) ? '[SERVER]' : "[CLIENT]")
     +'|'+(formatDate( opts.time ) + '|[' + opts.level + ']|'
     + opts.message
@@ -149,7 +149,7 @@ function fileNameDate( today ) {
   path: Meteor.absolutePath + '/logs/', // srcPath, //'~/tsx_cmd_logs/', // Use absolute storage path
 
   format(time, level, message, data, userId) {
-    var msgData= ((typeof data === 'undefined' || data == null) ? '' : (' = ' + data));
+    var msgData= ((typeof data === 'undefined' || data === null || data === '' ) ? '' : (' = ' + data));
     return (
       (Meteor.isServer) ? '[SERVER]' : "[CLIENT]")
       + '|' +(formatDate( time )

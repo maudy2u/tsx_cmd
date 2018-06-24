@@ -428,7 +428,7 @@ class Monitor extends Component {
         {/* </Segment>
            {/* <Segment> */}
           {/* <Form.Group widths='equal'> */}
-            <Dropdown compact
+            {/* <Dropdown compact
                label='Action '
                name='tsx_action'
                options={tsx_actions}
@@ -436,7 +436,7 @@ class Monitor extends Component {
                text={this.state.tsx_actions}
                onChange={this.handleTsx_actionsChange}
             />
-            <Button icon='toggle right' onClick={this.dropDownAction.bind(this)}/>
+            <Button icon='toggle right' onClick={this.dropDownAction.bind(this)}/> */}
          {/* </Form.Group> */}
          {/* <Button.Group icon floated='right'>
          </Button.Group> */}
