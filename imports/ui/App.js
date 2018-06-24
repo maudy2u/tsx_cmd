@@ -473,6 +473,78 @@ class App extends Component {
     )
   };
 
+  addNewTemplate() {
+    const id = TakeSeriesTemplates.insert(
+      {
+        name: "New Take Series",
+        description: "EDIT ME",
+        processSeries: 'across series',
+        repeatSeries: false,
+        createdAt: new Date(),
+        series: [],
+      }
+    )
+  }
+
+  addEntry() {
+    console.log('In the TargetSessionMenu addEntry');
+
+    // get the id for the new object
+    var newSession = TargetSessions.insert(
+      {
+        name: 'New Target',
+        targetFindName: 'New Target',
+        targetImage: '',
+        description: '',
+        enabledActive: false,
+        series: {
+        },
+        progress: [
+//            {_id: seriesId, taken:0},
+        ],
+        report_d: '',
+        ra: '',
+        dec: '',
+        angle: '',
+        scale: '',
+        coolingTemp: '',
+
+/*
+*******************************
+#todo Need to work on the loading of the defaults properly
+*/
+        // coolingTemp: TheSkyXInfos.findOne({name: 'defaultCoolTemp'}),
+        clsFilter: TheSkyXInfos.findOne({name: 'defaultFilter'}).value,
+        focusFilter: TheSkyXInfos.findOne({name: 'defaultFilter'}).value,
+        foccusSamples: '',
+        focusBin: '',
+        focusTarget: '',
+        focusExposure: TheSkyXInfos.findOne({name: 'defaultFocusExposure'}).value,
+        guideExposure: '',
+        guideDelay: '',
+        startTime: TheSkyXInfos.findOne({name: 'defaultStartTime'}).value,
+        stopTime: TheSkyXInfos.findOne({name: 'defaultStopTime'}).value,
+        priority: TheSkyXInfos.findOne({name: 'defaultPriority'}).value,
+        tempChg: TheSkyXInfos.findOne({name: 'defaultFocusTempDiff'}).value,
+        currentAlt: 0, // set to zero for now.
+        minAlt: TheSkyXInfos.findOne({name: 'defaultMinAlt'}).value,
+        completed: false,
+        createdAt: new Date(),
+        enableMeridianFlip: TheSkyXInfos.findOne({name: 'defaultMeridianFlip'}).value,
+        // startTime: '',
+        // stopTime: '',
+
+      }
+    );
+
+    this.setState({newTarget:
+      TargetSessions.findOne({_id: newSession })
+    });
+    this.setState({addModalOpen: true });
+
+  }
+
+
   render() {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
     */
@@ -507,11 +579,19 @@ class App extends Component {
                 </Label>
                 {this.renderPortEditor()}
               </Segment>
+              {/* <Segment raised> */}
             <Segment>
               <Button.Group size='small'>
                 <Button icon='refresh' onClick={this.connectToTSX.bind(this)}/>
                 <Button name='showMonitor' icon='dashboard' onClick={this.handleToggle.bind(this)}/>
               </Button.Group>
+              {/* <Button.Group size='small'> */}
+                <Button onClick={this.addEntry.bind(this)}>Add Target</Button>
+                <Button onClick={this.addNewTemplate.bind(this)}>Add Series</Button>
+              {/* </Button.Group> */}
+              {/* <Button icon='add' onClick={this.addEntry.bind(this)}/>
+              <Button icon='add' onClick={this.addNewTemplate.bind(this)}/> */}
+
               <Button.Group basic size='small' floated='right'>
                 <Button icon='car' onClick={this.park.bind(this)}/>
               </Button.Group>

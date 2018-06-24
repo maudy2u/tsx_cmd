@@ -12,19 +12,6 @@ class TakeSeriesTemplateMenu extends Component {
 
   newTemplate = '';
 
-  addNewTemplate() {
-    const id = TakeSeriesTemplates.insert(
-      {
-        name: "New Take Series",
-        description: "EDIT ME",
-        processSeries: 'across series',
-        repeatSeries: false,
-        createdAt: new Date(),
-        series: [],
-      }
-    )
-  }
-
   //{this.testMeteorMethod.bind(this)}
   loadTestDataMeteorMethod() {
 
@@ -51,9 +38,6 @@ class TakeSeriesTemplateMenu extends Component {
     return (
       <div>
         <Item.Group divided>
-        <Button.Group basic size='small'>
-          <Button icon='add' onClick={this.addNewTemplate.bind(this)}/>
-        </Button.Group>
         {/* <Button.Group basic size='small'>
           <Button icon='settings' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
           <Button icon='find' onClick={this.chkTestData.bind(this)}/>

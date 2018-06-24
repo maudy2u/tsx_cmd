@@ -120,7 +120,6 @@ Meteor.startup(() => {
   initServerStates();
 
   // Initialze the server on startup
-  UpdateStatus( ' idle');
   tsx_UpdateDevice('mount', 'Not connected ', '' );
   tsx_UpdateDevice('camera', 'Not connected ', '' );
   tsx_UpdateDevice('guider', 'Not connected ', '' );
@@ -333,7 +332,9 @@ Meteor.startup(() => {
   //   Start processes
   // *******************************
   // start server for scheduler and wait
+  UpdateStatus( ' idle');
   return scheduler.startJobServer();
+
 });
 
 function getSchedulerState() {
