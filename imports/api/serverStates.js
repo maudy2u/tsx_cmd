@@ -199,6 +199,18 @@ export function UpdateStatus( status ) {
   tsxLog( status );
 };
 
+// **************************************************************
+export function UpdateStatusErr( status ) {
+  tsx_SetServerState( 'currentStage', status );
+  tsxErr( status );
+};
+
+// **************************************************************
+export function UpdateStatusWarn( status ) {
+  tsx_SetServerState( 'currentStage', status );
+  tsxWarn( status );
+};
+
 export function UpdateImagingSesionID( t_id ) {
   tsx_SetServerState( 'imagingSessionId', t_id );
 };

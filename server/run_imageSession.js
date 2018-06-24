@@ -24,6 +24,8 @@ import {
   tsx_GetServerState,
   tsx_GetServerStateValue,
   UpdateStatus,
+  UpdateStatusWarn,
+  UpdateStatusErr,
   postProgressTotal,
   postStatus,
   UpdateImagingSesionID,
@@ -217,12 +219,14 @@ export function tsx_MntPark(defaultFilter, softPark) {
   var Out;
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        if( tsx_return == 'No error. Error = 0.' ) {
-          UpdateStatus( ' Parked' );
+        var result = tsx_return.split('|')[0].trim();
+
+        if( result == 'Parked' || result == 'Soft Parked' ) {
+          UpdateStatus( ' ' + result );
         }
         else {
-          Out = tsx_return;
-          UpdateStatus( ' !!! Parking err: ' + tsx_return );
+          Out = result;
+          UpdateStatus( ' !!! Parking err: ' + result );
         }
 
         tsx_is_waiting = false;
@@ -466,7 +470,7 @@ function tsx_CLS_target( target, filter ) {
       var result = tsx_return.split('|')[0].trim();
       if( result != 'Success') {
         tsxDebug(cmd);
-        UpdateStatus(' !!! Centring Failed. Error: ' + tsx_return);
+        UpdateStatusErr(' !!! Centring Failed. Error: ' + tsx_return);
       }
       else {
         UpdateStatus(' Centred: ' + target );

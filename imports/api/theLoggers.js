@@ -24,13 +24,31 @@ const filters = {
    server: true
 };
 
+export function tsxLog( msg, data ) {
+  if( typeof data === 'undefined' || data == null ) {
+    data = '';
+  }
+  logCon.log( msg, data );
+  logSession.log( msg, data );
+  logDB.log( msg, { data: data } );
+}
+
+export function tsxWarn( msg, data ) {
+  if( typeof data === 'undefined' || data == null ) {
+    data = '';
+  }
+  logCon.warn( msg, data );
+  logSession.warn( msg,  data );
+  logDB.warn( msg,  { info: data } );
+}
+
 export function tsxErr( msg, data ) {
   if( typeof data === 'undefined' || data == null ) {
     data = '';
   }
   logCon.error( msg, data );
   logSession.error( msg,  data );
-  logDB.error( msg,  { info: data } );
+  logDB.error( msg,  { data: data } );
 }
 
 export function tsxDebug( msg, data ) {
@@ -48,24 +66,6 @@ export function tsxInfo( msg, data ) {
   logCon.info( msg, data );
   logSession.info( msg,  data );
   logDB.info( msg,  { info: data } );
-}
-
-export function tsxWarn( msg, data ) {
-  if( typeof data === 'undefined' || data == null ) {
-    data = '';
-  }
-  logCon.warn( msg, data );
-  logSession.warn( msg,  data );
-  logDB.warn( msg,  { info: data } );
-}
-
-export function tsxLog( msg, data ) {
-  if( typeof data === 'undefined' || data == null ) {
-    data = '';
-  }
-  logCon.log( msg, data );
-  logSession.log( msg, data );
-  logDB.log( msg, { data: data } );
 }
 
 function formatDate( today ) {

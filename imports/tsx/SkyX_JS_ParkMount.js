@@ -10,7 +10,7 @@
 // 2018-04-21
 //
 var lumFilter = $000;
-var softPark =$001;
+var softPark = $001;
 var errMsgs = "";	//Initialize variable to store any shutdown error messages.
 var cr 			= "\n";
 
@@ -58,14 +58,17 @@ catch (repErr)
 if( SelectedHardware.mountModel !== "Telescope Mount Simulator" ) {
 	if (!softPark ) {
 		try {
-			sky6RASCOMTele.ParkAndDoNotDisconnect();
+			 sky6RASCOMTele.ParkAndDoNotDisconnect();
+			 errMsgs = 'Parked';
 		}
 		catch(e) {
 			sky6RASCOMTele.SetTracking(0, 1, 0 ,0);
+			errMsgs = 'Soft Parked';
 		}
 	}
 	else {
 			sky6RASCOMTele.SetTracking(0, 1, 0 ,0);
+			errMsgs = 'Soft Parked';
 	}
 }
 errMsgs
