@@ -853,7 +853,6 @@ function tsx_isDarkEnough(target) {
 	var chkTwilight = tsx_GetServerState('isTwilightEnabled').value;
   UpdateStatus('Twilight check enabled: ' + chkTwilight);
   var tsx_is_waiting = true;
-	var Out = true; // Always assume to return true
 	if( chkTwilight ) {
     // tsxDebug(target.report);
     UpdateStatus('Dark enough for ' + target.targetFindName +': ' + target.report.isDark);
@@ -861,10 +860,8 @@ function tsx_isDarkEnough(target) {
 	}
   else {
     tsxDebug('Twilight disabled');
-    return Out;
+    return true;
   }
-
-  return Out;
 }
 
 // **************************************************************
@@ -1770,7 +1767,9 @@ export function canTargetSessionStart( target ) {
     return false;
   }
 
-  if( !tsx_isDarkEnough( target ) ) {
+  var isDark = tsx_isDarkEnough( target );
+  tsxDebug(' tsx_isDarkEnough for target: ' + isDark );
+  if( !isDark ) {
     UpdateStatus( ' ' + target.targetFindName + ': Not dark enough' );
     return false;
   }
