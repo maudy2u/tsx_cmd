@@ -15,7 +15,7 @@ import { LoggerMongo } from 'meteor/ostrio:loggermongo';
 
 const filters = {
    filter: [
-     // 'DEBUG',
+     'DEBUG',
      'INFO',
      'LOG',
      // 'TRACE'

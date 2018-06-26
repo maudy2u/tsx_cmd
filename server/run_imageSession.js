@@ -812,7 +812,7 @@ function tsx_DeviceInfo() {
             }
          });
        }
-       UpdateStatus( ' Devices Updated'); 
+       UpdateStatus( ' Devices Updated');
      }
   ));
 }
@@ -1012,14 +1012,15 @@ function UpdateImagingTargetReport( target ) {
 }
 
 
-function checkTargetConditions(target) {
+// need to return true if to stop
+function isTargetConditionsInValid(target) {
   tsxDebug('************************');
-  tsxDebug(' *** checkTargetConditions: ' + target.targetFindName );
+  tsxDebug(' *** isTargetConditionsInValid: ' + target.targetFindName );
 
 	// *******************************
 	// check Twilight - force stop
 	var continueWithSeries = false;
-  tsxDebug(' *** checkTargetConditions: ' + target.targetFindName);
+  tsxDebug(' *** isTargetConditionsInValid: ' + target.targetFindName);
 
   if( isSchedulerStopped() ) {
     return true; // exit
@@ -1528,7 +1529,7 @@ export function processTargetTakeSeries( target ) {
         }
 
         // check end conditions
-        stopTarget = checkTargetConditions(target);
+        stopTarget = isTargetConditionsInValid(target);
       }
       // reset to check across series again
       if( remainingImages ) {
@@ -1557,7 +1558,7 @@ export function processTargetTakeSeries( target ) {
         takeSeriesImage(target, series);
 
         // check end conditions
-        stopTarget = checkTargetConditions(target);
+        stopTarget = isTargetConditionsInValid(target);
 
       }
       // now switch to next filter
@@ -1774,8 +1775,6 @@ export function canTargetSessionStart( target ) {
     return false;
   }
 
-  var currentTime = new Date();
-
   return canStart;
 }
 
@@ -1908,7 +1907,7 @@ Use this to set the last focus
     }
     else {
       tsxDebug('Found: ' + target.targetFindName);
-      var endCond = checkTargetConditions( target );
+      var endCond = isTargetConditionsInValid( target );
       tsxDebug(target.targetFindName + ' ending=' + endCond );
     }
   },
