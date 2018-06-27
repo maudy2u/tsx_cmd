@@ -180,7 +180,9 @@ Meteor.startup(() => {
           var ready = prepareTargetForImaging( target );
           if( ready ) {
             // target images per Take Series
-            UpdateStatus ( ' Starting imaging...');
+            tsxLog ( ' *************************');
+            UpdateStatus ( ' *** Starting imaging: ' + target.targetFindName );
+            tsxLog ( ' *************************');
             processTargetTakeSeries( target );
           }
           else {
@@ -383,7 +385,7 @@ export function srvStopScheduler() {
   tsx_SetServerState('currentJob', '');
   UpdateImagingSesionID( '' );
 
-  tsxDebug('Manually STOPPED scheduler');
+  UpdateStatus(' *** Manually STOPPED scheduler ***');
 }
 
 Meteor.methods({

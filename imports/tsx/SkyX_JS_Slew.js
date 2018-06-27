@@ -26,19 +26,30 @@
 //
 
 // Assumed Target already set
-  var ra='$000';
-  var dec='$001';
-  var Out;
-  var slewStatus = "Success";
-	//Do the closed loop slew synchronously\
-  try{
-    sky6RASCOMTele.SlewToRaDec('+ra+', '+dec+', "Slew"); 	// Go to the RA & DEC;
-  } catch( nErr ) {
-    slewStatus = "Failed";
-  }
-  if( slewStatus == "Success") {
-    Out = "Success |";
-  } else {
-  	Out = "Slew Failed|";
-  }
-  Out;
+var targetName = '$000';
+var targetRA;
+var targetDEC;
+var Out;
+var slewStatus = "Success";
+sky6StarChart.Find(targetName);
+var haveTarget = sky6ObjectInformation.Property(59); // altitude
+if( haveTarget != 'TypeError: Object not found. Error = 250.') {
+    // we have a target we can query
+    sky6ObjectInformation.Property(54);  // RA				// Pull the RA value
+    targetRA = sky6ObjectInformation.ObjInfoPropOut; 		// Stuff RA into variable
+
+    sky6ObjectInformation.Property(55); // DEC			// Pull the DEC value
+    targetDEC = sky6ObjectInformation.ObjInfoPropOut; 		// Stuff DEC into variable
+  	//Do the closed loop slew synchronously\
+    try{
+      sky6RASCOMTele.SlewToRaDec(targetRA, targetDEC, "Slew"); 	// Go to the RA & DEC;
+    } catch( nErr ) {
+      slewStatus = "Failed";
+    }
+    if( slewStatus == "Success") {
+      Out = "Success |";
+    } else {
+    	Out = "Slew Failed|";
+    }
+}
+Out;

@@ -396,9 +396,7 @@ function tsx_Slew( target ) {
   tsxDebug(' *** tsx_Slew: ' + target.targetFindName );
 
     var cmd = shell.cat(tsx_cmd('SkyX_JS_Slew'));
-    cmd = cmd.replace('$000', target.ra );
-    cmd = cmd.replace('$001', target.dec );
-    // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
+    cmd = cmd.replace('$000',  target.targetFindName  );
 
     var tsx_waiting = true;
     tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
@@ -414,7 +412,6 @@ function tsx_Slew( target ) {
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
-
 }
 
 // **************************************************************
@@ -469,7 +466,7 @@ function tsx_CLS_target( target, filter ) {
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       var result = tsx_return.split('|')[0].trim();
       if( result != 'Success') {
-        tsxDebug(cmd);
+        // tsxDebug(cmd);
         UpdateStatusErr(' !!! Centring Failed. Error: ' + tsx_return);
       }
       else {
@@ -508,7 +505,10 @@ function tsx_RunFocus3( target ) {
     var focusExp = target.focusExposure;
     var focusTarget = target.focusTarget;
     if( focusTarget != '' ) {
-      tsx_CLS_target( target.focusTarget, target.clsFilter)
+      var res = tsx_CLS_target( target.targetFindName, target.clsFilter);
+      if( res == false ) {
+        tsx_Slew(target);
+      }
     }
 
     var cmd = String(shell.cat(tsx_cmd('SkyX_JS_Focus-3')) );
@@ -532,7 +532,10 @@ function tsx_RunFocus3( target ) {
      Meteor.sleep( 1000 );
     }
     if( focusTarget != '' ) {
-      tsx_CLS_target( target.targetFindName, target.clsFilter)
+      var res = tsx_CLS( target );
+      if( res == false ) {
+        tsx_Slew(target);
+      }
     }
 
     UpdateStatus(' *** @Focus3 finished.');
@@ -609,7 +612,7 @@ function tsx_GetMountReport() {
 
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-       // tsxDebug(tsx_return);
+       tsxDebug(tsx_return);
         Out = {
           ra: tsx_return.split('|')[0].trim(),
           dec: tsx_return.split('|')[1].trim(),
@@ -713,7 +716,7 @@ export function getValidTargetSession() {
   //  b) Image
   //  c) Ra/Dec/Atl/Az/Transit/HA
   if( typeof target == 'undefined') {
-    UpdateStatus('Failed to find a valid target session.');
+    tsxDebug('Failed to find a valid target session.');
   }
   else {
     UpdateStatus(' Valid target: ' + target.targetFindName);
@@ -851,12 +854,19 @@ function tsx_isDarkEnough(target) {
   var targetFindName = target.targetFindName;
   UpdateImagingTargetReport( target );
 	var chkTwilight = tsx_GetServerState('isTwilightEnabled').value;
-  UpdateStatus('Twilight check enabled: ' + chkTwilight);
+  UpdateStatus(' Twilight check enabled: ' + chkTwilight);
   var tsx_is_waiting = true;
 	if( chkTwilight ) {
     // tsxDebug(target.report);
-    UpdateStatus('Dark enough for ' + target.targetFindName +': ' + target.report.isDark);
-    return target.report.isDark;
+    tsxDebug('Dark enough for ' + target.targetFindName +': ' + target.report.isDark);
+    if( target.report.isDark == 'false') {
+      tsxDebug( 'Dark enough found to be false');
+      return false;
+    }
+    else {
+      tsxDebug( 'Dark enough found to be true');
+      return true;
+    }
 	}
   else {
     tsxDebug('Twilight disabled');
@@ -875,9 +885,9 @@ function tsx_reachedMinAlt( target ) {
 		targetMinAlt = tsx_GetServerState(tsx_ServerStates.defaultMinAltitude).value;
 	}
 	var curAlt = target.report.ALT;
-	tsxLog(' *** is curAlt ' + curAlt + '<'+ ' minAlt ' + targetMinAlt);
+	UpdateStatus(' ' + target.targetFindName + ': curAlt ' + curAlt + '<'+ ' minAlt ' + targetMinAlt);
 	if( curAlt < targetMinAlt ) {
-		UpdateStatus( 'Stop|Minimum Altitude Crossed' );
+		UpdateStatus( ' Stop. Below Minimum Altitude.' );
 		return true;
 	}
 }
@@ -1565,12 +1575,12 @@ export function processTargetTakeSeries( target ) {
     }
   }
 
-  UpdateStatus( " Target stopped: "+ target);
+  UpdateStatus( " Target stopped: "+ target.targetFindName );
   tsx_AbortGuider();
   var filter = tsx_GetServerStateValue('defaultFilter');
   var park = tsx_GetServerStateValue('defaultSoftPark');
   var parked = tsx_MntPark(filter, park ); // use default filter
-  return result;
+  return;
 }
 
 // **************************************************************
@@ -1627,7 +1637,7 @@ export function findTargetSession() {
     if( canStart ) {
       validSession = targetSessions[i];
       foundSession = true;
-      tsxLog( 'Candidate: ', validSession.targetFindName);
+      UpdateStatus( ' Candidate: ' + validSession.targetFindName);
       break;
     }
   }
@@ -1636,6 +1646,7 @@ export function findTargetSession() {
   // priotiry
   if( foundSession ) {
     validSession = getHigherPriorityTarget( validSession );
+    UpdateStatus( ' Have target: ' + validSession.targetFindName);
   }
   tsxDebug('************************');
   return validSession;
@@ -1660,7 +1671,7 @@ function getHigherPriorityTarget( validSession ) {
         var chk = valPriority - chkPriority;
         if( (chk > 0) ) {
               validSession = chkSession;
-              tsxLog( 'Priority Candidate: ' + validSession.targetFindName);
+              UpdateStatus( 'Priority Candidate: ' + validSession.targetFindName);
         }
       }
     }
@@ -1769,10 +1780,12 @@ export function canTargetSessionStart( target ) {
 
   var isDark = tsx_isDarkEnough( target );
   tsxDebug(' tsx_isDarkEnough for target: ' + isDark );
-  if( !isDark ) {
+  if( isDark === false ) {
+    tsxDebug( 'inside canstart to return false' );
     UpdateStatus( ' ' + target.targetFindName + ': Not dark enough' );
     return false;
   }
+  tsxDebug( 'inside canstart did not return false' );
 
   return canStart;
 }
