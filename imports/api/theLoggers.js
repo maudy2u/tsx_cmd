@@ -15,10 +15,11 @@ import { LoggerMongo } from 'meteor/ostrio:loggermongo';
 
 const filters = {
    filter: [
-     'DEBUG',
+     // 'DEBUG',
      'INFO',
      'LOG',
      // 'TRACE'
+     'ERROR',
    ],
    client: true,
    server: true
@@ -47,18 +48,20 @@ export function tsxErr( msg, data ) {
     data = '';
   }
   logCon.error( msg, data );
-  logSession.error( msg,  data );
-  logDB.error( msg,  { data: data } );
+  logSession.error( msg, data );
+  logDB.error( msg, { data: data } );
 }
 
 export function tsxDebug( msg, data ) {
+
   if( typeof data === 'undefined' || data == null ) {
     data = '';
   }
   logCon.debug( msg, data );
-  logSession.debug( msg,  { info: data } );
-  // logDB.debug( msg,  data );
+  logSession.debug( msg, data );
+  logDB.debug( msg, { data: data } );
 }
+
 export function tsxInfo( msg, data ) {
   if( typeof data === 'undefined' || data == null ) {
     data = '';

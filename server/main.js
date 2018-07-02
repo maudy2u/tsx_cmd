@@ -87,6 +87,37 @@ function initServerStates() {
   }
 }
 
+function ParkMount( isParked ) {
+  if( !isParked ) {
+    UpdateStatus(' No valid sessions - parking...');
+    var defaultFilter = tsx_GetServerStateValue('defaultFilter');
+    var softPark = Boolean(tsx_GetServerStateValue('defaultSoftPark'));
+    tsx_AbortGuider();
+    tsx_MntPark(defaultFilter, softPark);
+  }
+  isParked = true;
+  var sleepTime = tsx_GetServerStateValue('defaultSleepTime');
+  UpdateStatus( ' No valid target, waiting... '+ sleepTime + 'min');
+  var timeout = 0;
+  var msSleep = Number(sleepTime); // number of seconds
+  postProgressTotal(sleepTime);
+  postProgressMessage('Waiting ~' + sleepTime + 'min.');
+  while( timeout < msSleep) { //
+    if( tsx_GetServerStateValue('currentJob') == '' ) {
+      UpdateStatus( ' Canceled sessions');
+      break;
+    }
+    var min = 1000*60; // one minute in milliseconds
+    Meteor.sleep( min );
+    timeout = timeout + 1;
+    postProgressIncrement( timeout );
+  }
+  postProgressTotal(0);
+  postProgressIncrement( 0 );
+  postProgressMessage(' Processing');
+  UpdateStatus(' Finished sleep. Waking Up...');
+}
+
 Meteor.startup(() => {
   // code to run on server at startup
   tsxLog(' ******************', '');
@@ -186,38 +217,11 @@ Meteor.startup(() => {
             processTargetTakeSeries( target );
           }
           else {
-
+            ParkMount( isParked );
           }
         }
         else {
-          if( !isParked ) {
-            UpdateStatus(' No valid sessions - parking...');
-            var defaultFilter = tsx_GetServerStateValue('defaultFilter');
-            var softPark = Boolean(tsx_GetServerStateValue('defaultSoftPark'));
-            tsx_AbortGuider();
-            tsx_MntPark(defaultFilter, softPark);
-          }
-          isParked = true;
-          var sleepTime = tsx_GetServerStateValue('defaultSleepTime');
-          UpdateStatus( ' No valid target, waiting... '+ sleepTime + 'min');
-          var timeout = 0;
-          var msSleep = Number(sleepTime); // number of seconds
-          postProgressTotal(sleepTime);
-          postProgressMessage('Waiting ~' + sleepTime + 'min.');
-          while( timeout < msSleep) { //
-            if( tsx_GetServerStateValue('currentJob') == '' ) {
-              UpdateStatus( ' Canceled sessions');
-              break;
-            }
-            var min = 1000*60; // one minute in milliseconds
-            Meteor.sleep( min );
-            timeout = timeout + 1;
-            postProgressIncrement( timeout );
-          }
-          postProgressTotal(0);
-          postProgressIncrement( 0 );
-          postProgressMessage(' Processing');
-          UpdateStatus(' Finished sleep. Waking Up...');
+          ParkMount( isParked );
         }
       }
 

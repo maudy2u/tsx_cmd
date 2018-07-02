@@ -476,7 +476,7 @@ class App extends Component {
   addNewTemplate() {
     const id = TakeSeriesTemplates.insert(
       {
-        name: "New Take Series",
+        name: "!New Take Series",
         description: "EDIT ME",
         processSeries: 'across series',
         repeatSeries: false,
@@ -492,8 +492,8 @@ class App extends Component {
     // get the id for the new object
     var newSession = TargetSessions.insert(
       {
-        name: 'New Target',
-        targetFindName: 'New Target',
+        name: '!New Target',
+        targetFindName: '!New Target',
         targetImage: '',
         description: '',
         enabledActive: false,
@@ -578,6 +578,9 @@ class App extends Component {
                   </Label.Detail>
                 </Label>
                 {this.renderPortEditor()}
+                <Button.Group basic size='small' floated='right'>
+                  <Button icon='car' onClick={this.park.bind(this)}/>
+                </Button.Group>
               </Segment>
               {/* <Segment raised> */}
             <Segment>
@@ -592,9 +595,6 @@ class App extends Component {
               {/* <Button icon='add' onClick={this.addEntry.bind(this)}/>
               <Button icon='add' onClick={this.addNewTemplate.bind(this)}/> */}
 
-              <Button.Group basic size='small' floated='right'>
-                <Button icon='car' onClick={this.park.bind(this)}/>
-              </Button.Group>
             </Segment>
             <Segment>
               <Label>Status: <Label.Detail>{this.state.currentStage}</Label.Detail></Label>

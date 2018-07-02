@@ -312,7 +312,7 @@ class Target extends Component {
             open={this.state.modalOpen}
             onClose={this.handleClose}
             closeIcon>
-            <Modal.Header>Edit Series</Modal.Header>
+            <Modal.Header>Edit Series {this.props.target.targetFindName}</Modal.Header>
             <Modal.Content>
               <Modal.Description>
                 <TargetEditor key={this.props.target._id} target={this.props.target} />

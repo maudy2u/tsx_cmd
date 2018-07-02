@@ -5,6 +5,7 @@ import { scheduler } from '../imports/api/theProcessors.js';
 import {
   tsx_GetServerStateValue,
   UpdateStatus,
+  UpdateStatusErr,
   postStatus,
   postProgressTotal,
   postProgressIncrement,
@@ -54,10 +55,12 @@ export function tsx_feeder( cmd, callback ) {
    });
 
    tsx.on('error', function(err) {
-    Meteor._debug(" ******************************* ");
-    Meteor._debug(cmd);
-    console.error('Connection error: ' + err);
-    console.error(new Error().stack);
+    console.error(" ******************************* ");
+    console.error(cmd);
+    console.error( 'Connection error: ' + err );
+    console.error( new Error().stack );
+    // not sure if the call back out should be used...
+    callback('TsxError|' + err);
     stop_tsx_is_waiting();
    });
 

@@ -27,6 +27,7 @@ class TargetEditor extends Component {
     report_id: '',
     ra: "",                 // Target RA
     dec: "",                // Target DEC
+    alt: "",                // Target ALT
     angle: "",
     scale: '',
     coolingTemp: -19,
@@ -230,6 +231,7 @@ class TargetEditor extends Component {
   getTargetRaDec() {
     this.setState({ra: ''});
     this.setState({dec: ''});
+    this.setState({alt: ''});
 
     console.log('targetFind: ' + this.props.target.targetFindName );
     Meteor.call(
@@ -246,6 +248,7 @@ class TargetEditor extends Component {
       cmdSuccess = true;
       this.setState({ra: result.RA});
       this.setState({dec: result.DEC});
+      this.setState({alt: result.ALT});
     }.bind(this));
   }
 
@@ -323,7 +326,8 @@ class TargetEditor extends Component {
                 <Button onClick={this.getTargetRaDec.bind(this)}>Find</Button>
                 <Label>RA <Label.Detail>{Number(this.state.ra).toFixed(4)}</Label.Detail></Label>
                 <Label>DEC <Label.Detail>{Number(this.state.dec).toFixed(4)}</Label.Detail></Label>
-                {/* <Label>Atl <Label.Detail>{Number(this.state.targetALT).toFixed(4)}</Label.Detail></Label>
+                <Label>Atl <Label.Detail>{Number(this.state.alt).toFixed(4)}</Label.Detail></Label>
+                {/*
                 <Label>Az <Label.Detail>{this.state.targetAZ}</Label.Detail></Label>
                 <Label>Angle <Label.Detail>{Number(this.state.targetAngle).toFixed(4)}</Label.Detail></Label>
                 <Label>HA <Label.Detail>{Number(this.state.targetHA).toFixed(4)}</Label.Detail></Label>

@@ -1,0 +1,6 @@
+{ 
+	"enable_debug": "yes", 
+	"public": { 
+		"client_and_server_setting": "bar", 
+	} 
+}
