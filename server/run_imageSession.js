@@ -468,7 +468,7 @@ function tsx_CLS_target( target, filter ) {
         UpdateStatusErr(' !!! Centring Failed. Error: ' + tsx_return);
       }
       else {
-        UpdateStatus(' Centred: ' + target );
+        tsxInfo(' Centred: ' + target );
         var angle = tsx_return.split('|')[1].trim();
         clsSuccess.angle = angle;
         tsxInfo( ' clsSuccess angle: ' + clsSuccess.angle );
@@ -859,7 +859,7 @@ function tsx_isDarkEnough(target) {
   var targetFindName = target.targetFindName;
   UpdateImagingTargetReport( target );
 	var chkTwilight = tsx_GetServerState('isTwilightEnabled').value;
-  UpdateStatus(' Twilight check enabled: ' + chkTwilight);
+  tsxDebug(' Twilight check enabled: ' + chkTwilight);
   var tsx_is_waiting = true;
 	if( chkTwilight ) {
     // tsxDebug(target.report);
@@ -1034,6 +1034,7 @@ function UpdateImagingTargetReport( target ) {
 function isTargetConditionsInValid(target) {
   tsxDebug('************************');
   tsxDebug(' *** isTargetConditionsInValid: ' + target.targetFindName );
+  UpdateStatus(' *** Check target: ' + target.targetFindName );
 
   // *******************************
   if( isSchedulerStopped() ) {
@@ -1460,28 +1461,28 @@ function takeSeriesImage(target, series) {
   // tsxDebug('************************');
   tsxDebug(' *** takeSeriesImage: ' + target.targetFindName);
 
-  tsxLog('Series repeat: ' + series.repeat);
+  tsxDebug('Series repeat: ' + series.repeat);
   var taken = takenImagesFor(target, series._id);
-  tsxLog('In series taken: ' + taken);
+  tsxDebug('In series taken: ' + taken);
   var remainingImages = series.repeat - taken;
-  tsxLog('In series remaining: ' + remainingImages);
+  tsxDebug('In series remaining: ' + remainingImages);
   if( (remainingImages <= series.repeat) && (remainingImages > 0) ) {
-    tsxLog('Series: ' + series.filter + ' at ' + series.exposure + ' seconds');
+    tsxDebug('Series: ' + series.filter + ' at ' + series.exposure + ' seconds');
 
     // *******************************
     // Take the image
     var slot = getFilterSlot( series.filter );
     var frame = getFrame( series.frame );//  cdLight =1, cdBias, cdDark, cdFlat
-
-    UpdateStatus( ' Taking: ' + series.filter + '@' + series.exposure );
+    var num = taken+1;
+    UpdateStatus( ' *** Taking: ' + num + '/' +series.repeat + ' of ' + series.filter + ' at ' + series.exposure + ' seconds' );
     // postStatus('Capturing: '+ series.filter + '@' + series.exposure);
 
     var res = tsx_takeImage( slot, series.exposure, frame );
     if( res != false ) {
-      UpdateStatus( ' Finished: ' + series.filter + '@' + series.exposure );
+      UpdateStatus( ' *** Finished: ' + num + '/' +series.repeat + ' of ' + series.filter + ' at ' + series.exposure + ' seconds' );
       // *******************************
       // Update progress
-      tsxLog(' *** Image taken: ' + series.filter + ' at ' + series.exposure + ' seconds');
+      // tsxLog(' *** Image taken: ' + series.filter + ' at ' + series.exposure + ' seconds');
       incrementTakenFor( target, series._id );
 
       // *******************************
@@ -1490,7 +1491,7 @@ function takeSeriesImage(target, series) {
     }
   }
   else {
-    tsxLog(' *** Completed: ' + series.filter + ' at ' + series.exposure + ' seconds');
+    UpdateStatus(' *** Completed: ' + series.filter + ' at ' + series.exposure + ' seconds');
   }
   var jid = tsx_GetServerState('currentJob');
   if( jid == '' ) {
