@@ -13,17 +13,34 @@ import { LoggerMongo } from 'meteor/ostrio:loggermongo';
  const logCon = new Logger();
  const logDB = new Logger();
 
-const filters = {
-   filter: [
-     // 'DEBUG',
-     'INFO',
-     'LOG',
-     // 'TRACE'
-     'ERROR',
-   ],
-   client: true,
-   server: true
-};
+
+var filters;
+if( Meteor.settings.enable_debug === 'yes') {
+  filters = {
+    filter: [
+      'DEBUG',
+      'INFO',
+      'LOG',
+      // 'TRACE'
+      'ERROR',
+    ],
+    client: true,
+    server: true
+ };
+}
+else {
+  filters = {
+    filter: [
+      // 'DEBUG',
+      'INFO',
+      'LOG',
+      // 'TRACE'
+      'ERROR',
+    ],
+    client: true,
+    server: true
+ };
+}
 
 export function tsxLog( msg, data ) {
   if( typeof data === 'undefined' || data == null ) {

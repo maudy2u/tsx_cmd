@@ -223,7 +223,7 @@ class TakeSeriesEditor extends Component {
             onChange={this.handleChange}
           />
         </Grid.Column>
-        <Grid.Column>
+        {/* <Grid.Column>
           <Input
             fluid
             placeholder='Binning'
@@ -231,7 +231,7 @@ class TakeSeriesEditor extends Component {
             value={this.state.binning}
             onChange={this.handleChange}
           />
-        </Grid.Column>
+        </Grid.Column> */}
         <Grid.Column>
           <Button size='mini' icon='arrow up'  onClick={this.moveUpEntry.bind(this)}/>
           <Button size='mini' icon='arrow down'  onClick={this.moveDownEntry.bind(this)}/>

@@ -280,9 +280,6 @@ function SetUpAutoGuiding(targetSession) {
     return;
   }
 
-  // #TODO test out the Calibrate....
-  // tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
-
   tsx_StartAutoGuide( star.guideStarX, star.guideStarY );
 }
 
@@ -505,12 +502,13 @@ function tsx_RunFocus3( target ) {
     var focusFilter = getFilterSlot(target.focusFilter);
     var focusExp = target.focusExposure;
     var focusTarget = target.focusTarget;
-    // if( focusTarget != '' ) {
-    //   var res = tsx_CLS_target( target.targetFindName, target.clsFilter);
-    //   if( res == false ) {
-    //     tsx_Slew(target);
-    //   }
-    // }
+
+    if( focusTarget != '' ) {
+      var res = tsx_CLS_target( focusTarget, target.clsFilter);
+      // if( res == false ) {
+      //   tsx_Slew(target);
+      // }
+    }
 
     var cmd = String(shell.cat(tsx_cmd('SkyX_JS_Focus-3')) );
 
@@ -532,12 +530,12 @@ function tsx_RunFocus3( target ) {
     while( tsx_is_waiting ) {
      Meteor.sleep( 1000 );
     }
-    // // if( focusTarget != '' ) {
-    // //   var res = tsx_CLS( target );
-    // //   if( res == false ) {
-    // //     tsx_Slew(target);
-    // //   }
-    // }
+    if( focusTarget != '' ) {
+      var res = tsx_CLS( target );
+      // if( res == false ) {
+      //   tsx_Slew(target);
+      // }
+    }
 
     UpdateStatus(' *** @Focus3 finished.');
     return Out;
@@ -669,6 +667,9 @@ function SetUpForImagingRun(targetSession) {
 
   // needs initial focus temp
   UpdateStatus( ' Target centred: '+ targetSession.targetFindName );
+
+  // #TODO test out the Calibrate....
+  // tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
 
   // Get Mount Coords and Orientations
 	var mntOrient = tsx_GetMountReport();
