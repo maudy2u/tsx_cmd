@@ -437,7 +437,7 @@ function tsx_CLS( target ) {
       }
     });
   }
-  tsxInfo( ' clsSuccess angle: ' + clsSuccess.angle );
+  // tsxInfo( ' clsSuccess angle: ' + clsSuccess.angle );
   return clsSuccess;
 }
 
@@ -468,7 +468,7 @@ function tsx_CLS_target( target, filter ) {
         tsxInfo(' Centred: ' + target );
         var angle = tsx_return.split('|')[1].trim();
         clsSuccess.angle = angle;
-        tsxInfo( ' clsSuccess angle: ' + clsSuccess.angle );
+        tsxInfo( ' Position Angle: ' + clsSuccess.angle );
 
         var rotPos;
         try {
@@ -486,7 +486,7 @@ function tsx_CLS_target( target, filter ) {
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
-  tsxInfo( ' clsSuccess angle out: ' + clsSuccess.angle );
+  // tsxInfo( ' clsSuccess angle out: ' + clsSuccess.angle );
 
   return clsSuccess;
 }
@@ -521,6 +521,9 @@ function tsx_RunFocus3( target ) {
     tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
           var success = tsx_return.split('|')[0].trim();
           // tsxDebug('SkyX_JS_Focus-3 result check: ' + tsx_return);
+          var postion = tsx_return.split('|')[1].trim();
+          // Focuser postion (1232345345) using LUM Filter
+          UpdateStatus(' Focuser postion (' + postion + ') using ' + target.focFilter + ' filter.');
 
           Out = success;
           tsx_is_waiting = false;
@@ -891,7 +894,7 @@ function tsx_reachedMinAlt( target ) {
 		targetMinAlt = tsx_GetServerState(tsx_ServerStates.defaultMinAltitude).value;
 	}
 	var curAlt = target.report.ALT;
-	UpdateStatus(' ' + target.targetFindName + ': curAlt ' + curAlt + '<'+ ' minAlt ' + targetMinAlt);
+	UpdateStatus(' ' + target.targetFindName + ': is curAlt (' + curAlt + ') <'+ ' minAlt ' + targetMinAlt);
 	if( curAlt < targetMinAlt ) {
 		UpdateStatus( ' Stop. Below Minimum Altitude.' );
 		return true;
@@ -1131,7 +1134,7 @@ function tsx_dither( target ) {
                 tsxLog('SkyX_JS_NewDither Failed. Error: ' + result);
               }
               else {
-                tsxLog('Dither success');
+                // tsxLog('Dither success');
                 UpdateStatus('Dither success');
               }
               Out = true;
