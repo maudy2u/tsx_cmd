@@ -749,29 +749,32 @@ function tsx_DeviceInfo() {
       tsxDebug(tsx_return);
       var errIndex = tsx_return.split('|').length-1;
       if( tsx_return.split('|')[errIndex].trim() === "No error. Error = 0.") {
-         success = true;
+	tsxDebug( tsx_return );
+         return;
       }
-      // tsxDebug(tsx_return);
+      if( tsx_return.split('|')[0].trim() === "TypeError: The operation failed because there is no connection to the device. Error = 200.") {
+	tsxDebug( tsx_return );
+        UpdateStatus('The operation failed because there is no connection to the device.');
+	return;
+      }
+
       tsx_UpdateDevice(
         'guider',
         tsx_return.split('|')[1].trim(),
         tsx_return.split('|')[3].trim(),
       );
-      tsxDebug(2);
 
       tsx_UpdateDevice(
         'camera',
         tsx_return.split('|')[5].trim(),
         tsx_return.split('|')[7].trim(),
       );
-      tsxDebug(3);
 
       tsx_UpdateDevice(
         'efw',
         tsx_return.split('|')[9].trim(),
         tsx_return.split('|')[11].trim(),
       );
-      tsxDebug(4);
 
       tsx_UpdateDevice(
         'focuser',
@@ -801,7 +804,6 @@ function tsx_DeviceInfo() {
          'numberOfFilters',
          numFilters
        );
-       tsxDebug(5);
 
        // if too many filters... reduce to matching
        // if not enough then upsert will clean up
