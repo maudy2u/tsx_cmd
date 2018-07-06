@@ -28,7 +28,9 @@ ostrio:meteor-root
 ostrio:loggerfile
 ostrio:loggerconsole
 dburles:collection-helpers
-vsivsi:job-collection
 ostrio:loggermongo
 akasha:shelljs
 session
+ostrio:logger
+vsivsi:job-collection
+#meteortoys:allthings
