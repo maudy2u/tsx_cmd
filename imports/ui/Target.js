@@ -305,7 +305,8 @@ class Target extends Component {
             <Label>Priority: <Label.Detail>{this.props.target.priority}</Label.Detail></Label>
             <Label>Start time: <Label.Detail>{this.props.target.startTime}</Label.Detail></Label>
             <Label>Stop time: <Label.Detail>{this.props.target.stopTime}</Label.Detail></Label>
-            {/* <Label>Altitude: <Label.Detail>{this.state.altitude}</Label.Detail></Label>
+            <Label>Min. Altitude: <Label.Detail>{this.props.target.minAlt}</Label.Detail></Label>
+            {/*
             <Label>Direction: <Label.Detail>{this.state.azimuth}</Label.Detail></Label> */}
           </Label.Group>
           <Modal

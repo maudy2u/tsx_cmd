@@ -174,9 +174,9 @@ class TakeSeriesTemplateEditor extends Component {
             <Grid.Column>
             <b>Repeat</b>
             </Grid.Column>
-            <Grid.Column>
+            {/* <Grid.Column>
             <b>Bin</b>
-            </Grid.Column>
+            </Grid.Column> */}
             <Grid.Column>
             <b>Order</b>
             </Grid.Column>

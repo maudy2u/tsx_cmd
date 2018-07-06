@@ -17,6 +17,7 @@
 var CCDSC		= ccdsoftCamera;
 var focusingFilter = $000;
 var focusExp = $001;
+var numFocSamples = 1;
 var initExp 		= ccdsoftCamera.ExposureTime;			// How long of an exposure does the camera use?
 
 if ( Application.build >= 11177 )
@@ -72,7 +73,7 @@ if ( Application.build >= 11177 )
 
 		// Finally! Focus the camera!
 			// Use three samples per point and let @F3 figure out the rest.
-			var res1 = CCDSC.AtFocus3(3, 1);
+			var res1 = CCDSC.AtFocus3(numFocSamples, 1);
 			var temp = CCDSC.focTemperature.toFixed(1);
 			var pos = CCDSC.focPosition;
 			out = temp +'|'+pos +'|'+res1;

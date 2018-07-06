@@ -584,13 +584,13 @@ class App extends Component {
               </Segment>
               {/* <Segment raised> */}
             <Segment>
-              <Button.Group size='small'>
-                <Button icon='refresh' onClick={this.connectToTSX.bind(this)}/>
-                <Button name='showMonitor' icon='dashboard' onClick={this.handleToggle.bind(this)}/>
-              </Button.Group>
               {/* <Button.Group size='small'> */}
-                <Button onClick={this.addEntry.bind(this)}>Add Target</Button>
-                <Button onClick={this.addNewTemplate.bind(this)}>Add Series</Button>
+                <Button size='small' icon='refresh' onClick={this.connectToTSX.bind(this)}/>
+                <Button size='small' name='showMonitor' icon='dashboard' onClick={this.handleToggle.bind(this)}/>
+              {/* </Button.Group> */}
+              {/* <Button.Group size='small'> */}
+                <Button size='small' onClick={this.addEntry.bind(this)}>Add Target</Button>
+                <Button size='small' onClick={this.addNewTemplate.bind(this)}>Add Series</Button>
               {/* </Button.Group> */}
               {/* <Button icon='add' onClick={this.addEntry.bind(this)}/>
               <Button icon='add' onClick={this.addNewTemplate.bind(this)}/> */}
