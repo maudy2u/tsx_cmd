@@ -748,14 +748,14 @@ function tsx_DeviceInfo() {
   tsx_feeder( String(cmd), Meteor.bindEnvironment((tsx_return) => {
       tsxDebug(tsx_return);
       var errIndex = tsx_return.split('|').length-1;
-      if( tsx_return.split('|')[errIndex].trim() === "No error. Error = 0.") {
-	tsxDebug( tsx_return );
+      if( tsx_return.split('|')[errIndex].trim() != "No error. Error = 0.") {
+	       tsxDebug( tsx_return );
          return;
       }
       if( tsx_return.split('|')[0].trim() === "TypeError: The operation failed because there is no connection to the device. Error = 200.") {
-	tsxDebug( tsx_return );
+	      tsxDebug( tsx_return );
         UpdateStatus('The operation failed because there is no connection to the device.');
-	return;
+	      return;
       }
 
       tsx_UpdateDevice(
