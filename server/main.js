@@ -200,7 +200,6 @@ Meteor.startup(() => {
        ) {
         // Find a session
         // Get the target to shoot
-        tsxLog ( ' *************************');
         UpdateStatus( ' Validating Targets...');
         var target = getValidTargetSession(); // no return
 

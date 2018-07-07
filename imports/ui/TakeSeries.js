@@ -127,7 +127,7 @@ class TakeSeries extends Component {
               open={this.state.editOpen}
               onClose={this.editClose}
               closeIcon>
-              <Modal.Header>Edit Series</Modal.Header>
+              <Modal.Header>Editing Series</Modal.Header>
               <Modal.Content>
                 <Modal.Description>
                   <TakeSeriesTemplateEditor key={this.props.seriesTemplate._id} template={this.props.seriesTemplate}/>
