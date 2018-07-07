@@ -1,1 +1,1 @@
-meteor --settings ./settings.json
+~/meteor/meteor --settings ./settings.json
