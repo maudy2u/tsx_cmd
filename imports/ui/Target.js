@@ -1,3 +1,21 @@
+/*
+tsx cmd - A web page to send commands to TheSkyX server
+    Copyright (C) 2018  Stephen Townsend
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom';
 // import {mount} from 'react-mounter';
@@ -236,7 +254,6 @@ class Target extends Component {
         if( tid == this.props.target._id ) {
           return (
             <Button.Group basic size='mini'  floated='right'>
-              <Button icon='location arrow' onClick={this.clsTarget.bind(this)}/>
               <Button icon='toggle on' onClick={this.setInactive.bind(this)}/>
             </Button.Group>
           )
@@ -244,7 +261,6 @@ class Target extends Component {
         else {
           return (
             <Button.Group basic size='mini'  floated='right'>
-              <Button icon='location arrow' onClick={this.clsTarget.bind(this)}/>
               <Button icon='toggle off' onClick={this.setActive.bind(this)}/>
             </Button.Group>
           )
@@ -288,10 +304,11 @@ class Target extends Component {
         </Item.Header>
         <Button.Group basic size='mini' floated='right'>
           <Button icon='refresh' onClick={this.getTargetReport.bind(this)}/>
+          <Button icon='location arrow' onClick={this.clsTarget.bind(this)}/>
+          <Button icon='retweet' onClick={this.eraseProgress.bind(this)}/>
           {/* <Button icon='edit' onClick={this.editEntry.bind(this)}/> */}
           <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
           <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
-          <Button icon='retweet' onClick={this.eraseProgress.bind(this)}/>
         </Button.Group>
         <Item.Description>
           {this.props.target.description}
