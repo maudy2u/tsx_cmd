@@ -1199,25 +1199,21 @@ function tsx_TargetReport( target ) {
         // true|West|42.2|5.593339690591149|22.023446766485247|3.4187695344846833|16.2723491463255240.0|0|
         // No error. Error = 0.
         var cmdErr = tsx_return.split('|')[0].trim();
-        tsxDebug( '1');
         if( cmdErr == 'TsxError') {
           tsxWarn('!!! TheSkyX connection is not working!');
           tsxDebug( tsx_return );
           return false;
         }
-        tsxDebug( '1');
         var result = tsx_return.split('|')[0].trim();
         if( result == 'TypeError: Object not found. Error = 250.') {
           tsxErr('!!! TargetReport failed.');
           tsxDebug( tsx_return );
           return false;
         }
-        tsxDebug( '2');
 
         var isDark = tsx_return.split('|')[0].trim();
         var sunAlt = tsx_return.split('|')[1].trim();
         var isValid = tsx_return.split('|')[2].trim();
-        tsxDebug( '3');
 
         // isValid will be false if not found or exception within script
         if( isValid != 'true' ) {
@@ -1226,7 +1222,6 @@ function tsx_TargetReport( target ) {
           return false;
         }
 
-        tsxDebug( '4');
         var az, alt, ra, dec, ha,
           transit, focTemp, focPostion,
           ready, readyMsg;
@@ -1314,7 +1309,6 @@ function tsx_TargetReport( target ) {
   while( tsx_is_waiting ) {
     Meteor.sleep( 1000 );
   }
-  tsxDebug( 'out \n' + Out );
   return Out;
 }
 
