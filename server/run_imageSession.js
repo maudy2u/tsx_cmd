@@ -519,11 +519,12 @@ function tsx_RunFocus3( target ) {
     UpdateStatus(' *** @Focus3 started');
 
     tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+          tsxDebug( ' ??? @Focusing-3 returned: ' + tsx_return );
           var success = tsx_return.split('|')[0].trim();
           // tsxDebug('SkyX_JS_Focus-3 result check: ' + tsx_return);
           var postion = tsx_return.split('|')[1].trim();
           // Focuser postion (1232345345) using LUM Filter
-          UpdateStatus(' Focuser postion (' + postion + ') using ' + target.focFilter + ' filter.');
+          UpdateStatus(' Focuser postion (' + postion + ') using ' + target.focusFilter + ' filter.');
 
           Out = success;
           tsx_is_waiting = false;
@@ -556,6 +557,7 @@ function InitialFocus( target ) {
   UpdateStatus(' *** Initial @Focus3: ' + target.targetFindName);
 //  tsx_AbortGuider( );
   var result = tsx_RunFocus3( target ); // need to get the focus position
+  tsxDebug( ' ??? Initial Focus: ' + result );
   var temp = result.split('|')[0].trim();
 //  var temp = tsx_GetFocusTemp( target ); // temp and position set inside
   tsx_SetServerState( 'initialFocusTemperature', temp);

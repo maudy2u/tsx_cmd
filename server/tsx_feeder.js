@@ -70,6 +70,7 @@ export function tsx_feeder( cmd, callback ) {
     Out = chunk;
     callback(Out);
     stop_tsx_is_waiting();
+    tsx.close;
    });
 
    tsx.connect(port, ip, function() {
