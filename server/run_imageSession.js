@@ -519,12 +519,16 @@ function tsx_RunFocus3( target ) {
     UpdateStatus(' *** @Focus3 started');
 
     tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+      //[[B^[[B^[[BI20180708-01:53:13.485(-3)?   [SERVER]|2018-07-08|01:53:13|[DEBUG]| ??? @Focusing-3 returned: TypeError: Error code = 5 (5). No additional information is available.|No error. Error = 0
           tsxDebug( ' ??? @Focusing-3 returned: ' + tsx_return );
           var temp = tsx_return.split('|')[0].trim();
-          // tsxDebug('SkyX_JS_Focus-3 result check: ' + tsx_return);
           var postion = tsx_return.split('|')[1].trim();
+          if( temp == 'TypeError: Error code = 5 (5). No additional information is available.') {
+              temp = tsx_GetServerState( 'initialFocusTemperature' ).value;
+              UpdateStatus( ' !!! Error find focus.' );
+          }
           // Focuser postion (1232345345) using LUM Filter
-          UpdateStatus(' Focuser postion (' + postion + ') using ' + target.focusFilter + ' filter.');
+          UpdateStatus(' Focuser postion (' + postion + ') and temp ('+temp+') using ' + target.focusFilter + ' filter.');
 
           Out = temp;
           tsx_is_waiting = false;
@@ -545,15 +549,13 @@ function tsx_RunFocus3( target ) {
     return Out;
   }
   UpdateStatus(' *** @Focus3 diabled');
-  Out = target.report.focusTemp;
+  Out = tsx_GetServerState( 'initialFocusTemperature' ).value; // get last temp
   return Out;
 }
 
 // **************************************************************
 function InitialFocus( target ) {
   // tsxDebug('************************');
-  tsxDebug(' *** InitialFocus: ' + target.targetFindName );
-
   UpdateStatus(' *** Initial @Focus3: ' + target.targetFindName);
 //  tsx_AbortGuider( );
   var temp = tsx_RunFocus3( target ); // need to get the focus position
@@ -967,14 +969,16 @@ function isFocusingNeeded(target) {
   tsxDebug(' *** isFocusingNeeded: ' + target.targetFindName);
 
   var lastFocusTemp = tsx_GetServerState( 'initialFocusTemperature' ).value; // get last temp
+  tsxDebug( ' lastFocus temp: ' + lastFocusTemp );
   if( lastFocusTemp == 'Simulator' ) {
     tsxDebug(' !!! Simulator will not do focus calculations');
     return false;
   }
 
   var curFocusTemp = target.report.focusTemp; // read new temp
+  tsxDebug( ' curFocusTemp temp: ' + curFocusTemp );
   if( typeof curFocusTemp == 'undefined' ) {
-    curFocusTemp = tsx_GetServerState('initialFocusTemperature').value;
+    curFocusTemp = lastFocusTemp;
   }
   var focusDiff = Math.abs(curFocusTemp - lastFocusTemp).toFixed(2);
   var targetDiff = target.tempChg; // diff for this target
