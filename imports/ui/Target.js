@@ -254,14 +254,14 @@ class Target extends Component {
         if( tid == this.props.target._id ) {
           return (
             <Button.Group basic size='mini'  floated='right'>
-              <Button icon='toggle on' onClick={this.setInactive.bind(this)}/>
+              {/* <Button icon='toggle on' onClick={this.setInactive.bind(this)}/> */}
             </Button.Group>
           )
         }
         else {
           return (
             <Button.Group basic size='mini'  floated='right'>
-              <Button icon='toggle off' onClick={this.setActive.bind(this)}/>
+              {/* <Button icon='toggle off' onClick={this.setActive.bind(this)}/> */}
             </Button.Group>
           )
         }

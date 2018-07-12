@@ -178,7 +178,8 @@ Meteor.startup(() => {
 
   var dbIp = TheSkyXInfos.findOne().ip() ;
   var dbPort = TheSkyXInfos.findOne().port();
-  var dbMinAlt = TheSkyXInfos.findOne().defaultMinAltitude();
+  // removing so can start up easier without error.
+  // var dbMinAlt = TheSkyXInfos.findOne().defaultMinAltitude();
   if( (typeof dbIp != 'undefined') && (typeof dbPort != 'undefined') ) {
     tsxLog(' TSX server   IP: ',  dbIp );
     tsxLog(' TSX server port: ', dbPort );

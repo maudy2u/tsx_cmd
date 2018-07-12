@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# tsx cmd - A web page to send commands to TheSkyX server
+#     Copyright (C) 2018  Stephen Townsend
+#
+#     This program is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU Affero General Public License as
+#     published by the Free Software Foundation, either version 3 of the
+#     License, or (at your option) any later version.
+#
+#     This program is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU Affero General Public License for more details.
+#
+#     You should have received a copy of the GNU Affero General Public License
+#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+install_dir=$(pwd)
+
+if [ $# -eq 0 ]
+  then
+    echo ""
+    echo " *******************************"
+    echo "Building TSX Cmd v1.0"
+    echo " *******************************"
+    echo ": You need to provide one parameter to build - version or date."
+    echo ": e.g."
+    echo ""
+    echo " build_tsx_cmd.sh 20180708"
+    echo ""
+    echo " *******************************"
+    echo ""
+    exit 1
+fi
+echo build_tsx_cmd.sh is creating file: ../tsx_cmd_build_${1}
+meteor bundle ../tsx_cmd_build_${1}
+growlnotify -n "Building TSX Cmd" -s -m "Completed"
