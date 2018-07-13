@@ -50,70 +50,72 @@ function tsx_GetPortAndIP() {
   return { ip, port };
 }
 
+var net = require('net');
+var tsx = new net.Socket({writeable: true}); //writeable true does not appear to help
+tsx.setEncoding(); // used to set the string type of return
+
+
+tsx.on('close', function() {
+     Meteor._debug('tsx_close');
+});
+
+tsx.on('write', function() {
+     // Meteor._debug('Writing to TheSkyX.');
+});
+
 // *******************************
 // test of generic write method...
 export function tsx_feeder( cmd, callback ) {
   // Meteor._debug(" ********** tsx_feeder ************ ");
+  // Meteor._debug('Started tsx_feeder.');
+  var Out;
   cmd = String(cmd);
   Meteor.sleep(3*1000);  // arbitary sleep for 3sec.
+
   const { ip, port } = tsx_GetPortAndIP();
 
-  // Meteor._debug('Started tsx_feeder.');
-   var Out;
-   var net = require('net');
-   var tsx = new net.Socket({writeable: true}); //writeable true does not appear to help
-   tsx.setEncoding(); // used to set the string type of return
-
-   tsx.on('close', function() {
-       Meteor._debug('tsx_close');
-   });
-
-   tsx.on('write', function() {
-       // Meteor._debug('Writing to TheSkyX.');
-   });
-
-   tsx.on('error', function(err) {
+  tsx.on('error', function(err) {
+    console.error(" ******************************* ");
+    console.error( 'Connection error: ' + err );
     console.error(" ******************************* ");
     console.error(cmd);
-    console.error( 'Connection error: ' + err );
-    console.error( new Error().stack );
+    console.error(" ******************************* ");
+    // console.error( new Error().stack );
     // not sure if the call back out should be used...
-    tsx.close;
-    callback('TsxError|' + err);
+    // tsx.close;
+    // callback('TsxError|' + err);
     stop_tsx_is_waiting();
-   });
+  });
 
-   tsx.on('data', (chunk) => {
+  tsx.on('data', (chunk) => {
     // Meteor._debug(`Received ${chunk.length} bytes of data.`);
     // Meteor._debug('Received: '  + chunk);
     Out = chunk;
-    tsx.close;
+    // tsx.close;
     callback(Out);
     stop_tsx_is_waiting();
-   });
+  });
 
-   tsx.connect(port, ip, function() {
-   });
+  start_tsx_is_waiting();
 
-   start_tsx_is_waiting();
-
-   tsx.write(cmd, (err) => {
+  tsx.connect(port, ip, function() {
+  });
+  tsx.write(cmd, (err) => {
      // Meteor._debug('Sending tsxCmd: ' + cmd);
-   });
+  });
 
-   // need a TSX WAIT FOR SCRIPT DONE...
-   // https://www.w3schools.com/js/js_timing.asp
-   var waiting = 0; // create arbitarty timeout
-   var imageChk = false;
-   var processId = tsx_GetServerStateValue( 'imagingSessionId' );
-   if( typeof processId != 'undefined' || processId != '') {
+  // need a TSX WAIT FOR SCRIPT DONE...
+  // https://www.w3schools.com/js/js_timing.asp
+  var waiting = 0; // create arbitarty timeout
+  var imageChk = false;
+  var processId = tsx_GetServerStateValue( 'imagingSessionId' );
+  if( typeof processId != 'undefined' || processId != '') {
      imageChk = true;
-   }
-   else {
+  }
+  else {
      processId = 'ignore';
-   }
+  }
   while( tsx_waiting && processId > '' ) { //}&& forceExit > 2*60*sec ) {
-    tsx.reads;
     var sec = 1000;
     Meteor.sleep( sec );
     waiting = waiting + sec;
@@ -127,5 +129,5 @@ export function tsx_feeder( cmd, callback ) {
   }
   postProgressTotal(0);
   postProgressIncrement(0);
-  tsx.close;
+  tsx.end();
 };

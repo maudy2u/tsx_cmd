@@ -248,9 +248,7 @@ export function tsx_MntPark(defaultFilter, softPark) {
         }
 
         tsx_is_waiting = false;
-      }
-    )
-  );
+  }));
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
@@ -269,9 +267,7 @@ export function tsx_AbortGuider() {
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         tsx_is_waiting = false;
 
-      }
-    )
-  )
+  }));
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
@@ -316,9 +312,7 @@ function tsx_TakeAutoGuideImage( target ) {
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         tsxInfo( " Autoguider image taken" );
         tsx_is_waiting = false;
-      }
-    )
-  );
+  }));
 
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
@@ -347,9 +341,7 @@ function tsx_FindGuideStar() {
           guideStarY: guideStarY,
         };
         tsx_is_waiting = false;
-      }
-    )
-  );
+  }));
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
@@ -369,9 +361,7 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     tsx_is_waiting = false;
-      }
-    )
-  )
+  }));
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
@@ -392,9 +382,7 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     tsx_is_waiting = false;
-      }
-    )
-  )
+  }));
   while( tsx_is_waiting ) {
     Meteor.sleep( 1000 );
   }
@@ -419,8 +407,7 @@ function tsx_Slew( target ) {
         UpdateStatus('Slew Failed. Error: ' + result);
       }
       tsx_is_waiting = false;
-    }
-  ));
+    }));
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
@@ -498,8 +485,7 @@ function tsx_CLS_target( target, filter ) {
         }
       }
       tsx_is_waiting = false;
-    })
-  );
+  }));
 
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
@@ -1030,7 +1016,7 @@ function UpdateImagingTargetReport( target ) {
   // how old is report... if less than 1 minute get report
   var rpt;
   var tRprt = target.report;
-  if( typeof tRprt == 'undefined' || tRprt == '') {
+  if( typeof tRprt == 'undefined' || tRprt == '' || tRprt == false ) {
     UpdateStatus(' Create TargetReport: ' + target.targetFindName);
     tRprt = tsx_TargetReport( target );
   }
@@ -1050,11 +1036,13 @@ function UpdateImagingTargetReport( target ) {
 
   // Now have reprt and need to set the variables
   // the other checks use
-  TargetSessions.upsert({_id: target._id}, {
-    $set:{
-      report: rpt,
-    }
-  });
+  if( rpt != false && typeof rpt != 'undefined' && rpt != '') {
+    TargetSessions.upsert({_id: target._id}, {
+      $set:{
+        report: rpt,
+      }
+    });
+  }
 
   return rpt;
 }
@@ -1220,12 +1208,14 @@ function tsx_TargetReport( target ) {
         if( cmdErr == 'TsxError') {
           tsxWarn('!!! TheSkyX connection is not working!');
           tsxDebug( tsx_return );
+          tsx_is_waiting = false;
           return false;
         }
         var result = tsx_return.split('|')[0].trim();
         if( result == 'TypeError: Object not found. Error = 250.') {
           tsxErr('!!! TargetReport failed.');
           tsxDebug( tsx_return );
+          tsx_is_waiting = false;
           return false;
         }
 
@@ -1237,6 +1227,7 @@ function tsx_TargetReport( target ) {
         if( isValid != 'true' ) {
           tsxDebug( tsx_return );
           UpdateStatus('!!! TargetReport failed. Check target and connection.');
+          tsx_is_waiting = false;
           return false;
         }
 
@@ -1353,6 +1344,7 @@ function tsx_MatchRotation( targetSession ) {
         rotateSucess = true;
         tsxLog( 'Rotated to : GET ANGLE');
         tsx_feeder = false;
+        tsx_is_waiting = false;
       }
     )
   );
