@@ -50,19 +50,6 @@ function tsx_GetPortAndIP() {
   return { ip, port };
 }
 
-var net = require('net');
-var tsx = new net.Socket({writeable: true}); //writeable true does not appear to help
-tsx.setEncoding(); // used to set the string type of return
-
-
-tsx.on('close', function() {
-     Meteor._debug('tsx_close');
-});
-
-tsx.on('write', function() {
-     // Meteor._debug('Writing to TheSkyX.');
-});
-
 // *******************************
 // test of generic write method...
 export function tsx_feeder( cmd, callback ) {
@@ -73,6 +60,16 @@ export function tsx_feeder( cmd, callback ) {
   Meteor.sleep(3*1000);  // arbitary sleep for 3sec.
 
   const { ip, port } = tsx_GetPortAndIP();
+  var net = require('net');
+  var tsx = new net.Socket({writeable: true}); //writeable true does not appear to help
+  tsx.setEncoding(); // used to set the string type of return
+  tsx.on('close', function() {
+       Meteor._debug('tsx_close');
+  });
+  tsx.on('write', function() {
+       // Meteor._debug('Writing to TheSkyX.');
+  });
+
 
   tsx.on('error', function(err) {
     console.error(" ******************************* ");
