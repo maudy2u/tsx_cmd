@@ -6,8 +6,8 @@
 //
 //	Ken Sturrock
 //	Jaunary 13, 2018
-// Stephen Townsend
-// 2018-04-21
+//  Stephen Townsend
+//  2018-04-21
 //
 var lumFilter = $000;
 var softPark = $001;

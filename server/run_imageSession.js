@@ -484,6 +484,9 @@ function tsx_CLS_target( target, filter ) {
           // all good do nothing
         }
       }
+
+      // reset dithering....
+      tsx_SetServerState('imagingSessionDither', 0);
       tsx_is_waiting = false;
   }));
 
@@ -697,6 +700,7 @@ function SetUpForImagingRun(targetSession) {
   // rotateSucess = tsx_MatchRotation( targetSession );
 
   // get initial focus....
+  // #TODO: get the focus to create date/time of last focus... before redoing...
   InitialFocus( targetSession );
   if( isSchedulerStopped() ) {
     return false; // exit
@@ -1122,7 +1126,7 @@ function tsx_dither( target ) {
   var Out = false;
 
   if( ditherTarget > 0 ) {
-    if( lastDither >= ditherTarget ) {
+    if( lastDither > ditherTarget +1 ) { // adding a plus one so the zero works and if one is passed it will rung once.
 
         // first abort Guiding
         tsx_AbortGuider(); // #TODO can put into dither if needed.

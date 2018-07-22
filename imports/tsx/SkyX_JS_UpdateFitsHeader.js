@@ -1,7 +1,8 @@
 /* Java Script */
 /* Socket Start Packet */
 
-//
+// Stephen Townsend
+// 2018-04-19
 
 var Out = '';			// Form the output string
 var targetName = "$000";

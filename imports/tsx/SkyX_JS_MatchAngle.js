@@ -1,6 +1,8 @@
 /* Java Script */
 /* Socket Start Packet */
 // SkyX_JS_MatchAngle
+//  Stephen Townsend
+//  2018-04-21
 
 var targetAng= $000;
 var knownImageScale =$001;

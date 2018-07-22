@@ -1,5 +1,7 @@
 /* Java Script */
 /* Socket Start Packet */
+// Stephen Townsend
+// 2018-04-19
 
 var Out = '';
 var filters = '';

@@ -1,7 +1,8 @@
 /* Java Script */
 /* Socket Start Packet */
 
-//
+//	Ken Sturrock
+//	January 13, 2018
 
 var guideStarX = "$000";
 var guideStarY = "$001";

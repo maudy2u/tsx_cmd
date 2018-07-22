@@ -1,6 +1,10 @@
 /* Java Script */
 /* Socket Start Packet */
 // SkyX_JS_CLS
+//	Ken Sturrock
+//  January 13, 2018
+// Stephen Townsend
+// 2018-04-19
 
 var Target 		= "$000";		// tsxfeeder replaces $000 with a command line parameter
 var Filter		= "$001";		// the filter to use. Set by run_target, no effect if no wheel

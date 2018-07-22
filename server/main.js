@@ -237,10 +237,12 @@ Meteor.startup(() => {
           }
           else {
             ParkMount( isParked );
+            isParked = true;
           }
         }
         else {
           ParkMount( isParked );
+          isParked = true;
         }
       }
 
