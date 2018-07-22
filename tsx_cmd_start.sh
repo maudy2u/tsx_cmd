@@ -25,10 +25,12 @@ if [ "$(uname)" == "Darwin" ]; then
     export MONGO_URL='mongodb://localhost/tsx_cmd'
     export PORT=3000
     export ROOT_URL='http://127.0.0.1'
+    export METEOR_SETTINGS="$(pwd)/settings.json"
     cd ${install_dir}/bundle
     node main.js
   else
     echo Not Supported
+    exit 5
   fi
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
 
@@ -42,15 +44,19 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     export MONGO_URL='mongodb://localhost/tsx_cmd'
     export PORT=3000
     export ROOT_URL='http://127.0.0.1'
+    export METEOR_SETTINGS="$(pwd)/settings.json"
     cd ${install_dir}/bundle
     node main.js
   else
     echo Not Supported
+    exit 5
   fi
 elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
     # Do something under 32 bits Windows NT platform
     Echo windows32 - not yet supported
+    exit 5
 elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]; then
     # Do something under 64 bits Windows NT platform
     echo windows64 - not yet supported
+    exit 5
 fi
