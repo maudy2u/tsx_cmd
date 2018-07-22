@@ -93,7 +93,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     sudo apt-get install mongodb-enterprise
 
     # install nodejs
-    if [ "substr $(uname -p)" == "aarch64" ]; then
+    if [ "$(uname -p)" == "aarch64" ]; then
 
       echo " *******************************"
       echo "nodejs - Download and extract"
@@ -124,6 +124,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     npm uninstall fibers
     npm install fibers
     cd ${install_dir}
+    ${install_dir}/node-v8.11.3-linux-arm64/bin/node /home/stephen/test/bundle/programs/server/node_modules/fibers/build
 
     echo " *******************************"
     echo " TSX_CMD - installed"
