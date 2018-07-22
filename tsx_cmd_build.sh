@@ -33,5 +33,24 @@ if [ $# -eq 0 ]
     exit 1
 fi
 echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}.tar
-meteor bundle ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}.tar
-growlnotify -n "Build $(git rev-list --all --count) of TSX Cmd" -s -m "Completed"
+if [ "$(uname -s)" == "Darwin" ]; then
+  if [ "$(uname -p)" == "i386" ]; then
+    meteor bundle ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}.tar
+    growlnotify -n "Build $(git rev-list --all --count) of TSX Cmd" -s -m "Completed"
+  else
+    echo $(uname -s) $(uname -p) - Not Supported
+    exit 5
+  fi
+elif [ "$(uname -s)" == "Linux" ]; then
+
+  if [ "$(uname -p)" == "aarch64" ]; then
+    ~/meteor/meteor bundle ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}.tar
+  else
+    echo $(uname -s) $(uname -p) - Not Supported
+    exit 5
+  fi
+else
+    # Do something under 64 bits Windows NT platform
+    echo $(uname -s) $(uname -p) - Not Supported
+    exit 5
+fi
