@@ -17,25 +17,34 @@
 #
 install_dir=$(pwd)
 if [ "$(uname)" == "Darwin" ]; then
-  echo Mac in ${install_dir}
-  export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-darwin-x64/bin:$PATH
-  mkdir -p ${install_dir}/db
-  mongod --dbpath ${install_dir}/db &
-  export MONGO_URL='mongodb://localhost/tsx_cmd'
-  export PORT=3000
-  export ROOT_URL='http://127.0.0.1'
-  cd ${install_dir}/bundle
-  node main.js
+  if [ "substr $(uname -p)" == "i386" ]; then
+    echo Mac in ${install_dir}
+    export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-darwin-x64/bin:$PATH
+    mkdir -p ${install_dir}/db
+    mongod --dbpath ${install_dir}/db &
+    export MONGO_URL='mongodb://localhost/tsx_cmd'
+    export PORT=3000
+    export ROOT_URL='http://127.0.0.1'
+    cd ${install_dir}/bundle
+    node main.js
+  else
+    echo Not Supported
+  fi
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-  echo Linux in ${install_dir}
-  export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-darwin-x64/bin:$PATH
-  mkdir -p ${install_dir}/db
-  mongod --dbpath ${install_dir}/db &
-  export MONGO_URL='mongodb://localhost/tsx_cmd'
-  export PORT=3000
-  export ROOT_URL='http://127.0.0.1'
-  cd ${install_dir}/bundle
-  node main.js
+
+  if [ "substr $(uname -p)" == "aarch64" ]; then
+    echo Linux ARM in ${install_dir}
+    export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-darwin-x64/bin:$PATH
+    mkdir -p ${install_dir}/db
+    mongod --dbpath ${install_dir}/db &
+    export MONGO_URL='mongodb://localhost/tsx_cmd'
+    export PORT=3000
+    export ROOT_URL='http://127.0.0.1'
+    cd ${install_dir}/bundle
+    node main.js
+  else
+    echo Not Supported
+  fi
 elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
     # Do something under 32 bits Windows NT platform
     Echo windows32 - not yet supported

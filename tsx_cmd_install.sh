@@ -85,26 +85,34 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     echo " *******************************"
     echo "Mongodb - Download and extract"
     echo " *******************************"
-    curl https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-4.0.0.tgz -o mongodb-osx-ssl-x86_64-4.0.0.tgz
-    tar -xf mongodb-osx-ssl-x86_64-4.0.0.tgz
-    rm ${install_dir}/mongodb-osx-ssl-x86_64-4.0.0.tgz
+    # source: https://andyfelong.com/2018/02/update-mongodb-3-6-on-odroid-c2-with-ubuntu-16-04-3-arm64/
+    sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
+    echo "deb [ arch=amd64,arm64,ppc64el,s390x ] http://repo.mongodb.com/apt/ubuntu xenial/mongodb-enterprise/3.6 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-enterprise.list
+    sudo apt-get update
+    sudo apt-get upgrade
+    sudo apt-get install mongodb-enterprise
 
     # install nodejs
-    echo " *******************************"
-    echo "nodejs - Download and extract"
-    echo " *******************************"
-    curl https://nodejs.org/dist/v8.11.3/node-v8.11.3-darwin-x64.tar.gz -o node-v8.11.3-darwin-x64.tar.gz
-    tar -xf node-v8.11.3-darwin-x64.tar.gz
-    rm ${install_dir}/node-v8.11.3-darwin-x64.tar.gz
+    if [ "substr $(uname -p)" == "aarch64" ]; then
+
+      echo " *******************************"
+      echo "nodejs - Download and extract"
+      echo " *******************************"
+      curl https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-arm64.tar.xz -o node-v8.11.3-linux-arm64.tar.xz
+      tar -xf node-v8.11.3-linux-arm64.tar.xz
+      rm ${install_dir}/node-v8.11.3-linux-arm64.tar.xz
+    else
+      echo NO NODEJS supported
+    fi
 
     # install tsx__cmd - assumes already downloaded
     echo " *******************************"
-    echo " TSX_CMD - Download and extract"
+    echo " TSX_CMD - Extract" ${1}
     echo " *******************************"
-    # curl https://www.dropbox.com/s/stnwx3d2qeap4a1/tsx_cmd_20180708_05.tar -o tsx_cmd_20180708_05.tar
-    tar -xf tsx_cmd_20180708_05.tar
+    # https://drive.google.com/drive/folders/1yUPU6A0gbBv5UnuSp308lvctY4d6aUtw?usp=sharing
+    tar -xf ${1}
 
-    export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-darwin-x64/bin:$PATH
+    export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-linux-arm64/bin:$PATH
     mkdir -p ${install_dir}/db
     export MONGO_URL='mongodb://localhost/tsx_cmd'
     export PORT=3000
