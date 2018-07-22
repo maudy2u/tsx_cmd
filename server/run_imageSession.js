@@ -118,13 +118,9 @@ export function string_replace(haystack, find, sub) {
 // **************************************************************
 export function tsx_cmd(script) {
   tsxInfo(' *** tsx_cmd: ' + script);
-  // var src =
-  var path = Npm.require('path');
-  var rootPath = path.resolve('.');
-  var src = rootPath.split(path.sep + '.meteor')[0];
-  // var c = Meteor.absolutePath;
-  // tsxDebug('Root: ' + src);
-  return src +'/imports/tsx/'+ script+'.js';
+
+  var src = Assets.getText(script+'.js');
+  return src;
 }
 
 // **************************************************************
@@ -133,7 +129,7 @@ export function tsx_Connect() {
   tsxDebug(' *** tsx_Connect' );
 
   var success = false;
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_Connect'));
+  var cmd = tsx_cmd('SkyX_JS_Connect');
   // #TODO var cmd = Assets.getText('.tsx/SkyX_JS_Connect.js');
 
   var tsx_is_waiting = true;
@@ -154,7 +150,7 @@ export function tsx_Disconnect() {
   tsxDebug(' *** tsx_Disconnect' );
 
   var success = false;
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_Disconnect'));
+  var cmd = tsx_cmd('SkyX_JS_Disconnect');
 
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
@@ -230,7 +226,7 @@ export function tsx_MntPark(defaultFilter, softPark) {
   else {
     UpdateStatus(' Full Parking... ');
   }
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_ParkMount'));
+  var cmd = tsx_cmd('SkyX_JS_ParkMount');
   cmd = cmd.replace("$000", slot ); // set filter
   cmd = cmd.replace("$001", softPark ); // set filter
 
@@ -261,7 +257,7 @@ export function tsx_AbortGuider() {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_AbortGuider');
 
-  var cmd = String(shell.cat(tsx_cmd('SkyX_JS_AbortGuider')));
+  var cmd = tsx_cmd('SkyX_JS_AbortGuider');
 
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
@@ -302,7 +298,7 @@ function tsx_TakeAutoGuideImage( target ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_TakeAutoGuideImage: ' + target.targetFindName );
 
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_TakeGuideImage'));
+  var cmd = tsx_cmd('SkyX_JS_TakeGuideImage');
   var exp = tsx_GetServerState('defaultGuideExposure').value;
 
   cmd = cmd.replace('$000', exp );
@@ -327,7 +323,7 @@ function tsx_FindGuideStar() {
   var guideStarX = 0;
   var guideStarY = 0;
   // var cmd = tsxCmdFindGuideStar();
-  var cmd = String( shell.cat(tsx_cmd('SkyX_JS_FindAutoGuideStar')) );
+  var cmd = tsx_cmd('SkyX_JS_FindAutoGuideStar');
   // cmd = cmd.replace('$000', targetSession.guideExposure );
   // cmd = cmd.replace('$001', targetSession.scale);
   // cmd = cmd.replace('$002', targetSession.exposure);
@@ -355,7 +351,7 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
 
   tsx_is_waiting = true;
   // var cmd = tsxCmdFindGuideStar();
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_AutoguideCalibrate'));
+  var cmd = tsx_cmd('SkyX_JS_AutoguideCalibrate');
   cmd = cmd.replace('$000', guideStarX );
   cmd = cmd.replace('$001', guideStarY );
 
@@ -376,7 +372,7 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
   // star guiding
   tsx_is_waiting = true;
   // var cmd = tsxCmdFindGuideStar();
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_FrameAndGuide'));
+  var cmd = tsx_cmd('SkyX_JS_FrameAndGuide');
   cmd = cmd.replace('$000', guideStarX );
   cmd = cmd.replace('$001', guideStarY );
 
@@ -395,7 +391,7 @@ function tsx_Slew( target ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_Slew: ' + target.targetFindName );
 
-    var cmd = shell.cat(tsx_cmd('SkyX_JS_Slew'));
+    var cmd = tsx_cmd('SkyX_JS_Slew');
     cmd = cmd.replace('$000',  target.targetFindName  );
 
     var tsx_waiting = true;
@@ -457,7 +453,7 @@ function tsx_CLS_target( target, filter ) {
   var tsx_is_waiting = true;
 
   // var cmd = tsxCmdCLS();
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_CLS'));
+  var cmd = tsx_cmd('SkyX_JS_CLS');
   cmd = cmd.replace("$000", target );
   var slot = getFilterSlot(filter);
   // tsxDebug('Found slot: ' + slot);
@@ -517,7 +513,7 @@ function tsx_RunFocus3( target ) {
       // }
     }
 
-    var cmd = String(shell.cat(tsx_cmd('SkyX_JS_Focus-3')) );
+    var cmd = tsx_cmd('SkyX_JS_Focus-3');
 
     cmd = cmd.replace("$000", focusFilter ); // set filter
     cmd = cmd.replace("$001", focusExp ); // set Bin
@@ -577,9 +573,8 @@ export function tsx_GetFocusTemp( target ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_GetFocusTemp: ' + target.targetFindName );
 
-  var file = tsx_cmd('SkyX_JS_GetFocTemp');
+  var cmd = tsx_cmd('SkyX_JS_GetFocTemp');
   // tsxDebug('File: ' + file );
-  var cmd = String(shell.cat(file));
   // cmd = cmd.replace("$001", 30 ); // set exposure
   // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
   var Out = {
@@ -619,7 +614,7 @@ function tsx_GetMountReport() {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_GetMountReport' );
 
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_GetMntReport'));
+  var cmd = tsx_cmd('SkyX_JS_GetMntReport');
 
   var Out;
 
@@ -752,7 +747,7 @@ function tsx_DeviceInfo() {
   tsxDebug(' *** tsx_DeviceInfo' );
 
   // tsx_Connect();
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_DeviceInfo'));
+  var cmd = tsx_cmd('SkyX_JS_DeviceInfo');
   // cmd = cmd.replace('$000', Number(filterNum) ); // set filter
   // cmd = cmd.replace('$001', Number(exposure) ); // set exposure
 
@@ -1131,7 +1126,7 @@ function tsx_dither( target ) {
         // first abort Guiding
         tsx_AbortGuider(); // #TODO can put into dither if needed.
 
-        var cmd = shell.cat(tsx_cmd('SkyX_JS_NewDither'));
+        var cmd = tsx_cmd('SkyX_JS_NewDither');
 
         var pixelSize = tsx_GetServerStateValue('imagingPixelSize');
         tsxDebug(' *** pixelSize: ' + pixelSize);
@@ -1186,7 +1181,7 @@ function tsx_TargetReport( target ) {
   tsxDebug(' *** tsx_TargetReport: ' + target.targetFindName);
 
   // var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale, target.expos);
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_TargetReport'));
+  var cmd = tsx_cmd('SkyX_JS_TargetReport');
   cmd = cmd.replace('$000', target.targetFindName );
 
   var sunAlt = tsx_GetServerStateValue( 'defaultMinSunAlt');
@@ -1332,7 +1327,7 @@ function tsx_MatchRotation( targetSession ) {
 
   var rotateSucess = false;
   // var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale, target.expos);
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_MatchAngle'));
+  var cmd = tsx_cmd('SkyX_JS_MatchAngle');
   cmd = cmd.replace('$000', targetSession.angle );
   cmd = cmd.replace('$001', targetSession.scale);
   cmd = cmd.replace('$002', targetSession.exposure);
@@ -1422,7 +1417,7 @@ function tsx_takeImage( filterNum, exposure, frame ) {
 
   var success = 'Failed';
 
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_TakeImage'));
+  var cmd = tsx_cmd('SkyX_JS_TakeImage');
   postProgressTotal(exposure);
 
   cmd = cmd.replace("$000", filterNum ); // set filter
@@ -1459,7 +1454,7 @@ function tsx_UpdateFITS( target ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_UpdateFITS: ' + target.targetFindName);
 
-  var cmd = shell.cat(tsx_cmd('SkyX_JS_UpdateFitsHeader'));
+  var cmd = tsx_cmd('SkyX_JS_UpdateFitsHeader');
   cmd = cmd.replace("$000", target.targetFindName ); // set filter
 
   var tsx_is_waiting = true;
