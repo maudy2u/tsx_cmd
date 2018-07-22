@@ -21,9 +21,9 @@ if [ "$(uname -s)" == "Darwin" ]; then
     echo $(uname -s) $(uname -p) - Not Supported
     exit 5
   fi
-elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+elif [ "$(uname -s)" == "Linux" ]; then
 
-  if [ "$(expr substr $(uname -p) 1 5)" == "aarch64" ]; then
+  if [ "$(uname -p)" == "aarch64" ]; then
     ~/meteor/meteor --settings ./settings.json
   else
     echo $(uname -s) $(uname -p) - Not Supported
