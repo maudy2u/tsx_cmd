@@ -29,7 +29,7 @@ sudo apt-get install mongodb-enterprise
 cd ~
 git clone --depth 1 --branch release-1.4-universal-beta https://github.com/4commerce-technologies-AG/meteor.git
 cd meteor
-meteor —version
+./meteor —version
 cd ~
 alias meteor=$HOME/meteor/meteor
 
