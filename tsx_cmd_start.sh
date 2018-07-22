@@ -34,7 +34,9 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
 
   if [ "$(uname -p)" == "aarch64" ]; then
     echo Linux ARM in ${install_dir}
-    export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-linux-arm64/bin:$PATH
+    export PATH=${install_dir}/node-v8.11.3-linux-armv7l/bin:$PATH
+    # export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-linux-arm64/bin:$PATH
+    # https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz
     mkdir -p ${install_dir}/db
     mongod --dbpath ${install_dir}/db &
     export MONGO_URL='mongodb://localhost/tsx_cmd'

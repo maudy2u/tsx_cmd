@@ -98,9 +98,14 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
       echo " *******************************"
       echo "nodejs - Download and extract"
       echo " *******************************"
-      curl https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-arm64.tar.xz -o node-v8.11.3-linux-arm64.tar.xz
-      tar -xf node-v8.11.3-linux-arm64.tar.xz
-      rm ${install_dir}/node-v8.11.3-linux-arm64.tar.xz
+      # armv7
+      curl https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz -o node-v8.11.3-linux-armv7l.tar.xz
+      tar -xf node-v8.11.3-linux-armv7l.tar.xz
+      rm ${install_dir}/node-v8.11.3-linux-armv7l.tar.xz
+      # armv8
+      #curl https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-arm64.tar.xz -o node-v8.11.3-linux-arm64.tar.xz
+      #tar -xf node-v8.11.3-linux-arm64.tar.xz
+      #rm ${install_dir}/node-v8.11.3-linux-arm64.tar.xz
     else
       echo NO NODEJS supported
     fi
@@ -112,7 +117,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     # https://drive.google.com/drive/folders/1yUPU6A0gbBv5UnuSp308lvctY4d6aUtw?usp=sharing
     tar -xf ${1}
 
-    export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-linux-arm64/bin:$PATH
+    export PATH=${install_dir}/node-v8.11.3-linux-armv7l/bin:$PATH
     mkdir -p ${install_dir}/db
     export MONGO_URL='mongodb://localhost/tsx_cmd'
     export PORT=3000
@@ -124,7 +129,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     npm uninstall fibers
     npm install fibers
     cd ${install_dir}
-    ${install_dir}/node-v8.11.3-linux-arm64/bin/node /home/stephen/test/bundle/programs/server/node_modules/fibers/build
+    #${install_dir}/node-v8.11.3-linux-armv7l/bin/node /home/stephen/test/bundle/programs/server/node_modules/fibers/build
 
     echo " *******************************"
     echo " TSX_CMD - installed"
