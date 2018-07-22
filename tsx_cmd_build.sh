@@ -32,6 +32,6 @@ if [ $# -eq 0 ]
     echo ""
     exit 1
 fi
-echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_$(uname -p)_build_${1}_$(git rev-list --all --count).tar
-meteor bundle ../tsx_cmd_$(uname -s)_$(uname -p)_build_${1}_$(git rev-list --all --count).tar
+echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}.tar
+meteor bundle ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}.tar
 growlnotify -n "Build $(git rev-list --all --count) of TSX Cmd" -s -m "Completed"

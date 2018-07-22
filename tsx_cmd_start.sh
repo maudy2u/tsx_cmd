@@ -25,7 +25,7 @@ if [ "$(uname)" == "Darwin" ]; then
     export MONGO_URL='mongodb://localhost/tsx_cmd'
     export PORT=3000
     export ROOT_URL='http://127.0.0.1'
-    export METEOR_SETTINGS="$(pwd)/settings.json"
+    export METEOR_SETTINGS="$(cat $(pwd)/settings.json)"
     cd ${install_dir}/bundle
     node main.js
   else
@@ -44,7 +44,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     export MONGO_URL='mongodb://localhost/tsx_cmd'
     export PORT=3000
     export ROOT_URL='http://127.0.0.1'
-    export METEOR_SETTINGS="$(pwd)/settings.json"
+    export METEOR_SETTINGS="$(cat $(pwd)/settings.json)"
     cd ${install_dir}/bundle
     node main.js
   else
