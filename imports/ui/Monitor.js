@@ -85,15 +85,72 @@ class Monitor extends Component {
       tsx_actions: '',
       targetSessionId: '',
 
+      isTwilightEnabled: true,
+      isFocus3Enabled: false,
+      isFocus3Binned: false,
+      defaultMeridianFlip: true,
+      defaultSoftPark: false,
+      defaultCLSEnabled: true,
+
+
   };
 
   handleChange = (e, { name, value }) => this.setState({ [name]: value });
-  handleToggle = (e, { name, value }) => this.setState({ [name]: !value });
+//  handleToggle = (e, { name, value }) => this.setState({ [name]: !value });
+
+  // requires the ".bind(this)", on the callers
+  handleToggle = (e, { name, value }) => {
+
+    var val = eval( 'this.state.' + name);
+
+    this.setState({
+      [name]: !val
+    });
+    this.toggleDefaultState( name, !val );
+  };
+
   noFoundSessionOpen = () => this.setState({ noFoundSession: true })
   noFoundSessionClose = () => this.setState({ noFoundSession: false })
 
   componentWillReceiveProps(nextProps) {
     this.updateMonitor(nextProps);
+  }
+
+  // Use this method to save any defaults gathered
+  saveDefaults(){
+
+    // this.saveDefaultState('ip');
+    // this.saveDefaultState('port');
+    this.saveDefaultState('defaultMeridianFlip');
+    this.saveDefaultState('defaultSoftPark');
+    this.saveDefaultState('isTwilightEnabled');
+    this.saveDefaultState('isFocus3Enabled');
+    this.saveDefaultState('defaultCLSEnabled');
+
+  }
+
+  // Generic Method to determine default to save.
+  saveDefaultState( param ) {
+    var value = eval("this.state."+param);
+
+    Meteor.call( 'updateServerState', param, value , function(error, result) {
+
+        if (error && error.error === "logged-out") {
+          // show a nice error message
+          Session.set("errorMessage", "Please fix.");
+        }
+    });//.bind(this));
+  }
+
+  // Generic Method to determine default to save.
+  toggleDefaultState( param, val ) {
+    Meteor.call( 'updateServerState', param, val , function(error, result) {
+
+        if (error && error.error === "logged-out") {
+          // show a nice error message
+          Session.set("errorMessage", "Please fix.");
+        }
+    });//.bind(this));
   }
 
   textTSX() {
@@ -195,6 +252,43 @@ class Monitor extends Component {
     finally {
 
     }
+  }
+
+  componentDidMount() {
+    this.updateDefaults(this.props);
+  }
+
+  updateDefaults(nextProps) {
+    if( typeof nextProps == 'undefined'  ) {
+      return;
+    }
+
+    if( typeof nextProps.tsxInfo == 'undefined'  ) {
+      return;
+    }
+
+    this.setState({
+      defaultMeridianFlip: Boolean(nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultMeridianFlip';
+      }).value),
+      defaultSoftPark: Boolean(nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultSoftPark';
+      }).value),
+      isTwilightEnabled: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'isTwilightEnabled';
+      }).value,
+      isFocus3Enabled: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'isFocus3Enabled';
+      }).value,
+      isFocus3Binned: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'isFocus3Binned';
+      }).value,
+      defaultCLSEnabled: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultCLSEnabled';
+      }).value,
+
+    });
+
   }
 
   confirmPlayScheduler() {
@@ -488,6 +582,65 @@ class Monitor extends Component {
           </Segment>
             <Segment>
             <Label>Transit <Label.Detail>{Number(this.state.monTransit).toFixed(4)}</Label.Detail></Label>
+          </Segment>
+        </Segment.Group>
+        <Segment.Group size='mini'>
+          <Segment>
+            <h3 className="ui header">Session Controls</h3>
+            <Form.Group>
+              <Form.Checkbox
+                label='Meridian Flip Enabled '
+                name='defaultMeridianFlip'
+                toggle
+                placeholder= 'Enable auto meridian flip'
+                checked={this.state.defaultMeridianFlip}
+                onChange={this.handleToggle.bind(this)}
+              />
+              <Form.Checkbox
+                label='CLS Enabled '
+                name='defaultCLSEnabled'
+                toggle
+                placeholder= 'Enable CLS'
+                checked={this.state.defaultCLSEnabled}
+                onChange={this.handleToggle.bind(this)}
+              />
+              <Form.Checkbox
+                label='Soft Park Enabled (Stop tracking) '
+                name='defaultSoftPark'
+                toggle
+                placeholder= 'Enable soft parking'
+                checked={this.state.defaultSoftPark}
+                onChange={this.handleToggle.bind(this)}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Checkbox
+                label='Checking Focus Enabled (@Focus3) '
+                name='isFocus3Enabled'
+                toggle
+                placeholder= 'Enable focus checking'
+                checked={this.state.isFocus3Enabled}
+                onChange={this.handleToggle.bind(this)}
+              />
+              {/* <Form.Checkbox
+                label='Bin 2x2 Focus Enabled '
+                name='isFocus3Binned'
+                toggle
+                placeholder= 'Enable to bin when focusing'
+                checked={this.state.isFocus3Binned}
+                onChange={this.handleToggle.bind(this)}
+              /> */}
+            </Form.Group>
+            <Form.Group>
+              <Form.Checkbox
+                label='Twilight Check Enabled '
+                name='isTwilightEnabled'
+                toggle
+                placeholder= 'Enable twilight check'
+                checked={this.state.isTwilightEnabled}
+                onChange={this.handleToggle.bind(this)}
+              />
+            </Form.Group>
           </Segment>
         </Segment.Group>
         {/*  */}

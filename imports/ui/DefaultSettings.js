@@ -151,9 +151,9 @@ class DefaultSettings extends Component {
       // port: nextProps.tsxInfo.find(function(element) {
       //   return element.name == 'port';
       // }).value,
-      defaultCoolTemp: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultCoolTemp';
-      }).value,
+      // defaultCoolTemp: nextProps.tsxInfo.find(function(element) {
+      //   return element.name == 'defaultCoolTemp';
+      // }).value,
       defaultFocusTempDiff: nextProps.tsxInfo.find(function(element) {
         return element.name == 'defaultFocusTempDiff';
       }).value,
@@ -349,7 +349,7 @@ class DefaultSettings extends Component {
               onChange={this.handleChange}
             />
           </Form.Group>
-          <Form.Group>
+          {/* <Form.Group>
             <Form.Checkbox
               label='Meridian Flip Enabled '
               name='defaultMeridianFlip'
@@ -374,8 +374,8 @@ class DefaultSettings extends Component {
               checked={this.state.defaultSoftPark}
               onChange={this.handleToggle.bind(this)}
             />
-          </Form.Group>
-          <Form.Group>
+          </Form.Group> */}
+          {/* <Form.Group>
             <Form.Checkbox
               label='Checking Focus Enabled (@Focus3) '
               name='isFocus3Enabled'
@@ -384,24 +384,24 @@ class DefaultSettings extends Component {
               checked={this.state.isFocus3Enabled}
               onChange={this.handleToggle.bind(this)}
             />
-            {/* <Form.Checkbox
+            <Form.Checkbox
               label='Bin 2x2 Focus Enabled '
               name='isFocus3Binned'
               toggle
               placeholder= 'Enable to bin when focusing'
               checked={this.state.isFocus3Binned}
               onChange={this.handleToggle.bind(this)}
-            /> */}
-          </Form.Group>
+            />
+          </Form.Group> */}
           <Form.Group>
-            <Form.Checkbox
+            {/* <Form.Checkbox
               label='Twilight Check Enabled '
               name='isTwilightEnabled'
               toggle
               placeholder= 'Enable twilight check'
               checked={this.state.isTwilightEnabled}
               onChange={this.handleToggle.bind(this)}
-            />
+            /> */}
             <Form.Input
               label='Twilight Alittude for Sun '
               name='defaultMinSunAlt'

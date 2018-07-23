@@ -297,11 +297,37 @@ class App extends Component {
 
     if (this.state.activeItem == 'Targets' ) {
       return (
-        <TargetSessionMenu />
+        <div>
+          {/* <Segment> */}
+            {/* <Button.Group size='small'> */}
+              {/* <Button size='small' icon='refresh' onClick={this.connectToTSX.bind(this)}/> */}
+            {/* </Button.Group> */}
+            {/* <Button.Group size='small'> */}
+              <Button size='small' onClick={this.addEntry.bind(this)}>Add Target</Button>
+            {/* </Button.Group> */}
+            {/* <Button icon='add' onClick={this.addEntry.bind(this)}/>
+            <Button icon='add' onClick={this.addNewTemplate.bind(this)}/> */}
+
+          {/* </Segment> */}
+          <TargetSessionMenu />
+        </div>
       )
     } else if (this.state.activeItem == 'Series') {
       return (
-        <TakeSeriesTemplateMenu />
+        <div>
+          {/* <Segment> */}
+            {/* <Button.Group size='small'> */}
+              {/* <Button size='small' icon='refresh' onClick={this.connectToTSX.bind(this)}/> */}
+            {/* </Button.Group> */}
+            {/* <Button.Group size='small'> */}
+              <Button size='small' onClick={this.addNewTemplate.bind(this)}>Add Series</Button>
+            {/* </Button.Group> */}
+            {/* <Button icon='add' onClick={this.addEntry.bind(this)}/>
+            <Button icon='add' onClick={this.addNewTemplate.bind(this)}/> */}
+
+          {/* </Segment> */}
+          <TakeSeriesTemplateMenu />
+      </div>
       )
     } else if (this.state.activeItem == 'Devices') {
       return this.renderDevices();
@@ -583,6 +609,7 @@ class App extends Component {
           <div>
             <Segment.Group>
               <Segment>
+                <Button size='small' name='showMonitor' icon='dashboard' onClick={this.handleToggle.bind(this)}/>
                 <Label onClick={this.modalEnterIpOpen.bind(this)}>TSX ip:
                   <Label.Detail>
                     {IP}
@@ -597,26 +624,13 @@ class App extends Component {
                 </Label>
                 {this.renderPortEditor()}
                 <Button.Group basic size='small' floated='right'>
+                  <Button icon='refresh' onClick={this.connectToTSX.bind(this)}/>
                   <Button icon='car' onClick={this.park.bind(this)}/>
                 </Button.Group>
               </Segment>
-              {/* <Segment raised> */}
-            <Segment>
-              {/* <Button.Group size='small'> */}
-                <Button size='small' icon='refresh' onClick={this.connectToTSX.bind(this)}/>
-                <Button size='small' name='showMonitor' icon='dashboard' onClick={this.handleToggle.bind(this)}/>
-              {/* </Button.Group> */}
-              {/* <Button.Group size='small'> */}
-                <Button size='small' onClick={this.addEntry.bind(this)}>Add Target</Button>
-                <Button size='small' onClick={this.addNewTemplate.bind(this)}>Add Series</Button>
-              {/* </Button.Group> */}
-              {/* <Button icon='add' onClick={this.addEntry.bind(this)}/>
-              <Button icon='add' onClick={this.addNewTemplate.bind(this)}/> */}
-
-            </Segment>
-            <Segment>
-              <Label>Status: <Label.Detail>{this.state.currentStage}</Label.Detail></Label>
-            </Segment>
+              <Segment>
+                <Label>Status: <Label.Detail>{this.state.currentStage}</Label.Detail></Label>
+              </Segment>
             {/* { this.tsxConnectionFailed() } */}
               <Segment>
             { this.showMain() }

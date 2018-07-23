@@ -55,21 +55,6 @@ class TakeSeriesTemplateMenu extends Component {
 
     return (
       <div>
-        <Item.Group divided>
-        {/* <Button.Group basic size='small'>
-          <Button icon='settings' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
-          <Button icon='find' onClick={this.chkTestData.bind(this)}/>
-        </Button.Group> */}
-      </Item.Group>
-        {/* <Button.Group>
-
-          <Button circular icon='add' onClick={this.handleAddOpen.bind(this)} />
-          <Button circular icon='edit' onClick={this.handleEditOpen.bind(this)} />
-          <Button circular icon='delete' onClick={this.handleDelOpen.bind(this)} />
-       </Button.Group> */}
-       {/* {this.createNewTemplateSeries()} */}
-       {/* {this.editTemplateSeries()}
-       {this.deleteCheckedTemplateSeries()} */}
          <Item.Group divided>
            {this.props.takeSeriesTemplates.map( (takeSeriesTemplate)=>{
              return <TakeSeries key={takeSeriesTemplate._id} seriesTemplate={takeSeriesTemplate} />
