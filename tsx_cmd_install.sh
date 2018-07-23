@@ -81,19 +81,19 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     # Do something under GNU/Linux platform
     echo Linux
 
-    # install mongodb
-    echo " *******************************"
-    echo "Mongodb - Download and extract"
-    echo " *******************************"
-    # source: https://andyfelong.com/2018/02/update-mongodb-3-6-on-odroid-c2-with-ubuntu-16-04-3-arm64/
-    sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
-    echo "deb [ arch=amd64,arm64,ppc64el,s390x ] http://repo.mongodb.com/apt/ubuntu xenial/mongodb-enterprise/3.6 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-enterprise.list
-    sudo apt-get update
-    sudo apt-get upgrade
-    sudo apt-get install mongodb-enterprise
-
     # install nodejs
     if [ "$(uname -p)" == "aarch64" ]; then
+
+      # install mongodb
+      echo " *******************************"
+      echo "Mongodb - apt-get install"
+      echo " *******************************"
+      # source: https://andyfelong.com/2018/02/update-mongodb-3-6-on-odroid-c2-with-ubuntu-16-04-3-arm64/
+      sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
+      echo "deb [ arch=amd64,arm64,ppc64el,s390x ] http://repo.mongodb.com/apt/ubuntu xenial/mongodb-enterprise/3.6 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-enterprise.list
+      sudo apt-get update
+      sudo apt-get upgrade
+      sudo apt-get install mongodb-enterprise
 
       echo " *******************************"
       echo "nodejs - Download and extract"
@@ -106,6 +106,22 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
       #curl https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-arm64.tar.xz -o node-v8.11.3-linux-arm64.tar.xz
       #tar -xf node-v8.11.3-linux-arm64.tar.xz
       #rm ${install_dir}/node-v8.11.3-linux-arm64.tar.xz
+    elif [ "$(uname -p)" == "armv7l" ]; then
+      # install mongodb
+      echo " *******************************"
+      echo "Mongodb - apt-get install"
+      echo " *******************************"
+      sudo apt-get update
+      sudo apt-get upgrade
+      sudo apt-get install mongodb-server
+
+      echo " *******************************"
+      echo "nodejs - Download and extract"
+      echo " *******************************"
+      # armv7
+      curl https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz -o node-v8.11.3-linux-armv7l.tar.xz
+      tar -xf node-v8.11.3-linux-armv7l.tar.xz
+      rm ${install_dir}/node-v8.11.3-linux-armv7l.tar.xz
     else
       echo NO NODEJS supported
     fi
@@ -135,10 +151,8 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     echo " TSX_CMD - installed"
     echo " *******************************"
 
-elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
-    # Do something under 32 bits Windows NT platform
-    Echo windows32
-elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]; then
-    # Do something under 64 bits Windows NT platform
-    echo windows64
-fi
+  else
+      # Do something under 64 bits Windows NT platform
+      echo $(uname -s) $(uname -p) - Not Supported
+      exit 5
+  fi
