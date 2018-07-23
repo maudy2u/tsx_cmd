@@ -208,10 +208,10 @@ class TargetSessionMenu extends Component {
             </Modal.Content>
           </Modal>
           <Segment>
-          <Item.Group divided unstackable>
-            {this.renderTargets(this.state.targetList)}
-        </Item.Group>
-      </Segment>
+            <Item.Group divided unstackable>
+              {this.renderTargets(this.state.targetList)}
+            </Item.Group>
+          </Segment>
       </div>
     )
   }

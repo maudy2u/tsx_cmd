@@ -32,9 +32,9 @@ if [ $# -eq 0 ]
     echo ""
     exit 1
 fi
-echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}.tar
 if [ "$(uname -s)" == "Darwin" ]; then
   if [ "$(uname -p)" == "i386" ]; then
+    echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}.tar
     meteor bundle ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}.tar
     growlnotify -n "Build $(git rev-list --all --count) of TSX Cmd" -s -m "Completed"
   else
@@ -44,9 +44,11 @@ if [ "$(uname -s)" == "Darwin" ]; then
 elif [ "$(uname -s)" == "Linux" ]; then
 
   if [ "$(uname -p)" == "aarch64" ]; then
+    echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_armv7_build_$(git rev-list --all --count)_${1}.tar
     ~/meteor/meteor bundle ../tsx_cmd_$(uname -s)_armv7_build_$(git rev-list --all --count)_${1}.tar
 
   elif [ "$(uname -p)" == "armv7l" ]; then
+    echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_armv7_build_$(git rev-list --all --count)_${1}.tar
     ~/meteor/meteor bundle ../tsx_cmd_$(uname -s)_armv7_build_$(git rev-list --all --count)_${1}.tar
   else
     echo $(uname -s) $(uname -p) - Not Supported
