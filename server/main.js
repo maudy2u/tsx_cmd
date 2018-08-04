@@ -49,6 +49,8 @@ import {
   prepareTargetForImaging,
   processTargetTakeSeries,
   tsx_ServerIsOnline,
+  tsx_isDark,
+  tsx_MntUnpark,
 } from './run_imageSession.js';
 
 import { tsx_feeder, stop_tsx_is_waiting } from './tsx_feeder.js';
@@ -104,6 +106,9 @@ function initServerStates() {
     }
   }
 }
+function UnparkMount() {
+  tsx_MntUnpark();
+}
 
 function ParkMount( isParked ) {
   if( !isParked ) {
@@ -120,20 +125,30 @@ function ParkMount( isParked ) {
   var msSleep = Number(sleepTime); // number of seconds
   postProgressTotal(sleepTime);
   postProgressMessage('Waiting ~' + sleepTime + 'min.');
-  while( timeout < msSleep) { //
-    if( tsx_GetServerStateValue('currentJob') == '' ) {
-      UpdateStatus( ' Canceled sessions');
-      break;
-    }
+  while( timeout < msSleep && tsx_GetServerStateValue('currentJob') != '') { //
     var min = 1000*60; // one minute in milliseconds
     Meteor.sleep( min );
     timeout = timeout + 1;
     postProgressIncrement( timeout );
   }
+  if( tsx_GetServerStateValue('currentJob') == '' ) {
+    UpdateStatus( ' Canceled sessions');
+  }
   postProgressTotal(0);
   postProgressIncrement( 0 );
   postProgressMessage(' Processing');
   UpdateStatus(' Finished sleep. Waking Up...');
+
+}
+
+function isDarkEnough() {
+  var isDark = tsx_isDark();
+  tsxDebug(' Is dark enough for target: ' + isDark );
+  if( isDark === false ) {
+    tsxDebug( ' Sun is not low enough.' );
+    return false;
+  }
+  return true;
 }
 
 Meteor.startup(() => {
@@ -154,6 +169,9 @@ Meteor.startup(() => {
   // Clean up the scheduler process collections...
   // Persistence across reboots is not needed at this time.
   tsxDebug('Number of Jobs found: ' + jobs.length);
+  if( jobs.length > 0 ) {
+    UpdateStatus( ' Cleaning up DB.');
+  }
   for (var i = 0; i < jobs.length; i++) {
     if( typeof jobs[i] != 'undefined') {
       scheduler.remove(jobs[i]._id);
@@ -217,33 +235,44 @@ Meteor.startup(() => {
         // THis is used for the session... not for the job.
         //        && tsx_GetServerStateValue( tsx_ServerStates.imagingSessionId ) != ''
        ) {
-        // Find a session
-        // Get the target to shoot
-        UpdateStatus( ' Validating Targets...');
-        var target = getValidTargetSession(); // no return
 
-        if (typeof target != 'undefined') {
-          isParked = false;
-          UpdateStatus ( ' Preparing target...');
+          if( isParked ) {
+            UnparkMount();
+          }
 
-          // Point, Focus, Guide
-          var ready = prepareTargetForImaging( target );
-          if( ready ) {
-            // target images per Take Series
-            tsxLog ( ' *************************');
-            UpdateStatus ( ' *** Starting imaging: ' + target.targetFindName );
-            tsxLog ( ' *************************');
-            processTargetTakeSeries( target );
+          // Find a session
+          // Get the target to shoot
+          tsxInfo( ' Validating Targets...');
+
+          var target = getValidTargetSession(); // no return
+
+          if (typeof target != 'undefined') {
+            isParked = false;
+            tsxDebug ( ' ' + target.targetFindName + ' Preparing target...');
+
+            // Point, Focus, Guide
+            var ready = prepareTargetForImaging( target );
+            if( ready ) {
+              // target images per Take Series
+              tsxLog ( ' *************************');
+              tsxLog ( ' *************************');
+              UpdateStatus ( ' *** Start imaging: ' + target.targetFindName );
+              processTargetTakeSeries( target );
+            }
+            else {
+              ParkMount( isParked );
+              isParked = true;
+            }
           }
           else {
             ParkMount( isParked );
             isParked = true;
           }
-        }
-        else {
-          ParkMount( isParked );
-          isParked = true;
-        }
+          if( !isDarkEnough() ) {
+            UpdateStatus( ' Scheduler stopped: not dark.');
+            break;
+          }
+
       }
 
       // While ended... exit process
@@ -323,7 +352,7 @@ Meteor.startup(() => {
     function (job, cb) {
       var schedule = job.data; // Only one email per job
       // This will only be called if a
-      // 'runScheduler' job is obtained
+      // 'manageCameraTemp' job is obtained
       // tsxLog('manageCameraTemp');
       // job.log("Entered manageCameraTemp",
       //   {level: 'info'});
@@ -506,7 +535,7 @@ Meteor.methods({
      var id = TheSkyXInfos.upsert( {name: name }, {
        $set: { value: value }
      })
-     // tsxDebug('updated: ' +name+':'+value);
+     UpdateStatus(' [Saved] ' +name+':'+value);
    },
 
    updateSeriesIdWith(

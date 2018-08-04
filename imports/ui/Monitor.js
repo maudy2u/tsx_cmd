@@ -92,6 +92,7 @@ class Monitor extends Component {
       defaultSoftPark: false,
       defaultCLSEnabled: true,
 
+      enableImagingCooler: false,
 
   };
 
@@ -126,6 +127,7 @@ class Monitor extends Component {
     this.saveDefaultState('isTwilightEnabled');
     this.saveDefaultState('isFocus3Enabled');
     this.saveDefaultState('defaultCLSEnabled');
+    this.saveDefaultState('enableImagingCooler');
 
   }
 
@@ -285,6 +287,9 @@ class Monitor extends Component {
       }).value,
       defaultCLSEnabled: nextProps.tsxInfo.find(function(element) {
         return element.name == 'defaultCLSEnabled';
+      }).value,
+      enableImagingCooler: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'enableImagingCooler';
       }).value,
 
     });
@@ -638,6 +643,16 @@ class Monitor extends Component {
                 toggle
                 placeholder= 'Enable twilight check'
                 checked={this.state.isTwilightEnabled}
+                onChange={this.handleToggle.bind(this)}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Checkbox
+                label='Enable Imaging Cooler '
+                name='enableImagingCooler'
+                toggle
+                placeholder= 'Cool down camera'
+                checked={this.state.enableImagingCooler}
                 onChange={this.handleToggle.bind(this)}
               />
             </Form.Group>

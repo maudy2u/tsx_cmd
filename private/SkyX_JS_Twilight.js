@@ -6,19 +6,16 @@
 //
 // Ken Sturrock
 // January 13, 2018
-//
+// Stephen Townsend
+// August 1, 2018
 
-var target 	= "$000";	// tsxfeeder replaces $000 with the current target name.
-var minSunAlt = $001;
+var minSunAlt = $000;
 var Out;
 
 // Find the sun and figure out how high it is.
 sky6StarChart.Find("sun");
 sky6ObjectInformation.Property(59);
 var altitude = sky6ObjectInformation.ObjInfoPropOut;
-
-// Refind where we were.
-sky6StarChart.Find(target);
 
 if (altitude > minSunAlt )
 //

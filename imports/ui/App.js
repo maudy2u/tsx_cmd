@@ -71,10 +71,6 @@ class App extends Component {
 
   handleToggle = (e, { name, value }) => this.setState({ [name]: Boolean(!eval('this.state.'+name)) })
 
-  // handleStartChange = ( value ) => this.setState({defaultStartTime: value.formatted24 });
-  // handleStopChange = ( value ) => this.setState({defaultStopTime: value.formatted24 });
-  // handlePriorityChange = ( value ) => this.setState({defaultPriority: value.value });
-
   handleMenuItemClick = (e, { name }) => this.setState({ activeItem: name });
   saveServerFailedOpen = () => this.setState({ saveServerFailed: true });
   saveServerFailedClose = () => this.setState({ saveServerFailed: false });

@@ -163,7 +163,7 @@ function fileNameDate( today ) {
   collectionName: 'AppLogsCon',
   format(opts) {
     var msgData= ((typeof opts.data === 'undefined' || opts.data === null || opts.data === '') ? '' : (' = ' + opts.data));
-    return ((Meteor.isServer) ? '[SERVER]' : "[CLIENT]")
+    return ((Meteor.isServer) ? '[TSX_CMD]' : "[CLIENT]")
     +'|'+(formatDate( opts.time ) + '|[' + opts.level + ']|'
     + opts.message
     + msgData);
@@ -189,7 +189,7 @@ function fileNameDate( today ) {
   format(time, level, message, data, userId) {
     var msgData= ((typeof data === 'undefined' || data === null || data === '' ) ? '' : (' = ' + data));
     return (
-      (Meteor.isServer) ? '[SERVER]' : "[CLIENT]")
+      (Meteor.isServer) ? '[TSX_CMD]' : "[CLIENT]")
       + '|' +(formatDate( time )
       + '|[' + level + ']|'
       + message

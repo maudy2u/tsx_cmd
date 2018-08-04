@@ -88,7 +88,6 @@ class TargetEditor extends Component {
   handleCoolingTimeChange = ( value ) => this.setState({coolingTime: value.value });
   // handleFocusTempChange = ( value ) => this.setState({tempChg: value.value });
   handleMinAltChange = ( value ) => this.setState({minAlt: value.value });
-  onStopTimeChange = (value) => this.setState({testDate: value});
   onChangeChecked() {
     this.setState({enabledActive: !this.state.enabledActive});
   }
@@ -416,14 +415,7 @@ class TargetEditor extends Component {
       { menuItem: 'Constraints', render: () =>
       <Tab.Pane>
         <h3 className="ui header">Constraints</h3>
-        {/* <Segment>
-          <h4 className="ui header">Stop Time</h4>
-          <DateTime
-            value={this.state.testDate}
-            pickerOptions={timeOptions}
-            onChange={this.onStopTimeChange}
-          />
-        </Segment> */}
+
         <Segment>
           <h4 className="ui header">Priority: {targetPriority}</h4>
           <ReactSimpleRange

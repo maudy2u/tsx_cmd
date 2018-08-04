@@ -64,7 +64,9 @@ if ( Application.build >= 11177 )
 			// var initBinY = CCDSC.BinY;
 			// CCDSC.BinX = 2;
 			// CCDSC.Biny = 2;
-			CCDSC.ImageReduction = 1;
+
+			// NOt needed in @Focus3: http://www.bisque.com/sc/forums/p/32837/169061.aspx#169061
+			//CCDSC.ImageReduction = 1;
 			//
 			CCDSC.TakeImage();			// Snap the throw-away
 
