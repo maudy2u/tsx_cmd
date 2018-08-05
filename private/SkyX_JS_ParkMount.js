@@ -58,12 +58,17 @@ catch (repErr)
 if( SelectedHardware.mountModel !== "Telescope Mount Simulator" ) {
 	if (!softPark ) {
 		try {
-			 sky6RASCOMTele.ParkAndDoNotDisconnect();
+			if(!sky6RASCOMTele.IsParked() ){
+				sky6RASCOMTele.ParkAndDoNotDisconnect();
+ 			 	while( !sky6RASCOMTele.IsParked() ) {
+ 				 	errMsgs = 'Parking';
+ 			 	}
+		 }
 			 errMsgs = 'Parked';
 		}
 		catch(e) {
 			sky6RASCOMTele.SetTracking(0, 1, 0 ,0);
-			errMsgs = 'Soft Parked';
+			errMsgs = 'Soft Parked - catch';
 		}
 	}
 	else {

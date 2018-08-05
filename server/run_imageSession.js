@@ -214,20 +214,22 @@ export function tsx_MntUnpark() {
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         var result = tsx_return.split('|')[0].trim();
-
-        if( result == 'Unparked' || result == 'Unparked' ) {
+        tsxDebug( ' unpark result: ' + result );
+        if( result == 'unparked' ) {
           UpdateStatus( ' ' + result );
         }
         else {
-          Out = result;
           UpdateStatus( ' !!! Unparking err: ' + result );
         }
 
+        Out = result;
         tsx_is_waiting = false;
   }));
+  tsxDebug ( ' unpark waiting ') ;
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
+  tsxDebug ( ' unpark done ') ;
   return Out;
 }
 
@@ -261,20 +263,22 @@ export function tsx_MntPark(defaultFilter, softPark) {
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         var result = tsx_return.split('|')[0].trim();
-
+        tsxDebug( ' park result: ' + result );
         if( result == 'Parked' || result == 'Soft Parked' ) {
           UpdateStatus( ' ' + result );
         }
         else {
-          Out = result;
           UpdateStatus( ' !!! Parking err: ' + result );
         }
 
+        Out = result;
         tsx_is_waiting = false;
   }));
+  tsxDebug( ' Park waiting' );
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
+  tsxDebug( ' Park wait done' );
   return Out;
 }
 
@@ -930,7 +934,7 @@ function tsx_isDarkEnough(target) {
     }
 	}
   else {
-    tsxDebug('Twilight disabled');
+    tsxDebug(' Twilight disabled');
     return true;
   }
 }
@@ -966,7 +970,7 @@ export function tsx_isDark() {
       Meteor.sleep( 1000 );
     }
 
-    tsxDebug('Dark enough: ' + isDark);
+    tsxDebug(' Dark enough: ' + isDark);
     if( isDark == 'Light') {
       tsxDebug( ' Not Dark enough.');
       return false;
@@ -977,7 +981,7 @@ export function tsx_isDark() {
     }
 	}
   else {
-    tsxDebug('Twilight disabled');
+    tsxDebug(' Twilight disabled');
     return true;
   }
 }
@@ -1844,7 +1848,7 @@ function isTargetComplete( target ) {
 }
 // *************************** ***********************************
 
-function hasStartTimePassed( target ) {
+export function hasStartTimePassed( target ) {
   // tsxDebug('************************');
   tsxDebug(' *** hasStartTimePassed: ' + target.targetFindName );
 
@@ -1860,7 +1864,7 @@ function hasStartTimePassed( target ) {
 // 24hrs e.g.
 // 21:00
 // return true if undedefined
-function isTimeBeforeCurrentTime( ts ) {
+export function isTimeBeforeCurrentTime( ts ) {
   // tsxDebug('************************');
   tsxDebug(' *** isTimeBeforeCurrentTime: ' + ts );
 

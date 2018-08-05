@@ -39,12 +39,14 @@ catch (repErr) {
 
 if( SelectedHardware.mountModel !== "Telescope Mount Simulator" ) {
 	try {
-		 sky6RASCOMTele.Unpark();
+		if( sky6RASCOMTele.isParked() ) {
+			sky6RASCOMTele.Unpark();
+		}
 		 errMsgs = 'unparked';
 	}
 	catch(e) {
 		sky6RASCOMTele.SetTracking(0, 1, 0 ,0);
-		errMsgs = 'uparked';
+		errMsgs = 'unparked';
 	}
 }
 errMsgs

@@ -50,6 +50,8 @@ import {
   processTargetTakeSeries,
   tsx_ServerIsOnline,
   tsx_isDark,
+  isTimeBeforeCurrentTime,
+  hasStartTimePassed,
   tsx_MntUnpark,
 } from './run_imageSession.js';
 
@@ -106,9 +108,6 @@ function initServerStates() {
     }
   }
 }
-function UnparkMount() {
-  tsx_MntUnpark();
-}
 
 function ParkMount( isParked ) {
   if( !isParked ) {
@@ -120,7 +119,7 @@ function ParkMount( isParked ) {
   }
   isParked = true;
   var sleepTime = tsx_GetServerStateValue('defaultSleepTime');
-  UpdateStatus( ' No valid target, waiting... '+ sleepTime + 'min');
+  UpdateStatus( ' No valid target, waiting: '+ sleepTime + ' min');
   var timeout = 0;
   var msSleep = Number(sleepTime); // number of seconds
   postProgressTotal(sleepTime);
@@ -137,7 +136,7 @@ function ParkMount( isParked ) {
   postProgressTotal(0);
   postProgressIncrement( 0 );
   postProgressMessage(' Processing');
-  UpdateStatus(' Finished sleep. Waking Up...');
+  UpdateStatus(' WAKING UP...');
 
 }
 
@@ -236,9 +235,8 @@ Meteor.startup(() => {
         //        && tsx_GetServerStateValue( tsx_ServerStates.imagingSessionId ) != ''
        ) {
 
-          if( isParked ) {
-            UnparkMount();
-          }
+          tsx_MntUnpark();
+          isParked = false;
 
           // Find a session
           // Get the target to shoot
@@ -269,13 +267,19 @@ Meteor.startup(() => {
             isParked = true;
           }
           if( !isDarkEnough() ) {
-            UpdateStatus( ' Scheduler stopped: not dark.');
-            break;
+            ParkMount( isParked );
+            isParked = true;
+            var approachingDawn = isTimeBeforeCurrentTime('3:00');
+            if( approachingDawn ) {
+              UpdateStatus( ' Scheduler stopped: not dark.');
+              UpdateStatus( ' ^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
+              break;
+            }
           }
-
       }
 
       // While ended... exit process
+      setSchedulerState('Stop' );
       UpdateStatus( ' Idle');
       // tsx_Disconnect();
       job.done();
@@ -399,11 +403,6 @@ function getSchedulerState() {
 
 function setSchedulerState( value ) {
   schedulerRunning = value;
-}
-
-export function srvPlayScheduler ( callback ) {
-  tsxDebug('Scheduler STARTING' );
-  callback();
 }
 
 // The pause method should cancel the currentJob
@@ -535,7 +534,7 @@ Meteor.methods({
      var id = TheSkyXInfos.upsert( {name: name }, {
        $set: { value: value }
      })
-     UpdateStatus(' [Saved] ' +name+':'+value);
+     tsxInfo(' [Saved] ' +name+':'+value);
    },
 
    updateSeriesIdWith(
