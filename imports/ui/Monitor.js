@@ -594,7 +594,7 @@ class Monitor extends Component {
             <h3 className="ui header">Session Controls</h3>
             <Form.Group>
               <Form.Checkbox
-                label='Meridian Flip Enabled '
+                label='Enable Meridian Flip '
                 name='defaultMeridianFlip'
                 toggle
                 placeholder= 'Enable auto meridian flip'
@@ -602,7 +602,7 @@ class Monitor extends Component {
                 onChange={this.handleToggle.bind(this)}
               />
               <Form.Checkbox
-                label='CLS Enabled '
+                label='Enable CLS '
                 name='defaultCLSEnabled'
                 toggle
                 placeholder= 'Enable CLS'
@@ -610,7 +610,7 @@ class Monitor extends Component {
                 onChange={this.handleToggle.bind(this)}
               />
               <Form.Checkbox
-                label='Soft Park Enabled (Stop tracking) '
+                label='Enable Soft Parking (Stop tracking) '
                 name='defaultSoftPark'
                 toggle
                 placeholder= 'Enable soft parking'
@@ -620,7 +620,7 @@ class Monitor extends Component {
             </Form.Group>
             <Form.Group>
               <Form.Checkbox
-                label='Checking Focus Enabled (@Focus3) '
+                label='Enable Autofocusing (@Focus3) '
                 name='isFocus3Enabled'
                 toggle
                 placeholder= 'Enable focus checking'
@@ -638,7 +638,7 @@ class Monitor extends Component {
             </Form.Group>
             <Form.Group>
               <Form.Checkbox
-                label='Twilight Check Enabled '
+                label='Enable Twilight Check '
                 name='isTwilightEnabled'
                 toggle
                 placeholder= 'Enable twilight check'
