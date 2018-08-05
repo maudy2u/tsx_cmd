@@ -21,9 +21,8 @@
 # source: https://andyfelong.com/2018/02/update-mongodb-3-6-on-odroid-c2-with-ubuntu-16-04-3-arm64/
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
 echo "deb [ arch=amd64,arm64,ppc64el,s390x ] http://repo.mongodb.com/apt/ubuntu xenial/mongodb-enterprise/3.6 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-enterprise.list
-sudo apt-get update
-sudo apt-get upgrade
-sudo apt-get install mongodb-enterprise
+sudo apt update
+sudo apt install mongodb-enterprise
 
 # INSTALL METEOR
 cd ~
