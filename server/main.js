@@ -53,6 +53,7 @@ import {
   isTimeBeforeCurrentTime,
   hasStartTimePassed,
   tsx_MntUnpark,
+  tsx_IsParked,
 } from './run_imageSession.js';
 
 import { tsx_feeder, stop_tsx_is_waiting } from './tsx_feeder.js';
@@ -133,11 +134,12 @@ function ParkMount( isParked ) {
   if( tsx_GetServerStateValue('currentJob') == '' ) {
     UpdateStatus( ' Canceled sessions');
   }
+  else {
+    UpdateStatus(' WAKING UP...');
+  }
   postProgressTotal(0);
   postProgressIncrement( 0 );
   postProgressMessage(' Processing');
-  UpdateStatus(' WAKING UP...');
-
 }
 
 function isDarkEnough() {
@@ -150,12 +152,7 @@ function isDarkEnough() {
   return true;
 }
 
-Meteor.startup(() => {
-  // code to run on server at startup
-  tsxLog(' ******************', '');
-  tsxLog(' STARTED', '');
-  tsxLog(' ******************', '');
-
+function CleanUpJobs() {
   // *******************************
   // Server restarts and it means no session
   // get rid of any old processes/jobs
@@ -174,14 +171,17 @@ Meteor.startup(() => {
   for (var i = 0; i < jobs.length; i++) {
     if( typeof jobs[i] != 'undefined') {
       scheduler.remove(jobs[i]._id);
-      // jobs[i].remove(function (err, result) {
-      //   if (result) {
-      //     // Job removed from server.
-      //     tsxLog('job removed');
-      //   }
-      // });
     }
   }
+}
+
+Meteor.startup(() => {
+  // code to run on server at startup
+  tsxLog(' ******************', '');
+  tsxLog(' STARTED', '');
+  tsxLog(' ******************', '');
+
+  CleanUpJobs();
 
   initServerStates();
 
@@ -218,15 +218,26 @@ Meteor.startup(() => {
   // Do not assume Autoguider calibrated, will be done once guide star found
   var workers = scheduler.processJobs( 'runScheduler',
     function (job, cb) {
+      // tsxDebug('@1');
       var schedule = job.data; // Only one email per job
+      // tsxDebug('@2');
+
       // This will only be called if a
       // 'runScheduler' job is obtained
       setSchedulerState('Running' );
+      tsx_SetServerState('currentJob', job);
+      UpdateStatus(' Scheduler Started');
+      // tsxDebug('@3');
+
       // tsxLog('Finding');
       job.log("Entered the scheduler process",
-        {level: 'info'});
+        {level: 'info'}
+      );
+      // tsxDebug('@4');
 
-      var isParked = false;
+      var isParked = '';
+      // tsxDebug('@5');
+
       // tsx_Connect();
       while(
         // the job is used to run the scheduler.
@@ -235,8 +246,10 @@ Meteor.startup(() => {
         //        && tsx_GetServerStateValue( tsx_ServerStates.imagingSessionId ) != ''
        ) {
 
+         // tsxDebug('@6');
           tsx_MntUnpark();
           isParked = false;
+          // tsxDebug('@7');
 
           // Find a session
           // Get the target to shoot
@@ -245,17 +258,18 @@ Meteor.startup(() => {
           var target = getValidTargetSession(); // no return
 
           if (typeof target != 'undefined') {
-            isParked = false;
+            tsxLog ( ' =========================');
             tsxDebug ( ' ' + target.targetFindName + ' Preparing target...');
 
             // Point, Focus, Guide
             var ready = prepareTargetForImaging( target );
             if( ready ) {
               // target images per Take Series
-              tsxLog ( ' *************************');
+              tsxLog ( ' =========================');
               tsxLog ( ' *************************');
               UpdateStatus ( ' *** Start imaging: ' + target.targetFindName );
               processTargetTakeSeries( target );
+              tsxLog ( ' *************************');
             }
             else {
               ParkMount( isParked );
@@ -270,6 +284,9 @@ Meteor.startup(() => {
             ParkMount( isParked );
             isParked = true;
             var approachingDawn = isTimeBeforeCurrentTime('3:00');
+            tsxDebug( ' Is approachingDawn: ' + approachingDawn);
+            // var stillDaytime = isTimeBeforeCurrentTime('15:00');
+            // tsxDebug( ' Is stillDaytime: ' + stillDaytime);
             if( approachingDawn ) {
               UpdateStatus( ' Scheduler stopped: not dark.');
               UpdateStatus( ' ^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
@@ -431,13 +448,12 @@ export function srvPauseScheduler() {
 export function srvStopScheduler() {
   var dummyVar;
   // Any job document from myJobs can be turned into a Job object
+  CleanUpJobs();
   setSchedulerState('Stop' );
   tsx_SetServerState('SchedulerStatus', 'Stop');
-  var jid = tsx_GetServerStateValue('currentJob');
-  scheduler.remove( jid );
   tsx_SetServerState('currentJob', '');
   UpdateImagingSesionID( '' );
-
+  tsx_AbortGuider();
   UpdateStatus(' *** Manually STOPPED scheduler ***');
 }
 
@@ -482,6 +498,7 @@ Meteor.methods({
           return;
         }
 
+        tsxDebug( '@@ Start1' );
         // Create a job:
         var job = new Job(scheduler, 'runScheduler', // type of job
           // Job data that you define, including anything the job
@@ -490,6 +507,7 @@ Meteor.methods({
             startTime: new Date(),
           }
         );
+        tsxDebug( '@@ Start2' );
 
         // Set some properties of the job and then submit it
         // the same submit the start time to the scheduler...
@@ -499,10 +517,9 @@ Meteor.methods({
         //   wait: 5*60*1000 }) //15*60*1000 })  // 15 minutes between attempts
         // .delay(0);// 60*60*1000)     // Wait an hour before first try
         var jid = job.save();               // Commit it to the server
+        tsxDebug( '@@ Start1' );
 
         // tsxLog('Job id: ' + jid);
-        tsx_SetServerState('currentJob', jid);
-        UpdateStatus(' Scheduler Started');
         return;
      }
      else {

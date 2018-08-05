@@ -61,7 +61,7 @@ if( SelectedHardware.mountModel !== "Telescope Mount Simulator" ) {
 			if(!sky6RASCOMTele.IsParked() ){
 				sky6RASCOMTele.ParkAndDoNotDisconnect();
  			 	while( !sky6RASCOMTele.IsParked() ) {
- 				 	errMsgs = 'Parking';
+					sky6Web.Sleep(1000);
  			 	}
 		 }
 			 errMsgs = 'Parked';
@@ -72,9 +72,18 @@ if( SelectedHardware.mountModel !== "Telescope Mount Simulator" ) {
 		}
 	}
 	else {
-			sky6RASCOMTele.SetTracking(0, 1, 0 ,0);
-			errMsgs = 'Soft Parked';
+		if( sky6RASCOMTele.IsParked() ){
+			try{
+				sky6RASCOMTele.Unpark();
+			}
+			catch(e) {
+				// ignore... assume simulator
+			}
+		}
+		sky6RASCOMTele.SetTracking(0, 1, 0 ,0);
+		errMsgs = 'Soft Parked';
 	}
 }
+sky6Web.Sleep(3000); // needed if command is too fast
 errMsgs
 /* Socket End Packet */

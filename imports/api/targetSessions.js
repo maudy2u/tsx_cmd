@@ -19,12 +19,65 @@ tsx cmd - A web page to send commands to TheSkyX server
 import { Mongo } from 'meteor/mongo';
 import { TakeSeriesTemplates } from './takeSeriesTemplates.js'
 import { Seriess } from './seriess.js'
+import { TheSkyXInfos } from './theSkyXInfos.js'
 // import SimpleSchema from 'simple-schema';
 
 // Used to store the sessions for a Target - the actual imaging
 export const TargetSessions = new Mongo.Collection('targetSessions');
 
+export function addNewTargetSession() {
 
+  // get defaults
+  var clsFilter = TheSkyXInfos.findOne({name: 'defaultFilter'}).value;
+
+  const id  = TargetSessions.insert(
+    {
+      name: '!New Target',
+      targetFindName: '!New Target',
+      targetImage: '',
+      description: '',
+      enabledActive: false,
+      series: {
+      },
+      progress: [
+  //            {_id: seriesId, taken:0},
+      ],
+      report_d: '',
+      ra: '',
+      dec: '',
+      angle: '',
+      scale: '',
+      coolingTemp: '',
+
+  /*
+  *******************************
+  #todo Need to work on the loading of the defaults properly
+  */
+      // coolingTemp: TheSkyXInfos.findOne({name: 'defaultCoolTemp'}),
+      clsFilter: TheSkyXInfos.findOne({name: 'defaultFilter'}).value,
+      focusFilter: TheSkyXInfos.findOne({name: 'defaultFilter'}).value,
+      foccusSamples: '',
+      focusBin: '',
+      focusTarget: '',
+      focusExposure: TheSkyXInfos.findOne({name: 'defaultFocusExposure'}).value,
+      guideExposure: '',
+      guideDelay: '',
+      startTime: TheSkyXInfos.findOne({name: 'defaultStartTime'}).value,
+      stopTime: TheSkyXInfos.findOne({name: 'defaultStopTime'}).value,
+      priority: TheSkyXInfos.findOne({name: 'defaultPriority'}).value,
+      tempChg: TheSkyXInfos.findOne({name: 'defaultFocusTempDiff'}).value,
+      currentAlt: 0, // set to zero for now.
+      minAlt: TheSkyXInfos.findOne({name: 'defaultMinAlt'}).value,
+      completed: false,
+      createdAt: new Date(),
+      enableMeridianFlip: TheSkyXInfos.findOne({name: 'defaultMeridianFlip'}).value,
+      // startTime: '',
+      // stopTime: '',
+
+    }
+  );
+  return id;
+}
 // This code only runs on the server
 // Meteor.publish('tsx.ip', function tsxIpPublication() {
 //   var ip = TheSkyXInfos.findOne().ip().text;

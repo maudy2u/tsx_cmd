@@ -30,9 +30,16 @@ import { withTracker } from 'meteor/react-meteor-data';
 import { Form, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Radio } from 'semantic-ui-react'
 
 // Import the API Model
-import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
+import {
+  TakeSeriesTemplates,
+  addNewTakeSeriesTemplate,
+} from '../api/takeSeriesTemplates.js';
+import {
+  TargetSessions,
+  addNewTargetSession,
+ } from '../api/targetSessions.js';
+
 import { Filters } from '../api/filters.js';
-import { TargetSessions } from '../api/targetSessions.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 
 // Import the UI
@@ -66,7 +73,7 @@ class App extends Component {
 
     ip: 'localhost',
     port: '3040',
-    currentStage: '',
+    currentStage: ' Loading....',
   };
 
   handleToggle = (e, { name, value }) => this.setState({ [name]: Boolean(!eval('this.state.'+name)) })
@@ -294,34 +301,14 @@ class App extends Component {
     if (this.state.activeItem == 'Targets' ) {
       return (
         <div>
-          {/* <Segment> */}
-            {/* <Button.Group size='small'> */}
-              {/* <Button size='small' icon='refresh' onClick={this.connectToTSX.bind(this)}/> */}
-            {/* </Button.Group> */}
-            {/* <Button.Group size='small'> */}
-              <Button size='small' onClick={this.addEntry.bind(this)}>Add Target</Button>
-            {/* </Button.Group> */}
-            {/* <Button icon='add' onClick={this.addEntry.bind(this)}/>
-            <Button icon='add' onClick={this.addNewTemplate.bind(this)}/> */}
-
-          {/* </Segment> */}
+          <Button size='small' onClick={this.addNewTargets.bind(this)}>Add Target</Button>
           <TargetSessionMenu />
         </div>
       )
     } else if (this.state.activeItem == 'Series') {
       return (
         <div>
-          {/* <Segment> */}
-            {/* <Button.Group size='small'> */}
-              {/* <Button size='small' icon='refresh' onClick={this.connectToTSX.bind(this)}/> */}
-            {/* </Button.Group> */}
-            {/* <Button.Group size='small'> */}
-              <Button size='small' onClick={this.addNewTemplate.bind(this)}>Add Series</Button>
-            {/* </Button.Group> */}
-            {/* <Button icon='add' onClick={this.addEntry.bind(this)}/>
-            <Button icon='add' onClick={this.addNewTemplate.bind(this)}/> */}
-
-          {/* </Segment> */}
+          <Button size='small' onClick={this.addNewTakeSeries.bind(this)}>Add Series</Button>
           <TakeSeriesTemplateMenu />
       </div>
       )
@@ -389,9 +376,7 @@ class App extends Component {
             {/* <Menu.Item name='logout' active={activeItem === 'logout'} onClick={this.handleMenuItemClick} /> */}
           </Menu.Menu>
         </Menu>
-        {/* <Segment raised> */}
-          {this.renderMenuSegments()}
-        {/* </Segment> */}
+        {this.renderMenuSegments()}
       </div>
     )
   }
@@ -513,77 +498,15 @@ class App extends Component {
     )
   };
 
-  addNewTemplate() {
-    const id = TakeSeriesTemplates.insert(
-      {
-        name: "!New Take Series",
-        description: "EDIT ME",
-        processSeries: 'across series',
-        repeatSeries: false,
-        createdAt: new Date(),
-        series: [],
-      }
-    )
-  }
-
-  addEntry() {
-    console.log('In the TargetSessionMenu addEntry');
-
+  addNewTargets() {
     // get the id for the new object
-    var newSession = TargetSessions.insert(
-      {
-        name: '!New Target',
-        targetFindName: '!New Target',
-        targetImage: '',
-        description: '',
-        enabledActive: false,
-        series: {
-        },
-        progress: [
-//            {_id: seriesId, taken:0},
-        ],
-        report_d: '',
-        ra: '',
-        dec: '',
-        angle: '',
-        scale: '',
-        coolingTemp: '',
+    var out = addNewTargetSession();
+    console.log('Left TargetSessionMenu addNewTarget');
+  };
 
-/*
-*******************************
-#todo Need to work on the loading of the defaults properly
-*/
-        // coolingTemp: TheSkyXInfos.findOne({name: 'defaultCoolTemp'}),
-        clsFilter: TheSkyXInfos.findOne({name: 'defaultFilter'}).value,
-        focusFilter: TheSkyXInfos.findOne({name: 'defaultFilter'}).value,
-        foccusSamples: '',
-        focusBin: '',
-        focusTarget: '',
-        focusExposure: TheSkyXInfos.findOne({name: 'defaultFocusExposure'}).value,
-        guideExposure: '',
-        guideDelay: '',
-        startTime: TheSkyXInfos.findOne({name: 'defaultStartTime'}).value,
-        stopTime: TheSkyXInfos.findOne({name: 'defaultStopTime'}).value,
-        priority: TheSkyXInfos.findOne({name: 'defaultPriority'}).value,
-        tempChg: TheSkyXInfos.findOne({name: 'defaultFocusTempDiff'}).value,
-        currentAlt: 0, // set to zero for now.
-        minAlt: TheSkyXInfos.findOne({name: 'defaultMinAlt'}).value,
-        completed: false,
-        createdAt: new Date(),
-        enableMeridianFlip: TheSkyXInfos.findOne({name: 'defaultMeridianFlip'}).value,
-        // startTime: '',
-        // stopTime: '',
-
-      }
-    );
-
-    this.setState({newTarget:
-      TargetSessions.findOne({_id: newSession })
-    });
-    this.setState({addModalOpen: true });
-
-  }
-
+  addNewTakeSeries() {
+    var out = addNewTakeSeriesTemplate();
+  };
 
   render() {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
@@ -594,8 +517,8 @@ class App extends Component {
       IP = this.props.tsxIP.value;
       PORT = this.props.tsxPort.value;
     } catch (e) {
-      IP = 'Not Connected';
-      PORT = 'Not Connected';
+      IP = 'Initializing';
+      PORT = 'Initializing';
     }
 
     return (

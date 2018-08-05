@@ -99,79 +99,21 @@ class TargetSessionMenu extends Component {
     }.bind(this));
   }
 
-
-  // addEntry() {
-  //   console.log('In the TargetSessionMenu addEntry');
   //
-  //   // get the id for the new object
-  //   var newSession = TargetSessions.insert(
-  //     {
-  //       name: '',
-  //       targetFindName: '',
-  //       targetImage: '',
-  //       description: '',
-  //       enabledActive: false,
-  //       series: {
-  //       },
-  //       progress: [
-  //         //            {_id: seriesId, taken:0},
-  //       ],
-  //       report_d: '',
-  //       ra: '',
-  //       dec: '',
-  //       angle: '',
-  //       scale: '',
-  //       coolingTemp: '',
+  // renderTargets() {
   //
-  //   /*
-  //   *******************************
-  //   #todo Need to work on the loading of the defaults properly
-  //   */
-  //       // coolingTemp: TheSkyXInfos.findOne({name: 'defaultCoolTemp'}),
-  //       clsFilter: TheSkyXInfos.findOne({name: 'defaultFilter'}).value,
-  //       focusFilter: TheSkyXInfos.findOne({name: 'defaultFilter'}).value,
-  //       foccusSamples: '',
-  //       focusBin: '',
-  //       focusTarget: '',
-  //       focusExposure: TheSkyXInfos.findOne({name: 'defaultFocusExposure'}).value,
-  //       guideExposure: '',
-  //       guideDelay: '',
-  //       startTime: TheSkyXInfos.findOne({name: 'defaultStartTime'}).value,
-  //       stopTime: TheSkyXInfos.findOne({name: 'defaultStopTime'}).value,
-  //       priority: TheSkyXInfos.findOne({name: 'defaultPriority'}).value,
-  //       tempChg: TheSkyXInfos.findOne({name: 'defaultFocusTempDiff'}).value,
-  //       currentAlt: 0, // set to zero for now.
-  //       minAlt: TheSkyXInfos.findOne({name: 'defaultMinAlt'}).value,
-  //       completed: false,
-  //       createdAt: new Date(),
-  //       enableMeridianFlip: TheSkyXInfos.findOne({name: 'defaultMeridianFlip'}).value,
-  //       // startTime: '',
-  //       // stopTime: '',
+  //   var list = {};
+  //   if( typeof this.props.targets != 'undefined' ) {
+  //     list = this.state.targetList;
+  //   }
   //
-  //     }
-  //   );
-  //
-  //   this.setState({newTarget:
-  //     TargetSessions.findOne({_id: newSession })
-  //   });
-  //   this.setState({addModalOpen: true });
-  //
+  //   return (
+  //     this.props.targets.map( (target)=>{
+  //       return <Target key={target._id} target={target} />
+  //     })
+  //   )
   // }
   //
-  renderTargets() {
-
-    var list = {};
-    if( typeof this.props.targets != 'undefined' ) {
-      list = this.state.targetList;
-    }
-
-    return (
-      this.props.targets.map( (target)=>{
-        return <Target key={target._id} target={target} />
-      })
-    )
-  }
-
   renderTargets( container ) {
     // this.props.template.series.. this is a series ID
     // does not work:       this.props.template.series.map({sort: {order:1}}, (definedSeries)=>{

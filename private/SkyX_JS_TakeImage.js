@@ -6,6 +6,7 @@
 var aFilter = $000;
 var aExpTime = $001;
 var aFrame = $002; //  cdLight =1, cdBias, cdDark, cdFlat
+var tName = '$003';
 var Out = 'Success|';
 
 while (!ccdsoftCamera.State == 0)
@@ -33,6 +34,31 @@ if ( SelectedHardware.filterWheelModel !== "<No Filter Wheel Selected>" )
 }
 
 ccdsoftCamera.TakeImage();
+
+if( tName != '$003' ) {
+	//open TSX camera and get the last image
+	var tsxi = ccdsoftCameraImage;
+	var success = tsxi.AttachToActiveImager();
+
+	//Add some FITSKeywords for future reference
+
+	//Correct the OBJECT Keyword if using coordinates instead of a target name
+	tsxi.setFITSKeyword("OBJECT", tName);
+
+	//Enter the rotator angle
+	var tsxc = ccdsoftCamera;
+	if( tsxc.focIsConnected ) {
+	  tsxi.setFITSKeyword("FOCUS_POS", tsxc.focPosition);
+	}
+	if( tsxc.rotatorIsConnected ) {
+	  tsxi.setFITSKeyword("ROTATOR_POS", tsxc.rotatorPositionAngle());
+	}
+
+	//Set save path and save
+	//tsxi.Path = targetImageDataPath;
+
+	tsxi.Save();
+}
 
 Out;
 /* Socket End Packet */

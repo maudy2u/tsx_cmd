@@ -87,6 +87,7 @@ class Monitor extends Component {
 
       isTwilightEnabled: true,
       isFocus3Enabled: false,
+      isAutoguidingEnabled: true,
       isFocus3Binned: false,
       defaultMeridianFlip: true,
       defaultSoftPark: false,
@@ -126,6 +127,7 @@ class Monitor extends Component {
     this.saveDefaultState('defaultSoftPark');
     this.saveDefaultState('isTwilightEnabled');
     this.saveDefaultState('isFocus3Enabled');
+    this.saveDefaultState('isAutoguidingEnabled');
     this.saveDefaultState('defaultCLSEnabled');
     this.saveDefaultState('enableImagingCooler');
 
@@ -290,6 +292,9 @@ class Monitor extends Component {
       }).value,
       enableImagingCooler: nextProps.tsxInfo.find(function(element) {
         return element.name == 'enableImagingCooler';
+      }).value,
+      isAutoguidingEnabled: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'isAutoguidingEnabled';
       }).value,
 
     });
@@ -625,6 +630,14 @@ class Monitor extends Component {
                 toggle
                 placeholder= 'Enable focus checking'
                 checked={this.state.isFocus3Enabled}
+                onChange={this.handleToggle.bind(this)}
+              />
+              <Form.Checkbox
+                label='Enable Autoguiding '
+                name='isAutoguidingEnabled'
+                toggle
+                placeholder= 'Enable Autoguiding checking'
+                checked={this.state.isAutoguidingEnabled}
                 onChange={this.handleToggle.bind(this)}
               />
               {/* <Form.Checkbox

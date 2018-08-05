@@ -204,17 +204,40 @@ function tsxCmdTestCLS() {
 //
 var imagingSession;
 
+
+// *******************************
+export function tsx_IsParked() {
+  tsxDebug('************************');
+  tsxDebug(' *** tsx_IsParked' );
+
+  var out = false;
+  var cmd = tsx_cmd('SkyX_JS_IsParked');
+
+  var tsx_is_waiting = true;
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+    var result = tsx_return.split('|')[0].trim();
+    tsxDebug( result );
+    out = result;
+    tsx_is_waiting = false;
+  }));
+  while( tsx_is_waiting ) {
+    Meteor.sleep( 1000 );
+  }
+  return out;
+}
+
+
 // **************************************************************
 export function tsx_MntUnpark() {
   tsxDebug('************************');
   tsxDebug(' *** tsx_MntUnpark' );
   var cmd = tsx_cmd('SkyX_JS_UnparkMount');
 
-  var Out;
+  var Out = '';
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         var result = tsx_return.split('|')[0].trim();
-        tsxDebug( ' unpark result: ' + result );
+        tsxDebug( ' *** result: ' + result );
         if( result == 'unparked' ) {
           UpdateStatus( ' ' + result );
         }
@@ -226,9 +249,9 @@ export function tsx_MntUnpark() {
         tsx_is_waiting = false;
   }));
   tsxDebug ( ' unpark waiting ') ;
-  while( tsx_is_waiting ) {
-   Meteor.sleep( 1000 );
-  }
+  // while( tsx_is_waiting ) {
+  //   Meteor.sleep( 1000 );
+  // }
   tsxDebug ( ' unpark done ') ;
   return Out;
 }
@@ -253,7 +276,7 @@ export function tsx_MntPark(defaultFilter, softPark) {
     UpdateStatus(' Soft Parking... ');
   }
   else {
-    UpdateStatus(' Full Parking... ');
+    UpdateStatus(' Parking... ');
   }
   var cmd = tsx_cmd('SkyX_JS_ParkMount');
   cmd = cmd.replace("$000", slot ); // set filter
@@ -275,9 +298,9 @@ export function tsx_MntPark(defaultFilter, softPark) {
         tsx_is_waiting = false;
   }));
   tsxDebug( ' Park waiting' );
-  while( tsx_is_waiting ) {
-   Meteor.sleep( 1000 );
-  }
+  // while( tsx_is_waiting ) {
+  //  Meteor.sleep( 1000 );
+  // }
   tsxDebug( ' Park wait done' );
   return Out;
 }
@@ -305,13 +328,18 @@ export function tsx_AbortGuider() {
 // Breakup into reusable sections...
 // tsx_ will send TSX commands
 // non-tsx_ functions are higher level
-function SetUpAutoGuiding(targetSession) {
+function SetUpAutoGuiding( target ) {
   // tsxDebug('************************');
-  tsxDebug(' *** SetUpAutoGuiding: ' + targetSession.targetFindName );
+  tsxDebug(' *** SetUpAutoGuiding: ' + target.targetFindName );
+  var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
+  if( !enabled ) {
+    UpdateStatus(' @Autoguiding disabled: ' + target.targetFindName);
+    return;
+  }
 
-  UpdateStatus(' ' + targetSession.targetFindName + ": setup guiding");
+  UpdateStatus(' ' + target.targetFindName + ": setup guiding");
 
-  tsx_TakeAutoGuideImage( targetSession );
+  tsx_TakeAutoGuideImage( target );
   if( isSchedulerStopped() ) {
     return;
   }
@@ -322,12 +350,18 @@ function SetUpAutoGuiding(targetSession) {
   }
 
   tsx_StartAutoGuide( star.guideStarX, star.guideStarY );
+  UpdateStatus(' ' + target.targetFindName + ": autoguiding");
 }
 
 // **************************************************************
 function tsx_TakeAutoGuideImage( target ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_TakeAutoGuideImage: ' + target.targetFindName );
+  var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
+  if( !enabled ) {
+    UpdateStatus(' @Autoguiding disabled: ' + target.targetFindName);
+    return;
+  }
 
   var cmd = tsx_cmd('SkyX_JS_TakeGuideImage');
   var exp = tsx_GetServerState('defaultGuideExposure').value;
@@ -345,24 +379,27 @@ function tsx_TakeAutoGuideImage( target ) {
    Meteor.sleep( 1000 );
   }
 }
+
 // **************************************************************
 function tsx_FindGuideStar() {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_FindGuideStar' );
+  var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
+  if( !enabled ) {
+    UpdateStatus(' @Autoguiding disabled: ' + target.targetFindName);
+    return;
+  }
 
   tsx_is_waiting = true;
   var guideStarX = 0;
   var guideStarY = 0;
   // var cmd = tsxCmdFindGuideStar();
   var cmd = tsx_cmd('SkyX_JS_FindAutoGuideStar');
-  // cmd = cmd.replace('$000', targetSession.guideExposure );
-  // cmd = cmd.replace('$001', targetSession.scale);
-  // cmd = cmd.replace('$002', targetSession.exposure);
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         // tsxDebug('Any error?: ' + tsx_return);
         guideStarX = tsx_return.split('|')[0].trim();
         guideStarY = tsx_return.split('|')[1].trim();
-        UpdateStatus( " Best guide star candidate: "+guideStarX+", "+guideStarY );
+        UpdateStatus( " Guide star candidate: "+guideStarX+", "+guideStarY );
         out = {
           guideStarX: guideStarX,
           guideStarY: guideStarY,
@@ -379,6 +416,11 @@ function tsx_FindGuideStar() {
 function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_CalibrateAutoGuide' );
+  var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
+  if( !enabled ) {
+    UpdateStatus(' @Autoguiding disabled: ' + target.targetFindName);
+    return;
+  }
 
   tsx_is_waiting = true;
   // var cmd = tsxCmdFindGuideStar();
@@ -399,6 +441,11 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
 function tsx_StartAutoGuide(guideStarX, guideStarY) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_StartAutoGuide' );
+  var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
+  if( !enabled ) {
+    UpdateStatus(' @Autoguiding disabled: ' + target.targetFindName);
+    return;
+  }
 
   // star guiding
   tsx_is_waiting = true;
@@ -413,7 +460,6 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
   while( tsx_is_waiting ) {
     Meteor.sleep( 1000 );
   }
-  UpdateStatus(  " Autoguiding" );
 }
 
 // **************************************************************
@@ -448,6 +494,7 @@ function tsx_CLS( target ) {
 
   var doCLS = tsx_GetServerStateValue( 'defaultCLSEnabled' );
   if( doCLS == false ) {
+    tsxInfo(' *** tsx_CLS: disabled, slewing' );
 
     // If CLS not enabled then Slew...
     var res = tsx_Slew( target );
@@ -501,10 +548,10 @@ function tsx_CLS_target( target, filter ) {
         UpdateStatusErr(' !!! Centring Failed. Error: ' + tsx_return);
       }
       else {
-        tsxInfo(' Centred: ' + target );
+        tsxInfo(' ' + target + ': Centred' );
         var angle = tsx_return.split('|')[1].trim();
         clsSuccess.angle = angle;
-        tsxInfo( ' Position Angle: ' + clsSuccess.angle );
+        tsxInfo(' ' + target + ': Position Angle: ' + clsSuccess.angle );
 
         var rotPos;
         try {
@@ -537,7 +584,7 @@ function tsx_RunFocus3( target ) {
   var Out;
   var enabled = tsx_GetServerStateValue('isFocus3Enabled');
   var doCLS = tsx_GetServerStateValue( 'defaultCLSEnabled' );
-  tsxDebug('??? @FOcus3 enabled found to be: ' + enabled );
+  tsxDebug(' ??? @Focus3 enabled found to be: ' + enabled );
   if( enabled == true  ) {
     var focusFilter = getFilterSlot(target.focusFilter);
     var focusExp = target.focusExposure;
@@ -559,7 +606,7 @@ function tsx_RunFocus3( target ) {
     cmd = cmd.replace("$001", focusExp ); // set Bin
 
     var tsx_is_waiting = true;
-    UpdateStatus(' *** @Focus3 started');
+    UpdateStatus(' *** ' + target.targetFindName +': @Focus3 started');
 
     tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       //[[B^[[B^[[BI20180708-01:53:13.485(-3)?   [SERVER]|2018-07-08|01:53:13|[DEBUG]| ??? @Focusing-3 returned: TypeError: Error code = 5 (5). No additional information is available.|No error. Error = 0
@@ -591,13 +638,13 @@ function tsx_RunFocus3( target ) {
       }
     }
 
-    UpdateStatus(' *** @Focus3 finished.');
+    UpdateStatus(' *** ' + target.targetFindName +': @Focus3 finished');
     return Out;
   }
   else {
     tsx_SetServerState( 'initialFocusTemperature', 21); // #TODO change random picked number
   }
-  UpdateStatus(' *** @Focus3 diabled');
+  UpdateStatus(' *** ' + target.targetFindName +': @Focus3 disabled');
   Out = tsx_GetServerState( 'initialFocusTemperature' ).value; // get last temp
   return Out;
 }
@@ -605,10 +652,10 @@ function tsx_RunFocus3( target ) {
 // **************************************************************
 function InitialFocus( target ) {
   // tsxDebug('************************');
-  UpdateStatus(' *** Initial @Focus3: ' + target.targetFindName);
+  tsxDebug(' *** ' + target.targetFindName +': @Focus3 Needed');
   //  tsx_AbortGuider( );
   var temp = tsx_RunFocus3( target ); // need to get the focus position
-  tsxDebug( ' Initial Focus temp: ' + temp );
+  tsxDebug( ' *** ' + target.targetFindName +': Initial Focus temp: ' + temp );
   // var temp = result.split('|')[0].trim();
   //  var temp = tsx_GetFocusTemp( target ); // temp and position set inside
   tsx_SetServerState( 'initialFocusTemperature', temp);
@@ -617,12 +664,10 @@ function InitialFocus( target ) {
 // **************************************************************
 export function tsx_GetFocusTemp( target ) {
   // tsxDebug('************************');
-  tsxDebug(' *** tsx_GetFocusTemp: ' + target.targetFindName );
+  tsxDebug( ' *** ' + target.targetFindName + ': tsx_GetFocusTemp ' );
 
   var cmd = tsx_cmd('SkyX_JS_GetFocTemp');
-  // tsxDebug('File: ' + file );
-  // cmd = cmd.replace("$001", 30 ); // set exposure
-  // var cmd = tsxCmdSlew(targetSession.ra,targetSession.dec);
+
   var Out = {
     err: true,
     errmsg: 'Focuser not found',
@@ -651,7 +696,6 @@ export function tsx_GetFocusTemp( target ) {
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
-
   return Out;
 }
 
@@ -699,7 +743,7 @@ function SetUpForImagingRun(targetSession) {
   //# starting location for future comparisons, find a decent guide star and start autoguiding
   //#
 	//# Kill the guider in case it's still running.
-  UpdateStatus( ' ' + targetSession.targetFindName + ': preparing for session' );
+  UpdateStatus( ' ' + targetSession.targetFindName + ': setting up session' );
   Meteor.sleep(3000); // pause 3 seconds
   // UpdateStatus(  " Stopping autoguider" );
   // tsx_AbortGuider(); // now done in CLS
@@ -997,7 +1041,7 @@ function tsx_reachedMinAlt( target ) {
 		targetMinAlt = tsx_GetServerState(tsx_ServerStates.defaultMinAltitude).value;
 	}
 	var curAlt = target.report.ALT;
-	UpdateStatus(' ' + target.targetFindName + ': is curAlt (' + curAlt + ') <'+ ' minAlt ' + targetMinAlt);
+	UpdateStatus(' ' + target.targetFindName + ': altitude (' + curAlt + ') <'+ ' minAlt (' + targetMinAlt + ')' );
 	if( curAlt < targetMinAlt ) {
 		UpdateStatus( ' Stop. Below Minimum Altitude.' );
 		return true;
@@ -1042,7 +1086,7 @@ function isMeridianFlipNeed( target ) {
   var lastDir = tsx_GetServerStateValue('lastTargetDirection');
   var curDir = target.report.AZ;
   tsx_SetServerState('lastTargetDirection', curDir);
-  tsxLog( ' ' + target.targetFindName + ': target pointing ' + lastDir + ' cf. ' + curDir);
+  tsxLog( ' ' + target.targetFindName + ': pointing (' + lastDir + '), cf. previous (' + curDir +')');
   if( curDir == 'West' && lastDir == 'East') {
     // we need to flip
     tsxLog( ' ' + target.targetFindName + ': merdian flip needed.' );
@@ -1079,7 +1123,7 @@ function isFocusingNeeded(target) {
   }
   var focusDiff = Math.abs(curFocusTemp - lastFocusTemp).toFixed(2);
   var targetDiff = target.tempChg; // diff for this target
-  tsxLog(' *** Focus diff('+targetDiff+'): ' + focusDiff + '='+curFocusTemp +'-'+lastFocusTemp );
+  tsxLog(' ' + target.targetFindName + ': Focus diff('+targetDiff+'): ' + focusDiff + '='+curFocusTemp +'-'+lastFocusTemp );
   if( focusDiff >= targetDiff ) {
   // returning true tell caller to run  @Focus3
     return true;
@@ -1145,7 +1189,7 @@ function UpdateImagingTargetReport( target ) {
 function isTargetConditionsInValid(target) {
   tsxDebug('************************');
   tsxDebug(' *** isTargetConditionsInValid: ' + target.targetFindName );
-  UpdateStatus(' *** Checking target: ' + target.targetFindName );
+  UpdateStatus(' ' + target.targetFindName + ': target evaluation');
 
   // *******************************
   if( isSchedulerStopped() ) {
@@ -1243,7 +1287,7 @@ function tsx_dither( target ) {
               }
               else {
                 // tsxLog('Dither success');
-                UpdateStatus(' Dither succeeded.');
+                UpdateStatus(' ' + target.targetFindName +': Dither succeeded.');
                 tsx_SetServerState('imagingSessionDither', 0);
               }
               Out = true;
@@ -1261,9 +1305,12 @@ function tsx_dither( target ) {
     }
     else {
       tsx_SetServerState('imagingSessionDither', lastDither+1);
+      UpdateStatus(' ' + target.targetFindName +': not dithering');
     }
   }
-
+  else{
+    UpdateStatus(' ' + target.targetFindName +': Dithering disabled');
+  }
   return Out;
 
 }
@@ -1505,7 +1552,7 @@ function takenImagesFor(target, seriesId) {
 // Use the filter and exposure to take an image
 // Currently it is assumed these are Light images
 // Could set frame type...
-function tsx_takeImage( filterNum, exposure, frame ) {
+function tsx_takeImage( filterNum, exposure, frame, tName ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_takeImage: ' + filterNum );
 
@@ -1517,6 +1564,8 @@ function tsx_takeImage( filterNum, exposure, frame ) {
   cmd = cmd.replace("$000", filterNum ); // set filter
   cmd = cmd.replace("$001", exposure ); // set exposure
   cmd = cmd.replace("$002", frame ); // set exposure
+  cmd = cmd.replace("$003", tName ); // set exposure
+
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         var result = tsx_return.split('|')[0].trim();
@@ -1583,11 +1632,11 @@ function takeSeriesImage(target, series) {
   var frame = getFrame( series.frame );//  cdLight =1, cdBias, cdDark, cdFlat
   var num = taken+1;
   if( (remainingImages <= series.repeat) && (remainingImages > 0) ) {
-    UpdateStatus( ' *** Take: ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds: ' + num + '/' +series.repeat );
+    UpdateStatus( ' ' + target.targetFindName + ': Take - ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds: ' + num + '/' +series.repeat );
 
-    var res = tsx_takeImage( slot, series.exposure, frame );
+    var res = tsx_takeImage( slot, series.exposure, frame, target.targetFindName );
     if( res != false ) {
-      UpdateStatus( ' *** Done: ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds: ' + num + '/' +series.repeat );
+      UpdateStatus( ' ' + target.targetFindName + ': Done - ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds: ' + num + '/' +series.repeat );
       // *******************************
       // Update progress
       // tsxLog(' *** Image taken: ' + series.filter + ' at ' + series.exposure + ' seconds');
@@ -1595,11 +1644,12 @@ function takeSeriesImage(target, series) {
 
       // *******************************
       // ADD THE FOCUS AND ROTATOR POSITIONS INTO THE FITS HEADER
-      tsx_UpdateFITS( target );
+//      tsx_UpdateFITS( target );
+//   Now done after taking the image
     }
   }
   else {
-    UpdateStatus( ' *** Completed: ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds: ' + num + '/' +series.repeat );
+    UpdateStatus( ' *** Completed ' + target.targetFindName + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds: ' + num + '/' +series.repeat );
   }
   var jid = tsx_GetServerState('currentJob');
   if( jid == '' ) {
@@ -1730,7 +1780,7 @@ export function processTargetTakeSeries( target ) {
     }
   }
 
-  UpdateStatus( " *** Target stopped: "+ target.targetFindName );
+  UpdateStatus( ' ' + target.targetFindName + ": Target stopped");
   tsx_AbortGuider();
   var filter = tsx_GetServerStateValue('defaultFilter');
   return;
@@ -1748,6 +1798,7 @@ export function prepareTargetForImaging( target ) {
   }
   else {
     UpdateImagingSesionID( target._id );
+    UpdateStatus('========================');
     UpdateStatus( ' '+ target.targetFindName + ": Target selected");
 
     var targetCoords = UpdateImagingTargetReport( target );
@@ -1799,7 +1850,7 @@ export function findTargetSession() {
   // priotiry
   if( foundSession ) {
     validSession = getHigherPriorityTarget( validSession );
-    UpdateStatus( ' ' + validSession.targetFindName + ': Selected' );
+    UpdateStatus( ' ' + validSession.targetFindName + ': Choosen' );
   }
   tsxDebug('************************');
   return validSession;
