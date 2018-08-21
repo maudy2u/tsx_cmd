@@ -611,11 +611,15 @@ function tsx_RunFocus3( target ) {
     tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       //[[B^[[B^[[BI20180708-01:53:13.485(-3)?   [SERVER]|2018-07-08|01:53:13|[DEBUG]| ??? @Focusing-3 returned: TypeError: Error code = 5 (5). No additional information is available.|No error. Error = 0
           tsxDebug( ' ??? @Focusing-3 returned: ' + tsx_return );
-          var temp = tsx_return.split('|')[0].trim();
-          var postion = tsx_return.split('|')[1].trim();
+          var temp = tsx_return.split('|')[1].trim();
+          var postion = tsx_return.split('|')[0].trim();
           if( temp == 'TypeError: Error code = 5 (5). No additional information is available.') {
               temp = tsx_GetServerState( 'initialFocusTemperature' ).value;
               UpdateStatus( ' !!! Error find focus.' );
+          }
+          else if (temp =='TypeError: @Focus diverged.  Error = 7001.') {
+            temp = tsx_GetServerState( 'initialFocusTemperature' ).value;
+            UpdateStatus( ' !!! Error find focus.' );
           }
           // Focuser postion (1232345345) using LUM Filter
           UpdateStatus(' Focuser postion (' + postion + ') and temp ('+temp+') using ' + target.focusFilter + ' filter.');
@@ -1043,7 +1047,7 @@ function tsx_reachedMinAlt( target ) {
 	var curAlt = target.report.ALT;
 	UpdateStatus(' ' + target.targetFindName + ': altitude (' + curAlt + ') <'+ ' minAlt (' + targetMinAlt + ')' );
 	if( curAlt < targetMinAlt ) {
-		UpdateStatus( ' Stop. Below Minimum Altitude.' );
+		UpdateStatus( ' ' + target.targetFindName + ': Stoped, below Minimum Altitude.' );
 		return true;
 	}
   return false;
@@ -1115,6 +1119,8 @@ function isFocusingNeeded(target) {
     tsxDebug(' !!! Simulator will not do focus calculations');
     return false;
   }
+  var lastFocusTempDate = tsx_GetServerState( 'initialFocusTemperatureDate' ).value; // get last temp
+  tsxDebug( ' lastFocus date: ' + lastFocusTempDate );
 
   var curFocusTemp = target.report.focusTemp; // read new temp
   tsxDebug( ' curFocusTemp temp: ' + curFocusTemp );
@@ -1598,7 +1604,7 @@ function tsx_UpdateFITS( target ) {
   tsxDebug(' *** tsx_UpdateFITS: ' + target.targetFindName);
 
   var cmd = tsx_cmd('SkyX_JS_UpdateFitsHeader');
-  cmd = cmd.replace("$000", target.targetFindName ); // set filter
+  cmd = cmd.replace("$000", target.targetFindName.trim() ); // set filter
 
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
@@ -1634,7 +1640,7 @@ function takeSeriesImage(target, series) {
   if( (remainingImages <= series.repeat) && (remainingImages > 0) ) {
     UpdateStatus( ' ' + target.targetFindName + ': Take - ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds: ' + num + '/' +series.repeat );
 
-    var res = tsx_takeImage( slot, series.exposure, frame, target.targetFindName );
+    var res = tsx_takeImage( slot, series.exposure, frame, target.targetFindName.trim() );
     if( res != false ) {
       UpdateStatus( ' ' + target.targetFindName + ': Done - ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds: ' + num + '/' +series.repeat );
       // *******************************
@@ -1907,6 +1913,30 @@ export function hasStartTimePassed( target ) {
   var canStart = isTimeBeforeCurrentTime( start_time );
   // do not start if undefined
   return canStart;
+}
+
+export function isDateBeforeCurrentDate( chkDate ) {
+  var cur_dts = new Date();
+  var cur_time = cur_dts.getHours()+(cur_dts.getMinutes()/60);
+  // tsxDebug('Current time: ' + cur_time );
+
+  // add 24 to the morning time so that
+  ((cur_time < 8) ? cur_time=cur_time+24 : cur_time);
+
+  chkDate = chkDate.getHours()+(chkDate.getMinutes()/60);
+
+
+  // tsxDebug('Start time: ' + start_time );
+  var hrs = ts.split(':')[0].trim();
+  // tsxDebug('Start hrs: ' + hrs );
+  var min = ts.split(':')[1].trim();
+  // tsxDebug('Start min: ' + min );
+  ts = Number(hrs) + Number(min/60);
+  ((ts < 8) ? ts=ts+24 : ts);
+  // tsxDebug('curtime: ' + cur_time + ' vs ' + ts);
+  var curBefore = ((ts < cur_time ) ? true : false);
+  return curBefore;
+
 }
 
 // **************************************************************

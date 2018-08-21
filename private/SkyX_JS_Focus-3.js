@@ -73,12 +73,20 @@ if ( Application.build >= 11177 )
 			CCDSC.AutoSaveOn = true;		// Keep the images for the future
 
 
-		// Finally! Focus the camera!
+			// Finally! Focus the camera!
 			// Use three samples per point and let @F3 figure out the rest.
-			var res1 = CCDSC.AtFocus3(numFocSamples, 1);
-			var temp = CCDSC.focTemperature.toFixed(1);
-			var pos = CCDSC.focPosition;
-			out = temp +'|'+pos +'|'+res1;
+			var res1 ='';
+			var temp = '';
+			var pos = '';
+			try {
+				res1 = CCDSC.AtFocus3(numFocSamples, 1);
+			} catch (e) {
+				res1 = 'Failed: focus failed.'
+			} finally {
+				temp = CCDSC.focTemperature.toFixed(1);
+				pos = CCDSC.focPosition;
+			}
+			out = pos +'|'+ temp +'|'+ res1;
 
 			// out = CCDSC.AtFocus2();
 			CCDSC.ImageReduction = 0;
