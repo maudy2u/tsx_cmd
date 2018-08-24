@@ -55,11 +55,6 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
       echo $(uname -s) $(uname -p) - Not Supported
       exit 5
     fi
-  else
-      # Do something under 64 bits Windows NT platform
-      echo $(uname -s) $(uname -p) - Not Supported
-      exit 5
-  fi
 else
     # Do something under 64 bits Windows NT platform
     echo $(uname -s) $(uname -p) - Not Supported
