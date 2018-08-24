@@ -364,7 +364,7 @@ function tsx_TakeAutoGuideImage( target ) {
   }
 
   var cmd = tsx_cmd('SkyX_JS_TakeGuideImage');
-  var exp = tsx_GetServerState('defaultGuideExposure').value;
+  var exp = tsx_GetServerStateValue('defaultGuideExposure');
 
   cmd = cmd.replace('$000', exp );
   cmd = cmd.replace('$001', exp );
@@ -614,11 +614,11 @@ function tsx_RunFocus3( target ) {
           var temp = tsx_return.split('|')[1].trim();
           var postion = tsx_return.split('|')[0].trim();
           if( temp == 'TypeError: Error code = 5 (5). No additional information is available.') {
-              temp = tsx_GetServerState( 'initialFocusTemperature' ).value;
+              temp = tsx_GetServerStateValue( 'initialFocusTemperature' );
               UpdateStatus( ' !!! Error find focus.' );
           }
           else if (temp =='TypeError: @Focus diverged.  Error = 7001.') {
-            temp = tsx_GetServerState( 'initialFocusTemperature' ).value;
+            temp = tsx_GetServerStateValue( 'initialFocusTemperature' );
             UpdateStatus( ' !!! Error find focus.' );
           }
           // Focuser postion (1232345345) using LUM Filter
@@ -649,7 +649,7 @@ function tsx_RunFocus3( target ) {
     tsx_SetServerState( 'initialFocusTemperature', 21); // #TODO change random picked number
   }
   UpdateStatus(' *** ' + target.targetFindName +': @Focus3 disabled');
-  Out = tsx_GetServerState( 'initialFocusTemperature' ).value; // get last temp
+  Out = tsx_GetServerStateValue( 'initialFocusTemperature' ); // get last temp
   return Out;
 }
 
@@ -966,7 +966,7 @@ function tsx_isDarkEnough(target) {
 
   var targetFindName = target.targetFindName;
   UpdateImagingTargetReport( target );
-	var chkTwilight = tsx_GetServerState('isTwilightEnabled').value;
+	var chkTwilight = tsx_GetServerStateValue('isTwilightEnabled');
   tsxDebug(' Twilight check enabled: ' + chkTwilight);
   var tsx_is_waiting = true;
 	if( chkTwilight ) {
@@ -991,8 +991,8 @@ function tsx_isDarkEnough(target) {
 export function tsx_isDark() {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_isDark' );
-	var chkTwilight = tsx_GetServerState('isTwilightEnabled').value;
-  var defaultMinSunAlt = tsx_GetServerState('defaultMinSunAlt').value;
+	var chkTwilight = tsx_GetServerStateValue('isTwilightEnabled');
+  var defaultMinSunAlt = tsx_GetServerStateValue('defaultMinSunAlt');
   tsxDebug(' Twilight check enabled: ' + chkTwilight);
   var isDark = '';
   var tsx_is_waiting = true;
@@ -1042,7 +1042,7 @@ function tsx_reachedMinAlt( target ) {
 
   var targetMinAlt = target.minAlt;
 	if( typeof targetMinAlt == 'undefined' ) {
-		targetMinAlt = tsx_GetServerState(tsx_ServerStates.defaultMinAltitude).value;
+		targetMinAlt = tsx_GetServerStateValue(tsx_ServerStates.defaultMinAltitude);
 	}
 	var curAlt = target.report.ALT;
 	UpdateStatus(' ' + target.targetFindName + ': altitude (' + curAlt + ') <'+ ' minAlt (' + targetMinAlt + ')' );
@@ -1113,13 +1113,13 @@ function isFocusingNeeded(target) {
   // tsxDebug('************************');
   tsxDebug(' *** isFocusingNeeded: ' + target.targetFindName);
 
-  var lastFocusTemp = tsx_GetServerState( 'initialFocusTemperature' ).value; // get last temp
+  var lastFocusTemp = tsx_GetServerStateValue( 'initialFocusTemperature' ); // get last temp
   tsxDebug( ' lastFocus temp: ' + lastFocusTemp );
   if( lastFocusTemp == 'Simulator' ) {
     tsxDebug(' !!! Simulator will not do focus calculations');
     return false;
   }
-  var lastFocusTempDate = tsx_GetServerState( 'initialFocusTemperatureDate' ).value; // get last temp
+  var lastFocusTempDate = tsx_GetServerStateValue( 'initialFocusTemperatureDate' ); // get last temp
   tsxDebug( ' lastFocus date: ' + lastFocusTempDate );
 
   var curFocusTemp = target.report.focusTemp; // read new temp
@@ -1157,37 +1157,45 @@ function UpdateImagingTargetReport( target ) {
   tsxDebug(' *** UpdateImagingTargetReport: ' + target.targetFindName );
 
   // how old is report... if less than 1 minute get report
-  var rpt;
   var tRprt = target.report;
-  if( typeof tRprt == 'undefined' || tRprt == '' || tRprt == false ) {
-    tsxDebug(' Create TargetReport: ' + target.targetFindName);
-    tRprt = tsx_TargetReport( target );
+  if( typeof tRprt == 'undefined'
+    || typeof tRprt.updatedAt == 'undefined'
+    || tRprt == ''
+    || tRprt == false ) {
+      tsxDebug(' Creating TargetReport: ' + target.targetFindName);
+      tRprt = tsx_TargetReport( target );
+      if( typeof tRprt == 'undefined' ) {
+        return {
+          ready: false,
+        };
+      }
   }
   var cTime = new Date();
   // tsxDebug('Current time: ' + cTime );
+  tsxDebug( '!!! updatedAt: ' + tRprt.updatedAt );
   var msecDiff = cTime - tRprt.updatedAt;
   // tsxDebug('Report time diff: ' + msecDiff);
   var mm = Math.floor(msecDiff / 1000 / 60);
   if( mm > 1 ) { // one minte passed so update report.
     tsxDebug(' Refresh TargetReport: ' + target.targetFindName);
-    rpt = tsx_TargetReport( target );
+    tRprt = tsx_TargetReport( target );
   }
   else {
     tsxDebug(' Reuse TargetReport: ' + target.targetFindName);
-    rpt = target.report;
+    tRprt = target.report;
   }
 
   // Now have reprt and need to set the variables
   // the other checks use
-  if( rpt != false && typeof rpt != 'undefined' && rpt != '') {
+  if( tRprt != false && typeof tRprt != 'undefined' && tRprt != '') {
     TargetSessions.upsert({_id: target._id}, {
       $set:{
-        report: rpt,
+        report: tRprt,
       }
     });
   }
 
-  return rpt;
+  return tRprt;
 }
 
 
