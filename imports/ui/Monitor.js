@@ -87,18 +87,17 @@ class Monitor extends Component {
 
       isTwilightEnabled: true,
       isFocus3Enabled: false,
-      isAutoguidingEnabled: true,
+      isAutoguidingEnabled: false,
       isFocus3Binned: false,
-      defaultMeridianFlip: true,
+      defaultMeridianFlip: false,
       defaultSoftPark: false,
-      defaultCLSEnabled: true,
+      defaultCLSEnabled: false,
 
       enableImagingCooler: false,
 
   };
 
   handleChange = (e, { name, value }) => this.setState({ [name]: value });
-//  handleToggle = (e, { name, value }) => this.setState({ [name]: !value });
 
   // requires the ".bind(this)", on the callers
   handleToggle = (e, { name, value }) => {
@@ -108,29 +107,67 @@ class Monitor extends Component {
     this.setState({
       [name]: !val
     });
-    this.toggleDefaultState( name, !val );
+    this.saveDefaultStateValue( name, !val );
   };
 
   noFoundSessionOpen = () => this.setState({ noFoundSession: true })
   noFoundSessionClose = () => this.setState({ noFoundSession: false })
 
-  componentWillReceiveProps(nextProps) {
-    this.updateMonitor(nextProps);
+  componentDidMount() {
+    this.updateDefaults(this.props);
   }
 
-  // Use this method to save any defaults gathered
-  saveDefaults(){
+  updateDefaults(nextProps) {
+    if( typeof nextProps == 'undefined'  ) {
+      return;
+    }
 
-    // this.saveDefaultState('ip');
-    // this.saveDefaultState('port');
-    this.saveDefaultState('defaultMeridianFlip');
-    this.saveDefaultState('defaultSoftPark');
-    this.saveDefaultState('isTwilightEnabled');
-    this.saveDefaultState('isFocus3Enabled');
-    this.saveDefaultState('isAutoguidingEnabled');
-    this.saveDefaultState('defaultCLSEnabled');
-    this.saveDefaultState('enableImagingCooler');
+    if( typeof nextProps.tsxInfo == 'undefined'  ) {
+      return;
+    }
 
+    var isFlip = Boolean(nextProps.tsxInfo.find(function(element) {
+      return element.name == 'defaultMeridianFlip';
+    }).value);
+
+    this.setState({
+      defaultMeridianFlip: isFlip,
+    });
+    this.setState({
+      defaultSoftPark: Boolean(nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultSoftPark';
+      }).value),
+    });
+    this.setState({
+      isTwilightEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
+        return element.name == 'isTwilightEnabled';
+      }).value),
+    });
+    this.setState({
+      isFocus3Enabled: Boolean(nextProps.tsxInfo.find(function(element) {
+        return element.name == 'isFocus3Enabled';
+      }).value),
+    });
+    this.setState({
+      isFocus3Binned: Boolean(nextProps.tsxInfo.find(function(element) {
+        return element.name == 'isFocus3Binned';
+      }).value),
+    });
+    this.setState({
+      defaultCLSEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultCLSEnabled';
+      }).value),
+    });
+    this.setState({
+      enableImagingCooler: Boolean(nextProps.tsxInfo.find(function(element) {
+        return element.name == 'enableImagingCooler';
+      }).value),
+    });
+    this.setState({
+      isAutoguidingEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
+        return element.name == 'isAutoguidingEnabled';
+      }).value),
+    });
   }
 
   // Generic Method to determine default to save.
@@ -145,9 +182,9 @@ class Monitor extends Component {
         }
     });//.bind(this));
   }
-
   // Generic Method to determine default to save.
-  toggleDefaultState( param, val ) {
+  saveDefaultStateValue( param, val ) {
+
     Meteor.call( 'updateServerState', param, val , function(error, result) {
 
         if (error && error.error === "logged-out") {
@@ -258,49 +295,6 @@ class Monitor extends Component {
     }
   }
 
-  componentDidMount() {
-    this.updateDefaults(this.props);
-  }
-
-  updateDefaults(nextProps) {
-    if( typeof nextProps == 'undefined'  ) {
-      return;
-    }
-
-    if( typeof nextProps.tsxInfo == 'undefined'  ) {
-      return;
-    }
-
-    this.setState({
-      defaultMeridianFlip: Boolean(nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultMeridianFlip';
-      }).value),
-      defaultSoftPark: Boolean(nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultSoftPark';
-      }).value),
-      isTwilightEnabled: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'isTwilightEnabled';
-      }).value,
-      isFocus3Enabled: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'isFocus3Enabled';
-      }).value,
-      isFocus3Binned: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'isFocus3Binned';
-      }).value,
-      defaultCLSEnabled: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultCLSEnabled';
-      }).value,
-      enableImagingCooler: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'enableImagingCooler';
-      }).value,
-      isAutoguidingEnabled: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'isAutoguidingEnabled';
-      }).value,
-
-    });
-
-  }
-
   confirmPlayScheduler() {
     this.setState({confirmOpen: true});
   }
@@ -328,7 +322,7 @@ class Monitor extends Component {
         tsx_UpdateServerState(tsx_ServerStates.targetAZ, '_');
         tsx_UpdateServerState(tsx_ServerStates.targetHA, '_');
         tsx_UpdateServerState(tsx_ServerStates.targetTransit, '_');
-        tsx_UpdateServerState(tsx_ServerStates.currentStage, 'Stopped');
+//        tsx_UpdateServerState(tsx_ServerStates.currentStage, 'Stopped');
 
       }.bind(this));
   }

@@ -96,18 +96,11 @@ class DefaultSettings extends Component {
     this.saveDefaultState( name );
   };
 
-  // handleToggle = (e, { name, value }) => {
-  //   Meteor.call( 'updateServerState', name, !value , function(error, result) {
-  //   });
-  // };
-
-//  handleChange = (e, { name, value }) => this.setState({ [name]: value.trim() });
   handleChange = (e, { name, value }) => {
     this.setState({ [name]: value.trim() });
     this.saveDefaultState( name );
   };
 
-  handleChangeAndSave = (e, { name, value }) => this.setSaveState(name, value.trim());
   setSaveState( name, value ) {
     this.setState({ [name]: value });
     this.saveDefaultState( name );

@@ -135,7 +135,7 @@ class TakeSeries extends Component {
           <Item.Extra>
             <Button.Group basic size='small'>
               {/* <Button icon='edit' onClick={this.editEntry.bind(this)}/> */}
-              <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
+              {/* <Button icon='copy' onClick={this.copyEntry.bind(this)}/> */}
               <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
             </Button.Group>
             {/* *******************************
