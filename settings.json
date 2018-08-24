@@ -2,6 +2,6 @@
   "enable_debug": "yes",
   "log_file_location": "/media/odroid/PENSIVE2/tsx_cmd_logs",
   "public": {
-    "client_and_server_setting": "bar",
+    "client_and_server_setting": "bar"
   }
 }
