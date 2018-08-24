@@ -38,43 +38,55 @@ fi
 echo " *******************************"
 echo " Update TSX Cmd v1.0"
 echo " *******************************"
-echo " Updating tsx_cmd in ${install_dir}"
-echo " *******************************"
-echo ""
 
-if [ "$(uname)" == "Darwin" || "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-  echo " backing up current bundle to bundle.prev"
-  mv ./bundle ./bundle.prev
-
-  if [ "substr $(uname -p)" == "i386" ]; then
+if [ "$(uname)" == "Darwin" ]; then
+    echo Mac in ${install_dir}
     export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-darwin-x64/bin:$PATH
-  fi
-  elif [ "$(uname -p)" == "aarch64" ]; then
+
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    # Do something under GNU/Linux platform
+    echo Linux
+    if [ "$(uname -p)" == "aarch64" ]; then
       export PATH=${install_dir}/node-v8.11.3-linux-armv7l/bin:$PATH
-  elif [ "$(uname -p)" == "armv7l" ]; then
+    elif [ "$(uname -p)" == "armv7l" ]; then
       export PATH=${install_dir}/node-v8.11.3-linux-armv7l/bin:$PATH
+    else
+      echo NO NODEJS supported
+      echo $(uname -s) $(uname -p) - Not Supported
+      exit 5
+    fi
+  else
+      # Do something under 64 bits Windows NT platform
+      echo $(uname -s) $(uname -p) - Not Supported
+      exit 5
   fi
-
-  echo " *******************************"
-  echo " TSX_CMD - Extract" ${1}
-  echo " *******************************"
-  # https://drive.google.com/drive/folders/1yUPU6A0gbBv5UnuSp308lvctY4d6aUtw?usp=sharing
-  tar -xf ${1}
-
-  cd ${install_dir}/bundle/programs/server
-  echo " *******************************"
-  echo " TSX_CMD - fix for fibers deploy"
-  echo " *******************************"
-  npm uninstall fibers
-  npm install fibers
-  cd ${install_dir}
-
-  echo " *******************************"
-  echo " TSX_CMD - updated"
-  echo " *******************************"
-
 else
     # Do something under 64 bits Windows NT platform
     echo $(uname -s) $(uname -p) - Not Supported
     exit 5
 fi
+
+echo " *******************************"
+echo " Updating tsx_cmd in ${install_dir}"
+echo " *******************************"
+echo ""
+mv ./bundle ./bundle.prev
+echo " ./bundle backed up to ./bundle.prev"
+
+echo " *******************************"
+echo " TSX_CMD - Extract" ${1}
+echo " *******************************"
+# https://drive.google.com/drive/folders/1yUPU6A0gbBv5UnuSp308lvctY4d6aUtw?usp=sharing
+tar -xf ${1}
+
+cd ${install_dir}/bundle/programs/server
+echo " *******************************"
+echo " TSX_CMD - fix for fibers deploy"
+echo " *******************************"
+npm uninstall fibers
+npm install fibers
+cd ${install_dir}
+
+echo " *******************************"
+echo " TSX_CMD - updated"
+echo " *******************************"
