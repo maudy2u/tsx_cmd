@@ -444,7 +444,7 @@ class DefaultSettings extends Component {
             <Form.Input
               label='Imaging Camera Pixel Size: '
               name='imagingPixelSize'
-              placeholder='Pixel Size'
+              placeholder='i.e. scale dither using imaging pixel size'
               value={this.state.imagingPixelSize}
               onChange={this.handleChange}
             />

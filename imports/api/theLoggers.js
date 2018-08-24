@@ -31,8 +31,15 @@ import { LoggerMongo } from 'meteor/ostrio:loggermongo';
  const logCon = new Logger();
  const logDB = new Logger();
 
+var logFolder = '';
+if( Meteor.settings.log_file_location === '') {
+  logFolder = Meteor.absolutePath;
+}
+else {
+  logFolder = Meteor.settings.log_file_location;
+}
 
-var filters;
+var filters ='';
 if( Meteor.settings.enable_debug === 'yes') {
   filters = {
     filter: [
@@ -184,7 +191,7 @@ function fileNameDate( today ) {
     // Create log so that the name match the times for the "night" session
     return fileNameDate(time) + "_tsx_cmd.log";
   },
-  path: Meteor.absolutePath + '/logs/', // srcPath, //'~/tsx_cmd_logs/', // Use absolute storage path
+  path: logFolder + '/logs/', // srcPath, //'~/tsx_cmd_logs/', // Use absolute storage path
 
   format(time, level, message, data, userId) {
     var msgData= ((typeof data === 'undefined' || data === null || data === '' ) ? '' : (' = ' + data));

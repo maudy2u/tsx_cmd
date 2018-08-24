@@ -617,9 +617,13 @@ function tsx_RunFocus3( target ) {
               temp = tsx_GetServerStateValue( 'initialFocusTemperature' );
               UpdateStatus( ' !!! Error find focus.' );
           }
+          //TypeError: @Focus diverged.  Error = 7001
           else if (temp =='TypeError: @Focus diverged.  Error = 7001.') {
             temp = tsx_GetServerStateValue( 'initialFocusTemperature' );
             UpdateStatus( ' !!! Error find focus.' );
+          }
+          if( typeof temp == 'undefined' ) {
+            temp = '';
           }
           // Focuser postion (1232345345) using LUM Filter
           UpdateStatus(' Focuser postion (' + postion + ') and temp ('+temp+') using ' + target.focusFilter + ' filter.');
@@ -643,13 +647,11 @@ function tsx_RunFocus3( target ) {
     }
 
     UpdateStatus(' *** ' + target.targetFindName +': @Focus3 finished');
-    return Out;
   }
   else {
-    tsx_SetServerState( 'initialFocusTemperature', 21); // #TODO change random picked number
+    UpdateStatus(' *** ' + target.targetFindName +': @Focus3 disabled');
+    Out = ''; // get last temp
   }
-  UpdateStatus(' *** ' + target.targetFindName +': @Focus3 disabled');
-  Out = tsx_GetServerStateValue( 'initialFocusTemperature' ); // get last temp
   return Out;
 }
 
@@ -1119,8 +1121,18 @@ function isFocusingNeeded(target) {
     tsxDebug(' !!! Simulator will not do focus calculations');
     return false;
   }
-  var lastFocusTempDate = tsx_GetServerStateValue( 'initialFocusTemperatureDate' ); // get last temp
-  tsxDebug( ' lastFocus date: ' + lastFocusTempDate );
+  else if( lastFocusTemp == '' ) {
+    tsxLog(' ' + target.targetFindName + ': Initial focus not found trying again.');
+    return true;
+  }
+  else if( typeof lastFocusTemp == 'undefined' ) {
+    tsxLog(' ' + target.targetFindName + ': Initial focus not found trying again.');
+    return true;
+  }
+
+    // Start of code to check last time focusing was done.
+    var lastFocusTempDate = tsx_GetServerStateValue( 'initialFocusTemperatureDate' ); // get last temp
+    tsxDebug( ' lastFocus date: ' + lastFocusTempDate );
 
   var curFocusTemp = target.report.focusTemp; // read new temp
   tsxDebug( ' curFocusTemp temp: ' + curFocusTemp );
