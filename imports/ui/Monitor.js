@@ -92,6 +92,7 @@ class Monitor extends Component {
       defaultMeridianFlip: false,
       defaultSoftPark: false,
       defaultCLSEnabled: false,
+      isGuideSettlingEnabled: false,
 
       enableImagingCooler: false,
 
@@ -166,6 +167,11 @@ class Monitor extends Component {
     this.setState({
       isAutoguidingEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
         return element.name == 'isAutoguidingEnabled';
+      }).value),
+    });
+    this.setState({
+      isGuideSettlingEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
+        return element.name == 'isGuideSettlingEnabled';
       }).value),
     });
   }
@@ -632,6 +638,14 @@ class Monitor extends Component {
                 toggle
                 placeholder= 'Enable Autoguiding checking'
                 checked={this.state.isAutoguidingEnabled}
+                onChange={this.handleToggle.bind(this)}
+              />
+              <Form.Checkbox
+                label='Enable Guiding Settling '
+                name='isGuideSettlingEnabled'
+                toggle
+                placeholder= 'Enable Autoguiding Settling'
+                checked={this.state.isGuideSettlingEnabled}
                 onChange={this.handleToggle.bind(this)}
               />
               {/* <Form.Checkbox

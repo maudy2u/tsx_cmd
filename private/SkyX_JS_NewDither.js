@@ -46,6 +46,31 @@ catch(e) {
 
 }
 
+// *******************************
+// End any auto guide
+var CCDAG = ccdsoftAutoguider;
+var isGuiding = false;
+if( SelectedHardware.autoguiderCameraModel !== '<No Camera Selected>' ) {
+	if( CCDAG.State === 5 ) { // check if we are already guding...
+		isGuiding = true;
+	}
+	if( isGuiding) {
+		while (CCDAG.ExposureStatus == "DSS From Web"){
+			sky6Web.Sleep (500);	// Waste time if we are waiting for a DSS download
+						// so it doesn't throw an Error 206.
+						// Sometimes, it still does....
+		}
+		CCDAG.Abort();
+		while (!CCDAG.State == 0) {
+			//
+			// Diagnostic routine to make sure the camera is *really* done
+			//
+			sky6Web.Sleep (500);
+		}
+		CCDAG.Subframe = false;
+	}
+}
+
 if ( CCD.ImageUseDigitizedSkySurvey != "1" ) {
 	try
 	{

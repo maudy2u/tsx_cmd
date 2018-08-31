@@ -659,7 +659,7 @@ function tsx_RunFocus3( target ) {
 function InitialFocus( target ) {
   // tsxDebug('************************');
   tsxDebug(' *** ' + target.targetFindName +': @Focus3 Needed');
-  //  tsx_AbortGuider( );
+
   var temp = tsx_RunFocus3( target ); // need to get the focus position
   tsxDebug( ' *** ' + target.targetFindName +': Initial Focus temp: ' + temp );
   // var temp = result.split('|')[0].trim();
@@ -1290,7 +1290,7 @@ function tsx_dither( target ) {
     if( doDither ) { // adding a plus one so the zero works and if one is passed it will rung once.
 
         // first abort Guiding
-        tsx_AbortGuider(); // #TODO can put into dither if needed.
+        // tsx_AbortGuider(); // put into dither
 
         var cmd = tsx_cmd('SkyX_JS_NewDither');
 
@@ -1591,6 +1591,28 @@ function tsx_takeImage( filterNum, exposure, frame, tName ) {
   cmd = cmd.replace("$001", exposure ); // set exposure
   cmd = cmd.replace("$002", frame ); // set exposure
   cmd = cmd.replace("$003", tName ); // set exposure
+
+  var camScale = tsx_GetServerStateValue( 'imagingPixelSize');
+  var guiderScale = tsx_GetServerStateValue( 'guiderPixelSize');
+  var guidingPixelErrorTolerance = tsx_GetServerStateValue( 'guidingPixelErrorTolerance');
+  var isGuideSettlingEnabled = tsx_GetServerStateValue( 'isGuideSettlingEnabled');
+  if( typeof camScale === 'undefined' || camScale === '') {
+    camScale = 0;
+  }
+  if( typeof guiderScale === 'undefined' || guiderScale === '') {
+    guiderScale = 0;
+  }
+  if( typeof guidingPixelErrorTolerance === 'undefined' || guidingPixelErrorTolerance === '') {
+    guidingPixelErrorTolerance = 0;
+  }
+  if( typeof isGuideSettlingEnabled === 'undefined' || isGuideSettlingEnabled === '') {
+    isGuideSettlingEnabled = false;
+  }
+
+  cmd = cmd.replace("$004", camScale ); // set cameraImageScale
+  cmd = cmd.replace("$005", guiderScale ); // set guiderImageScale
+  cmd = cmd.replace("$006", guidingPixelErrorTolerance ); // set guidingPixelErrorTolerance
+  cmd = cmd.replace("$007", isGuideSettlingEnabled ); // set guidingPixelErrorTolerance
 
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {

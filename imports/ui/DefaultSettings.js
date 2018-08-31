@@ -82,6 +82,8 @@ class DefaultSettings extends Component {
     minDitherFactor: 3,
     maxDitherFactor: 7,
     imagingPixelSize: 3.8,
+    guiderPixelSize: 3.8,
+    guidingPixelErrorTolerance: 0.9,
     defaultCLSEnabled: true,
   };
 
@@ -204,6 +206,12 @@ class DefaultSettings extends Component {
       imagingPixelSize: nextProps.tsxInfo.find(function(element) {
         return element.name == 'imagingPixelSize';
       }).value,
+      guiderPixelSize: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'guiderPixelSize';
+      }).value,
+      guidingPixelErrorTolerance: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'guidingPixelErrorTolerance';
+      }).value,
       defaultFocusExposure: nextProps.tsxInfo.find(function(element) {
         return element.name == 'defaultFocusExposure';
       }).value,
@@ -289,6 +297,8 @@ class DefaultSettings extends Component {
     this.saveDefaultState('minDitherFactor');
     this.saveDefaultState('maxDitherFactor');
     this.saveDefaultState('imagingPixelSize');
+    this.saveDefaultState('guiderPixelSize');
+    this.saveDefaultState('guidingPixelErrorTolerance');
     this.saveDefaultState('defaultFocusExposure');
     this.saveDefaultState('defaultCLSEnabled');
     this.saveDefaultState('defaultFilter');
@@ -442,9 +452,23 @@ class DefaultSettings extends Component {
               onChange={this.handleChange}
             />
             <Form.Input
-              label='Imaging Camera Pixel Size: '
+              label='Guiding Tolerance: '
+              name='guidingPixelErrorTolerance'
+              placeholder='i.e. pixel scale to settle before starting image'
+              value={this.state.guidingPixelErrorTolerance}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='Guide Camera Pixel Size: '
+              name='guiderPixelSize'
+              placeholder='i.e. guider pixel scale'
+              value={this.state.guiderPixelSize}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='Image Camera Pixel Size: '
               name='imagingPixelSize'
-              placeholder='i.e. scale dither using imaging pixel size'
+              placeholder='i.e. image scale for dithering'
               value={this.state.imagingPixelSize}
               onChange={this.handleChange}
             />

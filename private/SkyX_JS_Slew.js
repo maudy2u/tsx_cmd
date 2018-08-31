@@ -31,6 +31,31 @@ var targetRA;
 var targetDEC;
 var Out;
 var slewStatus = "Success";
+var CCDAG = ccdsoftAutoguider;
+
+// *******************************
+// End any auto guide
+var isGuiding = false;
+if( SelectedHardware.autoguiderCameraModel !== '<No Camera Selected>' ) {
+	if( CCDAG.State === 5 ) { // check if we are already guding...
+		isGuiding = true;
+	}
+	if( isGuiding) {
+		while (CCDAG.ExposureStatus == "DSS From Web"){
+			sky6Web.Sleep (500);	// Waste time if we are waiting for a DSS download
+						// so it doesn't throw an Error 206.
+						// Sometimes, it still does....
+		}
+		CCDAG.Abort();
+		while (!CCDAG.State == 0) {
+			//
+			// Diagnostic routine to make sure the camera is *really* done
+			//
+			sky6Web.Sleep (500);
+		}
+		CCDAG.Subframe = false;
+	}
+}
 sky6StarChart.Find(targetName);
 var haveTarget = sky6ObjectInformation.Property(59); // altitude
 if( haveTarget != 'TypeError: Object not found. Error = 250.') {
