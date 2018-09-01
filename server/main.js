@@ -94,6 +94,7 @@ function initServerStates() {
   tsx_SetServerState('lastCheckMinSunAlt', '');
   tsx_SetServerState('lastFocusPos', '');
   tsx_SetServerState('lastFocusTemp', '');
+  tsx_SetServerState('initialFocusTemperature', '');
   tsx_SetServerState('imagingSessionDither', 0);
 
   for (var m in tsx_ServerStates){
