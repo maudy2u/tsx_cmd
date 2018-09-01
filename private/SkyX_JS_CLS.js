@@ -9,18 +9,20 @@
 var Target 		= "$000";		// tsxfeeder replaces $000 with a command line parameter
 var Filter		= "$001";		// the filter to use. Set by run_target, no effect if no wheel
 var repErr		= "";			// Throw-away error message for the try/catch tests
+var CCDSC = ccdsoftCamera;
+var SHW = SelectedHardware;
 var Out;
 
 // *******************************
 // unpark if parked
-if ( SelectedHardware.mountModel !== "Telescope Mount Simulator") {
+if ( SHW.mountModel !== "Telescope Mount Simulator") {
 	sky6RASCOMTele.Unpark();
 }
 
 // *******************************
 // End any auto guide
 var isGuiding = false;
-if( SelectedHardware.autoguiderCameraModel !== '<No Camera Selected>' ) {
+if( SHW.autoguiderCameraModel !== '<No Camera Selected>' ) {
 	if( CCDAG.State === 5 ) { // check if we are already guding...
 		isGuiding = true;
 	}
@@ -45,26 +47,26 @@ if( SelectedHardware.autoguiderCameraModel !== '<No Camera Selected>' ) {
 // Find target and start CLS
 sky6StarChart.Find(Target);				// This has been validated before calling this script
 
-ccdsoftCamera.Connect();
+CCDSC.Connect();
 
 sky6RASCOMTele.Asynchronous = false;
-ccdsoftCamera.Asynchronous = false;
-ccdsoftCamera.AutoSaveOn = true;
-ccdsoftCamera.ImageReduction = 0;			// Set this to ONE if you have a mechanical shutter.
-ccdsoftCamera.Frame = 1; // for light frame
-ccdsoftCamera.Subframe = false;
+CCDSC.Asynchronous = false;
+CCDSC.AutoSaveOn = true;
+CCDSC.ImageReduction = 0;			// Set this to ONE if you have a mechanical shutter.
+CCDSC.Frame = 1; // for light frame
+CCDSC.Subframe = false;
 
-if ( SelectedHardware.filterWheelModel !== "<No Filter Wheel Selected>" ) {
-	ccdsoftCamera.filterWheelConnect();		// Probably redundant.
-	ccdsoftCamera.FilterIndexZeroBased = Filter;	// Set in main script
+if ( SHW.filterWheelModel !== "<No Filter Wheel Selected>" ) {
+	CCDSC.filterWheelConnect();		// Probably redundant.
+	CCDSC.FilterIndexZeroBased = Filter;	// Set in main script
 }
 
 try {
 		ClosedLoopSlew.exec();
 		var imageLinkAng=ImageLinkResults.imagePositionAngle; // the real sky position
 		Out = 'Success|' + imageLinkAng;
-		if( SelectedHardware.rotatorModel != '<No Rotator Selected>') {
-			Out = Out + '|' + ccdsoftCamera.rotatorPositionAngle(); // the real position
+		if( SHW.rotatorModel != '<No Rotator Selected>') {
+			Out = Out + '|' + CCDSC.rotatorPositionAngle(); // the real position
 		}
 }
 catch (repErr) 	{

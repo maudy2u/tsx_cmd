@@ -3,24 +3,24 @@
 // Stephen Townsend
 // 2018-04-19
 
+var Out = 'Success|';
 var aFilter = $000;
 var aExpTime = $001;
 var aFrame = $002; //  cdLight =1, cdBias, cdDark, cdFlat
 var tName = '$003';
-var Out = 'Success|';
 
 var camScale = $004;
 var guiderScale = $005;
 var guidingPixelErrorTolerance = $006;
 var isGuideSettlingEnabled = $007;
 
+var CCDSC = ccdsoftCamera;
 var CCDAG = ccdsoftAutoguider;
 var wait = ((CCDAG.AutoguiderExposureTime + CCDAG.Delay + 1) * 1000);
 
 function isGuidingGood( camImageScale, guiderImageScale, pixelTolerance ) {
-	var wait = ((ccdsoftAutoguider.AutoguiderExposureTime + ccdsoftAutoguider.Delay + 1) * 1000);
+	var wait = ((CCDAG.AutoguiderExposureTime + CCDAG.Delay + 1) * 1000);
 
-	var CCDAG = ccdsoftAutoguider;
 	var isGuiding = false;
 	if( SelectedHardware.autoguiderCameraModel !== '<No Camera Selected>' ) {
 
@@ -82,7 +82,7 @@ function isGuidingGood( camImageScale, guiderImageScale, pixelTolerance ) {
 	return Quality;
 }
 
-while (!ccdsoftCamera.State == 0)
+while (!CCDSC.State == 0)
 //
 // Diagnostic routine to make sure the camera is *really* ready
 //
@@ -90,20 +90,20 @@ while (!ccdsoftCamera.State == 0)
 	sky6Web.Sleep (1000);
 }
 
-ccdsoftCamera.Asynchronous = false;		// We are going to wait for it
-ccdsoftCamera.ExposureTime = aExpTime;		// Set the exposure time based on the second parameter from tsxfeeder
-ccdsoftCamera.AutoSaveOn = true;		// Keep the image
-ccdsoftCamera.ImageReduction = 0;		// Don't do autodark, change this if you do want some other calibration (1=AD, 2=full)
-ccdsoftCamera.Frame = aFrame;			// It's a light frame
-ccdsoftCamera.Subframe = false;			// Not a subframe
+CCDSC.Asynchronous = false;		// We are going to wait for it
+CCDSC.ExposureTime = aExpTime;		// Set the exposure time based on the second parameter from tsxfeeder
+CCDSC.AutoSaveOn = true;		// Keep the image
+CCDSC.ImageReduction = 0;		// Don't do autodark, change this if you do want some other calibration (1=AD, 2=full)
+CCDSC.Frame = aFrame;			// It's a light frame
+CCDSC.Subframe = false;			// Not a subframe
 
 if ( SelectedHardware.filterWheelModel !== "<No Filter Wheel Selected>" )
 //
 // This test looks to see if there is a filter wheel. If so, change filters as instructed.
 //
 {
-	ccdsoftCamera.filterWheelConnect();		// Probably redundant.
-	ccdsoftCamera.FilterIndexZeroBased = aFilter;	// Pick a filter (up to eight), set by first parameter from tsxfeeder.
+	CCDSC.filterWheelConnect();		// Probably redundant.
+	CCDSC.FilterIndexZeroBased = aFilter;	// Pick a filter (up to eight), set by first parameter from tsxfeeder.
 }
 
 // *******************************
@@ -122,27 +122,24 @@ while( chk_guiding && (chk_count < max_chk) && (guideQuality === "Poor") ) {
 
 // *******************************
 // now take image...
-ccdsoftCamera.TakeImage();
+CCDSC.TakeImage();
 
 // *******************************
 // Setup the object name an update the fits file
 if( tName != '$003' ) {
 	//open TSX camera and get the last image
-	var tsxi = ccdsoftCameraImage;
-	var success = tsxi.AttachToActiveImager();
+	var success = CCDSC.AttachToActiveImager();
 
 	//Add some FITSKeywords for future reference
-
 	//Correct the OBJECT Keyword if using coordinates instead of a target name
-	tsxi.setFITSKeyword("OBJECT", tName);
+	CCDSC.setFITSKeyword("OBJECT", tName);
 
 	//Enter the rotator angle
-	var tsxc = ccdsoftCamera;
-	if( tsxc.focIsConnected ) {
-	  tsxi.setFITSKeyword("FOCUS_POS", tsxc.focPosition);
+	if( CCDSC.focIsConnected ) {
+	  CCDSC.setFITSKeyword("FOCUS_POS", tsxc.focPosition);
 	}
-	if( tsxc.rotatorIsConnected ) {
-	  tsxi.setFITSKeyword("ROTATOR_POS", tsxc.rotatorPositionAngle());
+	if( CCDSC.rotatorIsConnected ) {
+	  CCDSC.setFITSKeyword("ROTATOR_POS", tsxc.rotatorPositionAngle());
 	}
 
 	//Set save path and save

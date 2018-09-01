@@ -14,11 +14,11 @@
 // January 17, 2018
 //
 
-var CCDSC		= ccdsoftCamera;
+var CCDSC	= ccdsoftCamera;
 var focusingFilter = $000;
 var focusExp = $001;
 var numFocSamples = 1;
-var initExp 		= ccdsoftCamera.ExposureTime;			// How long of an exposure does the camera use?
+var initExp = CCDSC.ExposureTime;			// How long of an exposure does the camera use?
 
 if ( Application.build >= 11177 )
 {

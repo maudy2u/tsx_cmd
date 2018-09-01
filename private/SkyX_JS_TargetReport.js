@@ -1,5 +1,6 @@
 /* Java Script */
 /* Socket Start Packet */
+// SkyX_JS_TargetReport
 // Stephen Townsend
 // 2018-04-19
 
@@ -22,7 +23,9 @@ try { // try to get focuser info
  focPostion
 }
 */
-
+var OBJI = sky6ObjectInformation;
+var CHART = sky6StarChart;
+var CCDSC = ccdsoftCamera;
 // name use to find
 var targetName = "$000";
 //"astronomical twilight" (-18 degrees)
@@ -37,9 +40,9 @@ var tryTarget 	= {
 	msg: 'Did nothing',
 };
 
-sky6StarChart.Find("sun");
-sky6ObjectInformation.Property(59);
-var sunAlt = sky6ObjectInformation.ObjInfoPropOut;
+CHART.Find("sun");
+OBJI.Property(59);
+var sunAlt = OBJI.ObjInfoPropOut;
 if (sunAlt > twightlightAlt ) {
 report  = false
   + '|' +
@@ -55,11 +58,11 @@ try {
   //
   // Try to find the target and catch the error if it fails.
   //
-  sky6StarChart.Find(targetName);
-  var haveTarget = sky6ObjectInformation.Property(59); // altitude
+  CHART.Find(targetName);
+  var haveTarget = OBJI.Property(59); // altitude
   if( haveTarget != 'TypeError: Object not found. Error = 250.') {
     // we have a target we can query
-    var altitude = sky6ObjectInformation.ObjInfoPropOut;
+    var altitude = OBJI.ObjInfoPropOut;
     altitude = altitude.toFixed(1);
     if (altitude < altLimit)
     {
@@ -75,25 +78,25 @@ try {
       };
     }
 
-    sky6ObjectInformation.Property(58); // azimuth
-    var azimuth = sky6ObjectInformation.ObjInfoPropOut;
+    OBJI.Property(58); // azimuth
+    var azimuth = OBJI.ObjInfoPropOut;
     if (azimuth < 179) {
     	azimuth = "East";
     } else {
     	azimuth = "West";
     }
 
-    sky6ObjectInformation.Property(54);  // RA				// Pull the RA value
-    var targetRA = sky6ObjectInformation.ObjInfoPropOut; 		// Stuff RA into variable
+    OBJI.Property(54);  // RA				// Pull the RA value
+    var targetRA = OBJI.ObjInfoPropOut; 		// Stuff RA into variable
 
-    sky6ObjectInformation.Property(55); // DEC			// Pull the DEC value
-    var targetDEC = sky6ObjectInformation.ObjInfoPropOut; 		// Stuff DEC into variable
+    OBJI.Property(55); // DEC			// Pull the DEC value
+    var targetDEC = OBJI.ObjInfoPropOut; 		// Stuff DEC into variable
 
-    sky6ObjectInformation.Property(70); // HA			// Pull the Hour Angle value
-    var targetHA = sky6ObjectInformation.ObjInfoPropOut; 		// Stuff DEC into variable
+    OBJI.Property(70); // HA			// Pull the Hour Angle value
+    var targetHA = OBJI.ObjInfoPropOut; 		// Stuff DEC into variable
 
-    sky6ObjectInformation.Property(68); // TransitTime			// Pull the transitTime value
-    var targetTransit = sky6ObjectInformation.ObjInfoPropOut; 		// Stuff DEC into variable
+    OBJI.Property(68); // TransitTime			// Pull the transitTime value
+    var targetTransit = OBJI.ObjInfoPropOut; 		// Stuff DEC into variable
 
     report = report +
       '|' +
@@ -140,8 +143,8 @@ report = report +'|'+ tryTarget.ready + '|'+tryTarget.msg;
 
 // add focuser info
 if( SelectedHardware.focuserModel != '<No Focuser Selected>') {
-  var temp = ccdsoftCamera.focTemperature.toFixed(1);
-  var pos = ccdsoftCamera.focPosition;
+  var temp = CCDSC.focTemperature.toFixed(1);
+  var pos = CCDSC.focPosition;
   report = report +'|'+ temp +'|'+ pos;
 }
 

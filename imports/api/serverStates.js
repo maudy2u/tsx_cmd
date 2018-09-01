@@ -80,6 +80,7 @@ export const tsx_ServerStates = {
   defaultSoftPark: 'defaultSoftPark',
   defaultSleepTime: 'defaultSleepTime',
   defaultGuideExposure: 'defaultGuideExposure',
+  defaultFOVExposure: 'defaultFOVExposure',
 
   defaultMinSunAlt: 'defaultMinSunAlt',
   isTwilightEnabled: 'isTwilightEnabled',
@@ -88,6 +89,8 @@ export const tsx_ServerStates = {
   isGuideSettlingEnabled: 'isGuideSettlingEnabled',
   guidingPixelErrorTolerance: 'guidingPixelErrorTolerance',
   guiderPixelSize: 'guiderPixelSize',
+  fovPositionAngleTolerance: 'fovPositionAngleTolerance',
+  isFOVAngleEnabled: 'isFOVAngleEnabled',
 
   lastTargetDirection: 'lastTargetDirection',
   lastCheckMinSunAlt: 'lastCheckMinSunAlt',

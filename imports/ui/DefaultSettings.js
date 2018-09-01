@@ -85,6 +85,8 @@ class DefaultSettings extends Component {
     guiderPixelSize: 3.8,
     guidingPixelErrorTolerance: 0.9,
     defaultCLSEnabled: true,
+    fovPositionAngleTolerance: 0.5,
+    defaultFOVExposure: 4,
   };
 
   // requires the ".bind(this)", on the callers
@@ -221,6 +223,12 @@ class DefaultSettings extends Component {
       defaultFilter: nextProps.tsxInfo.find(function(element) {
         return element.name == 'defaultFilter';
       }).value,
+      fovPositionAngleTolerance: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'fovPositionAngleTolerance';
+      }).value,
+      defaultFOVExposure: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultFOVExposure';
+      }).value,
 
     });
 
@@ -302,7 +310,8 @@ class DefaultSettings extends Component {
     this.saveDefaultState('defaultFocusExposure');
     this.saveDefaultState('defaultCLSEnabled');
     this.saveDefaultState('defaultFilter');
-
+    this.saveDefaultState('fovPositionAngleTolerance');
+    this.saveDefaultState('defaultFOVExposure');
   }
 
   getDropDownFilters() {
@@ -352,59 +361,7 @@ class DefaultSettings extends Component {
               onChange={this.handleChange}
             />
           </Form.Group>
-          {/* <Form.Group>
-            <Form.Checkbox
-              label='Meridian Flip Enabled '
-              name='defaultMeridianFlip'
-              toggle
-              placeholder= 'Enable auto meridian flip'
-              checked={this.state.defaultMeridianFlip}
-              onChange={this.handleToggle.bind(this)}
-            />
-            <Form.Checkbox
-              label='CLS Enabled '
-              name='defaultCLSEnabled'
-              toggle
-              placeholder= 'Enable CLS'
-              checked={this.state.defaultCLSEnabled}
-              onChange={this.handleToggle.bind(this)}
-            />
-            <Form.Checkbox
-              label='Soft Park Enabled (Stop tracking) '
-              name='defaultSoftPark'
-              toggle
-              placeholder= 'Enable soft parking'
-              checked={this.state.defaultSoftPark}
-              onChange={this.handleToggle.bind(this)}
-            />
-          </Form.Group> */}
-          {/* <Form.Group>
-            <Form.Checkbox
-              label='Checking Focus Enabled (@Focus3) '
-              name='isFocus3Enabled'
-              toggle
-              placeholder= 'Enable focus checking'
-              checked={this.state.isFocus3Enabled}
-              onChange={this.handleToggle.bind(this)}
-            />
-            <Form.Checkbox
-              label='Bin 2x2 Focus Enabled '
-              name='isFocus3Binned'
-              toggle
-              placeholder= 'Enable to bin when focusing'
-              checked={this.state.isFocus3Binned}
-              onChange={this.handleToggle.bind(this)}
-            />
-          </Form.Group> */}
           <Form.Group>
-            {/* <Form.Checkbox
-              label='Twilight Check Enabled '
-              name='isTwilightEnabled'
-              toggle
-              placeholder= 'Enable twilight check'
-              checked={this.state.isTwilightEnabled}
-              onChange={this.handleToggle.bind(this)}
-            /> */}
             <Form.Input
               label='Twilight Alittude for Sun '
               name='defaultMinSunAlt'
@@ -419,6 +376,13 @@ class DefaultSettings extends Component {
               name='defaultGuideExposure'
               placeholder='Enter number seconds'
               value={this.state.defaultGuideExposure}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='FOV Angle Exposure '
+              name='defaultFOVExposure'
+              placeholder='Enter number seconds'
+              value={this.state.defaultFOVExposure}
               onChange={this.handleChange}
             />
             <Form.Input
@@ -468,7 +432,7 @@ class DefaultSettings extends Component {
             <Form.Input
               label='Image Camera Pixel Size: '
               name='imagingPixelSize'
-              placeholder='i.e. image scale for dithering'
+              placeholder='i.e. image scale for dithering, and angle match'
               value={this.state.imagingPixelSize}
               onChange={this.handleChange}
             />
@@ -484,6 +448,13 @@ class DefaultSettings extends Component {
               name='maxDitherFactor'
               placeholder='Maximum number of pixels'
               value={this.state.maxDitherFactor}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='FOV Position Angle Tolerance '
+              name='fovPositionAngleTolerance'
+              placeholder='e.g. 0.5 (zero disables)'
+              value={this.state.fovPositionAngleTolerance}
               onChange={this.handleChange}
             />
           </Form.Group>

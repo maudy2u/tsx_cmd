@@ -93,6 +93,7 @@ class Monitor extends Component {
       defaultSoftPark: false,
       defaultCLSEnabled: false,
       isGuideSettlingEnabled: false,
+      isFOVAngleEnabled: false,
 
       enableImagingCooler: false,
 
@@ -172,6 +173,11 @@ class Monitor extends Component {
     this.setState({
       isGuideSettlingEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
         return element.name == 'isGuideSettlingEnabled';
+      }).value),
+    });
+    this.setState({
+      isFOVAngleEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
+        return element.name == 'isFOVAngleEnabled';
       }).value),
     });
   }
@@ -638,6 +644,14 @@ class Monitor extends Component {
                 toggle
                 placeholder= 'Enable Autoguiding checking'
                 checked={this.state.isAutoguidingEnabled}
+                onChange={this.handleToggle.bind(this)}
+              />
+              <Form.Checkbox
+                label='Enable FOV Angle Matching '
+                name='isFOVAngleEnabled'
+                toggle
+                placeholder= 'Enable using the targets angle'
+                checked={this.state.isFOVAngleEnabled}
                 onChange={this.handleToggle.bind(this)}
               />
               <Form.Checkbox

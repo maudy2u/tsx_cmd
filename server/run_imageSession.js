@@ -789,8 +789,8 @@ function SetUpForImagingRun(targetSession) {
   //      b) obtained from image
   var rotateSucess = false;
   UpdateStatus( ' ' + targetSession.targetFindName + ': matching angle' );
-  // rotateSucess = tsx_MatchRotation( targetSession );
-  UpdateStatus( ' ' + targetSession.targetFindName + ': angle matched' );
+  rotateSucess = tsx_MatchRotation( targetSession );
+  UpdateStatus( ' ' + targetSession.targetFindName + ': angle matched (' + rotateSucess + ')' );
 
   // get initial focus....
   // #TODO: get the focus to create date/time of last focus... before redoing...
@@ -1265,7 +1265,7 @@ function isTargetConditionsInValid(target) {
     tsx_AbortGuider();
     InitialFocus( target );
     // no need to return false... can keep going.
-    SetUpAutoGuiding( targetSession );			// Setup & Start Auto-Guiding.
+    SetUpAutoGuiding( target );			// Setup & Start Auto-Guiding.
   }
   //
   // *******************************
@@ -1496,28 +1496,55 @@ function tsx_MatchRotation( targetSession ) {
   tsxDebug(' *** tsx_MatchRotation: ' + target.targetFindName);
 
   var rotateSucess = false;
-  // var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale, target.expos);
-  var cmd = tsx_cmd('SkyX_JS_MatchAngle');
-  cmd = cmd.replace('$000', targetSession.angle );
-  cmd = cmd.replace('$001', targetSession.scale);
-  cmd = cmd.replace('$002', targetSession.exposure);
-  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        var result = tsx_return.split('|')[0].trim();
-        tsxDebug('Any error?: ' + result);
-        if( result != 'Success') {
-          forceAbort = true;
-          tsxWarn('!!! SkyX_JS_MatchAngle Failed. Error: ' + result);
-        }
-        else {
-          rotateSucess = true;
-          tsxLog( 'Rotated to : GET ANGLE');
-        }
-        tsx_is_waiting = false;
+  var isEnabled = tsx_GetServerStateValue( 'isFOVAngleEnabled');
+  var fovExposure = tsx_GetServerStateValue( 'defaultFOVExposure');
+  var pixelSize = tsx_GetServerStateValue( 'imagingPixelSize');
+  var angle = targetSession.angle;
+  if( typeof pixelSize === 'undefined') {
+    UpdateStatus(' *** Rotating failed: fix by setting default image pixel size')
+    return rotateSucess;
+  }
+  if( typeof angle === 'undefined') {
+    UpdateStatus(' *** Rotating failed: fix by setting target angle in editor')
+    return rotateSucess;
+  }
+  if( typeof isEnabled === 'undefined') {
+    tsx_SetServerState( 'isFOVAngleEnabled', false );
+    isEnabled = false; // assume within one degree default
+  }
+  if( typeof fovExposure === 'undefined') {
+    tsx_SetServerState( 'fovExposure', 4 );
+    tsxWarn(' *** Rotating FIXED: set to a default 4 sec, check on default page')
+  }
+
+  if( isEnabled ) {
+    var ACCURACY = tsx_GetServerStateValue( 'fovPositionAngleTolerance');
+    if( typeof ACCURACY === 'undefined') {
+      ACCURACY = 1; // assume within one degree default
+    }
+
+    UpdateStatus( ' ' + target.targetFindName + ' Setting FOV to ('+ angle +')' );
+    var cmd = tsx_cmd('SkyX_JS_MatchAngle');
+    cmd = cmd.replace('$000', angle );
+    cmd = cmd.replace('$001', pixelSize);
+    cmd = cmd.replace('$002', fovExposure);
+    cmd = cmd.replace('$003', ACCURACY);
+    tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+      var result = tsx_return.split('|')[0].trim();
+      tsxDebug('Any error?: ' + result);
+      if( result != 'Success') {
+        forceAbort = true;
+        tsxWarn('!!! SkyX_JS_MatchAngle Failed. Error: ' + result);
       }
-    )
-  );
-  while( tsx_is_waiting ) {
-    Meteor.sleep( 1000 );
+      else {
+        rotateSucess = true;
+        tsxLog( 'Rotated to : GET ANGLE');
+      }
+      tsx_is_waiting = false;
+    }));
+    while( tsx_is_waiting ) {
+      Meteor.sleep( 1000 );
+    }
   }
 
   return rotateSucess;

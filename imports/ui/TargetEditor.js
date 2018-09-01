@@ -329,7 +329,7 @@ class TargetEditor extends Component {
                 <Form.Input
                     label='Target Name'
                     name='targetFindName'
-                    placeholder='Catalogue name, or RA/DEC Values, e.g.: 11h 33m 48s, 55d 57m 18s'
+                    placeholder='TheSkyX Find: e.g.: M31 or, 11h 33m 48s, 55d 57m 18s'
                     value={this.state.targetFindName}
                     onChange={this.handleChange}/>
                 <Form.Field control={Input}
@@ -338,6 +338,12 @@ class TargetEditor extends Component {
                   placeholder='Describe the session'
                   value={this.state.description}
                   onChange={this.handleChange}/>
+                <Form.Input
+                    label='FOV Angle'
+                    name='angle'
+                    placeholder='Position angle per CLS, e.g. 0 for PEC capture.'
+                    value={this.state.angle}
+                    onChange={this.handleChange}/>
               </Form.Group>
               <Form.Group>
                 <Button onClick={this.getTargetRaDec.bind(this)}>Find</Button>

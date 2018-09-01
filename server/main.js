@@ -83,7 +83,6 @@ isCurrentlyImaging: 'isCurrentlyImaging',
 function initServerStates() {
   tsx_SetServerState('mntMntDir', '');
   tsx_SetServerState('mntMntAlt', '');
-  // tsx_SetServerState('targetName', '');
   tsx_SetServerState('targetRA', '');
   tsx_SetServerState('targetDEC', '');
   tsx_SetServerState('targetALT', '');
@@ -289,6 +288,10 @@ Meteor.startup(() => {
             // var stillDaytime = isTimeBeforeCurrentTime('15:00');
             // tsxDebug( ' Is stillDaytime: ' + stillDaytime);
             if( approachingDawn ) {
+              var defaultFilter = tsx_GetServerStateValue('defaultFilter');
+              var softPark = false;
+              tsx_AbortGuider();
+              tsx_MntPark(defaultFilter, softPark);
               UpdateStatus( ' Scheduler stopped: not dark.');
               UpdateStatus( ' ^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
               break;
