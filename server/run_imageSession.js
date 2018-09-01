@@ -601,7 +601,8 @@ function tsx_RunFocus3( target ) {
     }
 
     var cmd = tsx_cmd('SkyX_JS_Focus-3');
-
+    tsxDebug( ' ??? @Focusing-3 filter: ' + focusFilter );
+    tsxDebug( ' ??? @Focusing-3 exposure: ' + focusExp );
     cmd = cmd.replace("$000", focusFilter ); // set filter
     cmd = cmd.replace("$001", focusExp ); // set Bin
 
@@ -793,6 +794,7 @@ function SetUpForImagingRun(targetSession) {
 
   // get initial focus....
   // #TODO: get the focus to create date/time of last focus... before redoing...
+  tsx_AbortGuider();
   InitialFocus( targetSession );
   if( isSchedulerStopped() ) {
     return false; // exit
@@ -1260,8 +1262,10 @@ function isTargetConditionsInValid(target) {
 	// check if reFocusTemp - needs to refocus
   var runFocus3 = isFocusingNeeded( target );
   if( runFocus3 ) {
+    tsx_AbortGuider();
     InitialFocus( target );
     // no need to return false... can keep going.
+    SetUpAutoGuiding( targetSession );			// Setup & Start Auto-Guiding.
   }
   //
   // *******************************
