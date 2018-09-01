@@ -85,11 +85,15 @@ export const tsx_ServerStates = {
   isTwilightEnabled: 'isTwilightEnabled',
   isFocus3Enabled: 'isFocus3Enabled',
   isFocus3Binned: 'isFocus3Binned',
+  isGuideSettlingEnabled: 'isGuideSettlingEnabled',
+  guidingPixelErrorTolerance: 'guidingPixelErrorTolerance',
+  guiderPixelSize: 'guiderPixelSize',
 
   lastTargetDirection: 'lastTargetDirection',
   lastCheckMinSunAlt: 'lastCheckMinSunAlt',
   lastFocusPos: 'lastFocusPos',
   lastFocusTemp: 'lastFocusTemp',
+
 };
 
 export function postStatus( info ) {

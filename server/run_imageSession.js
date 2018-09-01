@@ -622,7 +622,7 @@ function tsx_RunFocus3( target ) {
             temp = tsx_GetServerStateValue( 'initialFocusTemperature' );
             UpdateStatus( ' !!! Error find focus.' );
           }
-          if( typeof temp == 'undefined' ) {
+          if( typeof temp == 'undefined' || temp === 'No error. Error = 0.') {
             temp = '';
           }
           // Focuser postion (1232345345) using LUM Filter
