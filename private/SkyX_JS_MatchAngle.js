@@ -75,7 +75,7 @@ var obinX = CCDSC.BinX;
 var obinY = CCDSC.BinY;
 var oSave = CCDSC.AutoSaveOn;
 
-var knownImageScale = pixelSize * oBinX;
+var knownImageScale = pixelSize * obinX;
 
 rotate( targetAng, knownImageScale ); // using 1.17 and CCW=false for simulator
 
