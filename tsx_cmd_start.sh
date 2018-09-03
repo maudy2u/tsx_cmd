@@ -15,61 +15,42 @@
 #     You should have received a copy of the GNU Affero General Public License
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+echo *******************************
 install_dir=$(pwd)
+mkdir -p ${install_dir}/db
 if [ "$(uname)" == "Darwin" ]; then
   if [ "substr $(uname -p)" == "i386" ]; then
     echo Mac in ${install_dir}
     export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-darwin-x64/bin:$PATH
-    mkdir -p ${install_dir}/db
-    mongod --inMemorySizeGB 1 --dbpath ${install_dir}/db &
-    export MONGO_URL='mongodb://localhost/tsx_cmd'
-    export PORT=3000
-    export ROOT_URL='http://127.0.0.1'
-    export METEOR_SETTINGS="$(cat $(pwd)/settings.json)"
-    cd ${install_dir}/bundle
-    node main.js
+    mongod --inMemorySizeGB 1 --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log &
   else
-    echo Not Supported
+    echo "$(expr substr $(uname -s) 1 10)" - not yet supported
     exit 5
   fi
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-
   if [ "$(uname -p)" == "aarch64" ]; then
-    echo Linux ARM in ${install_dir}
+    echo Linux aarch64 in ${install_dir}
     export PATH=${install_dir}/node-v8.11.3-linux-armv7l/bin:$PATH
     # export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-linux-arm64/bin:$PATH
     # https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz
-    mkdir -p ${install_dir}/db
-    mongod --inMemorySizeGB 1 --dbpath ${install_dir}/db &
-    export MONGO_URL='mongodb://localhost/tsx_cmd'
-    export PORT=3000
-    export ROOT_URL='http://127.0.0.1'
-    export METEOR_SETTINGS="$(cat $(pwd)/settings.json)"
-    cd ${install_dir}/bundle
-    node main.js
+    mongod --inMemorySizeGB 1 --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log &
   elif [ "$(uname -p)" == "armv7l" ]; then
     echo Linux ARM in ${install_dir}
-    export PATH=${install_dir}/node-v8.11.3-linux-armv7l/bin:$PATH
-    # export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-linux-arm64/bin:$PATH
+    export PATH=~/bin:${install_dir}/node-v8.11.3-linux-armv7l/bin:/home/odroid/test2/mongo/mongodb:$PATH
     # https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz
-    mkdir -p ${install_dir}/db
-    mongod --inMemorySizeGB 1 --dbpath ${install_dir}/db &
-    export MONGO_URL='mongodb://localhost/tsx_cmd'
-    export PORT=3000
-    export ROOT_URL='http://127.0.0.1'
-    export METEOR_SETTINGS="$(cat $(pwd)/settings.json)"
-    cd ${install_dir}/bundle
-    node main.js
+    mongod --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log --journal &
   else
-    echo Not Supported
+    echo "$(expr substr $(uname -s) 1 10)" - not yet supported
     exit 5
   fi
-elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
-    # Do something under 32 bits Windows NT platform
-    Echo windows32 - not yet supported
-    exit 5
-elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]; then
-    # Do something under 64 bits Windows NT platform
-    echo windows64 - not yet supported
+else
+    echo "$(expr substr $(uname -s) 1 10)" - not yet supported
     exit 5
 fi
+
+export MONGO_URL='mongodb://localhost/tsx_cmd'
+export PORT=3000
+export ROOT_URL='http://127.0.0.1'
+export METEOR_SETTINGS="$(cat $(pwd)/settings.json)"
+cd ${install_dir}/bundle
+node main.js
