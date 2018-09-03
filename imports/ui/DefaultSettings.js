@@ -118,16 +118,6 @@ class DefaultSettings extends Component {
   saveServerFailedOpen = () => this.setState({ saveServerFailed: true });
   saveServerFailedClose = () => this.setState({ saveServerFailed: false });
 
-  // Set TSX Server
-  // // ipChange = (e, { value }) => this.setState({ ip: value.trim() });
-  // // portChange = (e, { value }) => this.setState({ port: value.trim() });
-  // modalEnterIpOpen = () => this.setState({ modalEnterIp: true });
-  // modalEnterIpClose = () => this.setState({ modalEnterIp: false });
-  // modalEnterPortOpen = () => this.setState({ modalEnterPort: true });
-  // modalEnterPortClose = () => this.setState({ modalEnterPort: false });
-  // modalConnectionFailedOpen = () => this.setState({ modalConnectionFailed: true });
-  // modalConnectionFailedClose = () => this.setState({ modalConnectionFailed: false });
-
   componentDidMount() {
     this.updateDefaults(this.props);
   }
@@ -142,15 +132,7 @@ class DefaultSettings extends Component {
     }
 
     this.setState({
-      // ip: nextProps.tsxInfo.find(function(element) {
-      //   return element.name == 'ip';
-      // }).value,
-      // port: nextProps.tsxInfo.find(function(element) {
-      //   return element.name == 'port';
-      // }).value,
-      // defaultCoolTemp: nextProps.tsxInfo.find(function(element) {
-      //   return element.name == 'defaultCoolTemp';
-      // }).value,
+
       defaultFocusTempDiff: nextProps.tsxInfo.find(function(element) {
         return element.name == 'defaultFocusTempDiff';
       }).value,
@@ -233,26 +215,6 @@ class DefaultSettings extends Component {
     });
 
   }
-  // saveTSXServerIp() {
-  //     this.saveDefaultState('ip');
-  //     this.modalEnterIpClose();
-  // };
-  //
-  // saveTSXServerPort() {
-  //   this.saveDefaultState('port');
-  //   this.modalEnterPortClose();
-  // };
-
-  // saveTSXServerConnection() {
-  //
-  //   if( this.state.port == "" || this.state.ip == ""  ) {
-  //     this.saveServerFailedOpen();
-  //   }
-  //   else {
-  //     this.saveDefaultState('ip');
-  //     this.saveDefaultState('port');
-  //   };
-  // };
 
   // Generic Method to determine default to save.
   saveDefaultState( param ) {
@@ -361,28 +323,14 @@ class DefaultSettings extends Component {
               onChange={this.handleChange}
             />
           </Form.Group>
+        </Segment>
+        <Segment>
           <Form.Group>
             <Form.Input
               label='Twilight Alittude for Sun '
               name='defaultMinSunAlt'
               placeholder='Enter negative degrees below horizon'
               value={this.state.defaultMinSunAlt}
-              onChange={this.handleChange}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Input
-              label='AutoGuide Exposure '
-              name='defaultGuideExposure'
-              placeholder='Enter number seconds'
-              value={this.state.defaultGuideExposure}
-              onChange={this.handleChange}
-            />
-            <Form.Input
-              label='FOV Angle Exposure '
-              name='defaultFOVExposure'
-              placeholder='Enter number seconds'
-              value={this.state.defaultFOVExposure}
               onChange={this.handleChange}
             />
             <Form.Input
@@ -393,35 +341,16 @@ class DefaultSettings extends Component {
               onChange={this.handleChange}
             />
             <Form.Input
-              label='Focusing Temperature '
-              name='defaultFocusTempDiff'
-              placeholder='Temp diff to run auto focus'
-              value={this.state.defaultFocusTempDiff}
-              onChange={this.handleChange}
-            />
-            <Form.Input
-              label='Starting Focusing Exposure '
-              name='defaultFocusExposure'
-              placeholder='Enter seconds'
-              value={this.state.defaultFocusExposure}
+              label='Time to sleep when no target '
+              name='defaultSleepTime'
+              placeholder='Minutes to sleep'
+              value={this.state.defaultSleepTime}
               onChange={this.handleChange}
             />
           </Form.Group>
+        </Segment>
+        <Segment>
           <Form.Group>
-            <Form.Input
-              label='Dither after X images (0 disables): '
-              name='defaultDithering'
-              placeholder='Images before dither'
-              value={this.state.defaultDithering}
-              onChange={this.handleChange}
-            />
-            <Form.Input
-              label='Guiding Tolerance: '
-              name='guidingPixelErrorTolerance'
-              placeholder='i.e. pixel scale to settle before starting image'
-              value={this.state.guidingPixelErrorTolerance}
-              onChange={this.handleChange}
-            />
             <Form.Input
               label='Guide Camera Pixel Size: '
               name='guiderPixelSize'
@@ -436,6 +365,60 @@ class DefaultSettings extends Component {
               value={this.state.imagingPixelSize}
               onChange={this.handleChange}
             />
+          </Form.Group>
+        </Segment>
+        <Segment>
+          <Form.Group>
+            <Form.Input
+              label='Guiding Tolerance '
+              name='guidingPixelErrorTolerance'
+              placeholder='i.e. pixel scale to settle before starting image'
+              value={this.state.guidingPixelErrorTolerance}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='FOV Angle Tolerance '
+              name='fovPositionAngleTolerance'
+              placeholder='e.g. 0.5 (zero disables)'
+              value={this.state.fovPositionAngleTolerance}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='Focus Temp Tolerance '
+              name='defaultFocusTempDiff'
+              placeholder='Temp diff to run auto focus'
+              value={this.state.defaultFocusTempDiff}
+              onChange={this.handleChange}
+            />
+          </Form.Group>
+        </Segment>
+        <Segment>
+          <Form.Group>
+            <Form.Input
+              label='AutoGuide Exposure '
+              name='defaultGuideExposure'
+              placeholder='Enter number seconds'
+              value={this.state.defaultGuideExposure}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='Starting Focusing Exposure '
+              name='defaultFocusExposure'
+              placeholder='Enter seconds'
+              value={this.state.defaultFocusExposure}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='FOV Angle Exposure '
+              name='defaultFOVExposure'
+              placeholder='Enter number seconds'
+              value={this.state.defaultFOVExposure}
+              onChange={this.handleChange}
+            />
+          </Form.Group>
+        </Segment>
+        <Segment>
+          <Form.Group>
             <Form.Input
               label='Dithering Minimum Pixel Move '
               name='minDitherFactor'
@@ -451,26 +434,10 @@ class DefaultSettings extends Component {
               onChange={this.handleChange}
             />
             <Form.Input
-              label='FOV Position Angle Tolerance '
-              name='fovPositionAngleTolerance'
-              placeholder='e.g. 0.5 (zero disables)'
-              value={this.state.fovPositionAngleTolerance}
-              onChange={this.handleChange}
-            />
-          </Form.Group>
-          <Form.Group>
-            {/* <Form.Input
-              label='Cooling Temperature: '
-              name='defaultCoolTemp'
-              placeholder='-20'
-              value={this.state.defaultCoolTemp}
-              onChange={this.handleChangeAndSave}
-            /> */}
-            <Form.Input
-              label='Time to sleep when no target '
-              name='defaultSleepTime'
-              placeholder='Minutes to sleep'
-              value={this.state.defaultSleepTime}
+              label='Dither after X images (0 disables): '
+              name='defaultDithering'
+              placeholder='Images before dither'
+              value={this.state.defaultDithering}
               onChange={this.handleChange}
             />
           </Form.Group>
