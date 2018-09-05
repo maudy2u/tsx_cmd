@@ -15,6 +15,7 @@
 #     You should have received a copy of the GNU Affero General Public License
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+install_dir=$(pwd)
 echo ************************
 echo Install SCONS Build tools
 sudo apt install scons
@@ -38,9 +39,14 @@ cp ../SConscript src/third_party/v8-3.25/SConscript
 echo ************************
 echo "Build Mongod"
 #scons --disable-warnings-as-errors --prefix=/tmp/mongo-build --js-engine=mozjs mongod
-scons --disable-warnings-as-errors --prefix=/tmp/mongo-build --js-engine=v8-3.25 mongod
+#scons --disable-warnings-as-errors --prefix=/tmp/mongo-build --js-engine=v8-3.25 mongod
+scons -j 2 --wiredtiger=off --js-engine=v8-3.25 --c++11=off --disable-warnings-as-errors CXXFLAGS="-std=gnu++11" core
+scons --wiredtiger=off --js-engine=v8-3.25 --c++11=off --disable-warnings-as-errors CXXFLAGS="-std=gnu++11" install
 
 echo ************************
 echo "Install mongod: ~/bin/mongod"
 mkdir -p ~/bin
-cp ./mongod  ~/bin/mongod
+cp ./build/install/bin/mongos  ${install_dir}/mongos
+cp ./build/install/bin/mongoperf  ${install_dir}/mongoperf
+cp ./build/install/bin/mongod  ${install_dir}/mongod
+cp ./build/install/bin/mongo  ${install_dir}/mongo

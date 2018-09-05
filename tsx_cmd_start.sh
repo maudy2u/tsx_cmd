@@ -29,14 +29,14 @@ if [ "$(uname)" == "Darwin" ]; then
   fi
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   if [ "$(uname -p)" == "aarch64" ]; then
-    echo Linux aarch64 in ${install_dir}
+    echo Linux aarch64_$(uname -p) in ${install_dir}
     export PATH=${install_dir}/node-v8.11.3-linux-armv7l/bin:$PATH
     # export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-linux-arm64/bin:$PATH
     # https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz
     mongod --inMemorySizeGB 1 --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log &
   elif [ "$(uname -p)" == "armv7l" ]; then
-    echo Linux ARM in ${install_dir}
-    export PATH=~/bin:${install_dir}/node-v8.11.3-linux-armv7l/bin:/home/odroid/test2/mongo/mongodb:$PATH
+    echo Linux ARM-32bit_$(uname -p) in ${install_dir}
+    export PATH=${install_dir}:${install_dir}/node-v8.11.3-linux-armv7l/bin:/home/odroid/test2/mongo/mongodb:$PATH
     # https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz
     mongod --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log --journal &
   else
