@@ -87,6 +87,7 @@ class DefaultSettings extends Component {
     defaultCLSEnabled: true,
     fovPositionAngleTolerance: 0.5,
     defaultFOVExposure: 4,
+    defaultCLSRetries: 1,
   };
 
   // requires the ".bind(this)", on the callers
@@ -122,14 +123,42 @@ class DefaultSettings extends Component {
     this.updateDefaults(this.props);
   }
 
-  updateDefaults(nextProps) {
-    if( typeof nextProps == 'undefined'  ) {
-      return;
+  getDefault( name ) {
+    var found;
+    var result;
+    try {
+      found = this.props.tsxInfo.find(function(element) {
+        return element.name == name;
+      });
+      result = found.value;
+    } catch (e) {
+      result = '';
+    } finally {
+      return result;
     }
+  }
 
-    if( typeof nextProps.tsxInfo == 'undefined'  ) {
-      return;
-    }
+  // Generic Method to determine default to save.
+  saveDefaultState( param ) {
+    var value = eval("this.state."+param);
+
+    Meteor.call( 'updateServerState', param, value , function(error, result) {
+
+        if (error && error.error === "logged-out") {
+          // show a nice error message
+          Session.set("errorMessage", "Please fix.");
+        }
+    });//.bind(this));
+  }
+
+  updateDefaults(nextProps) {
+      if( typeof nextProps == 'undefined'  ) {
+        return;
+      }
+
+      if( typeof nextProps.tsxInfo == 'undefined'  ) {
+        return;
+      }
 
     this.setState({
 
@@ -211,37 +240,12 @@ class DefaultSettings extends Component {
       defaultFOVExposure: nextProps.tsxInfo.find(function(element) {
         return element.name == 'defaultFOVExposure';
       }).value,
+      defaultCLSRetries: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultCLSRetries';
+      }).value,
 
     });
 
-  }
-
-  // Generic Method to determine default to save.
-  saveDefaultState( param ) {
-    var value = eval("this.state."+param);
-
-    Meteor.call( 'updateServerState', param, value , function(error, result) {
-
-        if (error && error.error === "logged-out") {
-          // show a nice error message
-          Session.set("errorMessage", "Please fix.");
-        }
-    });//.bind(this));
-  }
-
-  getDefault( name ) {
-    var found;
-    var result;
-    try {
-      found = this.props.tsxInfo.find(function(element) {
-        return element.name == name;
-      });
-      result = found.value;
-    } catch (e) {
-      result = '';
-    } finally {
-      return result;
-    }
   }
 
   // Use this method to save any defaults gathered
@@ -274,6 +278,7 @@ class DefaultSettings extends Component {
     this.saveDefaultState('defaultFilter');
     this.saveDefaultState('fovPositionAngleTolerance');
     this.saveDefaultState('defaultFOVExposure');
+    this.saveDefaultState('defaultCLSRetries');
   }
 
   getDropDownFilters() {
@@ -438,6 +443,17 @@ class DefaultSettings extends Component {
               name='defaultDithering'
               placeholder='Images before dither'
               value={this.state.defaultDithering}
+              onChange={this.handleChange}
+            />
+          </Form.Group>
+        </Segment>
+        <Segment>
+          <Form.Group>
+            <Form.Input
+              label='CloseLoopSlew Retries  '
+              name='defaultCLSRetries'
+              placeholder='Number of CLS retries - think cloud checking'
+              value={this.state.defaultCLSRetries}
               onChange={this.handleChange}
             />
           </Form.Group>

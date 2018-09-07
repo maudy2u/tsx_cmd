@@ -524,7 +524,6 @@ class App extends Component {
     return (
       <div className="container">
         <header>
-          <h1>Image Sessions</h1>
           <div>
             <Segment.Group>
               <Segment>

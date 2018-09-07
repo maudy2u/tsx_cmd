@@ -72,6 +72,7 @@ export const tsx_ServerStates = {
   defaultFocusTempDiff: 'defaultFocusTempDiff',
   defaultFocusExposure: 'defaultFocusExposure',
 
+  defaultCLSRetries: 'defaultCLSRetries',
   defaultCLSEnabled: 'defaultCLSEnabled',
   defaultMeridianFlip: 'defaultMeridianFlip',
   defaultStartTime: 'defaultStartTime',

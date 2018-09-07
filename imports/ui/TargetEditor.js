@@ -339,7 +339,7 @@ class TargetEditor extends Component {
                   value={this.state.description}
                   onChange={this.handleChange}/>
                 <Form.Input
-                    label='FOV Angle'
+                    label='FOV Angle (optional)'
                     name='angle'
                     placeholder='Position angle per CLS, e.g. 0 for PEC capture.'
                     value={this.state.angle}

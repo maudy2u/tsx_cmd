@@ -486,6 +486,30 @@ function tsx_Slew( target ) {
   }
 }
 
+// *******************************
+// #TODO set the target.isCloudy = false;
+function updateTargetIsCloudy( target, isCloudy ) {
+  if( isCloudy == -1 ) {
+    // it is cloudy so update target
+    TargetSessions.upsert({_id: target._id}, {
+      $set:{
+        isCloudy: true,
+      }
+    });
+
+  }
+  else {
+    // it is not cloudy... angle/FOV rotation found, so set not cloudy
+    TargetSessions.upsert({_id: target._id}, {
+      $set:{
+        isCloudy: false,
+      }
+    });
+
+  }
+}
+
+
 // **************************************************************
 //    B. CLS to target
 function tsx_CLS( target ) {
@@ -520,6 +544,9 @@ function tsx_CLS( target ) {
       }
     });
   }
+  else {
+    updateTargetIsCloudy( target, clsSuccess.angle );
+  }
   // tsxInfo( ' clsSuccess angle: ' + clsSuccess.angle );
   return clsSuccess;
 }
@@ -533,6 +560,11 @@ function tsx_CLS_target( target, filter ) {
     rotPos: -1, // not set
   };
   var tsx_is_waiting = true;
+  var retries = tsx_GetServerStateValue( 'defaultCLSRetries' );
+  if( typeof retries === 'undefined' || retries === '' ) {
+    retries =0;
+    tsxWarn(' ' + target.targetFindName + ': CLS retries not set. Set to zero');
+  }
 
   // var cmd = tsxCmdCLS();
   var cmd = tsx_cmd('SkyX_JS_CLS');
@@ -540,11 +572,13 @@ function tsx_CLS_target( target, filter ) {
   var slot = getFilterSlot(filter);
   // tsxDebug('Found slot: ' + slot);
   cmd = cmd.replace("$001", slot);
+  cmd = cmd.replace("$002", retries);
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+      tsxInfo( ' CLS res: ' + tsx_return );
       var result = tsx_return.split('|')[0].trim();
       if( result != 'Success') {
-        // tsxDebug(cmd);
+        // So if we fail here... what do we do...
         UpdateStatusErr(' !!! Centring Failed. Error: ' + tsx_return);
       }
       else {
@@ -597,6 +631,8 @@ function tsx_RunFocus3( target ) {
       }
       else {
         var res = tsx_CLS_target( focusTarget, target.clsFilter);
+        // #TODO set the target.isCloudy = false;
+        updateTargetIsCloudy( target, res.angle );
       }
     }
 
@@ -1491,7 +1527,7 @@ function tsx_TargetReport( target ) {
 }
 
 // **************************************************************
-function tsx_MatchRotation( targetSession ) {
+function tsx_MatchRotation( target ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_MatchRotation: ' + target.targetFindName);
 
@@ -1499,13 +1535,17 @@ function tsx_MatchRotation( targetSession ) {
   var isEnabled = tsx_GetServerStateValue( 'isFOVAngleEnabled');
   var fovExposure = tsx_GetServerStateValue( 'defaultFOVExposure');
   var pixelSize = tsx_GetServerStateValue( 'imagingPixelSize');
-  var angle = targetSession.angle;
+  var angle = target.angle;
   if( typeof pixelSize === 'undefined') {
-    UpdateStatus(' *** Rotating failed: fix by setting default image pixel size')
+    var str =  ' *** Rotating failed: fix by setting default image pixel size';
+    UpdateStatus( str );
+    tsxInfo( str );
     return rotateSucess;
   }
   if( typeof angle === 'undefined') {
-    UpdateStatus(' *** Rotating failed: fix by setting target angle in editor')
+    var str = ' *** Rotating failed: fix by setting target angle in editor';
+    UpdateStatus( str );
+    tsxInfo( str );
     return rotateSucess;
   }
   if( typeof isEnabled === 'undefined') {
@@ -1514,7 +1554,9 @@ function tsx_MatchRotation( targetSession ) {
   }
   if( typeof fovExposure === 'undefined') {
     tsx_SetServerState( 'fovExposure', 4 );
-    tsxWarn(' *** Rotating FIXED: set to a default 4 sec, check on default page')
+    var str = ' *** Rotating FIXED: set to a default 4 sec, check on default page';
+    UpdateStatus( str );
+    tsxInfo( str );
   }
 
   if( isEnabled ) {
@@ -1545,6 +1587,13 @@ function tsx_MatchRotation( targetSession ) {
     while( tsx_is_waiting ) {
       Meteor.sleep( 1000 );
     }
+  }
+  else {
+    var str = ' ' + target.targetFindName + ': match angle disabled';
+    UpdateStatus( str );
+    tsxInfo( str );
+    UpdateStatus( str );
+    tsxInfo( str );
   }
 
   return rotateSucess;
@@ -1886,6 +1935,8 @@ export function prepareTargetForImaging( target ) {
     UpdateStatus( ' '+ target.targetFindName + ": points " + curDir);
 
     var ready = SetUpForImagingRun( target);
+    // So if the setup is "false"... then no target.... who is going to redirect...
+    // the target selection needs to know this...
 
     // return target to start series...
     return ready;

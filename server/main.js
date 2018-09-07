@@ -218,27 +218,20 @@ Meteor.startup(() => {
   // Do not assume Autoguider calibrated, will be done once guide star found
   var workers = scheduler.processJobs( 'runScheduler',
     function (job, cb) {
-      // tsxDebug('@1');
       var schedule = job.data; // Only one email per job
-      // tsxDebug('@2');
 
-      // This will only be called if a
-      // 'runScheduler' job is obtained
+      // This will only be called if a 'runScheduler' job is obtained
       setSchedulerState('Running' );
       tsx_SetServerState('currentJob', job);
       UpdateStatus(' Scheduler Started');
-      // tsxDebug('@3');
 
-      // tsxLog('Finding');
       job.log("Entered the scheduler process",
         {level: 'info'}
       );
-      // tsxDebug('@4');
 
       var isParked = '';
-      // tsxDebug('@5');
+      // #TODO  reset all targets as isCloudy = false.
 
-      // tsx_Connect();
       while(
         // the job is used to run the scheduler.
         tsx_GetServerStateValue('currentJob') != ''
@@ -254,6 +247,17 @@ Meteor.startup(() => {
           // Find a session
           // Get the target to shoot
           tsxInfo( ' Validating Targets...');
+
+          /*
+So working on the cloud detection to PAUSE.
+
+1.  getValidTargetSession returns a target.
+    It needs to a add a check that if isCloudy = false then it is skipped
+2.  prepareTargetForImaging can return false.. meaning the chosen target
+    could not be prepared... CLS failed. If so then market the target as FAILED
+    (The start of the job needs to "reset" all targets as isCloudy = false.)
+           
+          */
 
           var target = getValidTargetSession(); // no return
 
