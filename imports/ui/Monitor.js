@@ -96,6 +96,7 @@ class Monitor extends Component {
       isFOVAngleEnabled: false,
 
       enableImagingCooler: false,
+      isCLSRepeatEnabled: false,
 
   };
 
@@ -124,62 +125,77 @@ class Monitor extends Component {
       return;
     }
 
-    if( typeof nextProps.tsxInfo == 'undefined'  ) {
-      return;
+    if( typeof nextProps.reports != 'undefined'  ) {
+      this.setState({
+        defaultSoftPark: Boolean(nextProps.tsxInfo.find(function(element) {
+          return element.name == 'defaultSoftPark';
+        }).value),
+      });
     }
 
-    var isFlip = Boolean(nextProps.tsxInfo.find(function(element) {
-      return element.name == 'defaultMeridianFlip';
-    }).value);
+    if( typeof nextProps.tsxInfo != 'undefined'  ) {
 
-    this.setState({
-      defaultMeridianFlip: isFlip,
-    });
-    this.setState({
-      defaultSoftPark: Boolean(nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultSoftPark';
-      }).value),
-    });
-    this.setState({
-      isTwilightEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-        return element.name == 'isTwilightEnabled';
-      }).value),
-    });
-    this.setState({
-      isFocus3Enabled: Boolean(nextProps.tsxInfo.find(function(element) {
-        return element.name == 'isFocus3Enabled';
-      }).value),
-    });
-    this.setState({
-      isFocus3Binned: Boolean(nextProps.tsxInfo.find(function(element) {
-        return element.name == 'isFocus3Binned';
-      }).value),
-    });
-    this.setState({
-      defaultCLSEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultCLSEnabled';
-      }).value),
-    });
-    this.setState({
-      enableImagingCooler: Boolean(nextProps.tsxInfo.find(function(element) {
-        return element.name == 'enableImagingCooler';
-      }).value),
-    });
-    this.setState({
-      isAutoguidingEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-        return element.name == 'isAutoguidingEnabled';
-      }).value),
-    });
-    this.setState({
-      isGuideSettlingEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-        return element.name == 'isGuideSettlingEnabled';
-      }).value),
-    });
-    this.setState({
-      isFOVAngleEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-        return element.name == 'isFOVAngleEnabled';
-      }).value),
-    });
+      var isFlip = Boolean(nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultMeridianFlip';
+      }).value);
+
+      this.setState({
+        defaultMeridianFlip: isFlip,
+      });
+
+      this.setState({
+        defaultSoftPark: Boolean(nextProps.tsxInfo.find(function(element) {
+          return element.name == 'defaultSoftPark';
+        }).value),
+      });
+      this.setState({
+        isTwilightEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
+          return element.name == 'isTwilightEnabled';
+        }).value),
+      });
+      this.setState({
+        isFocus3Enabled: Boolean(nextProps.tsxInfo.find(function(element) {
+          return element.name == 'isFocus3Enabled';
+        }).value),
+      });
+      this.setState({
+        isFocus3Binned: Boolean(nextProps.tsxInfo.find(function(element) {
+          return element.name == 'isFocus3Binned';
+        }).value),
+      });
+      this.setState({
+        defaultCLSEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
+          return element.name == 'defaultCLSEnabled';
+        }).value),
+      });
+      this.setState({
+        enableImagingCooler: Boolean(nextProps.tsxInfo.find(function(element) {
+          return element.name == 'enableImagingCooler';
+        }).value),
+      });
+      this.setState({
+        isAutoguidingEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
+          return element.name == 'isAutoguidingEnabled';
+        }).value),
+      });
+      this.setState({
+        isGuideSettlingEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
+          return element.name == 'isGuideSettlingEnabled';
+        }).value),
+      });
+      this.setState({
+        isFOVAngleEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
+          return element.name == 'isFOVAngleEnabled';
+        }).value),
+      });
+      this.setState({
+        isCLSRepeatEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
+          return element.name == 'isCLSRepeatEnabled';
+        }).value),
+      });
+
+    }
+
   }
 
   // Generic Method to determine default to save.
@@ -690,6 +706,15 @@ class Monitor extends Component {
                 checked={this.state.enableImagingCooler}
                 onChange={this.handleToggle.bind(this)}
               />
+              <Form.Checkbox
+                label='Enable Periodical CLS (Cloud checks) '
+                name='isCLSRepeatEnabled'
+                toggle
+                placeholder= 'CLS every X secs'
+                checked={this.state.isCLSRepeatEnabled}
+                onChange={this.handleToggle.bind(this)}
+              />
+
             </Form.Group>
           </Segment>
         </Segment.Group>

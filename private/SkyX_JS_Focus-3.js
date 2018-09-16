@@ -19,6 +19,8 @@ var focusingFilter = $000;
 var focusExp = $001;
 var numFocSamples = 1;
 var initExp = CCDSC.ExposureTime;			// How long of an exposure does the camera use?
+// var initBinX = CCDSC.BinX;
+// var initBinY = CCDSC.BinY;
 
 if ( Application.build >= 11177 )
 {
@@ -60,8 +62,6 @@ if ( Application.build >= 11177 )
 			//
 			CCDSC.AutoSaveOn = false;		// Toss the image for this one single frame
 			CCDSC.ExposureTime = focusExp;			// Set duration for a throw-away light frame
-			// var initBinX = CCDSC.BinX;
-			// var initBinY = CCDSC.BinY;
 			// CCDSC.BinX = 2;
 			// CCDSC.Biny = 2;
 

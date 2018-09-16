@@ -98,6 +98,9 @@ export const tsx_ServerStates = {
   lastFocusPos: 'lastFocusPos',
   lastFocusTemp: 'lastFocusTemp',
 
+  defaultCLSRepeat: 'defaultCLSRepeat',
+  isCLSRepeatEnabled: 'isCLSRepeatEnabled',
+
 };
 
 export function postStatus( info ) {

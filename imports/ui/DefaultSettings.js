@@ -88,6 +88,8 @@ class DefaultSettings extends Component {
     fovPositionAngleTolerance: 0.5,
     defaultFOVExposure: 4,
     defaultCLSRetries: 1,
+    defaultCLSRepeat: 3600,
+
   };
 
   // requires the ".bind(this)", on the callers
@@ -243,6 +245,9 @@ class DefaultSettings extends Component {
       defaultCLSRetries: nextProps.tsxInfo.find(function(element) {
         return element.name == 'defaultCLSRetries';
       }).value,
+      defaultCLSRepeat: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'defaultCLSRepeat';
+      }).value,
 
     });
 
@@ -279,6 +284,7 @@ class DefaultSettings extends Component {
     this.saveDefaultState('fovPositionAngleTolerance');
     this.saveDefaultState('defaultFOVExposure');
     this.saveDefaultState('defaultCLSRetries');
+    this.saveDefaultState('defaultCLSRepeat');
   }
 
   getDropDownFilters() {
@@ -454,6 +460,13 @@ class DefaultSettings extends Component {
               name='defaultCLSRetries'
               placeholder='Number of CLS retries - think cloud checking'
               value={this.state.defaultCLSRetries}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='CloseLoopSlew Redo  '
+              name='defaultCLSRepeat'
+              placeholder='Number seconds before CLS redo - think cloud checking'
+              value={this.state.defaultCLSRepeat}
               onChange={this.handleChange}
             />
           </Form.Group>

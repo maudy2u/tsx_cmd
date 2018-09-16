@@ -1303,6 +1303,32 @@ function isTargetConditionsInValid(target) {
     // no need to return false... can keep going.
     SetUpAutoGuiding( target );			// Setup & Start Auto-Guiding.
   }
+
+  // check if time to redo CLS
+  var isCLSRepeatEnabled = tsx_GetServerStateValue('isCLSRepeatEnabled');
+  if( isCLSRepeatEnabled === true ) {
+    // now retry
+    var defaultCLSRepeat = tsx_GetServerStateValue('defaultCLSRepeat');
+    if( typeof defaultCLSRepeat === 'undefined' ) {
+      defaultCLSRepeat = {
+        value:3600,        // assume one hour
+        timestamp:new Date(),  // set to current datetime
+      };
+    }
+    if( typeof defaultCLSRepeat.timestamp === 'undefined' ) {
+      defaultCLSRepeat = {
+        timestamp:new Date(),  // set to current datetime
+      };
+    }
+    var doCLS = hasTimePassed( defaultCLSRepeat.value, defaultCLSRepeat.timestamp )
+    if( doCLS === true ) {
+        tsx_CLS( target );
+        defaultCLSRepeat.timestamp = new Date();
+        tsx_SetServerState('defaultCLSRepeat', defaultCLSRepeat);
+        return false;
+    }
+  }
+
   //
   // *******************************
   // check if a dither is needed
@@ -2028,6 +2054,16 @@ function isTargetComplete( target ) {
   return true;
 }
 // *************************** ***********************************
+// Assuming a time in seconds is provided and a Date Object
+export function hasTimePassed( duration, timestamp ) {
+  var now = new Date();
+  var diff = parseInt(now - timestamp)/1000; // Difference in seconds
+  if( diff >= duration) {
+    return true;
+  }
+  return false;
+}
+
 
 export function hasStartTimePassed( target ) {
   // tsxDebug('************************');
