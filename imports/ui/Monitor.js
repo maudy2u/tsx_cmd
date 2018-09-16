@@ -80,7 +80,7 @@ class Monitor extends Component {
       filter: '_',
       binning: '_',
 
-      tsx_progress: 0,
+      // tsx_progress: 0,
       tsx_total: 0,
       tsx_actions: '',
       targetSessionId: '',
@@ -313,9 +313,9 @@ class Monitor extends Component {
         tsx_total: nextProps.tsxInfo.find(function(element) {
           return element.name == 'tsx_total';
         }).value,
-        tsx_progress: nextProps.tsxInfo.find(function(element) {
-          return element.name == 'tsx_progress';
-        }).value,
+        // tsx_progress: nextProps.tsxInfo.find(function(element) {
+        //   return element.name == 'tsx_progress';
+        // }).value,
       });
     }
     finally {
@@ -586,7 +586,7 @@ class Monitor extends Component {
          </Button.Group> */}
         </Segment>
            <Segment>
-             <Progress value={this.state.tsx_progress} total={this.state.tsx_total} progress='ratio'>Processing</Progress>
+             <Progress value={this.props.tsx_progress.value} total={this.state.tsx_total} progress='ratio'>Processing</Progress>
            </Segment>
         <Segment>
           {this.renderTarget( this.state.targetSessionId )}

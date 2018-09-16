@@ -111,6 +111,7 @@ export function postStatus( info ) {
    {
      status: info,
      reportedAt: new Date(),
+     timestamp: new Date(),
    }
  );
 
@@ -132,6 +133,7 @@ export function postProgressTotal( info ) {
     {
       total: info,
       reportedAt: new Date(),
+      timestamp: new Date(),
     }
   );
 
@@ -153,6 +155,8 @@ export function postProgressIncrement( info ) {
   {
     progress: info,
     reportedAt: new Date(),
+    timestamp: new Date(),
+
   });
 
   // Set some properties of the job and then submit it
@@ -173,6 +177,7 @@ export function postProgressMessage( info ) {
   {
     message: info,
     reportedAt: new Date(),
+    timestamp: new Date(),
   });
 
   // Set some properties of the job and then submit it
@@ -187,7 +192,10 @@ export function postProgressMessage( info ) {
 
 export function tsx_SetServerState( name, value) {
   TheSkyXInfos.upsert( {name: name }, {
-    $set: { value: value }
+    $set: {
+      value: value,
+      timestamp: new Date(),
+     }
   })
 };
 
@@ -196,6 +204,7 @@ export function tsx_UpdateDevice( name, man, mod) {
     $set: {
       model: mod,
       manufacturer: man,
+      timestamp: new Date(),
      }
   })
 };
@@ -203,7 +212,10 @@ export function tsx_UpdateDevice( name, man, mod) {
 export function tsx_UpdateServerState( name, value) {
   var tsx = tsx_GetServerState( name );
   var id = TheSkyXInfos.update( {_id: tsx._id }, {
-    $set: { value: value }
+    $set: {
+      value: value,
+      timestamp: new Date(),
+     }
   })
 };
 

@@ -248,8 +248,15 @@ class App extends Component {
   // *******************************
   //
   renderMonitor() {
+    /* need to pass things down:
+        - the tsxInfo...
+        - the published active target
+        - the progress...
+     */
+//      <Monitor  tsxInfo={this.props.tsxInfo}/>
+
     return  (
-      <Monitor  />
+      <Monitor  tsx_progress={this.props.tsx_progress}/>
     );
   }
 
@@ -595,6 +602,7 @@ class App extends Component {
 export default withTracker(() => {
 
     return {
+      tsx_progress: TheSkyXInfos.findOne({name: 'tsx_progress'}),
       tsxIP: TheSkyXInfos.findOne({name: 'ip'}),
       tsxPort: TheSkyXInfos.findOne({name: 'port'}),
       tsxInfo: TheSkyXInfos.find({}).fetch(),

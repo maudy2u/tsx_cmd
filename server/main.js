@@ -248,7 +248,7 @@ Meteor.startup(() => {
           // Get the target to shoot
           tsxInfo( ' Validating Targets...');
 
-          /*
+          /* #TODO
 So working on the cloud detection to PAUSE.
 
 1.  getValidTargetSession returns a target.
@@ -256,7 +256,7 @@ So working on the cloud detection to PAUSE.
 2.  prepareTargetForImaging can return false.. meaning the chosen target
     could not be prepared... CLS failed. If so then market the target as FAILED
     (The start of the job needs to "reset" all targets as isCloudy = false.)
-           
+
           */
 
           var target = getValidTargetSession(); // no return

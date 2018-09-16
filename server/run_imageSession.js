@@ -1310,21 +1310,13 @@ function isTargetConditionsInValid(target) {
     // now retry
     var defaultCLSRepeat = tsx_GetServerStateValue('defaultCLSRepeat');
     if( typeof defaultCLSRepeat === 'undefined' ) {
-      defaultCLSRepeat = {
-        value:3600,        // assume one hour
-        timestamp:new Date(),  // set to current datetime
-      };
+      tsx_SetServerState('defaultCLSRepeat', 3600); // default to one hour
     }
-    if( typeof defaultCLSRepeat.timestamp === 'undefined' ) {
-      defaultCLSRepeat = {
-        timestamp:new Date(),  // set to current datetime
-      };
-    }
+
     var doCLS = hasTimePassed( defaultCLSRepeat.value, defaultCLSRepeat.timestamp )
     if( doCLS === true ) {
         tsx_CLS( target );
-        defaultCLSRepeat.timestamp = new Date();
-        tsx_SetServerState('defaultCLSRepeat', defaultCLSRepeat);
+        tsx_SetServerState('defaultCLSRepeat', defaultCLSRepeat.value);
         return false;
     }
   }
