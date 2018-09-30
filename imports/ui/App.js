@@ -256,7 +256,12 @@ class App extends Component {
 //      <Monitor  tsxInfo={this.props.tsxInfo}/>
 
     return  (
-      <Monitor  tsx_progress={this.props.tsx_progress}/>
+      <Monitor
+        tsx_progress={this.props.tsx_progress}
+        tsx_total={this.props.tsx_total}
+        scheduler_report={this.props.scheduler_report}
+        targetSessionId={this.props.targetSessionId}
+      />
     );
   }
 
@@ -603,6 +608,9 @@ export default withTracker(() => {
 
     return {
       tsx_progress: TheSkyXInfos.findOne({name: 'tsx_progress'}),
+      tsx_total:  TheSkyXInfos.findOne({name: 'tsx_total'}),
+      tsx_message: TheSkyXInfos.findOne({name: 'tsx_message'}),
+      scheduler_report: TheSkyXInfos.findOne({name: 'scheduler_report'}),
       tsxIP: TheSkyXInfos.findOne({name: 'ip'}),
       tsxPort: TheSkyXInfos.findOne({name: 'port'}),
       tsxInfo: TheSkyXInfos.find({}).fetch(),

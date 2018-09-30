@@ -529,20 +529,7 @@ function tsx_CLS( target ) {
   var clsSuccess = tsx_CLS_target( target.targetFindName, target.clsFilter );
   // Update the target angle...
   if( clsSuccess.angle != -1 ) {
-
-    var rid = TargetReports.upsert( { target_id: target._id }, {
-      $set: {
-        angle: clsSuccess.angle,
-      }
-    });
-    var rpt = target.report;
-    rpt.angle = clsSuccess.angle;
-    TargetSessions.update({_id: target._id} , {
-      $set: {
-        report_id: rid,
-        report: rpt,
-      }
-    });
+    targetReportAngle( target, clsSuccess.angle );
   }
   else {
     updateTargetIsCloudy( target, clsSuccess.angle );
@@ -586,7 +573,7 @@ function tsx_CLS_target( target, filter ) {
         var angle = tsx_return.split('|')[1].trim();
         clsSuccess.angle = angle;
         tsxInfo(' ' + target + ': Position Angle: ' + clsSuccess.angle );
-
+        targetReportAngle( target, angle );
         var rotPos;
         try {
           rotPos = tsx_return.split('|')[2].trim();
@@ -608,6 +595,22 @@ function tsx_CLS_target( target, filter ) {
   // tsxInfo( ' clsSuccess angle out: ' + clsSuccess.angle );
 
   return clsSuccess;
+}
+
+function targetReportAngle( target, angle ) {
+  var rid = TargetReports.upsert( { target_id: target._id }, {
+    $set: {
+      ANGLE: angle,
+    }
+  });
+  var rpt = TargetReports.findOne( { target_id: target._id } );
+  var tgt = TargetSessions.update({_id: target._id} , {
+    $set: {
+      report_id: rid,
+      report: rpt,
+    }
+  });
+  tsx_SetServerState('scheduler_report', rpt );
 }
 
 // **************************************************************
@@ -778,27 +781,32 @@ function tsx_GetMountReport() {
 }
 
 // **************************************************************
-function SetUpForImagingRun(targetSession) {
+function SetUpForImagingRun(target) {
   tsxDebug('************************');
-  tsxDebug(' *** SetUpForImagingRun: ' + targetSession.targetFindName );
+  tsxDebug(' *** SetUpForImagingRun: ' + target.targetFindName );
   //#
   //# Call the Closed-Loop-Slew function to point the mount to the target, record the mount's
   //# starting location for future comparisons, find a decent guide star and start autoguiding
   //#
 	//# Kill the guider in case it's still running.
-  UpdateStatus( ' ' + targetSession.targetFindName + ': setting up session' );
+  UpdateStatus( ' ' + target.targetFindName + ': setting up session' );
   Meteor.sleep(3000); // pause 3 seconds
   // UpdateStatus(  " Stopping autoguider" );
   // tsx_AbortGuider(); // now done in CLS
 
-  var tryTarget = UpdateImagingTargetReport( targetSession );
+  var tryTarget = UpdateImagingTargetReport( target );
 	if( !tryTarget.ready ) {
-    tsxDebug(targetSession.targetFindName + ' ' + tryTarget.msg);
+    tsxDebug(target.targetFindName + ' ' + tryTarget.msg);
     return false;
-  };
+  }
+  else {
+    // Used to update the monitor, as it is this target to continue
+    tsx_SetServerState('scheduler_report', target.report );
+    tsxLog(' 2. Updated scheduler report');
+  }
 
-  UpdateStatus( ' ' + targetSession.targetFindName + ': centring' );
-	var cls = tsx_CLS(targetSession); 						//# Call the Closed-Loop-Slew function to go to the target
+  UpdateStatus( ' ' + target.targetFindName + ': centring' );
+	var cls = tsx_CLS(target); 						//# Call the Closed-Loop-Slew function to go to the target
   if( cls.angle == -1 ) {
     UpdateStatus( ' Target centred FAILED: ' + cls.angle);
     return false; // the angle should be set other than -1
@@ -808,7 +816,7 @@ function SetUpForImagingRun(targetSession) {
   }
 
   // needs initial focus temp
-  UpdateStatus( ' ' + targetSession.targetFindName + ': Centred' );
+  UpdateStatus( ' ' + target.targetFindName + ': Centred' );
 
   // #TODO test out the Calibrate....
   // tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
@@ -824,20 +832,20 @@ function SetUpForImagingRun(targetSession) {
   //      a) if entered for session
   //      b) obtained from image
   var rotateSucess = false;
-  UpdateStatus( ' ' + targetSession.targetFindName + ': matching angle' );
-  rotateSucess = tsx_MatchRotation( targetSession );
-  UpdateStatus( ' ' + targetSession.targetFindName + ': angle matched (' + rotateSucess + ')' );
+  UpdateStatus( ' ' + target.targetFindName + ': matching angle' );
+  rotateSucess = tsx_MatchRotation( target );
+  UpdateStatus( ' ' + target.targetFindName + ': angle matched (' + rotateSucess + ')' );
 
   // get initial focus....
   // #TODO: get the focus to create date/time of last focus... before redoing...
   tsx_AbortGuider();
-  InitialFocus( targetSession );
+  InitialFocus( target );
   if( isSchedulerStopped() ) {
     return false; // exit
   }
 
-  // UpdateStatus( " Setup guider: " + targetSession.targetFindName );
-	SetUpAutoGuiding( targetSession );			// Setup & Start Auto-Guiding.
+  // UpdateStatus( " Setup guider: " + target.targetFindName );
+	SetUpAutoGuiding( target );			// Setup & Start Auto-Guiding.
   if( isSchedulerStopped() ) {
     return false; // exit
   }
@@ -1265,6 +1273,11 @@ function isTargetConditionsInValid(target) {
   if( !(canTargetSessionStart( target )) ) {
     tsxDebug(' ' + target.targetFindName + ' cannot continue!!');
     return true;
+  }
+  else {
+    // Used to update the monitor, as it is this target to continue
+    tsx_SetServerState('scheduler_report', target.report );
+    tsxLog(' 3. Updated scheduler report');
   }
 
   // *******************************
@@ -1953,6 +1966,11 @@ export function prepareTargetForImaging( target ) {
     UpdateStatus( ' '+ target.targetFindName + ": points " + curDir);
 
     var ready = SetUpForImagingRun( target);
+    if( ready ) {
+//      var rpt = TargetReports.findOne({ target_id: target._id })
+      tsx_SetServerState('scheduler_report', target.report );
+      tsxLog(' 1. Updated scheduler report');
+    }
     // So if the setup is "false"... then no target.... who is going to redirect...
     // the target selection needs to know this...
 
@@ -2133,7 +2151,7 @@ export function canTargetSessionStart( target ) {
   // tsxDebug('************************');
   tsxDebug(' *** canTargetSessionStart: ' + target.targetFindName );
 
-  UpdateImagingTargetReport( target );
+  var result =  UpdateImagingTargetReport( target );
   var canStart = true;
 
   tsxDebug( ' Is target active: ' + target.enabledActive );
@@ -2168,7 +2186,7 @@ export function canTargetSessionStart( target ) {
 
   // check if TSX says okay... Altitude and here
   // ready also checks for the sun to be below specific altitude e.g. -18 degrees
-  var result =   UpdateImagingTargetReport( target );
+  // see up above... do not redo... var result =   UpdateImagingTargetReport( target );
   tsxDebug( ' Is target ready: ' + result.ready );
   if( !result.ready ) {
     UpdateStatus( ' ' + target.targetFindName + ' per report ready: ' + result.ready );

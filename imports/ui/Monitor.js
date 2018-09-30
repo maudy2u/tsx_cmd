@@ -283,46 +283,6 @@ class Monitor extends Component {
     return 0;
   }
 
-  updateMonitor(nextProps) {
-
-    try {
-      this.setState({ // use this to trigger reloading the Monitor Target
-        targetSessionId: nextProps.tsxInfo.find(function(element) {
-          return element.name == 'imagingSessionId';
-        }).value,
-      });
-
-      var tid = this.state.targetSessionId;//.value;
-      // reports
-      var report = TargetReports.findOne( {
-        target_id: tid
-      });
-
-      this.setState({
-        monRA: report.RA,
-        monDEC: report.DEC,
-        monALT: report.ALT,
-        monAZ: report.AZ,
-        monHA: report.HA,
-        monTransit: report.TRANSIT,
-        monAngle: report.angle,
-        monIsDark: report.isDark,
-      });
-
-      this.setState({
-        tsx_total: nextProps.tsxInfo.find(function(element) {
-          return element.name == 'tsx_total';
-        }).value,
-        // tsx_progress: nextProps.tsxInfo.find(function(element) {
-        //   return element.name == 'tsx_progress';
-        // }).value,
-      });
-    }
-    finally {
-
-    }
-  }
-
   confirmPlayScheduler() {
     this.setState({confirmOpen: true});
   }
@@ -562,58 +522,38 @@ class Monitor extends Component {
     return (
       <div>
          <Segment raised>
-           <h3>Scheduler: </h3>
+           <h3>Target: {this.renderTarget( this.state.targetSessionId )}</h3>
+
            <Button.Group icon>
              <Button icon='play'  onClick={this.playScheduler.bind(this)}/>
              {/* <Button icon='pause' onClick={this.pauseScheduler.bind(this)}  /> */}
              <Button icon='stop' onClick={this.stopScheduler.bind(this)} />
-             <Button icon='refresh' onClick={this.updateMonitor.bind(this)}/>
           </Button.Group>
-        {/* </Segment>
-           {/* <Segment> */}
-          {/* <Form.Group widths='equal'> */}
-            {/* <Dropdown compact
-               label='Action '
-               name='tsx_action'
-               options={tsx_actions}
-               placeholder='Action for TheSkyX'
-               text={this.state.tsx_actions}
-               onChange={this.handleTsx_actionsChange}
-            />
-            <Button icon='toggle right' onClick={this.dropDownAction.bind(this)}/> */}
-         {/* </Form.Group> */}
-         {/* <Button.Group icon floated='right'>
-         </Button.Group> */}
-        </Segment>
-           <Segment>
-             <Progress value={this.props.tsx_progress.value} total={this.state.tsx_total} progress='ratio'>Processing</Progress>
-           </Segment>
-        <Segment>
-          {this.renderTarget( this.state.targetSessionId )}
+          <Progress value={this.props.tsx_progress.value} total={this.props.tsx_total.value} progress='ratio'>Processing</Progress>
         </Segment>
         <Segment.Group  size='mini' horizontal>
           <Segment>
-            <Label>RA <Label.Detail>{Number(this.state.monRA).toFixed(4)}</Label.Detail></Label>
+            <Label>RA <Label.Detail>{Number(this.props.scheduler_report.value.RA).toFixed(4)}</Label.Detail></Label>
           </Segment>
             <Segment>
-            <Label>DEC <Label.Detail>{Number(this.state.monDEC).toFixed(4)}</Label.Detail></Label>
+            <Label>DEC <Label.Detail>{Number(this.props.scheduler_report.value.DEC).toFixed(4)}</Label.Detail></Label>
           </Segment>
             <Segment>
-            <Label>Angle <Label.Detail>{Number(this.state.monAngle).toFixed(4)}</Label.Detail></Label>
+            <Label>Angle <Label.Detail>{Number(this.props.scheduler_report.value.ANGLE).toFixed(4)}</Label.Detail></Label>
           </Segment>
         </Segment.Group>
         <Segment.Group size='mini' horizontal>
           <Segment>
-            <Label>Atl <Label.Detail>{Number(this.state.monALT).toFixed(4)}</Label.Detail></Label>
+            <Label>Atl <Label.Detail>{Number(this.props.scheduler_report.value.ALT).toFixed(4)}</Label.Detail></Label>
           </Segment>
             <Segment>
-            <Label>Az <Label.Detail>{this.state.monAZ}</Label.Detail></Label>
+            <Label>Az <Label.Detail>{this.props.scheduler_report.value.AZ}</Label.Detail></Label>
           </Segment>
             <Segment>
-            <Label>HA <Label.Detail>{Number(this.state.monHA).toFixed(4)}</Label.Detail></Label>
+            <Label>HA <Label.Detail>{Number(this.props.scheduler_report.value.HA).toFixed(4)}</Label.Detail></Label>
           </Segment>
             <Segment>
-            <Label>Transit <Label.Detail>{Number(this.state.monTransit).toFixed(4)}</Label.Detail></Label>
+            <Label>Transit <Label.Detail>{Number(this.props.scheduler_report.value.TRANSIT).toFixed(4)}</Label.Detail></Label>
           </Segment>
         </Segment.Group>
         <Segment.Group size='mini'>
