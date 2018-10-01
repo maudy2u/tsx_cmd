@@ -833,7 +833,7 @@ function SetUpForImagingRun(target) {
   var rotateSucess = false;
   UpdateStatus( ' ' + target.targetFindName + ': matching angle' );
   rotateSucess = tsx_MatchRotation( target );
-  UpdateStatus( ' ' + target.targetFindName + ': angle matched (' + rotateSucess + ')' );
+  UpdateStatus( ' ' + target.targetFindName + ': matched angle (' + rotateSucess + ')' );
 
   // get initial focus....
   // #TODO: get the focus to create date/time of last focus... before redoing...
@@ -1566,6 +1566,12 @@ function tsx_MatchRotation( target ) {
   var pixelSize = tsx_GetServerStateValue( 'imagingPixelSize');
   var focalLength = tsx_GetServerStateValue( 'imagingFocalLength');
   var angle = target.angle;
+  if( typeof angle === 'undefined' || angle === '') {
+    var str = ' Matching Angle: Exiting - no target angle set.';
+    UpdateStatus( str );
+    tsxInfo( str );
+    return rotateSucess;
+  }
   if( typeof pixelSize === 'undefined') {
     var str =  ' *** Rotating failed: fix by setting default image pixel size';
     UpdateStatus( str );
@@ -1574,12 +1580,6 @@ function tsx_MatchRotation( target ) {
   }
   if( typeof focalLength === 'undefined') {
     var str =  ' *** Rotating failed: fix by setting default focal length';
-    UpdateStatus( str );
-    tsxInfo( str );
-    return rotateSucess;
-  }
-  if( typeof angle === 'undefined') {
-    var str = ' *** Rotating failed: fix by setting target angle in editor';
     UpdateStatus( str );
     tsxInfo( str );
     return rotateSucess;
