@@ -802,7 +802,6 @@ function SetUpForImagingRun(target) {
   else {
     // Used to update the monitor, as it is this target to continue
     tsx_SetServerState('scheduler_report', target.report );
-    tsxLog(' 2. Updated scheduler report');
   }
 
   UpdateStatus( ' ' + target.targetFindName + ': centring' );
@@ -1277,7 +1276,6 @@ function isTargetConditionsInValid(target) {
   else {
     // Used to update the monitor, as it is this target to continue
     tsx_SetServerState('scheduler_report', target.report );
-    tsxLog(' 3. Updated scheduler report');
   }
 
   // *******************************
@@ -1566,9 +1564,16 @@ function tsx_MatchRotation( target ) {
   var isEnabled = tsx_GetServerStateValue( 'isFOVAngleEnabled');
   var fovExposure = tsx_GetServerStateValue( 'defaultFOVExposure');
   var pixelSize = tsx_GetServerStateValue( 'imagingPixelSize');
+  var focalLength = tsx_GetServerStateValue( 'imagingFocalLength');
   var angle = target.angle;
   if( typeof pixelSize === 'undefined') {
     var str =  ' *** Rotating failed: fix by setting default image pixel size';
+    UpdateStatus( str );
+    tsxInfo( str );
+    return rotateSucess;
+  }
+  if( typeof focalLength === 'undefined') {
+    var str =  ' *** Rotating failed: fix by setting default focal length';
     UpdateStatus( str );
     tsxInfo( str );
     return rotateSucess;
@@ -1589,7 +1594,6 @@ function tsx_MatchRotation( target ) {
     UpdateStatus( str );
     tsxInfo( str );
   }
-
   if( isEnabled ) {
     var ACCURACY = tsx_GetServerStateValue( 'fovPositionAngleTolerance');
     if( typeof ACCURACY === 'undefined') {
@@ -1600,10 +1604,11 @@ function tsx_MatchRotation( target ) {
     var cmd = tsx_cmd('SkyX_JS_MatchAngle');
     cmd = cmd.replace('$000', angle );
     cmd = cmd.replace('$001', pixelSize);
-    cmd = cmd.replace('$002', fovExposure);
+    cmd = cmd.replace('$002', focalLength);
     cmd = cmd.replace('$003', ACCURACY);
     tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       var result = tsx_return.split('|')[0].trim();
+      //e.g. Success|imageLinkAng=0.00|targetAngle=0.00|rotPos=-0.3305915915429978|newPos=-0.32895315919987494
       tsxDebug('Any error?: ' + result);
       if( result != 'Success') {
         forceAbort = true;
@@ -1611,6 +1616,9 @@ function tsx_MatchRotation( target ) {
       }
       else {
         rotateSucess = true;
+        var resMsg = tsx_return.split('|')[1].trim();
+        var angle = resMsg.split('=')[1].trim();
+        targetReportAngle( target, angle );
         tsxLog( 'Rotated to : GET ANGLE');
       }
       tsx_is_waiting = false;
@@ -1969,7 +1977,6 @@ export function prepareTargetForImaging( target ) {
     if( ready ) {
 //      var rpt = TargetReports.findOne({ target_id: target._id })
       tsx_SetServerState('scheduler_report', target.report );
-      tsxLog(' 1. Updated scheduler report');
     }
     // So if the setup is "false"... then no target.... who is going to redirect...
     // the target selection needs to know this...

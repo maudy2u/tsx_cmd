@@ -303,6 +303,7 @@ So working on the cloud detection to PAUSE.
           }
       }
 
+      tsxLog( ' Scheduler exited.');
       // While ended... exit process
       setSchedulerState('Stop' );
       UpdateStatus( ' Idle');

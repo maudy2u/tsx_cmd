@@ -82,6 +82,7 @@ class DefaultSettings extends Component {
     minDitherFactor: 3,
     maxDitherFactor: 7,
     imagingPixelSize: 3.8,
+    imagingFocalLength: 2800,
     guiderPixelSize: 3.8,
     guidingPixelErrorTolerance: 0.9,
     defaultCLSEnabled: true,
@@ -221,6 +222,9 @@ class DefaultSettings extends Component {
       imagingPixelSize: nextProps.tsxInfo.find(function(element) {
         return element.name == 'imagingPixelSize';
       }).value,
+      imagingFocalLength: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'imagingFocalLength';
+      }).value,
       guiderPixelSize: nextProps.tsxInfo.find(function(element) {
         return element.name == 'guiderPixelSize';
       }).value,
@@ -276,6 +280,7 @@ class DefaultSettings extends Component {
     this.saveDefaultState('minDitherFactor');
     this.saveDefaultState('maxDitherFactor');
     this.saveDefaultState('imagingPixelSize');
+    this.saveDefaultState('imagingFocalLength');
     this.saveDefaultState('guiderPixelSize');
     this.saveDefaultState('guidingPixelErrorTolerance');
     this.saveDefaultState('defaultFocusExposure');
@@ -374,6 +379,13 @@ class DefaultSettings extends Component {
               name='imagingPixelSize'
               placeholder='i.e. image scale for dithering, and angle match'
               value={this.state.imagingPixelSize}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='Focal Length: '
+              name='imagingFocalLength'
+              placeholder='i.e. focal length in mm of OTA'
+              value={this.state.imagingFocalLength}
               onChange={this.handleChange}
             />
           </Form.Group>

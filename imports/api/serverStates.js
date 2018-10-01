@@ -64,6 +64,7 @@ export const tsx_ServerStates = {
   // Dithering related states
   defaultDithering: 'defaultDithering',
   imagingPixelSize: 'imagingPixelSize',
+  imagingFocalLength: 'imagingFocalLength',
   minDitherFactor: 'minDitherFactor',
   maxDitherFactor: 'maxDitherFactor',
 
