@@ -90,6 +90,7 @@ function initServerStates() {
   tsx_SetServerState('targetHA', '');
   tsx_SetServerState('targetTransit', '');
   tsx_SetServerState('targetName', 'No Active Target');
+  tsx_SetServerState('scheduler_report', '');
   tsx_SetServerState('lastTargetDirection', '');
   tsx_SetServerState('lastCheckMinSunAlt', '');
   tsx_SetServerState('lastFocusPos', '');
@@ -135,6 +136,7 @@ function ParkMount( isParked ) {
   if( tsx_GetServerStateValue('currentJob') == '' ) {
     UpdateStatus( ' Canceled sessions');
     tsx_SetServerState('targetName', 'No Active Target');
+    tsx_SetServerState('scheduler_report', '');
   }
   else {
     UpdateStatus(' WAKING UP...');
@@ -164,6 +166,7 @@ function CleanUpJobs() {
   tsx_SetServerState('currentJob', '');
   UpdateImagingSesionID( '' );
   tsx_SetServerState('targetName', 'No Active Target');
+  tsx_SetServerState('scheduler_report', '');
 
   // Clean up the scheduler process collections...
   // Persistence across reboots is not needed at this time.
@@ -464,6 +467,7 @@ export function srvStopScheduler() {
   tsx_SetServerState('SchedulerStatus', 'Stop');
   tsx_SetServerState('currentJob', '');
   tsx_SetServerState('targetName', 'No Active Target');
+  tsx_SetServerState('scheduler_report', '');
   UpdateImagingSesionID( '' );
   tsx_AbortGuider();
   UpdateStatus(' *** Manually STOPPED scheduler ***');

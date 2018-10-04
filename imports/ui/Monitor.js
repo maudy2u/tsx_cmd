@@ -534,26 +534,13 @@ class Monitor extends Component {
         <Segment.Group  size='mini' horizontal>
           <Segment>
             <Label>RA <Label.Detail>{Number(this.props.scheduler_report.value.RA).toFixed(4)}</Label.Detail></Label>
-          </Segment>
-            <Segment>
             <Label>DEC <Label.Detail>{Number(this.props.scheduler_report.value.DEC).toFixed(4)}</Label.Detail></Label>
-          </Segment>
-            <Segment>
             <Label>Angle <Label.Detail>{Number(this.props.scheduler_report.value.ANGLE).toFixed(4)}</Label.Detail></Label>
-          </Segment>
-        </Segment.Group>
-        <Segment.Group size='mini' horizontal>
-          <Segment>
             <Label>Atl <Label.Detail>{Number(this.props.scheduler_report.value.ALT).toFixed(4)}</Label.Detail></Label>
-          </Segment>
-            <Segment>
             <Label>Az <Label.Detail>{this.props.scheduler_report.value.AZ}</Label.Detail></Label>
-          </Segment>
-            <Segment>
             <Label>HA <Label.Detail>{Number(this.props.scheduler_report.value.HA).toFixed(4)}</Label.Detail></Label>
-          </Segment>
-            <Segment>
             <Label>Transit <Label.Detail>{Number(this.props.scheduler_report.value.TRANSIT).toFixed(4)}</Label.Detail></Label>
+            <Label>Pointing <Label.Detail>{Number(this.props.scheduler_report.value.pointing).toFixed(4)}</Label.Detail></Label>
           </Segment>
         </Segment.Group>
         <Segment.Group size='mini'>

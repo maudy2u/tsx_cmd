@@ -70,7 +70,8 @@ function isSchedulerStopped() {
   ) {
     return false; // exit
   }
-  tsx_SetServerState( 'targetName', 'No active target');
+  tsx_SetServerState('targetName', 'No Active Target');
+  tsx_SetServerState('scheduler_report', '');
   return true;
 }
 
