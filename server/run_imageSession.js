@@ -63,14 +63,14 @@ function isSchedulerStopped() {
   // tsxDebug('************************');
   tsxDebug(' *** isSchedulerStopped ' );
 
-  var process = tsx_GetServerStateValue( 'imagingSessionId' );
+  var sched = tsx_GetServerStateValue( 'currentJob' );
   if(
-    (typeof process != 'undefined'
-    || process != '')
-    && tsx_GetServerStateValue('currentJob') != ''
+    (typeof sched != 'undefined'
+    || sched != '')
   ) {
     return false; // exit
   }
+  tsx_SetServerState( 'targetName', 'No active target');
   return true;
 }
 
@@ -763,12 +763,14 @@ function tsx_GetMountReport() {
           hms: tsx_return.split('|')[2].trim(),
           direction: tsx_return.split('|')[3].trim(),
           altitude: tsx_return.split('|')[4].trim(),
+          pointing: tsx_return.split('|')[5].trim(),
         }
         tsx_SetServerState( 'mntMntRA', Out.ra );
         tsx_SetServerState( 'mntMntDEC', Out.dec );
         tsx_SetServerState( 'mntMntMHS', Out.hms );
         tsx_SetServerState( 'mntMntDir', Out.direction );
         tsx_SetServerState( 'mntMntAlt', Out.altitude );
+        tsx_SetServerState( 'mntMntPointing', Out.pointing );
 
         tsx_is_waiting = false;
       }
@@ -879,6 +881,8 @@ export function getValidTargetSession() {
   else {
     tsxDebug(' Valid target: ' + target.targetFindName);
     var result = UpdateImagingTargetReport (target);
+    tsx_SetServerState( 'targetName', target.targetFindName);
+
   }
   return target;
 }
@@ -1227,13 +1231,14 @@ function UpdateImagingTargetReport( target ) {
         };
       }
   }
-  var cTime = new Date();
+
+  // var cTime = new Date();
   // tsxDebug('Current time: ' + cTime );
   tsxDebug( '!!! updatedAt: ' + tRprt.updatedAt );
-  var msecDiff = cTime - tRprt.updatedAt;
+  // var msecDiff = cTime - tRprt.updatedAt;
   // tsxDebug('Report time diff: ' + msecDiff);
-  var mm = Math.floor(msecDiff / 1000 / 60);
-  if( mm > 1 ) { // one minte passed so update report.
+  // var mm = Math.floor(msecDiff / 1000 / 60);
+  if( hasTimePassed( 60, tRprt.updatedAt ) ) { // one minte passed so update report.
     tsxDebug(' Refresh TargetReport: ' + target.targetFindName);
     tRprt = tsx_TargetReport( target );
   }
@@ -1467,7 +1472,7 @@ function tsx_TargetReport( target ) {
 
         var az, alt, ra, dec, ha,
           transit, focTemp, focPostion,
-          ready, readyMsg;
+          ready, readyMsg, pointing;
 
         // #TODO can add star detect in case of clouds...
 
@@ -1480,9 +1485,10 @@ function tsx_TargetReport( target ) {
         transit = tsx_return.split('|')[8].trim();
         ready = tsx_return.split('|')[9].trim();
         readyMsg = tsx_return.split('|')[10].trim();
+        pointing = tsx_return.split('|')[11].trim();
         try { // try to get focuser info
-          focTemp = tsx_return.split('|')[11].trim();
-          focPostion = tsx_return.split('|')[12].trim();
+          focTemp = tsx_return.split('|')[12].trim();
+          focPostion = tsx_return.split('|')[13].trim();
         }
         catch(e) {
             // no need
@@ -1507,6 +1513,7 @@ function tsx_TargetReport( target ) {
           updatedAt: update,
           ready: ready,
           readyMsg: readyMsg,
+          pointing: pointing,
         };
 
         var rid = TargetReports.upsert( { target_id: target._id }, {
@@ -1528,6 +1535,7 @@ function tsx_TargetReport( target ) {
             updatedAt: update,
             ready: ready,
             readyMsg: readyMsg,
+            pointing: pointing,
           }
         });
         TargetSessions.update({_id: target._id} , {
@@ -1546,6 +1554,7 @@ function tsx_TargetReport( target ) {
         tsx_SetServerState(tsx_ServerStates.targetAZ, az );
         tsx_SetServerState( tsx_ServerStates.targetHA, ha );
         tsx_SetServerState( tsx_ServerStates.targetTransit, transit );
+        tsx_SetServerState( 'mntMntPointing', pointing );
 
         tsx_is_waiting = false;
   }));
@@ -1619,7 +1628,7 @@ function tsx_MatchRotation( target ) {
         var resMsg = tsx_return.split('|')[1].trim();
         var angle = resMsg.split('=')[1].trim();
         targetReportAngle( target, angle );
-        tsxLog( 'Rotated to : GET ANGLE');
+        tsxLog( 'Rotator set: ' + angle);
       }
       tsx_is_waiting = false;
     }));
@@ -1967,6 +1976,7 @@ export function prepareTargetForImaging( target ) {
     UpdateImagingSesionID( target._id );
     UpdateStatus('========================');
     UpdateStatus( ' '+ target.targetFindName + ": Target selected");
+    tsx_SetServerState('targetName', target.targetFindName);
 
     var targetCoords = UpdateImagingTargetReport( target );
     var curDir = targetCoords.direction;

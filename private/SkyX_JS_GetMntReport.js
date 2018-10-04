@@ -12,7 +12,7 @@
 // Define variables and set known initial values
 //
 var CoordsHMS2000 = "";
-var rpt;
+var rpt ='';
 var mntRa = 0;
 var mntDec = 0;
 var mntDir = "";
@@ -54,11 +54,29 @@ if (mntAz < 179)
 	mntDir = "West";
 }
 
+sky6RASCOMTele.DoCommand(11, "");
+
+var BTP = sky6RASCOMTele.DoCommandOutput;
+var pointing = '';
+if (BTP == 1)
+{
+  pointing = 'East';
+  // RunJavaScriptOutput.writeLine ("Mount has not flipped and is pointing east.");
+
+} else if (BTP == 0) {
+
+  pointing = 'West';
+  //RunJavaScriptOutput.writeLine ("Mount has flipped and is pointing west.");
+
+}
+else {
+  pointing = 'Unknown';
+}
+
 Out = {
 	direction: mntDir,
 	altitude: mntAlt,
 };			// Form the output string
-rpt = rpt + '|' + Out.direction + '|' + Out.altitude;
 
-
+rpt = rpt + '|' + Out.direction + '|' + Out.altitude + '|' + pointing;
 /* Socket End Packet */

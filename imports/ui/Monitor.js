@@ -522,7 +522,7 @@ class Monitor extends Component {
     return (
       <div>
          <Segment raised>
-           <h3>Target: {this.renderTarget( this.state.targetSessionId )}</h3>
+           <h3>Target: {this.props.targetName.value}</h3>
 
            <Button.Group icon>
              <Button icon='play'  onClick={this.playScheduler.bind(this)}/>
@@ -638,14 +638,14 @@ class Monitor extends Component {
               />
             </Form.Group>
             <Form.Group>
-              <Form.Checkbox
+              {/* <Form.Checkbox
                 label='Enable Imaging Cooler '
                 name='enableImagingCooler'
                 toggle
                 placeholder= 'Cool down camera'
                 checked={this.state.enableImagingCooler}
                 onChange={this.handleToggle.bind(this)}
-              />
+              /> */}
               <Form.Checkbox
                 label='Enable Periodical CLS (Cloud checks) '
                 name='isCLSRepeatEnabled'

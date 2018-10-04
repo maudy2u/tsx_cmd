@@ -44,6 +44,7 @@ export const tsx_ServerStates = {
   mntMHS: 'mntMHS',
   mntMntDir: 'mntMntDir',
   mntMntAlt: 'mntMntAlt',
+  mntMntPointing: 'mntMntPointing',
 
   targetName: 'targetName',
   targetRA: 'targetRA',

@@ -139,7 +139,22 @@ catch (repErr) {
   };
 }
 
-report = report +'|'+ tryTarget.ready + '|'+tryTarget.msg;
+var BTP = sky6RASCOMTele.DoCommandOutput;
+var pointing = '';
+if (BTP == 1)
+{
+  pointing = 'East';
+  // RunJavaScriptOutput.writeLine ("Mount has not flipped and is pointing east.");
+
+} else if (BTP == 0) {
+
+  pointing = 'West';
+  //RunJavaScriptOutput.writeLine ("Mount has flipped and is pointing west.");
+}
+else {
+  pointing = 'Unknown';
+}
+report = report +'|'+ tryTarget.ready + '|'+tryTarget.msg + '|'+pointing;
 
 // add focuser info
 if( SelectedHardware.focuserModel != '<No Focuser Selected>') {

@@ -261,6 +261,7 @@ class App extends Component {
         tsx_total={this.props.tsx_total}
         scheduler_report={this.props.scheduler_report}
         targetSessionId={this.props.targetSessionId}
+        targetName={this.props.targetName}
       />
     );
   }
@@ -607,6 +608,7 @@ class App extends Component {
 export default withTracker(() => {
 
     return {
+      targetName: TheSkyXInfos.findOne({name: 'targetName'}),
       tsx_progress: TheSkyXInfos.findOne({name: 'tsx_progress'}),
       tsx_total:  TheSkyXInfos.findOne({name: 'tsx_total'}),
       tsx_message: TheSkyXInfos.findOne({name: 'tsx_message'}),

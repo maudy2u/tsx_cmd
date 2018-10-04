@@ -89,6 +89,7 @@ function initServerStates() {
   tsx_SetServerState('targetAZ', '');
   tsx_SetServerState('targetHA', '');
   tsx_SetServerState('targetTransit', '');
+  tsx_SetServerState('targetName', 'No Active Target');
   tsx_SetServerState('lastTargetDirection', '');
   tsx_SetServerState('lastCheckMinSunAlt', '');
   tsx_SetServerState('lastFocusPos', '');
@@ -133,6 +134,7 @@ function ParkMount( isParked ) {
   }
   if( tsx_GetServerStateValue('currentJob') == '' ) {
     UpdateStatus( ' Canceled sessions');
+    tsx_SetServerState('targetName', 'No Active Target');
   }
   else {
     UpdateStatus(' WAKING UP...');
@@ -161,6 +163,7 @@ function CleanUpJobs() {
   scheduler.remove( jid );
   tsx_SetServerState('currentJob', '');
   UpdateImagingSesionID( '' );
+  tsx_SetServerState('targetName', 'No Active Target');
 
   // Clean up the scheduler process collections...
   // Persistence across reboots is not needed at this time.
@@ -457,13 +460,14 @@ export function srvPauseScheduler() {
 export function srvStopScheduler() {
   var dummyVar;
   // Any job document from myJobs can be turned into a Job object
-  CleanUpJobs();
   setSchedulerState('Stop' );
   tsx_SetServerState('SchedulerStatus', 'Stop');
   tsx_SetServerState('currentJob', '');
+  tsx_SetServerState('targetName', 'No Active Target');
   UpdateImagingSesionID( '' );
   tsx_AbortGuider();
   UpdateStatus(' *** Manually STOPPED scheduler ***');
+  CleanUpJobs();
 }
 
 Meteor.methods({
