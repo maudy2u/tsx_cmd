@@ -54,6 +54,7 @@ import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 import {
   tsx_ServerStates,
   tsx_UpdateServerState,
+  UpdateStatus,
   // tsx_GetServerState,
 } from  '../api/serverStates.js';
 
@@ -64,7 +65,7 @@ import Timekeeper from 'react-timekeeper';
 class App extends Component {
 
   state = {
-    activeItem: 'Targets',
+    activeMenu: 'Targets',
     saveServerFailed: false,
     modalEnterIp: false,
     modalEnterPort: false,
@@ -78,7 +79,7 @@ class App extends Component {
 
   handleToggle = (e, { name, value }) => this.setState({ [name]: Boolean(!eval('this.state.'+name)) })
 
-  handleMenuItemClick = (e, { name }) => this.setState({ activeItem: name });
+  handleMenuItemClick = (e, { name }) => this.setState({ activeMenu: name });
   saveServerFailedOpen = () => this.setState({ saveServerFailed: true });
   saveServerFailedClose = () => this.setState({ saveServerFailed: false });
 
@@ -133,14 +134,6 @@ class App extends Component {
     }
 
     this.updateDefaults(this.props);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.setState({
-      currentStage: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'currentStage';
-      }).value,
-    });
   }
 
   updateDefaults(nextProps) {
@@ -307,44 +300,6 @@ class App extends Component {
 
   }
 
-  // *******************************
-  //
-  renderMenuSegments(){
-
-    if (this.state.activeItem == 'Targets' ) {
-      return (
-        <div>
-          <Button size='small' onClick={this.addNewTargets.bind(this)}>Add Target</Button>
-          <TargetSessionMenu />
-        </div>
-      )
-    } else if (this.state.activeItem == 'Series') {
-      return (
-        <div>
-          <Button size='small' onClick={this.addNewTakeSeries.bind(this)}>Add Series</Button>
-          <TakeSeriesTemplateMenu />
-      </div>
-      )
-    } else if (this.state.activeItem == 'Devices') {
-      return this.renderDevices();
-
-    } else if (this.state.activeItem == 'Settings') {
-      // return this.renderDefaultSettings();
-      return (
-        <DefaultSettings />
-      )
-
-    } else if (this.state.activeItem == 'logout') {
-      return this.renderLogout();
-
-    } else {
-      this.state = { activeItem: 'Targets' };
-      return (
-        <TargetSessionMenu />
-      )
-    }
-  }
-
   connectToTSX() {
 
     // these are all working methods
@@ -354,10 +309,12 @@ class App extends Component {
       if (error && error.reason === "Internal server error") {
         // show a nice error message
         this.setState({modalConnectionFailed: true});
-
+      }
+      else {
+        this.setState({activeMenu: 'Devices'});
+        saveDefaultState('activeMenu');
       }
     }.bind(this));
-
   }
 
   park() {
@@ -374,36 +331,84 @@ class App extends Component {
 
   }
 
-  renderMenu() {
-    const { activeItem  } = this.state;
-
+  renderMenu( MENU ) {
+    const { activeMenu  } = this.state;
     return(
       <div>
         <Menu pointing secondary>
-          <Menu.Item name='Targets' active={activeItem === 'Targets'} onClick={this.handleMenuItemClick} />
-          <Menu.Item name='Series' active={activeItem === 'Series'} onClick={this.handleMenuItemClick} />
+          <Menu.Item name='Monitor' active={activeMenu === 'Monitor'} onClick={this.handleMenuItemClick} />
+          <Menu.Item name='Flats' active={activeMenu === 'Flats'} onClick={this.handleMenuItemClick} />
+          <Menu.Item name='Targets' active={activeMenu === 'Targets'} onClick={this.handleMenuItemClick} />
+          <Menu.Item name='Series' active={activeMenu === 'Series'} onClick={this.handleMenuItemClick} />
           <Menu.Menu position='right'>
-            <Menu.Item name='Devices' active={activeItem === 'Devices'} onClick={this.handleMenuItemClick} />
-            <Menu.Item name='Settings' active={activeItem === 'Settings'} onClick={this.handleMenuItemClick} />
-            {/* <Menu.Item name='tests' active={activeItem === 'tests'} onClick={this.handleMenuItemClick} /> */}
-            {/* <Menu.Item name='logout' active={activeItem === 'logout'} onClick={this.handleMenuItemClick} /> */}
+            <Menu.Item name='Devices' active={activeMenu === 'Devices'} onClick={this.handleMenuItemClick} />
+            <Menu.Item name='Settings' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick} />
           </Menu.Menu>
         </Menu>
-        {this.renderMenuSegments()}
+        {this.renderMenuSegments( MENU )}
       </div>
     )
   }
 
+  // *******************************
+  //
+  renderMenuSegments(){
+
+    if (this.state.activeMenu == 'Monitor' ) {
+      return (
+        <div>
+          <Monitor
+            tsx_progress={this.props.tsx_progress}
+            tsx_total={this.props.tsx_total}
+            scheduler_report={this.props.scheduler_report}
+            targetSessionId={this.props.targetSessionId}
+            targetName={this.props.targetName}
+          />
+        </div>
+      )
+    } else if (this.state.activeMenu == 'Flats' ) {
+      return (
+        <div>
+        </div>
+      )
+    } else if (this.state.activeMenu == 'Targets' ) {
+      return (
+        <div>
+          <Button size='small' onClick={this.addNewTargets.bind(this)}>Add Target</Button>
+          <TargetSessionMenu
+            targets={this.props.targetSessions}
+          />
+        </div>
+      )
+    } else if (this.state.activeMenu == 'Series') {
+      return (
+        <div>
+          <Button size='small' onClick={this.addNewTakeSeries.bind(this)}>Add Series</Button>
+          <TakeSeriesTemplateMenu
+            seriesList={this.props.takeSeriesTemplates}
+          />
+      </div>
+      )
+    } else if (this.state.activeMenu == 'Devices') {
+      return this.renderDevices();
+
+    } else if (this.state.activeMenu == 'Settings') {
+      return (
+        <DefaultSettings />
+      )
+
+    } else if (this.state.activeMenu == 'logout') {
+      return this.renderLogout();
+
+    } else {
+      return (
+        <DefaultSettings />
+      )
+    }
+    saveDefaultState('activeMenu');
+  }
+
   renderIPEditor() {
-    // var IP;
-    // var PORT;
-    //
-    // try {
-    //   IP = this.state.ip;
-    // } catch (e) {
-    //   IP = 'Not Connected';
-    //   PORT = 'Not Connected';
-    // }
 
     return (
       <Modal
@@ -469,17 +474,6 @@ class App extends Component {
     )
   }
 
-  showMain() {
-
-    //    if( !Session.get( 'showMonitor' ) {
-    if( !this.state.showMonitor ) {
-      return this.renderMenu();
-    }
-    else {
-      return this.renderMonitor();
-    }
-  }
-
   tsxConnectionFailed() {
     return (
       <Modal
@@ -524,14 +518,19 @@ class App extends Component {
   render() {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
     */
-    var IP;
-    var PORT;
+    var IP = '';
+    var PORT ='';
+    var STATUS ='';
     try {
       IP = this.props.tsxIP.value;
       PORT = this.props.tsxPort.value;
+      STATUS = this.props.currentStage.value;
+      MENU = this.props.activeMenu.value;
     } catch (e) {
       IP = 'Initializing';
       PORT = 'Initializing';
+      STATUS = 'Initializing';
+      MENU = 'Targets';
     }
 
     return (
@@ -540,7 +539,6 @@ class App extends Component {
           <div>
             <Segment.Group>
               <Segment>
-                <Button size='small' name='showMonitor' icon='dashboard' onClick={this.handleToggle.bind(this)}/>
                 <Label onClick={this.modalEnterIpOpen.bind(this)}>TSX ip:
                   <Label.Detail>
                     {IP}
@@ -560,17 +558,18 @@ class App extends Component {
                 </Button.Group>
               </Segment>
               <Segment>
-                <Label>Status: <Label.Detail>{this.state.currentStage}</Label.Detail></Label>
+                <Label>Status: <Label.Detail>{STATUS}</Label.Detail></Label>
               </Segment>
             {/* { this.tsxConnectionFailed() } */}
               <Segment>
-            { this.showMain() }
+            { this.renderMenu( MENU ) }
             </Segment>
-            {/* *******************************
-
-            THIS IS FOR A FAILED CONNECTION TO TSX
-            *******************************             */}
           </Segment.Group>
+          {/* *******************************
+
+          THIS IS FOR A FAILED CONNECTION TO TSX
+
+          *******************************             */}
             <Modal
               open={this.state.modalConnectionFailed}
               onClose={this.modalConnectionFailedClose.bind(this)}
@@ -608,6 +607,8 @@ class App extends Component {
 export default withTracker(() => {
 
     return {
+      currentStage: TheSkyXInfos.findOne({name: 'currentStage'}),
+      activeMenu: TheSkyXInfos.findOne({name: 'activeMenu'}),
       targetName: TheSkyXInfos.findOne({name: 'targetName'}),
       tsx_progress: TheSkyXInfos.findOne({name: 'tsx_progress'}),
       tsx_total:  TheSkyXInfos.findOne({name: 'tsx_total'}),

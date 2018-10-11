@@ -20,7 +20,7 @@ import React, { Component } from 'react';
 import { withTracker } from 'meteor/react-meteor-data';
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 
-import { Modal, Button, Item, Radio, Icon, Table, } from 'semantic-ui-react'
+import { Modal, Button, Item, Radio, Icon, Table, Segment, } from 'semantic-ui-react'
 
 import TakeSeries from './TakeSeries.js'
 
@@ -44,28 +44,30 @@ class TakeSeriesTemplateMenu extends Component {
   }
 
   chkTestData() {
-    var takeSeries = this.props.takeSeriesTemplates;
+    var takeSeries = this.props.seriesList;
     console.log('test');
   }
 
   render() {
 
-    var test0 = this.props.takeSeriesTemplates;
-    var test1 = this.props.takeSeriesTemplates.series;
+    var test0 = this.props.seriesList;
+//    var test1 = this.props.seriesList.series;
 
     return (
       <div>
-         <Item.Group divided>
-           {this.props.takeSeriesTemplates.map( (takeSeriesTemplate)=>{
+        <Segment>
+         <Item.Group divided unstackable>
+           {this.props.seriesList.map( (takeSeriesTemplate)=>{
              return <TakeSeries key={takeSeriesTemplate._id} seriesTemplate={takeSeriesTemplate} />
            })}
          </Item.Group>
+        </Segment>
        </div>
       )
   }
 }
 export default withTracker(() => {
     return {
-      takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
+      // takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
   };
 })(TakeSeriesTemplateMenu);

@@ -114,30 +114,24 @@ class TakeSeries extends Component {
   }
 
   render() {
-//    <input type="checkbox" checked={!!this.props.takeSeriesTemplate.checked} name={this.props.takeSeriesTemplate.name} readOnly="" tabIndex="0" />
     return (
       <Item>
         <Item.Content>
           <Item.Header as='a' onClick={this.editEntry.bind(this)}>
             {this.props.seriesTemplate.name}
           </Item.Header>
-          <Item.Meta>
-            {/* <Checkbox
-              toggle
-              checked={this.state.checked}
-              onChange={this.onChangeChecked.bind(this)}
-            /> */}
-            {this.props.seriesTemplate.description}
-          </Item.Meta>
+          <Button.Group basic size='mini' floated='right'>
+            {/* <Button icon='edit' onClick={this.editEntry.bind(this)}/> */}
+            {/* <Button icon='copy' onClick={this.copyEntry.bind(this)}/> */}
+            <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
+          </Button.Group>
           <Item.Description>
-            {this.seriesDetails()}
+            {this.props.seriesTemplate.description}
           </Item.Description>
+          <Item.Meta>
+          </Item.Meta>
           <Item.Extra>
-            <Button.Group basic size='small'>
-              {/* <Button icon='edit' onClick={this.editEntry.bind(this)}/> */}
-              {/* <Button icon='copy' onClick={this.copyEntry.bind(this)}/> */}
-              <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
-            </Button.Group>
+            {this.seriesDetails()}
             {/* *******************************
               Used to handle the Editing deleting of a series
               */}
@@ -151,32 +145,6 @@ class TakeSeries extends Component {
                   <TakeSeriesTemplateEditor key={this.props.seriesTemplate._id} template={this.props.seriesTemplate}/>
                 </Modal.Description>
               </Modal.Content>
-            </Modal>
-            {/* *******************************
-              Used to handle the FAILED deleting of a series
-              */}
-            <Modal
-              open={this.state.deleteFailed}
-              onClose={this.deleteFailedClose}
-              basic
-              size='small'
-              closeIcon>
-              <Modal.Header>Delete Failed</Modal.Header>
-              <Modal.Content>
-                <h3>This series is used by a Target. Please change the target and try again:</h3>
-                {this.state.targetsPreventingDelete.map( (target)=>{
-                  return (
-                      <li>
-                        {target.name}
-                      </li>
-                  )
-                })}
-              </Modal.Content>
-              <Modal.Actions>
-                <Button color='red' onClick={this.deleteFailedClose.bind(this)} inverted>
-                  <Icon name='stop' /> Got it
-                </Button>
-              </Modal.Actions>
             </Modal>
           </Item.Extra>
         </Item.Content>

@@ -81,6 +81,7 @@ isCurrentlyImaging: 'isCurrentlyImaging',
 */
 
 function initServerStates() {
+  tsx_SetServerState('activeMenu', 'Settings');
   tsx_SetServerState('mntMntDir', '');
   tsx_SetServerState('mntMntAlt', '');
   tsx_SetServerState('targetRA', '');

@@ -151,7 +151,9 @@ class TargetSessionMenu extends Component {
           </Modal>
           <Segment>
             <Item.Group divided unstackable>
-              {this.renderTargets(this.state.targetList)}
+              {this.props.targets.map((target)=>{
+                return <Target key={target._id} target={target} />
+              })}
             </Item.Group>
           </Segment>
       </div>
@@ -160,6 +162,6 @@ class TargetSessionMenu extends Component {
 }
 export default withTracker(() => {
     return {
-      targets: TargetSessions.find({}, { sort: { enabledActive: -1, targetFindName: 1, } }).fetch(),
+      // targets: TargetSessions.find({}, { sort: { enabledActive: -1, targetFindName: 1, } }).fetch(),
   };
 })(TargetSessionMenu);

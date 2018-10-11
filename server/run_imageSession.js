@@ -903,6 +903,7 @@ function tsx_DeviceInfo() {
       tsxDebug(tsx_return);
       var errIndex = tsx_return.split('|').length-1;
       if( tsx_return.split('|')[errIndex].trim() != "No error. Error = 0.") {
+        UpdateStatus(' Devices Updated');
 	       tsxDebug( tsx_return );
          return;
       }
@@ -2250,13 +2251,13 @@ Meteor.methods({
   // **************************************************************
   connectToTSX() {
     tsxDebug(' ******************************* ');
+    UpdateStatus(' Refreshing Devices...');
     var isOnline = tsx_ServerIsOnline();
     tsxDebug('tsx_ServerIsOnline: ' + isOnline);
     // *******************************
     //  GET THE CONNECTED EQUIPEMENT
     tsxDebug(' ******************************* ');
     tsxDebug('Loading devices');
-
     var out = tsx_DeviceInfo();
 
    },

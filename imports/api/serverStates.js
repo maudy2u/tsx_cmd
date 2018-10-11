@@ -30,6 +30,7 @@ import {
 export const tsx_ServerStates = {
   ip: 'ip',
   port: 'port',
+  activeMenu: 'Settings',
   currentStage: 'currentStage', // this is a status line update for the dashboard
   SchedulerStatus: 'SchedulerStatus',
   scheduler_report: 'scheduler_report', // used by monitor to get target report
