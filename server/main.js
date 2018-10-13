@@ -54,6 +54,7 @@ import {
   hasStartTimePassed,
   tsx_MntUnpark,
   tsx_IsParked,
+  findCalibrationSession,
 } from './run_imageSession.js';
 
 import { tsx_feeder, stop_tsx_is_waiting } from './tsx_feeder.js';
@@ -266,7 +267,15 @@ So working on the cloud detection to PAUSE.
 
           */
 
+          // Process Targets
           var target = getValidTargetSession(); // no return
+          // if no valid target then check for calibration sessions...
+          // how to detect calibation sessions...
+          // Create Calibration sessions similar to Targets..
+          // New database... uses calibration images...
+          // Means there are edits... i.e. assign/copy a series
+          // anything else? enable/disable... Flat/Dark/Bias
+          // remove dark/bias/flat from targets...
 
           if (typeof target != 'undefined') {
             tsxLog ( ' =========================');
@@ -291,7 +300,12 @@ So working on the cloud detection to PAUSE.
             ParkMount( isParked );
             isParked = true;
           }
-          if( !isDarkEnough() ) {
+
+          // See if there are calibration frames to do (Bias/Darl/Flats)
+          var calFrames = findCalibrationSession(); // temp var
+
+          // Check if sun is up and no cal frames
+          if( (!isDarkEnough()) && (calFrames == '') ) {
             ParkMount( isParked );
             isParked = true;
             var approachingDawn = isTimeBeforeCurrentTime('3:00');
@@ -306,6 +320,16 @@ So working on the cloud detection to PAUSE.
               UpdateStatus( ' Scheduler stopped: not dark.');
               UpdateStatus( ' ^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
               break;
+            }
+          }
+          // check of cal frames and no target
+          else if ( calFrames != '' && (typeof target == 'undefined')) {
+            for( var i = 0; i < calFrames.length; i++ ) {
+                // process the
+                // Need to prompt user to continuw...
+                // If flat... put on panel
+                // if Dark put on lense cover...
+                processTargetTakeSeries( calFrames[i] );
             }
           }
       }

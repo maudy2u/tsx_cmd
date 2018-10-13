@@ -97,6 +97,7 @@ class Monitor extends Component {
 
       enableImagingCooler: false,
       isCLSRepeatEnabled: false,
+      isCalibrationEnabled: false,
 
   };
 
@@ -193,7 +194,11 @@ class Monitor extends Component {
           return element.name == 'isCLSRepeatEnabled';
         }).value),
       });
-
+      this.setState({
+        isCalibrationEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
+          return element.name == 'isCalibrationEnabled';
+        }).value),
+      });
     }
 
   }
@@ -518,18 +523,30 @@ class Monitor extends Component {
   render() {
 
     var tsx_actions = this.getTsxActions();
+    var TARGETNAME ='';
+    var PROGRESS = '';
+    var TOTAL = '';
+    try {
+      TARGETNAME = this.props.targetName.value;
+      PROGRESS = this.props.tsx_progress.value
+      TOTAL = this.props.tsx_total.value
+    } catch (e) {
+      TARGETNAME = 'Initializing';
+      PROGRESS = 0;
+      TOTAL = 0;
+    }
 
     return (
       <div>
          <Segment raised>
-           <h3>Target: {this.props.targetName.value}</h3>
+           <h3>Target: {TARGETNAME}</h3>
 
            <Button.Group icon>
              <Button icon='play'  onClick={this.playScheduler.bind(this)}/>
              {/* <Button icon='pause' onClick={this.pauseScheduler.bind(this)}  /> */}
              <Button icon='stop' onClick={this.stopScheduler.bind(this)} />
           </Button.Group>
-          <Progress value={this.props.tsx_progress.value} total={this.props.tsx_total.value} progress='ratio'>Processing</Progress>
+          <Progress value={PROGRESS} total={TOTAL} progress='ratio'>Processing</Progress>
         </Segment>
         <Segment.Group  size='mini' horizontal>
           <Segment>
@@ -619,6 +636,14 @@ class Monitor extends Component {
                 toggle
                 placeholder= 'Enable Autoguiding Settling'
                 checked={this.state.isGuideSettlingEnabled}
+                onChange={this.handleToggle.bind(this)}
+              />
+              <Form.Checkbox
+                label='Enable Autoguide Calibrating '
+                name='isCalibrationEnabled'
+                toggle
+                placeholder= 'Enable Autoguiding Calibrating'
+                checked={this.state.isCalibrationEnabled}
                 onChange={this.handleToggle.bind(this)}
               />
               {/* <Form.Checkbox

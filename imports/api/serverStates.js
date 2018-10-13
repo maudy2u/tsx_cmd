@@ -105,6 +105,9 @@ export const tsx_ServerStates = {
   defaultCLSRepeat: 'defaultCLSRepeat',
   isCLSRepeatEnabled: 'isCLSRepeatEnabled',
 
+  flatSettings: 'flatSettings',
+  isCalibrationEnabled: 'isCalibrationEnabled',
+  calibrationFrameSize: 'calibrationFrameSize',
 };
 
 export function postStatus( info ) {

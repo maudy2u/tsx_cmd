@@ -49,7 +49,6 @@ import TargetSessionMenu from './TargetSessionMenu.js';
 // import Filter from './Filter.js';
 import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
-//import TheSkyXInfo from './TheSkyXInfo.js';
 
 import {
   tsx_ServerStates,
@@ -337,7 +336,7 @@ class App extends Component {
       <div>
         <Menu pointing secondary>
           <Menu.Item name='Monitor' active={activeMenu === 'Monitor'} onClick={this.handleMenuItemClick} />
-          <Menu.Item name='Flats' active={activeMenu === 'Flats'} onClick={this.handleMenuItemClick} />
+          {/* <Menu.Item name='Flats' active={activeMenu === 'Flats'} onClick={this.handleMenuItemClick} /> */}
           <Menu.Item name='Targets' active={activeMenu === 'Targets'} onClick={this.handleMenuItemClick} />
           <Menu.Item name='Series' active={activeMenu === 'Series'} onClick={this.handleMenuItemClick} />
           <Menu.Menu position='right'>
@@ -366,15 +365,10 @@ class App extends Component {
           />
         </div>
       )
-    } else if (this.state.activeMenu == 'Flats' ) {
-      return (
-        <div>
-        </div>
-      )
     } else if (this.state.activeMenu == 'Targets' ) {
       return (
         <div>
-          <Button size='small' onClick={this.addNewTargets.bind(this)}>Add Target</Button>
+          <Button size='mini' onClick={this.addNewTargets.bind(this)}>Add Target</Button>
           <TargetSessionMenu
             targets={this.props.targetSessions}
           />
@@ -383,7 +377,7 @@ class App extends Component {
     } else if (this.state.activeMenu == 'Series') {
       return (
         <div>
-          <Button size='small' onClick={this.addNewTakeSeries.bind(this)}>Add Series</Button>
+          <Button size='mini' onClick={this.addNewTakeSeries.bind(this)}>Add Series</Button>
           <TakeSeriesTemplateMenu
             seriesList={this.props.takeSeriesTemplates}
           />
@@ -607,6 +601,7 @@ class App extends Component {
 export default withTracker(() => {
 
     return {
+      flatSettings: TheSkyXInfos.findOne({name: 'flatSettings'}),
       currentStage: TheSkyXInfos.findOne({name: 'currentStage'}),
       activeMenu: TheSkyXInfos.findOne({name: 'activeMenu'}),
       targetName: TheSkyXInfos.findOne({name: 'targetName'}),

@@ -40,6 +40,7 @@ class Target extends Component {
   state = {
     modalOpen: false,
     enabledActive: false,
+    isCalibrationFrames: false,
     ra: '0',
     dec: '0',
     altitude: '0',
@@ -55,11 +56,16 @@ class Target extends Component {
     this.setState({
       [name]: checked
     });
-
-    TargetSessions.update({_id:this.props.target._id}, {
-      $set:{ enabledActive: checked }
-    });
-
+    if( name == 'enabledActive') {
+      TargetSessions.update({_id:this.props.target._id}, {
+        $set:{ enabledActive: checked }
+      });
+    }
+    if( name == 'isCalibrationFrames') {
+      TargetSessions.update({_id:this.props.target._id}, {
+        $set:{ isCalibrationFrames: checked }
+      });
+    }
     this.forceUpdate();
   };
 
@@ -152,6 +158,7 @@ class Target extends Component {
         targetImage: orgTarget.targetImage,
         description: 'DUPLICATED: ' + orgTarget.description,
         enabledActive: false,
+        isCalibrationFrames: orgTarget.isCalibrationFrames,
         series: {
           _id: orgTarget.series._id,
           value: orgTarget.series.text,
@@ -282,11 +289,14 @@ class Target extends Component {
       )
     }
 
-    var ENABLEACTIVE;
+    var ENABLEACTIVE ='';
+    var CALIBRATION = '';
     try {
       ENABLEACTIVE = this.props.target.enabledActive;
+      CALIBRATION = this.props.target.isCalibrationFrames;
     } catch (e) {
       ENABLEACTIVE = this.state.enabledActive;
+      CALIBRATION = this.state.isCalibrationFrames;
     }
 
     return (
@@ -302,7 +312,7 @@ class Target extends Component {
         <Item.Header as='a' onClick={this.editEntry.bind(this)}>
           {this.props.target.targetFindName}
         </Item.Header>
-        <Button.Group basic size='mini' floated='right'>
+        <Button.Group basic size='mini'>
           <Button icon='refresh' onClick={this.getTargetReport.bind(this)}/>
           <Button icon='location arrow' onClick={this.clsTarget.bind(this)}/>
           <Button icon='retweet' onClick={this.eraseProgress.bind(this)}/>
@@ -326,6 +336,13 @@ class Target extends Component {
             {/*
             <Label>Direction: <Label.Detail>{this.state.azimuth}</Label.Detail></Label> */}
           </Label.Group>
+          <Checkbox
+            label=' Calibration Target'
+            name='isCalibrationFrames'
+            toggle
+            checked={CALIBRATION}
+            onChange={this.handleToggleEnabled.bind(this)}
+          />
           <Modal
             open={this.state.modalOpen}
             onClose={this.handleClose}
@@ -346,8 +363,7 @@ class Target extends Component {
 
 export default withTracker(() => {
     return {
-      targets2: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
-      report: TargetReports.find().fetch(),
+      // report: TargetReports.find().fetch(),
   };
 
 })(Target);

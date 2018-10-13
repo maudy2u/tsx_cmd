@@ -90,7 +90,7 @@ class DefaultSettings extends Component {
     defaultFOVExposure: 4,
     defaultCLSRetries: 1,
     defaultCLSRepeat: 3600,
-
+    calibrationFrameSize: 100,
   };
 
   // requires the ".bind(this)", on the callers
@@ -252,6 +252,9 @@ class DefaultSettings extends Component {
       defaultCLSRepeat: nextProps.tsxInfo.find(function(element) {
         return element.name == 'defaultCLSRepeat';
       }).value,
+      calibrationFrameSize: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'calibrationFrameSize';
+      }).value,
 
     });
 
@@ -290,6 +293,8 @@ class DefaultSettings extends Component {
     this.saveDefaultState('defaultFOVExposure');
     this.saveDefaultState('defaultCLSRetries');
     this.saveDefaultState('defaultCLSRepeat');
+    this.saveDefaultState('calibrationFrameSize');
+
   }
 
   getDropDownFilters() {
@@ -411,6 +416,13 @@ class DefaultSettings extends Component {
               name='defaultFocusTempDiff'
               placeholder='Temp diff to run auto focus'
               value={this.state.defaultFocusTempDiff}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='Calibration Frame '
+              name='calibrationFrameSize'
+              placeholder='Frame size (pixels) '
+              value={this.state.calibrationFrameSize}
               onChange={this.handleChange}
             />
           </Form.Group>

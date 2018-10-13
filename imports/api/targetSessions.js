@@ -37,6 +37,7 @@ export function addNewTargetSession() {
       targetImage: '',
       description: '',
       enabledActive: false,
+      isCalibrationFrames: false,
       series: {
       },
       progress: [

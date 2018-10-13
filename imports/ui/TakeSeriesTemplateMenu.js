@@ -58,7 +58,9 @@ class TakeSeriesTemplateMenu extends Component {
         <Segment>
          <Item.Group divided unstackable>
            {this.props.seriesList.map( (takeSeriesTemplate)=>{
-             return <TakeSeries key={takeSeriesTemplate._id} seriesTemplate={takeSeriesTemplate} />
+             if( takeSeriesTemplate.name != 'ThisIsTheFl@tSeries') {
+               return <TakeSeries key={takeSeriesTemplate._id} seriesTemplate={takeSeriesTemplate} />
+             }
            })}
          </Item.Group>
         </Segment>
