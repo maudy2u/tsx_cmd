@@ -353,7 +353,9 @@ function SetUpAutoGuiding( target, doCalibration ) {
   // Calibrate....
   if( doCalibration ) {
     var cal_res = tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
-    UpdateStatus(' ' + target.targetFindName + ": Calibrated");
+    if( cal_res ) {
+      UpdateStatus(' ' + target.targetFindName + ": AutoGuider Calibrated");
+    }
   }
 
   tsx_StartAutoGuide( star.guideStarX, star.guideStarY );
@@ -406,7 +408,7 @@ function tsx_FindGuideStar() {
         // tsxDebug('Any error?: ' + tsx_return);
         guideStarX = tsx_return.split('|')[0].trim();
         guideStarY = tsx_return.split('|')[1].trim();
-        UpdateStatus( " Guide star candidate: "+guideStarX+", "+guideStarY );
+        UpdateStatus( " Guide star: "+guideStarX+", "+guideStarY );
         out = {
           guideStarX: guideStarX,
           guideStarY: guideStarY,
@@ -426,12 +428,12 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
   var enabled = tsx_GetServerStateValue('isCalibrationEnabled');
   if( !enabled ) {
     UpdateStatus(' @Calibration disabled');
-    return;
+    return false;
   }
   enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
   if( !enabled ) {
     UpdateStatus(' @Autoguiding disabled ');
-    return;
+    return false;
   }
   var fSize = tsx_GetServerStateValue('calibrationFrameSize');
   if( typeof fSize == 'undefined' || fSize === '' ) {
@@ -446,10 +448,14 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
   cmd = cmd.replace('$001', guideStarY );
   cmd = cmd.replace('$002', fSize );
 
+  var success = false;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     var result = tsx_return.split('|')[0].trim();
     if( result != 'Success') {
       UpdateStatus(' FAILED -Calibrting Guider: ' + result);
+    }
+    else {
+      success = true;
     }
 
     tsx_is_waiting = false;
@@ -457,6 +463,7 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
+  return success;
 }
 
 
@@ -680,7 +687,7 @@ function tsx_RunFocus3( target ) {
       //[[B^[[B^[[BI20180708-01:53:13.485(-3)?   [SERVER]|2018-07-08|01:53:13|[DEBUG]| ??? @Focusing-3 returned: TypeError: Error code = 5 (5). No additional information is available.|No error. Error = 0
           tsxDebug( ' ??? @Focusing-3 returned: ' + tsx_return );
           var temp = tsx_return.split('|')[1].trim();
-          var postion = tsx_return.split('|')[0].trim();
+          var position = tsx_return.split('|')[0].trim();
           if( temp == 'TypeError: Error code = 5 (5). No additional information is available.') {
               temp = tsx_GetServerStateValue( 'initialFocusTemperature' );
               UpdateStatus( ' !!! Error find focus.' );
@@ -693,8 +700,11 @@ function tsx_RunFocus3( target ) {
           else if( typeof temp == 'undefined' || temp === 'No error. Error = 0.') {
             temp = '';
           }
+          if( position == 'Simulator') {
+            temp = position;
+          }
           // Focuser postion (1232345345) using LUM Filter
-          UpdateStatus(' Focuser postion (' + postion + ') and temp ('+temp+') using ' + target.focusFilter + ' filter.');
+          UpdateStatus(' Focuser postion (' + position + ') and temp ('+temp+') using ' + target.focusFilter + ' filter.');
 
           Out = temp;
           tsx_is_waiting = false;
@@ -729,7 +739,7 @@ function InitialFocus( target ) {
   tsxDebug(' *** ' + target.targetFindName +': @Focus3 Needed');
 
   var temp = tsx_RunFocus3( target ); // need to get the focus position
-  tsxDebug( ' *** ' + target.targetFindName +': Initial Focus temp: ' + temp );
+  tsxInfo( ' *** ' + target.targetFindName +': Initial Focus temp: ' + temp );
   // var temp = result.split('|')[0].trim();
   //  var temp = tsx_GetFocusTemp( target ); // temp and position set inside
   tsx_SetServerState( 'initialFocusTemperature', temp);
@@ -1352,18 +1362,25 @@ function isTargetConditionInValid(target) {
     // now retry
     var defaultCLSRepeat = tsx_GetServerState('defaultCLSRepeat');
     if( typeof defaultCLSRepeat === 'undefined' ) {
+      tsxInfo( ' Check if to CLS again - needs a value.');
       tsx_SetServerState('defaultCLSRepeat', 0); // default to one hour
       defaultCLSRepeat = tsx_GetServerState('defaultCLSRepeat');
     }
-
+    tsxInfo( ' CLS val: ' + defaultCLSRepeat.value + ', CLS dts: ' + defaultCLSRepeat.timestamp );
     // only SetUpForImagingRun if greater than zero
     if( defaultCLSRepeat.value > 0  ) {
+      tsxInfo( ' Check if time to CLS again: ' + defaultCLSRepeat.value );
+      tsxInfo( ' Check time: ' + defaultCLSRepeat.timestamp );
       var doCLS = hasTimePassed( defaultCLSRepeat.value, defaultCLSRepeat.timestamp )
       if( doCLS === true ) {
-          UpdateStatus( ' Re-centring: ' + target.targetFindName);
-          SetUpForImagingRun( target );
-          tsx_SetServerState('defaultCLSRepeat', defaultCLSRepeat.value);
-          return false;
+        tsxInfo( ' time to CLS again.');
+        UpdateStatus( ' ' + target.targetFindName + ': centring');
+        SetUpForImagingRun( target );
+        tsx_SetServerState('defaultCLSRepeat', defaultCLSRepeat.value);
+        return false;
+      }
+      else {
+        UpdateStatus( ' ' + target.targetFindName + ': NOT recentring');
       }
     }
   }
@@ -1640,7 +1657,7 @@ function tsx_MatchRotation( target ) {
       ACCURACY = 1; // assume within one degree default
     }
 
-    UpdateStatus( ' ' + target.targetFindName + ' Setting FOV to ('+ angle +')' );
+    UpdateStatus( ' ' + target.targetFindName + ': Setting FOV to ('+ angle +')' );
     var cmd = tsx_cmd('SkyX_JS_MatchAngle');
     cmd = cmd.replace('$000', angle );
     cmd = cmd.replace('$001', pixelSize);
@@ -1659,7 +1676,7 @@ function tsx_MatchRotation( target ) {
         var resMsg = tsx_return.split('|')[1].trim();
         var angle = resMsg.split('=')[1].trim();
         targetReportAngle( target, angle );
-        tsxLog( 'Rotator set: ' + angle);
+        tsxLog( ' Rotator set: ' + angle);
       }
       tsx_is_waiting = false;
     }));
@@ -2012,7 +2029,7 @@ export function prepareTargetForImaging( target ) {
   }
   else {
     UpdateImagingSesionID( target._id );
-    UpdateStatus('========================');
+    UpdateStatus(' ========================');
     UpdateStatus( ' '+ target.targetFindName + ": Target selected");
     tsx_SetServerState('targetName', target.targetFindName);
 

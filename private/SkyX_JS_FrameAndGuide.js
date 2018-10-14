@@ -28,4 +28,5 @@ ccdsoftAutoguider.Frame = 1;			// Light Frame
 ccdsoftAutoguider.Asynchronous = true;		// Turn on so we don't get stuck waiting for an endless process
 ccdsoftAutoguider.Autoguide();			// Do it.
 
+Out = 'Success|'
 /* Socket End Packet */

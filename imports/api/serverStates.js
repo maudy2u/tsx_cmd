@@ -198,10 +198,11 @@ export function postProgressMessage( info ) {
 };
 
 export function tsx_SetServerState( name, value) {
+  var dts = new Date();
   TheSkyXInfos.upsert( {name: name }, {
     $set: {
       value: value,
-      timestamp: new Date(),
+      timestamp: dts,
      }
   })
 };

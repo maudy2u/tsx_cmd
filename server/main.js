@@ -174,12 +174,13 @@ function CleanUpJobs() {
   // Persistence across reboots is not needed at this time.
   tsxDebug('Number of Jobs found: ' + jobs.length);
   if( jobs.length > 0 ) {
-    UpdateStatus( ' Cleaning up DB.');
-  }
-  for (var i = 0; i < jobs.length; i++) {
-    if( typeof jobs[i] != 'undefined') {
-      scheduler.remove(jobs[i]._id);
+    UpdateStatus( ' Cleaning up DB');
+    for (var i = 0; i < jobs.length; i++) {
+      if( typeof jobs[i] != 'undefined') {
+        scheduler.remove(jobs[i]._id);
+      }
     }
+    UpdateStatus( ' Cleaned DB');
   }
 }
 
@@ -495,8 +496,8 @@ export function srvStopScheduler() {
   tsx_SetServerState('scheduler_report', '');
   UpdateImagingSesionID( '' );
   tsx_AbortGuider();
-  UpdateStatus(' *** Manually STOPPED scheduler ***');
   CleanUpJobs();
+  UpdateStatus(' *** Manually STOPPED scheduler ***');
 }
 
 Meteor.methods({
