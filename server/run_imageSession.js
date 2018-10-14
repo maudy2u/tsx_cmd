@@ -1383,6 +1383,9 @@ function isTargetConditionInValid(target) {
         UpdateStatus( ' ' + target.targetFindName + ': NOT recentring');
       }
     }
+    else {
+      UpdateStatus( ' ' + target.targetFindName + ': NOT recentring');
+    }
   }
 
   //
