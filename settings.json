@@ -1,7 +1,6 @@
 {
-  "enable_debug": "yes",
-  "log_file_location": "/media/odroid/PENSIVE2/tsx_cmd_logs",
-  "public": {
-    "client_and_server_setting": "bar"
-  }
+  "enable_debug": "no",
+  "removed-to-enable: log_file_location": "/media/odroid/PENSIVE2/tsx_cmd_logs",
+  "version": "2.0",
+  "date": "2018-10-14"
 }

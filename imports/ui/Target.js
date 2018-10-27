@@ -312,14 +312,6 @@ class Target extends Component {
         <Item.Header as='a' onClick={this.editEntry.bind(this)}>
           {this.props.target.targetFindName}
         </Item.Header>
-        <Button.Group basic size='mini'>
-          <Button icon='refresh' onClick={this.getTargetReport.bind(this)}/>
-          <Button icon='location arrow' onClick={this.clsTarget.bind(this)}/>
-          <Button icon='retweet' onClick={this.eraseProgress.bind(this)}/>
-          {/* <Button icon='edit' onClick={this.editEntry.bind(this)}/> */}
-          <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
-          <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
-        </Button.Group>
         <Item.Description>
           {this.props.target.description}
         </Item.Description>
@@ -336,6 +328,14 @@ class Target extends Component {
             {/*
             <Label>Direction: <Label.Detail>{this.state.azimuth}</Label.Detail></Label> */}
           </Label.Group>
+          <Button.Group basic size='mini'>
+            <Button icon='refresh' onClick={this.getTargetReport.bind(this)}/>
+            <Button icon='location arrow' onClick={this.clsTarget.bind(this)}/>
+            <Button icon='retweet' onClick={this.eraseProgress.bind(this)}/>
+            {/* <Button icon='edit' onClick={this.editEntry.bind(this)}/> */}
+            <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
+            <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
+          </Button.Group>
           <Checkbox
             label=' Calibration Target'
             name='isCalibrationFrames'

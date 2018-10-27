@@ -22,7 +22,7 @@ if( (guideStarX - frameHalf) > 0 ) {
   L = guideStarX - frameHalf;
 }
 if( (guideStarY - frameHalf) > 0 ) {
-  L = guideStarY - frameHalf;
+  T = guideStarY - frameHalf;
 }
 if( (guideStarX + frameHalf) < W ) {
   R = guideStarX + frameHalf;

@@ -27,14 +27,8 @@ sky6Utils.ConvertEquatorialToString(sky6Utils.dOut0, sky6Utils.dOut1, 5);
 
 CoordsHMS2000 = sky6Utils.strOut;
 
-
-Out = {
-  ra: mntRa,
-  dec: mntDec,
-  hms: CoordsHMS2000,
-};			// Form the output string
-
-rpt = Out.ra +'|'+Out.dec+'|'+Out.hms
+// Form the output string
+rpt = mntRa +'|'+mntDec+'|'+CoordsHMS2000
 
 var mntAz = 0;
 var mntAlt = 0;
@@ -58,13 +52,12 @@ sky6RASCOMTele.DoCommand(11, "");
 
 var BTP = sky6RASCOMTele.DoCommandOutput;
 var pointing = '';
-if (BTP == 1)
-{
+if (BTP == 1) {
   pointing = 'East';
   // RunJavaScriptOutput.writeLine ("Mount has not flipped and is pointing east.");
 
-} else if (BTP == 0) {
-
+}
+else if (BTP == 0) {
   pointing = 'West';
   //RunJavaScriptOutput.writeLine ("Mount has flipped and is pointing west.");
 
@@ -72,11 +65,6 @@ if (BTP == 1)
 else {
   pointing = 'Unknown';
 }
-
-Out = {
-	direction: mntDir,
-	altitude: mntAlt,
-};			// Form the output string
-
-rpt = rpt + '|' + Out.direction + '|' + Out.altitude + '|' + pointing;
+// Form the output string
+rpt = rpt + '|' + mntDir + '|' + mntAlt + '|' + pointing;
 /* Socket End Packet */

@@ -28,6 +28,8 @@ import {
 } from './theLoggers.js';
 
 export const tsx_ServerStates = {
+  tsx_version: 'tsx_version',
+  tsx_date: 'tsx_date',
   ip: 'ip',
   port: 'port',
   activeMenu: 'Settings',

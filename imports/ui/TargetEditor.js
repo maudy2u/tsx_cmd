@@ -48,6 +48,7 @@ class TargetEditor extends Component {
     alt: "",                // Target ALT
     angle: "",
     scale: '',
+    rotator_position: '',
     coolingTemp: -19,
     coolingTime: 5,
     clsFilter: '',
@@ -140,6 +141,7 @@ class TargetEditor extends Component {
       ra: this.props.target.ra,
       dec: this.props.target.dec,
       angle: this.props.target.angle,
+      rotator_position: this.props.target.rotator_position,
       scale: this.props.target.scale,
       coolingTemp: Number(this.props.target.coolingTemp),
       clsFilter: this.props.target.clsFilter,
@@ -195,6 +197,7 @@ class TargetEditor extends Component {
         ra: this.state.ra,
         dec: this.state.dec,
         angle: this.state.angle,
+        rotator_position: this.state.rotator_position,
         scale: this.state.scale,
         coolingTemp: this.state.coolingTemp,
         clsFilter: this.state.clsFilter,
@@ -338,6 +341,12 @@ class TargetEditor extends Component {
                   placeholder='Describe the session'
                   value={this.state.description}
                   onChange={this.handleChange}/>
+                  <Form.Input
+                      label='Rotator Position (optional)'
+                      name='rotator_position'
+                      placeholder='Position for rotator (i.e. used with flats)'
+                      value={this.state.rotator_position}
+                      onChange={this.handleChange}/>
                 <Form.Input
                     label='FOV Angle (optional)'
                     name='angle'

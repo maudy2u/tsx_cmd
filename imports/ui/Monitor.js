@@ -49,30 +49,14 @@ class Monitor extends Component {
 
     state = {
 
-      currentTarget: 'None',
-      monRA: '_',
-      monDEC: '_',
-      monALT: '_',
-      monAZ: '_',
-      monAngle: '_',
-      monHA: '_',
-      monTransit: '_',
-      monIsDark: '_',
-      monitorStatus: '_',
+      focusPostion: '_',
 
       monitorDisplay: true,
       confirmOpen: false,
 
       activeItem: 'Targets',
 
-      defaultMinAlt: 30,
-      defaultCoolTemp: -20,
-      defaultFocusTempDiff: 0.7,
-      defaultMeridianFlip: true,
-      defaultStartTime: 21,
-      defaultStopTime: 6,
       noFoundSession: false,
-      noFoundSessions: [],
 
       focusTemp: '_',
       focusPos: '_',
@@ -133,7 +117,6 @@ class Monitor extends Component {
         }).value),
       });
     }
-
     if( typeof nextProps.tsxInfo != 'undefined'  ) {
 
       var isFlip = Boolean(nextProps.tsxInfo.find(function(element) {
@@ -200,7 +183,6 @@ class Monitor extends Component {
         }).value),
       });
     }
-
   }
 
   // Generic Method to determine default to save.
@@ -551,15 +533,6 @@ class Monitor extends Component {
         <Segment.Group  size='mini' horizontal>
           <Segment>
             <Form.Group>
-              <Label>RA <Label.Detail>{Number(this.props.scheduler_report.value.RA).toFixed(4)}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
-              <Label>DEC <Label.Detail>{Number(this.props.scheduler_report.value.DEC).toFixed(4)}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
-              <Label>Angle <Label.Detail>{Number(this.props.scheduler_report.value.ANGLE).toFixed(4)}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
               <Label>Atl <Label.Detail>{Number(this.props.scheduler_report.value.ALT).toFixed(4)}</Label.Detail></Label>
             </Form.Group>
             <Form.Group>
@@ -573,6 +546,18 @@ class Monitor extends Component {
             </Form.Group>
             <Form.Group>
               <Label>Pointing <Label.Detail>{Number(this.props.scheduler_report.value.pointing).toFixed(4)}</Label.Detail></Label>
+            </Form.Group>
+            <Form.Group>
+              <Label>Rotator <Label.Detail>{Number(this.props.scheduler_report.value.focusPostion).toFixed(4)}</Label.Detail></Label>
+            </Form.Group>
+            <Form.Group>
+              <Label>Angle <Label.Detail>{Number(this.props.scheduler_report.value.ANGLE).toFixed(4)}</Label.Detail></Label>
+            </Form.Group>
+            <Form.Group>
+              <Label>RA <Label.Detail>{Number(this.props.scheduler_report.value.RA).toFixed(4)}</Label.Detail></Label>
+            </Form.Group>
+            <Form.Group>
+              <Label>DEC <Label.Detail>{Number(this.props.scheduler_report.value.DEC).toFixed(4)}</Label.Detail></Label>
             </Form.Group>
           </Segment>
         </Segment.Group>
@@ -736,6 +721,6 @@ export default withTracker(() => {
     reports: TargetReports.find().fetch(),
     tsxInfo: TheSkyXInfos.find({}).fetch(),
     takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
-    targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
+    // targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
 };
 })(Monitor);

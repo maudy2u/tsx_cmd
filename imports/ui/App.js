@@ -515,21 +515,27 @@ class App extends Component {
     var IP = '';
     var PORT ='';
     var STATUS ='';
+    var MENU = '';
+    var VERSION = '';
+    var DATE = '';
     try {
       IP = this.props.tsxIP.value;
       PORT = this.props.tsxPort.value;
       STATUS = this.props.currentStage.value;
       MENU = this.props.activeMenu.value;
+      VERSION = this.props.tsx_version.value;
+      DATE = this.props.tsx_date.value;
     } catch (e) {
       IP = 'Initializing';
       PORT = 'Initializing';
       STATUS = 'Initializing';
       MENU = 'Targets';
+      VERSION = '';
+      DATE = '';
     }
 
     return (
       <div className="container">
-        <header>
           <div>
             <Segment.Group>
               <Segment>
@@ -591,7 +597,7 @@ class App extends Component {
               </Modal.Actions>
             </Modal>
           </div>
-        </header>
+          version: {VERSION}, date: {DATE}, tsx cmd - A web page to send commands to TheSkyX server
       </div>
     );
   }
@@ -601,6 +607,8 @@ class App extends Component {
 export default withTracker(() => {
 
     return {
+      tsx_version: TheSkyXInfos.findOne({name: 'tsx_version'}),
+      tsx_date: TheSkyXInfos.findOne({name: 'tsx_date'}),
       flatSettings: TheSkyXInfos.findOne({name: 'flatSettings'}),
       currentStage: TheSkyXInfos.findOne({name: 'currentStage'}),
       activeMenu: TheSkyXInfos.findOne({name: 'activeMenu'}),
@@ -614,6 +622,6 @@ export default withTracker(() => {
       tsxInfo: TheSkyXInfos.find({}).fetch(),
       filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
-      targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
+      targetSessions: TargetSessions.find({}, { sort: { enabled: 1, name: 1 } }).fetch(),
   };
 })(App);

@@ -47,6 +47,7 @@ export function addNewTargetSession() {
       ra: '',
       dec: '',
       angle: '',
+      rotator_position: '',
       scale: '',
       coolingTemp: '',
 

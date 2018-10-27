@@ -186,21 +186,19 @@ function CleanUpJobs() {
 
 Meteor.startup(() => {
   // code to run on server at startup
-  tsxLog(' ******************', '');
-  tsxLog(' STARTED', '');
-  tsxLog(' ******************', '');
+  tsxLog(' ******* STARTED ******', '');
 
-  CleanUpJobs();
-
-  initServerStates();
-
-  // Initialze the server on startup
-  tsx_UpdateDevice('mount', 'Not connected ', '' );
-  tsx_UpdateDevice('camera', 'Not connected ', '' );
-  tsx_UpdateDevice('guider', 'Not connected ', '' );
-  tsx_UpdateDevice('rotator', 'Not connected ', '' );
-  tsx_UpdateDevice('efw', 'Not connected ', '' );
-  tsx_UpdateDevice('focuser', 'Not connected ', '' );
+  var version_dat = {};
+  version_dat = JSON.parse(Assets.getText('version.json'));
+  if( version_dat.version != '') {
+    tsx_SetServerState('tsx_version', version_dat.version);
+    tsxLog(' TSX Server Version:', version_dat.version);
+  }
+  if( version_dat.date != '') {
+    tsx_SetServerState('tsx_date', version_dat.date);
+    tsxLog(' TSX Server Date:', version_dat.date);
+  }
+  tsxLog(' ', '');
 
   var dbIp = TheSkyXInfos.findOne().ip() ;
   var dbPort = TheSkyXInfos.findOne().port();
@@ -212,6 +210,18 @@ Meteor.startup(() => {
 
   };
   tsxLog(' ******* TSX_CMD ONLINE ******', '');
+  CleanUpJobs();
+  initServerStates();
+
+  // Initialze the server on startup
+  tsx_UpdateDevice('mount', 'Not connected ', '' );
+  tsx_UpdateDevice('camera', 'Not connected ', '' );
+  tsx_UpdateDevice('guider', 'Not connected ', '' );
+  tsx_UpdateDevice('rotator', 'Not connected ', '' );
+  tsx_UpdateDevice('efw', 'Not connected ', '' );
+  tsx_UpdateDevice('focuser', 'Not connected ', '' );
+
+  tsxLog(' ******************', '');
 
 
   // *******************************
