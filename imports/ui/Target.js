@@ -302,29 +302,28 @@ class Target extends Component {
     return (
     <Item>
       <Item.Content>
+        <Item.Header as='a' onClick={this.editEntry.bind(this)}>
         <Checkbox
           label='  '
           name='enabledActive'
           toggle
           checked={ENABLEACTIVE}
           onChange={this.handleToggleEnabled.bind(this)}
-        />
-        <Item.Header as='a' onClick={this.editEntry.bind(this)}>
-          {this.props.target.targetFindName}
+        /> {this.props.target.targetFindName}
         </Item.Header>
         <Item.Description>
           {this.props.target.description}
         </Item.Description>
         <Item.Meta>
-          <Progress value={this.props.target.totalImagesTaken()} total={this.props.target.totalImagesPlanned()} progress='ratio'>Images Taken</Progress>
+        <Label>Images Taken: <Label.Detail>{this.props.target.totalImagesTaken()}/{this.props.target.totalImagesPlanned()}</Label.Detail></Label>
+        <Label>Priority: <Label.Detail>{this.props.target.priority}</Label.Detail></Label>
+        <Label>Start time: <Label.Detail>{this.props.target.startTime}</Label.Detail></Label>
+        <Label>Stop time: <Label.Detail>{this.props.target.stopTime}</Label.Detail></Label>
+        <Label>Min. Altitude: <Label.Detail>{this.props.target.minAlt}</Label.Detail></Label>
         </Item.Meta>
         <Item.Extra>
           {this.renderTargeting()}
           <Label.Group>
-            <Label>Priority: <Label.Detail>{this.props.target.priority}</Label.Detail></Label>
-            <Label>Start time: <Label.Detail>{this.props.target.startTime}</Label.Detail></Label>
-            <Label>Stop time: <Label.Detail>{this.props.target.stopTime}</Label.Detail></Label>
-            <Label>Min. Altitude: <Label.Detail>{this.props.target.minAlt}</Label.Detail></Label>
             {/*
             <Label>Direction: <Label.Detail>{this.state.azimuth}</Label.Detail></Label> */}
           </Label.Group>

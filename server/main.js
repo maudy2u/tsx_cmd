@@ -192,11 +192,11 @@ Meteor.startup(() => {
   version_dat = JSON.parse(Assets.getText('version.json'));
   if( version_dat.version != '') {
     tsx_SetServerState('tsx_version', version_dat.version);
-    tsxLog(' TSX Server Version:', version_dat.version);
+    tsxLog(' Version', version_dat.version);
   }
   if( version_dat.date != '') {
     tsx_SetServerState('tsx_date', version_dat.date);
-    tsxLog(' TSX Server Date:', version_dat.date);
+    tsxLog(' Date', version_dat.date);
   }
   tsxLog(' ', '');
 
@@ -205,8 +205,8 @@ Meteor.startup(() => {
   // removing so can start up easier without error.
   // var dbMinAlt = TheSkyXInfos.findOne().defaultMinAltitude();
   if( (typeof dbIp != 'undefined') && (typeof dbPort != 'undefined') ) {
-    tsxLog(' TSX server   IP: ',  dbIp );
-    tsxLog(' TSX server port: ', dbPort );
+    tsxLog('   IP',  dbIp );
+    tsxLog(' port', dbPort );
 
   };
   tsxLog(' ******* TSX_CMD ONLINE ******', '');

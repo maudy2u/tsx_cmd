@@ -325,13 +325,12 @@ class DefaultSettings extends Component {
 
     return (
       <Form>
-      <Segment.Group>
         <Segment>
           <Button icon='save' onClick={this.saveDefaults.bind(this)} />
           {/* <Button icon='save' onClick={this.saveTSXServerConnection.bind(this)}> Save Connection </Button>
           {this.renderTSXConnetion()} */}
         </Segment>
-        <Segment>
+        <Segment raised>
           <h3 className="ui header">Defaults</h3>
           <Form.Group>
             <Form.Field control={Dropdown}
@@ -345,7 +344,7 @@ class DefaultSettings extends Component {
             />
           </Form.Group>
         </Segment>
-        <Segment>
+        <Segment raised>
           <Form.Group>
             <Form.Input
               label='Twilight Alittude for Sun '
@@ -370,7 +369,7 @@ class DefaultSettings extends Component {
             />
           </Form.Group>
         </Segment>
-        <Segment>
+        <Segment raised>
           <Form.Group>
             <Form.Input
               label='Guide Camera Pixel Size: '
@@ -395,7 +394,7 @@ class DefaultSettings extends Component {
             />
           </Form.Group>
         </Segment>
-        <Segment>
+        <Segment raised>
           <Form.Group>
             <Form.Input
               label='Guiding Tolerance '
@@ -427,7 +426,7 @@ class DefaultSettings extends Component {
             />
           </Form.Group>
         </Segment>
-        <Segment>
+        <Segment raised>
           <Form.Group>
             <Form.Input
               label='AutoGuide Exposure '
@@ -452,7 +451,7 @@ class DefaultSettings extends Component {
             />
           </Form.Group>
         </Segment>
-        <Segment>
+        <Segment raised>
           <Form.Group>
             <Form.Input
               label='Dithering Minimum Pixel Move '
@@ -477,7 +476,7 @@ class DefaultSettings extends Component {
             />
           </Form.Group>
         </Segment>
-        <Segment>
+        <Segment raised>
           <Form.Group>
             <Form.Input
               label='CloseLoopSlew Retries  '
@@ -495,7 +494,7 @@ class DefaultSettings extends Component {
             />
           </Form.Group>
         </Segment>
-        <Segment>
+        <Segment raised>
             <h4 className="ui header">Priority: {this.state.defaultPriority}</h4>
             <ReactSimpleRange
               label
@@ -508,14 +507,14 @@ class DefaultSettings extends Component {
               onChange={this.handlePriorityChange}
             />
         </Segment>
-        <Segment>
+        <Segment raised>
             <h4 className="ui header">Set Default START time</h4>
             <Timekeeper
               time={this.state.defaultStartTime}
               onChange={this.handleStartChange}
             />
           </Segment>
-          <Segment>
+          <Segment raised>
             <h4 className="ui header">Set Default STOP time</h4>
             {/* <DateTime />pickerOptions={{format:"LL"}} value="2017-04-20"/> */}
             <Timekeeper
@@ -523,7 +522,6 @@ class DefaultSettings extends Component {
               onChange={this.handleStopChange}
             />
           </Segment>
-      </Segment.Group>
     </Form>
 
     );

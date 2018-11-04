@@ -45,7 +45,7 @@ import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 //import TheSkyXInfo from './TheSkyXInfo.js';
 
-class Monitor extends Component {
+class Toolbox extends Component {
 
     state = {
 
@@ -209,38 +209,6 @@ class Monitor extends Component {
     });//.bind(this));
   }
 
-  textTSX() {
-    //var d = new Date(year, month, day, hours, minutes, seconds, milliseconds);
-    var currentTime = new Date();
-    var startTime1 = new Date(0, 0, 0, 22, 30, 0, 0);
-    var startTime2 = new Date(0, 0, 0, 22, 30, 0, 0);
-    var stopTime1 = new Date(0, 0, 1, 6, 30, 0, 0);
-
-    var ip = TheSkyXInfos.findOne({name: 'ip'});
-    var port = TheSkyXInfos.findOne({name: 'port'});
-    // any remaining images
-
-    Meteor.call("tsxTestImageSession", function (error, result) {
-        console.log('Error: ' + error);
-        console.log('result: ' + result);
-        for (var i = 0; i < result.split('|').length; i++) {
-          var txt = result.split('|')[i].trim();
-          console.log('Found: ' + txt);
-        }
-        if (error && error.error === "logged-out") {
-          // show a nice error message
-          this.noFoundSessionOpen();
-
-          Session.set("errorMessage", "Please log in to post a comment.");
-        }
-        else {
-          // if success then TheSkyX has made this point the target...
-          // now get the coordinates
-          cmdSuccess = true;
-      }
-    }.bind(this));
-  }
-
   // *******************************
 
   startSessions() {
@@ -388,29 +356,6 @@ class Monitor extends Component {
     }.bind(this));
   }
 
-  renderTarget( tid ) {
-    var target;
-    var str;
-    try {
-      target = TargetSessions.findOne({_id:tid});
-      if( tid == '' ) {
-        return (
-          <Label>No active target</Label>
-        )
-      }
-      else {
-        return (
-          <Target key={tid} target={target} />
-        )
-      }
-    } catch (e) {
-      console.log('error');
-      return (
-        <Label>No active target</Label>
-      )
-    }
-  }
-
   getTsxActions() {
 
     var actionArray = [];
@@ -521,14 +466,19 @@ class Monitor extends Component {
     return (
       <div>
          <Segment raised>
-           <h3>Target: {TARGETNAME}</h3>
-
-           <Button.Group icon>
-             <Button icon='play'  onClick={this.playScheduler.bind(this)}/>
-             {/* <Button icon='pause' onClick={this.pauseScheduler.bind(this)}  /> */}
-             <Button icon='stop' onClick={this.stopScheduler.bind(this)} />
+          <Button.Group icon>
+             <Button  onClick={this.getCurrentTarget.bind(this)}>Calibrate</Button>
           </Button.Group>
-          <Progress value={PROGRESS} total={TOTAL} progress='ratio'>Processing</Progress>
+        </Segment>
+        <Segment raised>
+          <Button.Group icon>
+             <Button  onClick={this.getCurrentTarget.bind(this)}>Flat Position</Button>
+          </Button.Group>
+        </Segment>
+        <Segment raised>
+          <Button.Group icon>
+             <Button  onClick={this.getCurrentTarget.bind(this)}>FOV Angle</Button>
+          </Button.Group>
         </Segment>
         <Segment.Group  size='mini' horizontal>
           <Segment>
@@ -545,7 +495,7 @@ class Monitor extends Component {
               <Label>Transit <Label.Detail>{Number(this.props.scheduler_report.value.TRANSIT).toFixed(4)}</Label.Detail></Label>
             </Form.Group>
             <Form.Group>
-              <Label>Pointing <Label.Detail>{this.props.scheduler_report.value.pointing}</Label.Detail></Label>
+              <Label>Pointing <Label.Detail>{Number(this.props.scheduler_report.value.pointing).toFixed(4)}</Label.Detail></Label>
             </Form.Group>
             <Form.Group>
               <Label>Rotator <Label.Detail>{Number(this.props.scheduler_report.value.focusPostion).toFixed(4)}</Label.Detail></Label>
@@ -561,160 +511,6 @@ class Monitor extends Component {
             </Form.Group>
           </Segment>
         </Segment.Group>
-        <Segment.Group size='mini'>
-          <Segment>
-            <h3 className="ui header">Session Controls</h3>
-            <Form.Group>
-              <Form.Checkbox
-                label='Enable Meridian Flip '
-                name='defaultMeridianFlip'
-                toggle
-                placeholder= 'Enable auto meridian flip'
-                checked={this.state.defaultMeridianFlip}
-                onChange={this.handleToggle.bind(this)}
-              />
-              <Form.Checkbox
-                label='Enable CLS '
-                name='defaultCLSEnabled'
-                toggle
-                placeholder= 'Enable CLS'
-                checked={this.state.defaultCLSEnabled}
-                onChange={this.handleToggle.bind(this)}
-              />
-              <Form.Checkbox
-                label='Enable Soft Parking (Stop tracking) '
-                name='defaultSoftPark'
-                toggle
-                placeholder= 'Enable soft parking'
-                checked={this.state.defaultSoftPark}
-                onChange={this.handleToggle.bind(this)}
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Checkbox
-                label='Enable FOV Angle Matching '
-                name='isFOVAngleEnabled'
-                toggle
-                placeholder= 'Enable using the targets angle'
-                checked={this.state.isFOVAngleEnabled}
-                onChange={this.handleToggle.bind(this)}
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Checkbox
-                label='Enable Autofocus (@Focus3) '
-                name='isFocus3Enabled'
-                toggle
-                placeholder= 'Enable focus checking'
-                checked={this.state.isFocus3Enabled}
-                onChange={this.handleToggle.bind(this)}
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Checkbox
-                label='Enable Autoguiding '
-                name='isAutoguidingEnabled'
-                toggle
-                placeholder= 'Enable Autoguiding checking'
-                checked={this.state.isAutoguidingEnabled}
-                onChange={this.handleToggle.bind(this)}
-              />
-              <Form.Checkbox
-                label='Enable Autoguide Calibrating '
-                name='isCalibrationEnabled'
-                toggle
-                placeholder= 'Enable Autoguiding Calibrating'
-                checked={this.state.isCalibrationEnabled}
-                onChange={this.handleToggle.bind(this)}
-              />
-              <Form.Checkbox
-                label='Enable Guiding Settling '
-                name='isGuideSettlingEnabled'
-                toggle
-                placeholder= 'Enable Autoguiding Settling'
-                checked={this.state.isGuideSettlingEnabled}
-                onChange={this.handleToggle.bind(this)}
-              />
-              {/* <Form.Checkbox
-                label='Bin 2x2 Focus Enabled '
-                name='isFocus3Binned'
-                toggle
-                placeholder= 'Enable to bin when focusing'
-                checked={this.state.isFocus3Binned}
-                onChange={this.handleToggle.bind(this)}
-              /> */}
-            </Form.Group>
-            <Form.Group>
-              {/* <Form.Checkbox
-                label='Enable Imaging Cooler '
-                name='enableImagingCooler'
-                toggle
-                placeholder= 'Cool down camera'
-                checked={this.state.enableImagingCooler}
-                onChange={this.handleToggle.bind(this)}
-              /> */}
-              <Form.Checkbox
-                label='Enable Periodical CLS (Cloud checks) '
-                name='isCLSRepeatEnabled'
-                toggle
-                placeholder= 'CLS every X secs'
-                checked={this.state.isCLSRepeatEnabled}
-                onChange={this.handleToggle.bind(this)}
-              />
-
-            </Form.Group>
-            <Form.Group>
-              <Form.Checkbox
-                label='Enable Twilight Check '
-                name='isTwilightEnabled'
-                toggle
-                placeholder= 'Enable twilight check'
-                checked={this.state.isTwilightEnabled}
-                onChange={this.handleToggle.bind(this)}
-              />
-            </Form.Group>
-          </Segment>
-        </Segment.Group>
-        {/*  */}
-        {/* <Segment>
-          <h3>Focuser  <Label>Temp<Label.Detail>{this.state.focusTemp}</Label.Detail></Label>
-          <Label>Position<Label.Detail>{this.state.focusPos}</Label.Detail></Label>
-          </h3>
-        </Segment>
-        <Segment>
-          <h3>Camera <Label>Temp<Label.Detail>{this.state.cameraTemp}</Label.Detail></Label>
-            <Label>Filter<Label.Detail>{this.state.filter}</Label.Detail></Label>
-            <Label>Binning<Label.Detail>{this.state.binning}</Label.Detail></Label>
-          </h3>
-          <Progress percent='50' progress>Current Exposure</Progress>
-          <Progress value='3' total='5' progress='ratio'>Frames per Filter</Progress>
-        </Segment> */}
-        <Confirm
-          header='Start an imaging session'
-          name='confirmOpen'
-          open={this.state.confirmOpen}
-          content='Do you wish to continue and start an imaging session?'
-          onCancel={this.handleToggle}
-          onConfirm={this.startSessions.bind(this)}
-        />
-        <Modal
-          open={this.state.noFoundSession}
-          onClose={this.noFoundSessionClose.bind(this)}
-          basic
-          size='small'
-          closeIcon>
-          <Modal.Header>Could not find a session</Modal.Header>
-          <Modal.Content>
-            <h3>content='There were no sessions that could be run. Please check the constraints on the sessions and that at least on is enabled.'
-            </h3>
-          </Modal.Content>
-          <Modal.Actions>
-            <Button color='red' onClick={this.noFoundSessionClose.bind(this)} inverted>
-              <Icon name='stop' /> Try again!
-            </Button>
-          </Modal.Actions>
-        </Modal>
-      {/* </Segment.Group> */}
     </div>
     )
   }
@@ -722,9 +518,9 @@ class Monitor extends Component {
 export default withTracker(() => {
 
   return {
-    reports: TargetReports.find().fetch(),
-    tsxInfo: TheSkyXInfos.find({}).fetch(),
-    takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
+    // reports: TargetReports.find().fetch(),
+    // tsxInfo: TheSkyXInfos.find({}).fetch(),
+    // takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
     // targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
 };
-})(Monitor);
+})(Toolbox);

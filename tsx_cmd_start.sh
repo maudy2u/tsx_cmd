@@ -18,6 +18,7 @@
 echo *******************************
 install_dir=$(pwd)
 mkdir -p ${install_dir}/db
+mkdir -p /tmp/mongod
 if [ "$(uname)" == "Darwin" ]; then
   if [ "substr $(uname -p)" == "i386" ]; then
     echo Mac in ${install_dir}

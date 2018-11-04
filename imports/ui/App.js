@@ -45,6 +45,8 @@ import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 // Import the UI
 import DefaultSettings from './DefaultSettings.js';
 import Monitor from './Monitor.js';
+import Toolbox from './Toolbox.js';
+import Flats from './Flats.js';
 import TargetSessionMenu from './TargetSessionMenu.js';
 // import Filter from './Filter.js';
 import Series from './Series.js';
@@ -339,6 +341,8 @@ class App extends Component {
           {/* <Menu.Item name='Flats' active={activeMenu === 'Flats'} onClick={this.handleMenuItemClick} /> */}
           <Menu.Item name='Targets' active={activeMenu === 'Targets'} onClick={this.handleMenuItemClick} />
           <Menu.Item name='Series' active={activeMenu === 'Series'} onClick={this.handleMenuItemClick} />
+          <Menu.Item name='Flats' active={activeMenu === 'Flats'} onClick={this.handleMenuItemClick} />
+          <Menu.Item name='Toolbox' active={activeMenu === 'Toolbox'} onClick={this.handleMenuItemClick} />
           <Menu.Menu position='right'>
             <Menu.Item name='Devices' active={activeMenu === 'Devices'} onClick={this.handleMenuItemClick} />
             <Menu.Item name='Settings' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick} />
@@ -394,6 +398,18 @@ class App extends Component {
     } else if (this.state.activeMenu == 'logout') {
       return this.renderLogout();
 
+    } else if (this.state.activeMenu == 'Toolbox') {
+      return (
+        <Toolbox
+        scheduler_report={this.props.scheduler_report}
+        />
+      )
+    } else if (this.state.activeMenu == 'Flats') {
+      return (
+        <Flats
+        scheduler_report={this.props.scheduler_report}
+        />
+      )
     } else {
       return (
         <DefaultSettings />
@@ -530,8 +546,8 @@ class App extends Component {
       PORT = 'Initializing';
       STATUS = 'Initializing';
       MENU = 'Targets';
-      VERSION = '';
-      DATE = '';
+      VERSION = '...';
+      DATE = '...';
     }
 
     return (

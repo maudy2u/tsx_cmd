@@ -149,13 +149,12 @@ class TargetSessionMenu extends Component {
               </Modal.Description>
             </Modal.Content>
           </Modal>
-          <Segment>
-            <Item.Group divided unstackable>
               {this.props.targets.map((target)=>{
-                return <Target key={target._id} target={target} />
-              })}
-            </Item.Group>
-          </Segment>
+                return (
+                <Segment raised>
+                  <Target key={target._id} target={target} />
+                </Segment>
+                )})}
       </div>
     )
   }
