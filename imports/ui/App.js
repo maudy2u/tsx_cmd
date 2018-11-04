@@ -638,6 +638,7 @@ export default withTracker(() => {
       tsxInfo: TheSkyXInfos.find({}).fetch(),
       filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
-      targetSessions: TargetSessions.find({}, { sort: { enabled: 1, name: 1 } }).fetch(),
+      // targetSessions: TargetSessions.find({}, { sort: { enabledActive: 0, targetFindName: 1 } }).fetch(),
+      targetSessions: TargetSessions.find({}, { sort: { targetFindName: 1, enabledActive: 1 } }).fetch(),
   };
 })(App);
