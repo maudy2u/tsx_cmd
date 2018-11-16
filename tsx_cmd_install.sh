@@ -110,12 +110,10 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     elif [ "$(uname -p)" == "armv7l" ]; then
       # install mongodb
       echo " *******************************"
-      echo "Mongodb - apt-get install"
+      echo "Mongodb - BUILD - NEED TO BE BUILT FOR ARMv7"
+      echo "run the following (it can take a while on ODroid-XU4)"
+      echo " ./mongod_arm_build.sh"
       echo " *******************************"
-#      sudo apt update
-#      sudo apt install g++ build-essential -y
-#      sudo apt install mongodb-server -y
-      echo "get the build SH"
 
       echo " *******************************"
       echo "nodejs - Download and extract"
