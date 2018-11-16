@@ -25,6 +25,8 @@ elif [ "$(uname -s)" == "Linux" ]; then
 
   if [ "$(uname -p)" == "aarch64" ]; then
     ~/meteor/meteor --settings ./settings.json
+  elif [ "$(uname -p)" == "armv7l" ]; then
+    ~/meteor/meteor --settings ./settings.json
   else
     echo $(uname -s) $(uname -p) - Not Supported
     exit 5
