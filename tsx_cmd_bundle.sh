@@ -26,7 +26,7 @@ if [ $# -eq 0 ]
     echo ": You need to provide one parameter to build - version or date."
     echo ": e.g."
     echo ""
-    echo " build_tsx_cmd.sh 20180708"
+    echo " tsx_cmd_bundle.sh 20180708"
     echo ""
     echo " *******************************"
     echo ""
@@ -36,9 +36,9 @@ if [ "$(uname -s)" == "Darwin" ]; then
   if [ "$(uname -p)" == "i386" ]; then
     echo ""
     echo " *******************************"
-    echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}.tar
+    echo tsx_cmd_bundle.sh is creating file: ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}.tar
     echo " *******************************"
-    meteor build --directory ../app
+    meteor bundle ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}.tar
     growlnotify -n "Build $(git rev-list --all --count) of TSX Cmd" -s -m "Completed"
   else
     echo $(uname -s) $(uname -p) - Not Supported
@@ -49,16 +49,16 @@ elif [ "$(uname -s)" == "Linux" ]; then
   if [ "$(uname -p)" == "aarch64" ]; then
     echo ""
     echo " *******************************"
-    echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_aarch64_build_$(git rev-list --all --count)_${1}.tar
+    echo tsx_cmd_bundle.sh is creating file: ../tsx_cmd_$(uname -s)_aarch64_build_$(git rev-list --all --count)_${1}.tar
     echo " *******************************"
-    ~/meteor/meteor  build --directory ../app
+    ~/meteor/meteor bundle ../tsx_cmd_$(uname -s)_aarch64_build_$(git rev-list --all --count)_${1}.tar
 
   elif [ "$(uname -p)" == "armv7l" ]; then
     echo ""
     echo " *******************************"
-    echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_armv7_build_$(git rev-list --all --count)_${1}.tar
+    echo tsx_cmd_bundle.sh is creating file: ../tsx_cmd_$(uname -s)_armv7_build_$(git rev-list --all --count)_${1}.tar
     echo " *******************************"
-    ~/meteor/meteor  build --directory ../app
+    ~/meteor/meteor bundle ../tsx_cmd_$(uname -s)_armv7_build_$(git rev-list --all --count)_${1}.tar
   else
     echo $(uname -s) $(uname -p) - Not Supported
     exit 5

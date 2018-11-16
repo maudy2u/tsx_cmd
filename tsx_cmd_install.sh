@@ -35,6 +35,11 @@ if [ $# -eq 0 ]
     exit 1
 fi
 
+mkdir -p ${install_dir}/db
+export MONGO_URL='mongodb://localhost/tsx_cmd'
+export PORT=3000
+export ROOT_URL='http://127.0.0.1'
+
 if [ "$(uname)" == "Darwin" ]; then
     echo Mac in ${install_dir}
 
@@ -59,24 +64,8 @@ if [ "$(uname)" == "Darwin" ]; then
     echo " TSX_CMD - Extract" ${1}
     echo " *******************************"
     # https://drive.google.com/drive/folders/1yUPU6A0gbBv5UnuSp308lvctY4d6aUtw?usp=sharing
-    tar -xf ${1}
-
     export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-darwin-x64/bin:$PATH
-    mkdir -p ${install_dir}/db
-    export MONGO_URL='mongodb://localhost/tsx_cmd'
-    export PORT=3000
-    export ROOT_URL='http://127.0.0.1'
-    cd ${install_dir}/bundle/programs/server
-    echo " *******************************"
-    echo " TSX_CMD - fix for fibers deploy"
-    echo " *******************************"
-    npm uninstall fibers
-    npm install fibers
-    cd ${install_dir}
 
-    echo " *******************************"
-    echo " TSX_CMD - installed"
-    echo " *******************************"
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     # Do something under GNU/Linux platform
     echo Linux
@@ -122,38 +111,35 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
       curl https://nodejs.org/dist/latest-v6.x/node-v6.14.4-linux-armv7l.tar.gz -o node-v6.14.4-linux-armv7l.tar.gz
       tar -xf node-v6.14.4-linux-armv7l.tar.gz
       rm ${install_dir}/node-v6.14.4-linux-armv7l.tar.gz
+      # FIX for odroid
+      #npm install -g node-gyp
+      rm ~/.node-gyp
       export PATH=${install_dir}/node-v6.14.4-linux-armv7l/bin:$PATH
     else
       echo NO NODEJS supported
     fi
 
-    # install tsx__cmd - assumes already downloaded
-    echo " *******************************"
-    echo " TSX_CMD - Extract" ${1}
-    echo " *******************************"
-    # https://drive.google.com/drive/folders/1yUPU6A0gbBv5UnuSp308lvctY4d6aUtw?usp=sharing
-    tar -xf ${1}
+else
+    # Do something under 64 bits Windows NT platform
+    echo $(uname -s) $(uname -p) - Not Supported
+    exit 5
+fi
+  
+# install tsx__cmd - assumes already downloaded
+echo " *******************************"
+echo " TSX_CMD - Extract" ${1}
+echo " *******************************"
+# https://drive.google.com/drive/folders/1yUPU6A0gbBv5UnuSp308lvctY4d6aUtw?usp=sharing
+tar -xf ${1}
 
-    mkdir -p ${install_dir}/db
-    export MONGO_URL='mongodb://localhost/tsx_cmd'
-    export PORT=3000
-    export ROOT_URL='http://127.0.0.1'
-    cd ${install_dir}/bundle/programs/server
-    echo " *******************************"
-    echo " TSX_CMD - fix for fibers deploy"
-    echo " *******************************"
-    npm install -g node-gyp
-    npm uninstall fibers
-    npm install fibers
-    cd ${install_dir}
-    #${install_dir}/node-v8.11.3-linux-armv7l/bin/node /home/stephen/test/bundle/programs/server/node_modules/fibers/build
+echo " *******************************"
+echo " TSX_CMD - fix for fibers deploy"
+echo " *******************************"
+cd ${install_dir}/bundle/programs/server
+npm uninstall fibers
+npm install fibers
+cd ${install_dir}
 
-    echo " *******************************"
-    echo " TSX_CMD - installed"
-    echo " *******************************"
-
-  else
-      # Do something under 64 bits Windows NT platform
-      echo $(uname -s) $(uname -p) - Not Supported
-      exit 5
-  fi
+echo " *******************************"
+echo " TSX_CMD - installed"
+echo " *******************************"
