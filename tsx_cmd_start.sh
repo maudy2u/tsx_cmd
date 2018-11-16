@@ -37,7 +37,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     mongod --inMemorySizeGB 1 --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log &
   elif [ "$(uname -p)" == "armv7l" ]; then
     echo Linux ARM-32bit_$(uname -p) in ${install_dir}
-    export PATH=${install_dir}:${install_dir}/node-v8.11.3-linux-armv7l/bin:/home/odroid/test2/mongo/mongodb:$PATH
+    export PATH=${install_dir}:${install_dir}/node-v6.14.4-linux-armv7l/bin:$PATH
     # https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz
     mongod --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log --journal &
   else

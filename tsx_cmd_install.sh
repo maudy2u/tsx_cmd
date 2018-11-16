@@ -102,6 +102,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
       curl https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz -o node-v8.11.3-linux-armv7l.tar.xz
       tar -xf node-v8.11.3-linux-armv7l.tar.xz
       rm ${install_dir}/node-v8.11.3-linux-armv7l.tar.xz
+      export PATH=${install_dir}/node-v8.11.3-linux-armv7l/bin:$PATH
       # armv8
       #curl https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-arm64.tar.xz -o node-v8.11.3-linux-arm64.tar.xz
       #tar -xf node-v8.11.3-linux-arm64.tar.xz
@@ -111,17 +112,19 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
       echo " *******************************"
       echo "Mongodb - apt-get install"
       echo " *******************************"
-      sudo apt update
-      sudo apt install g++ build-essential -y
-      sudo apt install mongodb-server -y
+#      sudo apt update
+#      sudo apt install g++ build-essential -y
+#      sudo apt install mongodb-server -y
+      echo "get the build SH"
 
       echo " *******************************"
       echo "nodejs - Download and extract"
       echo " *******************************"
       # armv7
-      curl https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz -o node-v8.11.3-linux-armv7l.tar.xz
-      tar -xf node-v8.11.3-linux-armv7l.tar.xz
-      rm ${install_dir}/node-v8.11.3-linux-armv7l.tar.xz
+      curl https://nodejs.org/dist/latest-v6.x/node-v6.14.4-linux-armv7l.tar.gz -o node-v6.14.4-linux-armv7l.tar.gz
+      tar -xf node-v6.14.4-linux-armv7l.tar.gz
+      rm ${install_dir}/node-v6.14.4-linux-armv7l.tar.gz
+      export PATH=${install_dir}/node-v6.14.4-linux-armv7l/bin:$PATH
     else
       echo NO NODEJS supported
     fi
@@ -133,7 +136,6 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     # https://drive.google.com/drive/folders/1yUPU6A0gbBv5UnuSp308lvctY4d6aUtw?usp=sharing
     tar -xf ${1}
 
-    export PATH=${install_dir}/node-v8.11.3-linux-armv7l/bin:$PATH
     mkdir -p ${install_dir}/db
     export MONGO_URL='mongodb://localhost/tsx_cmd'
     export PORT=3000

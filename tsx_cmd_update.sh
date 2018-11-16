@@ -49,7 +49,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     if [ "$(uname -p)" == "aarch64" ]; then
       export PATH=${install_dir}/node-v8.11.3-linux-armv7l/bin:$PATH
     elif [ "$(uname -p)" == "armv7l" ]; then
-      export PATH=${install_dir}/node-v8.11.3-linux-armv7l/bin:$PATH
+      export PATH=${install_dir}/node-v6.14.4-linux-armv7l/bin:$PATH
     else
       echo NO NODEJS supported
       echo $(uname -s) $(uname -p) - Not Supported
