@@ -44,8 +44,8 @@ if [ "$(uname -s)" == "Darwin" ]; then
 elif [ "$(uname -s)" == "Linux" ]; then
 
   if [ "$(uname -p)" == "aarch64" ]; then
-    echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_armv7_build_$(git rev-list --all --count)_${1}.tar
-    ~/meteor/meteor bundle ../tsx_cmd_$(uname -s)_armv7_build_$(git rev-list --all --count)_${1}.tar
+    echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_aarch64_build_$(git rev-list --all --count)_${1}.tar
+    ~/meteor/meteor bundle ../tsx_cmd_$(uname -s)_aarch64_build_$(git rev-list --all --count)_${1}.tar
 
   elif [ "$(uname -p)" == "armv7l" ]; then
     echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_armv7_build_$(git rev-list --all --count)_${1}.tar
