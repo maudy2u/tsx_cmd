@@ -113,7 +113,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
       rm ${install_dir}/node-v6.14.4-linux-armv7l.tar.gz
       # FIX for odroid
       #npm install -g node-gyp
-      rm ~/.node-gyp
+      rm -rf ~/.node-gyp
       export PATH=${install_dir}/node-v6.14.4-linux-armv7l/bin:$PATH
     else
       echo NO NODEJS supported
@@ -124,7 +124,7 @@ else
     echo $(uname -s) $(uname -p) - Not Supported
     exit 5
 fi
-  
+
 # install tsx__cmd - assumes already downloaded
 echo " *******************************"
 echo " TSX_CMD - Extract" ${1}
