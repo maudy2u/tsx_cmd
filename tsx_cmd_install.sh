@@ -142,6 +142,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     echo " *******************************"
     echo " TSX_CMD - fix for fibers deploy"
     echo " *******************************"
+    npm install -g node-gyp
     npm uninstall fibers
     npm install fibers
     cd ${install_dir}
