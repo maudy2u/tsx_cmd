@@ -200,15 +200,28 @@ Meteor.startup(() => {
   }
   tsxLog(' ', '');
 
-  var dbIp = TheSkyXInfos.findOne().ip() ;
-  var dbPort = TheSkyXInfos.findOne().port();
+  var dbIp = '';
+  var dbPort = '';
+  try {
+    dbIp = TheSkyXInfos.findOne().ip() ;
+  } catch( err ) {
+    // do nothing
+    tsx_SetServerState('ip', 'localhost');
+    dbIp = 'localhost';
+  }
+  try {
+    dbPort = TheSkyXInfos.findOne().port();
+  } catch( err ) {
+    // do nothing
+    tsx_SetServerState('port', '3040');
+    dbPort = '3040';
+  }
+
   // removing so can start up easier without error.
   // var dbMinAlt = TheSkyXInfos.findOne().defaultMinAltitude();
-  if( (typeof dbIp != 'undefined') && (typeof dbPort != 'undefined') ) {
-    tsxLog('   IP',  dbIp );
-    tsxLog(' port', dbPort );
+  tsxLog('   IP',  dbIp );
+  tsxLog(' port', dbPort );
 
-  };
   tsxLog(' ******* TSX_CMD ONLINE ******', '');
   CleanUpJobs();
   initServerStates();
