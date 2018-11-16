@@ -19,6 +19,11 @@ echo '*******************************'
 install_dir=$(pwd)
 mkdir -p ${install_dir}/db
 mkdir -p /tmp/mongod
+export MONGO_URL='mongodb://localhost/tsx_cmd'
+export PORT=3000
+export ROOT_URL='http://127.0.0.1'
+export METEOR_SETTINGS="$(cat ${install_dir}/settings.json)"
+
 if [ "$(uname)" == "Darwin" ]; then
   if [ "substr $(uname -p)" == "i386" ]; then
     echo Mac in ${install_dir}
@@ -37,7 +42,8 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     mongod --inMemorySizeGB 1 --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log &
   elif [ "$(uname -p)" == "armv7l" ]; then
     echo Linux ARM-32bit_$(uname -p) in ${install_dir}
-    export PATH=${install_dir}:${install_dir}/node-v6.14.4-linux-armv7l/bin:$PATH
+#    export PATH=${install_dir}:${install_dir}/node-v6.14.4-linux-armv7l/bin:$PATH
+    export PATH=${install_dir}:${install_dir}/node-v8.11.3-linux-armv7l/bin:$PATH
     # https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz
     mongod --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log --journal &
   else
@@ -49,9 +55,5 @@ else
     exit 5
 fi
 
-export MONGO_URL='mongodb://localhost/tsx_cmd'
-export PORT=3000
-export ROOT_URL='http://127.0.0.1'
-export METEOR_SETTINGS="$(cat $(pwd)/settings.json)"
 cd ${install_dir}/bundle
 node main.js
