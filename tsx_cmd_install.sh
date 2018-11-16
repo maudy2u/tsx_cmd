@@ -112,8 +112,8 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
       tar -xf node-v6.14.4-linux-armv7l.tar.gz
       rm ${install_dir}/node-v6.14.4-linux-armv7l.tar.gz
       # FIX for odroid
-      #npm install -g node-gyp
       rm -rf ~/.node-gyp
+      npm install -g node-gyp
       export PATH=${install_dir}/node-v6.14.4-linux-armv7l/bin:$PATH
     else
       echo NO NODEJS supported
