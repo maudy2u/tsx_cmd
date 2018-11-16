@@ -17,21 +17,11 @@
 #
 install_dir=$(pwd)
 
-if [ $# -eq 0 ]
-  then
-    echo ""
-    echo " *******************************"
-    echo "Building TSX Cmd v1.0"
-    echo " *******************************"
-    echo ": You need to provide one parameter to build - version or date."
-    echo ": e.g."
-    echo ""
-    echo " build_tsx_cmd.sh 20180708"
-    echo ""
-    echo " *******************************"
-    echo ""
-    exit 1
-fi
+echo ""
+echo " *******************************"
+echo "Building TSX Cmd v1.0"
+echo " *******************************"
+
 if [ "$(uname -s)" == "Darwin" ]; then
   if [ "$(uname -p)" == "i386" ]; then
     echo ""
