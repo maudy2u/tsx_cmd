@@ -130,7 +130,7 @@ echo " *******************************"
 echo " TSX_CMD - Extract" ${1}
 echo " *******************************"
 # https://drive.google.com/drive/folders/1yUPU6A0gbBv5UnuSp308lvctY4d6aUtw?usp=sharing
-if [ "$(1)" != "update-only" ]; then
+if [ "${1}" != "update-only" ]; then
     tar -xf ${1}
 fi
 
