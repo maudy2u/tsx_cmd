@@ -466,16 +466,13 @@ class Toolbox extends Component {
     return (
       <div>
          <Segment raised>
+         Perhaps add ATL/Az for positioning:
           <Button.Group icon>
              <Button  onClick={this.getCurrentTarget.bind(this)}>Calibrate</Button>
           </Button.Group>
         </Segment>
         <Segment raised>
-          <Button.Group icon>
-             <Button  onClick={this.getCurrentTarget.bind(this)}>Flat Position</Button>
-          </Button.Group>
-        </Segment>
-        <Segment raised>
+        Enter the Angle desired (rotator position reported below)
           <Button.Group icon>
              <Button  onClick={this.getCurrentTarget.bind(this)}>FOV Angle</Button>
           </Button.Group>

@@ -465,20 +465,14 @@ class Flats extends Component {
 
     return (
       <div>
-         <Segment raised>
-          <Button.Group icon>
-             <Button  onClick={this.getCurrentTarget.bind(this)}>Calibrate</Button>
-          </Button.Group>
-        </Segment>
         <Segment raised>
           <Button.Group icon>
              <Button  onClick={this.getCurrentTarget.bind(this)}>Flat Position</Button>
           </Button.Group>
         </Segment>
         <Segment raised>
-          <Button.Group icon>
-             <Button  onClick={this.getCurrentTarget.bind(this)}>FOV Angle</Button>
-          </Button.Group>
+        Present the targets, and check of which ones to
+        calibrate - use the target FOV rotator position
         </Segment>
         <Segment.Group  size='mini' horizontal>
           <Segment>
