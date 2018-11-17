@@ -130,14 +130,16 @@ echo " *******************************"
 echo " TSX_CMD - Extract" ${1}
 echo " *******************************"
 # https://drive.google.com/drive/folders/1yUPU6A0gbBv5UnuSp308lvctY4d6aUtw?usp=sharing
-tar -xf ${1}
+if [ "$(1)" != "update-only" ]; then
+    tar -xf ${1}
+fi
 
 echo " *******************************"
 echo " TSX_CMD - fix for fibers deploy"
 echo " *******************************"
 cd ${install_dir}/bundle/programs/server
 npm uninstall fibers
-npm install fibers
+npm install fibers@2.0.2 amdefine ansi-styles chalk escape-string-regexp has-ansi promise source-map strip-ansi type-of ansi-regex asap eachline meteor-promise semver source-map-support supports-color underscore
 cd ${install_dir}
 
 echo " *******************************"
