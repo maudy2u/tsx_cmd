@@ -32,8 +32,6 @@
 
 echo *******************************
 install_dir=$(pwd)
-mkdir -p ${install_dir}/db
-mkdir -p /tmp/mongod
 if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   if [ "$(uname -p)" == "aarch64" ]; then
     cd ~
