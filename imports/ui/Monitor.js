@@ -79,7 +79,7 @@ class Monitor extends Component {
       isGuideSettlingEnabled: false,
       isFOVAngleEnabled: false,
 
-      enableImagingCooler: false,
+      // enableImagingCooler: false,
       isCLSRepeatEnabled: false,
       isCalibrationEnabled: false,
 
@@ -152,11 +152,11 @@ class Monitor extends Component {
           return element.name == 'defaultCLSEnabled';
         }).value),
       });
-      this.setState({
-        enableImagingCooler: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'enableImagingCooler';
-        }).value),
-      });
+      // this.setState({
+      //   enableImagingCooler: Boolean(nextProps.tsxInfo.find(function(element) {
+      //     return element.name == 'enableImagingCooler';
+      //   }).value),
+      // });
       this.setState({
         isAutoguidingEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
           return element.name == 'isAutoguidingEnabled';
