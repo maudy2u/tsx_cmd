@@ -256,6 +256,7 @@ class App extends Component {
         scheduler_report={this.props.scheduler_report}
         targetSessionId={this.props.targetSessionId}
         targetName={this.props.targetName}
+        tsxInfo={this.props.tsxInfo}
       />
     );
   }
@@ -366,6 +367,7 @@ class App extends Component {
             scheduler_report={this.props.scheduler_report}
             targetSessionId={this.props.targetSessionId}
             targetName={this.props.targetName}
+            tsxInfo={this.props.tsxInfo}
           />
         </div>
       )

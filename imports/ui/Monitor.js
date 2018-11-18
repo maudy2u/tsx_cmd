@@ -723,7 +723,7 @@ export default withTracker(() => {
 
   return {
     reports: TargetReports.find().fetch(),
-    tsxInfo: TheSkyXInfos.find({}).fetch(),
+    // tsxInfo: TheSkyXInfos.find({}).fetch(),
     takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
     // targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
 };
