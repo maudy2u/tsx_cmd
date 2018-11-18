@@ -339,7 +339,6 @@ class App extends Component {
       <div>
         <Menu pointing secondary>
           <Menu.Item name='Monitor' active={activeMenu === 'Monitor'} onClick={this.handleMenuItemClick} />
-          {/* <Menu.Item name='Flats' active={activeMenu === 'Flats'} onClick={this.handleMenuItemClick} /> */}
           <Menu.Item name='Targets' active={activeMenu === 'Targets'} onClick={this.handleMenuItemClick} />
           <Menu.Item name='Series' active={activeMenu === 'Series'} onClick={this.handleMenuItemClick} />
           <Menu.Item name='Flats' active={activeMenu === 'Flats'} onClick={this.handleMenuItemClick} />
@@ -410,6 +409,7 @@ class App extends Component {
       return (
         <Flats
         scheduler_report={this.props.scheduler_report}
+        tsxInfo={this.props.tsxInfo}
         />
       )
     } else {

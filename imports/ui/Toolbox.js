@@ -279,6 +279,14 @@ class Toolbox extends Component {
     return target;
   }
 
+  calibrateGuider() {
+    Meteor.call( 'calibrateGuider', function(error, result) {
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+    }.bind(this));
+  }
+
+
   testTryTarget() {
     Meteor.call( 'testTryTarget', this.getCurrentTarget(), function(error, result) {
       console.log('Error: ' + error);
@@ -468,7 +476,7 @@ class Toolbox extends Component {
          <Segment raised>
          Perhaps add ATL/Az for positioning:
           <Button.Group icon>
-             <Button  onClick={this.getCurrentTarget.bind(this)}>Calibrate</Button>
+             <Button  onClick={this.calibrateGuider.bind(this)}>Calibrate</Button>
           </Button.Group>
         </Segment>
         <Segment raised>

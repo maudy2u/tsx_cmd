@@ -110,6 +110,7 @@ export const tsx_ServerStates = {
   flatSettings: 'flatSettings',
   isCalibrationEnabled: 'isCalibrationEnabled',
   calibrationFrameSize: 'calibrationFrameSize',
+  flatPosition: 'flatPosition',
 };
 
 export function postStatus( info ) {

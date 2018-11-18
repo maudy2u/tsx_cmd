@@ -49,43 +49,15 @@ class Flats extends Component {
 
     state = {
 
-      focusPostion: '_',
-
-      monitorDisplay: true,
-      confirmOpen: false,
-
-      activeItem: 'Targets',
-
-      noFoundSession: false,
-
-      focusTemp: '_',
-      focusPos: '_',
-      cameraTemp: '_',
-      filter: '_',
-      binning: '_',
-
-      // tsx_progress: 0,
-      tsx_total: 0,
-      tsx_actions: '',
-      targetSessionId: '',
-
-      isTwilightEnabled: true,
-      isFocus3Enabled: false,
-      isAutoguidingEnabled: false,
-      isFocus3Binned: false,
-      defaultMeridianFlip: false,
-      defaultSoftPark: false,
-      defaultCLSEnabled: false,
-      isGuideSettlingEnabled: false,
-      isFOVAngleEnabled: false,
-
-      enableImagingCooler: false,
-      isCLSRepeatEnabled: false,
-      isCalibrationEnabled: false,
+      flatPosition: '',
 
   };
 
-  handleChange = (e, { name, value }) => this.setState({ [name]: value });
+  handleChange = (e, { name, value }) => {
+    this.setState({ [name]: value.trim() });
+    this.saveDefaultState( name );
+  };
+
 
   // requires the ".bind(this)", on the callers
   handleToggle = (e, { name, value }) => {
@@ -118,68 +90,9 @@ class Flats extends Component {
       });
     }
     if( typeof nextProps.tsxInfo != 'undefined'  ) {
-
-      var isFlip = Boolean(nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultMeridianFlip';
-      }).value);
-
       this.setState({
-        defaultMeridianFlip: isFlip,
-      });
-
-      this.setState({
-        defaultSoftPark: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'defaultSoftPark';
-        }).value),
-      });
-      this.setState({
-        isTwilightEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'isTwilightEnabled';
-        }).value),
-      });
-      this.setState({
-        isFocus3Enabled: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'isFocus3Enabled';
-        }).value),
-      });
-      this.setState({
-        isFocus3Binned: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'isFocus3Binned';
-        }).value),
-      });
-      this.setState({
-        defaultCLSEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'defaultCLSEnabled';
-        }).value),
-      });
-      this.setState({
-        enableImagingCooler: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'enableImagingCooler';
-        }).value),
-      });
-      this.setState({
-        isAutoguidingEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'isAutoguidingEnabled';
-        }).value),
-      });
-      this.setState({
-        isGuideSettlingEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'isGuideSettlingEnabled';
-        }).value),
-      });
-      this.setState({
-        isFOVAngleEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'isFOVAngleEnabled';
-        }).value),
-      });
-      this.setState({
-        isCLSRepeatEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'isCLSRepeatEnabled';
-        }).value),
-      });
-      this.setState({
-        isCalibrationEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'isCalibrationEnabled';
+        flatPosition: Boolean(nextProps.tsxInfo.find(function(element) {
+          return element.name == 'flatPosition';
         }).value),
       });
     }
@@ -209,51 +122,7 @@ class Flats extends Component {
     });//.bind(this));
   }
 
-  // *******************************
-
-  startSessions() {
-    Meteor.call("startScheduler", function (error, result) {
-      }.bind(this));
-  }
-
-  closeMonitorDisplay() {
-    this.setState({monitorDisplay: false});
-  }
-
-  totalTaken() {
-    try {
-      return TargetSessions.findOne({_id: this.props.target._id}).totalImagesTaken();
-    } catch (e) {
-      // Do nothing
-    }
-    return 0;
-  }
-
-  totalPlanned() {
-    try {
-      return TargetSessions.findOne({_id: this.props.target._id}).totalImagesPlanned();
-    } catch (e) {
-      // Do nothing
-    }
-    return 0;
-  }
-
-  confirmPlayScheduler() {
-    this.setState({confirmOpen: true});
-  }
-
-  playScheduler() {
-    Meteor.call("startScheduler", function (error, result) {
-      this.forceUpdate();
-      }.bind(this));
-  }
-
-  pauseScheduler() {
-    Meteor.call("pauseScheduler", function (error, result) {
-      }.bind(this));
-  }
-
-  stopScheduler() {
+  stopFlats() {
     // this.tsxStopSession();
     Meteor.call("stopScheduler", function (error, result) {
         // identify the error
@@ -270,205 +139,35 @@ class Flats extends Component {
       }.bind(this));
   }
 
-  getCurrentTarget() {
-    var tid = this.props.targetSessionId[0].value;
-    var target = TargetSessions.findOne({_id: tid });
-    // #TODO report no valid target
-
-
-    return target;
-  }
-
-  testTryTarget() {
-    Meteor.call( 'testTryTarget', this.getCurrentTarget(), function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  testPicking() {
+  startFlats() {
     Meteor.call( 'testTargetPicking', function(error, result) {
       console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
   }
 
-  testEndConditions() {
+  gotoFlatPosition() {
     Meteor.call( 'testEndConditions', function(error, result) {
       console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
   }
 
-  startImaging() {
-
-    Meteor.call( 'startImaging', this.getCurrentTarget(), function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  testDither() {
-
-    Meteor.call( 'testDither', this.getCurrentTarget(),  function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  testGuide() {
-
-    Meteor.call( 'testGuide', this.getCurrentTarget(),  function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  testSolve() {
-
-    Meteor.call( 'testSolve', this.getCurrentTarget(),  function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  testFocus3 () {
-
-    Meteor.call( 'testFocus3', this.getCurrentTarget(),  function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  testAbortGuide () {
-
-    Meteor.call( 'testAbortGuide', this.getCurrentTarget(),  function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  testMatchRotation() {
-
-    Meteor.call( 'testMatchRotation', this.getCurrentTarget(),  function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  getTsxActions() {
-
-    var actionArray = [];
-    actionArray.push({
-      key: 'Pick',
-      text: 'test Picking target',
-      value: 'Pick'
-    });
-    actionArray.push({
-      key: 'Test End',
-      text: 'Test End',
-      value: 'Test End'
-    });
-    actionArray.push({
-      key: '@Focus3',
-      text: '@Focus3',
-      value: '@Focus3'
-    });
-    actionArray.push({
-      key: 'Dither',
-      text: 'Dither',
-      value: 'Dither'
-    });
-    actionArray.push({
-      key: 'Guide',
-      text: 'Guide',
-      value: 'Guide'
-    });
-    actionArray.push({
-      key: 'Solve',
-      text: 'Solve',
-      value: 'Solve'
-    });
-    actionArray.push({
-      key: 'Test Angle',
-      text: 'Test Angle',
-      value: 'Test Angle'
-    });
-    actionArray.push({
-      key: 'Start Series',
-      text: 'Start Series',
-      value: 'Start Series'
-    });
-    actionArray.push({
-      key: 'AbortGuide',
-      text: 'AbortGuide',
-      value: 'AbortGuide'
-    });
-
-
-    return actionArray;
-  }
-
-  handleTsx_actionsChange = (e, { name, value }) => {
-    this.setState({ [name]: value })
-  };
-
-  dropDownAction() {
-
-    var value = this.state.tsx_action;
-
-    if( value == 'Pick' ) {
-      this.testPicking();
-    }
-    else if ( value == 'Test End' ) {
-      this.testEndConditions();
-    }
-    else if ( value == '@Focus3' ) {
-      this.testFocus3();
-    }
-    else if ( value == 'Dither' ) {
-      this.testDither();
-    }
-    else if ( value == 'Guide' ) {
-      this.testGuide();
-    }
-    else if ( value == 'Solve' ) {
-      this.testSolve();
-    }
-    else if ( value == 'Test Angle' ) {
-      this.testMatchRotation();
-    }
-    else if ( value == 'Start Series' ) {
-      this.startImaging();
-    }
-    else if ( value == 'AbortGuide' ) {
-      this.testAbortGuiding();
-    }
-
-  };
-
   render() {
-
-    var tsx_actions = this.getTsxActions();
-    var TARGETNAME ='';
-    var PROGRESS = '';
-    var TOTAL = '';
-    try {
-      TARGETNAME = this.props.targetName.value;
-      PROGRESS = this.props.tsx_progress.value
-      TOTAL = this.props.tsx_total.value
-    } catch (e) {
-      TARGETNAME = 'Initializing';
-      PROGRESS = 0;
-      TOTAL = 0;
-    }
 
     return (
       <div>
         <Segment raised>
           <Button.Group icon>
-             <Button  onClick={this.getCurrentTarget.bind(this)}>Flat Position</Button>
+             <Button  onClick={this.gotoFlatPosition.bind(this)}>Goto Flat Position</Button>
           </Button.Group>
+          <Form.Input
+            label=' '
+            name='flatPosition'
+            placeholder='e.g.: M31 or, 11h 33m 48s, 55d 57m 18s'
+            value={this.state.flatPosition}
+            onChange={this.handleChange}
+          />
         </Segment>
         <Segment raised>
         Present the targets, and check of which ones to
