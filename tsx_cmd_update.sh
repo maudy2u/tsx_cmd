@@ -65,6 +65,10 @@ echo " *******************************"
 echo " Updating tsx_cmd in ${install_dir}"
 echo " *******************************"
 echo ""
+# tsx_info=${install_dir}/bundle/programs/server/assets/app/version.json
+# for s in $(echo $tsx_info | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ); do
+#     export $s
+# done
 mv ./bundle ./bundle.prev
 echo " ./bundle backed up to ./bundle.prev"
 
@@ -80,6 +84,7 @@ echo " TSX_CMD - fix for fibers deploy"
 echo " *******************************"
 npm uninstall fibers
 npm install fibers
+npm install amdefine ansi-styles chalk escape-string-regexp has-ansi promise source-map strip-ansi type-of ansi-regex asap eachline meteor-promise semver source-map-support supports-color underscore
 cd ${install_dir}
 
 echo " *******************************"
