@@ -25,7 +25,7 @@ import { Filters } from '../imports/api/filters.js';
 import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
 import { scheduler } from '../imports/api/theProcessors.js';
 
-import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug } from '../imports/api/theLoggers.js';
+import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug, logFileForClient, AppLogsDB } from '../imports/api/theLoggers.js';
 
 import {
   tsx_ServerStates,
@@ -323,6 +323,13 @@ So working on the cloud detection to PAUSE.
 
 Meteor.startup(() => {
   // code to run on server at startup
+  // var logsItems = AppLogsDB.find({}).fetch();
+  // for (var i in logsItems ) {
+  //   var obj =  i;
+  //   // Meteor._debug(obj);
+    AppLogsDB.remove({});
+  // }
+
   tsxLog(' ******* STARTED ******', '');
 
   var version_dat = {};
@@ -371,7 +378,7 @@ Meteor.startup(() => {
   tsx_UpdateDevice('efw', 'Not connected ', '' );
   tsx_UpdateDevice('focuser', 'Not connected ', '' );
 
-
+  tsxLog( ' Logfile: ' + logFileForClient() );
   UpdateStatus( ' idle');
   tsxLog(' ******************', '');
 

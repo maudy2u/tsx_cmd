@@ -31,14 +31,6 @@ import { LoggerMongo } from 'meteor/ostrio:loggermongo';
  const logCon = new Logger();
  const logDB = new Logger();
 
-var logFolder = '';
-if( Meteor.settings.log_file_location === '') {
-  logFolder = Meteor.absolutePath;
-}
-else {
-  logFolder = Meteor.settings.log_file_location;
-}
-
 var filters ='';
 if( Meteor.settings.enable_debug === 'yes') {
   filters = {
@@ -73,7 +65,11 @@ export function tsxLog( msg, data ) {
   }
   logCon.log( msg, data );
   logSession.log( msg, data );
-  logDB.log( msg, { data: data } );
+  var dt = new Date();
+  if( data != '' ) {
+    data = '= ' + data;
+  }
+logDB.log( '|'+ formatDate(dt) +'|' + msg + ' ' + data );
 }
 
 export function tsxWarn( msg, data ) {
@@ -82,7 +78,7 @@ export function tsxWarn( msg, data ) {
   }
   logCon.warn( msg, data );
   logSession.warn( msg,  data );
-  logDB.warn( msg,  { info: data } );
+  logDB.warn( msg + ' ' + data );
 }
 
 export function tsxErr( msg, data ) {
@@ -91,7 +87,7 @@ export function tsxErr( msg, data ) {
   }
   logCon.error( msg, data );
   logSession.error( msg, data );
-  logDB.error( msg, { data: data } );
+  logDB.error( msg + ' ' + data );
 }
 
 export function tsxDebug( msg, data ) {
@@ -101,7 +97,7 @@ export function tsxDebug( msg, data ) {
   }
   logCon.debug( msg, data );
   logSession.debug( msg, data );
-  logDB.debug( msg, { data: data } );
+  logDB.debug( msg + ' ' + data );
 }
 
 export function tsxInfo( msg, data ) {
@@ -110,7 +106,7 @@ export function tsxInfo( msg, data ) {
   }
   logCon.info( msg, data );
   logSession.info( msg,  data );
-  logDB.info( msg,  { info: data } );
+  logDB.info( msg + ' ' + data );
 }
 
 function formatDate( today ) {
@@ -157,11 +153,12 @@ function fileNameDate( today ) {
   collection: AppLogsDB,
   format(opts) {
     // var msgData= ((typeof opts.additional.info == 'undefined') ? '' : (' = ' + opts.additional.info));
+    var msgData= ((typeof opts.data === 'undefined' || opts.data === null || opts.data === '') ? '' : (' = ' + opts.data));
     return {
-      date: new Date(),
+      date: formatDate( new Date() ),
       level: opts.level,
       message: opts.message,
-      additional: opts.additional.info,
+      additional: msgData,
     }
   }
 })).enable( filters );
@@ -184,9 +181,23 @@ function fileNameDate( today ) {
 // // var c = Meteor.absolutePath;
 // // tsxDebug('Root: ' + src);
 // srcPath = srcPath +'/server/logs/';
+var logFolder = '';
+if( Meteor.settings.log_file_location === '') {
+  logFolder = Meteor.absolutePath;
+}
+else {
+  logFolder = Meteor.settings.log_file_location;
+}
 
 export function logFileForClient() {
   var time = new Date();
+  var logFolder = '';
+  if( Meteor.settings.log_file_location === '') {
+    logFolder = Meteor.absolutePath;
+  }
+  else {
+    logFolder = Meteor.settings.log_file_location;
+  }
   var location = logFolder + '/logs/';
   var fileName = fileNameDate(time) + "_tsx_cmd.log";
 

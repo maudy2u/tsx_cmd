@@ -41,6 +41,7 @@ import {
 
 import { Filters } from '../api/filters.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
+import { AppLogsDB } from '../api/theLoggers.js'
 
 // Import the UI
 import DefaultSettings from './DefaultSettings.js';
@@ -615,6 +616,12 @@ class App extends Component {
               </Modal.Actions>
             </Modal>
           </div>
+          {this.props.srvLog.map((target)=>{
+            return (
+              <div>
+              [{target.level}] {target.additional} {target.message}
+              </div>
+            )})}
           version: {VERSION}, date: {DATE}, tsx cmd - A web page to send commands to TheSkyX server
       </div>
     );
@@ -638,6 +645,7 @@ export default withTracker(() => {
       tsxIP: TheSkyXInfos.findOne({name: 'ip'}),
       tsxPort: TheSkyXInfos.findOne({name: 'port'}),
       tsxInfo: TheSkyXInfos.find({}).fetch(),
+      srvLog: AppLogsDB.find({}).fetch(),
       filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
       // targetSessions: TargetSessions.find({}, { sort: { enabledActive: 0, targetFindName: 1 } }).fetch(),
