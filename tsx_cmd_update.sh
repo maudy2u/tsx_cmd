@@ -35,6 +35,10 @@ if [ $# -eq 0 ]
     exit 1
 fi
 
+for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ./bundle/programs/server/assets/app/version.json ); do
+    export $s
+done
+
 echo " *******************************"
 echo " Update TSX Cmd v1.0"
 echo " *******************************"
@@ -69,8 +73,8 @@ echo ""
 # for s in $(echo $tsx_info | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ); do
 #     export $s
 # done
-mv ./bundle ./bundle.prev
-echo " ./bundle backed up to ./bundle.prev"
+mv ./bundle ./bundle.${version}.${date}
+echo " ./bundle backed up to ./bundle.${version}.${date}"
 
 echo " *******************************"
 echo " TSX_CMD - Extract" ${1}

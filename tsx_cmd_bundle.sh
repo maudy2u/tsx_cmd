@@ -21,24 +21,32 @@ if [ $# -eq 0 ]
   then
     echo ""
     echo " *******************************"
-    echo "Building TSX Cmd v1.0"
+    echo "Bundling TSX Cmd v1.1"
     echo " *******************************"
-    echo ": You need to provide one parameter to build - version or date."
+    echo ": You need to provide one parameter to build - a comment."
     echo ": e.g."
     echo ""
-    echo " tsx_cmd_bundle.sh 20180708"
+    echo " tsx_cmd_bundle.sh test"
+    echo " tsx_cmd_bundle.sh alpha"
     echo ""
     echo " *******************************"
     echo ""
     exit 1
 fi
+
+for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ./private/version.json ); do
+    export $s
+done
+
+export details=build_$(git rev-list --all --count)_v${version}_${date}_${1}
+
 if [ "$(uname -s)" == "Darwin" ]; then
   if [ "$(uname -p)" == "i386" ]; then
     echo ""
     echo " *******************************"
-    echo tsx_cmd_bundle.sh is creating file: ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}.tar
+    echo tsx_cmd_bundle.sh is creating file: ../tsx_cmd_$(uname -s)_$(uname -p)_${details}.tar
     echo " *******************************"
-    meteor bundle ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}.tar
+    meteor bundle ../tsx_cmd_$(uname -s)_$(uname -p)_${details}.tar
     growlnotify -n "Build $(git rev-list --all --count) of TSX Cmd" -s -m "Completed"
   else
     echo $(uname -s) $(uname -p) - Not Supported
@@ -49,16 +57,16 @@ elif [ "$(uname -s)" == "Linux" ]; then
   if [ "$(uname -p)" == "aarch64" ]; then
     echo ""
     echo " *******************************"
-    echo tsx_cmd_bundle.sh is creating file: ../tsx_cmd_$(uname -s)_aarch64_build_$(git rev-list --all --count)_${1}.tar
+    echo tsx_cmd_bundle.sh is creating file: ../tsx_cmd_$(uname -s)_aarch64_${details}.tar
     echo " *******************************"
-    ~/meteor/meteor bundle ../tsx_cmd_$(uname -s)_aarch64_build_$(git rev-list --all --count)_${1}.tar
+    ~/meteor/meteor bundle ../tsx_cmd_$(uname -s)_aarch64_${details}.tar
 
   elif [ "$(uname -p)" == "armv7l" ]; then
     echo ""
     echo " *******************************"
-    echo tsx_cmd_bundle.sh is creating file: ../tsx_cmd_$(uname -s)_armv7_build_$(git rev-list --all --count)_${1}.tar
+    echo tsx_cmd_bundle.sh is creating file: ../tsx_cmd_$(uname -s)_armv7_${details}.tar
     echo " *******************************"
-    ~/meteor/meteor bundle ../tsx_cmd_$(uname -s)_armv7_build_$(git rev-list --all --count)_${1}.tar
+    ~/meteor/meteor bundle ../tsx_cmd_$(uname -s)_armv7_${details}.tar
   else
     echo $(uname -s) $(uname -p) - Not Supported
     exit 5

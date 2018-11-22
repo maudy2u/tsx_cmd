@@ -185,6 +185,14 @@ function fileNameDate( today ) {
 // // tsxDebug('Root: ' + src);
 // srcPath = srcPath +'/server/logs/';
 
+export function logFileForClient() {
+  var time = new Date();
+  var location = logFolder + '/logs/';
+  var fileName = fileNameDate(time) + "_tsx_cmd.log";
+
+  return location + fileName;
+}
+
 (new LoggerFile(logSession, {
   collectionName: 'AppLogsSession',
   fileNameFormat(time) {
@@ -204,37 +212,3 @@ function fileNameDate( today ) {
     )
   }
 })).enable( filters );
-
-// /*
-//  * Separate settings and collection
-//  * for errors, exceptions, warnings and etc.
-//  */
-// (new LoggerMongo(logDBErrs, {
-//   collectionName: 'AppErrors',
-//   format(opts) {
-//     // return ((Meteor.isServer) ? '[SERVER]' : "[CLIENT]") + '|[' + opts.level + ']|' + (opts.time.getHours()) + ":" + (opts.time.getMinutes()) + ":" + (opts.time.getSeconds()) +'|'+ opts.message + " = " + opts.data;
-//     return ((Meteor.isServer) ? '[SERVER]' : "[CLIENT]") +'|'+(formatDate( opts.time ) + '|[' + opts.level + ']|'+ opts.message + ((typeof opts.data == 'undefined') ? '' : (' = ' + opts.data)));
-//     }
-// })).enable({
-//   filter: ['ERROR', 'FATAL', 'WARN'],
-//   client: true,
-//   server: true
-// });
-
-
-// (new LoggerFile(logFile, {
-//   collectionName: 'AppLogs',
-//   fileNameFormat(time) {
-//     // Create log-files hourly
-//     return fileNameDate(time) + ".log";
-//   },
-//   // path: '~/tsx_cmd_logs/', // Use absolute storage path
-//
-//   format(time, level, message, data, userId) {
-//     return ((Meteor.isServer) ? '[SERVER]' : "[CLIENT]") +'|'+(formatDate( time ) + '|[' + level + ']|'+ message + ((typeof data == 'undefined') ? '' : (' = ' + data))) + '\r\n';
-//   }
-// })).enable({
-//   filter: ['DEBUG', 'INFO', 'LOG', 'TRACE'],
-//   client: true,
-//   server: true
-// });

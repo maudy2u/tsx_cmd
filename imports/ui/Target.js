@@ -302,14 +302,15 @@ class Target extends Component {
     return (
     <Item>
       <Item.Content>
-        <Item.Header as='a' onClick={this.editEntry.bind(this)}>
-        <Checkbox
-          label='  '
-          name='enabledActive'
-          toggle
-          checked={ENABLEACTIVE}
-          onChange={this.handleToggleEnabled.bind(this)}
-        /> {this.props.target.targetFindName}
+      <Checkbox
+        label='  '
+        name='enabledActive'
+        toggle
+        checked={ENABLEACTIVE}
+        onChange={this.handleToggleEnabled.bind(this)}
+        /> 
+      <Item.Header as='a' onClick={this.editEntry.bind(this)}>
+        {this.props.target.targetFindName}
         </Item.Header>
         <Item.Description>
           {this.props.target.description}

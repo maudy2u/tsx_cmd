@@ -17,7 +17,7 @@ tsx cmd - A web page to send commands to TheSkyX server
  */
 
 import { TheSkyXInfos } from './theSkyXInfos.js';
-import { scheduler } from './theProcessors.js';
+// import { scheduler } from './theProcessors.js';
 
 import {
   tsxInfo,
@@ -114,90 +114,97 @@ export const tsx_ServerStates = {
 };
 
 export function postStatus( info ) {
-  // Create a job:
-  var job = new Job(scheduler, 'updateClientData', // type of job
- // Job data that you define, including anything the job
- // needs to complete. May contain links to files, etc...
-   {
-     status: info,
-     reportedAt: new Date(),
-     timestamp: new Date(),
-   }
- );
-
- // Set some properties of the job and then submit it
- // the same submit the start time to the scheduler...
- // at this time could add a tweet :)
- job.priority('normal');
-   // .retry({ retries: 5,
-   //   wait: 5*60*1000 }) //15*60*1000 })  // 15 minutes between attempts
-   // .delay(0);// 60*60*1000)     // Wait an hour before first try
- var jid = job.save();               // Commit it to the server
+  tsx_SetServerState('updateClientData', info );
+ //  // Create a job:
+ //  var job = new Job(scheduler, 'updateClientData', // type of job
+ // // Job data that you define, including anything the job
+ // // needs to complete. May contain links to files, etc...
+ //   {
+ //     status: info,
+ //     reportedAt: new Date(),
+ //     timestamp: new Date(),
+ //   }
+ // );
+ //
+ // // Set some properties of the job and then submit it
+ // // the same submit the start time to the scheduler...
+ // // at this time could add a tweet :)
+ // job.priority('normal');
+ //   // .retry({ retries: 5,
+ //   //   wait: 5*60*1000 }) //15*60*1000 })  // 15 minutes between attempts
+ //   // .delay(0);// 60*60*1000)     // Wait an hour before first try
+ // var jid = job.save();               // Commit it to the server
 };
 
 export function postProgressTotal( info ) {
    // Create a job:
-   var job = new Job(scheduler, 'updateProgressTotal', // type of job
-  // Job data that you define, including anything the job
-  // needs to complete. May contain links to files, etc...
-    {
-      total: info,
-      reportedAt: new Date(),
-      timestamp: new Date(),
-    }
-  );
+   tsx_SetServerState('tsx_total', info );
 
-  // Set some properties of the job and then submit it
-  // the same submit the start time to the scheduler...
-  // at this time could add a tweet :)
-  job.priority('normal');
-    // .retry({ retries: 5,
-    //   wait: 5*60*1000 }) //15*60*1000 })  // 15 minutes between attempts
-    // .delay(0);// 60*60*1000)     // Wait an hour before first try
-  var jid = job.save();               // Commit it to the server
+  //  var job = new Job(scheduler, 'updateProgressTotal', // type of job
+  // // Job data that you define, including anything the job
+  // // needs to complete. May contain links to files, etc...
+  //   {
+  //     total: info,
+  //     reportedAt: new Date(),
+  //     timestamp: new Date(),
+  //   }
+  // );
+  //
+  // // Set some properties of the job and then submit it
+  // // the same submit the start time to the scheduler...
+  // // at this time could add a tweet :)
+  // job.priority('normal');
+  //   // .retry({ retries: 5,
+  //   //   wait: 5*60*1000 }) //15*60*1000 })  // 15 minutes between attempts
+  //   // .delay(0);// 60*60*1000)     // Wait an hour before first try
+  // var jid = job.save();               // Commit it to the server
 };
 
 export function postProgressIncrement( info ) {
   // Create a job:
-  var job = new Job(scheduler, 'updateProgressIncrement', // type of job
-  // Job data that you define, including anything the job
-  // needs to complete. May contain links to files, etc...
-  {
-    progress: info,
-    reportedAt: new Date(),
-    timestamp: new Date(),
+  tsx_SetServerState('tsx_progress', info );
 
-  });
-
-  // Set some properties of the job and then submit it
-  // the same submit the start time to the scheduler...
-  // at this time could add a tweet :)
-  job.priority('normal');
-  // .retry({ retries: 5,
-  //   wait: 5*60*1000 }) //15*60*1000 })  // 15 minutes between attempts
-  // .delay(0);// 60*60*1000)     // Wait an hour before first try
-  var jid = job.save();               // Commit it to the server
+  // var job = new Job(scheduler, 'updateProgressIncrement', // type of job
+  // // Job data that you define, including anything the job
+  // // needs to complete. May contain links to files, etc...
+  // {
+  //   progress: info,
+  //   reportedAt: new Date(),
+  //   timestamp: new Date(),
+  //
+  // });
+  //
+  // // Set some properties of the job and then submit it
+  // // the same submit the start time to the scheduler...
+  // // at this time could add a tweet :)
+  // job.priority('normal');
+  // // .retry({ retries: 5,
+  // //   wait: 5*60*1000 }) //15*60*1000 })  // 15 minutes between attempts
+  // // .delay(0);// 60*60*1000)     // Wait an hour before first try
+  // var jid = job.save();               // Commit it to the server
 };
 
 export function postProgressMessage( info ) {
   // Create a job:
-  var job = new Job(scheduler, 'updateProgressMessage', // type of job
-  // Job data that you define, including anything the job
-  // needs to complete. May contain links to files, etc...
-  {
-    message: info,
-    reportedAt: new Date(),
-    timestamp: new Date(),
-  });
+  tsx_SetServerState('tsx_message', info );
 
-  // Set some properties of the job and then submit it
-  // the same submit the start time to the scheduler...
-  // at this time could add a tweet :)
-  job.priority('normal');
-  // .retry({ retries: 5,
-  //   wait: 5*60*1000 }) //15*60*1000 })  // 15 minutes between attempts
-  // .delay(0);// 60*60*1000)     // Wait an hour before first try
-  var jid = job.save();               // Commit it to the server
+  // var job = new Job(scheduler, 'updateProgressMessage', // type of job
+  // // Job data that you define, including anything the job
+  // // needs to complete. May contain links to files, etc...
+  // {
+  //   message: info,
+  //   reportedAt: new Date(),
+  //   timestamp: new Date(),
+  // });
+  //
+  // // Set some properties of the job and then submit it
+  // // the same submit the start time to the scheduler...
+  // // at this time could add a tweet :)
+  // job.priority('normal');
+  // // .retry({ retries: 5,
+  // //   wait: 5*60*1000 }) //15*60*1000 })  // 15 minutes between attempts
+  // // .delay(0);// 60*60*1000)     // Wait an hour before first try
+  // var jid = job.save();               // Commit it to the server
 };
 
 export function tsx_SetServerState( name, value) {

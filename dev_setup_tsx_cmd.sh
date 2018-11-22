@@ -32,5 +32,12 @@
 # used for a semantic-ui less error
 ~/meteor/meteor npm install --save-dev postcss@6.0.22 postcss-load-config@1.2.0
 
+echo " *******************************"
+echo "jq - Download and extract"
+echo " "
+echo " used when bundling e.g. tsx_cmd_bundle.sh"
+echo " *******************************"
+sudo apt install jq
+
 # meteortyos breaks job-collection
 # ~/meteor/meteor add meteortoys:allthings
