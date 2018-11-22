@@ -641,6 +641,6 @@ export default withTracker(() => {
       filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
       // targetSessions: TargetSessions.find({}, { sort: { enabledActive: 0, targetFindName: 1 } }).fetch(),
-      targetSessions: TargetSessions.find({}, { sort: { targetFindName: 1, enabledActive: 1 } }).fetch(),
+      targetSessions: TargetSessions.find({}, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
   };
 })(App);
