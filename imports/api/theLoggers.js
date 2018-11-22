@@ -69,7 +69,7 @@ export function tsxLog( msg, data ) {
   if( data != '' ) {
     data = '= ' + data;
   }
-logDB.log( '|'+ formatDate(dt) +'|' + msg + ' ' + data );
+  logDB.log( '|'+ formatDate(dt) +'|' + msg + ' ' + data );
 }
 
 export function tsxWarn( msg, data ) {
@@ -78,7 +78,11 @@ export function tsxWarn( msg, data ) {
   }
   logCon.warn( msg, data );
   logSession.warn( msg,  data );
-  logDB.warn( msg + ' ' + data );
+  var dt = new Date();
+  if( data != '' ) {
+    data = '= ' + data;
+  }
+  logDB.warn( '|'+ formatDate(dt) +'|' + msg + ' ' + data );
 }
 
 export function tsxErr( msg, data ) {
@@ -87,7 +91,11 @@ export function tsxErr( msg, data ) {
   }
   logCon.error( msg, data );
   logSession.error( msg, data );
-  logDB.error( msg + ' ' + data );
+  var dt = new Date();
+  if( data != '' ) {
+    data = '= ' + data;
+  }
+  logDB.error( '|'+ formatDate(dt) +'|' + msg + ' ' + data );
 }
 
 export function tsxDebug( msg, data ) {
@@ -97,7 +105,11 @@ export function tsxDebug( msg, data ) {
   }
   logCon.debug( msg, data );
   logSession.debug( msg, data );
-  logDB.debug( msg + ' ' + data );
+  var dt = new Date();
+  if( data != '' ) {
+    data = '= ' + data;
+  }
+  logDB.debug( '|'+ formatDate(dt) +'|' + msg + ' ' + data );
 }
 
 export function tsxInfo( msg, data ) {
@@ -106,7 +118,11 @@ export function tsxInfo( msg, data ) {
   }
   logCon.info( msg, data );
   logSession.info( msg,  data );
-  logDB.info( msg + ' ' + data );
+  var dt = new Date();
+  if( data != '' ) {
+    data = '= ' + data;
+  }
+  logDB.info( '|'+ formatDate(dt) +'|' + msg + ' ' + data );
 }
 
 function formatDate( today ) {
