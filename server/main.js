@@ -55,13 +55,12 @@ import {
   tsx_MntUnpark,
   tsx_IsParked,
   findCalibrationSession,
+  CalibrateAutoGuider,
 } from './run_imageSession.js';
 
 import { tsx_feeder, stop_tsx_is_waiting } from './tsx_feeder.js';
 
 import {shelljs} from 'meteor/akasha:shelljs';
-
-var schedulerRunning = 'Stop';
 
 /*
 tsx_SetServerState
@@ -99,6 +98,8 @@ function initServerStates() {
   tsx_SetServerState('lastFocusTemp', '');
   tsx_SetServerState('initialFocusTemperature', '');
   tsx_SetServerState('imagingSessionDither', 0);
+  tsx_SetServerState('currentJob', '');
+  tsx_SetServerState('scheduler_running', 'Stop');
 
   for (var m in tsx_ServerStates){
     var state = tsx_ServerStates[m];
@@ -182,6 +183,142 @@ function CleanUpJobs() {
     }
     UpdateStatus( ' Cleaned DB');
   }
+  return;
+}
+
+function startServerProcess() {
+  // *******************************
+  //   Imaging processs
+  // *******************************
+  // Assumed balanced RA/DEC
+  // Assumed Date/Time/Long/Lat correct
+  // Assumed Homed
+  // Assume Polar aligned (rough, or with Polemaster)
+  // Assumed initial focus is done
+  // Assume TPoint recalibration done
+  // Assumed Accurate Polar Alignment (APA) done
+  // Do not assume Autoguider calibrated, will be done once guide star found
+  var workers = scheduler.processJobs( 'runScheduler',
+    function (job, cb) {
+      UpdateStatus(' Scheduler Started');
+      var schedule = job.data; // Only one email per job
+
+      // This will only be called if a 'runScheduler' job is obtained
+      setSchedulerState('Running' );
+      tsx_SetServerState('currentJob', job);
+
+      job.log("Entered the scheduler process",
+        {level: 'info'}
+      );
+
+      var isParked = '';
+      // #TODO  reset all targets as isCloudy = false.
+
+      while(
+        // the job is used to run the scheduler.
+        tsx_GetServerStateValue('currentJob') != ''
+       ) {
+
+         // tsxDebug('@6');
+          tsx_MntUnpark();
+          isParked = false;
+          // tsxDebug('@7');
+
+          // Find a session
+          // Get the target to shoot
+          tsxInfo( ' Validating Targets...');
+
+          /* #TODO
+So working on the cloud detection to PAUSE.
+
+1.  getValidTargetSession returns a target.
+    It needs to a add a check that if isCloudy = false then it is skipped
+2.  prepareTargetForImaging can return false.. meaning the chosen target
+    could not be prepared... CLS failed. If so then market the target as FAILED
+    (The start of the job needs to "reset" all targets as isCloudy = false.)
+
+          */
+
+          // Process Targets
+          var target = getValidTargetSession(); // no return
+          // if no valid target then check for calibration sessions...
+          // how to detect calibation sessions...
+          // Create Calibration sessions similar to Targets..
+          // New database... uses calibration images...
+          // Means there are edits... i.e. assign/copy a series
+          // anything else? enable/disable... Flat/Dark/Bias
+          // remove dark/bias/flat from targets...
+
+          if (typeof target != 'undefined' && tsx_GetServerStateValue('currentJob') != '' ) {
+            tsxLog ( ' =========================');
+            tsxDebug ( ' ' + target.targetFindName + ' Preparing target...');
+
+            // Point, Focus, Guide
+            var ready = prepareTargetForImaging( target );
+            if( ready ) {
+              // target images per Take Series
+              tsxLog ( ' =========================');
+              tsxLog ( ' ************************1*');
+              UpdateStatus ( ' *** Start imaging: ' + target.targetFindName );
+              processTargetTakeSeries( target );
+              tsxLog ( ' ************************2*');
+            }
+            else {
+              ParkMount( isParked );
+              isParked = true;
+            }
+          }
+          else {
+            ParkMount( isParked );
+            isParked = true;
+          }
+
+          // See if there are calibration frames to do (Bias/Darl/Flats)
+          var calFrames = findCalibrationSession(); // temp var
+
+          // Check if sun is up and no cal frames
+          if( (!isDarkEnough()) && (calFrames == '') && tsx_GetServerStateValue('currentJob') != '' ) {
+            ParkMount( isParked );
+            isParked = true;
+            var approachingDawn = isTimeBeforeCurrentTime('3:00');
+            tsxDebug( ' Is approachingDawn: ' + approachingDawn);
+            // var stillDaytime = isTimeBeforeCurrentTime('15:00');
+            // tsxDebug( ' Is stillDaytime: ' + stillDaytime);
+            if( approachingDawn ) {
+              var defaultFilter = tsx_GetServerStateValue('defaultFilter');
+              var softPark = false;
+              tsx_AbortGuider();
+              tsx_MntPark(defaultFilter, softPark);
+              UpdateStatus( ' Scheduler stopped: not dark.');
+              UpdateStatus( ' ^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
+              break;
+            }
+          }
+          // check of cal frames and no target
+          else if ( calFrames != '' && (typeof target == 'undefined') && tsx_GetServerStateValue('currentJob') != '' ) {
+            for( var i = 0; i < calFrames.length; i++ ) {
+                // process the
+                // Need to prompt user to continuw...
+                // If flat... put on panel
+                // if Dark put on lense cover...
+                processTargetTakeSeries( calFrames[i] );
+            }
+          }
+      }
+
+      tsxLog( ' Scheduler exited.');
+      // While ended... exit process
+      setSchedulerState('Stop' );
+      UpdateStatus( ' Idle');
+      // tsx_Disconnect();
+      job.done();
+
+      // Be sure to invoke the callback
+      // when work on this job has finished
+      cb();
+    }
+  );
+  return scheduler.startJobServer();
 }
 
 Meteor.startup(() => {
@@ -234,293 +371,32 @@ Meteor.startup(() => {
   tsx_UpdateDevice('efw', 'Not connected ', '' );
   tsx_UpdateDevice('focuser', 'Not connected ', '' );
 
+
+  UpdateStatus( ' idle');
   tsxLog(' ******************', '');
 
-
-  // *******************************
-  //   Imaging processs
-  // *******************************
-  // Assumed balanced RA/DEC
-  // Assumed Date/Time/Long/Lat correct
-  // Assumed Homed
-  // Assume Polar aligned (rough, or with Polemaster)
-  // Assumed initial focus is done
-  // Assume TPoint recalibration done
-  // Assumed Accurate Polar Alignment (APA) done
-  // Do not assume Autoguider calibrated, will be done once guide star found
-  var workers = scheduler.processJobs( 'runScheduler',
-    function (job, cb) {
-      var schedule = job.data; // Only one email per job
-
-      // This will only be called if a 'runScheduler' job is obtained
-      setSchedulerState('Running' );
-      tsx_SetServerState('currentJob', job);
-      UpdateStatus(' Scheduler Started');
-
-      job.log("Entered the scheduler process",
-        {level: 'info'}
-      );
-
-      var isParked = '';
-      // #TODO  reset all targets as isCloudy = false.
-
-      while(
-        // the job is used to run the scheduler.
-        tsx_GetServerStateValue('currentJob') != ''
-        // THis is used for the session... not for the job.
-        //        && tsx_GetServerStateValue( tsx_ServerStates.imagingSessionId ) != ''
-       ) {
-
-         // tsxDebug('@6');
-          tsx_MntUnpark();
-          isParked = false;
-          // tsxDebug('@7');
-
-          // Find a session
-          // Get the target to shoot
-          tsxInfo( ' Validating Targets...');
-
-          /* #TODO
-So working on the cloud detection to PAUSE.
-
-1.  getValidTargetSession returns a target.
-    It needs to a add a check that if isCloudy = false then it is skipped
-2.  prepareTargetForImaging can return false.. meaning the chosen target
-    could not be prepared... CLS failed. If so then market the target as FAILED
-    (The start of the job needs to "reset" all targets as isCloudy = false.)
-
-          */
-
-          // Process Targets
-          var target = getValidTargetSession(); // no return
-          // if no valid target then check for calibration sessions...
-          // how to detect calibation sessions...
-          // Create Calibration sessions similar to Targets..
-          // New database... uses calibration images...
-          // Means there are edits... i.e. assign/copy a series
-          // anything else? enable/disable... Flat/Dark/Bias
-          // remove dark/bias/flat from targets...
-
-          if (typeof target != 'undefined') {
-            tsxLog ( ' =========================');
-            tsxDebug ( ' ' + target.targetFindName + ' Preparing target...');
-
-            // Point, Focus, Guide
-            var ready = prepareTargetForImaging( target );
-            if( ready ) {
-              // target images per Take Series
-              tsxLog ( ' =========================');
-              tsxLog ( ' *************************');
-              UpdateStatus ( ' *** Start imaging: ' + target.targetFindName );
-              processTargetTakeSeries( target );
-              tsxLog ( ' *************************');
-            }
-            else {
-              ParkMount( isParked );
-              isParked = true;
-            }
-          }
-          else {
-            ParkMount( isParked );
-            isParked = true;
-          }
-
-          // See if there are calibration frames to do (Bias/Darl/Flats)
-          var calFrames = findCalibrationSession(); // temp var
-
-          // Check if sun is up and no cal frames
-          if( (!isDarkEnough()) && (calFrames == '') ) {
-            ParkMount( isParked );
-            isParked = true;
-            var approachingDawn = isTimeBeforeCurrentTime('3:00');
-            tsxDebug( ' Is approachingDawn: ' + approachingDawn);
-            // var stillDaytime = isTimeBeforeCurrentTime('15:00');
-            // tsxDebug( ' Is stillDaytime: ' + stillDaytime);
-            if( approachingDawn ) {
-              var defaultFilter = tsx_GetServerStateValue('defaultFilter');
-              var softPark = false;
-              tsx_AbortGuider();
-              tsx_MntPark(defaultFilter, softPark);
-              UpdateStatus( ' Scheduler stopped: not dark.');
-              UpdateStatus( ' ^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
-              break;
-            }
-          }
-          // check of cal frames and no target
-          else if ( calFrames != '' && (typeof target == 'undefined')) {
-            for( var i = 0; i < calFrames.length; i++ ) {
-                // process the
-                // Need to prompt user to continuw...
-                // If flat... put on panel
-                // if Dark put on lense cover...
-                processTargetTakeSeries( calFrames[i] );
-            }
-          }
-      }
-
-      tsxLog( ' Scheduler exited.');
-      // While ended... exit process
-      setSchedulerState('Stop' );
-      UpdateStatus( ' Idle');
-      // tsx_Disconnect();
-      job.done();
-
-      // Be sure to invoke the callback
-      // when work on this job has finished
-      cb();
-    }
-  );
-  // *******************************
-  //   update client reports/status
-  // *******************************
-  workers = scheduler.processJobs( 'updateClientData',
-    function (job, cb) {
-      var info = job.data; // Only one email per job
-      // This will only be called if a
-      // 'runScheduler' job is obtained
-      // tsxLog('updateClientData');
-      job.log("Entered updateClientData",
-        {level: 'info'});
-
-      // While ended... exit process
-      UpdateStatus( ' ' + info.status );
-      // tsx_Disconnect();
-      job.done();
-
-      // Be sure to invoke the callback
-      // when work on this job has finished
-      cb();
-    }
-  );
-  workers = scheduler.processJobs( 'updateProgressMessage',
-    function (job, cb) {
-      var info = job.data; // Only one email per job
-      tsx_SetServerState('tsx_message', info.message );
-      // tsxLog('updateProgressMessage');
-      // tsx_Disconnect();
-      job.done();
-
-      // Be sure to invoke the callback
-      // when work on this job has finished
-      cb();
-    }
-  );
-  workers = scheduler.processJobs( 'updateProgressIncrement',
-    function (job, cb) {
-      var info = job.data; // Only one email per job
-      tsx_SetServerState('tsx_progress', info.progress );
-      // tsxLog('updateProgressIncrement');
-      job.done();
-
-      // Be sure to invoke the callback
-      // when work on this job has finished
-      cb();
-    }
-  );
-  workers = scheduler.processJobs( 'updateProgressTotal',
-    function (job, cb) {
-      var info = job.data; // Only one email per job
-      tsx_SetServerState('tsx_total', info.total );
-      // tsxLog('updateProgressTotal');
-      // tsx_Disconnect();
-      job.done();
-
-      // Be sure to invoke the callback
-      // when work on this job has finished
-      cb();
-    }
-  );
-  // *******************************
-  //   Manage Cooling and Warming camera
-  // *******************************
-  workers = scheduler.processJobs( 'manageCameraTemp',
-    function (job, cb) {
-      var schedule = job.data; // Only one email per job
-      // This will only be called if a
-      // 'manageCameraTemp' job is obtained
-      // tsxLog('manageCameraTemp');
-      // job.log("Entered manageCameraTemp",
-      //   {level: 'info'});
-
-      // tsx_Disconnect();
-      job.done();
-
-      // Be sure to invoke the callback
-      // when work on this job has finished
-      cb();
-    }
-  );
-  workers = scheduler.processJobs( 'PostImageProcessUpdate',
-    function (job, cb) {
-      var schedule = job.data; // Only one email per job
-      // This will only be called if a
-      // 'runScheduler' job is obtained
-      tsxDebug('PostImageProcessUpdate');
-      // job.log("Entered PostImageProcessUpdate",
-        // {level: 'info'});
-
-
-      // tsx_Disconnect();
-      job.done();
-
-      // Be sure to invoke the callback
-      // when work on this job has finished
-      cb();
-    }
-  );
-
-  // *******************************
-  //   Start processes
-  // *******************************
-  // start server for scheduler and wait
-  UpdateStatus( ' idle');
-  return scheduler.startJobServer();
+  return;
 
 });
 
 function getSchedulerState() {
-  return schedulerRunning;
+  var state = tsx_GetServerStateValue('scheduler_running');
+  return state;
 }
 
 function setSchedulerState( value ) {
-  schedulerRunning = value;
-}
-
-// The pause method should cancel the currentJob
-// and recreate a new job...
-export function srvPauseScheduler() {
-  var jid = tsx_GetServerStateValue('currentJob');
-  scheduler.getJob(jid, function (err, job) {
-    job.pause(function (err, result) {
-      tsxDebug('scheduler Paused job');
-      if (result) {
-        // Status updated
-        tsxDebug('Result ' + result);
-      }
-      if (err) {
-        // Status updated
-        tsxDebug('Error ' + err);
-      }
-    }); // assumes it is the take series that is being PAUSED
-
-   });
-
-  setSchedulerState('Pause' );
-  tsxDebug('Manually PAUSED scheduler');
+  tsx_SetServerState('scheduler_running', value);
 }
 
 export function srvStopScheduler() {
-  var dummyVar;
-  // Any job document from myJobs can be turned into a Job object
-  setSchedulerState('Stop' );
+  CleanUpJobs();
+  UpdateImagingSesionID( '' );
   tsx_SetServerState('SchedulerStatus', 'Stop');
-  tsx_SetServerState('currentJob', '');
   tsx_SetServerState('targetName', 'No Active Target');
   tsx_SetServerState('scheduler_report', '');
-  UpdateImagingSesionID( '' );
   tsx_AbortGuider();
-  CleanUpJobs();
   UpdateStatus(' *** Manually STOPPED scheduler ***');
+  setSchedulerState('Stop' );
 }
 
 Meteor.methods({
@@ -535,27 +411,20 @@ Meteor.methods({
    // 4. start/end checks... ???
    // or KISS and one big sequenital function...
    startScheduler() {
-     tsxLog(' ************************');
+     tsxLog(' ***********************2*');
      // tsxLog('Found scheduler state: ' + getSchedulerState() );
      if(
-       // If PAUSED... reset state to Running
-       getSchedulerState() == 'Pause'
-     ) {
-       var job = new Job(scheduler, scheduler.findOne({}));
-       job.resume();
-       setSchedulerState( 'Running' );
-       return;
-     }
-      // if already running, just return and update state
-     else if(
        getSchedulerState() == 'Running'
      ) {
+       tsxLog("Running found");
        tsxLog('Scheduler is alreadying running. Nothing to do.');
        return;
      }
      else if(
         getSchedulerState() == 'Stop'
       ) {
+        tsxLog("Stop found");
+        startServerProcess();
 
         // Confirm whether the there is a script running...
         if( !tsx_ServerIsOnline() ) {
@@ -582,6 +451,7 @@ Meteor.methods({
         // .retry({ retries: 5,
         //   wait: 5*60*1000 }) //15*60*1000 })  // 15 minutes between attempts
         // .delay(0);// 60*60*1000)     // Wait an hour before first try
+
         var jid = job.save();               // Commit it to the server
         tsxDebug( '@@ Start1' );
 
@@ -589,28 +459,24 @@ Meteor.methods({
         return;
      }
      else {
-       logCon.error('Invalid state found for scheduler.');
-     }
-   },
-
-   pauseScheduler() {
-     if( getSchedulerState() != 'Stop') {
-       tsxDebug('Pausing');
-       srvPauseScheduler();
-     }
-     else {
-       tsxDebug('Do nothing - not Paused');
+       tsxErr("Invalid state found for scheduler.");
+       // logCon.error('Invalid state found for scheduler.');
      }
    },
 
    stopScheduler() {
-     // if( getSchedulerState() != 'Stop' ) {
+     if( getSchedulerState() != 'Stop' ) {
        tsxDebug('Stopping');
        srvStopScheduler();
-     // }
-     // else {
-       // tsxDebug('Do nothing - not Stopped');
-     // }
+     }
+     else {
+       tsxDebug('Do nothing - Already Stopped');
+     }
+   },
+
+   calibrateGuider() {
+     tsxLog('Calibrating AutoGuider');
+     CalibrateAutoGuider();
    },
 
    updateServerState( name, value ) {

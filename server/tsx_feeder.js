@@ -105,12 +105,14 @@ export function tsx_feeder( cmd, callback ) {
   // https://www.w3schools.com/js/js_timing.asp
   var waiting = 0; // create arbitarty timeout
   var imageChk = false;
-  var processId = tsx_GetServerStateValue( 'imagingSessionId' );
-  if( typeof processId != 'undefined' || processId != '') {
-     imageChk = true;
+  var processId = tsx_GetServerStateValue( 'currentJob' );
+  if( typeof processId != 'undefined' && processId != '') {
+    imageChk = true;
+    // Meteor._debug('Image checking: ' + processId );
   }
   else {
-     processId = 'ignore';
+    processId = 'ignore';
+    // Meteor._debug('No image checking');
   }
   while( tsx_waiting && processId > '' ) { //}&& forceExit > 2*60*sec ) {
     var sec = 1000;
@@ -121,10 +123,10 @@ export function tsx_feeder( cmd, callback ) {
     // postStatus( 'tsx_waiting (sec): ' + waiting /sec  );
     // Meteor._debug('tsx_waiting (sec): ' + waiting /sec );
     if( imageChk ) {
-      processId = tsx_GetServerStateValue( 'imagingSessionId' );
+      processId = tsx_GetServerStateValue( 'currentJob' );
     }
   }
   postProgressTotal(0);
   postProgressIncrement(0);
-  tsx.end();
+  tsx.end(); // will announce tsx_close
 };

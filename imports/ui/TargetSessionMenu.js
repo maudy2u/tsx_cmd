@@ -54,9 +54,6 @@ class TargetSessionMenu extends Component {
     // used to force a reload.... must be better way
     this.setState({
       targetList: nextProps.targets,
-      // targetSessionId: nextProps.tsxInfo.find(function(element) {
-      //   return element.name == 'imagingSessionId';
-      // }).value,
     });
   }
 

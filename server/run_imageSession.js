@@ -45,7 +45,6 @@ import {
   UpdateStatusWarn,
   UpdateStatusErr,
   postProgressTotal,
-  postStatus,
   UpdateImagingSesionID,
  } from '../imports/api/serverStates.js'
 
@@ -62,16 +61,18 @@ var forceAbort = false;
 function isSchedulerStopped() {
   // tsxDebug('************************');
   tsxDebug(' *** isSchedulerStopped ' );
-
-  var sched = tsx_GetServerStateValue( 'currentJob' );
+  var sched = tsx_GetServerStateValue('scheduler_running');
   if(
-    (typeof sched != 'undefined'
-    || sched != '')
+    (sched != 'Stop')
   ) {
+    tsxDebug('scheduler_running: ' + sched);
     return false; // exit
   }
   tsx_SetServerState('targetName', 'No Active Target');
   tsx_SetServerState('scheduler_report', '');
+  // THis line is needed in the tsx_feeder
+  tsx_SetServerState('imagingSessionId', '');
+
   return true;
 }
 
@@ -325,6 +326,33 @@ export function tsx_AbortGuider() {
   return true;
 }
 
+// just do calibration
+export function CalibrateAutoGuider() {
+  if( isSchedulerStopped() ) {
+    UpdateStatus(' Calibrating Exiting - Scheduler active');
+    return;
+  }
+  // tsxDebug('************************');
+  var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
+  if( !enabled ) {
+    UpdateStatus(' @Autoguiding disabled');
+    return;
+  }
+
+  tsxLog("1");
+  tsx_TakeAutoGuideImage();
+  tsxLog("2");
+  var star = tsx_FindGuideStar();
+  tsxLog("3");
+
+  // Calibrate....
+  var cal_res = tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
+  if( cal_res ) {
+    UpdateStatus(' AutoGuider Calibrated');
+  }
+  tsxLog("4");
+}
+
 // **************************************************************
 // Breakup into reusable sections...
 // tsx_ will send TSX commands
@@ -340,7 +368,7 @@ function SetUpAutoGuiding( target, doCalibration ) {
 
   UpdateStatus(' ' + target.targetFindName + ": setup guiding");
 
-  tsx_TakeAutoGuideImage( target );
+  tsx_TakeAutoGuideImage( );
   if( isSchedulerStopped() ) {
     return;
   }
@@ -363,12 +391,11 @@ function SetUpAutoGuiding( target, doCalibration ) {
 }
 
 // **************************************************************
-function tsx_TakeAutoGuideImage( target ) {
+function tsx_TakeAutoGuideImage( ) {
   // tsxDebug('************************');
-  tsxDebug(' *** tsx_TakeAutoGuideImage: ' + target.targetFindName );
   var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
   if( !enabled ) {
-    UpdateStatus(' @Autoguiding disabled: ' + target.targetFindName);
+    UpdateStatus(' @Autoguiding disabled ');
     return;
   }
 
@@ -1812,6 +1839,7 @@ function tsx_takeImage( filterNum, exposure, frame, tName ) {
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
    if( isSchedulerStopped() ) {
+     tsxDebug('Stop Waiting Image - scheduler Stopped');
      tsx_is_waiting = false;
      success = false;
    }

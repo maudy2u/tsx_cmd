@@ -126,7 +126,6 @@ class Flats extends Component {
     // this.tsxStopSession();
     Meteor.call("stopScheduler", function (error, result) {
         // identify the error
-        tsx_UpdateServerState(tsx_ServerStates.imagingSessionId, '' );
         tsx_UpdateServerState(tsx_ServerStates.targetImageName, '');
         tsx_UpdateServerState(tsx_ServerStates.targetDEC, '_');
         tsx_UpdateServerState(tsx_ServerStates.targetRA, '_');

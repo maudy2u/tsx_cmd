@@ -34,6 +34,7 @@ export const tsx_ServerStates = {
   port: 'port',
   activeMenu: 'Settings',
   currentStage: 'currentStage', // this is a status line update for the dashboard
+  scheduler_running: 'scheduler_running',
   SchedulerStatus: 'SchedulerStatus',
   scheduler_report: 'scheduler_report', // used by monitor to get target report
   currentJob: 'currentJob',

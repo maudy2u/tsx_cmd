@@ -67,9 +67,6 @@ class TakeSeriesTemplateEditor extends Component {
     // used to force a reload.... must be better way
     this.setState({
       seriesOrderFix: nextProps.seriess,
-      // targetSessionId: nextProps.tsxInfo.find(function(element) {
-      //   return element.name == 'imagingSessionId';
-      // }).value,
     });
   }
 
