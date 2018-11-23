@@ -280,6 +280,27 @@ class Target extends Component {
     }
   }
 
+  targetButtons( state ) {
+    if( state == 'Stop') {
+      return(
+        <Button.Group basic size='mini'>
+          <Button icon='refresh' onClick={this.getTargetReport.bind(this)}/>
+          <Button icon='location arrow' onClick={this.clsTarget.bind(this)}/>
+          <Button icon='retweet' onClick={this.eraseProgress.bind(this)}/>
+          {/* <Button icon='edit' onClick={this.editEntry.bind(this)}/> */}
+          <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
+          <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
+        </Button.Group>
+      )
+    }
+  }
+
+  canHeaderClick( state ) {
+    if( state == 'Stop' ) {
+      return this.editEntry.bind(this);
+    }
+  }
+
   render() {
 // Use the image for a stretched image in the Future
 //       <Item.Image size='tiny' src='' />
@@ -308,8 +329,8 @@ class Target extends Component {
         toggle
         checked={ENABLEACTIVE}
         onChange={this.handleToggleEnabled.bind(this)}
-        /> 
-      <Item.Header as='a' onClick={this.editEntry.bind(this)}>
+        />
+      <Item.Header as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value)}>
         {this.props.target.targetFindName}
         </Item.Header>
         <Item.Description>
@@ -328,14 +349,7 @@ class Target extends Component {
             {/*
             <Label>Direction: <Label.Detail>{this.state.azimuth}</Label.Detail></Label> */}
           </Label.Group>
-          <Button.Group basic size='mini'>
-            <Button icon='refresh' onClick={this.getTargetReport.bind(this)}/>
-            <Button icon='location arrow' onClick={this.clsTarget.bind(this)}/>
-            <Button icon='retweet' onClick={this.eraseProgress.bind(this)}/>
-            {/* <Button icon='edit' onClick={this.editEntry.bind(this)}/> */}
-            <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
-            <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
-          </Button.Group>
+          {this.targetButtons(this.props.scheduler_running.value)}
           <Checkbox
             label=' Calibration Target'
             name='isCalibrationFrames'

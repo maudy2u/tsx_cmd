@@ -502,16 +502,37 @@ class Monitor extends Component {
 
   };
 
+  playButtons( state ) {
+    if( state == 'Stop') {
+      return (
+        <div>
+        <Button icon='play'  onClick={this.playScheduler.bind(this)}/>
+        <Button disabled='true' icon='stop' onClick={this.stopScheduler.bind(this)} />
+        </div>
+      )
+    }
+    else {
+      return (
+        <div>
+          <Button disabled='true' icon='play'  onClick={this.playScheduler.bind(this)}/>
+          <Button  icon='stop' onClick={this.stopScheduler.bind(this)} />
+        </div>
+      )
+    }
+  }
+
   render() {
 
     var tsx_actions = this.getTsxActions();
     var TARGETNAME ='';
     var PROGRESS = '';
     var TOTAL = '';
+    var RUNNING = '';
     try {
       TARGETNAME = this.props.targetName.value;
-      PROGRESS = this.props.tsx_progress.value
-      TOTAL = this.props.tsx_total.value
+      PROGRESS = this.props.tsx_progress.value;
+      TOTAL = this.props.tsx_total.value;
+      RUNNING = this.props.scheduler_running.value;
     } catch (e) {
       TARGETNAME = 'Initializing';
       PROGRESS = 0;
@@ -522,11 +543,8 @@ class Monitor extends Component {
       <div>
          <Segment raised>
            <h3>Target: {TARGETNAME}</h3>
-
            <Button.Group icon>
-             <Button icon='play'  onClick={this.playScheduler.bind(this)}/>
-             {/* <Button icon='pause' onClick={this.pauseScheduler.bind(this)}  /> */}
-             <Button icon='stop' onClick={this.stopScheduler.bind(this)} />
+            {this.playButtons(RUNNING) }
           </Button.Group>
           <Progress value={PROGRESS} total={TOTAL} progress='ratio'>Processing</Progress>
         </Segment>

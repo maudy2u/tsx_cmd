@@ -128,13 +128,6 @@ class TargetSessionMenu extends Component {
 
       return (
         <div>
-          {/* <Segment>
-            <Button.Group basic size='small'>
-              <Button icon='linkify' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
-              <Button icon='settings' onClick={this.loadTestDataMeteorMethod.bind(this)}/>
-              <Button icon='find' onClick={this.chkTestData.bind(this)}/>
-            </Button.Group>
-          </Segment> */}
           <Modal
             open={this.state.addModalOpen}
             onClose={this.handleAddModalClose}
@@ -142,14 +135,14 @@ class TargetSessionMenu extends Component {
             <Modal.Header>Add Session</Modal.Header>
             <Modal.Content>
               <Modal.Description>
-                <TargetEditor key={this.state.newTarget._id} target={this.state.newTarget} />
+                <TargetEditor key={this.state.newTarget._id} target={this.state.newTarget} scheduler_running={this.props.scheduler_running}/>
               </Modal.Description>
             </Modal.Content>
           </Modal>
               {this.props.targets.map((target)=>{
                 return (
                 <Segment raised>
-                  <Target key={target._id} target={target} />
+                  <Target key={target._id} target={target} scheduler_running={this.props.scheduler_running}/>
                 </Segment>
                 )})}
       </div>

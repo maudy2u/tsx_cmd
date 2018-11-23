@@ -334,7 +334,7 @@ class App extends Component {
 
   }
 
-  renderMenu( MENU ) {
+  renderMenu( MENU, RUNNING ) {
     const { activeMenu  } = this.state;
     return(
       <div>
@@ -356,7 +356,18 @@ class App extends Component {
 
   // *******************************
   //
-  renderMenuSegments(){
+  renderMenuSegments( MENU ){
+    var RUNNING = '';
+    try {
+      RUNNING = this.props.scheduler_running.value;
+    } catch (e) {
+      RUNNING = '';
+    }
+
+    var DISABLE = true;
+    if( RUNNING == 'Stop'){
+      DISABLE = false;
+    }
 
     if (this.state.activeMenu == 'Monitor' ) {
       return (
@@ -368,24 +379,27 @@ class App extends Component {
             targetSessionId={this.props.targetSessionId}
             targetName={this.props.targetName}
             tsxInfo={this.props.tsxInfo}
+            scheduler_running={this.props.scheduler_running}
           />
         </div>
       )
     } else if (this.state.activeMenu == 'Targets' ) {
       return (
         <div>
-          <Button size='mini' onClick={this.addNewTargets.bind(this)}>Add Target</Button>
+          <Button disabled={DISABLE} size='mini' onClick={this.addNewTargets.bind(this)}>Add Target</Button>
           <TargetSessionMenu
             targets={this.props.targetSessions}
+            scheduler_running={this.props.scheduler_running}
           />
         </div>
       )
     } else if (this.state.activeMenu == 'Series') {
       return (
         <div>
-          <Button size='mini' onClick={this.addNewTakeSeries.bind(this)}>Add Series</Button>
+          <Button disabled={DISABLE} size='mini' onClick={this.addNewTakeSeries.bind(this)}>Add Series</Button>
           <TakeSeriesTemplateMenu
             seriesList={this.props.takeSeriesTemplates}
+            scheduler_running={this.props.scheduler_running}
           />
       </div>
       )
@@ -394,7 +408,9 @@ class App extends Component {
 
     } else if (this.state.activeMenu == 'Settings') {
       return (
-        <DefaultSettings />
+        <DefaultSettings
+          scheduler_running={this.props.scheduler_running}
+        />
       )
 
     } else if (this.state.activeMenu == 'logout') {
@@ -403,19 +419,23 @@ class App extends Component {
     } else if (this.state.activeMenu == 'Toolbox') {
       return (
         <Toolbox
-        scheduler_report={this.props.scheduler_report}
+          scheduler_report={this.props.scheduler_report}
+          scheduler_running={this.props.scheduler_running}
         />
       )
     } else if (this.state.activeMenu == 'Flats') {
       return (
         <Flats
-        scheduler_report={this.props.scheduler_report}
-        tsxInfo={this.props.tsxInfo}
+          scheduler_report={this.props.scheduler_report}
+          tsxInfo={this.props.tsxInfo}
+          scheduler_running={this.props.scheduler_running}
         />
       )
     } else {
       return (
-        <DefaultSettings />
+        <DefaultSettings
+          scheduler_running={this.props.scheduler_running}
+        />
       )
     }
     saveDefaultState('activeMenu');
@@ -528,6 +548,25 @@ class App extends Component {
     var out = addNewTakeSeriesTemplate();
   };
 
+  parkButtons( state ) {
+    if( state == 'Stop') {
+      return (
+        <div>
+          <Button icon='refresh' onClick={this.connectToTSX.bind(this)}/>
+          <Button icon='car' onClick={this.park.bind(this)}/>
+        </div>
+      )
+    }
+    else {
+      return (
+        <div>
+          <Button disabled='true' icon='refresh' onClick={this.connectToTSX.bind(this)}/>
+          <Button disabled='true' icon='car' onClick={this.park.bind(this)}/>
+        </div>
+      )
+    }
+  }
+
   render() {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
     */
@@ -537,6 +576,7 @@ class App extends Component {
     var MENU = '';
     var VERSION = '';
     var DATE = '';
+    var RUNNING = '';
     try {
       IP = this.props.tsxIP.value;
       PORT = this.props.tsxPort.value;
@@ -544,6 +584,7 @@ class App extends Component {
       MENU = this.props.activeMenu.value;
       VERSION = this.props.tsx_version.value;
       DATE = this.props.tsx_date.value;
+      RUNNING = this.props.scheduler_running.value;
     } catch (e) {
       IP = 'Initializing';
       PORT = 'Initializing';
@@ -551,6 +592,7 @@ class App extends Component {
       MENU = 'Targets';
       VERSION = '...';
       DATE = '...';
+      RUNNING = '';
     }
 
     return (
@@ -572,8 +614,8 @@ class App extends Component {
                 </Label>
                 {this.renderPortEditor()}
                 <Button.Group basic size='small' floated='right'>
-                  <Button icon='refresh' onClick={this.connectToTSX.bind(this)}/>
-                  <Button icon='car' onClick={this.park.bind(this)}/>
+                //scheduler_running disable if running...
+                {this.parkButtons(RUNNING)}
                 </Button.Group>
               </Segment>
               <Segment>
@@ -581,7 +623,7 @@ class App extends Component {
               </Segment>
             {/* { this.tsxConnectionFailed() } */}
               <Segment>
-            { this.renderMenu( MENU ) }
+            { this.renderMenu( MENU, RUNNING ) }
             </Segment>
           </Segment.Group>
           {/* *******************************
@@ -641,11 +683,12 @@ export default withTracker(() => {
       tsx_progress: TheSkyXInfos.findOne({name: 'tsx_progress'}),
       tsx_total:  TheSkyXInfos.findOne({name: 'tsx_total'}),
       tsx_message: TheSkyXInfos.findOne({name: 'tsx_message'}),
+      scheduler_running: TheSkyXInfos.findOne({name: 'scheduler_running'}),
       scheduler_report: TheSkyXInfos.findOne({name: 'scheduler_report'}),
       tsxIP: TheSkyXInfos.findOne({name: 'ip'}),
       tsxPort: TheSkyXInfos.findOne({name: 'port'}),
       tsxInfo: TheSkyXInfos.find({}).fetch(),
-      srvLog: AppLogsDB.find({}).fetch(),
+      srvLog: AppLogsDB.find({}, {sort:{time:-1}}).fetch(10),
       filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
       // targetSessions: TargetSessions.find({}, { sort: { enabledActive: 0, targetFindName: 1 } }).fetch(),

@@ -455,6 +455,52 @@ class Toolbox extends Component {
 
   };
 
+  rotateTool( state ) {
+    if( state == 'Stop') {
+        return (
+          <div>
+            Enter the Angle desired (rotator position reported below)
+            <Button.Group icon>
+               <Button  onClick={this.getCurrentTarget.bind(this)}>FOV Angle</Button>
+            </Button.Group>
+          </div>
+        )
+    }
+    else {
+      return (
+        <div>
+          Enter the Angle desired (rotator position reported below)
+          <Button.Group icon>
+             <Button  disabled='true' onClick={this.getCurrentTarget.bind(this)}>FOV Angle</Button>
+          </Button.Group>
+        </div>
+      )
+    }
+  }
+
+  calibrateTools( state ) {
+    if( state == 'Stop' ) {
+        return (
+          <div>
+          Perhaps add ATL/Az for positioning:
+           <Button.Group icon>
+              <Button  onClick={this.calibrateGuider.bind(this)}>Calibrate</Button>
+           </Button.Group>
+         </div>
+        )
+    }
+    else {
+      return (
+        <div>
+        Perhaps add ATL/Az for positioning:
+         <Button.Group icon>
+            <Button  disabled='true' onClick={this.calibrateGuider.bind(this)}>Calibrate</Button>
+         </Button.Group>
+       </div>
+      )
+    }
+  }
+
   render() {
 
     var tsx_actions = this.getTsxActions();
@@ -463,8 +509,9 @@ class Toolbox extends Component {
     var TOTAL = '';
     try {
       TARGETNAME = this.props.targetName.value;
-      PROGRESS = this.props.tsx_progress.value
-      TOTAL = this.props.tsx_total.value
+      PROGRESS = this.props.tsx_progress.value;
+      TOTAL = this.props.tsx_total.value;
+
     } catch (e) {
       TARGETNAME = 'Initializing';
       PROGRESS = 0;
@@ -474,16 +521,10 @@ class Toolbox extends Component {
     return (
       <div>
          <Segment raised>
-         Perhaps add ATL/Az for positioning:
-          <Button.Group icon>
-             <Button  onClick={this.calibrateGuider.bind(this)}>Calibrate</Button>
-          </Button.Group>
+         {this.calibrateTools( this.props.scheduler_running.value )}
         </Segment>
         <Segment raised>
-        Enter the Angle desired (rotator position reported below)
-          <Button.Group icon>
-             <Button  onClick={this.getCurrentTarget.bind(this)}>FOV Angle</Button>
-          </Button.Group>
+          {this.rotateTool( this.props.scheduler_running.value )}
         </Segment>
         <Segment.Group  size='mini' horizontal>
           <Segment>
