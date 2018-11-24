@@ -23,7 +23,7 @@ import { Session } from 'meteor/session'
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { Confirm, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
+import { Header, Confirm, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
 
 import {
   tsx_ServerStates,
@@ -83,9 +83,17 @@ class Toolbox extends Component {
       isCLSRepeatEnabled: false,
       isCalibrationEnabled: false,
 
+      tool_calibrate_via: '',
+      tool_calibrate_ra: '',
+      tool_calibrate_dec: '',
+      tool_rotator_num: '',
+      tool_rotator_type: '',
   };
 
-  handleChange = (e, { name, value }) => this.setState({ [name]: value });
+  handleChange = (e, { name, value }) => {
+    this.setState({ [name]: value.trim() });
+    this.saveDefaultStateValue( name, value.trim() );
+  };
 
   // requires the ".bind(this)", on the callers
   handleToggle = (e, { name, value }) => {
@@ -110,78 +118,28 @@ class Toolbox extends Component {
       return;
     }
 
-    if( typeof nextProps.reports != 'undefined'  ) {
-      this.setState({
-        defaultSoftPark: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'defaultSoftPark';
-        }).value),
-      });
-    }
     if( typeof nextProps.tsxInfo != 'undefined'  ) {
 
-      var isFlip = Boolean(nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultMeridianFlip';
-      }).value);
-
       this.setState({
-        defaultMeridianFlip: isFlip,
-      });
-
+        tool_calibrate_via: nextProps.tsxInfo.find(function(element) {
+          return element.name == 'tool_calibrate_via';
+      }).value});
       this.setState({
-        defaultSoftPark: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'defaultSoftPark';
-        }).value),
-      });
+        tool_calibrate_ra: nextProps.tsxInfo.find(function(element) {
+          return element.name == 'tool_calibrate_ra';
+      }).value});
       this.setState({
-        isTwilightEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'isTwilightEnabled';
-        }).value),
-      });
+        tool_calibrate_dec: nextProps.tsxInfo.find(function(element) {
+          return element.name == 'tool_calibrate_dec';
+      }).value});
       this.setState({
-        isFocus3Enabled: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'isFocus3Enabled';
-        }).value),
-      });
+        tool_rotator_type: nextProps.tsxInfo.find(function(element) {
+          return element.name == 'tool_rotator_type';
+      }).value});
       this.setState({
-        isFocus3Binned: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'isFocus3Binned';
-        }).value),
-      });
-      this.setState({
-        defaultCLSEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'defaultCLSEnabled';
-        }).value),
-      });
-      this.setState({
-        enableImagingCooler: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'enableImagingCooler';
-        }).value),
-      });
-      this.setState({
-        isAutoguidingEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'isAutoguidingEnabled';
-        }).value),
-      });
-      this.setState({
-        isGuideSettlingEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'isGuideSettlingEnabled';
-        }).value),
-      });
-      this.setState({
-        isFOVAngleEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'isFOVAngleEnabled';
-        }).value),
-      });
-      this.setState({
-        isCLSRepeatEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'isCLSRepeatEnabled';
-        }).value),
-      });
-      this.setState({
-        isCalibrationEnabled: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'isCalibrationEnabled';
-        }).value),
-      });
+        tool_rotator_num: nextProps.tsxInfo.find(function(element) {
+          return element.name == 'tool_rotator_num';
+      }).value});
     }
   }
 
@@ -211,291 +169,168 @@ class Toolbox extends Component {
 
   // *******************************
 
-  startSessions() {
-    Meteor.call("startScheduler", function (error, result) {
-      }.bind(this));
-  }
 
-  closeMonitorDisplay() {
-    this.setState({monitorDisplay: false});
-  }
-
-  totalTaken() {
-    try {
-      return TargetSessions.findOne({_id: this.props.target._id}).totalImagesTaken();
-    } catch (e) {
-      // Do nothing
-    }
-    return 0;
-  }
-
-  totalPlanned() {
-    try {
-      return TargetSessions.findOne({_id: this.props.target._id}).totalImagesPlanned();
-    } catch (e) {
-      // Do nothing
-    }
-    return 0;
-  }
-
-  confirmPlayScheduler() {
-    this.setState({confirmOpen: true});
-  }
-
-  playScheduler() {
-    Meteor.call("startScheduler", function (error, result) {
-      this.forceUpdate();
-      }.bind(this));
-  }
-
-  pauseScheduler() {
-    Meteor.call("pauseScheduler", function (error, result) {
-      }.bind(this));
-  }
-
-  stopScheduler() {
-    // this.tsxStopSession();
-    Meteor.call("stopScheduler", function (error, result) {
-        // identify the error
-        tsx_UpdateServerState(tsx_ServerStates.imagingSessionId, '' );
-        tsx_UpdateServerState(tsx_ServerStates.targetImageName, '');
-        tsx_UpdateServerState(tsx_ServerStates.targetDEC, '_');
-        tsx_UpdateServerState(tsx_ServerStates.targetRA, '_');
-        tsx_UpdateServerState(tsx_ServerStates.targetALT, '_');
-        tsx_UpdateServerState(tsx_ServerStates.targetAZ, '_');
-        tsx_UpdateServerState(tsx_ServerStates.targetHA, '_');
-        tsx_UpdateServerState(tsx_ServerStates.targetTransit, '_');
-//        tsx_UpdateServerState(tsx_ServerStates.currentStage, 'Stopped');
-
-      }.bind(this));
-  }
-
-  getCurrentTarget() {
-    var tid = this.props.targetSessionId[0].value;
-    var target = TargetSessions.findOne({_id: tid });
-    // #TODO report no valid target
-
-
-    return target;
+  rotateCamera() {
+    Meteor.call( 'rotateCamera', function(error, result) {
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+    }.bind(this));
   }
 
   calibrateGuider() {
-    Meteor.call( 'calibrateGuider', function(error, result) {
+    Meteor.call( 'rotateCamera', function(error, result) {
       console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
   }
 
-
-  testTryTarget() {
-    Meteor.call( 'testTryTarget', this.getCurrentTarget(), function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  testPicking() {
-    Meteor.call( 'testTargetPicking', function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  testEndConditions() {
-    Meteor.call( 'testEndConditions', function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  startImaging() {
-
-    Meteor.call( 'startImaging', this.getCurrentTarget(), function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  testDither() {
-
-    Meteor.call( 'testDither', this.getCurrentTarget(),  function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  testGuide() {
-
-    Meteor.call( 'testGuide', this.getCurrentTarget(),  function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  testSolve() {
-
-    Meteor.call( 'testSolve', this.getCurrentTarget(),  function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  testFocus3 () {
-
-    Meteor.call( 'testFocus3', this.getCurrentTarget(),  function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  testAbortGuide () {
-
-    Meteor.call( 'testAbortGuide', this.getCurrentTarget(),  function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  testMatchRotation() {
-
-    Meteor.call( 'testMatchRotation', this.getCurrentTarget(),  function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  getTsxActions() {
-
-    var actionArray = [];
-    actionArray.push({
-      key: 'Pick',
-      text: 'test Picking target',
-      value: 'Pick'
-    });
-    actionArray.push({
-      key: 'Test End',
-      text: 'Test End',
-      value: 'Test End'
-    });
-    actionArray.push({
-      key: '@Focus3',
-      text: '@Focus3',
-      value: '@Focus3'
-    });
-    actionArray.push({
-      key: 'Dither',
-      text: 'Dither',
-      value: 'Dither'
-    });
-    actionArray.push({
-      key: 'Guide',
-      text: 'Guide',
-      value: 'Guide'
-    });
-    actionArray.push({
-      key: 'Solve',
-      text: 'Solve',
-      value: 'Solve'
-    });
-    actionArray.push({
-      key: 'Test Angle',
-      text: 'Test Angle',
-      value: 'Test Angle'
-    });
-    actionArray.push({
-      key: 'Start Series',
-      text: 'Start Series',
-      value: 'Start Series'
-    });
-    actionArray.push({
-      key: 'AbortGuide',
-      text: 'AbortGuide',
-      value: 'AbortGuide'
-    });
-
-
-    return actionArray;
-  }
-
-  handleTsx_actionsChange = (e, { name, value }) => {
-    this.setState({ [name]: value })
-  };
-
-  dropDownAction() {
-
-    var value = this.state.tsx_action;
-
-    if( value == 'Pick' ) {
-      this.testPicking();
-    }
-    else if ( value == 'Test End' ) {
-      this.testEndConditions();
-    }
-    else if ( value == '@Focus3' ) {
-      this.testFocus3();
-    }
-    else if ( value == 'Dither' ) {
-      this.testDither();
-    }
-    else if ( value == 'Guide' ) {
-      this.testGuide();
-    }
-    else if ( value == 'Solve' ) {
-      this.testSolve();
-    }
-    else if ( value == 'Test Angle' ) {
-      this.testMatchRotation();
-    }
-    else if ( value == 'Start Series' ) {
-      this.startImaging();
-    }
-    else if ( value == 'AbortGuide' ) {
-      this.testAbortGuiding();
-    }
-
-  };
-
-  rotateTool( state ) {
+  rotateTool( state, ROTATOR_TYPE, ROTATOR_NUM ) {
+    var typeOptions =
+    [
+      {
+        text: 'Position',
+        value: 'Position',
+      },
+      {
+        text: 'Angle',
+        value: 'Angle',
+      },
+      {
+        text: '',
+        value: '',
+      },
+    ];
     if( state == 'Stop') {
-        return (
-          <div>
-            Enter the Angle desired (rotator position reported below)
-            <Button.Group icon>
-               <Button  onClick={this.getCurrentTarget.bind(this)}>FOV Angle</Button>
-            </Button.Group>
-          </div>
-        )
+      return (
+        <div>
+          <Button.Group icon>
+               <Button  onClick={this.rotateCamera.bind(this)}>Set FOV</Button>
+          </Button.Group>
+          <Dropdown
+            placeholder='Set via...'
+            selection options={typeOptions}
+            name='tool_rotator_type'
+            value={ROTATOR_TYPE}
+            onChange={this.handleChange}
+          />
+          <br/>Enter the Angle desired (rotator position reported below)
+          <br/>Position or Degrees: <Input
+            name='tool_rotator_num'
+            placeholder='eg. 19826, or 0.5'
+            value={ROTATOR_NUM}
+            onChange={this.handleChange}/>
+        </div>
+      )
     }
     else {
       return (
         <div>
-          Enter the Angle desired (rotator position reported below)
           <Button.Group icon>
-             <Button  disabled='true' onClick={this.getCurrentTarget.bind(this)}>FOV Angle</Button>
+             <Button  disabled='true' onClick={this.rotateCamera.bind(this)}>Set FOV</Button>
           </Button.Group>
+          <Dropdown
+            placeholder='Set via...'
+            selection options={typeOptions}
+            name='tool_rotator_type'
+            value={ROTATOR_TYPE}
+            onChange={this.handleChange}
+          />
+          <br/>Enter the Angle desired (rotator position reported below)
+          <br/>Position or Degrees: <Input
+            name='tool_rotator_num'
+            placeholder='eg. 19826, or 0.5'
+            value={ROTATOR_NUM}
+            onChange={this.handleChange}/>
         </div>
       )
     }
   }
 
-  calibrateTools( state ) {
+  calibrateTools( state
+    , calType
+    , calRa
+    , calDec
+  ) {
+   // var CALIBRATE_TYPE = '';
+   // var CALIBRATE_RA = '';
+   // var CALIBRATE_DEC = '';
+   //
+   // try {
+   //   CALIBRATE_TYPE = calType.value;
+   //   CALIBRATE_RA = calRa.value;
+   //   CALIBRATE_DEC = calDec.value;
+   // } catch (e) {
+   //   CALIBRATE_TYPE = '';
+   //   CALIBRATE_RA = '';
+   //   CALIBRATE_DEC = '';
+   // }
+
+    var slewOptions =
+    [
+      {
+        text: 'Ra/Dec',
+        value: 'Ra/Dec',
+      },
+      {
+        text: 'Alt/Az',
+        value: 'Alt/Az  ',
+      },
+      {
+        text: '',
+        value: '',
+      },
+    ];
     if( state == 'Stop' ) {
-        return (
-          <div>
-          Perhaps add ATL/Az for positioning:
-           <Button.Group icon>
-              <Button  onClick={this.calibrateGuider.bind(this)}>Calibrate</Button>
-           </Button.Group>
-         </div>
-        )
+      return (
+        <div>
+        <Button.Group icon>
+            <Button  onClick={this.calibrateGuider.bind(this)}>Calibrate</Button>
+         </Button.Group>
+         <Dropdown
+            name='tool_calibrate_via'
+            placeholder='Slew via...'
+            selection options={slewOptions}
+            value={calType}
+            onChange={this.handleChange}
+          />
+         <br/>(Optional provide a location)
+         <br/>Location: <Form.Input
+           name='tool_calibrate_ra'
+           placeholder='Ra/Alt: '
+           value={calRa}
+           onChange={this.handleChange}/>
+         <Form.Input
+           name='tool_calibrate_dec'
+           placeholder='Dec/Az: '
+           value={calDec}
+           onChange={this.handleChange}/>
+       </div>
+      )
     }
     else {
       return (
         <div>
-        Perhaps add ATL/Az for positioning:
          <Button.Group icon>
             <Button  disabled='true' onClick={this.calibrateGuider.bind(this)}>Calibrate</Button>
          </Button.Group>
+         <Dropdown
+            name='tool_calibrate_via'
+            placeholder='Slew via...'
+            selection options={slewOptions}
+            value={calType}
+            onChange={this.handleChange}
+          />
+         <br/>(Optional provide a location)
+         <br/>Location: <Form.Input
+           name='tool_calibrate_ra'
+           placeholder='Ra/Alt: '
+           value={calRa}
+           onChange={this.handleChange}/>
+         <Form.Input
+           name='tool_calibrate_dec'
+           placeholder='Dec/Az: '
+           value={calDec}
+           onChange={this.handleChange}/>
        </div>
       )
     }
@@ -503,15 +338,14 @@ class Toolbox extends Component {
 
   render() {
 
-    var tsx_actions = this.getTsxActions();
     var TARGETNAME ='';
     var PROGRESS = '';
     var TOTAL = '';
+
     try {
       TARGETNAME = this.props.targetName.value;
       PROGRESS = this.props.tsx_progress.value;
       TOTAL = this.props.tsx_total.value;
-
     } catch (e) {
       TARGETNAME = 'Initializing';
       PROGRESS = 0;
@@ -520,11 +354,22 @@ class Toolbox extends Component {
 
     return (
       <div>
-         <Segment raised>
-         {this.calibrateTools( this.props.scheduler_running.value )}
+        <Segment raised>
+          <Header>Calibrate Autoguider</Header>
+         {this.calibrateTools(
+           this.props.scheduler_running.value
+           , this.state.tool_calibrate_via
+           , this.state.tool_calibrate_ra
+           , this.state.tool_calibrate_dec
+         )}
         </Segment>
         <Segment raised>
-          {this.rotateTool( this.props.scheduler_running.value )}
+        <Header>Rotate FOV</Header>
+          {this.rotateTool(
+            this.props.scheduler_running.value
+            , this.state.tool_rotator_type
+            , this.state.tool_rotator_num
+          )}
         </Segment>
         <Segment.Group  size='mini' horizontal>
           <Segment>
@@ -562,11 +407,6 @@ class Toolbox extends Component {
   }
 }
 export default withTracker(() => {
-
   return {
-    // reports: TargetReports.find().fetch(),
-    // tsxInfo: TheSkyXInfos.find({}).fetch(),
-    // takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
-    // targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
 };
 })(Toolbox);

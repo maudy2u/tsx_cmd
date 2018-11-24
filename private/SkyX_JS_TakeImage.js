@@ -16,6 +16,7 @@ var isGuideSettlingEnabled = $007;
 
 var CCDSC = ccdsoftCamera;
 var CCDAG = ccdsoftAutoguider;
+var TSXI = ccdsoftCameraImage;
 var wait = ((CCDAG.AutoguiderExposureTime + CCDAG.Delay + 1) * 1000);
 
 function isGuidingGood( camImageScale, guiderImageScale, pixelTolerance ) {
@@ -125,28 +126,26 @@ while( chk_guiding && (chk_count < max_chk) && (guideQuality === "Poor") ) {
 CCDSC.TakeImage();
 
 // *******************************
-// Setup the object name an update the fits file
-if( tName != '$003' ) {
-	//open TSX camera and get the last image
-	var success = CCDSC.AttachToActiveImager();
+//Add some FITSKeywords for future reference
+//open TSX camera and get the last image
+var success = TSXI.AttachToActiveImager();
 
-	//Add some FITSKeywords for future reference
-	//Correct the OBJECT Keyword if using coordinates instead of a target name
-	CCDSC.setFITSKeyword("OBJECT", tName);
-
-	//Enter the rotator angle
-	if( CCDSC.focIsConnected ) {
-	  CCDSC.setFITSKeyword("FOCUS_POS", tsxc.focPosition);
-	}
-	if( CCDSC.rotatorIsConnected ) {
-	  CCDSC.setFITSKeyword("ROTATOR_POS", tsxc.rotatorPositionAngle());
-	}
-
-	//Set save path and save
-	//tsxi.Path = targetImageDataPath;
-
-	tsxi.Save();
+//Enter the focsuer position
+if( CCDSC.focIsConnected ) {
+  tsxi.setFITSKeyword("FOCUS_POS", CCDSC.focPosition);
 }
+//Enter the rotator angle
+if( CCDSC.rotatorIsConnected ) {
+  tsxi.setFITSKeyword("ROTATOR_POS", CCDSC.rotatorPositionAngle());
+}
+//Enter the custom object name
+if( tName != '$003' ) {
+	//Correct the OBJECT Keyword if using coordinates instead of a target name
+	TSXI.setFITSKeyword("OBJECT", tName);
+}
+//Set save path and save
+//tsxi.Path = targetImageDataPath;
+tsxi.Save();
 
 Out;
 /* Socket End Packet */

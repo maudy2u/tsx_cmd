@@ -17,8 +17,9 @@ tsx cmd - A web page to send commands to TheSkyX server
  */
 
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
-import { Session } from 'meteor/session'
+import TrackerReact from 'meteor/ultimatejs:tracker-react'
+// import ReactDOM from 'react-dom';
+// import { Session } from 'meteor/session'
 
 // used for log files
 import { Logger }     from 'meteor/ostrio:logger';
@@ -27,7 +28,7 @@ import { LoggerFile } from 'meteor/ostrio:loggerfile';
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { Form, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Radio } from 'semantic-ui-react'
+import { TextArea, Form, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Radio } from 'semantic-ui-react'
 
 // Import the API Model
 import {
@@ -64,7 +65,7 @@ import ReactSimpleRange from 'react-simple-range';
 import Timekeeper from 'react-timekeeper';
 
 // App component - represents the whole app
-class App extends Component {
+class App extends TrackerReact(Component) {
 
   state = {
     activeMenu: 'Targets',
@@ -338,16 +339,28 @@ class App extends Component {
     const { activeMenu  } = this.state;
     return(
       <div>
-        <Menu pointing secondary>
-          <Menu.Item name='Monitor' active={activeMenu === 'Monitor'} onClick={this.handleMenuItemClick} />
-          <Menu.Item name='Targets' active={activeMenu === 'Targets'} onClick={this.handleMenuItemClick} />
-          <Menu.Item name='Series' active={activeMenu === 'Series'} onClick={this.handleMenuItemClick} />
-          <Menu.Item name='Flats' active={activeMenu === 'Flats'} onClick={this.handleMenuItemClick} />
-          <Menu.Item name='Toolbox' active={activeMenu === 'Toolbox'} onClick={this.handleMenuItemClick} />
-          <Menu.Menu position='right'>
-            <Menu.Item name='Devices' active={activeMenu === 'Devices'} onClick={this.handleMenuItemClick} />
-            <Menu.Item name='Settings' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick} />
-          </Menu.Menu>
+        <Menu tabular icon>
+          <Menu.Item name='Monitor' active={activeMenu === 'Monitor'} onClick={this.handleMenuItemClick}>
+            <Icon name='play' />
+          </Menu.Item>
+          <Menu.Item name='Targets' active={activeMenu === 'Targets'} onClick={this.handleMenuItemClick}>
+            <Icon name='target' />
+          </Menu.Item>
+          <Menu.Item name='Series' active={activeMenu === 'Series'} onClick={this.handleMenuItemClick}>
+            <Icon name='list ol' />
+          </Menu.Item>
+          <Menu.Item name='Flats' active={activeMenu === 'Flats'} onClick={this.handleMenuItemClick}>
+            <Icon name="area graph" />
+          </Menu.Item>
+          <Menu.Item name='Toolbox' active={activeMenu === 'Toolbox'} onClick={this.handleMenuItemClick}>
+            <Icon name='briefcase' />
+          </Menu.Item>
+          <Dropdown icon='dropdown'>
+            <Dropdown.Menu>
+              <Dropdown.Item name='Devices' icon='power cord' active={activeMenu === 'Devices'} onClick={this.handleMenuItemClick}/>
+              <Dropdown.Item name='Settings' icon='configure' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick}/>
+            </Dropdown.Menu>
+          </Dropdown>
         </Menu>
         {this.renderMenuSegments( MENU )}
       </div>
@@ -380,6 +393,7 @@ class App extends Component {
             targetName={this.props.targetName}
             tsxInfo={this.props.tsxInfo}
             scheduler_running={this.props.scheduler_running}
+            srvLog={this.props.srvLog}
           />
         </div>
       )
@@ -421,6 +435,7 @@ class App extends Component {
         <Toolbox
           scheduler_report={this.props.scheduler_report}
           scheduler_running={this.props.scheduler_running}
+          tsxInfo = {this.props.tsxInfo}
         />
       )
     } else if (this.state.activeMenu == 'Flats') {
@@ -552,7 +567,7 @@ class App extends Component {
     if( state == 'Stop') {
       return (
         <div>
-          <Button icon='refresh' onClick={this.connectToTSX.bind(this)}/>
+          <Button icon='wifi' onClick={this.connectToTSX.bind(this)}/>
           <Button icon='car' onClick={this.park.bind(this)}/>
         </div>
       )
@@ -560,8 +575,8 @@ class App extends Component {
     else {
       return (
         <div>
-          <Button disabled='true' icon='refresh' onClick={this.connectToTSX.bind(this)}/>
-          <Button disabled='true' icon='car' onClick={this.park.bind(this)}/>
+          <Button disabled icon='wifi' onClick={this.connectToTSX.bind(this)}/>
+          <Button disabled icon='car' onClick={this.park.bind(this)}/>
         </div>
       )
     }
@@ -593,6 +608,17 @@ class App extends Component {
       VERSION = '...';
       DATE = '...';
       RUNNING = '';
+    }
+    var LOG = [];
+    var num = 0;
+    try {
+      num = this.props.srvLog.length;
+    }
+    finally {
+      for (var i = num-1; i > -1; i--) { // this puts most resent line on top
+          var log = this.props.srvLog[i];
+          LOG = LOG + '[' + log.level +']' + log.message + '\n';
+      }
     }
 
     return (
@@ -658,13 +684,9 @@ class App extends Component {
               </Modal.Actions>
             </Modal>
           </div>
-          {this.props.srvLog.map((target)=>{
-            return (
-              <div>
-              [{target.level}] {target.additional} {target.message}
-              </div>
-            )})}
-          version: {VERSION}, date: {DATE}, tsx cmd - A web page to send commands to TheSkyX server
+          <Label>tsx cmd - A web page to send commands to TheSkyX server</Label>
+          <Label>version <Label.Detail>{VERSION}</Label.Detail></Label>
+          <Label>date <Label.Detail>{DATE}</Label.Detail></Label>
       </div>
     );
   }
@@ -674,6 +696,12 @@ class App extends Component {
 export default withTracker(() => {
 
     return {
+      tool_calibrate_via: TheSkyXInfos.findOne({name: 'tool_calibrate_via'}),
+      tool_calibrate_ra: TheSkyXInfos.findOne({name: 'tool_calibrate_ra'}),
+      tool_calibrate_dec: TheSkyXInfos.findOne({name: 'tool_calibrate_dec'}),
+      tool_rotator_num: TheSkyXInfos.findOne({name: 'tool_rotator_num'}),
+      tool_rotator_type: TheSkyXInfos.findOne({name: 'tool_rotator_type'}),
+
       tsx_version: TheSkyXInfos.findOne({name: 'tsx_version'}),
       tsx_date: TheSkyXInfos.findOne({name: 'tsx_date'}),
       flatSettings: TheSkyXInfos.findOne({name: 'flatSettings'}),

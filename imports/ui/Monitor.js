@@ -23,7 +23,7 @@ import { Session } from 'meteor/session'
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { Confirm, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
+import { Grid, TextArea, Divider, Confirm, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
 
 import {
   tsx_ServerStates,
@@ -539,6 +539,18 @@ class Monitor extends Component {
       TOTAL = 0;
     }
 
+    var LOG = [];
+    var num = 0;
+    try {
+      num = this.props.srvLog.length;
+    }
+    finally {
+      for (var i = num-1; i > -1; i--) { // this puts most resent line on top
+          var log = this.props.srvLog[i];
+          LOG = LOG + '[' + log.level +']' + log.message + '\n';
+      }
+    }
+
     return (
       <div>
          <Segment raised>
@@ -546,43 +558,29 @@ class Monitor extends Component {
            <Button.Group icon>
             {this.playButtons(RUNNING) }
           </Button.Group>
-          <Progress value={PROGRESS} total={TOTAL} progress='ratio'>Processing</Progress>
+          <br /><Progress value={PROGRESS} total={TOTAL} progress='ratio'>Processing</Progress>
         </Segment>
-        <Segment.Group  size='mini' horizontal>
-          <Segment>
-            <Form.Group>
+        <Segment raised>
+          <Grid columns={3}>
+            <Grid.Column width={4}>
               <Label>Atl <Label.Detail>{Number(this.props.scheduler_report.value.ALT).toFixed(4)}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
-              <Label>Az <Label.Detail>{this.props.scheduler_report.value.AZ}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
-              <Label>HA <Label.Detail>{Number(this.props.scheduler_report.value.HA).toFixed(4)}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
-              <Label>Transit <Label.Detail>{Number(this.props.scheduler_report.value.TRANSIT).toFixed(4)}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
-              <Label>Pointing <Label.Detail>{this.props.scheduler_report.value.pointing}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
-              <Label>Rotator <Label.Detail>{Number(this.props.scheduler_report.value.focusPostion).toFixed(4)}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
-              <Label>Angle <Label.Detail>{Number(this.props.scheduler_report.value.ANGLE).toFixed(4)}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
-              <Label>RA <Label.Detail>{Number(this.props.scheduler_report.value.RA).toFixed(4)}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
-              <Label>DEC <Label.Detail>{Number(this.props.scheduler_report.value.DEC).toFixed(4)}</Label.Detail></Label>
-            </Form.Group>
-          </Segment>
-        </Segment.Group>
+              <br /><Label>Az <Label.Detail>{this.props.scheduler_report.value.AZ}</Label.Detail></Label>
+              <br /><Label>HA <Label.Detail>{Number(this.props.scheduler_report.value.HA).toFixed(4)}</Label.Detail></Label>
+              <br /><Label>Transit <Label.Detail>{Number(this.props.scheduler_report.value.TRANSIT).toFixed(4)}</Label.Detail></Label>
+              <br /><Label>Pointing <Label.Detail>{this.props.scheduler_report.value.pointing}</Label.Detail></Label>
+              <br /><Label>Rotator <Label.Detail>{Number(this.props.scheduler_report.value.focusPostion).toFixed(4)}</Label.Detail></Label>
+              <br /><Label>Angle <Label.Detail>{Number(this.props.scheduler_report.value.ANGLE).toFixed(4)}</Label.Detail></Label>
+              <br /><Label>RA <Label.Detail>{Number(this.props.scheduler_report.value.RA).toFixed(4)}</Label.Detail></Label>
+              <br /><Label>DEC <Label.Detail>{Number(this.props.scheduler_report.value.DEC).toFixed(4)}</Label.Detail></Label>
+            </Grid.Column>
+            <Grid.Column stretched >
+              <TextArea value={LOG} rows={3} style={{ minHeight: 200, minWidth:225 }} />
+            </Grid.Column>
+          </Grid>
+        </Segment>
         <Segment.Group size='mini'>
           <Segment>
             <h3 className="ui header">Session Controls</h3>
-            <Form.Group>
               <Form.Checkbox
                 label='Enable Meridian Flip '
                 name='defaultMeridianFlip'
@@ -607,9 +605,7 @@ class Monitor extends Component {
                 checked={this.state.defaultSoftPark}
                 onChange={this.handleToggle.bind(this)}
               />
-            </Form.Group>
-            <Form.Group>
-              <Form.Checkbox
+              <br /><Form.Checkbox
                 label='Enable FOV Angle Matching '
                 name='isFOVAngleEnabled'
                 toggle
@@ -617,8 +613,6 @@ class Monitor extends Component {
                 checked={this.state.isFOVAngleEnabled}
                 onChange={this.handleToggle.bind(this)}
               />
-            </Form.Group>
-            <Form.Group>
               <Form.Checkbox
                 label='Enable Autofocus (@Focus3) '
                 name='isFocus3Enabled'
@@ -627,8 +621,6 @@ class Monitor extends Component {
                 checked={this.state.isFocus3Enabled}
                 onChange={this.handleToggle.bind(this)}
               />
-            </Form.Group>
-            <Form.Group>
               <Form.Checkbox
                 label='Enable Autoguiding '
                 name='isAutoguidingEnabled'
@@ -661,8 +653,6 @@ class Monitor extends Component {
                 checked={this.state.isFocus3Binned}
                 onChange={this.handleToggle.bind(this)}
               /> */}
-            </Form.Group>
-            <Form.Group>
               {/* <Form.Checkbox
                 label='Enable Imaging Cooler '
                 name='enableImagingCooler'
@@ -679,9 +669,6 @@ class Monitor extends Component {
                 checked={this.state.isCLSRepeatEnabled}
                 onChange={this.handleToggle.bind(this)}
               />
-
-            </Form.Group>
-            <Form.Group>
               <Form.Checkbox
                 label='Enable Twilight Check '
                 name='isTwilightEnabled'
@@ -690,7 +677,6 @@ class Monitor extends Component {
                 checked={this.state.isTwilightEnabled}
                 onChange={this.handleToggle.bind(this)}
               />
-            </Form.Group>
           </Segment>
         </Segment.Group>
         {/*  */}

@@ -341,7 +341,7 @@ class TargetEditor extends Component {
                   placeholder='Describe the session'
                   value={this.state.description}
                   onChange={this.handleChange}/>
-                  <Form.Input
+                <Form.Input
                       label='Rotator Position (optional)'
                       name='rotator_position'
                       placeholder='Position for rotator (i.e. used with flats)'

@@ -65,11 +65,12 @@ export function tsxLog( msg, data ) {
   }
   logCon.log( msg, data );
   logSession.log( msg, data );
-  var dt = new Date();
-  if( data != '' ) {
-    data = '= ' + data;
-  }
-  logDB.log( '|'+ formatDate(dt) +'|' + msg + ' ' + data );
+  // var dt = new Date();
+  // if( data != '' ) {
+  //   data = '= ' + data;
+  // }
+//  logDB.log( '|'+ formatDate(dt) +'|' + msg + ' ' + data );
+  logDB.log( msg + ' ' + data );
 }
 
 export function tsxWarn( msg, data ) {
@@ -78,11 +79,12 @@ export function tsxWarn( msg, data ) {
   }
   logCon.warn( msg, data );
   logSession.warn( msg,  data );
-  var dt = new Date();
-  if( data != '' ) {
-    data = '= ' + data;
-  }
-  logDB.warn( '|'+ formatDate(dt) +'|' + msg + ' ' + data );
+  // var dt = new Date();
+  // if( data != '' ) {
+  //   data = '= ' + data;
+  // }
+  // logDB.warn( '|'+ formatDate(dt) +'|' + msg + ' ' + data );
+  logDB.warn( msg + ' ' + data );
 }
 
 export function tsxErr( msg, data ) {
@@ -91,11 +93,7 @@ export function tsxErr( msg, data ) {
   }
   logCon.error( msg, data );
   logSession.error( msg, data );
-  var dt = new Date();
-  if( data != '' ) {
-    data = '= ' + data;
-  }
-  logDB.error( '|'+ formatDate(dt) +'|' + msg + ' ' + data );
+  logDB.error( msg + ' ' + data );
 }
 
 export function tsxDebug( msg, data ) {
@@ -105,11 +103,7 @@ export function tsxDebug( msg, data ) {
   }
   logCon.debug( msg, data );
   logSession.debug( msg, data );
-  var dt = new Date();
-  if( data != '' ) {
-    data = '= ' + data;
-  }
-  logDB.debug( '|'+ formatDate(dt) +'|' + msg + ' ' + data );
+  logDB.debug( msg + ' ' + data );
 }
 
 export function tsxInfo( msg, data ) {

@@ -97,6 +97,8 @@ export const tsx_ServerStates = {
   isGuideSettlingEnabled: 'isGuideSettlingEnabled',
   guidingPixelErrorTolerance: 'guidingPixelErrorTolerance',
   guiderPixelSize: 'guiderPixelSize',
+
+  fovAngle: 'fovAngle',
   fovPositionAngleTolerance: 'fovPositionAngleTolerance',
   isFOVAngleEnabled: 'isFOVAngleEnabled',
 
@@ -108,9 +110,17 @@ export const tsx_ServerStates = {
   defaultCLSRepeat: 'defaultCLSRepeat',
   isCLSRepeatEnabled: 'isCLSRepeatEnabled',
 
-  flatSettings: 'flatSettings',
   isCalibrationEnabled: 'isCalibrationEnabled',
   calibrationFrameSize: 'calibrationFrameSize',
+
+  tool_calibrate_via: 'tool_calibrate_via',
+  tool_calibrate_ra: 'tool_calibrate_ra',
+  tool_calibrate_dec: 'tool_calibrate_dec',
+
+  tool_rotator_type: 'tool_rotator_type',
+  tool_rotator_num: 'tool_rotator_num',
+
+  flatSettings: 'flatSettings',
   flatPosition: 'flatPosition',
 };
 

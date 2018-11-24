@@ -56,6 +56,7 @@ import {
   tsx_IsParked,
   findCalibrationSession,
   CalibrateAutoGuider,
+  tsx_RotateCamera,
 } from './run_imageSession.js';
 
 import { tsx_feeder, stop_tsx_is_waiting } from './tsx_feeder.js';
@@ -423,14 +424,14 @@ Meteor.methods({
      if(
        getSchedulerState() == 'Running'
      ) {
-       tsxLog("Running found");
+       tsxDebug("Running found");
        tsxLog('Scheduler is alreadying running. Nothing to do.');
        return;
      }
      else if(
         getSchedulerState() == 'Stop'
       ) {
-        tsxLog("Stop found");
+        tsxDebug("Stop found");
         startServerProcess();
 
         // Confirm whether the there is a script running...
@@ -477,13 +478,21 @@ Meteor.methods({
        srvStopScheduler();
      }
      else {
-       tsxDebug('Do nothing - Already Stopped');
+       tsxInfo('Do nothing - Already Stopped');
      }
    },
 
    calibrateGuider() {
-     tsxLog('Calibrating AutoGuider');
+     tsxLog(' Calibrating AutoGuider');
      CalibrateAutoGuider();
+   },
+
+   rotateCamera() {
+     tsxLog(' Rotating Camera');
+     var numType = tsx_GetServerStateValue('tool_rotator_type');
+     var num  = tsx_GetServerStateValue('tool_rotator_num');
+
+     tsx_RotateCamera( numType, num );
    },
 
    updateServerState( name, value ) {
