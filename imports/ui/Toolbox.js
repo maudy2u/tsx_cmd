@@ -178,7 +178,7 @@ class Toolbox extends Component {
   }
 
   calibrateGuider() {
-    Meteor.call( 'rotateCamera', function(error, result) {
+    Meteor.call( 'calibrateGuider', function(error, result) {
       console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
@@ -206,19 +206,12 @@ class Toolbox extends Component {
           <Button.Group icon>
                <Button  onClick={this.rotateCamera.bind(this)}>Set FOV</Button>
           </Button.Group>
-          <Dropdown
-            placeholder='Set via...'
-            selection options={typeOptions}
-            name='tool_rotator_type'
-            value={ROTATOR_TYPE}
-            onChange={this.handleChange}
-          />
-          <br/>Enter the Angle desired (rotator position reported below)
-          <br/>Position or Degrees: <Input
+          <Input
             name='tool_rotator_num'
             placeholder='eg. 19826, or 0.5'
             value={ROTATOR_NUM}
             onChange={this.handleChange}/>
+            <br/>Enter the Angle desired (rotator position reported below)
         </div>
       )
     }

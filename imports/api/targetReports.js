@@ -24,37 +24,26 @@ import { Seriess } from './seriess.js'
 // Used to store the sessions for a Target - the actual imaging
 export const TargetReports = new Mongo.Collection('targetReports');
 
-
-// This code only runs on the server
-// Meteor.publish('tsx.ip', function tsxIpPublication() {
-//   var ip = TheSkyXInfos.findOne().ip().text;
-//   console.log('FOund ip: ' + ip);
-//   return ip;
-// });
-// Meteor.publish('tsxPort', function tsxPortPublication() {
-//   return TheSkyXInfos.findOne().port().text;
-// });
-
 /*
-_id
-name: '',
-ra: '',
-dec: '',
-angle: '',
-scale: '',
-azithum:
-direction:
-altitude,
-isValid: true,
-AZ: azimuth,
-ALT: altitude,
-RA:  targetRA,
-DEC: targetDEC,
-HA: targetHA,
-TRANSIT: targetTransit,
-isDark: true,
-sunAltitude: sunAlt,
-updatedAt: new Date(),
+TargetReports = {
+  scale: '',
+  isValid: isValid,
+  AZ: az,
+  direction: az,
+  ALT: alt,
+  RA:  ra,
+  DEC: dec,
+  HA: ha,
+  TRANSIT: transit,
+  isDark: isDark,
+  sunAltitude: sunAlt,
+  focusTemp: focTemp,
+  focusPostion: focPostion,
+  updatedAt: update,
+  ready: ready,
+  readyMsg: readyMsg,
+  pointing: pointing,
+};
 
  */
 

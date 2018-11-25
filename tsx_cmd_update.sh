@@ -73,8 +73,8 @@ echo ""
 # for s in $(echo $tsx_info | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ); do
 #     export $s
 # done
-mv ./bundle ./bundle.${version}.${date}
-echo " ./bundle backed up to ./bundle.${version}.${date}"
+mv ./bundle ./bundle_${version}_${date}
+echo " ./bundle backed up to ./bundle_${version}_${date}"
 
 echo " *******************************"
 echo " TSX_CMD - Extract" ${1}

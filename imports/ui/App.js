@@ -39,6 +39,9 @@ import {
   TargetSessions,
   addNewTargetSession,
  } from '../api/targetSessions.js';
+ import {
+   TargetReports
+ } from '../api/targetReports.js'
 
 import { Filters } from '../api/filters.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
@@ -721,5 +724,6 @@ export default withTracker(() => {
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
       // targetSessions: TargetSessions.find({}, { sort: { enabledActive: 0, targetFindName: 1 } }).fetch(),
       targetSessions: TargetSessions.find({}, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
+      targetReports: TargetReports.find({}).fetch();
   };
 })(App);

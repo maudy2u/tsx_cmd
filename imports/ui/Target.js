@@ -45,6 +45,8 @@ class Target extends Component {
     dec: '0',
     altitude: '0',
     azimuth: '0',
+    currentAlt: '',
+
     description: '',
     priority: 10,
   }
@@ -78,7 +80,6 @@ class Target extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.updateMonitor(nextProps);
   }
 
   eraseProgress() {
@@ -108,10 +109,11 @@ class Target extends Component {
 
     try {
 
-      Meteor.call( 'getTargetReport', this.props.target , function(error, result) {
+      Meteor.call( 'getUpdateTargetReport', this.props.target , function(error, result) {
 
-          var nextProps; // send in dummy var
-          this.updateMonitor(nextProps);
+        if( typeof result != 'undefined') {
+          this.updateMonitor(result);
+        }
 
       }.bind(this));
     } catch (e) {
@@ -119,30 +121,13 @@ class Target extends Component {
     }
   }
 
-  updateMonitor(nextProps) {
+  updateMonitor(report) {
 
-    var prop;
-    try {
-      prop = nextProps.target;
-    } catch (e) {
-      prop = this.props.target;
+    if( typeof report != 'undefined' && report != '') {
+      this.setState({
+        currentAlt: report.ALT,
+      });
     }
-
-    // reports
-    var report = TargetReports.findOne( {
-      target_id: prop._id,
-    });
-
-    // it is possible for a new target to not have a report
-    if( typeof report == 'undefined' ) {
-      return ;
-    }
-    this.setState({
-      ra: report.RA,
-      dec: report.DEC,
-      altitude: report.ALT,
-      azimuth: report.AZ,
-    });
   }
 
   copyEntry() {
@@ -286,9 +271,9 @@ class Target extends Component {
         <Button.Group basic size='mini'>
           <Button icon='refresh' onClick={this.getTargetReport.bind(this)}/>
           <Button icon='location arrow' onClick={this.clsTarget.bind(this)}/>
-          <Button icon='retweet' onClick={this.eraseProgress.bind(this)}/>
+          <Button icon='repeat' onClick={this.eraseProgress.bind(this)}/>
           {/* <Button icon='edit' onClick={this.editEntry.bind(this)}/> */}
-          <Button icon='copy' onClick={this.copyEntry.bind(this)}/>
+          {/* <Button icon='copy' onClick={this.copyEntry.bind(this)}/> */}
           <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
         </Button.Group>
       )
@@ -337,11 +322,12 @@ class Target extends Component {
           {this.props.target.description}
         </Item.Description>
         <Item.Meta>
-        <Label>Images Taken: <Label.Detail>{this.props.target.totalImagesTaken()}/{this.props.target.totalImagesPlanned()}</Label.Detail></Label>
+        <Label>Images: <Label.Detail>{this.props.target.totalImagesTaken()}/{this.props.target.totalImagesPlanned()}</Label.Detail></Label>
         <Label>Priority: <Label.Detail>{this.props.target.priority}</Label.Detail></Label>
-        <Label>Start time: <Label.Detail>{this.props.target.startTime}</Label.Detail></Label>
-        <Label>Stop time: <Label.Detail>{this.props.target.stopTime}</Label.Detail></Label>
-        <Label>Min. Altitude: <Label.Detail>{this.props.target.minAlt}</Label.Detail></Label>
+        <Label>Start: <Label.Detail>{this.props.target.startTime}</Label.Detail></Label>
+        <Label>Stop: <Label.Detail>{this.props.target.stopTime}</Label.Detail></Label>
+        <Label>Min. Alt.: <Label.Detail>{this.props.target.minAlt}</Label.Detail></Label>
+        <Label>Cur. Alt.: <Label.Detail>{this.state.currentAlt}</Label.Detail></Label>
         </Item.Meta>
         <Item.Extra>
           {this.renderTargeting()}

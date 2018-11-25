@@ -328,7 +328,7 @@ export function tsx_AbortGuider() {
 
 // just do calibration
 export function CalibrateAutoGuider() {
-  if( isSchedulerStopped() ) {
+  if( !isSchedulerStopped() ) {
     UpdateStatus(' Calibrating Exiting - Scheduler active');
     return;
   }
@@ -1276,7 +1276,7 @@ function isFocusingNeeded(target) {
 // *******************************
 // 8. End session activities
 // return TRUE if reached end condition
-function UpdateImagingTargetReport( target ) {
+export function UpdateImagingTargetReport( target ) {
   // tsxDebug('************************');
   tsxDebug(' *** UpdateImagingTargetReport: ' + target.targetFindName );
 
@@ -1726,17 +1726,16 @@ function tsx_MatchRotation( target ) {
 }
 
 // **************************************************************
-export function tsx_RotateCamera( type, position ) {
+export function tsx_RotateCamera( position ) {
   // tsxDebug('************************');
-  tsxDebug(' *** tsx_RotateCamera: ' + type + ':' + position);
+  tsxDebug(' *** tsx_RotateCamera: ' + position);
 
   var rotateSucess = false;
   var fovExposure = tsx_GetServerStateValue( 'defaultFOVExposure');
   var pixelSize = tsx_GetServerStateValue( 'imagingPixelSize');
   var focalLength = tsx_GetServerStateValue( 'imagingFocalLength');
   if(
-    typeof type === 'undefined' || type === ''
-    || typeof position === 'undefined' || position === ''
+    typeof position === 'undefined' || position === ''
   ) {
     var str = ' Rotating: Exiting - type or position.';
     UpdateStatus( str );
@@ -1772,7 +1771,6 @@ export function tsx_RotateCamera( type, position ) {
   cmd = cmd.replace('$001', pixelSize);
   cmd = cmd.replace('$002', focalLength);
   cmd = cmd.replace('$003', ACCURACY);
-  cmd = cmd.replace('$004', type);
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     var result = tsx_return.split('|')[0].trim();
     //e.g. Success|imageLinkAng=0.00|targetAngle=0.00|rotPos=-0.3305915915429978|newPos=-0.32895315919987494

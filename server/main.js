@@ -57,6 +57,7 @@ import {
   findCalibrationSession,
   CalibrateAutoGuider,
   tsx_RotateCamera,
+  UpdateImagingTargetReport,
 } from './run_imageSession.js';
 
 import { tsx_feeder, stop_tsx_is_waiting } from './tsx_feeder.js';
@@ -489,10 +490,17 @@ Meteor.methods({
 
    rotateCamera() {
      tsxLog(' Rotating Camera');
-     var numType = tsx_GetServerStateValue('tool_rotator_type');
      var num  = tsx_GetServerStateValue('tool_rotator_num');
 
-     tsx_RotateCamera( numType, num );
+     var res = tsx_RotateCamera( num );
+     UpdateStatus( ' ' + res );
+
+   },
+
+   getUpdateTargetReport(target) {
+     tsxLog( ' TargetReport: ' + target.targetFindName );
+     var rpt = UpdateImagingTargetReport( target )
+     return rpt;
    },
 
    updateServerState( name, value ) {

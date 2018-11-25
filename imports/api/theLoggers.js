@@ -112,11 +112,7 @@ export function tsxInfo( msg, data ) {
   }
   logCon.info( msg, data );
   logSession.info( msg,  data );
-  var dt = new Date();
-  if( data != '' ) {
-    data = '= ' + data;
-  }
-  logDB.info( '|'+ formatDate(dt) +'|' + msg + ' ' + data );
+  logDB.info(  msg + ' ' + data );
 }
 
 function formatDate( today ) {
