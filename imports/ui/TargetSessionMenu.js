@@ -135,14 +135,14 @@ class TargetSessionMenu extends Component {
             <Modal.Header>Add Session</Modal.Header>
             <Modal.Content>
               <Modal.Description>
-                <TargetEditor key={this.state.newTarget._id} target={this.state.newTarget} scheduler_running={this.props.scheduler_running}/>
+                <TargetEditor key={this.state.newTarget._id} target={this.state.newTarget} scheduler_running={this.props.scheduler_running} tool_active={this.props.tool_active}/>
               </Modal.Description>
             </Modal.Content>
           </Modal>
           {this.props.targets.map((target)=>{
             return (
             <Segment raised>
-              <Target key={target._id} target={target} scheduler_running={this.props.scheduler_running}/>
+              <Target key={target._id} target={target} scheduler_running={this.props.scheduler_running} tool_active={this.props.tool_active}/>
             </Segment>
             )})}
       </div>

@@ -397,6 +397,7 @@ class App extends TrackerReact(Component) {
             tsxInfo={this.props.tsxInfo}
             scheduler_running={this.props.scheduler_running}
             srvLog={this.props.srvLog}
+            tool_active = {this.props.tool_active}
           />
         </div>
       )
@@ -407,6 +408,7 @@ class App extends TrackerReact(Component) {
           <TargetSessionMenu
             targets={this.props.targetSessions}
             scheduler_running={this.props.scheduler_running}
+            tool_active = {this.props.tool_active}
           />
         </div>
       )
@@ -417,6 +419,7 @@ class App extends TrackerReact(Component) {
           <TakeSeriesTemplateMenu
             seriesList={this.props.takeSeriesTemplates}
             scheduler_running={this.props.scheduler_running}
+            tool_active = {this.props.tool_active}
           />
       </div>
       )
@@ -439,6 +442,7 @@ class App extends TrackerReact(Component) {
           scheduler_report={this.props.scheduler_report}
           scheduler_running={this.props.scheduler_running}
           tsxInfo = {this.props.tsxInfo}
+          tool_active = {this.props.tool_active}
         />
       )
     } else if (this.state.activeMenu == 'Flats') {
@@ -447,6 +451,7 @@ class App extends TrackerReact(Component) {
           scheduler_report={this.props.scheduler_report}
           tsxInfo={this.props.tsxInfo}
           scheduler_running={this.props.scheduler_running}
+          tool_active = {this.props.tool_active}
         />
       )
     } else {
@@ -566,8 +571,8 @@ class App extends TrackerReact(Component) {
     var out = addNewTakeSeriesTemplate();
   };
 
-  parkButtons( state ) {
-    if( state == 'Stop') {
+  parkButtons( state, active ) {
+    if( state == 'Stop' && active == false ) {
       return (
         <div>
           <Button icon='wifi' onClick={this.connectToTSX.bind(this)}/>
@@ -595,6 +600,7 @@ class App extends TrackerReact(Component) {
     var VERSION = '';
     var DATE = '';
     var RUNNING = '';
+    var ACTIVE = false;
     try {
       IP = this.props.tsxIP.value;
       PORT = this.props.tsxPort.value;
@@ -603,6 +609,7 @@ class App extends TrackerReact(Component) {
       VERSION = this.props.tsx_version.value;
       DATE = this.props.tsx_date.value;
       RUNNING = this.props.scheduler_running.value;
+      ACTIVE = this.props.tool_active.value;
     } catch (e) {
       IP = 'Initializing';
       PORT = 'Initializing';
@@ -611,6 +618,7 @@ class App extends TrackerReact(Component) {
       VERSION = '...';
       DATE = '...';
       RUNNING = '';
+      ACTIVE=false;
     }
     var LOG = [];
     var num = 0;
@@ -644,7 +652,7 @@ class App extends TrackerReact(Component) {
                 {this.renderPortEditor()}
                 <Button.Group basic size='small' floated='right'>
                 //scheduler_running disable if running...
-                {this.parkButtons(RUNNING)}
+                {this.parkButtons(RUNNING, ACTIVE)}
                 </Button.Group>
               </Segment>
               <Segment>
@@ -700,10 +708,10 @@ export default withTracker(() => {
 
     return {
       tool_calibrate_via: TheSkyXInfos.findOne({name: 'tool_calibrate_via'}),
-      tool_calibrate_ra: TheSkyXInfos.findOne({name: 'tool_calibrate_ra'}),
-      tool_calibrate_dec: TheSkyXInfos.findOne({name: 'tool_calibrate_dec'}),
+      tool_calibrate_location: TheSkyXInfos.findOne({name: 'tool_calibrate_location'}),
       tool_rotator_num: TheSkyXInfos.findOne({name: 'tool_rotator_num'}),
       tool_rotator_type: TheSkyXInfos.findOne({name: 'tool_rotator_type'}),
+      tool_active: TheSkyXInfos.findOne({name: 'tool_active'}),
 
       tsx_version: TheSkyXInfos.findOne({name: 'tsx_version'}),
       tsx_date: TheSkyXInfos.findOne({name: 'tsx_date'}),
@@ -724,6 +732,6 @@ export default withTracker(() => {
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
       // targetSessions: TargetSessions.find({}, { sort: { enabledActive: 0, targetFindName: 1 } }).fetch(),
       targetSessions: TargetSessions.find({}, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
-      targetReports: TargetReports.find({}).fetch();
+      targetReports: TargetReports.find({}).fetch(),
   };
 })(App);

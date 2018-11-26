@@ -152,21 +152,91 @@ class Flats extends Component {
     }.bind(this));
   }
 
+  flatsTools( state
+    , flatSlewType
+    , flatRa
+    , flatDec
+  ) {
+
+    var slewOptions =
+    [
+      {
+        text: 'Ra/Dec',
+        value: 'Ra/Dec',
+      },
+      {
+        text: 'Alt/Az',
+        value: 'Alt/Az  ',
+      },
+      {
+        text: '',
+        value: '',
+      },
+    ];
+    if( state == 'Stop' ) {
+      return (
+        <div>
+        <Button.Group icon>
+            <Button  onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
+         </Button.Group>
+         <Dropdown
+            name='tool_flats_slew_via'
+            placeholder='Slew via...'
+            selection options={slewOptions}
+            value={flatSlewType}
+            onChange={this.handleChange}
+          />
+         <br/>Provide a location (position) for OTA
+         <br/>Location: <Form.Input
+           name='tool_flats_slew_ra'
+           placeholder='Ra/Alt: '
+           value={flatRa}
+           onChange={this.handleChange}/>
+         <Form.Input
+           name='tool_flats_slew_dec'
+           placeholder='Dec/Az: '
+           value={flatDec}
+           onChange={this.handleChange}/>
+       </div>
+      )
+    }
+    else {
+      return (
+        <div>
+         <Button.Group icon>
+            <Button  disabled='true' onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
+         </Button.Group>
+         <Dropdown
+            name='tool_flats_slew_via'
+            placeholder='Slew via...'
+            selection options={slewOptions}
+            value={flatSlewType}
+            onChange={this.handleChange}
+          />
+         <br/>Provide a location (position) for OTA
+         <br/>Location: <Form.Input
+           name='tool_flats_slew_ra'
+           placeholder='Ra/Alt: '
+           value={flatRa}
+           onChange={this.handleChange}/>
+         <Form.Input
+           name='tool_flats_slew_dec'
+           placeholder='Dec/Az: '
+           value={flatDec}
+           onChange={this.handleChange}/>
+       </div>
+      )
+    }
+  }
+
   render() {
 
     return (
       <div>
         <Segment raised>
-          <Button.Group icon>
-             <Button  onClick={this.gotoFlatPosition.bind(this)}>Goto Flat Position</Button>
-          </Button.Group>
-          <Form.Input
-            label=' '
-            name='flatPosition'
-            placeholder='e.g.: M31 or, 11h 33m 48s, 55d 57m 18s'
-            value={this.state.flatPosition}
-            onChange={this.handleChange}
-          />
+          {this.flatsTools(
+            this.props.scheduler_running.value,
+          )}
         </Segment>
         <Segment raised>
         Present the targets, and check of which ones to

@@ -40,6 +40,7 @@ if( Meteor.settings.enable_debug === 'yes') {
       'LOG',
       // 'TRACE'
       'ERROR',
+      'WARN',
     ],
     client: true,
     server: true
@@ -53,6 +54,7 @@ else {
       'LOG',
       // 'TRACE'
       'ERROR',
+      'WARN',
     ],
     client: true,
     server: true

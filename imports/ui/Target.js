@@ -88,21 +88,17 @@ class Target extends Component {
       $set:{ progress: progress }
     });
     this.forceUpdate();
-
-
   }
 
   deleteEntry() {
       TargetSessions.remove(this.props.target._id);
       this.forceUpdate();
-
   }
 
   editEntry() {
     console.log('In the DefineTemplate editEntry');
     this.handleOpen();
     this.forceUpdate();
-
   }
 
   getTargetReport() {
@@ -265,8 +261,8 @@ class Target extends Component {
     }
   }
 
-  targetButtons( state ) {
-    if( state == 'Stop') {
+  targetButtons( state, active ) {
+    if( state == 'Stop' && active == false ) {
       return(
         <Button.Group basic size='mini'>
           <Button icon='refresh' onClick={this.getTargetReport.bind(this)}/>
@@ -280,8 +276,8 @@ class Target extends Component {
     }
   }
 
-  canHeaderClick( state ) {
-    if( state == 'Stop' ) {
+  canHeaderClick( state, active ) {
+    if( state == 'Stop' && active == false ) {
       return this.editEntry.bind(this);
     }
   }
@@ -315,7 +311,7 @@ class Target extends Component {
         checked={ENABLEACTIVE}
         onChange={this.handleToggleEnabled.bind(this)}
         />
-      <Item.Header as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value)}>
+      <Item.Header as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, this.props.tool_active.value)}>
         {this.props.target.targetFindName}
         </Item.Header>
         <Item.Description>
@@ -335,7 +331,7 @@ class Target extends Component {
             {/*
             <Label>Direction: <Label.Detail>{this.state.azimuth}</Label.Detail></Label> */}
           </Label.Group>
-          {this.targetButtons(this.props.scheduler_running.value)}
+          {this.targetButtons(this.props.scheduler_running.value, this.props.tool_active.value)}
           <Checkbox
             label=' Calibration Target'
             name='isCalibrationFrames'

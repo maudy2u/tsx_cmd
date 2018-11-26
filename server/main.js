@@ -58,6 +58,8 @@ import {
   CalibrateAutoGuider,
   tsx_RotateCamera,
   UpdateImagingTargetReport,
+  tsx_SlewCoords,
+  tsx_SlewTargetName,
 } from './run_imageSession.js';
 
 import { tsx_feeder, stop_tsx_is_waiting } from './tsx_feeder.js';
@@ -102,6 +104,7 @@ function initServerStates() {
   tsx_SetServerState('imagingSessionDither', 0);
   tsx_SetServerState('currentJob', '');
   tsx_SetServerState('scheduler_running', 'Stop');
+  tsx_SetServerState('tool_active', false );
 
   for (var m in tsx_ServerStates){
     var state = tsx_ServerStates[m];
@@ -483,18 +486,38 @@ Meteor.methods({
      }
    },
 
-   calibrateGuider() {
-     tsxLog(' Calibrating AutoGuider');
-     CalibrateAutoGuider();
-   },
+  calibrateGuider( slew, location, dec_az ) {
+    tsx_SetServerState( 'tool_active', true );
+    try {
+      if( slew != '' ) {
+        if( slew == 'Alt/Az'&& location !='' && dec_az != '') {
+          tsx_SlewCmdCoords( 'SkyX_JS_SlewAltAz', location, dec_az );
+        }
+        else if( slew == 'Ra/Dec' && location !='' && dec_az != '') {
+          tsx_SlewCmdCoords( 'SkyX_JS_SlewRaDec', location, dec_az );
+        }
+        else if( slew == 'Target name' && location !='') {
+          tsx_SlewTargetName( '', location  );
+        }
+      }
+      tsxLog(' Calibrating AutoGuider');
+      CalibrateAutoGuider();
+    }
+    finally {
+      tsx_SetServerState( 'tool_active', false );
+    }
+  },
 
    rotateCamera() {
-     tsxLog(' Rotating Camera');
-     var num  = tsx_GetServerStateValue('tool_rotator_num');
-
-     var res = tsx_RotateCamera( num );
-     UpdateStatus( ' ' + res );
-
+     tsx_SetServerState( 'tool_active', true );
+     try {
+       tsxLog(' Rotating Camera');
+       var num  = tsx_GetServerStateValue('tool_rotator_num');
+       var res = tsx_RotateCamera( num );
+     }
+     finally {
+       tsx_SetServerState( 'tool_active', false );
+     }
    },
 
    getUpdateTargetReport(target) {

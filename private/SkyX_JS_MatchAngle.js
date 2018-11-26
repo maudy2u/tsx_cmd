@@ -4,16 +4,6 @@
 //  Stephen Townsend
 //  2018-09-30
 // *******************************
-// #TODO SO THE TEST IS TO CONFIRM WHAT SETTINGS ARE USED
-// WHEN CCDSC.TakeImage(); IS CALLED; DOES IT MATTER
-// IF IMAGE IS TAKEN AFTER A CLS/TPOINT/OR SAMPLE?
-// *******************************
-// 2018-09-30 22:58:24 The script needs to have the imagescale
-// per the camera for scripted CLS i.e. 0.28, or 1.7
-// *******************************
-// #TODO NEED TO TEST WHAT HAPPENS IF BIN is FORCE 1x1, and IMAGESCALE is set
-// Does this mean the ImageLink Scale needs to change?
-// *******************************
 var TARGETANG= $000;
 var PIXELSIZE =$001; // 23.07 ... for simulator with 1.7 imagescale and 2800 FL
 var FOCALLENGTH = $002; // use 2800 on SIM
@@ -81,7 +71,7 @@ function setupFilterWheel() {
 function calcBin() {
   var imageScale = PIXELSIZE*206.3/FOCALLENGTH;
   var bin = Number(AILSSCALE / imageScale).toFixed(0);
-  if( bin < 1 ) {
+  if( bin < 1 || CCDSC.ImageUseDigitizedSkySurvey == "1" ){
     bin = 1;
   }
   return bin;

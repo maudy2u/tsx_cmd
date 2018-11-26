@@ -114,11 +114,13 @@ export const tsx_ServerStates = {
   calibrationFrameSize: 'calibrationFrameSize',
 
   tool_calibrate_via: 'tool_calibrate_via',
-  tool_calibrate_ra: 'tool_calibrate_ra',
-  tool_calibrate_dec: 'tool_calibrate_dec',
+  tool_calibrate_location: 'tool_calibrate_location',
+  tool_calibrate_DecAlt: 'tool_calibrate_dec_az',
 
   tool_rotator_type: 'tool_rotator_type',
   tool_rotator_num: 'tool_rotator_num',
+
+  tool_active: 'tool_active',
 
   flatSettings: 'flatSettings',
   flatPosition: 'flatPosition',

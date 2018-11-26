@@ -339,18 +339,18 @@ export function CalibrateAutoGuider() {
     return;
   }
 
-  tsxLog("1");
+  tsxDebug("1");
   tsx_TakeAutoGuideImage();
-  tsxLog("2");
+  tsxDebug("2");
   var star = tsx_FindGuideStar();
-  tsxLog("3");
+  tsxDebug("3");
 
   // Calibrate....
   var cal_res = tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
   if( cal_res ) {
     UpdateStatus(' AutoGuider Calibrated');
   }
-  tsxLog("4");
+  tsxDebug("4");
 }
 
 // **************************************************************
@@ -540,6 +540,57 @@ function tsx_Slew( target ) {
     if( result != 'Success') {
       forceAbort = true;
       UpdateStatus('Slew Failed. Error: ' + result);
+    }
+    tsx_is_waiting = false;
+  }));
+  while( tsx_is_waiting ) {
+   Meteor.sleep( 1000 );
+  }
+}
+
+export function tsx_SlewTargetName( target ) {
+  // tsxDebug('************************');
+  tsxDebug(' *** tsx_Slew: ' + target );
+
+  var cmd = tsx_cmd('SkyX_JS_SlewTarget');
+  cmd = cmd.replace('$000',  target  );
+
+  var tsx_waiting = true;
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+    var result = tsx_return.split('|')[0].trim();
+    // tsxDebug('Any error?: ' + result);
+    if( result != 'Success') {
+      forceAbort = true;
+      UpdateStatus('Slew Failed. Error: ' + result);
+    }
+    else {
+      UpdateStatus('Slew finished');
+    }
+    tsx_is_waiting = false;
+  }));
+  while( tsx_is_waiting ) {
+   Meteor.sleep( 1000 );
+  }
+}
+
+export function tsx_SlewCmdCoords( cmd, ra, dec ) {
+  // tsxDebug('************************');
+  tsxDebug(' *** tsx_Slew: ' + target );
+
+  var cmd = tsx_cmd(cmd);
+  cmd = cmd.replace('$000',  ra  );
+  cmd = cmd.replace('$001',  dec  );
+
+  var tsx_waiting = true;
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+    var result = tsx_return.split('|')[0].trim();
+    // tsxDebug('Any error?: ' + result);
+    if( result != 'Success') {
+      forceAbort = true;
+      UpdateStatus('Slew Failed. Error: ' + result);
+    }
+    else {
+      UpdateStatus('Slew finished');
     }
     tsx_is_waiting = false;
   }));
@@ -1771,6 +1822,8 @@ export function tsx_RotateCamera( position ) {
   cmd = cmd.replace('$001', pixelSize);
   cmd = cmd.replace('$002', focalLength);
   cmd = cmd.replace('$003', ACCURACY);
+  UpdateStatus(' Rotator/Camera rotating FOV: ' + position);
+
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     var result = tsx_return.split('|')[0].trim();
     //e.g. Success|imageLinkAng=0.00|targetAngle=0.00|rotPos=-0.3305915915429978|newPos=-0.32895315919987494
@@ -1784,14 +1837,13 @@ export function tsx_RotateCamera( position ) {
       var resMsg = tsx_return.split('|')[1].trim();
       var angle = resMsg.split('=')[1].trim();
       tsx_SetServerState( 'fovAngle', angle );
-      tsxLog( ' Rotator/Camera set: ' + angle);
+      UpdateStatus(' Rotator/Camera set: ' + angle);
     }
     tsx_is_waiting = false;
   }));
   while( tsx_is_waiting ) {
     Meteor.sleep( 1000 );
   }
-
   return rotateSucess;
 }
 

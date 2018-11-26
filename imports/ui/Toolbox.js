@@ -84,8 +84,8 @@ class Toolbox extends Component {
       isCalibrationEnabled: false,
 
       tool_calibrate_via: '',
-      tool_calibrate_ra: '',
-      tool_calibrate_dec: '',
+      tool_calibrate_location: '',
+      tool_calibrate_dec_az: '',
       tool_rotator_num: '',
       tool_rotator_type: '',
   };
@@ -125,12 +125,12 @@ class Toolbox extends Component {
           return element.name == 'tool_calibrate_via';
       }).value});
       this.setState({
-        tool_calibrate_ra: nextProps.tsxInfo.find(function(element) {
-          return element.name == 'tool_calibrate_ra';
+        tool_calibrate_location: nextProps.tsxInfo.find(function(element) {
+          return element.name == 'tool_calibrate_location';
       }).value});
       this.setState({
-        tool_calibrate_dec: nextProps.tsxInfo.find(function(element) {
-          return element.name == 'tool_calibrate_dec';
+        tool_calibrate_dec_az: nextProps.tsxInfo.find(function(element) {
+          return element.name == 'tool_calibrate_dec_az';
       }).value});
       this.setState({
         tool_rotator_type: nextProps.tsxInfo.find(function(element) {
@@ -168,8 +168,6 @@ class Toolbox extends Component {
   }
 
   // *******************************
-
-
   rotateCamera() {
     Meteor.call( 'rotateCamera', function(error, result) {
       console.log('Error: ' + error);
@@ -178,13 +176,16 @@ class Toolbox extends Component {
   }
 
   calibrateGuider() {
-    Meteor.call( 'calibrateGuider', function(error, result) {
+    var slew = this.state.tool_calibrate_via;
+    var location = this.state.tool_calibrate_location;
+    var dec_az = this.state.tool_calibrate_
+    Meteor.call( 'calibrateGuider', slew, location, dec_az, function(error, result) {
       console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
   }
 
-  rotateTool( state, ROTATOR_TYPE, ROTATOR_NUM ) {
+  rotateTool( state, ROTATOR_TYPE, ROTATOR_NUM, active ) {
     var typeOptions =
     [
       {
@@ -200,18 +201,17 @@ class Toolbox extends Component {
         value: '',
       },
     ];
-    if( state == 'Stop') {
+    if( state == 'Stop' && active == false) {
       return (
         <div>
           <Button.Group icon>
                <Button  onClick={this.rotateCamera.bind(this)}>Set FOV</Button>
-          </Button.Group>
-          <Input
-            name='tool_rotator_num'
-            placeholder='eg. 19826, or 0.5'
-            value={ROTATOR_NUM}
-            onChange={this.handleChange}/>
-            <br/>Enter the Angle desired (rotator position reported below)
+         </Button.Group> <Input
+           name='tool_rotator_num'
+           placeholder='eg. 19826, or 0.5'
+           value={ROTATOR_NUM}
+           onChange={this.handleChange}/>
+         <br/>Enter the Angle desired (rotator position reported below)
         </div>
       )
     }
@@ -219,21 +219,13 @@ class Toolbox extends Component {
       return (
         <div>
           <Button.Group icon>
-             <Button  disabled='true' onClick={this.rotateCamera.bind(this)}>Set FOV</Button>
-          </Button.Group>
-          <Dropdown
-            placeholder='Set via...'
-            selection options={typeOptions}
-            name='tool_rotator_type'
-            value={ROTATOR_TYPE}
-            onChange={this.handleChange}
-          />
-          <br/>Enter the Angle desired (rotator position reported below)
-          <br/>Position or Degrees: <Input
+             <Button  disabled onClick={this.rotateCamera.bind(this)}>Set FOV</Button>
+          </Button.Group> <Input
             name='tool_rotator_num'
             placeholder='eg. 19826, or 0.5'
             value={ROTATOR_NUM}
             onChange={this.handleChange}/>
+          <br/>Enter the Angle desired (rotator position reported below)
         </div>
       )
     }
@@ -241,22 +233,10 @@ class Toolbox extends Component {
 
   calibrateTools( state
     , calType
-    , calRa
-    , calDec
+    , calLocation
+    , calDecAz
+    , active
   ) {
-   // var CALIBRATE_TYPE = '';
-   // var CALIBRATE_RA = '';
-   // var CALIBRATE_DEC = '';
-   //
-   // try {
-   //   CALIBRATE_TYPE = calType.value;
-   //   CALIBRATE_RA = calRa.value;
-   //   CALIBRATE_DEC = calDec.value;
-   // } catch (e) {
-   //   CALIBRATE_TYPE = '';
-   //   CALIBRATE_RA = '';
-   //   CALIBRATE_DEC = '';
-   // }
 
     var slewOptions =
     [
@@ -266,14 +246,18 @@ class Toolbox extends Component {
       },
       {
         text: 'Alt/Az',
-        value: 'Alt/Az  ',
+        value: 'Alt/Az',
+      },
+      {
+        text: 'Target name',
+        value: 'Target name',
       },
       {
         text: '',
         value: '',
       },
     ];
-    if( state == 'Stop' ) {
+    if( state == 'Stop' && active == false) {
       return (
         <div>
         <Button.Group icon>
@@ -285,18 +269,17 @@ class Toolbox extends Component {
             selection options={slewOptions}
             value={calType}
             onChange={this.handleChange}
-          />
-         <br/>(Optional provide a location)
-         <br/>Location: <Form.Input
-           name='tool_calibrate_ra'
-           placeholder='Ra/Alt: '
-           value={calRa}
-           onChange={this.handleChange}/>
-         <Form.Input
-           name='tool_calibrate_dec'
-           placeholder='Dec/Az: '
-           value={calDec}
-           onChange={this.handleChange}/>
+          /><Form.Input
+            name='tool_calibrate_location'
+            placeholder='Target name, Ra, or Alt: '
+            value={calLocation}
+            onChange={this.handleChange}/>
+          <Form.Input
+            name='tool_calibrate_dec_az'
+            placeholder='Dec, or azimuth: '
+            value={calDecAz}
+            onChange={this.handleChange}/>
+            <br/>(Optionaly select a slew type and specify a location, e.g 5.95, 21.99)
        </div>
       )
     }
@@ -304,26 +287,25 @@ class Toolbox extends Component {
       return (
         <div>
          <Button.Group icon>
-            <Button  disabled='true' onClick={this.calibrateGuider.bind(this)}>Calibrate</Button>
-         </Button.Group>
-         <Dropdown
-            name='tool_calibrate_via'
-            placeholder='Slew via...'
-            selection options={slewOptions}
-            value={calType}
-            onChange={this.handleChange}
-          />
-         <br/>(Optional provide a location)
-         <br/>Location: <Form.Input
-           name='tool_calibrate_ra'
-           placeholder='Ra/Alt: '
-           value={calRa}
-           onChange={this.handleChange}/>
-         <Form.Input
-           name='tool_calibrate_dec'
-           placeholder='Dec/Az: '
-           value={calDec}
-           onChange={this.handleChange}/>
+            <Button  disabled onClick={this.calibrateGuider.bind(this)}>Calibrate</Button>
+            </Button.Group>
+            <Dropdown
+               name='tool_calibrate_via'
+               placeholder='Slew via...'
+               selection options={slewOptions}
+               value={calType}
+               onChange={this.handleChange}
+           /><Form.Input
+             name='tool_calibrate_location'
+             placeholder='Target name, Ra, or Alt: '
+             value={calLocation}
+             onChange={this.handleChange}/>
+           <Form.Input
+             name='tool_calibrate_dec_az'
+             placeholder='Dec, or azimuth: '
+             value={calDecAz}
+             onChange={this.handleChange}/>
+             <br/>(Optionaly select a slew type and specify a location, e.g 5.95, 21.99)
        </div>
       )
     }
@@ -352,8 +334,9 @@ class Toolbox extends Component {
          {this.calibrateTools(
            this.props.scheduler_running.value
            , this.state.tool_calibrate_via
-           , this.state.tool_calibrate_ra
-           , this.state.tool_calibrate_dec
+           , this.state.tool_calibrate_location
+           , this.state.tool_calibrate_dec_az
+           , this.props.tool_active.value
          )}
         </Segment>
         <Segment raised>
@@ -362,7 +345,11 @@ class Toolbox extends Component {
             this.props.scheduler_running.value
             , this.state.tool_rotator_type
             , this.state.tool_rotator_num
+            , this.props.tool_active.value
           )}
+        </Segment>
+        <Segment>
+        Start script to collect the filters focus offset.
         </Segment>
         <Segment.Group  size='mini' horizontal>
           <Segment>

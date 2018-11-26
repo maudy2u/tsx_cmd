@@ -49,7 +49,9 @@ ccdAG.GuideStarY = guideStarY * ccdsoftAutoguiderImage.FITSKeyword ("YBINNING") 
 
 ccdAG.AutoSaveOn = false;		// Dont save these images.
 ccdAG.Subframe = true;		// Use a subframe around the star.
-ccdAG.Frame = 1;			// Light Frame
+if( CCDSC.ImageUseDigitizedSkySurvey == "1" ){ // Simulator
+  ccdAG.Frame = 1;			// Light Frame
+}
 ccdsoftAutoguider.Asynchronous = false;		// Turn on so we don't get stuck waiting for an endless process
 
 try{
