@@ -202,6 +202,16 @@ TargetSessions.helpers({
     return taken;
   },
 
+  resetProgress: function(series) {
+    var progress = this.progress;
+    for (var i = 0; i < progress.length; i++) {
+      if (progress[i]._id == series._id ) {
+        this.progress[i] = [];
+        break;
+      }
+    }
+  },
+
   incrementTakenFor: function(seriesId) {
     var taken = 0;
     var progress = this.progress;

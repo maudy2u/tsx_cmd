@@ -46,9 +46,12 @@ class TakeSeriesTemplateEditor extends Component {
   seriesProcessChange = (e, { value }) => this.setState({ seriesProcess: value });
   updateSeriesContainer = (e, { value }) => this.setState({ seriesContainer: value });
 
-  onChangeChecked() {
-    this.setState({repeatSeries: !this.state.repeatSeries});
-  }
+  handleToggle = (e, { name, value }) => {
+    var val = eval( 'this.state.' + name);
+    this.setState({
+      [name]: !val
+    });
+  };
 
   nameChange = (e, { value }) => this.setState({ name: value });
 
@@ -162,7 +165,7 @@ class TakeSeriesTemplateEditor extends Component {
               toggle
               name='repeatSeries'
               checked={this.state.repeatSeries}
-              onChange={this.onChangeChecked}
+              onChange={this.handleToggle.bind(this)}
             />
             {/* <Form.Checkbox onChange={this.seriesProcessChange} /> */}
             <Form.Input

@@ -76,11 +76,22 @@ class TargetEditor extends Component {
     filterDropDown:[],
     seriesDropDown:[],
     testDate: '',
+
+    rotator_angle_westside: false,
+    rotator_180_flip: false,
   };
 
   handleOpen = () => this.setState({ modalOpen: true });
   handleClose = () => this.setState({ modalOpen: false });
   handleChange = (e, { name, value }) => this.setState({ [name]: value });
+
+  handleToggle = (e, { name, value }) => {
+    var val = eval( 'this.state.' + name);
+    this.setState({
+      [name]: !val
+    });
+    this.saveDefaultStateValue( name, !val );
+  };
 
   handleStartChange = ( value ) => this.setState({startTime: value.formatted24 });
   handleStopChange = ( value ) => this.setState({stopTime: value.formatted24 });
@@ -328,31 +339,21 @@ class TargetEditor extends Component {
             <h3 className="ui header">Session</h3>
             {/* <Form>
               */}
-              <Form.Group widths='equal'>
+              <Form.Group>
                 <Form.Input
                     label='Target Name'
                     name='targetFindName'
                     placeholder='TheSkyX Find: e.g.: M31 or, 11h 33m 48s, 55d 57m 18s'
                     value={this.state.targetFindName}
                     onChange={this.handleChange}/>
+              </Form.Group>
+              <Form.Group>
                 <Form.Field control={Input}
                   label='Description'
                   name='description'
                   placeholder='Describe the session'
                   value={this.state.description}
                   onChange={this.handleChange}/>
-                <Form.Input
-                      label='Rotator Position (optional)'
-                      name='rotator_position'
-                      placeholder='Position for rotator (i.e. used with flats)'
-                      value={this.state.rotator_position}
-                      onChange={this.handleChange}/>
-                <Form.Input
-                    label='FOV Angle (optional)'
-                    name='angle'
-                    placeholder='Position angle per CLS, e.g. 0 for PEC capture.'
-                    value={this.state.angle}
-                    onChange={this.handleChange}/>
               </Form.Group>
               <Form.Group>
                 <Button onClick={this.getTargetRaDec.bind(this)}>Find</Button>
@@ -390,6 +391,40 @@ class TargetEditor extends Component {
                   onChange={this.handleChange}/>
               </Form.Group> */}
             {/* </Form> */}
+          </Segment>
+          <Segment>
+            <Form.Group>
+              <Form.Input
+                    label='Rotator Position (optional)'
+                    name='rotator_position'
+                    placeholder='Position for rotator (i.e. used with flats)'
+                    value={this.state.rotator_position}
+                    onChange={this.handleChange}/>
+              <Form.Input
+                  label='FOV Angle (optional)'
+                  name='angle'
+                  placeholder='Position angle per CLS, e.g. 0 for PEC capture.'
+                  value={this.state.angle}
+                  onChange={this.handleChange}/>
+              </Form.Group>
+              <Form.Group>
+              <Checkbox
+                label=' Rotate 180 after meridian flip'
+                name='rotator_180_flip'
+                disabled
+                toggle
+                checked={this.state.rotator_180_flip}
+                onChange={this.handleToggle}
+              />
+              <Checkbox
+                label=' On angle is WestSide, off EastSide'
+                name='rotator_angle_westside'
+                disabled
+                toggle
+                checked={this.state.rotator_angle_westside}
+                onChange={this.handleToggle}
+              />
+            </Form.Group>
           </Segment>
         </Segment.Group>
       </Tab.Pane> },

@@ -132,11 +132,11 @@ var success = TSXI.AttachToActiveImager();
 
 //Enter the focsuer position
 if( CCDSC.focIsConnected ) {
-  tsxi.setFITSKeyword("FOCUS_POS", CCDSC.focPosition);
+  TSXI.setFITSKeyword("FOCUS_POS", CCDSC.focPosition);
 }
 //Enter the rotator angle
 if( CCDSC.rotatorIsConnected ) {
-  tsxi.setFITSKeyword("ROTATOR_POS", CCDSC.rotatorPositionAngle());
+  TSXI.setFITSKeyword("ROTATOR_POS", CCDSC.rotatorPositionAngle());
 }
 //Enter the custom object name
 if( tName != '$003' ) {
@@ -144,8 +144,8 @@ if( tName != '$003' ) {
 	TSXI.setFITSKeyword("OBJECT", tName);
 }
 //Set save path and save
-//tsxi.Path = targetImageDataPath;
-tsxi.Save();
+//TSXI.Path = targetImageDataPath;
+TSXI.Save();
 
 Out;
 /* Socket End Packet */

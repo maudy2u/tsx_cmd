@@ -27,39 +27,30 @@ import { LoggerConsole } from 'meteor/ostrio:loggerconsole';
 // https://atmospherejs.com/ostrio/loggermongo
 import { LoggerMongo } from 'meteor/ostrio:loggermongo';
 
- const logSession = new Logger();
- const logCon = new Logger();
- const logDB = new Logger();
+const logSession = new Logger();
+const logCon = new Logger();
+const logDB = new Logger();
 
-var filters ='';
+var log_levels = [];
+if( Meteor.settings.enable_log === 'yes') {
+ log_levels.push('LOG');
+}
 if( Meteor.settings.enable_debug === 'yes') {
-  filters = {
-    filter: [
-      'DEBUG',
-      'INFO',
-      'LOG',
-      // 'TRACE'
-      'ERROR',
-      'WARN',
-    ],
-    client: true,
-    server: true
- };
+ log_levels.push('DEBUG');
 }
-else {
-  filters = {
-    filter: [
-      // 'DEBUG',
-      'INFO',
-      'LOG',
-      // 'TRACE'
-      'ERROR',
-      'WARN',
-    ],
-    client: true,
-    server: true
- };
+if( Meteor.settings.enable_info === 'yes') {
+ log_levels.push('INFO');
 }
+if( Meteor.settings.enable_warn === 'yes') {
+ log_levels.push('WARN');
+}
+log_levels.push('ERROR');
+
+var   filters = {
+  filter: log_levels,
+  client: true,
+  server: true,
+};
 
 export function tsxLog( msg, data ) {
   if( typeof data === 'undefined' || data == null ) {

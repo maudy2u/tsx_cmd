@@ -1882,6 +1882,34 @@ function incrementTakenFor(target, seriesId) {
 }
 
 // **************************************************************
+// this function resets the progress when a series needs to report
+function resetTargetImageProcess(target, series ) {
+  // tsxDebug('************************');
+  tsxDebug(' *** resetTargetImageProcess: ' + target.targetFindName);
+  var progress = target.progress;
+  if( typeof progress == 'undefined') {
+    progress = [];
+  }
+  var found = false;
+  for (var i = 0; i < progress.length; i++) {
+    if (progress[i]._id == series._id ) {
+      progress[i].taken=0;
+      found = true;
+      break;
+    }
+  }
+  if (!found) { // we are adding to the series
+    progress.push( {_id:seriesId, taken: 0} );
+  }
+  TargetSessions.update({_id: target._id}, {
+    $set: {
+      progress: target.progress,
+    }
+  });
+  return progress;
+}
+
+// **************************************************************
 // this function is used to obtain how many images have been taken
 // for the series
 function takenImagesFor(target, seriesId) {
@@ -2021,8 +2049,8 @@ function takeSeriesImage(target, series) {
 
       // *******************************
       // ADD THE FOCUS AND ROTATOR POSITIONS INTO THE FITS HEADER
-//      tsx_UpdateFITS( target );
-//   Now done after taking the image
+      //   tsx_UpdateFITS( target );
+      //   Now done after taking the image
     }
   }
   else {
@@ -2117,6 +2145,7 @@ export function processTargetTakeSeries( target ) {
           stopTarget = false;
         }
       }
+
       // reset to check across series again
       if( remainingImages ) {
         i=-1; //  set to -1 so that it is incremented back to zero...
@@ -2124,13 +2153,24 @@ export function processTargetTakeSeries( target ) {
         // so the issue is in here... for some reason the continue to processSeries
         // the next image is not happening..
 
-        tsxDebug( ' *** there are remaining images.');
+        tsxDebug( ' --- there are remaining images.');
       }
       else {
-        UpdateStatus(' *** TARGET COMPLETED');
+        if( template.repeatSeries == true ) {
+          UpdateStatus(' *** Repeating Series ***');
+          for( var s = 0; s < takeSeries.length; s ++ ) {
+              var ser = takeSeries[s];
+              target.progress = resetTargetImageProcess( target, ser);
+          }
+          // check if valid again
+          stopTarget = isTargetConditionInValid(target);
+          i=-1;
+        }
+        else {
+          UpdateStatus(' *** TARGET COMPLETED ***');
+        }
       }
     }
-
     // do we do one whole filter first.
     else if ( seriesProcess === 'per series' ) {
       // use i to lock to the current filter
@@ -2153,14 +2193,26 @@ export function processTargetTakeSeries( target ) {
           stopTarget = isTargetConditionInValid(target);
         }
         else {
-          tsxInfo(' Skipping end conditions - not Light Frame');
+          tsxInfo(' *** Skipping end conditions - not Light Frame');
           stopTarget = false;
         }
       }
       // now switch to next filter
+      // and check for a repeat...
+      if( template.repeatSeries == true && (i+1) >= takeSeries.length) {
+          UpdateStatus(' *** Repeating Series ***');
+          // reset series counts
+          for( var s = 0; s < takeSeries.length; s ++ ) {
+              var series = takeSeries[s];
+              target.progress = resetTargetImageProcess( target, series);
+          }
+          // set i to negative one... so the ++ increments correctly
+          stopTarget = isTargetConditionInValid(target);
+          i =- 1;
+      }
     }
     else {
-      tsxWarn('*** FAILED to process seriess');
+      tsxWarn('!!! FAILED to process seriess');
     }
   }
 
@@ -2172,7 +2224,7 @@ export function processTargetTakeSeries( target ) {
 
 // **************************************************************
 export function prepareTargetForImaging( target ) {
-  tsxDebug('************************');
+  tsxDebug(' ***********************');
   tsxDebug(' *** prepareTargetForImaging: ' + target.targetFindName);
 
   if( typeof target == 'undefined') {

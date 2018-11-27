@@ -651,8 +651,8 @@ class App extends TrackerReact(Component) {
                 </Label>
                 {this.renderPortEditor()}
                 <Button.Group basic size='small' floated='right'>
-                //scheduler_running disable if running...
-                {this.parkButtons(RUNNING, ACTIVE)}
+                  //scheduler_running disable if running...
+                  {this.parkButtons(RUNNING, ACTIVE)}
                 </Button.Group>
               </Segment>
               <Segment>

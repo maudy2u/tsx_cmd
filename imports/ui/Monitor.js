@@ -621,7 +621,7 @@ class Monitor extends Component {
                 checked={this.state.isFocus3Enabled}
                 onChange={this.handleToggle.bind(this)}
               />
-              <Form.Checkbox
+              <br /><Form.Checkbox
                 label='Enable Autoguiding '
                 name='isAutoguidingEnabled'
                 toggle
@@ -661,7 +661,7 @@ class Monitor extends Component {
                 checked={this.state.enableImagingCooler}
                 onChange={this.handleToggle.bind(this)}
               /> */}
-              <Form.Checkbox
+              <br /><Form.Checkbox
                 label='Enable Periodical CLS (Cloud checks) '
                 name='isCLSRepeatEnabled'
                 toggle

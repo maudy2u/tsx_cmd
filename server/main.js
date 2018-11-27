@@ -371,7 +371,6 @@ Meteor.startup(() => {
   tsxLog('   IP',  dbIp );
   tsxLog(' port', dbPort );
 
-  tsxLog(' ******* TSX_CMD ONLINE ******', '');
   CleanUpJobs();
   initServerStates();
 
@@ -385,7 +384,7 @@ Meteor.startup(() => {
 
   tsxLog( ' Logfile: ' + logFileForClient() );
   UpdateStatus( ' idle');
-  tsxLog(' ******************', '');
+  tsxLog(' ******* TSX_CMD ONLINE ******', '');
 
   return;
 
