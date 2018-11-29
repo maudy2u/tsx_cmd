@@ -21,11 +21,18 @@ import { Mongo } from 'meteor/mongo';
 // Used to store the filters currently available/active on TSX
 export const Filters = new Mongo.Collection('filters');
 
+export const subFrameTypes = [
+  'Light',
+  'Flat',
+  'Dark',
+  'Bias',
+];
+
 /*
   _id
   name
   slot
-  flat_exposure   
+  flat_exposure
  */
 
 // *******************************

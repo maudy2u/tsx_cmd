@@ -18,7 +18,6 @@ tsx cmd - A web page to send commands to TheSkyX server
 
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { Session } from 'meteor/session'
 
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
@@ -40,10 +39,12 @@ import { Filters } from '../api/filters.js';
 import {
   FlatSeries,
   addFlatSeries,
+  addFlatFilter,
  } from '../api/flatSeries.js';
 
 // Import the UI
 import Target  from './Target.js';
+import Flat  from './Flat.js';
 import TargetSessionMenu from './TargetSessionMenu.js';
 // import Filter from './Filter.js';
 import Series from './Series.js';
@@ -53,12 +54,10 @@ import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 class Flats extends Component {
 
     state = {
-
       flatPosition: '',
       tool_flats_via: '',
       tool_flats_location: '',
       tool_flats_dec_az: '',
-
   };
 
   handleChange = (e, { name, value }) => {
@@ -288,7 +287,7 @@ class Flats extends Component {
         <br />
         {this.props.filters.map((filter)=>{
           return (
-            <div>
+            <div key={filter._id}>
           { filter.name + '|' + filter.slot + '|' + filter.flat_exposure }
             </div>
           )})}
@@ -296,21 +295,29 @@ class Flats extends Component {
         {
           this.props.flatSeries.map((flat)=>{
             return (
-                <div key={flat._id}>
+              <Segment key={flat._id} raised>
                   RotatorGroup: {flat.rotatorPosition}
-                  {
-                    flat.filtergroup.map((filter)=>{
+                  <Button.Group basic size='mini' floated='right'>
+                    <Button icon='plus'/> {/*onClick=addFlatFilter(flat._id).bind(this)/>*/}
+                  </Button.Group>
+                  <br/>
+                  {flat.filtergroup.map((filter)=>{
                       return (
-                        <div key={filter._id}>
-                          frame: {filter.frame}<br/>
-                          filter: {filter.filter}<br/>
-                          exposure: {filter.exposure}<br/>
-                          repeat: {filter.repeat}<br/>
+                        <div>
+                        <Flat key={filter._id}
+                          scheduler_report={this.props.scheduler_report}
+                          tsxInfo={this.props.tsxInfo}
+                          scheduler_running={this.props.scheduler_running}
+                          tool_active = {this.props.tool_active}
+                          filter = {filter}
+                          flatSeries = {this.props.flatSeries}
+                        />
+                        <hr/>
                         </div>
                       )
                     })
                   }
-              </div>
+              </Segment>
           )})
         }
         </Segment>

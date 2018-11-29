@@ -21,6 +21,13 @@ import { Mongo } from 'meteor/mongo';
 // Used to store the filters currently available/active on TSX
 export const FlatSeries = new Mongo.Collection('flatSeries');
 
+const defaultFlat = {
+  frame: 'Flat',
+  filter: '',
+  exposure: 0,
+  repeat: 1,
+};
+
 export function addFlatSeries() {
   const id  = FlatSeries.insert(
     {
@@ -36,4 +43,18 @@ export function addFlatSeries() {
     },
   );
   return id;
+}
+
+export function addFlatFilter(flatSeries_id){
+  console.log('flat id: '+flatSeries_id);
+  var fs = FlatSeries.findOne({_id:flatSeries_id});
+  console.log('FlatSeries: ' + fs.rotatorPosition);
+  var fg = fs.filtergroup;
+  console.log('filtergroup: ' + fg);
+  fg.push(defaultFlat);
+  FlatSeries.upsert({_id: fs._id}, {
+    $set: {
+      filtergroup: fg,
+    }
+  });
 }
