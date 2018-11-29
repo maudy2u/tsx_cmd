@@ -140,11 +140,8 @@ class TargetSessionMenu extends Component {
             </Modal.Content>
           </Modal>
           {this.props.targets.map((target)=>{
-            return (
-            <Segment raised>
-              <Target key={target._id} target={target} scheduler_running={this.props.scheduler_running} tool_active={this.props.tool_active}/>
-            </Segment>
-            )})}
+            return               <Target key={target._id} target={target} scheduler_running={this.props.scheduler_running} tool_active={this.props.tool_active}/>
+          })}
       </div>
     )
   }

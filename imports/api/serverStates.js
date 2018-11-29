@@ -124,6 +124,11 @@ export const tsx_ServerStates = {
 
   flatSettings: 'flatSettings',
   flatPosition: 'flatPosition',
+
+  tool_flats_via: 'tool_flats_via',
+  tool_flats_location: 'tool_flats_location',
+  tool_flats_dec_az: 'tool_flats_dec_az',
+  
 };
 
 export function postStatus( info ) {

@@ -36,6 +36,11 @@ import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
 import { TargetSessions } from '../api/targetSessions.js';
 import { TargetReports } from '../api/targetReports.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
+import { Filters } from '../api/filters.js';
+import {
+  FlatSeries,
+  addFlatSeries,
+ } from '../api/flatSeries.js';
 
 // Import the UI
 import Target  from './Target.js';
@@ -50,6 +55,9 @@ class Flats extends Component {
     state = {
 
       flatPosition: '',
+      tool_flats_via: '',
+      tool_flats_location: '',
+      tool_flats_dec_az: '',
 
   };
 
@@ -61,9 +69,7 @@ class Flats extends Component {
 
   // requires the ".bind(this)", on the callers
   handleToggle = (e, { name, value }) => {
-
     var val = eval( 'this.state.' + name);
-
     this.setState({
       [name]: !val
     });
@@ -152,10 +158,12 @@ class Flats extends Component {
     }.bind(this));
   }
 
-  flatsTools( state
+  flatsTools(
+      state
     , flatSlewType
     , flatRa
     , flatDec
+    , active
   ) {
 
     var slewOptions =
@@ -166,21 +174,26 @@ class Flats extends Component {
       },
       {
         text: 'Alt/Az',
-        value: 'Alt/Az  ',
+        value: 'Alt/Az',
+      },
+      {
+        text: 'Target name',
+        value: 'Target name',
       },
       {
         text: '',
         value: '',
       },
     ];
-    if( state == 'Stop' ) {
+
+    if( state == 'Stop'  && active == false ) {
       return (
         <div>
         <Button.Group icon>
             <Button  onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
          </Button.Group>
          <Dropdown
-            name='tool_flats_slew_via'
+            name='tool_flats_via'
             placeholder='Slew via...'
             selection options={slewOptions}
             value={flatSlewType}
@@ -188,13 +201,13 @@ class Flats extends Component {
           />
          <br/>Provide a location (position) for OTA
          <br/>Location: <Form.Input
-           name='tool_flats_slew_ra'
-           placeholder='Ra/Alt: '
+           name='tool_flats_location'
+           placeholder='Target name, Ra, or Alt: '
            value={flatRa}
            onChange={this.handleChange}/>
          <Form.Input
-           name='tool_flats_slew_dec'
-           placeholder='Dec/Az: '
+           name='tool_flats_dec_az'
+           placeholder='Dec, or azimuth: '
            value={flatDec}
            onChange={this.handleChange}/>
        </div>
@@ -204,10 +217,10 @@ class Flats extends Component {
       return (
         <div>
          <Button.Group icon>
-            <Button  disabled='true' onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
+            <Button  disabled onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
          </Button.Group>
          <Dropdown
-            name='tool_flats_slew_via'
+            name='tool_flats_via'
             placeholder='Slew via...'
             selection options={slewOptions}
             value={flatSlewType}
@@ -215,18 +228,41 @@ class Flats extends Component {
           />
          <br/>Provide a location (position) for OTA
          <br/>Location: <Form.Input
-           name='tool_flats_slew_ra'
-           placeholder='Ra/Alt: '
+           name='tool_flats_location'
+           placeholder='Target name, Ra, or Alt: '
            value={flatRa}
            onChange={this.handleChange}/>
          <Form.Input
-           name='tool_flats_slew_dec'
-           placeholder='Dec/Az: '
+           name='tool_flats_dec_az'
+           placeholder='Dec, or azimuth: '
            value={flatDec}
            onChange={this.handleChange}/>
        </div>
       )
     }
+  }
+
+  addFilterForFlats(
+    state
+    , active
+    ) {
+    if( state == 'Stop'  && active == false ) {
+      return (
+        <Button.Group>
+            <Button icon='plus' onClick={addFlatSeries.bind(this)} />
+            <Button icon='minus' onClick={this.gotoFlatPosition.bind(this)} />
+         </Button.Group>
+       )
+    }
+    else {
+      return (
+        <Button.Group icon>
+           <Button disabled icon='plus' disabled onClick={addFlatSeries.bind(this)} />
+           <Button disabled icon='minus' disabled onClick={this.gotoFlatPosition.bind(this)} />
+        </Button.Group>
+      )
+    }
+
   }
 
   render() {
@@ -235,12 +271,48 @@ class Flats extends Component {
       <div>
         <Segment raised>
           {this.flatsTools(
-            this.props.scheduler_running.value,
+            this.props.scheduler_running.value
+            , this.state.tool_flats_via
+            , this.state.tool_flats_location
+            , this.state.tool_flats_dec_az
+            , this.props.tool_active.value
           )}
         </Segment>
+        {this.addFilterForFlats(
+          this.props.scheduler_running.value
+          , this.props.tool_active.value
+        )}
         <Segment raised>
         Present the targets, and check of which ones to
         calibrate - use the target FOV rotator position
+        <br />
+        {this.props.filters.map((filter)=>{
+          return (
+            <div>
+          { filter.name + '|' + filter.slot + '|' + filter.flat_exposure }
+            </div>
+          )})}
+        <hr/>
+        {
+          this.props.flatSeries.map((flat)=>{
+            return (
+                <div key={flat._id}>
+                  RotatorGroup: {flat.rotatorPosition}
+                  {
+                    flat.filtergroup.map((filter)=>{
+                      return (
+                        <div key={filter._id}>
+                          frame: {filter.frame}<br/>
+                          filter: {filter.filter}<br/>
+                          exposure: {filter.exposure}<br/>
+                          repeat: {filter.repeat}<br/>
+                        </div>
+                      )
+                    })
+                  }
+              </div>
+          )})
+        }
         </Segment>
         <Segment.Group  size='mini' horizontal>
           <Segment>
@@ -278,11 +350,6 @@ class Flats extends Component {
   }
 }
 export default withTracker(() => {
-
   return {
-    // reports: TargetReports.find().fetch(),
-    // tsxInfo: TheSkyXInfos.find({}).fetch(),
-    // takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
-    // targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
 };
 })(Flats);

@@ -19,33 +19,21 @@ tsx cmd - A web page to send commands to TheSkyX server
 import { Mongo } from 'meteor/mongo';
 
 // Used to store the filters currently available/active on TSX
-export const Filters = new Mongo.Collection('filters');
+export const FlatSeries = new Mongo.Collection('flatSeries');
 
-/*
-  _id
-  name
-  slot
-  flat_exposure   
- */
-
-// *******************************
-// Get the filters from TheSkyX
-Filters.helpers({
-
-  renderDropDownFilters: function() {
-    var filters = Filters.find().fetch();
-    var filterArray = [];
-    for (var i = 0; i < filters.length; i++) {
-      filterArray.push({
-        key: filters[i]._id,
-        text: filters[i].name,
-        value: filters[i].name });
-    }
-    return filterArray;
-  },
-  getFilterIndexFor: function(filterName) {
-    var filter = Filters.find({name: filterName}).fetch();
-    return filter.slot;
-  },
-
-});
+export function addFlatSeries() {
+  const id  = FlatSeries.insert(
+    {
+      rotatorPosition: 0,
+      filtergroup: [
+        {
+          frame: 'Flat',
+          filter: '',
+          exposure: 0,
+          repeat: 1,
+        },
+      ]
+    },
+  );
+  return id;
+}

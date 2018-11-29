@@ -24,6 +24,7 @@ import { Seriess } from '../imports/api/seriess.js';
 import { Filters } from '../imports/api/filters.js';
 import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
 import { scheduler } from '../imports/api/theProcessors.js';
+import { FlatSeries } from '../imports/api/flatSeries.js';
 
 import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug, logFileForClient, AppLogsDB } from '../imports/api/theLoggers.js';
 
@@ -333,6 +334,7 @@ Meteor.startup(() => {
   //   var obj =  i;
   //   // Meteor._debug(obj);
     AppLogsDB.remove({});
+    FlatSeries.remove({});
   // }
 
   tsxLog(' ******* STARTED ******', '');
@@ -347,7 +349,6 @@ Meteor.startup(() => {
     tsx_SetServerState('tsx_date', version_dat.date);
     tsxLog(' Date', version_dat.date);
   }
-  tsxLog(' ', '');
 
   var dbIp = '';
   var dbPort = '';
@@ -382,7 +383,7 @@ Meteor.startup(() => {
   tsx_UpdateDevice('efw', 'Not connected ', '' );
   tsx_UpdateDevice('focuser', 'Not connected ', '' );
 
-  tsxLog( ' Logfile: ' + logFileForClient() );
+  tsxLog( ' Logfile', logFileForClient() );
   UpdateStatus( ' idle');
   tsxLog(' ******* TSX_CMD ONLINE ******', '');
 

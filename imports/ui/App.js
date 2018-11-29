@@ -44,6 +44,7 @@ import {
  } from '../api/targetReports.js'
 
 import { Filters } from '../api/filters.js';
+import { FlatSeries } from '../api/flatSeries.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 import { AppLogsDB } from '../api/theLoggers.js'
 
@@ -452,6 +453,8 @@ class App extends TrackerReact(Component) {
           tsxInfo={this.props.tsxInfo}
           scheduler_running={this.props.scheduler_running}
           tool_active = {this.props.tool_active}
+          filters = {this.props.filters}
+          flatSeries = {this.props.flatSeries}
         />
       )
     } else {
@@ -651,7 +654,6 @@ class App extends TrackerReact(Component) {
                 </Label>
                 {this.renderPortEditor()}
                 <Button.Group basic size='small' floated='right'>
-                  //scheduler_running disable if running...
                   {this.parkButtons(RUNNING, ACTIVE)}
                 </Button.Group>
               </Segment>
@@ -729,8 +731,8 @@ export default withTracker(() => {
       tsxInfo: TheSkyXInfos.find({}).fetch(),
       srvLog: AppLogsDB.find({}, {sort:{time:-1}}).fetch(10),
       filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
+      flatSeries: FlatSeries.find({}).fetch(),
       takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
-      // targetSessions: TargetSessions.find({}, { sort: { enabledActive: 0, targetFindName: 1 } }).fetch(),
       targetSessions: TargetSessions.find({}, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
       targetReports: TargetReports.find({}).fetch(),
   };

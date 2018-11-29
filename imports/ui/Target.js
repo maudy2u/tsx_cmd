@@ -21,7 +21,7 @@ import ReactDOM from 'react-dom';
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { Item, Label, Button, Modal, Header, Icon, Table, Checkbox, Progress } from 'semantic-ui-react'
+import { Segment, Item, Label, Button, Modal, Header, Icon, Table, Checkbox, Progress } from 'semantic-ui-react'
 
 import { TargetReports } from '../api/targetReports.js';
 import { TargetSessions } from '../api/targetSessions.js';
@@ -302,57 +302,61 @@ class Target extends Component {
     }
 
     return (
-    <Item>
-      <Item.Content>
-      <Checkbox
-        label='  '
-        name='enabledActive'
-        toggle
-        checked={ENABLEACTIVE}
-        onChange={this.handleToggleEnabled.bind(this)}
-        />
-      <Item.Header as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, this.props.tool_active.value)}>
-        {this.props.target.targetFindName}
-        </Item.Header>
-        <Item.Description>
-          {this.props.target.description}
-        </Item.Description>
-        <Item.Meta>
-        <Label>Images: <Label.Detail>{this.props.target.totalImagesTaken()}/{this.props.target.totalImagesPlanned()}</Label.Detail></Label>
-        <Label>Priority: <Label.Detail>{this.props.target.priority}</Label.Detail></Label>
-        <Label>Start: <Label.Detail>{this.props.target.startTime}</Label.Detail></Label>
-        <Label>Stop: <Label.Detail>{this.props.target.stopTime}</Label.Detail></Label>
-        <Label>Min. Alt.: <Label.Detail>{this.props.target.minAlt}</Label.Detail></Label>
-        <Label>Cur. Alt.: <Label.Detail>{this.state.currentAlt}</Label.Detail></Label>
-        </Item.Meta>
-        <Item.Extra>
-          {this.renderTargeting()}
-          <Label.Group>
-            {/*
-            <Label>Direction: <Label.Detail>{this.state.azimuth}</Label.Detail></Label> */}
-          </Label.Group>
-          {this.targetButtons(this.props.scheduler_running.value, this.props.tool_active.value)}
-          <Checkbox
-            label=' Calibration Target'
-            name='isCalibrationFrames'
-            toggle
-            checked={CALIBRATION}
-            onChange={this.handleToggleEnabled.bind(this)}
+    <Segment raised>
+      <Item>
+        <Item.Content>
+        <Checkbox
+          label='  '
+          name='enabledActive'
+          toggle
+          checked={ENABLEACTIVE}
+          onChange={this.handleToggleEnabled.bind(this)}
           />
-          <Modal
-            open={this.state.modalOpen}
-            onClose={this.handleClose}
-            closeIcon>
-            <Modal.Header>Editing Target {this.props.target.targetFindName}</Modal.Header>
-            <Modal.Content>
-              <Modal.Description>
-                <TargetEditor key={this.props.target._id} target={this.props.target} />
-              </Modal.Description>
-            </Modal.Content>
-          </Modal>
-        </Item.Extra>
-      </Item.Content>
-    </Item>
+        <Item.Header as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, this.props.tool_active.value)}>
+          {this.props.target.targetFindName}
+          </Item.Header>
+          <Item.Description>
+            {this.props.target.description}
+          </Item.Description>
+          <Item.Meta>
+          <Label>Images: <Label.Detail>{this.props.target.totalImagesTaken()}/{this.props.target.totalImagesPlanned()}</Label.Detail></Label>
+          <Label>Priority: <Label.Detail>{this.props.target.priority}</Label.Detail></Label>
+          <Label>Start: <Label.Detail>{this.props.target.startTime}</Label.Detail></Label>
+          <Label>Stop: <Label.Detail>{this.props.target.stopTime}</Label.Detail></Label>
+          <Label>Min. Alt.: <Label.Detail>{this.props.target.minAlt}</Label.Detail></Label>
+          <Label>Cur. Alt.: <Label.Detail>{this.state.currentAlt}</Label.Detail></Label>
+          </Item.Meta>
+          <Item.Extra>
+            {this.renderTargeting()}
+            <Label.Group>
+              {/*
+              <Label>Direction: <Label.Detail>{this.state.azimuth}</Label.Detail></Label> */}
+            </Label.Group>
+            {this.targetButtons(this.props.scheduler_running.value, this.props.tool_active.value)}
+            {
+            // <Checkbox
+            //   label=' Calibration Target'
+            //   name='isCalibrationFrames'
+            //   toggle
+            //   checked={CALIBRATION}
+            //   onChange={this.handleToggleEnabled.bind(this)}
+            // />
+          }
+            <Modal
+              open={this.state.modalOpen}
+              onClose={this.handleClose}
+              closeIcon>
+              <Modal.Header>Editing Target {this.props.target.targetFindName}</Modal.Header>
+              <Modal.Content>
+                <Modal.Description>
+                  <TargetEditor key={this.props.target._id} target={this.props.target} />
+                </Modal.Description>
+              </Modal.Content>
+            </Modal>
+          </Item.Extra>
+        </Item.Content>
+      </Item>
+    </Segment>
     )
   }
 }

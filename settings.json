@@ -2,6 +2,6 @@
   "enable_log": "yes",
   "enable_debug": "no",
   "enable_info": "no",
-  "enable_warn": "no",
+  "enable_warn": "yes",
   "removed-to-enable: log_file_location": "/media/odroid/PENSIVE2/tsx_cmd_logs"
 }

@@ -1090,6 +1090,7 @@ function tsx_DeviceInfo() {
          Filters.upsert( {slot: i }, {
            $set: {
              name: name,
+             flat_exposure: 0,
             }
          });
        }
@@ -1938,7 +1939,7 @@ function tsx_takeImage( filterNum, exposure, frame, tName ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_takeImage: ' + filterNum );
 
-  var success = 'Failed';
+  var success = false;
 
   var cmd = tsx_cmd('SkyX_JS_TakeImage');
   postProgressTotal(exposure);
@@ -1975,7 +1976,14 @@ function tsx_takeImage( filterNum, exposure, frame, tName ) {
         var result = tsx_return.split('|')[0].trim();
         tsxDebug(' Image: ' + result);
         if( result === "Success") {
-          success = result;
+          success = true;
+          // check for rotatorPositionAngle
+          var rotPos = tsx_return.split('|')[1].trim()
+          if( rotPos == 'rotatorPosition') {
+            // the position is stored
+            // the stoed position can be used for flats
+
+          }
         }
         else {
           tsxWarn(' Image failed: ' + tsx_return);
@@ -2527,6 +2535,8 @@ Meteor.methods({
 
   // **************************************************************
   connectToTSX() {
+    tsx_SetServerState( 'tool_active', true );
+
     tsxDebug(' ******************************* ');
     UpdateStatus(' Refreshing Devices...');
     var isOnline = tsx_ServerIsOnline();
@@ -2537,6 +2547,7 @@ Meteor.methods({
     tsxDebug('Loading devices');
     var out = tsx_DeviceInfo();
 
+    tsx_SetServerState( 'tool_active', false );
    },
 
    // this from the monitor
@@ -2572,9 +2583,13 @@ Use this to set the last focus
   // **************************************************************
   // Used to pass RA/DEC to target editors
   targetFind(target) {
+    tsx_SetServerState( 'tool_active', true );
+
     tsxDebug('************************');
     tsxDebug(' *** targetFind: ' + target.targetFindName);
-    return UpdateImagingTargetReport(target);
+    var res = UpdateImagingTargetReport(target);
+    tsx_SetServerState( 'tool_active', false );
+    return res;
 
   },
 
@@ -2706,31 +2721,39 @@ Use this to set the last focus
   },
 
   centreTarget( target ) {
+    tsx_SetServerState( 'tool_active', true );
     UpdateStatus( ' Centre : ' + target.targetFindName );
     var result = tsx_CLS( target);
+    tsx_SetServerState( 'tool_active', false );
     return result;
   },
 
   getTargetReport( target ) {
+    tsx_SetServerState( 'tool_active', true );
     UpdateStatus( ' Getting report : ' + target.targetFindName );
     var result = tsx_TargetReport( target );
     UpdateStatus( ' Received report' );
+    tsx_SetServerState( 'tool_active', false );
     return result;
   },
 
   getTargetReports( targetArray ) {
+    tsx_SetServerState( 'tool_active', true );
     UpdateStatus( ' Getting report : ' + target.targetFindName );
     for (var i = 0; i < targetArray.length; i++) {
       var target = targetArray[i];
       var result = tsx_TargetReport( target );
     }
     UpdateStatus( ' Received report' );
+    tsx_SetServerState( 'tool_active', false );
     return result;
   },
 
   park( ) {
+    tsx_SetServerState( 'tool_active', true );
     var filter = tsx_GetServerStateValue('defaultFilter');
     var result = tsx_MntPark(filter, false ); // use default filter
+    tsx_SetServerState( 'tool_active', false );
     return result;
   }
 

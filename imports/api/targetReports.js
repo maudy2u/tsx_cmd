@@ -43,6 +43,7 @@ TargetReports = {
   ready: ready,
   readyMsg: readyMsg,
   pointing: pointing,
+  ANGLE: clsSuccess.angle,
 };
 
  */
