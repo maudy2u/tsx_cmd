@@ -135,11 +135,10 @@ if( CCDSC.focIsConnected ) {
   TSXI.setFITSKeyword("FOCUS_POS", CCDSC.focPosition);
 }
 //Enter the rotator angle
-var rotatorPosition = '';
 if( CCDSC.rotatorIsConnected ) {
-	rotatorPosition = CCDSC.rotatorPositionAngle();
+	var rotatorPosition = CCDSC.rotatorPositionAngle();
   TSXI.setFITSKeyword("ROTATOR_POS", rotatorPosition);
-	Out = Out+'|rotatorPosition|'+rotatorPosition;
+	Out = Out+'rotatorPosition|'+rotatorPosition;
 }
 //Enter the custom object name
 if( tName != '$003' ) {

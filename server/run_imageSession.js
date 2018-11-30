@@ -33,6 +33,10 @@ import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
 import { Seriess } from '../imports/api/seriess.js';
 import { Filters } from '../imports/api/filters.js';
 import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
+import {
+  TargetAngles,
+  recordRotatorPosition,
+} from '../imports/api/targetAngles.js';
 
 //Tools
 import {
@@ -1975,14 +1979,16 @@ function tsx_takeImage( filterNum, exposure, frame, tName ) {
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         var result = tsx_return.split('|')[0].trim();
         tsxDebug(' Image: ' + result);
+        tsxDebug( tsx_return );
         if( result === "Success") {
           success = true;
           // check for rotatorPositionAngle
           var rotPos = tsx_return.split('|')[1].trim()
+          tsxLog( 'found rotator position: ' + rotPos + ' with name ' + tName );
           if( rotPos == 'rotatorPosition') {
             // the position is stored
             // the stoed position can be used for flats
-
+            recordRotatorPosition( tName, tsx_return.split('|')[2].trim() );
           }
         }
         else {
@@ -2611,7 +2617,7 @@ Use this to set the last focus
     var slot = getFilterSlot( series.filter );
     //  cdLight =1, cdBias, cdDark, cdFlat
     var frame = getFrame(series.frame);
-    out = tsx_takeImage(slot,series.exposure, frame);
+    out = tsx_takeImage(slot,series.exposure, frame, targetSession.targetFindName);
     tsxDebug('Taken image: ' +res);
 
     return;

@@ -507,14 +507,14 @@ class Monitor extends Component {
       return (
         <div>
         <Button icon='play'  onClick={this.playScheduler.bind(this)}/>
-        <Button disabled='true' icon='stop' onClick={this.stopScheduler.bind(this)} />
+        <Button disabled icon='stop' onClick={this.stopScheduler.bind(this)} />
         </div>
       )
     }
     else {
       return (
         <div>
-          <Button disabled='true' icon='play'  onClick={this.playScheduler.bind(this)}/>
+          <Button disabled icon='play'  onClick={this.playScheduler.bind(this)}/>
           <Button  icon='stop' onClick={this.stopScheduler.bind(this)} />
         </div>
       )
@@ -662,7 +662,7 @@ class Monitor extends Component {
                 onChange={this.handleToggle.bind(this)}
               /> */}
               <br /><Form.Checkbox
-                label='Enable Periodical CLS (Cloud checks) '
+                label='Enable Cloud Check (periodic CLS) '
                 name='isCLSRepeatEnabled'
                 toggle
                 placeholder= 'CLS every X secs'

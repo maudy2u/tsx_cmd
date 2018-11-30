@@ -42,6 +42,9 @@ import {
  import {
    TargetReports
  } from '../api/targetReports.js'
+ import {
+   TargetAngles
+ } from '../api/targetAngles.js'
 
 import { Filters } from '../api/filters.js';
 import { FlatSeries } from '../api/flatSeries.js';
@@ -345,7 +348,7 @@ class App extends TrackerReact(Component) {
       <div>
         <Menu tabular icon>
           <Menu.Item name='Monitor' active={activeMenu === 'Monitor'} onClick={this.handleMenuItemClick}>
-            <Icon name='play' />
+            <Icon name='camera' />
           </Menu.Item>
           <Menu.Item name='Targets' active={activeMenu === 'Targets'} onClick={this.handleMenuItemClick}>
             <Icon name='target' />

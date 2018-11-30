@@ -22,7 +22,7 @@ import ReactDOM from 'react-dom';
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { Confirm, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
+import { Confirm, Input, Icon, Grid, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
 
 import {
   tsx_ServerStates,
@@ -44,10 +44,10 @@ import {
 
 // Import the UI
 import Target  from './Target.js';
-import Flat  from './Flat.js';
 import TargetSessionMenu from './TargetSessionMenu.js';
 // import Filter from './Filter.js';
 import Series from './Series.js';
+import FlatGrid from './FlatGrid.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 //import TheSkyXInfo from './TheSkyXInfo.js';
 
@@ -64,7 +64,6 @@ class Flats extends Component {
     this.setState({ [name]: value.trim() });
     this.saveDefaultState( name );
   };
-
 
   // requires the ".bind(this)", on the callers
   handleToggle = (e, { name, value }) => {
@@ -282,44 +281,34 @@ class Flats extends Component {
           , this.props.tool_active.value
         )}
         <Segment raised>
-        Present the targets, and check of which ones to
-        calibrate - use the target FOV rotator position
-        <br />
-        {this.props.filters.map((filter)=>{
-          return (
-            <div key={filter._id}>
-          { filter.name + '|' + filter.slot + '|' + filter.flat_exposure }
-            </div>
-          )})}
-        <hr/>
-        {
-          this.props.flatSeries.map((flat)=>{
+          Present the targets, and check of which ones to
+          calibrate - use the target FOV rotator position
+          <br />
+          REMEMBER TO ADD IN THE "EXPOSURE" FOR THE TYPE OF Filter
+          THE IDEA IS TO ADD THE EXPOSURE TO THE FILTER ITSELF WITH
+          THE FILTER NAME AND SLOT
+          <br />
+          {this.props.filters.map((filter)=>{
             return (
-              <Segment key={flat._id} raised>
-                  RotatorGroup: {flat.rotatorPosition}
-                  <Button.Group basic size='mini' floated='right'>
-                    <Button icon='plus'/> {/*onClick=addFlatFilter(flat._id).bind(this)/>*/}
-                  </Button.Group>
-                  <br/>
-                  {flat.filtergroup.map((filter)=>{
-                      return (
-                        <div>
-                        <Flat key={filter._id}
-                          scheduler_report={this.props.scheduler_report}
-                          tsxInfo={this.props.tsxInfo}
-                          scheduler_running={this.props.scheduler_running}
-                          tool_active = {this.props.tool_active}
-                          filter = {filter}
-                          flatSeries = {this.props.flatSeries}
-                        />
-                        <hr/>
-                        </div>
-                      )
-                    })
-                  }
-              </Segment>
-          )})
-        }
+              <div key={filter._id}>
+            { filter.name + '|' + filter.slot + '|' + filter.flat_exposure }
+              </div>
+            )})}
+          <hr/>
+          {
+            this.props.flatSeries.map((flat)=>{
+              return (
+                <FlatGrid
+                  key={flat._id}
+                  flat={flat}
+                  scheduler_report={this.props.scheduler_report}
+                  tsxInfo={this.props.tsxInfo}
+                  scheduler_running={this.props.scheduler_running}
+                  tool_active = {this.props.tool_active}
+                  flatSeries = {this.props.flatSeries}
+                />
+            )})
+          }
         </Segment>
         <Segment.Group  size='mini' horizontal>
           <Segment>

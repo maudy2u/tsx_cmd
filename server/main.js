@@ -25,6 +25,7 @@ import { Filters } from '../imports/api/filters.js';
 import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
 import { scheduler } from '../imports/api/theProcessors.js';
 import { FlatSeries } from '../imports/api/flatSeries.js';
+import { TargetAngles } from '../imports/api/targetAngles.js';
 
 import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug, logFileForClient, AppLogsDB } from '../imports/api/theLoggers.js';
 
@@ -181,13 +182,13 @@ function CleanUpJobs() {
   // Persistence across reboots is not needed at this time.
   tsxDebug('Number of Jobs found: ' + jobs.length);
   if( jobs.length > 0 ) {
-    UpdateStatus( ' Cleaning up DB');
+    tsxDebug( ' Cleaning up DB');
     for (var i = 0; i < jobs.length; i++) {
       if( typeof jobs[i] != 'undefined') {
         scheduler.remove(jobs[i]._id);
       }
     }
-    UpdateStatus( ' Cleaned DB');
+    tsxDebug(' Cleaned DB');
   }
   return;
 }
@@ -264,10 +265,10 @@ So working on the cloud detection to PAUSE.
             if( ready ) {
               // target images per Take Series
               tsxLog ( ' =========================');
-              tsxLog ( ' ************************1*');
+              tsxDebug ( ' ************************1*');
               UpdateStatus ( ' *** Start imaging: ' + target.targetFindName );
               processTargetTakeSeries( target );
-              tsxLog ( ' ************************2*');
+              tsxDebug ( ' ************************2*');
             }
             else {
               ParkMount( isParked );
@@ -328,14 +329,10 @@ So working on the cloud detection to PAUSE.
 }
 
 Meteor.startup(() => {
-  // code to run on server at startup
-  // var logsItems = AppLogsDB.find({}).fetch();
-  // for (var i in logsItems ) {
-  //   var obj =  i;
-  //   // Meteor._debug(obj);
-    AppLogsDB.remove({});
-    FlatSeries.remove({});
-  // }
+
+  AppLogsDB.remove({});
+  // FlatSeries.remove({});
+  // TargetAngles.remove({});
 
   tsxLog(' ******* STARTED ******', '');
 
@@ -423,7 +420,7 @@ Meteor.methods({
    // 4. start/end checks... ???
    // or KISS and one big sequenital function...
    startScheduler() {
-     tsxLog(' ***********************2*');
+     tsxDebug(' ***********************2*');
      // tsxLog('Found scheduler state: ' + getSchedulerState() );
      if(
        getSchedulerState() == 'Running'

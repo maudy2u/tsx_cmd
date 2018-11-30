@@ -18,7 +18,7 @@ tsx cmd - A web page to send commands to TheSkyX server
 
 import React, { Component } from 'react'
 import { withTracker } from 'meteor/react-meteor-data';
-import { Button, Dropdown, Input, Modal, Item, Header, Icon, Table, } from 'semantic-ui-react'
+import { Button, Dropdown, Grid, Input, Modal, Item, Header, Icon, Table, } from 'semantic-ui-react'
 import {
   tsx_ServerStates,
   tsx_UpdateServerState,
@@ -32,12 +32,20 @@ import { TargetReports } from '../api/targetReports.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 import {
   Filters,
-  subFrameTypes,
+  renderDropDownFilters,
 } from '../api/filters.js';
+
 import {
   FlatSeries,
-  addFlatSeries,
+  deleteFlatFilter,
+  updateFlatFilter,
  } from '../api/flatSeries.js';
+
+export const subFrameTypes = [
+  'Flat',
+  'Dark',
+  'Bias',
+];
 
 class Flat extends Component {
 
@@ -56,7 +64,40 @@ class Flat extends Component {
   handleChange = (e, { name, value }) => {
 
     this.setState({ [name]: value });
+    updateFlatFilter(
+      this.props.flat._id,
+      this.props.filter._id,
+      name,
+      value,
+    //   this.state.exposure,
+    //   this.state.repeat ,
+    );
   };
+
+  componentDidMount() {
+    this.updateDefaults(this.props);
+  }
+
+  updateDefaults(nextProps) {
+    if( typeof nextProps == 'undefined'  ) {
+      return;
+    }
+
+    if( typeof nextProps.filter != 'undefined'  ) {
+      this.setState({
+        frame: nextProps.filter.frame
+      });
+      this.setState({
+        filter: nextProps.filter.filter
+      });
+      this.setState({
+        exposure: nextProps.filter.exposure
+      });
+      this.setState({
+        repeat: nextProps.filter.repeat
+      });
+    }
+  }
 
   // *******************************
   // This is used to populate drop down frame lists
@@ -72,35 +113,57 @@ class Flat extends Component {
 
   deleteEntry() {
     // check if the series is used - if so cannot delete... list the Targets using it
-    }
+    deleteFlatFilter(this.props.flat._id, this.props.filter._id);
+  }
 
   render() {
-    return (
-      <div>
 
-        Filter: {this.props.filter._id}>
-        frame: <Dropdown
-          fluid
-          name='frame'
-          options={this.renderDropDownFrames()}
-          placeholder='Frame'
-          text={this.state.frame}
-          onChange={this.handleChange}
-        />
-        filter: {this.props.filter.filter}<br/>
-        Exposure: <Input
-          fluid
-          placeholder='Exposure'
-          name='exposure'
-          value={this.props.filter.exposure}
-          onChange={this.handleChange}
-        />
-        {}<br/>
-        repeat: {this.props.filter.repeat}<br/>
-        <Button.Group basic size='mini' floated='right'>
-          <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
-        </Button.Group>
-    </div>
+    return (
+      <Grid.Row>
+        <Grid.Column width={1}>
+          <Dropdown
+            fluid
+            name='frame'
+            options={this.renderDropDownFrames()}
+            placeholder='Frame'
+            value={this.state.frame}
+            onChange={this.handleChange}
+          />
+        </Grid.Column>
+        <Grid.Column>
+          <Dropdown
+            fluid
+            name='filter'
+            options={renderDropDownFilters()}
+            placeholder='Filter'
+            value={this.state.filter}
+            onChange={this.handleChange}
+          />
+        </Grid.Column>
+        <Grid.Column>
+          <Input
+            fluid
+            placeholder='Exposure'
+            name='exposure'
+            value={this.state.exposure}
+            onChange={this.handleChange}
+          />
+        </Grid.Column>
+        <Grid.Column>
+          <Input
+            fluid
+            placeholder='Repeat'
+            name='repeat'
+            value={this.state.repeat}
+            onChange={this.handleChange}
+          />
+        </Grid.Column>
+        <Grid.Column>
+          <Button.Group basic size='mini' floated='right'>
+            <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
+          </Button.Group>
+        </Grid.Column>
+      </Grid.Row>
     )
   }
 
