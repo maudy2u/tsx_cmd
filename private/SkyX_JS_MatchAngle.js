@@ -2,7 +2,7 @@
 /* Socket Start Packet */
 // SkyX_JS_MatchAngle
 //  Stephen Townsend
-//  2018-09-30
+//  2018-11-29
 // *******************************
 var TARGETANG= $000;
 var PIXELSIZE =$001; // 23.07 ... for simulator with 1.7 imagescale and 2800 FL
@@ -20,6 +20,12 @@ var AILSFILTER = AILS.filterNameAILS;
 
 // *******************************
 // Calc position to rotate too...
+if( TARGETANG < 0 ) {
+	TARGETANG = 360+TARGETANG;
+}
+else if( TARGETANG > 360 ) {
+	TARGETANG = TARGETANG %360;
+}
 function calcNewPostion( imageLinkAng, rotPos, targetAng)  {
   var diff = imageLinkAng - targetAng; // difference between the actual and target
   var newPos = 0; // new possition for the rotator
