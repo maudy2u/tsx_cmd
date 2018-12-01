@@ -27,7 +27,8 @@ import { scheduler } from '../imports/api/theProcessors.js';
 import { FlatSeries } from '../imports/api/flatSeries.js';
 import { TargetAngles } from '../imports/api/targetAngles.js';
 
-import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug, logFileForClient, AppLogsDB } from '../imports/api/theLoggers.js';
+import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug,
+  logFileForClient, AppLogsDB } from '../imports/api/theLoggers.js';
 
 import {
   tsx_ServerStates,
@@ -60,8 +61,8 @@ import {
   CalibrateAutoGuider,
   tsx_RotateCamera,
   UpdateImagingTargetReport,
-  tsx_SlewCoords,
   tsx_SlewTargetName,
+  tsx_SlewCmdCoords,
 } from './run_imageSession.js';
 
 import { tsx_feeder, stop_tsx_is_waiting } from './tsx_feeder.js';

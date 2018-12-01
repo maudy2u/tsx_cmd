@@ -366,47 +366,36 @@ class Flats extends Component {
           basic
           size='small'
           closeIcon>
-          <Modal.Header>Filter Fat Exposures</Modal.Header>
+          <Modal.Header>Flat Filter Exposures</Modal.Header>
           <Modal.Content>
             <Segment raised>
-              <Grid columns={2} centered divided='vertically' >
-                <Grid.Row>
-                  <Grid.Column>
-                    <b>Filter</b>
-                  </Grid.Column>
-                  <Grid.Column>
-                    <b>Exposure</b>
-                  </Grid.Column>
-                </Grid.Row>
+              <Form>
+                <Form.Field inline >
+                    <Label>Filter</Label>
+                    <Label>Exposure</Label>
+                    <br/>
+                </Form.Field>
                 {this.props.filters.map((filter)=>{
                   return (
-                  <Grid.Row key={filter._id}>
-                    <Grid.Column width={1}>
+                    <Form.Field inline pointing='right'>
                       <Label>
                         {filter.name}
                       </Label>
-                    </Grid.Column>
-                    <Grid.Column>
                       <Input
-                        fluid
                         placeholder='Exposure'
                         name={filter._id}
                         value={filter.flat_exposure}
                         onChange={this.handleFilterChange}
                       />
-                    </Grid.Column>
-                  </Grid.Row>
+                </Form.Field>
                 )})}
-              </Grid>
+              </Form>
             </Segment>
           </Modal.Content>
           <Modal.Description>
           Enter the default exposure settings for each filter.
           </Modal.Description>
           <Modal.Actions>
-            <Button onClick={this.closeModal.bind(this)} inverted>
-              <Icon name='stop' />Stop
-            </Button>
           </Modal.Actions>
         </Modal>
     </div>

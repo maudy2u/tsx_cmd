@@ -580,28 +580,30 @@ export function tsx_SlewTargetName( target ) {
 
 export function tsx_SlewCmdCoords( cmd, ra, dec ) {
   // tsxDebug('************************');
-  tsxDebug(' *** tsx_Slew: ' + target );
+  tsxDebug(' *** tsx_Slew: ' + ra + ', ' + dec );
 
+  var result = '';
   var cmd = tsx_cmd(cmd);
   cmd = cmd.replace('$000',  ra  );
   cmd = cmd.replace('$001',  dec  );
 
   var tsx_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-    var result = tsx_return.split('|')[0].trim();
+    result = tsx_return.split('|')[0].trim();
     // tsxDebug('Any error?: ' + result);
     if( result != 'Success') {
       forceAbort = true;
-      UpdateStatus('Slew Failed. Error: ' + result);
+      tsxDebug('Slew Failed. Error: ' + result);
     }
     else {
-      UpdateStatus('Slew finished');
+      tsxDebug('Slew finished');
     }
     tsx_is_waiting = false;
   }));
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
+  return result;
 }
 
 // *******************************
