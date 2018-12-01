@@ -35,12 +35,15 @@ import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
 import { TargetSessions } from '../api/targetSessions.js';
 import { TargetReports } from '../api/targetReports.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
-import { Filters } from '../api/filters.js';
+import {
+  Filters,
+  updateFlatExposure,
+} from '../api/filters.js';
 import {
   FlatSeries,
   addFlatSeries,
   addFlatFilter,
- } from '../api/flatSeries.js';
+} from '../api/flatSeries.js';
 
 // Import the UI
 import Target  from './Target.js';
@@ -73,6 +76,10 @@ class Flats extends Component {
   handleChange = (e, { name, value }) => {
     this.setState({ [name]: value.trim() });
     this.saveDefaultStateValue( name, value.trim() );
+  };
+  handleFilterChange = (e, { name, value }) => {
+    var fid = name;
+    updateFlatExposure( fid, value );
   };
 
   // requires the ".bind(this)", on the callers
@@ -297,7 +304,7 @@ class Flats extends Component {
         {this.addFilterForFlats(
           this.props.scheduler_running.value
           , this.props.tool_active.value
-        )} <h1>FLAT GROUPS</h1>
+        )} <h1>FLAT Series</h1>
         { this.flatSettings() }
         <Segment raised>
           Present the targets, and check of which ones to
@@ -307,9 +314,6 @@ class Flats extends Component {
           THE IDEA IS TO ADD THE EXPOSURE TO THE FILTER ITSELF WITH
           THE FILTER NAME AND SLOT
           <br />
-          ADD IN AN ENABLE BUTTON FOR A SPECIFIC FILTER GROUP: LRGB,
-          SHO... AS AN IDEA
-          <hr/>
           {
             this.props.flatSeries.map((flat)=>{
               return (
@@ -365,25 +369,35 @@ class Flats extends Component {
           <Modal.Header>Filter Fat Exposures</Modal.Header>
           <Modal.Content>
             <Segment raised>
-              <Grid.Row columns={2} centered divided='vertically'>
-                <Grid.Column>
-                  <b>Filter</b>
-                </Grid.Column>
-                <Grid.Column>
-                  <b>Exposure</b>
-                </Grid.Column>
-              </Grid.Row>
-          {this.props.filters.map((filter)=>{
-            return (
-              <Grid.Row key={filter._id}>
-                <Grid.Column width={1}>
-                  {filter.name}
-                </Grid.Column>
-                <Grid.Column>
-                  {filter.flat_exposure}
-                </Grid.Column>
-              </Grid.Row>
-            )})}
+              <Grid columns={2} centered divided='vertically' >
+                <Grid.Row>
+                  <Grid.Column>
+                    <b>Filter</b>
+                  </Grid.Column>
+                  <Grid.Column>
+                    <b>Exposure</b>
+                  </Grid.Column>
+                </Grid.Row>
+                {this.props.filters.map((filter)=>{
+                  return (
+                  <Grid.Row key={filter._id}>
+                    <Grid.Column width={1}>
+                      <Label>
+                        {filter.name}
+                      </Label>
+                    </Grid.Column>
+                    <Grid.Column>
+                      <Input
+                        fluid
+                        placeholder='Exposure'
+                        name={filter._id}
+                        value={filter.flat_exposure}
+                        onChange={this.handleFilterChange}
+                      />
+                    </Grid.Column>
+                  </Grid.Row>
+                )})}
+              </Grid>
             </Segment>
           </Modal.Content>
           <Modal.Description>

@@ -138,7 +138,7 @@ class FlatGrid extends Component {
         <br/>
         <br/>
           <Grid columns={5} centered divided='vertically'>
-            <Grid.Row >
+            <Grid.Row centered textAlign='center'>
               <Grid.Column>
                 <b>Frame</b>
               </Grid.Column>

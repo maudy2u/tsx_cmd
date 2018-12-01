@@ -47,6 +47,27 @@ export function renderDropDownFilters() {
   return filterArray;
 };
 
+export function getFlatExposure ( fid ) {
+  var filter = Filters.findOne({name: fid});
+  var exp = 0;
+  if( typeof filter != 'undefined' ) {
+    exp = filter.flat_exposure;
+  }
+  return exp;
+}
+
+export function updateFlatExposure( fid, value ) {
+  var filter = Filters.findOne({_id: fid});
+  if( typeof filter != 'undefined' ) {
+    Filters.update({_id: fid }, {
+      $set: {
+        flat_exposure: value,
+      }
+    });
+  }
+  return;
+};
+
 // *******************************
 // Get the filters from TheSkyX
 Filters.helpers({

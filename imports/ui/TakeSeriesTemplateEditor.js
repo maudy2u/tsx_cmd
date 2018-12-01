@@ -167,7 +167,8 @@ class TakeSeriesTemplateEditor extends Component {
               checked={this.state.repeatSeries}
               onChange={this.handleToggle.bind(this)}
             />
-            {/* <Form.Checkbox onChange={this.seriesProcessChange} /> */}
+            <br/>
+            <br/>
             <Form.Input
               label='Dither after: '
               name='defaultDithering'
@@ -177,8 +178,9 @@ class TakeSeriesTemplateEditor extends Component {
             />
           </Form.Group>
         </Form>
+        <br/>
         <Grid columns={6} centered divided='vertically'>
-          <Grid.Row >
+          <Grid.Row centered>
             <Grid.Column width={1}/>
             <Grid.Column>
             <b>Exposure</b>

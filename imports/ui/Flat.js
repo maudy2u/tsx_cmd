@@ -18,7 +18,7 @@ tsx cmd - A web page to send commands to TheSkyX server
 
 import React, { Component } from 'react'
 import { withTracker } from 'meteor/react-meteor-data';
-import { Button, Dropdown, Grid, Input, Modal, Item, Header, Icon, Table, } from 'semantic-ui-react'
+import { Button, Dropdown, Grid, Label, Input, Modal, Item, Header, Icon, Table, } from 'semantic-ui-react'
 import {
   tsx_ServerStates,
   tsx_UpdateServerState,
@@ -33,6 +33,7 @@ import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 import {
   Filters,
   renderDropDownFilters,
+  getFlatExposure,
 } from '../api/filters.js';
 
 import {
@@ -69,9 +70,20 @@ class Flat extends Component {
       this.props.filter._id,
       name,
       value,
-    //   this.state.exposure,
-    //   this.state.repeat ,
     );
+  };
+
+  handleFilterChange = (e, { name, value }) => {
+
+    this.setState({ [name]: value });
+    updateFlatFilter(
+      this.props.flat._id,
+      this.props.filter._id,
+      name,
+      value,
+    );
+    var e = getFlatExposure( value );
+    this.setState( {exposure: e } );
   };
 
   componentDidMount() {
@@ -119,7 +131,7 @@ class Flat extends Component {
   render() {
 
     return (
-      <Grid.Row>
+      <Grid.Row centered textAlign='center' >
         <Grid.Column width={1}>
           <Dropdown
             fluid
@@ -137,17 +149,13 @@ class Flat extends Component {
             options={renderDropDownFilters()}
             placeholder='Filter'
             value={this.state.filter}
-            onChange={this.handleChange}
+            onChange={this.handleFilterChange}
           />
         </Grid.Column>
         <Grid.Column>
-          <Input
-            fluid
-            placeholder='Exposure'
-            name='exposure'
-            value={this.state.exposure}
-            onChange={this.handleChange}
-          />
+          <Label>
+          {this.state.exposure}
+          </Label>
         </Grid.Column>
         <Grid.Column>
           <Input
