@@ -22,20 +22,41 @@ import { Random } from 'meteor/random';
 // Used to store the filters currently available/active on TSX
 export const FlatSeries = new Mongo.Collection('flatSeries');
 
+/* Flat Series is:
+  rotatorPosition: 0,
+  enabledActive:false,
+  filtergroup: [],
+ */
+
 const defaultFlat = {
   _id: '',
   frame: 'Flat',
   filter: '',
   exposure: 0,
   repeat: 1,
+  enabledActive: false,
 };
 
-export function updateFlatRotation( fid, name, value ) {
-  FlatSeries.update({_id: fid}, {
-    $set: {
-      rotatorPosition: value,
+export function updateFlatSeries( fid, name, value ) {
+  var fs = FlatSeries.findOne({_id:fid});
+  if( typeof fs != 'undefined') {
+    if( name == 'rotatorPosition') {
+      fs.rotatorPosition = value;
     }
-  });
+    else if( name == 'enabledActive') {
+      fs.enabledActive = value;
+    }
+    else if( name == 'filtergroup') {
+      fs.filtergroup = value;
+    }
+    FlatSeries.update({_id: fs._id}, {
+      $set: {
+        rotatorPosition: fs.rotatorPosition,
+        filtergroup: fs.filtergroup,
+        enabledActive: fs.enabledActive,
+      }
+    });
+  }
 }
 
 export function addFlatSeries() {
@@ -43,6 +64,7 @@ export function addFlatSeries() {
   const id  = FlatSeries.insert(
     {
       rotatorPosition: 0,
+      enabledActive:false,
       filtergroup: [
         {
           _id: nid,
@@ -96,6 +118,9 @@ export function updateFlatFilter(
       }
       else if( name == 'repeat') {
         filter.repeat = value;
+      }
+      else if( name == 'enabledActive') {
+        filter.enabledActive = value;
       }
     }
     newgroup.push(filter);

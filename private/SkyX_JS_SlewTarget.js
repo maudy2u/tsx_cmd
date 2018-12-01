@@ -26,11 +26,11 @@
 //
 
 // Assumed Target already set
-var targetName = '$000';
+var targetName = "$000";
 var targetRA;
 var targetDEC;
-var Out;
 var slewStatus = "Success";
+var Out = 'nothing happened';
 var CCDAG = ccdsoftAutoguider;
 var SHW = SelectedHardware;
 
@@ -61,31 +61,40 @@ if ( SHW.mountModel !== "Telescope Mount Simulator") {
 	sky6RASCOMTele.Unpark();
 }
 
-sky6StarChart.Find(targetName);
-var haveTarget = sky6ObjectInformation.Property(59); // altitude
-if( haveTarget != 'TypeError: Object not found. Error = 250.') {
-    // we have a target we can query
-    sky6ObjectInformation.Property(54);  // RA				// Pull the RA value
-    targetRA = sky6ObjectInformation.ObjInfoPropOut; 		// Stuff RA into variable
+var found = false;
+try {
+	sky6StarChart.Find(targetName);
+	found = true;
+}
+catch( err) {
+	Out = "Slew Failed|";
+}
+if( found ) {
+	var haveTarget = sky6ObjectInformation.Property(59); // altitude
+	if( haveTarget != 'TypeError: Object not found. Error = 250.') {
+		// we have a target we can query
+		sky6ObjectInformation.Property(54);  // RA				// Pull the RA value
+		targetRA = sky6ObjectInformation.ObjInfoPropOut; 		// Stuff RA into variable
 
-    sky6ObjectInformation.Property(55); // DEC			// Pull the DEC value
-    targetDEC = sky6ObjectInformation.ObjInfoPropOut; 		// Stuff DEC into variable
-  	//Do the closed loop slew synchronously\
-    try{
+		sky6ObjectInformation.Property(55); // DEC			// Pull the DEC value
+		targetDEC = sky6ObjectInformation.ObjInfoPropOut; 		// Stuff DEC into variable
+		//Do the closed loop slew synchronously\
+		try {
 			sky6RASCOMTele.Asynchronous = true;
-      sky6RASCOMTele.SlewToRaDec(targetRA, targetDEC, "Slew"); 	// Go to the RA & DEC;
+		  sky6RASCOMTele.SlewToRaDec(targetRA, targetDEC, ""); 	// Go to the RA & DEC;
 			while (sky6RASCOMTele.IsSlewComplete == 0)
 			{
 				sky6Web.Sleep (10000);						// Hang out.
 			}
 			sky6RASCOMTele.Asynchronous = false;
-    } catch( nErr ) {
-      slewStatus = "Failed";
-    }
-    if( slewStatus == "Success") {
-      Out = "Success |";
-    } else {
-    	Out = "Slew Failed|";
-    }
+		} catch( nErr ) {
+		  slewStatus = "Failed";
+		}
+		if( slewStatus == "Success") {
+		  Out = "Success |";
+		} else {
+			Out = "Slew Failed|";
+		}
+	}
 }
 Out;

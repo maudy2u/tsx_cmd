@@ -18,7 +18,7 @@ tsx cmd - A web page to send commands to TheSkyX server
 
 import React, { Component } from 'react'
 import { withTracker } from 'meteor/react-meteor-data';
-import { Button, Segment, Dropdown, Grid, Input, Modal, Item, Header, Icon, Table, } from 'semantic-ui-react'
+import { Button, Segment, Checkbox, Dropdown, Grid, Input, Modal, Item, Header, Icon, Table, } from 'semantic-ui-react'
 import {
   tsx_ServerStates,
   tsx_UpdateServerState,
@@ -41,7 +41,7 @@ import {
 import {
   FlatSeries,
   addFlatFilter,
-  updateFlatRotation,
+  updateFlatSeries,
  } from '../api/flatSeries.js';
 
  import Flat from './Flat.js';
@@ -56,6 +56,7 @@ class FlatGrid extends Component {
 
   state = {
     rotatorPosition: '',
+    enabledActive: false,
   }
 
   editOpen = () => this.setState({ editOpen: true })
@@ -64,16 +65,24 @@ class FlatGrid extends Component {
   deleteFailedClose = () => this.setState({ deleteFailed: false })
 
   handleChange = (e, { name, value }) => {
-
     this.setState({ [name]: value });
-
-    updateFlatRotation(
+    updateFlatSeries(
       this.props.flat._id,
       name,
       value,
     );
   };
 
+  handleToggleEnabled = (e, { name, checked }) => {
+    this.setState({
+      [name]: checked
+    });
+    updateFlatSeries(
+      this.props.flat._id,
+      name,
+      checked,
+    );
+  };
 
   componentDidMount() {
     this.updateDefaults(this.props);
@@ -87,6 +96,9 @@ class FlatGrid extends Component {
     if( typeof nextProps.flat != 'undefined'  ) {
       this.setState({
         rotatorPosition: nextProps.flat.rotatorPosition
+      });
+      this.setState({
+        enabledActive: nextProps.flat.enabledActive
       });
     }
   };
@@ -104,12 +116,18 @@ class FlatGrid extends Component {
 
     return (
       <Segment key={this.props.flat._id} raised>
-        <Button icon='delete' onClick={this.deleteEntry.bind(this)}/> RotatorGroup:
+        <Checkbox
+          label='  '
+          name='enabledActive'
+          toggle
+          checked={this.state.enabledActive}
+          onChange={this.handleToggleEnabled.bind(this)}
+        />
         <Button.Group basic size='mini' floated='right'>
+          <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
         </Button.Group>
+        <br/>RotatorGroup:
         <Dropdown
-          fluid
-          compact
           selection
           name='rotatorPosition'
           options={renderDropDownAngles()}
@@ -117,6 +135,8 @@ class FlatGrid extends Component {
           value={this.state.rotatorPosition}
           onChange={this.handleChange}
         />
+        <br/>
+        <br/>
           <Grid columns={5} centered divided='vertically'>
             <Grid.Row >
               <Grid.Column>

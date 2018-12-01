@@ -494,11 +494,37 @@ Meteor.methods({
           tsx_SlewCmdCoords( 'SkyX_JS_SlewRaDec', location, dec_az );
         }
         else if( slew == 'Target name' && location !='') {
-          tsx_SlewTargetName( '', location  );
+          tsx_SlewTargetName( location  );
         }
       }
       tsxLog(' Calibrating AutoGuider');
       CalibrateAutoGuider();
+    }
+    finally {
+      tsx_SetServerState( 'tool_active', false );
+    }
+  },
+
+  slewPosition( slew, location, dec_az ) {
+    tsx_SetServerState( 'tool_active', true );
+    tsxDebug( '  slew'+slew);
+    tsxDebug( '  location'+location);
+    tsxDebug( '  dec_az'+dec_az);
+    var res = '';
+    try {
+      if( slew != '' ) {
+        if( slew == 'Alt/Az'&& location !='' && dec_az != '') {
+          res = tsx_SlewCmdCoords( 'SkyX_JS_SlewAltAz', location, dec_az );
+        }
+        else if( slew == 'Ra/Dec' && location !='' && dec_az != '') {
+          res =tsx_SlewCmdCoords( 'SkyX_JS_SlewRaDec', location, dec_az );
+        }
+        else if( slew == 'Target name' && location !='') {
+          res = tsx_SlewTargetName( location  );
+
+        }
+      }
+      UpdateStatus(' Slew: ' + res );
     }
     finally {
       tsx_SetServerState( 'tool_active', false );

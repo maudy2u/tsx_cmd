@@ -17,8 +17,6 @@ tsx cmd - A web page to send commands to TheSkyX server
  */
 
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
-import { Session } from 'meteor/session'
 
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
@@ -178,7 +176,7 @@ class Toolbox extends Component {
   calibrateGuider() {
     var slew = this.state.tool_calibrate_via;
     var location = this.state.tool_calibrate_location;
-    var dec_az = this.state.tool_calibrate_
+    var dec_az = this.state.tool_calibrate_dec_az;
     Meteor.call( 'calibrateGuider', slew, location, dec_az, function(error, result) {
       console.log('Error: ' + error);
       console.log('result: ' + result);

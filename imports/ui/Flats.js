@@ -54,15 +54,25 @@ import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 class Flats extends Component {
 
     state = {
+      showModal: false,
+
       flatPosition: '',
       tool_flats_via: '',
       tool_flats_location: '',
       tool_flats_dec_az: '',
   };
 
+  showModal() {
+    this.setState({showModal: true });
+  }
+
+  closeModal() {
+    this.setState({showModal: false });
+  }
+
   handleChange = (e, { name, value }) => {
     this.setState({ [name]: value.trim() });
-    this.saveDefaultState( name );
+    this.saveDefaultStateValue( name, value.trim() );
   };
 
   // requires the ".bind(this)", on the callers
@@ -74,46 +84,6 @@ class Flats extends Component {
     this.saveDefaultStateValue( name, !val );
   };
 
-  noFoundSessionOpen = () => this.setState({ noFoundSession: true })
-  noFoundSessionClose = () => this.setState({ noFoundSession: false })
-
-  componentDidMount() {
-    this.updateDefaults(this.props);
-  }
-
-  updateDefaults(nextProps) {
-    if( typeof nextProps == 'undefined'  ) {
-      return;
-    }
-
-    if( typeof nextProps.reports != 'undefined'  ) {
-      this.setState({
-        defaultSoftPark: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'defaultSoftPark';
-        }).value),
-      });
-    }
-    if( typeof nextProps.tsxInfo != 'undefined'  ) {
-      this.setState({
-        flatPosition: Boolean(nextProps.tsxInfo.find(function(element) {
-          return element.name == 'flatPosition';
-        }).value),
-      });
-    }
-  }
-
-  // Generic Method to determine default to save.
-  saveDefaultState( param ) {
-    var value = eval("this.state."+param);
-
-    Meteor.call( 'updateServerState', param, value , function(error, result) {
-
-        if (error && error.error === "logged-out") {
-          // show a nice error message
-          Session.set("errorMessage", "Please fix.");
-        }
-    });//.bind(this));
-  }
   // Generic Method to determine default to save.
   saveDefaultStateValue( param, val ) {
 
@@ -124,6 +94,33 @@ class Flats extends Component {
           Session.set("errorMessage", "Please fix.");
         }
     });//.bind(this));
+  }
+
+  componentDidMount() {
+    this.updateDefaults(this.props);
+  }
+
+  updateDefaults(nextProps) {
+    if( typeof nextProps == 'undefined'  ) {
+      return;
+    }
+    if( typeof nextProps.tsxInfo != 'undefined'  ) {
+
+      this.setState({
+        tool_flats_via: nextProps.tsxInfo.find(function(element) {
+          return element.name == 'tool_flats_via';
+      }).value});
+
+      this.setState({
+        tool_flats_dec_az: nextProps.tsxInfo.find(function(element) {
+          return element.name == 'tool_flats_dec_az';
+      }).value});
+
+      this.setState({
+        tool_flats_location: nextProps.tsxInfo.find(function(element) {
+          return element.name == 'tool_flats_location';
+      }).value});
+    }
   }
 
   stopFlats() {
@@ -149,8 +146,12 @@ class Flats extends Component {
     }.bind(this));
   }
 
+
   gotoFlatPosition() {
-    Meteor.call( 'testEndConditions', function(error, result) {
+    var slew = this.state.tool_flats_via;
+    var location = this.state.tool_flats_location;
+    var dec_az = this.state.tool_flats_dec_az;
+    Meteor.call( 'slewPosition', slew, location, dec_az, function(error, result) {
       console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
@@ -158,10 +159,10 @@ class Flats extends Component {
 
   flatsTools(
       state
+    , active
     , flatSlewType
     , flatRa
     , flatDec
-    , active
   ) {
 
     var slewOptions =
@@ -263,6 +264,23 @@ class Flats extends Component {
 
   }
 
+  flatSettings() {
+    if( this.props.scheduler_running.value == 'Stop'  && this.props.tool_active.value == false ){
+      return (
+        <Button.Group basic size='mini' floated='right'>
+          <Button icon='settings' onClick={this.showModal.bind(this)}/>
+        </Button.Group>
+      )
+    }
+    else {
+      return (
+        <Button.Group basic size='mini' floated='right'>
+          <Button disabled icon='settings' onClick={this.showModal.bind(this)}/>
+        </Button.Group>
+      )
+    }
+  }
+
   render() {
 
     return (
@@ -270,16 +288,17 @@ class Flats extends Component {
         <Segment raised>
           {this.flatsTools(
             this.props.scheduler_running.value
+            , this.props.tool_active.value
             , this.state.tool_flats_via
             , this.state.tool_flats_location
             , this.state.tool_flats_dec_az
-            , this.props.tool_active.value
           )}
         </Segment>
         {this.addFilterForFlats(
           this.props.scheduler_running.value
           , this.props.tool_active.value
-        )}
+        )} <h1>FLAT GROUPS</h1>
+        { this.flatSettings() }
         <Segment raised>
           Present the targets, and check of which ones to
           calibrate - use the target FOV rotator position
@@ -288,12 +307,8 @@ class Flats extends Component {
           THE IDEA IS TO ADD THE EXPOSURE TO THE FILTER ITSELF WITH
           THE FILTER NAME AND SLOT
           <br />
-          {this.props.filters.map((filter)=>{
-            return (
-              <div key={filter._id}>
-            { filter.name + '|' + filter.slot + '|' + filter.flat_exposure }
-              </div>
-            )})}
+          ADD IN AN ENABLE BUTTON FOR A SPECIFIC FILTER GROUP: LRGB,
+          SHO... AS AN IDEA
           <hr/>
           {
             this.props.flatSeries.map((flat)=>{
@@ -341,6 +356,45 @@ class Flats extends Component {
             </Form.Group>
           </Segment>
         </Segment.Group>
+        <Modal
+          open={this.state.showModal}
+          onClose={this.closeModal.bind(this)}
+          basic
+          size='small'
+          closeIcon>
+          <Modal.Header>Filter Fat Exposures</Modal.Header>
+          <Modal.Content>
+            <Segment raised>
+              <Grid.Row columns={2} centered divided='vertically'>
+                <Grid.Column>
+                  <b>Filter</b>
+                </Grid.Column>
+                <Grid.Column>
+                  <b>Exposure</b>
+                </Grid.Column>
+              </Grid.Row>
+          {this.props.filters.map((filter)=>{
+            return (
+              <Grid.Row key={filter._id}>
+                <Grid.Column width={1}>
+                  {filter.name}
+                </Grid.Column>
+                <Grid.Column>
+                  {filter.flat_exposure}
+                </Grid.Column>
+              </Grid.Row>
+            )})}
+            </Segment>
+          </Modal.Content>
+          <Modal.Description>
+          Enter the default exposure settings for each filter.
+          </Modal.Description>
+          <Modal.Actions>
+            <Button onClick={this.closeModal.bind(this)} inverted>
+              <Icon name='stop' />Stop
+            </Button>
+          </Modal.Actions>
+        </Modal>
     </div>
     )
   }

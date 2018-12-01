@@ -558,23 +558,24 @@ export function tsx_SlewTargetName( target ) {
 
   var cmd = tsx_cmd('SkyX_JS_SlewTarget');
   cmd = cmd.replace('$000',  target  );
-
+  var result = '';
   var tsx_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-    var result = tsx_return.split('|')[0].trim();
+    result = tsx_return.split('|')[0].trim();
     // tsxDebug('Any error?: ' + result);
     if( result != 'Success') {
       forceAbort = true;
-      UpdateStatus('Slew Failed. Error: ' + result);
+      tsxDebug(' Slew Failed. Error: ' + result);
     }
     else {
-      UpdateStatus('Slew finished');
+      tsxDebug(' Slew finished');
     }
     tsx_is_waiting = false;
   }));
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
+  return result;
 }
 
 export function tsx_SlewCmdCoords( cmd, ra, dec ) {

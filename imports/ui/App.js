@@ -458,6 +458,9 @@ class App extends TrackerReact(Component) {
           tool_active = {this.props.tool_active}
           filters = {this.props.filters}
           flatSeries = {this.props.flatSeries}
+          tool_flats_via = {this.props.tool_flats_via}
+          tool_flats_location = {this.props.tool_flats_location}
+          tool_flats_dec_az = {this.props.tool_flats_dec_az}
         />
       )
     } else {
@@ -717,6 +720,9 @@ export default withTracker(() => {
       tool_rotator_num: TheSkyXInfos.findOne({name: 'tool_rotator_num'}),
       tool_rotator_type: TheSkyXInfos.findOne({name: 'tool_rotator_type'}),
       tool_active: TheSkyXInfos.findOne({name: 'tool_active'}),
+      tool_flats_dec_az: TheSkyXInfos.findOne({name: 'tool_flats_dec_az'}),
+      tool_flats_location: TheSkyXInfos.findOne({name: 'tool_flats_location'}),
+      tool_flats_via: TheSkyXInfos.findOne({name: 'tool_flats_via'}),
 
       tsx_version: TheSkyXInfos.findOne({name: 'tsx_version'}),
       tsx_date: TheSkyXInfos.findOne({name: 'tsx_date'}),

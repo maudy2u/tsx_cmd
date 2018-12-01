@@ -62,7 +62,7 @@ if ( SHW.mountModel !== "Telescope Mount Simulator") {
 
 try{
 	sky6RASCOMTele.Asynchronous = true;
-	sky6RASCOMTele.SlewToRaDec(targetRA, targetDEC, "Slew RaDec"); 	// Go to the RA & DEC;
+	sky6RASCOMTele.SlewToRaDec(targetRA, targetDEC, ""); 	// Go to the RA & DEC;
 	while (sky6RASCOMTele.IsSlewComplete == 0)
 	{
 		sky6Web.Sleep (10000);						// Hang out.
