@@ -26,6 +26,7 @@ export const FlatSeries = new Mongo.Collection('flatSeries');
   rotatorPosition: 0,
   enabledActive:false,
   filtergroup: [],
+  target_id,
  */
 
 const defaultFlat = {
@@ -49,11 +50,15 @@ export function updateFlatSeries( fid, name, value ) {
     else if( name == 'filtergroup') {
       fs.filtergroup = value;
     }
+    else if( name == 'target_id') {
+      fs.target_id = value;
+    }
     FlatSeries.update({_id: fs._id}, {
       $set: {
         rotatorPosition: fs.rotatorPosition,
         filtergroup: fs.filtergroup,
         enabledActive: fs.enabledActive,
+        target_id: fs.target_id,
       }
     });
   }
@@ -65,6 +70,7 @@ export function addFlatSeries() {
     {
       rotatorPosition: 0,
       enabledActive:false,
+      target_id: '',
       filtergroup: [
         {
           _id: nid,
@@ -121,6 +127,9 @@ export function updateFlatFilter(
       }
       else if( name == 'enabledActive') {
         filter.enabledActive = value;
+      }
+      else if( name == 'target_id') {
+        filter.target_id = value;
       }
     }
     newgroup.push(filter);

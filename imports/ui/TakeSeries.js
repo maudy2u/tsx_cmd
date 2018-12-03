@@ -53,6 +53,10 @@ class TakeSeries extends Component {
       this.deleteFailedOpen();
     }
     else {
+      for( var i=0; i<this.props.seriesTemplate.series.length; i++ ) {
+        var sid = this.props.seriesTemplate.series[i].id;
+        Seriess.remove( sid );
+      }
       TakeSeriesTemplates.remove(this.props.seriesTemplate._id);
     }
   }

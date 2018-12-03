@@ -2198,6 +2198,7 @@ export function processTargetTakeSeries( target ) {
 
       // calcuate remaining images
       var remainingImages = series.repeat - taken;
+      tsxDebug( ' Taken: ' + taken + ', Remaining: ' + ', series.repeat: ' + series.repeat );
 
       // take remaining images
       for (var perSeries = 0; perSeries < remainingImages && !stopTarget && (!isSchedulerStopped()); perSeries++) {

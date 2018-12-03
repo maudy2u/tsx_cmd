@@ -17,7 +17,7 @@ tsx cmd - A web page to send commands to TheSkyX server
  */
 
 import React, { Component } from 'react'
-import ReactDOM from 'react-dom';
+//import ReactDOM from 'react-dom';
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
@@ -199,7 +199,6 @@ class Target extends Component {
   }
 
   startTakeSeries() {
-
     // get the session variable to store which target is Currently
     // being imaged
     var session = TheSkyXInfos.findOne({name: 'imagingSessionId'});
@@ -234,33 +233,6 @@ class Target extends Component {
     this.forceUpdate();
   }
 
-  renderTargeting() {
-    var session = TheSkyXInfos.findOne({name: 'imagingSessionId'});
-    var tid = session.value;
-    try {
-      if( this.props.target.enabledActive == true ) {
-        if( tid == this.props.target._id ) {
-          return (
-            <Button.Group basic size='mini'  floated='right'>
-              {/* <Button icon='toggle on' onClick={this.setInactive.bind(this)}/> */}
-            </Button.Group>
-          )
-        }
-        else {
-          return (
-            <Button.Group basic size='mini'  floated='right'>
-              {/* <Button icon='toggle off' onClick={this.setActive.bind(this)}/> */}
-            </Button.Group>
-          )
-        }
-      }
-    } catch (e) {
-      return (
-        <div/>
-      )
-    }
-  }
-
   targetButtons( state, active ) {
     if( state == 'Stop' && active == false ) {
       return(
@@ -283,22 +255,25 @@ class Target extends Component {
   }
 
   render() {
-// Use the image for a stretched image in the Future
-//       <Item.Image size='tiny' src='' />
+    // Use the image for a stretched image in the Future
+    //       <Item.Image size='tiny' src='' />
     if( typeof this.props.target == 'undefined' ) {
       return (
         <div/>
       )
     }
 
-    var ENABLEACTIVE ='';
-    var CALIBRATION = '';
+    let ENABLEACTIVE ='';
+    let CALIBRATION = '';
+    let TOOL_ACTIVE = false;
     try {
       ENABLEACTIVE = this.props.target.enabledActive;
       CALIBRATION = this.props.target.isCalibrationFrames;
+      TOOL_ACTIVE = this.props.tool_active.value;
     } catch (e) {
       ENABLEACTIVE = this.state.enabledActive;
       CALIBRATION = this.state.isCalibrationFrames;
+      TOOL_ACTIVE = false;
     }
 
     return (
@@ -312,7 +287,7 @@ class Target extends Component {
           checked={ENABLEACTIVE}
           onChange={this.handleToggleEnabled.bind(this)}
           />
-        <Item.Header as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, this.props.tool_active.value)}>
+        <Item.Header as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, TOOL_ACTIVE)}>
           {this.props.target.targetFindName}
           </Item.Header>
           <Item.Description>
@@ -327,12 +302,11 @@ class Target extends Component {
           <Label>Cur. Alt.: <Label.Detail>{this.state.currentAlt}</Label.Detail></Label>
           </Item.Meta>
           <Item.Extra>
-            {this.renderTargeting()}
             <Label.Group>
               {/*
               <Label>Direction: <Label.Detail>{this.state.azimuth}</Label.Detail></Label> */}
             </Label.Group>
-            {this.targetButtons(this.props.scheduler_running.value, this.props.tool_active.value)}
+            {this.targetButtons(this.props.scheduler_running.value, TOOL_ACTIVE)}
             {
             // <Checkbox
             //   label=' Calibration Target'

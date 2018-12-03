@@ -209,10 +209,12 @@ function startServerProcess() {
   var workers = scheduler.processJobs( 'runScheduler',
     function (job, cb) {
       UpdateStatus(' Scheduler Started');
-      var schedule = job.data; // Only one email per job
+      var schedule = job.data;
+      tsxDebug( schedule );
+      tsxDebug( job.data );
 
       // This will only be called if a 'runScheduler' job is obtained
-      setSchedulerState('Running' );
+      setSchedulerState( 'Running' );
       tsx_SetServerState('currentJob', job);
 
       job.log("Entered the scheduler process",
@@ -220,100 +222,110 @@ function startServerProcess() {
       );
 
       var isParked = '';
-      // #TODO  reset all targets as isCloudy = false.
 
-      while(
+      if( schedule.scheduleType == 'calibration') {
+        // *******************************
+        tsxDebug(" Checking for targets");
+
+        for( var i=0; i<schedule.targets.length;i++ ) {
+          var target = schedule.targets[i];
+          processTargetTakeSeries( target );
+        }
+        tsx_SetServerState( 'tool_active', false );
+      }
+      else {
+        // *******************************
         // the job is used to run the scheduler.
-        tsx_GetServerStateValue('currentJob') != ''
-       ) {
+        while( tsx_GetServerStateValue('currentJob') != '' ) {
 
-         // tsxDebug('@6');
-          tsx_MntUnpark();
-          isParked = false;
-          // tsxDebug('@7');
+           // tsxDebug('@6');
+            tsx_MntUnpark();
+            isParked = false;
+            // tsxDebug('@7');
 
-          // Find a session
-          // Get the target to shoot
-          tsxInfo( ' Validating Targets...');
+            // Find a session
+            // Get the target to shoot
+            tsxInfo( ' Validating Targets...');
 
-          /* #TODO
-So working on the cloud detection to PAUSE.
+            /* #TODO
+            So working on the cloud detection to PAUSE.
 
-1.  getValidTargetSession returns a target.
-    It needs to a add a check that if isCloudy = false then it is skipped
-2.  prepareTargetForImaging can return false.. meaning the chosen target
-    could not be prepared... CLS failed. If so then market the target as FAILED
-    (The start of the job needs to "reset" all targets as isCloudy = false.)
+            1.  getValidTargetSession returns a target.
+                It needs to a add a check that if isCloudy = false then it is skipped
+            2.  prepareTargetForImaging can return false.. meaning the chosen target
+                could not be prepared... CLS failed. If so then market the target as FAILED
+                (The start of the job needs to "reset" all targets as isCloudy = false.)
 
-          */
+            */
 
-          // Process Targets
-          var target = getValidTargetSession(); // no return
-          // if no valid target then check for calibration sessions...
-          // how to detect calibation sessions...
-          // Create Calibration sessions similar to Targets..
-          // New database... uses calibration images...
-          // Means there are edits... i.e. assign/copy a series
-          // anything else? enable/disable... Flat/Dark/Bias
-          // remove dark/bias/flat from targets...
+            // Process Targets
+            var target = getValidTargetSession(); // no return
+            // if no valid target then check for calibration sessions...
+            // how to detect calibation sessions...
+            // Create Calibration sessions similar to Targets..
+            // New database... uses calibration images...
+            // Means there are edits... i.e. assign/copy a series
+            // anything else? enable/disable... Flat/Dark/Bias
+            // remove dark/bias/flat from targets...
 
-          if (typeof target != 'undefined' && tsx_GetServerStateValue('currentJob') != '' ) {
-            tsxLog ( ' =========================');
-            tsxDebug ( ' ' + target.targetFindName + ' Preparing target...');
-
-            // Point, Focus, Guide
-            var ready = prepareTargetForImaging( target );
-            if( ready ) {
-              // target images per Take Series
+            if (typeof target != 'undefined' && tsx_GetServerStateValue('currentJob') != '' ) {
               tsxLog ( ' =========================');
-              tsxDebug ( ' ************************1*');
-              UpdateStatus ( ' *** Start imaging: ' + target.targetFindName );
-              processTargetTakeSeries( target );
-              tsxDebug ( ' ************************2*');
+              tsxDebug ( ' ' + target.targetFindName + ' Preparing target...');
+
+              // Point, Focus, Guide
+              var ready = prepareTargetForImaging( target );
+              if( ready ) {
+                // target images per Take Series
+                tsxLog ( ' =========================');
+                tsxDebug ( ' ************************1*');
+                UpdateStatus ( ' *** Start imaging: ' + target.targetFindName );
+                processTargetTakeSeries( target );
+                tsxDebug ( ' ************************2*');
+              }
+              else {
+                ParkMount( isParked );
+                isParked = true;
+              }
             }
             else {
               ParkMount( isParked );
               isParked = true;
             }
-          }
-          else {
-            ParkMount( isParked );
-            isParked = true;
-          }
 
-          // See if there are calibration frames to do (Bias/Darl/Flats)
-          var calFrames = findCalibrationSession(); // temp var
+            // See if there are calibration frames to do (Bias/Darl/Flats)
+            var calFrames = findCalibrationSession(); // temp var
 
-          // Check if sun is up and no cal frames
-          if( (!isDarkEnough()) && (calFrames == '') && tsx_GetServerStateValue('currentJob') != '' ) {
-            ParkMount( isParked );
-            isParked = true;
-            var approachingDawn = isTimeBeforeCurrentTime('3:00');
-            tsxDebug( ' Is approachingDawn: ' + approachingDawn);
-            // var stillDaytime = isTimeBeforeCurrentTime('15:00');
-            // tsxDebug( ' Is stillDaytime: ' + stillDaytime);
-            if( approachingDawn ) {
-              var defaultFilter = tsx_GetServerStateValue('defaultFilter');
-              var softPark = false;
-              tsx_AbortGuider();
-              tsx_MntPark(defaultFilter, softPark);
-              UpdateStatus( ' Scheduler stopped: not dark.');
-              UpdateStatus( ' ^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
-              break;
+            // Check if sun is up and no cal frames
+            if( (!isDarkEnough()) && (calFrames == '') && tsx_GetServerStateValue('currentJob') != '' ) {
+              ParkMount( isParked );
+              isParked = true;
+              var approachingDawn = isTimeBeforeCurrentTime('3:00');
+              tsxDebug( ' Is approachingDawn: ' + approachingDawn);
+              // var stillDaytime = isTimeBeforeCurrentTime('15:00');
+              // tsxDebug( ' Is stillDaytime: ' + stillDaytime);
+              if( approachingDawn ) {
+                var defaultFilter = tsx_GetServerStateValue('defaultFilter');
+                var softPark = false;
+                tsx_AbortGuider();
+                tsx_MntPark(defaultFilter, softPark);
+                UpdateStatus( ' Scheduler stopped: not dark.');
+                UpdateStatus( ' ^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
+                break;
+              }
             }
-          }
-          // check of cal frames and no target
-          else if ( calFrames != '' && (typeof target == 'undefined') && tsx_GetServerStateValue('currentJob') != '' ) {
-            for( var i = 0; i < calFrames.length; i++ ) {
-                // process the
-                // Need to prompt user to continuw...
-                // If flat... put on panel
-                // if Dark put on lense cover...
-                processTargetTakeSeries( calFrames[i] );
+            // check of cal frames and no target
+            else if ( calFrames != '' && (typeof target == 'undefined') && tsx_GetServerStateValue('currentJob') != '' ) {
+              for( var i = 0; i < calFrames.length; i++ ) {
+                  // process the
+                  // Need to prompt user to continuw...
+                  // If flat... put on panel
+                  // if Dark put on lense cover...
+                //  processTargetTakeSeries( calFrames[i] );
+              }
             }
-          }
+        }
+
       }
-
       tsxLog( ' Scheduler exited.');
       // While ended... exit process
       setSchedulerState('Stop' );
@@ -450,6 +462,7 @@ Meteor.methods({
           // needs to complete. May contain links to files, etc...
           {
             startTime: new Date(),
+            scheduleType: 'imaging',
           }
         );
         tsxDebug( '@@ Start2' );
@@ -543,6 +556,25 @@ Meteor.methods({
        tsx_SetServerState( 'tool_active', false );
      }
    },
+
+  processCalibrationTargets( targets ) {
+
+    tsx_SetServerState( 'tool_active', true );
+    tsxDebug(" Calibration File Processes");
+    startServerProcess();
+    // Create a job:
+    var job = new Job(scheduler, 'runScheduler', // type of job
+      // Job data that you define, including anything the job
+      // needs to complete. May contain links to files, etc...
+      {
+        startTime: new Date(),
+        scheduleType: 'calibration',
+        targets: targets,
+      }
+    );
+    job.priority('normal');
+    var jid = job.save();               // Commit it to the server
+  },
 
    getUpdateTargetReport(target) {
      tsxLog( ' TargetReport: ' + target.targetFindName );

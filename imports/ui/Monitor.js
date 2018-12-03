@@ -558,7 +558,6 @@ class Monitor extends Component {
            <Button.Group icon>
             {this.playButtons(RUNNING) }
           </Button.Group>
-          <br /><Progress value={PROGRESS} total={TOTAL} progress='ratio'>Processing</Progress>
         </Segment>
         <Segment raised>
           <Grid columns={3}>

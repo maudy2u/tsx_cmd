@@ -26,8 +26,17 @@ import {
 } from  '../api/serverStates.js';
 
 // Import the API Model
-import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
-import { TargetSessions } from '../api/targetSessions.js';
+import {
+  Seriess
+} from '../api/seriess.js';
+import {
+  TakeSeriesTemplates,
+  addNewTakeSeriesTemplate,
+} from '../api/takeSeriesTemplates.js';
+import {
+  TargetSessions,
+  addNewTargetSession,
+} from '../api/targetSessions.js';
 import { TargetReports } from '../api/targetReports.js';
 import {
   TargetAngles,
@@ -104,13 +113,125 @@ class FlatGrid extends Component {
   };
 
   deleteEntry() {
+    deleteAnyFlatTargets();
     // check if the series is used - if so cannot delete... list the Targets using it
     FlatSeries.remove({_id:this.props.flat._id});
   }
+
   addEntry() {
     // check if the series is used - if so cannot delete... list the Targets using it
     addFlatFilter( this.props.flat._id);
   }
+
+  // *******************************
+  // THis handles the creation of the Calibration target series...
+  // *******************************
+  handleToggleOfCalibrationTargets = (e, { name, checked }) => {
+    this.setState({
+      [name]: checked
+    });
+    updateFlatSeries(
+      this.props.flat._id,
+      name,
+      checked,
+    );
+
+    // *******************************
+    // IF TURNED ON
+    if( checked ) {
+      // create the targetTransit
+//      var tid = addNewTakeSeriesTemplate();
+      let tid = TakeSeriesTemplates.insert(
+        {
+          name: this.props.flat._id,
+          description: "Flat series id",
+          processSeries: 'across series',
+          processSeries:"per series",
+          repeatSeries: false,
+          createdAt: new Date(),
+          series: [],
+          isCalibrationFrames: true,
+
+        }
+      );
+      // create an array of the filters for the seriess
+      let filters = [];
+      for( let i=0; i < this.props.flat.filtergroup.length; i++ ) {
+        let filter = this.props.flat.filtergroup[i];
+        let sid = Seriess.insert(
+          {
+            order: i,
+            exposure: filter.exposure,
+            binning: 1,
+            frame: 'Flat',
+            filter: filter.filter,
+            repeat: filter.repeat,
+            takeSeriesTemplate: this.props.flat._id,
+          }
+        );
+        TakeSeriesTemplates.update({_id: tid}, {
+          $push: { 'series': {id: sid} }
+        });
+      }
+
+      // add the target
+      let tsid = addNewTargetSession();
+      // var target = TargetSessions.findOne({_id: tid });
+      TargetSessions.update({ _id:tsid }, {
+        $set: {
+          isCalibrationFrames: true,
+          description: "Flat series",
+          name: this.props.flat._id,
+          series: {
+            _id: tid,
+            value: this.props.flat._id,
+          },
+        }
+      });
+
+      updateFlatSeries(
+        this.props.flat._id,
+        'target_id',
+        tsid,
+      );
+    }
+
+    // *******************************
+    // TURND OFF
+    else {
+      this.deleteAnyFlatTargets();
+      updateFlatSeries(
+        this.props.flat._id,
+        'target_id',
+        '',
+      );
+    }
+    // now create a target for calibration...
+    // the idea is that the target can still be used in the scheduler_report
+    // the scheduler needs to find the calibration target as valid...
+  };
+
+  deleteAnyFlatTargets() {
+    // remove the seriess
+    let ids = Seriess.find({takeSeriesTemplate: this.props.flat._id}).fetch();
+    for( let i=0;i<ids.length;i++ ) {
+      Seriess.remove( ids[i]._id );
+    }
+
+    // remove series template
+    ids = TakeSeriesTemplates.find( {name: this.props.flat._id} ).fetch();
+    for( let i=0;i<ids.length;i++ ) {
+      TakeSeriesTemplates.remove( ids[i]._id );
+    }
+
+    // remove target
+    ids = TargetSessions.find( {name: this.props.flat._id} ).fetch();
+    for( let i=0;i<ids.length;i++ ) {
+      TargetSessions.remove( ids[i]._id );
+    }
+  };
+
+
   render() {
     //{this.props.flat.rotatorPosition}
 
@@ -121,7 +242,7 @@ class FlatGrid extends Component {
           name='enabledActive'
           toggle
           checked={this.state.enabledActive}
-          onChange={this.handleToggleEnabled.bind(this)}
+          onChange={this.handleToggleOfCalibrationTargets.bind(this)}
         />
         <Button.Group basic size='mini' floated='right'>
           <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
@@ -137,11 +258,8 @@ class FlatGrid extends Component {
         />
         <br/>
         <br/>
-          <Grid columns={5} centered divided='vertically'>
+          <Grid columns={4} centered divided='vertically'>
             <Grid.Row centered textAlign='center'>
-              <Grid.Column>
-                <b>Frame</b>
-              </Grid.Column>
               <Grid.Column>
                 <b>Filter</b>
               </Grid.Column>

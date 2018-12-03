@@ -30,19 +30,9 @@ export function addNewTakeSeriesTemplate() {
       repeatSeries: false,
       createdAt: new Date(),
       series: [],
+      isCalibrationFrames: false,
     }
   );
 
   return id;
 }
-
-/*
-
-name: "New Take Series",
-description: "EDIT ME",
-processSeries: 'across series',
-repeatSeries: false,
-createdAt: new Date(),
-series: [],
-
- */

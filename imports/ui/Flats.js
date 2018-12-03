@@ -56,7 +56,9 @@ import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 
 class Flats extends Component {
 
-    state = {
+  constructor() {
+    super();
+    this.state = {
       showModal: false,
 
       flatPosition: '',
@@ -64,6 +66,8 @@ class Flats extends Component {
       tool_flats_location: '',
       tool_flats_dec_az: '',
   };
+  }
+
 
   showModal() {
     this.setState({showModal: true });
@@ -147,7 +151,10 @@ class Flats extends Component {
   }
 
   startFlats() {
-    Meteor.call( 'testTargetPicking', function(error, result) {
+    // obtain calibration targetSession
+    var targets = TargetSessions.find({ isCalibrationFrames: true }).fetch();
+
+    Meteor.call( 'processCalibrationTargets', targets, function(error, result) {
       console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
@@ -195,9 +202,6 @@ class Flats extends Component {
     if( state == 'Stop'  && active == false ) {
       return (
         <div>
-        <Button.Group icon>
-            <Button  onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
-         </Button.Group>
          <Dropdown
             name='tool_flats_via'
             placeholder='Slew via...'
@@ -222,9 +226,6 @@ class Flats extends Component {
     else {
       return (
         <div>
-         <Button.Group icon>
-            <Button  disabled onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
-         </Button.Group>
          <Dropdown
             name='tool_flats_via'
             placeholder='Slew via...'
@@ -257,6 +258,10 @@ class Flats extends Component {
         <Button.Group>
             <Button icon='plus' onClick={addFlatSeries.bind(this)} />
             <Button icon='minus' onClick={this.gotoFlatPosition.bind(this)} />
+            <Button disabled icon=''  />
+            <Button  onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
+            <Button disabled icon=''  />
+            <Button icon='play' onClick={this.startFlats.bind(this)} />
          </Button.Group>
        )
     }
@@ -265,6 +270,10 @@ class Flats extends Component {
         <Button.Group icon>
            <Button disabled icon='plus' disabled onClick={addFlatSeries.bind(this)} />
            <Button disabled icon='minus' disabled onClick={this.gotoFlatPosition.bind(this)} />
+           <Button disabled icon=''  />
+           <Button disabled onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
+           <Button disabled icon=''  />
+           <Button disabled icon='play' onClick={this.startFlats.bind(this)} />
         </Button.Group>
       )
     }
@@ -292,21 +301,13 @@ class Flats extends Component {
 
     return (
       <div>
-        <Segment raised>
-          {this.flatsTools(
-            this.props.scheduler_running.value
-            , this.props.tool_active.value
-            , this.state.tool_flats_via
-            , this.state.tool_flats_location
-            , this.state.tool_flats_dec_az
-          )}
-        </Segment>
+        <h1>FLATs</h1>
         {this.addFilterForFlats(
           this.props.scheduler_running.value
           , this.props.tool_active.value
-        )} <h1>FLAT Series</h1>
+        )}
         { this.flatSettings() }
-        <Segment raised>
+          <br />
           Present the targets, and check of which ones to
           calibrate - use the target FOV rotator position
           <br />
@@ -314,6 +315,17 @@ class Flats extends Component {
           THE IDEA IS TO ADD THE EXPOSURE TO THE FILTER ITSELF WITH
           THE FILTER NAME AND SLOT
           <br />
+          <Segment raised>
+            <h4>Flat position</h4>
+            {this.flatsTools(
+              this.props.scheduler_running.value
+              , this.props.tool_active.value
+              , this.state.tool_flats_via
+              , this.state.tool_flats_location
+              , this.state.tool_flats_dec_az
+            )}
+          </Segment>
+          <h4>FLAT Series</h4>
           {
             this.props.flatSeries.map((flat)=>{
               return (
@@ -328,38 +340,6 @@ class Flats extends Component {
                 />
             )})
           }
-        </Segment>
-        <Segment.Group  size='mini' horizontal>
-          <Segment>
-            <Form.Group>
-              <Label>Atl <Label.Detail>{Number(this.props.scheduler_report.value.ALT).toFixed(4)}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
-              <Label>Az <Label.Detail>{this.props.scheduler_report.value.AZ}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
-              <Label>HA <Label.Detail>{Number(this.props.scheduler_report.value.HA).toFixed(4)}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
-              <Label>Transit <Label.Detail>{Number(this.props.scheduler_report.value.TRANSIT).toFixed(4)}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
-              <Label>Pointing <Label.Detail>{Number(this.props.scheduler_report.value.pointing).toFixed(4)}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
-              <Label>Rotator <Label.Detail>{Number(this.props.scheduler_report.value.focusPostion).toFixed(4)}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
-              <Label>Angle <Label.Detail>{Number(this.props.scheduler_report.value.ANGLE).toFixed(4)}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
-              <Label>RA <Label.Detail>{Number(this.props.scheduler_report.value.RA).toFixed(4)}</Label.Detail></Label>
-            </Form.Group>
-            <Form.Group>
-              <Label>DEC <Label.Detail>{Number(this.props.scheduler_report.value.DEC).toFixed(4)}</Label.Detail></Label>
-            </Form.Group>
-          </Segment>
-        </Segment.Group>
         <Modal
           open={this.state.showModal}
           onClose={this.closeModal.bind(this)}
@@ -377,7 +357,7 @@ class Flats extends Component {
                 </Form.Field>
                 {this.props.filters.map((filter)=>{
                   return (
-                    <Form.Field inline pointing='right'>
+                    <Form.Field key={filter._id} inline pointing='right'>
                       <Label>
                         {filter.name}
                       </Label>

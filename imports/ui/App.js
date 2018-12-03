@@ -573,7 +573,6 @@ class App extends TrackerReact(Component) {
   addNewTargets() {
     // get the id for the new object
     var out = addNewTargetSession();
-    console.log('Left TargetSessionMenu addNewTarget');
   };
 
   addNewTakeSeries() {
@@ -610,6 +609,8 @@ class App extends TrackerReact(Component) {
     var DATE = '';
     var RUNNING = '';
     var ACTIVE = false;
+    let PROGRESS = 0;
+    let TOTAL = 0;
     try {
       IP = this.props.tsxIP.value;
       PORT = this.props.tsxPort.value;
@@ -619,6 +620,8 @@ class App extends TrackerReact(Component) {
       DATE = this.props.tsx_date.value;
       RUNNING = this.props.scheduler_running.value;
       ACTIVE = this.props.tool_active.value;
+      PROGRESS = this.props.tsx_progress.value;
+      TOTAL = this.props.tsx_total.value;
     } catch (e) {
       IP = 'Initializing';
       PORT = 'Initializing';
@@ -628,6 +631,8 @@ class App extends TrackerReact(Component) {
       DATE = '...';
       RUNNING = '';
       ACTIVE=false;
+      PROGRESS = 0;
+      TOTAL = 0;
     }
     var LOG = [];
     var num = 0;
@@ -663,8 +668,10 @@ class App extends TrackerReact(Component) {
                   {this.parkButtons(RUNNING, ACTIVE)}
                 </Button.Group>
               </Segment>
-              <Segment>
+              <Segment raised>
                 <Label>Status: <Label.Detail>{STATUS}</Label.Detail></Label>
+                <br/>
+                <Progress value={PROGRESS} total={TOTAL} progress='ratio'>Processing</Progress>
               </Segment>
             {/* { this.tsxConnectionFailed() } */}
               <Segment>
@@ -713,36 +720,41 @@ class App extends TrackerReact(Component) {
 // *******************************
 // THIS IS THE DEFAULT EXPORT AND IS WHERE THE LOADING OF THE COMPONENT STARTS
 export default withTracker(() => {
+  Meteor.subscribe('targetSessions');
+  Meteor.subscribe('tsxIP');
+  Meteor.subscribe('scheduler_running');
+  Meteor.subscribe('scheduler_report');
+  Meteor.subscribe('currentStage');
+  return {
+    tool_calibrate_via: TheSkyXInfos.findOne({name: 'tool_calibrate_via'}),
+    tool_calibrate_location: TheSkyXInfos.findOne({name: 'tool_calibrate_location'}),
+    tool_rotator_num: TheSkyXInfos.findOne({name: 'tool_rotator_num'}),
+    tool_rotator_type: TheSkyXInfos.findOne({name: 'tool_rotator_type'}),
+    tool_active: TheSkyXInfos.findOne({name: 'tool_active'}),
+    tool_flats_dec_az: TheSkyXInfos.findOne({name: 'tool_flats_dec_az'}),
+    tool_flats_location: TheSkyXInfos.findOne({name: 'tool_flats_location'}),
+    tool_flats_via: TheSkyXInfos.findOne({name: 'tool_flats_via'}),
 
-    return {
-      tool_calibrate_via: TheSkyXInfos.findOne({name: 'tool_calibrate_via'}),
-      tool_calibrate_location: TheSkyXInfos.findOne({name: 'tool_calibrate_location'}),
-      tool_rotator_num: TheSkyXInfos.findOne({name: 'tool_rotator_num'}),
-      tool_rotator_type: TheSkyXInfos.findOne({name: 'tool_rotator_type'}),
-      tool_active: TheSkyXInfos.findOne({name: 'tool_active'}),
-      tool_flats_dec_az: TheSkyXInfos.findOne({name: 'tool_flats_dec_az'}),
-      tool_flats_location: TheSkyXInfos.findOne({name: 'tool_flats_location'}),
-      tool_flats_via: TheSkyXInfos.findOne({name: 'tool_flats_via'}),
-
-      tsx_version: TheSkyXInfos.findOne({name: 'tsx_version'}),
-      tsx_date: TheSkyXInfos.findOne({name: 'tsx_date'}),
-      flatSettings: TheSkyXInfos.findOne({name: 'flatSettings'}),
-      currentStage: TheSkyXInfos.findOne({name: 'currentStage'}),
-      activeMenu: TheSkyXInfos.findOne({name: 'activeMenu'}),
-      targetName: TheSkyXInfos.findOne({name: 'targetName'}),
-      tsx_progress: TheSkyXInfos.findOne({name: 'tsx_progress'}),
-      tsx_total:  TheSkyXInfos.findOne({name: 'tsx_total'}),
-      tsx_message: TheSkyXInfos.findOne({name: 'tsx_message'}),
-      scheduler_running: TheSkyXInfos.findOne({name: 'scheduler_running'}),
-      scheduler_report: TheSkyXInfos.findOne({name: 'scheduler_report'}),
-      tsxIP: TheSkyXInfos.findOne({name: 'ip'}),
-      tsxPort: TheSkyXInfos.findOne({name: 'port'}),
-      tsxInfo: TheSkyXInfos.find({}).fetch(),
-      srvLog: AppLogsDB.find({}, {sort:{time:-1}}).fetch(10),
-      filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
-      flatSeries: FlatSeries.find({}).fetch(),
-      takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
-      targetSessions: TargetSessions.find({}, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
-      targetReports: TargetReports.find({}).fetch(),
+    tsx_version: TheSkyXInfos.findOne({name: 'tsx_version'}),
+    tsx_date: TheSkyXInfos.findOne({name: 'tsx_date'}),
+    flatSettings: TheSkyXInfos.findOne({name: 'flatSettings'}),
+    currentStage: TheSkyXInfos.findOne({name: 'currentStage'}),
+    activeMenu: TheSkyXInfos.findOne({name: 'activeMenu'}),
+    targetName: TheSkyXInfos.findOne({name: 'targetName'}),
+    tsx_progress: TheSkyXInfos.findOne({name: 'tsx_progress'}),
+    tsx_total:  TheSkyXInfos.findOne({name: 'tsx_total'}),
+    tsx_message: TheSkyXInfos.findOne({name: 'tsx_message'}),
+    scheduler_running: TheSkyXInfos.findOne({name: 'scheduler_running'}),
+    scheduler_report: TheSkyXInfos.findOne({name: 'scheduler_report'}),
+    tsxIP: TheSkyXInfos.findOne({name: 'ip'}),
+    tsxPort: TheSkyXInfos.findOne({name: 'port'}),
+    tsxInfo: TheSkyXInfos.find({}).fetch(),
+    srvLog: AppLogsDB.find({}, {sort:{time:-1}}).fetch(10),
+    filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
+    flatSeries: FlatSeries.find({}).fetch(),
+    takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
+    targetSessions: TargetSessions.find({ isCalibrationFrames: false }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
+//      targetSessions: TargetSessions.find({ }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
+    targetReports: TargetReports.find({}).fetch(),
   };
 })(App);

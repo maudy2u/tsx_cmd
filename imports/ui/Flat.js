@@ -84,6 +84,12 @@ class Flat extends Component {
     );
     var e = getFlatExposure( value );
     this.setState( {exposure: e } );
+    updateFlatFilter(
+      this.props.flat._id,
+      this.props.filter._id,
+      'exposure',
+      e,
+    );
   };
 
   componentDidMount() {
@@ -130,18 +136,22 @@ class Flat extends Component {
 
   render() {
 
+/*
+<Grid.Column width={1}>
+  <Dropdown
+    fluid
+    name='frame'
+    options={this.renderDropDownFrames()}
+    placeholder='Frame'
+    value={this.state.frame}
+    onChange={this.handleChange}
+  />
+</Grid.Column>
+
+*/
+
     return (
       <Grid.Row centered textAlign='center' >
-        <Grid.Column width={1}>
-          <Dropdown
-            fluid
-            name='frame'
-            options={this.renderDropDownFrames()}
-            placeholder='Frame'
-            value={this.state.frame}
-            onChange={this.handleChange}
-          />
-        </Grid.Column>
         <Grid.Column>
           <Dropdown
             fluid
