@@ -752,7 +752,7 @@ export default withTracker(() => {
     srvLog: AppLogsDB.find({}, {sort:{time:-1}}).fetch(10),
     filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
     flatSeries: FlatSeries.find({}).fetch(),
-    takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
+    takeSeriesTemplates: TakeSeriesTemplates.find({ isCalibrationFrames: false }, { sort: { name: 1 } }).fetch(),
     targetSessions: TargetSessions.find({ isCalibrationFrames: false }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
 //      targetSessions: TargetSessions.find({ }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
     targetReports: TargetReports.find({}).fetch(),

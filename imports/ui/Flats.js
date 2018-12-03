@@ -310,10 +310,12 @@ class Flats extends Component {
           <br />
             Remember to check if the Rotator position is set.
             If it is set then the position needs to be set.
-            Used the tsx_RotateCamera, same as the toolbox, 
+            Used the tsx_RotateCamera, same as the toolbox,
             but everything can be ignored, as it is a simple
             rotatorPosition.
           <br />
+          Look to delete from the drop down and thus delete
+          the stored target angle.
           <Segment raised>
             <h4>Flat position</h4>
             {this.flatsTools(
