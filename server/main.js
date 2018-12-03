@@ -229,6 +229,11 @@ function startServerProcess() {
 
         for( var i=0; i<schedule.targets.length;i++ ) {
           var target = schedule.targets[i];
+          // what is the FOV position??
+          if( target.rotator_position != '' ) {
+            // rotate to a specific position
+
+          }
           processTargetTakeSeries( target );
         }
         tsx_SetServerState( 'tool_active', false );

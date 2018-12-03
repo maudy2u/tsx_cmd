@@ -182,6 +182,7 @@ class FlatGrid extends Component {
           isCalibrationFrames: true,
           description: "Flat series",
           name: this.props.flat._id,
+          rotator_position:this.props.flat.rotatorPosition,
           series: {
             _id: tid,
             value: this.props.flat._id,

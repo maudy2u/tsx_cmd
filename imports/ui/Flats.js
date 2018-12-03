@@ -308,12 +308,11 @@ class Flats extends Component {
         )}
         { this.flatSettings() }
           <br />
-          Present the targets, and check of which ones to
-          calibrate - use the target FOV rotator position
-          <br />
-          REMEMBER TO ADD IN THE "EXPOSURE" FOR THE TYPE OF Filter
-          THE IDEA IS TO ADD THE EXPOSURE TO THE FILTER ITSELF WITH
-          THE FILTER NAME AND SLOT
+            Remember to check if the Rotator position is set.
+            If it is set then the position needs to be set.
+            Used the tsx_RotateCamera, same as the toolbox, 
+            but everything can be ignored, as it is a simple
+            rotatorPosition.
           <br />
           <Segment raised>
             <h4>Flat position</h4>
