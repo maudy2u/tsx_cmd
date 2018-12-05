@@ -40,6 +40,8 @@ import {
   FlatSeries,
   deleteFlatFilter,
   updateFlatFilter,
+  resetStoredFlat,
+  updateFlatSeries,
  } from '../api/flatSeries.js';
 
 export const subFrameTypes = [
@@ -71,6 +73,8 @@ class Flat extends Component {
       name,
       value,
     );
+    resetStoredFlat(this.props.flat._id);
+    this.props.disableFlats();
   };
 
   handleFilterChange = (e, { name, value }) => {
@@ -90,6 +94,8 @@ class Flat extends Component {
       'exposure',
       e,
     );
+    resetStoredFlat(this.props.flat._id);
+    this.props.disableFlats();
   };
 
   componentDidMount() {
@@ -132,6 +138,8 @@ class Flat extends Component {
   deleteEntry() {
     // check if the series is used - if so cannot delete... list the Targets using it
     deleteFlatFilter(this.props.flat._id, this.props.filter._id);
+    resetStoredFlat(this.props.flat._id);
+    this.props.disableFlats();
   }
 
   render() {

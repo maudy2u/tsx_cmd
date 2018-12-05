@@ -43,6 +43,7 @@ import {
   FlatSeries,
   addFlatSeries,
   addFlatFilter,
+  resetStoredFlat,
 } from '../api/flatSeries.js';
 
 // Import the UI
@@ -80,19 +81,15 @@ class Flats extends Component {
   handleChange = (e, { name, value }) => {
     this.setState({ [name]: value.trim() });
     this.saveDefaultStateValue( name, value.trim() );
+    resetStoredFlat(this.props.flat._id);
+    forceUpdate();
   };
+
   handleFilterChange = (e, { name, value }) => {
     var fid = name;
     updateFlatExposure( fid, value );
-  };
-
-  // requires the ".bind(this)", on the callers
-  handleToggle = (e, { name, value }) => {
-    var val = eval( 'this.state.' + name);
-    this.setState({
-      [name]: !val
-    });
-    this.saveDefaultStateValue( name, !val );
+    resetStoredFlat(this.props.flat._id);
+    forceUpdate();
   };
 
   // Generic Method to determine default to save.

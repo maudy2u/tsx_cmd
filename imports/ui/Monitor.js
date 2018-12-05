@@ -545,9 +545,15 @@ class Monitor extends Component {
       num = this.props.srvLog.length;
     }
     finally {
-      for (var i = num-1; i > -1; i--) { // this puts most resent line on top
-          var log = this.props.srvLog[i];
-          LOG = LOG + '[' + log.level +']' + log.message + '\n';
+      for (let i = num-1; i > -1; i--) { // this puts most resent line on top
+          let log = this.props.srvLog[i];
+          let ts = log.date.split('|')[1].trim();
+          if( log.level == 'LOG') {
+            LOG = LOG + ts + ' | ' + log.message + '\n';
+          }
+          else {
+            LOG = LOG + ts + ' |[' + log.level +']' + log.message + '\n';
+          }
       }
     }
 

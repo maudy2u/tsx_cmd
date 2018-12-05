@@ -17,10 +17,14 @@ tsx cmd - A web page to send commands to TheSkyX server
  */
 
 import { Mongo } from 'meteor/mongo';
-import { Random } from 'meteor/random';
-
 // Used to store the filters currently available/active on TSX
 export const FlatSeries = new Mongo.Collection('flatSeries');
+
+import { Random } from 'meteor/random';
+import { Seriess } from './seriess.js'
+import { TakeSeriesTemplates } from './takeSeriesTemplates.js'
+import { TargetSessions } from './targetSessions.js'
+
 
 /* Flat Series is:
   rotatorPosition: 0,
@@ -36,6 +40,45 @@ const defaultFlat = {
   exposure: 0,
   repeat: 1,
   enabledActive: false,
+};
+
+export function   resetStoredFlat( fid ) {
+
+  // Delete the stored flat
+  deleteAnyFlatTargets(fid);
+
+  // disable the grid
+  updateFlatSeries(
+    fid,
+    'enabledActive',
+    false,
+  );
+
+  updateFlatSeries(
+    fid,
+    'target_id',
+    '',
+  );
+};
+
+export function deleteAnyFlatTargets( fid ) {
+  // remove the seriess
+  let ids = Seriess.find({takeSeriesTemplate: fid}).fetch();
+  for( let i=0;i<ids.length;i++ ) {
+    Seriess.remove( ids[i]._id );
+  }
+
+  // remove series template
+  ids = TakeSeriesTemplates.find( {name: fid} ).fetch();
+  for( let i=0;i<ids.length;i++ ) {
+    TakeSeriesTemplates.remove( ids[i]._id );
+  }
+
+  // remove target
+  ids = TargetSessions.find( {name: fid} ).fetch();
+  for( let i=0;i<ids.length;i++ ) {
+    TargetSessions.remove( ids[i]._id );
+  }
 };
 
 export function updateFlatSeries( fid, name, value ) {

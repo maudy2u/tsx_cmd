@@ -51,6 +51,8 @@ import {
   FlatSeries,
   addFlatFilter,
   updateFlatSeries,
+  deleteAnyFlatTargets,
+  resetStoredFlat,
  } from '../api/flatSeries.js';
 
  import Flat from './Flat.js';
@@ -63,9 +65,16 @@ export const subFrameTypes = [
 
 class FlatGrid extends Component {
 
-  state = {
-    rotatorPosition: '',
-    enabledActive: false,
+  constructor(props) {
+    super(props);
+
+    this.disableFlat = this.disableFlat.bind(this);
+
+    this.state = {
+        rotatorPosition: '',
+        enabledActive: false,
+    };
+
   }
 
   editOpen = () => this.setState({ editOpen: true })
@@ -80,18 +89,16 @@ class FlatGrid extends Component {
       name,
       value,
     );
+    resetStoredFlat(this.props.flat._id);
+    this.disableFlat();
   };
 
-  handleToggleEnabled = (e, { name, checked }) => {
+  disableFlat() {
+    //this.state.enabledActive
     this.setState({
-      [name]: checked
-    });
-    updateFlatSeries(
-      this.props.flat._id,
-      name,
-      checked,
-    );
-  };
+      enabledActive: false
+    })
+  }
 
   componentDidMount() {
     this.updateDefaults(this.props);
@@ -113,14 +120,17 @@ class FlatGrid extends Component {
   };
 
   deleteEntry() {
-    deleteAnyFlatTargets();
     // check if the series is used - if so cannot delete... list the Targets using it
-    FlatSeries.remove({_id:this.props.flat._id});
+    resetStoredFlat(this.props.flat._id);
+    FlatSeries.remove({_id: this.props.flat._id});
+    this.disableFlat();
   }
 
   addEntry() {
     // check if the series is used - if so cannot delete... list the Targets using it
     addFlatFilter( this.props.flat._id);
+    resetStoredFlat(this.props.flat._id);
+    this.disableFlat();
   }
 
   // *******************************
@@ -140,12 +150,11 @@ class FlatGrid extends Component {
     // IF TURNED ON
     if( checked ) {
       // create the targetTransit
-//      var tid = addNewTakeSeriesTemplate();
+      //      var tid = addNewTakeSeriesTemplate();
       let tid = TakeSeriesTemplates.insert(
         {
           name: this.props.flat._id,
           description: "Flat series id",
-          processSeries: 'across series',
           processSeries:"per series",
           repeatSeries: false,
           createdAt: new Date(),
@@ -182,6 +191,7 @@ class FlatGrid extends Component {
           isCalibrationFrames: true,
           description: "Flat series",
           name: this.props.flat._id,
+          targetFindName: 'Flats',
           rotator_position:this.props.flat.rotatorPosition,
           series: {
             _id: tid,
@@ -200,38 +210,9 @@ class FlatGrid extends Component {
     // *******************************
     // TURND OFF
     else {
-      this.deleteAnyFlatTargets();
-      updateFlatSeries(
-        this.props.flat._id,
-        'target_id',
-        '',
-      );
+      resetStoredFlat(this.props.flat._id);
     }
-    // now create a target for calibration...
-    // the idea is that the target can still be used in the scheduler_report
-    // the scheduler needs to find the calibration target as valid...
-  };
-
-  deleteAnyFlatTargets() {
-    // remove the seriess
-    let ids = Seriess.find({takeSeriesTemplate: this.props.flat._id}).fetch();
-    for( let i=0;i<ids.length;i++ ) {
-      Seriess.remove( ids[i]._id );
-    }
-
-    // remove series template
-    ids = TakeSeriesTemplates.find( {name: this.props.flat._id} ).fetch();
-    for( let i=0;i<ids.length;i++ ) {
-      TakeSeriesTemplates.remove( ids[i]._id );
-    }
-
-    // remove target
-    ids = TargetSessions.find( {name: this.props.flat._id} ).fetch();
-    for( let i=0;i<ids.length;i++ ) {
-      TargetSessions.remove( ids[i]._id );
-    }
-  };
-
+};
 
   render() {
     //{this.props.flat.rotatorPosition}
@@ -284,6 +265,7 @@ class FlatGrid extends Component {
                     tool_active = {this.props.tool_active}
                     filter = {filter}
                     flatSeries = {this.props.flatSeries}
+                    disableFlats={this.disableFlat}
                   />
                 )
               })
