@@ -65,6 +65,15 @@ import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug, logFileForClient, AppLogsDB
    return items;
  };
 
+ export function eraseAllAngles() {
+   var angles = TargetAngles.find({},{ sort: { datetime: -1, targetName: 1 } }).fetch();
+   var items = [];
+   for (var i = 0; i < angles.length; i++) {
+     TargetAngles.remove(angles[i]._id);
+   }
+   return items;
+ };
+
 // *******************************
 // Get the filters from TheSkyX
 TargetAngles.helpers({

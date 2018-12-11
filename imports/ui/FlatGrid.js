@@ -189,6 +189,7 @@ class FlatGrid extends Component {
       TargetSessions.update({ _id:tsid }, {
         $set: {
           isCalibrationFrames: true,
+          enabledActive: true,
           description: "Flat series",
           name: this.props.flat._id,
           targetFindName: 'Flats',
@@ -212,10 +213,9 @@ class FlatGrid extends Component {
     else {
       resetStoredFlat(this.props.flat._id);
     }
-};
+  }
 
   render() {
-    //{this.props.flat.rotatorPosition}
 
     return (
       <Segment key={this.props.flat._id} raised>
@@ -234,7 +234,7 @@ class FlatGrid extends Component {
           selection
           name='rotatorPosition'
           options={renderDropDownAngles()}
-          placeholder='Pick Rotator'
+          placeholder='Pick (optional) Angle'
           value={this.state.rotatorPosition}
           onChange={this.handleChange}
         />

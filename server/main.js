@@ -63,6 +63,7 @@ import {
   UpdateImagingTargetReport,
   tsx_SlewTargetName,
   tsx_SlewCmdCoords,
+  tsx_StopTracking,
 } from './run_imageSession.js';
 
 import { tsx_feeder, stop_tsx_is_waiting } from './tsx_feeder.js';
@@ -230,9 +231,10 @@ function startServerProcess() {
         for( var i=0; i<schedule.targets.length;i++ ) {
           var target = schedule.targets[i];
           // what is the FOV position??
+          tsxLog( ' Calibration rotator: ' + target.rotator_position );
           if( target.rotator_position != '' ) {
             // rotate to a specific position
-
+            var res = tsx_RotateCamera( target.rotator_position );
           }
           processTargetTakeSeries( target );
         }
@@ -524,7 +526,7 @@ Meteor.methods({
     }
   },
 
-  slewPosition( slew, location, dec_az ) {
+  slewPosition( slew, location, dec_az, stopTracking ) {
     tsx_SetServerState( 'tool_active', true );
     tsxDebug( '  slew'+slew);
     tsxDebug( '  location'+location);
@@ -532,6 +534,7 @@ Meteor.methods({
     var res = '';
     try {
       if( slew != '' ) {
+        UpdateStatus('Slewing');
         if( slew == 'Alt/Az'&& location !='' && dec_az != '') {
           res = tsx_SlewCmdCoords( 'SkyX_JS_SlewAltAz', location, dec_az );
         }
@@ -545,22 +548,45 @@ Meteor.methods({
       }
       UpdateStatus(' Slew: ' + res );
     }
+    catch( e ) {
+      UpdateStatus('Slewing failed');
+      res = 'Failed slewing';
+    }
+    finally {
+      tsx_SetServerState( 'tool_active', false );
+      if( stopTracking ) {
+        UpdateStatus('Stopping tracking');
+
+        tsx_SetServerState( 'tool_active', true );
+        let res = '';
+        try {
+          res = tsx_StopTracking();
+          UpdateStatus('Stopped tracking');
+        }
+        catch (e) {
+          UpdateStatus('Stop tracking failed');
+          res = 'Stop tracking failed';
+        }
+        finally {
+          tsx_SetServerState( 'tool_active', false );
+        }
+        return res;
+      }
+    }
+    return res;
+  },
+
+  rotateCamera() {
+    tsx_SetServerState( 'tool_active', true );
+    try {
+      tsxLog(' Rotating Camera');
+      var num  = tsx_GetServerStateValue('tool_rotator_num');
+      var res = tsx_RotateCamera( num );
+    }
     finally {
       tsx_SetServerState( 'tool_active', false );
     }
   },
-
-   rotateCamera() {
-     tsx_SetServerState( 'tool_active', true );
-     try {
-       tsxLog(' Rotating Camera');
-       var num  = tsx_GetServerStateValue('tool_rotator_num');
-       var res = tsx_RotateCamera( num );
-     }
-     finally {
-       tsx_SetServerState( 'tool_active', false );
-     }
-   },
 
   processCalibrationTargets( targets ) {
 

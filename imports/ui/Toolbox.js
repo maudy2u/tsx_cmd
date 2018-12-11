@@ -209,7 +209,7 @@ class Toolbox extends Component {
            placeholder='eg. 19826, or 0.5'
            value={ROTATOR_NUM}
            onChange={this.handleChange}/>
-         <br/>Enter the Angle desired (rotator position reported below)
+         <br/>Enter the Angle desired
         </div>
       )
     }
@@ -223,7 +223,7 @@ class Toolbox extends Component {
             placeholder='eg. 19826, or 0.5'
             value={ROTATOR_NUM}
             onChange={this.handleChange}/>
-          <br/>Enter the Angle desired (rotator position reported below)
+          <br/>Enter the Angle desired
         </div>
       )
     }
@@ -347,7 +347,7 @@ class Toolbox extends Component {
           )}
         </Segment>
         <Segment>
-        Start script to collect the filters focus offset.
+        Future idea - launch a filteroffset script to collect the filters focus offset and then average.
         </Segment>
     </div>
     )

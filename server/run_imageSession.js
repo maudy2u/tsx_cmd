@@ -606,6 +606,31 @@ export function tsx_SlewCmdCoords( cmd, ra, dec ) {
   return result;
 }
 
+export function tsx_StopTracking() {
+  tsxLog(' *** tsx_StopTracking' );
+
+  let result = '';
+  let cmd = tsx_cmd('SkyX_JS_StopTracking');
+
+  let tsx_waiting = true;
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+    result = tsx_return.split('|')[0].trim();
+
+    if( result != 'Success') {
+      forceAbort = true;
+      tsxLog('Stop tracking Failed. Error: ' + result);
+    }
+    else {
+      tsxLog('Stop tracking finished');
+    }
+    tsx_is_waiting = false;
+  }));
+  while( tsx_is_waiting ) {
+   Meteor.sleep( 1000 );
+  }
+  return result;
+}
+
 // *******************************
 // #TODO set the target.isCloudy = false;
 function updateTargetIsCloudy( target, isCloudy ) {
@@ -1789,51 +1814,51 @@ export function tsx_RotateCamera( position ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_RotateCamera: ' + position);
 
-  var rotateSucess = false;
-  var fovExposure = tsx_GetServerStateValue( 'defaultFOVExposure');
-  var pixelSize = tsx_GetServerStateValue( 'imagingPixelSize');
-  var focalLength = tsx_GetServerStateValue( 'imagingFocalLength');
+  let rotateSucess = false;
+  let fovExposure = tsx_GetServerStateValue( 'defaultFOVExposure');
+  let pixelSize = tsx_GetServerStateValue( 'imagingPixelSize');
+  let focalLength = tsx_GetServerStateValue( 'imagingFocalLength');
   if(
     typeof position === 'undefined' || position === ''
   ) {
-    var str = ' Rotating: Exiting - type or position.';
+    let str = ' Rotating: Exiting - type or position.';
     UpdateStatus( str );
     tsxErr( str );
     return rotateSucess;
   }
   if( typeof pixelSize === 'undefined') {
-    var str =  ' !!! Rotating failed: fix by setting default image pixel size';
+    let str =  ' !!! Rotating failed: fix by setting default image pixel size';
     UpdateStatus( str );
     tsxErr( str );
     return rotateSucess;
   }
   if( typeof focalLength === 'undefined') {
-    var str =  ' !!! Rotating failed: fix by setting default focal length';
+    let str =  ' !!! Rotating failed: fix by setting default focal length';
     UpdateStatus( str );
     tsxErr( str );
     return rotateSucess;
   }
   if( typeof fovExposure === 'undefined') {
     tsx_SetServerState( 'fovExposure', 4 );
-    var str = ' *** Rotating FIXED: set to a default 4 sec, check on default page';
+    let str = ' *** Rotating FIXED: set to a default 4 sec, check on default page';
     UpdateStatus( str );
     tsxWarn( str );
   }
-  var ACCURACY = tsx_GetServerStateValue( 'fovPositionAngleTolerance');
+  let ACCURACY = tsx_GetServerStateValue( 'fovPositionAngleTolerance');
   if( typeof ACCURACY === 'undefined') {
     ACCURACY = 1; // assume within one degree default
     tsxWarn( " *** Using default accuracy of 1 degree" );
   }
 
-  var cmd = tsx_cmd('SkyX_JS_MatchAngle');
+  let cmd = tsx_cmd('SkyX_JS_MatchAngle');
   cmd = cmd.replace('$000', position );
   cmd = cmd.replace('$001', pixelSize);
   cmd = cmd.replace('$002', focalLength);
   cmd = cmd.replace('$003', ACCURACY);
   UpdateStatus(' Rotator/Camera rotating FOV: ' + position);
-
+  let tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-    var result = tsx_return.split('|')[0].trim();
+    let result = tsx_return.split('|')[0].trim();
     //e.g. Success|imageLinkAng=0.00|targetAngle=0.00|rotPos=-0.3305915915429978|newPos=-0.32895315919987494
     tsxDebug('Any error?: ' + result);
     if( result != 'Success') {
@@ -1842,8 +1867,8 @@ export function tsx_RotateCamera( position ) {
     }
     else {
       rotateSucess = true;
-      var resMsg = tsx_return.split('|')[1].trim();
-      var angle = resMsg.split('=')[1].trim();
+      let resMsg = tsx_return.split('|')[1].trim();
+      let angle = resMsg.split('=')[1].trim();
       tsx_SetServerState( 'fovAngle', angle );
       UpdateStatus(' Rotator/Camera set: ' + angle);
     }

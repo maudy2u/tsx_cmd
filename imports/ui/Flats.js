@@ -21,6 +21,10 @@ import ReactDOM from 'react-dom';
 
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
+import {
+  TargetAngles,
+  eraseAllAngles,
+} from '../api/targetAngles.js';
 
 import { Confirm, Input, Icon, Grid, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
 
@@ -78,6 +82,7 @@ class Flats extends Component {
     this.setState({showModal: false });
   }
 
+  // used for the modal exposure settings for flats
   handleChange = (e, { name, value }) => {
     this.setState({ [name]: value.trim() });
     this.saveDefaultStateValue( name, value.trim() );
@@ -152,7 +157,6 @@ class Flats extends Component {
     var targets = TargetSessions.find({ isCalibrationFrames: true }).fetch();
 
     Meteor.call( 'processCalibrationTargets', targets, function(error, result) {
-      console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
   }
@@ -162,9 +166,8 @@ class Flats extends Component {
     var slew = this.state.tool_flats_via;
     var location = this.state.tool_flats_location;
     var dec_az = this.state.tool_flats_dec_az;
-    Meteor.call( 'slewPosition', slew, location, dec_az, function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
+    Meteor.call( 'slewPosition', slew, location, dec_az, 1, function(error, result) {
+      console.log('Slew result: ' + result);
     }.bind(this));
   }
 
@@ -259,6 +262,7 @@ class Flats extends Component {
             <Button  onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
             <Button disabled icon=''  />
             <Button icon='play' onClick={this.startFlats.bind(this)} />
+            <Button disabled icon='stop' onClick={this.stopScheduler.bind(this)} />
          </Button.Group>
        )
     }
@@ -271,16 +275,47 @@ class Flats extends Component {
            <Button disabled onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
            <Button disabled icon=''  />
            <Button disabled icon='play' onClick={this.startFlats.bind(this)} />
+           <Button icon='stop' onClick={this.stopScheduler.bind(this)} />
         </Button.Group>
       )
     }
 
   }
 
+  stopScheduler() {
+    // this.tsxStopSession();
+    Meteor.call("stopScheduler", function (error, result) {
+        // identify the error
+        tsx_UpdateServerState(tsx_ServerStates.imagingSessionId, '' );
+        tsx_UpdateServerState(tsx_ServerStates.targetImageName, '');
+        tsx_UpdateServerState(tsx_ServerStates.targetDEC, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetRA, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetALT, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetAZ, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetHA, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetTransit, '_');
+//        tsx_UpdateServerState(tsx_ServerStates.currentStage, 'Stopped');
+
+      }.bind(this));
+  }
+
+  resetAngles() {
+    let ids = this.props.flatSeries;
+    for( let i=0; i<ids.length; i++ ) {
+      let id = ids[i];
+      resetStoredFlat(id._id);
+      // update state... meteor will update later
+      this.props.flatSeries[i].enabledActive = false;
+    }
+    eraseAllAngles();
+    this.render();
+  }
+
   flatSettings() {
     if( this.props.scheduler_running.value == 'Stop'  && this.props.tool_active.value == false ){
       return (
         <Button.Group basic size='mini' floated='right'>
+          <Button icon='recycle' onClick={this.resetAngles.bind(this)}/>
           <Button icon='settings' onClick={this.showModal.bind(this)}/>
         </Button.Group>
       )
@@ -288,6 +323,7 @@ class Flats extends Component {
     else {
       return (
         <Button.Group basic size='mini' floated='right'>
+          <Button disabled icon='recycle' onClick={this.resetAngles.bind(this)}/>
           <Button disabled icon='settings' onClick={this.showModal.bind(this)}/>
         </Button.Group>
       )
@@ -305,14 +341,6 @@ class Flats extends Component {
         )}
         { this.flatSettings() }
           <br />
-            Remember to check if the Rotator position is set.
-            If it is set then the position needs to be set.
-            Used the tsx_RotateCamera, same as the toolbox,
-            but everything can be ignored, as it is a simple
-            rotatorPosition.
-          <br />
-          Look to delete from the drop down and thus delete
-          the stored target angle.
           <Segment raised>
             <h4>Flat position</h4>
             {this.flatsTools(
@@ -346,6 +374,7 @@ class Flats extends Component {
           closeIcon>
           <Modal.Header>Flat Filter Exposures</Modal.Header>
           <Modal.Content>
+          Enter the default exposure settings for each filter.
             <Segment raised>
               <Form>
                 <Form.Field inline >
@@ -355,7 +384,7 @@ class Flats extends Component {
                 </Form.Field>
                 {this.props.filters.map((filter)=>{
                   return (
-                    <Form.Field key={filter._id} inline pointing='right'>
+                    <Form.Field key={filter._id} inline>
                       <Label>
                         {filter.name}
                       </Label>
@@ -371,7 +400,6 @@ class Flats extends Component {
             </Segment>
           </Modal.Content>
           <Modal.Description>
-          Enter the default exposure settings for each filter.
           </Modal.Description>
           <Modal.Actions>
           </Modal.Actions>
