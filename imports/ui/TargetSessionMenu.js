@@ -131,6 +131,8 @@ class TargetSessionMenu extends Component {
           <Modal
             open={this.state.addModalOpen}
             onClose={this.handleAddModalClose}
+            basic
+            size='small'
             closeIcon>
             <Modal.Header>Add Session</Modal.Header>
             <Modal.Content>
