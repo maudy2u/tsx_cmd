@@ -118,6 +118,10 @@ class TakeSeries extends Component {
   }
 
   render() {
+    let DESCRIPTION = '';
+    if( this.props.seriesTemplate.description != '') {
+      DESCRIPTION = this.props.seriesTemplate.description;
+    }
     return (
       <Segment raised>
         <Item>
@@ -131,7 +135,7 @@ class TakeSeries extends Component {
               <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
             </Button.Group>
             <Item.Description>
-              {this.props.seriesTemplate.description}
+            {DESCRIPTION}
             </Item.Description>
             <Item.Meta>
             </Item.Meta>

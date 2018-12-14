@@ -25,7 +25,7 @@ export function addNewTakeSeriesTemplate() {
   const id = TakeSeriesTemplates.insert(
     {
       name: "!New Take Series",
-      description: "EDIT ME",
+      description: "",
       processSeries: 'across series',
       repeatSeries: false,
       createdAt: new Date(),
