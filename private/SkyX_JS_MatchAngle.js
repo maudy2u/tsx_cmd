@@ -8,7 +8,7 @@ var TARGETANG= $000;
 var PIXELSIZE =$001; // 23.07 ... for simulator with 1.7 imagescale and 2800 FL
 var FOCALLENGTH = $002; // use 2800 on SIM
 var ACCURACY = $003; // acceptable difference between target angle and ImageLink angle
-
+var JUSTROTATE = $004;
 var OUT="";
 var MAXTRIES = 5;
 var NUMTRIES = 0;
@@ -121,47 +121,51 @@ function rotate( targetAng, imageScale ) {
 
 // *******************************
 // Okay.. let's getting going....
-
 // connect to the camera
 CCDSC.Connect();
-
-// Grab current settings so it can be restored
-var oFrame = CCDSC.Subframe;
-var oExp = CCDSC.ExposureTime;
-var obinX = CCDSC.BinX;
-var obinY = CCDSC.BinY;
-var oSave = CCDSC.AutoSaveOn;
-setupFilterWheel();
-
-// USE AutoImageLink settings to take ref image
-var ailsBin = calcBin()
-CCDSC.Subframe = false; // turn off
-CCDSC.ExposureTime=AILSEXPOSURE; // use AILS exposure
-// Make sure bin is valid.
-try {
-  CCDSC.BinX = ailsBin; // use AILS bin
-  CCDSC.BinY = ailsBin; // use AILS bin
+if( JUSTROTATE == 1 ) {
+	CCDSC.rotatorGotoPositionAngle(TARGETANG);
+	var rotPos = CCDSC.rotatorPositionAngle(); // the real position
+	OUT = "Success|" + rotPos;
 }
-catch( err ) {
-  OUT = "FAILED|BIN NOT CALCULATED CORRECTLY";
-  return OUT;
+else {
+
+	// Grab current settings so it can be restored
+	var oFrame = CCDSC.Subframe;
+	var oExp = CCDSC.ExposureTime;
+	var obinX = CCDSC.BinX;
+	var obinY = CCDSC.BinY;
+	var oSave = CCDSC.AutoSaveOn;
+	setupFilterWheel();
+
+	// USE AutoImageLink settings to take ref image
+	var ailsBin = calcBin()
+	CCDSC.Subframe = false; // turn off
+	CCDSC.ExposureTime=AILSEXPOSURE; // use AILS exposure
+	// Make sure bin is valid.
+	try {
+	  CCDSC.BinX = ailsBin; // use AILS bin
+	  CCDSC.BinY = ailsBin; // use AILS bin
+	}
+	catch( err ) {
+	  OUT = "FAILED|BIN NOT CALCULATED CORRECTLY";
+	  return OUT;
+	}
+	CCDSC.AutoSaveOn = 1; // save so can link
+	CCDSC.Asynchronous = false;		// We are going to wait for it
+	CCDSC.Frame = 1;			// It's a light frame
+
+	// Start the Rotation
+	// Could also pick a bin and set the imagescale
+	rotate( TARGETANG, AILSSCALE ); // SIMULATOR USES 1.7 and Rotator CCW=false
+
+	// Restore current settings
+	CCDSC.BinX = obinX;
+	CCDSC.BinY = obinY;
+	CCDSC.Subframe = oFrame;
+	CCDSC.ExposureTime = oExp;
+	CCDSC.AutoSaveOn = oSave;
 }
-CCDSC.AutoSaveOn = 1; // save so can link
-CCDSC.Asynchronous = false;		// We are going to wait for it
-CCDSC.Frame = 1;			// It's a light frame
-
-// Start the Rotation
-// Could also pick a bin and set the imagescale
-rotate( TARGETANG, AILSSCALE ); // SIMULATOR USES 1.7 and Rotator CCW=false
-
-// Restore current settings
-CCDSC.BinX = obinX;
-CCDSC.BinY = obinY;
-CCDSC.Subframe = oFrame;
-CCDSC.ExposureTime = oExp;
-CCDSC.AutoSaveOn = oSave;
-
 RunJavaScriptOutput.writeLine ("DONE");
 OUT;
-
 /* Socket End Packet */

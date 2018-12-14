@@ -1777,6 +1777,7 @@ function tsx_MatchRotation( target ) {
     cmd = cmd.replace('$001', pixelSize);
     cmd = cmd.replace('$002', focalLength);
     cmd = cmd.replace('$003', ACCURACY);
+    cmd = cmd.replace('$004', 0); // ImageLink Angle
     tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       var result = tsx_return.split('|')[0].trim();
       //e.g. Success|imageLinkAng=0.00|targetAngle=0.00|rotPos=-0.3305915915429978|newPos=-0.32895315919987494
@@ -1855,6 +1856,7 @@ export function tsx_RotateCamera( position ) {
   cmd = cmd.replace('$001', pixelSize);
   cmd = cmd.replace('$002', focalLength);
   cmd = cmd.replace('$003', ACCURACY);
+  cmd = cmd.replace('$004', 1); // just do position
   UpdateStatus(' Rotator/Camera rotating FOV: ' + position);
   let tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
@@ -1867,8 +1869,7 @@ export function tsx_RotateCamera( position ) {
     }
     else {
       rotateSucess = true;
-      let resMsg = tsx_return.split('|')[1].trim();
-      let angle = resMsg.split('=')[1].trim();
+      let angle = tsx_return.split('|')[1].trim();
       tsx_SetServerState( 'fovAngle', angle );
       UpdateStatus(' Rotator/Camera set: ' + angle);
     }
@@ -2011,12 +2012,19 @@ function tsx_takeImage( filterNum, exposure, frame, tName ) {
         if( result === "Success") {
           success = true;
           // check for rotatorPositionAngle
-          var rotPos = tsx_return.split('|')[1].trim()
-          tsxLog( 'found rotator position: ' + rotPos + ' with name ' + tName );
-          if( rotPos == 'rotatorPosition') {
-            // the position is stored
-            // the stoed position can be used for flats
-            recordRotatorPosition( tName, tsx_return.split('|')[2].trim() );
+          try {
+            tsxDebug( 'found rotator position: ' + tsx_return );
+            var rotPos = tsx_return.split('|')[1].trim()
+            if( rotPos == 'rotatorPosition') {
+              // the position is stored
+              let ang = tsx_return.split('|')[2].trim();
+              tsxLog( ' Rotator position: ' + Number(ang).toFixed(2) + ' with name ' + tName );
+              // the stoed position can be used for flats
+              recordRotatorPosition( tName, Number(ang).toFixed(2) );
+            }
+          }
+          finally{
+            // do nothing
           }
         }
         else {
