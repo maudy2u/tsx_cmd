@@ -55,17 +55,13 @@ class TakeSeriesTemplateMenu extends Component {
 
     return (
       <div>
-        <Segment>
-         <Item.Group divided unstackable>
-           {this.props.seriesList.map( (takeSeriesTemplate)=>{
-               return (
-                 <TakeSeries key={takeSeriesTemplate._id} seriesTemplate={takeSeriesTemplate} />                 
-               )
-           })}
-         </Item.Group>
-        </Segment>
-       </div>
-      )
+       {this.props.seriesList.map( (takeSeriesTemplate)=>{
+           return (
+             <TakeSeries key={takeSeriesTemplate._id} seriesTemplate={takeSeriesTemplate} />
+           )
+       })}
+     </div>
+    )
   }
 }
 export default withTracker(() => {

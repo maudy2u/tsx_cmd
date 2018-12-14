@@ -18,7 +18,7 @@ tsx cmd - A web page to send commands to TheSkyX server
 
 import React, { Component } from 'react'
 import { withTracker } from 'meteor/react-meteor-data';
-import { Button, Modal, Item, Header, Icon, Table, } from 'semantic-ui-react'
+import { Button, Modal, Segment, Item, Header, Icon, Table, } from 'semantic-ui-react'
 
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 import { TargetSessions } from '../api/targetSessions.js';
@@ -119,40 +119,42 @@ class TakeSeries extends Component {
 
   render() {
     return (
-      <Item>
-        <Item.Content>
-          <Item.Header as='a' onClick={this.editEntry.bind(this)}>
-            {this.props.seriesTemplate.name}
-          </Item.Header>
-          <Button.Group basic size='mini' floated='right'>
-            {/* <Button icon='edit' onClick={this.editEntry.bind(this)}/> */}
-            {/* <Button icon='copy' onClick={this.copyEntry.bind(this)}/> */}
-            <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
-          </Button.Group>
-          <Item.Description>
-            {this.props.seriesTemplate.description}
-          </Item.Description>
-          <Item.Meta>
-          </Item.Meta>
-          <Item.Extra>
-            {this.seriesDetails()}
-            {/* *******************************
-              Used to handle the Editing deleting of a series
-              */}
-            <Modal
-              open={this.state.editOpen}
-              onClose={this.editClose}
-              closeIcon>
-              <Modal.Header>Editing Series</Modal.Header>
-              <Modal.Content>
-                <Modal.Description>
-                  <TakeSeriesTemplateEditor key={this.props.seriesTemplate._id} template={this.props.seriesTemplate}/>
-                </Modal.Description>
-              </Modal.Content>
-            </Modal>
-          </Item.Extra>
-        </Item.Content>
-      </Item>
+      <Segment raised>
+        <Item>
+          <Item.Content>
+            <Item.Header as='a' onClick={this.editEntry.bind(this)}>
+              {this.props.seriesTemplate.name}
+            </Item.Header>
+            <Button.Group basic size='mini' floated='right'>
+              {/* <Button icon='edit' onClick={this.editEntry.bind(this)}/> */}
+              {/* <Button icon='copy' onClick={this.copyEntry.bind(this)}/> */}
+              <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
+            </Button.Group>
+            <Item.Description>
+              {this.props.seriesTemplate.description}
+            </Item.Description>
+            <Item.Meta>
+            </Item.Meta>
+            <Item.Extra>
+              {this.seriesDetails()}
+              {/* *******************************
+                Used to handle the Editing deleting of a series
+                */}
+              <Modal
+                open={this.state.editOpen}
+                onClose={this.editClose}
+                closeIcon>
+                <Modal.Header>Editing Series</Modal.Header>
+                <Modal.Content>
+                  <Modal.Description>
+                    <TakeSeriesTemplateEditor key={this.props.seriesTemplate._id} template={this.props.seriesTemplate}/>
+                  </Modal.Description>
+                </Modal.Content>
+              </Modal>
+            </Item.Extra>
+          </Item.Content>
+        </Item>
+      </Segment>
     )
   }
 

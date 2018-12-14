@@ -32,7 +32,7 @@ const logCon = new Logger();
 const logDB = new Logger();
 
 var log_levels = [];
-if( Meteor.settings.enable_log === 'yes') {
+if( Meteor.settings.enable_log != 'no') {
  log_levels.push('LOG');
 }
 if( Meteor.settings.enable_debug === 'yes') {

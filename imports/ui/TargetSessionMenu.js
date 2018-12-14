@@ -128,19 +128,6 @@ class TargetSessionMenu extends Component {
 
       return (
         <div>
-          <Modal
-            open={this.state.addModalOpen}
-            onClose={this.handleAddModalClose}
-            basic
-            size='small'
-            closeIcon>
-            <Modal.Header>Add Session</Modal.Header>
-            <Modal.Content>
-              <Modal.Description>
-                <TargetEditor key={this.state.newTarget._id} target={this.state.newTarget} scheduler_running={this.props.scheduler_running} tool_active={this.props.tool_active}/>
-              </Modal.Description>
-            </Modal.Content>
-          </Modal>
           {this.props.targets.map((target)=>{
             return (
                <Target key={target._id} target={target} scheduler_running={this.props.scheduler_running} tool_active={this.props.tool_active} />

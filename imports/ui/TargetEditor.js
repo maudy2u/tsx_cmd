@@ -606,13 +606,6 @@ class TargetEditor extends Component {
     return (
       <div>
         <Button  icon='save' onClick={this.saveEntry.bind(this)} />
-        {/* <Checkbox
-          label='Enabled'
-          className='enabledActive'
-          toggle
-          checked={this.state.enabledActive}
-          onChange={this.onChangeChecked.bind(this)}
-        /> */}
         <Form>
           <Tab menu={{ pointing: true }} renderActiveOnly={true} panes={panes} />
         </Form>

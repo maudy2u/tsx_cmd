@@ -319,6 +319,8 @@ class Target extends Component {
             <Modal
               open={this.state.modalOpen}
               onClose={this.handleClose}
+              basic
+              size='small'
               closeIcon>
               <Modal.Header>Editing Target {this.props.target.targetFindName}</Modal.Header>
               <Modal.Content>
