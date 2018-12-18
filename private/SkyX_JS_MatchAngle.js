@@ -126,7 +126,8 @@ CCDSC.Connect();
 if( JUSTROTATE == 1 ) {
 	CCDSC.rotatorGotoPositionAngle(TARGETANG);
 	var rotPos = CCDSC.rotatorPositionAngle(); // the real position
-	OUT = "Success|" + rotPos;
+	var resMsg = "imageLinkAng=NA|targetAngle=NA|rotPos=" + rotPos + "|targetPos=" + TARGETANG;
+	OUT = "Success|" + resMsg;
 }
 else {
 

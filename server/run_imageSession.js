@@ -758,6 +758,22 @@ function targetReportAngle( target, angle ) {
   tsx_SetServerState('scheduler_report', rpt );
 }
 
+function targetReportRotatorPosition( target, position ) {
+  var rid = TargetReports.upsert( { target_id: target._id }, {
+    $set: {
+      rotator_position: position,
+    }
+  });
+  var rpt = TargetReports.findOne( { target_id: target._id } );
+  var tgt = TargetSessions.update({_id: target._id} , {
+    $set: {
+      report_id: rid,
+      report: rpt,
+    }
+  });
+  tsx_SetServerState('scheduler_report', rpt );
+}
+
 // **************************************************************
 function tsx_RunFocus3( target ) {
   // tsxDebug('************************');
@@ -1738,7 +1754,7 @@ function tsx_MatchRotation( target ) {
   var pixelSize = tsx_GetServerStateValue( 'imagingPixelSize');
   var focalLength = tsx_GetServerStateValue( 'imagingFocalLength');
   var angle = target.angle;
-  let position = target.position;
+  let position = target.rotator_position;
   let foundFOV = false;
   let foundPos = false;
   if( typeof angle === 'undefined' || angle === '') {
@@ -1785,16 +1801,18 @@ function tsx_MatchRotation( target ) {
       ACCURACY = 1; // assume within one degree default
     }
 
-    UpdateStatus( ' ' + target.targetFindName + ': Setting FOV to ('+ angle +')' );
     var cmd = tsx_cmd('SkyX_JS_MatchAngle');
-    cmd = cmd.replace('$000', angle );
     cmd = cmd.replace('$001', pixelSize);
     cmd = cmd.replace('$002', focalLength);
     cmd = cmd.replace('$003', ACCURACY);
     if( foundFOV ) {
+      UpdateStatus( ' ' + target.targetFindName + ': Setting FOV to ('+ angle +')' );
+      cmd = cmd.replace('$000', angle );
       cmd = cmd.replace('$004', 0); // ImageLink Angle
     }
     else if( foundPos && foundFOV == false )  {
+      UpdateStatus( ' ' + target.targetFindName + ': Setting Rotator to ('+ position +')' );
+      cmd = cmd.replace('$000', position );
       cmd = cmd.replace('$004', 1); // just rotate
     }
     tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
@@ -1807,10 +1825,20 @@ function tsx_MatchRotation( target ) {
       }
       else {
         rotateSucess = true;
-        var resMsg = tsx_return.split('|')[1].trim();
-        var angle = resMsg.split('=')[1].trim();
-        targetReportAngle( target, angle );
-        tsxLog( ' Rotator set: ' + angle);
+//        var resMsg = "imageLinkAng=NA|targetAngle=NA|rotPos=" + TARGETANG + "|newPos=" + rotPos;
+
+        if( foundFOV ) {
+          var linkAngle = tsx_return.split('|')[1].trim();
+          var angle = linkAngle.split('=')[1].trim();
+          targetReportAngle( target, angle );
+          UpdateStatus(' Rotator FOV angle: ' + angle);
+        }
+        else if( foundPos && foundFOV == false )  {
+          var resMsg = tsx_return.split('|')[2].trim();
+          var pos = resMsg.split('=')[2].trim();
+          targetReportRotatorPosition( target, pos );
+          UpdateStatus(' Rotator position: ' + pos);
+        }
       }
       tsx_is_waiting = false;
     }));
@@ -1889,9 +1917,10 @@ export function tsx_RotateCamera( position ) {
     }
     else {
       rotateSucess = true;
-      let angle = tsx_return.split('|')[1].trim();
-      tsx_SetServerState( 'fovAngle', angle );
-      UpdateStatus(' Rotator/Camera set: ' + angle);
+      var resMsg = tsx_return.split('|')[2].trim();
+      var pos = resMsg.split('=')[2].trim();
+      targetReportRotatorPosition( target, pos );
+      UpdateStatus(' Rotator/Camera set: ' + pos);
     }
     tsx_is_waiting = false;
   }));
