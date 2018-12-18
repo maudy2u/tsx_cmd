@@ -579,10 +579,17 @@ class App extends TrackerReact(Component) {
     var out = addNewTakeSeriesTemplate();
   };
 
+  loadSkySafari() {
+    // pop up the upload dialog
+    // send the file to server
+    // server parses file "key=value"
+  }
+
   parkButtons( state, active ) {
     if( state == 'Stop' && active == false ) {
       return (
         <div>
+          <Button icon='cloud upload' onClick={this.loadSkySafari.bind(this)}/>
           <Button icon='wifi' onClick={this.connectToTSX.bind(this)}/>
           <Button icon='car' onClick={this.park.bind(this)}/>
         </div>
@@ -591,6 +598,7 @@ class App extends TrackerReact(Component) {
     else {
       return (
         <div>
+          <Button disabled icon='cloud upload' onClick={this.loadSkySafari.bind(this)}/>
           <Button disabled icon='wifi' onClick={this.connectToTSX.bind(this)}/>
           <Button disabled icon='car' onClick={this.park.bind(this)}/>
         </div>

@@ -1478,6 +1478,7 @@ function isTargetConditionInValid(target) {
       defaultCLSRepeat = tsx_GetServerState('defaultCLSRepeat');
     }
     tsxInfo( ' CLS val: ' + defaultCLSRepeat.value + ', CLS dts: ' + defaultCLSRepeat.timestamp );
+
     // only SetUpForImagingRun if greater than zero
     if( defaultCLSRepeat.value > 0  ) {
       tsxInfo( ' Check if time to CLS again: ' + defaultCLSRepeat.value );
@@ -1737,11 +1738,24 @@ function tsx_MatchRotation( target ) {
   var pixelSize = tsx_GetServerStateValue( 'imagingPixelSize');
   var focalLength = tsx_GetServerStateValue( 'imagingFocalLength');
   var angle = target.angle;
+  let position = target.position;
+  let foundFOV = false;
+  let foundPos = false;
   if( typeof angle === 'undefined' || angle === '') {
-    var str = ' Matching Angle: Exiting - no target angle set.';
+    var str = ' Matching Angle: no target angle set.';
     UpdateStatus( str );
     tsxInfo( str );
-    return rotateSucess;
+  }
+  else {
+    foundFOV = true;
+  }
+  if( typeof position === 'undefined' || position === '') {
+    var str = ' Matching Angle: no rotator position set.';
+    UpdateStatus( str );
+    tsxInfo( str );
+  }
+  else {
+    foundPos = true;
   }
   if( typeof pixelSize === 'undefined') {
     var str =  ' *** Rotating failed: fix by setting default image pixel size';
@@ -1765,7 +1779,7 @@ function tsx_MatchRotation( target ) {
     UpdateStatus( str );
     tsxInfo( str );
   }
-  if( isEnabled ) {
+  if( isEnabled && ( foundFOV || foundPos )) {
     var ACCURACY = tsx_GetServerStateValue( 'fovPositionAngleTolerance');
     if( typeof ACCURACY === 'undefined') {
       ACCURACY = 1; // assume within one degree default
@@ -1777,7 +1791,12 @@ function tsx_MatchRotation( target ) {
     cmd = cmd.replace('$001', pixelSize);
     cmd = cmd.replace('$002', focalLength);
     cmd = cmd.replace('$003', ACCURACY);
-    cmd = cmd.replace('$004', 0); // ImageLink Angle
+    if( foundFOV ) {
+      cmd = cmd.replace('$004', 0); // ImageLink Angle
+    }
+    else if( foundPos && foundFOV == false )  {
+      cmd = cmd.replace('$004', 1); // just rotate
+    }
     tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       var result = tsx_return.split('|')[0].trim();
       //e.g. Success|imageLinkAng=0.00|targetAngle=0.00|rotPos=-0.3305915915429978|newPos=-0.32895315919987494
@@ -1805,6 +1824,7 @@ function tsx_MatchRotation( target ) {
     tsxInfo( str );
     UpdateStatus( str );
     tsxInfo( str );
+    rotateSucess = false;
   }
 
   return rotateSucess;
