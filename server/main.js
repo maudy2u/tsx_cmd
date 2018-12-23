@@ -276,16 +276,14 @@ function startServerProcess() {
             // remove dark/bias/flat from targets...
 
             if (typeof target != 'undefined' && tsx_GetServerStateValue('currentJob') != '' ) {
-              tsxLog ( ' =========================');
               tsxDebug ( ' ' + target.targetFindName + ' Preparing target...');
 
               // Point, Focus, Guide
               var ready = prepareTargetForImaging( target );
               if( ready ) {
                 // target images per Take Series
-                tsxLog ( ' =========================');
                 tsxDebug ( ' ************************1*');
-                UpdateStatus ( ' *** Start imaging: ' + target.targetFindName );
+                UpdateStatus ( ' ' +target.targetFindName  + ' *** Start imaging');
                 processTargetTakeSeries( target );
                 tsxDebug ( ' ************************2*');
               }
@@ -581,7 +579,7 @@ Meteor.methods({
     try {
       tsxLog(' Rotating Camera');
       var num  = tsx_GetServerStateValue('tool_rotator_num');
-      var res = tsx_RotateCamera( num );
+      var res = tsx_RotateCamera( num, 0 ); // tool needs to use CLS use 0
     }
     finally {
       tsx_SetServerState( 'tool_active', false );

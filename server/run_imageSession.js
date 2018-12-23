@@ -970,7 +970,6 @@ function SetUpForImagingRun(target) {
     tsx_SetServerState('scheduler_report', target.report );
   }
 
-  UpdateStatus( ' ' + target.targetFindName + ': centring' );
 	var cls = tsx_CLS(target); 						//# Call the Closed-Loop-Slew function to go to the target
   if( cls.angle == -1 ) {
     UpdateStatus( ' Target centred FAILED: ' + cls.angle);
@@ -994,9 +993,9 @@ function SetUpForImagingRun(target) {
   //      a) if entered for session
   //      b) obtained from image
   var rotateSucess = false;
-  UpdateStatus( ' ' + target.targetFindName + ': matching angle' );
+//  UpdateStatus( ' ' + target.targetFindName + ': matching angle' );
   rotateSucess = tsx_MatchRotation( target );
-  UpdateStatus( ' ' + target.targetFindName + ': matched angle (' + rotateSucess + ')' );
+//  UpdateStatus( ' ' + target.targetFindName + ': matched angle (' + rotateSucess + ')' );
 
   // get initial focus....
   // #TODO: get the focus to create date/time of last focus... before redoing...
@@ -1259,9 +1258,9 @@ function tsx_reachedMinAlt( target ) {
 		targetMinAlt = tsx_GetServerStateValue(tsx_ServerStates.defaultMinAltitude);
 	}
 	var curAlt = target.report.ALT;
-	UpdateStatus(' ' + target.targetFindName + ': altitude (' + curAlt + ') <'+ ' minAlt (' + targetMinAlt + ')' );
+	tsxInfo(' ' + target.targetFindName + ': altitude (' + curAlt + ') <'+ ' minAlt (' + targetMinAlt + ')' );
 	if( curAlt < targetMinAlt ) {
-		UpdateStatus( ' ' + target.targetFindName + ': Stoped, below Minimum Altitude.' );
+		tsxInfo( ' ' + target.targetFindName + ': Stoped, below Minimum Altitude.' );
 		return true;
 	}
   return false;
@@ -1307,11 +1306,11 @@ function isMeridianFlipNeed( target ) {
   tsxLog( ' ' + target.targetFindName + ': pointing (' + lastDir + '), cf. previous (' + curDir +')');
   if( curDir == 'West' && lastDir == 'East') {
     // we need to flip
-    tsxLog( ' ' + target.targetFindName + ': merdian flip needed.' );
+    tsxDebug( ' ' + target.targetFindName + ': merdian flip needed.' );
     return true;
   }
   else {
-    tsxLog( ' ' + target.targetFindName + ': NO merdian flip needed.' );
+    tsxDebug( ' ' + target.targetFindName + ': NO merdian flip needed.' );
     return false;
   }
 }
@@ -1428,7 +1427,7 @@ export function UpdateImagingTargetReport( target ) {
 function isTargetConditionInValid(target) {
   tsxDebug('************************');
   tsxDebug(' *** isTargetConditionInValid: ' + target.targetFindName );
-  UpdateStatus(' ' + target.targetFindName + ': target evaluation');
+  tsxDebug(' ' + target.targetFindName + ': target evaluation');
 
   // *******************************
   if( isSchedulerStopped() ) {
@@ -1463,7 +1462,7 @@ function isTargetConditionInValid(target) {
     // okay we have a lot to do...
     // prepare target of imaging again...
     // no need to focus or dither as done in prerun
-    tsxDebug( ' *** meridian flip need detected.');
+    UpdateStatus( ' *** Meridian flip...');
     prepareTargetForImaging( target ) ;
 
     return false; // all good continue
@@ -1489,30 +1488,29 @@ function isTargetConditionInValid(target) {
     // now retry
     var defaultCLSRepeat = tsx_GetServerState('defaultCLSRepeat');
     if( typeof defaultCLSRepeat === 'undefined' ) {
-      tsxInfo( ' Check if to CLS again - needs a value.');
+      tsxDebug( ' Check if to CLS again - needs a value.');
       tsx_SetServerState('defaultCLSRepeat', 0); // default to one hour
       defaultCLSRepeat = tsx_GetServerState('defaultCLSRepeat');
     }
-    tsxInfo( ' CLS val: ' + defaultCLSRepeat.value + ', CLS dts: ' + defaultCLSRepeat.timestamp );
+    tsxDebug( ' CLS val: ' + defaultCLSRepeat.value + ', CLS dts: ' + defaultCLSRepeat.timestamp );
 
     // only SetUpForImagingRun if greater than zero
     if( defaultCLSRepeat.value > 0  ) {
-      tsxInfo( ' Check if time to CLS again: ' + defaultCLSRepeat.value );
-      tsxInfo( ' Check time: ' + defaultCLSRepeat.timestamp );
+      tsxDebug( ' Check if time to CLS again: ' + defaultCLSRepeat.value );
+      tsxDebug( ' Check time: ' + defaultCLSRepeat.timestamp );
       var doCLS = hasTimePassed( defaultCLSRepeat.value, defaultCLSRepeat.timestamp )
       if( doCLS === true ) {
         tsxInfo( ' time to CLS again.');
-        UpdateStatus( ' ' + target.targetFindName + ': centring');
         SetUpForImagingRun( target );
         tsx_SetServerState('defaultCLSRepeat', defaultCLSRepeat.value);
         return false;
       }
       else {
-        UpdateStatus( ' ' + target.targetFindName + ': NOT recentring');
+        tsxDebug( ' ' + target.targetFindName + ': NOT recentring');
       }
     }
     else {
-      UpdateStatus( ' ' + target.targetFindName + ': NOT recentring');
+      tsxDebug( ' ' + target.targetFindName + ': NOT recentring');
     }
   }
 
@@ -1538,7 +1536,7 @@ function tsx_dither( target ) {
   var Out = false;
   var dCount = lastDither +1;
   var doDither = (Math.round(dCount) >= Math.round(ditherTarget));
-  tsxInfo( ' [dither] needed: ' + doDither );
+  UpdateStatus( ' ' + target.targetFindName + 'dither: ' + doDither );
   if( ditherTarget != 0 ) {
     if( doDither ) { // adding a plus one so the zero works and if one is passed it will rung once.
 
@@ -1584,11 +1582,11 @@ function tsx_dither( target ) {
     }
     else {
       tsx_SetServerState('imagingSessionDither', lastDither+1);
-      UpdateStatus(' ' + target.targetFindName +': not dithering');
+      tsxDebug(' ' + target.targetFindName +': not dithering');
     }
   }
   else{
-    UpdateStatus(' ' + target.targetFindName +': Dithering disabled');
+    tsxDebug(' ' + target.targetFindName +': Dithering disabled');
   }
   return Out;
 
@@ -1757,18 +1755,18 @@ function tsx_MatchRotation( target ) {
   let position = target.rotator_position;
   let foundFOV = false;
   let foundPos = false;
+  tsxDebug( ' Founds target FOV: ' + angle );
+  tsxDebug( ' Founds target FOV: ' + position );
   if( typeof angle === 'undefined' || angle === '') {
     var str = ' Matching Angle: no target angle set.';
-    UpdateStatus( str );
-    tsxInfo( str );
+    tsxDebug( str );
   }
   else {
     foundFOV = true;
   }
   if( typeof position === 'undefined' || position === '') {
     var str = ' Matching Angle: no rotator position set.';
-    UpdateStatus( str );
-    tsxInfo( str );
+    tsxDebug( str );
   }
   else {
     foundPos = true;
@@ -1776,13 +1774,13 @@ function tsx_MatchRotation( target ) {
   if( typeof pixelSize === 'undefined') {
     var str =  ' *** Rotating failed: fix by setting default image pixel size';
     UpdateStatus( str );
-    tsxInfo( str );
+    tsxError( str );
     return rotateSucess;
   }
   if( typeof focalLength === 'undefined') {
     var str =  ' *** Rotating failed: fix by setting default focal length';
     UpdateStatus( str );
-    tsxInfo( str );
+    tsxError( str );
     return rotateSucess;
   }
   if( typeof isEnabled === 'undefined') {
@@ -1793,7 +1791,7 @@ function tsx_MatchRotation( target ) {
     tsx_SetServerState( 'fovExposure', 4 );
     var str = ' *** Rotating FIXED: set to a default 4 sec, check on default page';
     UpdateStatus( str );
-    tsxInfo( str );
+    tsxWarn( str );
   }
   if( isEnabled && ( foundFOV || foundPos )) {
     var ACCURACY = tsx_GetServerStateValue( 'fovPositionAngleTolerance');
@@ -1835,8 +1833,8 @@ function tsx_MatchRotation( target ) {
         }
         else if( foundPos && foundFOV == false )  {
           var resMsg = tsx_return.split('|')[2].trim();
-          var pos = resMsg.split('=')[2].trim();
-          targetReportRotatorPosition( target, pos );
+          var pos = resMsg.split('=')[1].trim();
+          // targetReportRotatorPosition( target, pos );
           UpdateStatus(' Rotator position: ' + pos);
         }
       }
@@ -1848,10 +1846,7 @@ function tsx_MatchRotation( target ) {
   }
   else {
     var str = ' ' + target.targetFindName + ': match angle disabled';
-    UpdateStatus( str );
-    tsxInfo( str );
-    UpdateStatus( str );
-    tsxInfo( str );
+    tsxDebug( str );
     rotateSucess = false;
   }
 
@@ -1859,7 +1854,7 @@ function tsx_MatchRotation( target ) {
 }
 
 // **************************************************************
-export function tsx_RotateCamera( position ) {
+export function tsx_RotateCamera( position, cls ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_RotateCamera: ' + position);
 
@@ -1904,7 +1899,7 @@ export function tsx_RotateCamera( position ) {
   cmd = cmd.replace('$001', pixelSize);
   cmd = cmd.replace('$002', focalLength);
   cmd = cmd.replace('$003', ACCURACY);
-  cmd = cmd.replace('$004', 1); // just do position
+  cmd = cmd.replace('$004', cls); // just do position
   UpdateStatus(' Rotator/Camera rotating FOV: ' + position);
   let tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
@@ -1917,10 +1912,11 @@ export function tsx_RotateCamera( position ) {
     }
     else {
       rotateSucess = true;
-      var resMsg = tsx_return.split('|')[2].trim();
-      var pos = resMsg.split('=')[2].trim();
-      targetReportRotatorPosition( target, pos );
-      UpdateStatus(' Rotator/Camera set: ' + pos);
+      var resMsg = tsx_return.split('|')[3].trim();
+      tsxLog( resMsg);
+      var pos = resMsg.split('=')[1].trim();
+      // targetReportRotatorPosition( pos );
+     UpdateStatus(' Rotator/Camera set: ' + pos);
     }
     tsx_is_waiting = false;
   }));
@@ -2067,9 +2063,9 @@ function tsx_takeImage( filterNum, exposure, frame, tName ) {
             if( rotPos == 'rotatorPosition') {
               // the position is stored
               let ang = tsx_return.split('|')[2].trim();
-              tsxLog( ' Rotator position: ' + Number(ang).toFixed(2) + ' with name ' + tName );
+              tsxLog( ' ' + tName + ' Rotator position: ' + Number(ang).toFixed(3) );
               // the stoed position can be used for flats
-              recordRotatorPosition( tName, Number(ang).toFixed(2) );
+              recordRotatorPosition( tName, Number(ang).toFixed(3) );
             }
           }
           finally{
@@ -2136,6 +2132,7 @@ function takeSeriesImage(target, series) {
   var frame = getFrame( series.frame );//  cdLight =1, cdBias, cdDark, cdFlat
   var num = taken+1;
   if( (remainingImages <= series.repeat) && (remainingImages > 0) ) {
+    tsxLog( ' -------------------------------');
     UpdateStatus( ' ' + target.targetFindName + ': Take - ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds: ' + num + '/' +series.repeat );
 
     var res = tsx_takeImage( slot, series.exposure, frame, target.targetFindName.trim() );
@@ -2334,8 +2331,9 @@ export function prepareTargetForImaging( target ) {
   }
   else {
     UpdateImagingSesionID( target._id );
-    UpdateStatus(' ========================');
+    tsxLog ( ' =========================');
     UpdateStatus( ' '+ target.targetFindName + ": Target selected");
+    tsxLog ( ' =========================');
     tsx_SetServerState('targetName', target.targetFindName);
 
     var targetCoords = UpdateImagingTargetReport( target );

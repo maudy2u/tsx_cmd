@@ -70,9 +70,8 @@ class Flats extends Component {
       tool_flats_via: '',
       tool_flats_location: '',
       tool_flats_dec_az: '',
-  };
+    };
   }
-
 
   showModal() {
     this.setState({showModal: true });
@@ -253,33 +252,25 @@ class Flats extends Component {
     state
     , active
     ) {
-    if( state == 'Stop'  && active == false ) {
-      return (
-        <Button.Group>
-            <Button icon='plus' onClick={addFlatSeries.bind(this)} />
-            <Button icon='minus' onClick={this.gotoFlatPosition.bind(this)} />
-            <Button disabled icon=''  />
-            <Button  onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
-            <Button disabled icon=''  />
-            <Button icon='play' onClick={this.startFlats.bind(this)} />
-            <Button disabled icon='stop' onClick={this.stopScheduler.bind(this)} />
-         </Button.Group>
-       )
-    }
-    else {
-      return (
-        <Button.Group icon>
-           <Button disabled icon='plus' disabled onClick={addFlatSeries.bind(this)} />
-           <Button disabled icon='minus' disabled onClick={this.gotoFlatPosition.bind(this)} />
-           <Button disabled icon=''  />
-           <Button disabled onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
-           <Button disabled icon=''  />
-           <Button disabled icon='play' onClick={this.startFlats.bind(this)} />
-           <Button icon='stop' onClick={this.stopScheduler.bind(this)} />
-        </Button.Group>
-      )
-    }
+    var DISABLE = true;
+    var NOT_DISABLE = false;
 
+    // then use as needed disabled={DISABLE} or disabled={NOT_DISABLE}
+    if( state.value == 'Stop'  && active.value == false ){
+      DISABLE = false;
+      NOT_DISABLE = true;
+    }
+    return (
+      <Button.Group icon>
+         <Button disabled={DISABLE} icon='plus' disabled onClick={addFlatSeries.bind(this)} />
+         <Button disabled={DISABLE} icon='minus' disabled onClick={this.gotoFlatPosition.bind(this)} />
+         <Button disabled={DISABLE} icon=''  />
+         <Button disabled={DISABLE} onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
+         <Button disabled={DISABLE} icon=''  />
+         <Button disabled={DISABLE} icon='play' onClick={this.startFlats.bind(this)} />
+         <Button disabled={NOT_DISABLE} icon='stop' onClick={this.stopScheduler.bind(this)} />
+      </Button.Group>
+    )
   }
 
   stopScheduler() {
@@ -336,8 +327,8 @@ class Flats extends Component {
       <div>
         <h1>FLATs</h1>
         {this.addFilterForFlats(
-          this.props.scheduler_running.value
-          , this.props.tool_active.value
+          this.props.scheduler_running
+          , this.props.tool_active
         )}
         { this.flatSettings() }
           <br />

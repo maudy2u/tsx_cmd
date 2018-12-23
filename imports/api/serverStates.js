@@ -128,8 +128,20 @@ export const tsx_ServerStates = {
   tool_flats_via: 'tool_flats_via',
   tool_flats_location: 'tool_flats_location',
   tool_flats_dec_az: 'tool_flats_dec_az',
-  
+
 };
+
+export function saveDefaultStateValue( param, val ) {
+
+  Meteor.call( 'updateServerState', param, val , function(error, result) {
+
+      if (error && error.error === "logged-out") {
+        // show a nice error message
+        Session.set("errorMessage", "Please fix.");
+      }
+  });//.bind(this));
+}
+
 
 export function postStatus( info ) {
   tsx_SetServerState('updateClientData', info );

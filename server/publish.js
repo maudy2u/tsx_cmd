@@ -20,3 +20,7 @@ Meteor.publish("scheduler_running", function pub_scheduler_running() {
 Meteor.publish("currentStage", function pub_currentStage() {
   return TheSkyXInfos.find({name: 'currentStage'});
 });
+
+Meteor.publish("tsxInfo", function pub_tsxInfo() {
+  return TheSkyXInfos.find({});
+});

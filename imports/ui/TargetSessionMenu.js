@@ -21,7 +21,10 @@ import { withTracker } from 'meteor/react-meteor-data';
 import { Item, Dropdown, Menu, Confirm, Modal, Table, Segment, Button, Progress } from 'semantic-ui-react'
 
 import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
-import { TargetSessions } from '../api/targetSessions.js';
+import {
+  TargetSessions,
+  addNewTargetSession,
+ } from '../api/targetSessions.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 
 import TargetEditor from './TargetEditor.js';
@@ -96,21 +99,34 @@ class TargetSessionMenu extends Component {
     }.bind(this));
   }
 
-  //
-  // renderTargets() {
-  //
-  //   var list = {};
-  //   if( typeof this.props.targets != 'undefined' ) {
-  //     list = this.state.targetList;
-  //   }
-  //
-  //   return (
-  //     this.props.targets.map( (target)=>{
-  //       return <Target key={target._id} target={target} />
-  //     })
-  //   )
-  // }
-  //
+  playScheduler() {
+    Meteor.call("startScheduler", function (error, result) {
+      this.forceUpdate();
+      }.bind(this));
+  }
+
+  pauseScheduler() {
+    Meteor.call("pauseScheduler", function (error, result) {
+      }.bind(this));
+  }
+
+  stopScheduler() {
+    // this.tsxStopSession();
+    Meteor.call("stopScheduler", function (error, result) {
+        // identify the error
+        tsx_UpdateServerState(tsx_ServerStates.imagingSessionId, '' );
+        tsx_UpdateServerState(tsx_ServerStates.targetImageName, '');
+        tsx_UpdateServerState(tsx_ServerStates.targetDEC, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetRA, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetALT, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetAZ, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetHA, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetTransit, '_');
+//        tsx_UpdateServerState(tsx_ServerStates.currentStage, 'Stopped');
+
+      }.bind(this));
+  }
+
   renderTargets( container ) {
     // this.props.template.series.. this is a series ID
     // does not work:       this.props.template.series.map({sort: {order:1}}, (definedSeries)=>{
@@ -121,18 +137,67 @@ class TargetSessionMenu extends Component {
     )
   }
 
+  targetButtons(
+    state
+    , active
+    ) {
+
+    var DISABLE = true;
+    var NOT_DISABLE = false;
+    // then use as needed disabled={DISABLE} or disabled={NOT_DISABLE}
+    if( state == 'Stop'  && active == false ){
+      DISABLE = false;
+      NOT_DISABLE = true;
+    }
+    return (
+      <div>
+        <Button.Group>
+            <Button disabled={DISABLE} icon='plus' onClick={this.addNewTargets.bind(this)} />
+            <Button disabled icon=''  />
+            <Button disabled={DISABLE}  >Refresh</Button>
+            <Button disabled icon=''  />
+            <Button disabled={DISABLE} icon='play'  onClick={this.playScheduler.bind(this)}/>
+            <Button disabled={NOT_DISABLE} icon='stop' onClick={this.stopScheduler.bind(this)} />
+         </Button.Group>
+         <Button.Group basic size='mini' floated='right'>
+           <Button disabled={DISABLE} icon='recycle' />
+           <Button disabled={DISABLE} icon='settings' />
+         </Button.Group>
+       </div>
+     )
+  }
+
+  addNewTargets() {
+    // get the id for the new object
+    var out = addNewTargetSession();
+  };
 
   render() {
-
     const { open } = this.state;
+    /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
+    */
+    var RUNNING = '';
+    var ACTIVE = false;
+    try {
+      RUNNING = this.props.scheduler_running.value;
+      ACTIVE = this.props.tool_active.value;
+    } catch (e) {
+      RUNNING = '';
+      ACTIVE=false;
+    }
 
-      return (
-        <div>
-          {this.props.targets.map((target)=>{
-            return (
-               <Target key={target._id} target={target} scheduler_running={this.props.scheduler_running} tool_active={this.props.tool_active} />
-            )
-          })}
+    return (
+      <div>
+        <h1>Target Plans</h1>{this.targetButtons(
+          RUNNING
+          , ACTIVE
+        )}
+        <br />
+        {this.props.targets.map((target)=>{
+          return (
+             <Target key={target._id} target={target} scheduler_running={this.props.scheduler_running} tool_active={this.props.tool_active} />
+          )
+        })}
       </div>
     )
   }

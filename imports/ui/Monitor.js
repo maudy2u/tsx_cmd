@@ -69,6 +69,7 @@ class Monitor extends Component {
       tsx_actions: '',
       targetSessionId: '',
 
+
       isTwilightEnabled: true,
       isFocus3Enabled: false,
       isAutoguidingEnabled: false,
@@ -584,7 +585,7 @@ class Monitor extends Component {
           </Grid>
         </Segment>
         <Segment.Group size='mini'>
-          <Segment>
+          <Segment>{/* use this icon fro the Model settings configure */}
             <h3 className="ui header">Session Controls</h3>
               <Form.Checkbox
                 label='Enable Meridian Flip '
@@ -611,7 +612,7 @@ class Monitor extends Component {
                 onChange={this.handleToggle.bind(this)}
               />
               <br /><Form.Checkbox
-                label='Enable FOV Angle Matching '
+                label='Enable FOV Rotator Angle/Position Matching '
                 name='isFOVAngleEnabled'
                 toggle
                 placeholder= 'Enable using the targets angle'

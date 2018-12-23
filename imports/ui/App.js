@@ -265,7 +265,6 @@ class App extends TrackerReact(Component) {
         - the progress...
      */
 //      <Monitor  tsxInfo={this.props.tsxInfo}/>
-
     return  (
       <Monitor
         tsx_progress={this.props.tsx_progress}
@@ -615,17 +614,29 @@ class App extends TrackerReact(Component) {
     )
   }
 
-  renderSessionControls() {
+  renderSessionControls( ) {
     /*
     modalWindowTitle='ControlPanel'
-     */
     let test = this.props.defaultMeridianFlip;
+     */
     return(
-        <SessionControls
-          defaultMeridianFlip={this.props.defaultMeridianFlip}
-          modalOpenWindow={this.state.modalOpenWindowSessionControls}
-          modalParentClose={this.modalCloseSessionsControls}
-        />
+      <Modal
+        open={this.state.modalOpenWindowSessionControls}
+        onClose={this.modalCloseSessionsControls}
+        basic
+        size='small'
+        closeIcon>
+        <Modal.Header>Session Controls</Modal.Header>
+        <Modal.Content>
+          <SessionControls
+            tsxInfo = { this.props.tsxInfo }
+          />
+        </Modal.Content>
+        <Modal.Description>
+        </Modal.Description>
+        <Modal.Actions>
+        </Modal.Actions>
+      </Modal>
     )
   }
   render() {
@@ -711,37 +722,37 @@ class App extends TrackerReact(Component) {
           THIS IS FOR A FAILED CONNECTION TO TSX
 
           *******************************             */}
-          { this.renderSessionControls()}
-            <Modal
-              open={this.state.modalConnectionFailed}
-              onClose={this.modalConnectionFailedClose.bind(this)}
-              basic
-              size='small'
-              closeIcon>
-              <Modal.Header>TSX Connection Failed</Modal.Header>
-              <Modal.Content>
-                <h3>Check that TheSkyX server is available, and the IP and Port to use to connect to the TSX Server.</h3>
-              </Modal.Content>
-              <Modal.Description>
-                <Input
-                  label='IP:'
-                  value={this.state.ip}
-                />
-                <Input
-                  label='Port:'
-                  value={this.state.port}
-                />
-              </Modal.Description>
-              <Modal.Actions>
-                <Button onClick={this.modalConnectionFailedClose.bind(this)} inverted>
-                  <Icon name='stop' />Stop
-                </Button>
-              </Modal.Actions>
-            </Modal>
-          </div>
-          <Label>tsx cmd - A web page to send commands to TheSkyX server</Label>
-          <Label>version <Label.Detail>{VERSION}</Label.Detail></Label>
-          <Label>date <Label.Detail>{DATE}</Label.Detail></Label>
+          {this.renderSessionControls()}
+          <Modal
+            open={this.state.modalConnectionFailed}
+            onClose={this.modalConnectionFailedClose.bind(this)}
+            basic
+            size='small'
+            closeIcon>
+            <Modal.Header>TSX Connection Failed</Modal.Header>
+            <Modal.Content>
+              <h3>Check that TheSkyX server is available, and the IP and Port to use to connect to the TSX Server.</h3>
+            </Modal.Content>
+            <Modal.Description>
+              <Input
+                label='IP:'
+                value={this.state.ip}
+              />
+              <Input
+                label='Port:'
+                value={this.state.port}
+              />
+            </Modal.Description>
+            <Modal.Actions>
+              <Button onClick={this.modalConnectionFailedClose.bind(this)} inverted>
+                <Icon name='stop' />Stop
+              </Button>
+            </Modal.Actions>
+          </Modal>
+        </div>
+        <Label>tsx cmd - A web page to send commands to TheSkyX server</Label>
+        <Label>version <Label.Detail>{VERSION}</Label.Detail></Label>
+        <Label>date <Label.Detail>{DATE}</Label.Detail></Label>
       </div>
     );
   }
@@ -754,6 +765,7 @@ export default withTracker(() => {
   Meteor.subscribe('scheduler_running');
   Meteor.subscribe('scheduler_report');
   Meteor.subscribe('currentStage');
+  Meteor.subscribe('tsxInfo');
   return {
     tool_calibrate_via: TheSkyXInfos.findOne({name: 'tool_calibrate_via'}),
     tool_calibrate_location: TheSkyXInfos.findOne({name: 'tool_calibrate_location'}),
@@ -781,11 +793,11 @@ export default withTracker(() => {
     isTwilightEnabled: TheSkyXInfos.findOne({name: 'isTwilightEnabled'}),
 
     // App stuf
+    tsxInfo: TheSkyXInfos.find({}).fetch(),
     tsx_version: TheSkyXInfos.findOne({name: 'tsx_version'}),
     tsx_date: TheSkyXInfos.findOne({name: 'tsx_date'}),
     tsxIP: TheSkyXInfos.findOne({name: 'ip'}),
     tsxPort: TheSkyXInfos.findOne({name: 'port'}),
-    tsxInfo: TheSkyXInfos.find({}).fetch(),
     srvLog: AppLogsDB.find({}, {sort:{time:-1}}).fetch(10),
     currentStage: TheSkyXInfos.findOne({name: 'currentStage'}),
     activeMenu: TheSkyXInfos.findOne({name: 'activeMenu'}),
