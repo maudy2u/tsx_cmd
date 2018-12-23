@@ -60,6 +60,7 @@ import TargetSessionMenu from './TargetSessionMenu.js';
 // import Filter from './Filter.js';
 import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
+import SessionControls from './SessionControls.js';
 
 import {
   tsx_ServerStates,
@@ -74,18 +75,22 @@ import Timekeeper from 'react-timekeeper';
 // App component - represents the whole app
 class App extends TrackerReact(Component) {
 
-  state = {
-    activeMenu: 'Targets',
-    saveServerFailed: false,
-    modalEnterIp: false,
-    modalEnterPort: false,
-    modalConnectionFailed: false,
-    showMonitor: false, // this needs to be a server session variable
+  constructor() {
+    super();
+    this.state = {
+      activeMenu: 'Targets',
+      saveServerFailed: false,
+      modalEnterIp: false,
+      modalEnterPort: false,
+      modalConnectionFailed: false,
+      showMonitor: false, // this needs to be a server session variable
 
-    ip: 'localhost',
-    port: '3040',
-    currentStage: ' Loading....',
-  };
+      ip: 'localhost',
+      port: '3040',
+      currentStage: ' Loading....',
+      modalOpenWindowSessionControls: false,
+    };
+  }
 
   handleToggle = (e, { name, value }) => this.setState({ [name]: Boolean(!eval('this.state.'+name)) })
 
@@ -102,6 +107,9 @@ class App extends TrackerReact(Component) {
   modalEnterPortClose = () => this.setState({ modalEnterPort: false });
   modalConnectionFailedOpen = () => this.setState({ modalConnectionFailed: true });
   modalConnectionFailedClose = () => this.setState({ modalConnectionFailed: false });
+
+  modalOpenSessionsControls = () => this.setState({ modalOpenWindowSessionControls: true });
+  modalCloseSessionsControls = () => this.setState({ modalOpenWindowSessionControls: false });
 
   saveTSXServerIp() {
     this.modalEnterIpClose();
@@ -406,11 +414,12 @@ class App extends TrackerReact(Component) {
         </div>
       )
     } else if (this.state.activeMenu == 'Targets' ) {
+//      <Button disabled={DISABLE} size='mini' onClick={this.addNewTargets.bind(this)}>Add Target</Button>
       return (
         <div>
-          <Button disabled={DISABLE} size='mini' onClick={this.addNewTargets.bind(this)}>Add Target</Button>
           <TargetSessionMenu
             targets={this.props.targetSessions}
+            tool_active = {this.props.tool_active}
             scheduler_running={this.props.scheduler_running}
             tool_active = {this.props.tool_active}
           />
@@ -586,26 +595,39 @@ class App extends TrackerReact(Component) {
   }
 
   parkButtons( state, active ) {
-    if( state == 'Stop' && active == false ) {
-      return (
-        <div>
-          <Button icon='cloud upload' onClick={this.loadSkySafari.bind(this)}/>
-          <Button icon='wifi' onClick={this.connectToTSX.bind(this)}/>
-          <Button icon='car' onClick={this.park.bind(this)}/>
-        </div>
-      )
+    // detective
+    var DISABLE = true;
+    var NOT_DISABLE = false;
+    // then use as needed disabled={DISABLE} or disabled={NOT_DISABLE}
+    if( state == 'Stop'  && active == false ){
+      DISABLE = false;
+      NOT_DISABLE = true;
     }
-    else {
-      return (
-        <div>
-          <Button disabled icon='cloud upload' onClick={this.loadSkySafari.bind(this)}/>
-          <Button disabled icon='wifi' onClick={this.connectToTSX.bind(this)}/>
-          <Button disabled icon='car' onClick={this.park.bind(this)}/>
-        </div>
-      )
-    }
+
+    return (
+      <Button.Group basic size='small' floated='right'>
+        <Button disabled={DISABLE} icon='detective' onClick={this.modalOpenSessionsControls}/>
+        <Button disabled={DISABLE} icon='cloud upload' onClick={this.loadSkySafari.bind(this)}/>
+        <Button disabled  />
+        <Button disabled={DISABLE} icon='wifi' onClick={this.connectToTSX.bind(this)}/>
+        <Button disabled={DISABLE} icon='car' onClick={this.park.bind(this)}/>
+      </Button.Group>
+    )
   }
 
+  renderSessionControls() {
+    /*
+    modalWindowTitle='ControlPanel'
+     */
+    let test = this.props.defaultMeridianFlip;
+    return(
+        <SessionControls
+          defaultMeridianFlip={this.props.defaultMeridianFlip}
+          modalOpenWindow={this.state.modalOpenWindowSessionControls}
+          modalParentClose={this.modalCloseSessionsControls}
+        />
+    )
+  }
   render() {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
     */
@@ -672,9 +694,7 @@ class App extends TrackerReact(Component) {
                   </Label.Detail>
                 </Label>
                 {this.renderPortEditor()}
-                <Button.Group basic size='small' floated='right'>
-                  {this.parkButtons(RUNNING, ACTIVE)}
-                </Button.Group>
+                {this.parkButtons(RUNNING, ACTIVE)}
               </Segment>
               <Segment raised>
                 <Label>Status: <Label.Detail>{STATUS}</Label.Detail></Label>
@@ -691,6 +711,7 @@ class App extends TrackerReact(Component) {
           THIS IS FOR A FAILED CONNECTION TO TSX
 
           *******************************             */}
+          { this.renderSessionControls()}
             <Modal
               open={this.state.modalConnectionFailed}
               onClose={this.modalConnectionFailedClose.bind(this)}
@@ -743,21 +764,39 @@ export default withTracker(() => {
     tool_flats_location: TheSkyXInfos.findOne({name: 'tool_flats_location'}),
     tool_flats_via: TheSkyXInfos.findOne({name: 'tool_flats_via'}),
 
+    // SESSION Controls
+    defaultMeridianFlip: TheSkyXInfos.findOne({name: 'defaultMeridianFlip'}),
+    defaultCLSEnabled: TheSkyXInfos.findOne({name: 'defaultCLSEnabled'}),
+    defaultSoftPark: TheSkyXInfos.findOne({name: 'defaultSoftPark'}),
+
+    isFOVAngleEnabled: TheSkyXInfos.findOne({name: 'isFOVAngleEnabled'}),
+    isFocus3Enabled: TheSkyXInfos.findOne({name: 'isFocus3Enabled'}),
+    isFocus3Binned: TheSkyXInfos.findOne({name: 'isFocus3Binned'}),
+
+    isAutoguidingEnabled: TheSkyXInfos.findOne({name: 'isAutoguidingEnabled'}),
+    isCalibrationEnabled: TheSkyXInfos.findOne({name: 'isCalibrationEnabled'}),
+    isGuideSettlingEnabled: TheSkyXInfos.findOne({name: 'isGuideSettlingEnabled'}),
+
+    isCLSRepeatEnabled: TheSkyXInfos.findOne({name: 'isCLSRepeatEnabled'}),
+    isTwilightEnabled: TheSkyXInfos.findOne({name: 'isTwilightEnabled'}),
+
+    // App stuf
     tsx_version: TheSkyXInfos.findOne({name: 'tsx_version'}),
     tsx_date: TheSkyXInfos.findOne({name: 'tsx_date'}),
-    flatSettings: TheSkyXInfos.findOne({name: 'flatSettings'}),
+    tsxIP: TheSkyXInfos.findOne({name: 'ip'}),
+    tsxPort: TheSkyXInfos.findOne({name: 'port'}),
+    tsxInfo: TheSkyXInfos.find({}).fetch(),
+    srvLog: AppLogsDB.find({}, {sort:{time:-1}}).fetch(10),
     currentStage: TheSkyXInfos.findOne({name: 'currentStage'}),
     activeMenu: TheSkyXInfos.findOne({name: 'activeMenu'}),
+
+    flatSettings: TheSkyXInfos.findOne({name: 'flatSettings'}),
     targetName: TheSkyXInfos.findOne({name: 'targetName'}),
     tsx_progress: TheSkyXInfos.findOne({name: 'tsx_progress'}),
     tsx_total:  TheSkyXInfos.findOne({name: 'tsx_total'}),
     tsx_message: TheSkyXInfos.findOne({name: 'tsx_message'}),
     scheduler_running: TheSkyXInfos.findOne({name: 'scheduler_running'}),
     scheduler_report: TheSkyXInfos.findOne({name: 'scheduler_report'}),
-    tsxIP: TheSkyXInfos.findOne({name: 'ip'}),
-    tsxPort: TheSkyXInfos.findOne({name: 'port'}),
-    tsxInfo: TheSkyXInfos.find({}).fetch(),
-    srvLog: AppLogsDB.find({}, {sort:{time:-1}}).fetch(10),
     filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
     flatSeries: FlatSeries.find({}).fetch(),
     takeSeriesTemplates: TakeSeriesTemplates.find({ isCalibrationFrames: false }, { sort: { name: 1 } }).fetch(),
