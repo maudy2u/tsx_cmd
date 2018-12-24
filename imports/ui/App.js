@@ -55,7 +55,7 @@ import { AppLogsDB } from '../api/theLoggers.js'
 import DefaultSettings from './DefaultSettings.js';
 import Monitor from './Monitor.js';
 import Toolbox from './Toolbox.js';
-import Flats from './Flats.js';
+import FlatsMenu from './FlatsMenu.js';
 import TargetSessionMenu from './TargetSessionMenu.js';
 // import Filter from './Filter.js';
 import Series from './Series.js';
@@ -355,7 +355,7 @@ class App extends TrackerReact(Component) {
       <div>
         <Menu tabular icon>
           <Menu.Item name='Monitor' active={activeMenu === 'Monitor'} onClick={this.handleMenuItemClick}>
-            <Icon name='camera' />
+            <Icon name='eye' />
           </Menu.Item>
           <Menu.Item name='Targets' active={activeMenu === 'Targets'} onClick={this.handleMenuItemClick}>
             <Icon name='target' />
@@ -369,7 +369,7 @@ class App extends TrackerReact(Component) {
           <Menu.Item name='Toolbox' active={activeMenu === 'Toolbox'} onClick={this.handleMenuItemClick}>
             <Icon name='briefcase' />
           </Menu.Item>
-          <Dropdown icon='dropdown'>
+          <Dropdown  item name='More' icon='angle double down'>
             <Dropdown.Menu>
               <Dropdown.Item name='Devices' icon='power cord' active={activeMenu === 'Devices'} onClick={this.handleMenuItemClick}/>
               <Dropdown.Item name='Settings' icon='configure' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick}/>
@@ -427,13 +427,26 @@ class App extends TrackerReact(Component) {
     } else if (this.state.activeMenu == 'Series') {
       return (
         <div>
-          <Button disabled={DISABLE} size='mini' onClick={this.addNewTakeSeries.bind(this)}>Add Series</Button>
           <TakeSeriesTemplateMenu
             seriesList={this.props.takeSeriesTemplates}
             scheduler_running={this.props.scheduler_running}
             tool_active = {this.props.tool_active}
           />
       </div>
+      )
+    } else if (this.state.activeMenu == 'Flats') {
+      return (
+        <FlatsMenu
+          scheduler_report={this.props.scheduler_report}
+          tsxInfo={this.props.tsxInfo}
+          scheduler_running={this.props.scheduler_running}
+          tool_active = {this.props.tool_active}
+          filters = {this.props.filters}
+          flatSeries = {this.props.flatSeries}
+          tool_flats_via = {this.props.tool_flats_via}
+          tool_flats_location = {this.props.tool_flats_location}
+          tool_flats_dec_az = {this.props.tool_flats_dec_az}
+        />
       )
     } else if (this.state.activeMenu == 'Devices') {
       return this.renderDevices();
@@ -455,20 +468,6 @@ class App extends TrackerReact(Component) {
           scheduler_running={this.props.scheduler_running}
           tsxInfo = {this.props.tsxInfo}
           tool_active = {this.props.tool_active}
-        />
-      )
-    } else if (this.state.activeMenu == 'Flats') {
-      return (
-        <Flats
-          scheduler_report={this.props.scheduler_report}
-          tsxInfo={this.props.tsxInfo}
-          scheduler_running={this.props.scheduler_running}
-          tool_active = {this.props.tool_active}
-          filters = {this.props.filters}
-          flatSeries = {this.props.flatSeries}
-          tool_flats_via = {this.props.tool_flats_via}
-          tool_flats_location = {this.props.tool_flats_location}
-          tool_flats_dec_az = {this.props.tool_flats_dec_az}
         />
       )
     } else {
@@ -578,15 +577,6 @@ class App extends TrackerReact(Component) {
     )
   };
 
-  addNewTargets() {
-    // get the id for the new object
-    var out = addNewTargetSession();
-  };
-
-  addNewTakeSeries() {
-    var out = addNewTakeSeriesTemplate();
-  };
-
   loadSkySafari() {
     // pop up the upload dialog
     // send the file to server
@@ -605,9 +595,9 @@ class App extends TrackerReact(Component) {
 
     return (
       <Button.Group basic size='small' floated='right'>
-        <Button disabled={DISABLE} icon='detective' onClick={this.modalOpenSessionsControls}/>
+        <Button icon='detective' onClick={this.modalOpenSessionsControls}/>
         <Button disabled={DISABLE} icon='cloud upload' onClick={this.loadSkySafari.bind(this)}/>
-        <Button disabled  />
+        <Button disabled compact />
         <Button disabled={DISABLE} icon='wifi' onClick={this.connectToTSX.bind(this)}/>
         <Button disabled={DISABLE} icon='car' onClick={this.park.bind(this)}/>
       </Button.Group>
@@ -639,6 +629,7 @@ class App extends TrackerReact(Component) {
       </Modal>
     )
   }
+
   render() {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
     */
@@ -689,30 +680,35 @@ class App extends TrackerReact(Component) {
 
     return (
       <div className="container">
-          <div>
+          <Segment>
             <Segment.Group>
-              <Segment>
-                <Label onClick={this.modalEnterIpOpen.bind(this)}>TSX ip:
-                  <Label.Detail>
-                    {IP}
-                  </Label.Detail>
-                </Label>
-                 {this.renderIPEditor()}
-                <Label onClick={this.modalEnterPortOpen.bind(this)}>
-                  TSX port:
-                  <Label.Detail>
-                    {PORT}
-                  </Label.Detail>
-                </Label>
+              <Segment.Group horizontal size='mini'>
+                <Segment>
+                  <Label onClick={this.modalEnterIpOpen.bind(this)}>TSX ip:
+                    <Label.Detail>
+                      {IP}
+                    </Label.Detail>
+                  </Label>
+                  <Label onClick={this.modalEnterPortOpen.bind(this)}>
+                    TSX port:
+                    <Label.Detail>
+                      {PORT}
+                    </Label.Detail>
+                  </Label>
+                </Segment>
+                <Segment>
+                  {this.parkButtons(RUNNING, ACTIVE)}
+                </Segment>
+                {this.renderIPEditor()}
                 {this.renderPortEditor()}
-                {this.parkButtons(RUNNING, ACTIVE)}
-              </Segment>
+              </Segment.Group>
               <Segment raised>
                 <Label>Status: <Label.Detail>{STATUS}</Label.Detail></Label>
                 <br/>
                 <Progress value={PROGRESS} total={TOTAL} progress='ratio'>Processing</Progress>
               </Segment>
-            {/* { this.tsxConnectionFailed() } */}
+          </Segment.Group>
+          <Segment.Group>
               <Segment>
             { this.renderMenu( MENU, RUNNING ) }
             </Segment>
@@ -749,7 +745,7 @@ class App extends TrackerReact(Component) {
               </Button>
             </Modal.Actions>
           </Modal>
-        </div>
+        </Segment>
         <Label>tsx cmd - A web page to send commands to TheSkyX server</Label>
         <Label>version <Label.Detail>{VERSION}</Label.Detail></Label>
         <Label>date <Label.Detail>{DATE}</Label.Detail></Label>

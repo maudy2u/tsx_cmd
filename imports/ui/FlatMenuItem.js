@@ -18,7 +18,7 @@ tsx cmd - A web page to send commands to TheSkyX server
 
 import React, { Component } from 'react'
 import { withTracker } from 'meteor/react-meteor-data';
-import { Button, Segment, Checkbox, Dropdown, Grid, Input, Modal, Item, Header, Icon, Table, } from 'semantic-ui-react'
+import { Segment, Checkbox, Button, Dropdown, Grid, Label, Input, Modal, Item, Header, Icon, Table, } from 'semantic-ui-react'
 import {
   tsx_ServerStates,
   tsx_UpdateServerState,
@@ -26,26 +26,19 @@ import {
 } from  '../api/serverStates.js';
 
 // Import the API Model
+import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
+import {
+  TargetSessions,
+  addNewTargetSession,
+ } from '../api/targetSessions.js';
+import { TargetReports } from '../api/targetReports.js';
+import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 import {
   Seriess
 } from '../api/seriess.js';
 import {
-  TakeSeriesTemplates,
-  addNewTakeSeriesTemplate,
-} from '../api/takeSeriesTemplates.js';
-import {
-  TargetSessions,
-  addNewTargetSession,
-} from '../api/targetSessions.js';
-import { TargetReports } from '../api/targetReports.js';
-import {
-  TargetAngles,
-  renderDropDownAngles,
-} from '../api/targetAngles.js';
-
-import { TheSkyXInfos } from '../api/theSkyXInfos.js';
-import {
   Filters,
+  updateFlatExposure,
 } from '../api/filters.js';
 import {
   FlatSeries,
@@ -53,9 +46,11 @@ import {
   updateFlatSeries,
   deleteAnyFlatTargets,
   resetStoredFlat,
- } from '../api/flatSeries.js';
+  flatSeriesDescription,
+  flatSeriesName,
+} from '../api/flatSeries.js';
+import FlatGrid from './FlatGrid.js';
 
- import Flat from './Flat.js';
 
 export const subFrameTypes = [
   'Flat',
@@ -63,19 +58,22 @@ export const subFrameTypes = [
   'Bias',
 ];
 
-class FlatGrid extends Component {
+class FlatMenuItem extends Component {
 
   constructor(props) {
     super(props);
 
-    this.disableFlat = this.disableFlat.bind(this);
-
     this.state = {
-        rotatorPosition: '',
-        enabledActive: false,
-    };
-
+      editOpen: false,
+      frame: 'Flat',
+      filter: '',
+      exposure: 0,
+      repeat: 1,
+      enabledActive: false,
+    }
+    this.disableFlat = this.disableFlat.bind(this);
   }
+
 
   editOpen = () => this.setState({ editOpen: true })
   editClose = () => this.setState({ editOpen: false })
@@ -83,22 +81,38 @@ class FlatGrid extends Component {
   deleteFailedClose = () => this.setState({ deleteFailed: false })
 
   handleChange = (e, { name, value }) => {
+
     this.setState({ [name]: value });
-    updateFlatSeries(
+    updateFlatFilter(
       this.props.flat._id,
+      this.props.filter._id,
       name,
       value,
     );
     resetStoredFlat(this.props.flat._id);
-    this.disableFlat();
+    this.props.disableFlats();
   };
 
-  disableFlat() {
-    //this.state.enabledActive
-    this.setState({
-      enabledActive: false
-    })
-  }
+  handleFilterChange = (e, { name, value }) => {
+
+    this.setState({ [name]: value });
+    updateFlatFilter(
+      this.props.flat._id,
+      this.props.filter._id,
+      name,
+      value,
+    );
+    var e = getFlatExposure( value );
+    this.setState( {exposure: e } );
+    updateFlatFilter(
+      this.props.flat._id,
+      this.props.filter._id,
+      'exposure',
+      e,
+    );
+    resetStoredFlat(this.props.flat._id);
+    this.props.disableFlats();
+  };
 
   componentDidMount() {
     this.updateDefaults(this.props);
@@ -109,21 +123,45 @@ class FlatGrid extends Component {
       return;
     }
 
-    if( typeof nextProps.flat != 'undefined'  ) {
+    if( typeof nextProps.filter != 'undefined'  ) {
       this.setState({
-        rotatorPosition: nextProps.flat.rotatorPosition
+        frame: nextProps.filter.frame
       });
       this.setState({
-        enabledActive: nextProps.flat.enabledActive
+        filter: nextProps.filter.filter
+      });
+      this.setState({
+        exposure: nextProps.filter.exposure
+      });
+      this.setState({
+        repeat: nextProps.filter.repeat
       });
     }
-  };
+  }
 
-  addEntry() {
+  // *******************************
+  // This is used to populate drop down frame lists
+  renderDropDownFrames() {
+
+    var frameArray = [];
+    for (var i = 0; i < subFrameTypes.length; i++) {
+      frameArray.push({ key: subFrameTypes[i], text: subFrameTypes[i], value: subFrameTypes[i] });
+    }
+    return frameArray;
+  }
+
+  disableFlat() {
+    //this.state.enabledActive
+    this.setState({
+      enabledActive: false
+    })
+  }
+
+  deleteEntry() {
     // check if the series is used - if so cannot delete... list the Targets using it
-    addFlatFilter( this.props.flat._id);
+    deleteFlatFilter(this.props.flat._id, this.props.filter._id);
     resetStoredFlat(this.props.flat._id);
-    this.disableFlat();
+    this.props.disableFlats();
   }
 
   // *******************************
@@ -208,60 +246,81 @@ class FlatGrid extends Component {
     }
   }
 
-  render() {
+  deleteEntry() {
+    // check if the series is used - if so cannot delete... list the Targets using it
+    resetStoredFlat(this.props.flat._id);
+    FlatSeries.remove({_id: this.props.flat._id});
+    this.disableFlat();
+  }
+
+  canHeaderClick( state, active ) {
+    if( state == 'Stop' && active == false ) {
+      return this.editEntry.bind(this);
+    }
+  }
+
+  editEntry() {
+    console.log('edit flat');
+    this.editOpen();
+    this.forceUpdate();
+  }
+
+  renderFlatEditor() {
 
     return (
-      <Segment secondary key={this.props.flat._id} raised>
-        <br/>
-          RotatorGroup
-        <Dropdown
-          selection
-          name='rotatorPosition'
-          options={renderDropDownAngles()}
-          placeholder='Pick (optional) Angle'
-          value={this.state.rotatorPosition}
-          onChange={this.handleChange}
-        />
-        <br/>
-        <br/>
-          <Grid columns={4} centered divided='vertically'>
-            <Grid.Row centered textAlign='center'>
-              <Grid.Column>
-                <b>Filter</b>
-              </Grid.Column>
-              <Grid.Column>
-                <b>Exposure</b>
-              </Grid.Column>
-              <Grid.Column>
-                <b>Quantity</b>
-              </Grid.Column>
-              <Grid.Column>
-                <Button size='mini' icon='plus' onClick={this.addEntry.bind(this)}/>
-              </Grid.Column>
-            </Grid.Row>
-            {this.props.flat.filtergroup.map((filter)=>{
-                return (
-                  <Flat key={filter._id}
-                    flat={this.props.flat}
-                    scheduler_report={this.props.scheduler_report}
-                    tsxInfo={this.props.tsxInfo}
-                    scheduler_running={this.props.scheduler_running}
-                    tool_active = {this.props.tool_active}
-                    filter = {filter}
-                    flatSeries = {this.props.flatSeries}
-                    disableFlats={this.disableFlat}
-                  />
-                )
-              })
-            }
-          </Grid>
-      </Segment>
+      <Modal
+        open={this.state.editOpen}
+        onClose={this.editClose}
+        basic
+        size='small'
+        closeIcon>
+        <Modal.Header>Flats Editor Controls</Modal.Header>
+        <Modal.Content>
+          <FlatGrid
+            tsxInfo = { this.props.tsxInfo }
+            flat = { this.props.flat }
+            scheduler_running={this.props.scheduler_running}
+            tool_active = {this.props.tool_active}
+          />
+        </Modal.Content>
+        <Modal.Description>
+        </Modal.Description>
+        <Modal.Actions>
+        </Modal.Actions>
+      </Modal>
     )
   }
 
+  render() {
+    let TOOL_ACTIVE = false;
+    try {
+      TOOL_ACTIVE = this.props.tool_active.value;
+    } catch (e) {
+      TOOL_ACTIVE = false;
+    }
+    return (
+      <Segment key={this.props.flat._id} raised>
+        <Checkbox
+          label='  '
+          name='enabledActive'
+          toggle
+          checked={this.props.flat.enabledActive}
+          onChange={this.handleToggleOfCalibrationTargets.bind(this)}
+        />
+        <Header as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, TOOL_ACTIVE)}>
+          {flatSeriesName( this.props.flat._id )}
+          </Header>
+        { ": " + flatSeriesDescription( this.props.flat._id )}
+        { this.renderFlatEditor() }
+        <Button.Group basic size='mini' floated='right'>
+          <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
+        </Button.Group>
+      </Segment>
+    )
+  }
 }
 
 export default withTracker(() => {
     return {
   };
-})(FlatGrid);
+})(FlatMenuItem);

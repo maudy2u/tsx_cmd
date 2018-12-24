@@ -149,27 +149,28 @@ class TargetSessionMenu extends Component {
       DISABLE = false;
       NOT_DISABLE = true;
     }
+/*
+<Button.Group basic size='mini' floated='right'>
+  <Button disabled={DISABLE} icon='recycle' />
+  <Button disabled={DISABLE} icon='settings' />
+</Button.Group>
+ */
     return (
-      <div>
-        <Button.Group>
-            <Button disabled={DISABLE} icon='plus' onClick={this.addNewTargets.bind(this)} />
-            <Button disabled icon=''  />
-            <Button disabled={DISABLE}  >Refresh</Button>
-            <Button disabled icon=''  />
-            <Button disabled={DISABLE} icon='play'  onClick={this.playScheduler.bind(this)}/>
-            <Button disabled={NOT_DISABLE} icon='stop' onClick={this.stopScheduler.bind(this)} />
-         </Button.Group>
-         <Button.Group basic size='mini' floated='right'>
-           <Button disabled={DISABLE} icon='recycle' />
-           <Button disabled={DISABLE} icon='settings' />
-         </Button.Group>
-       </div>
+      <Button.Group>
+          <Button disabled={DISABLE} icon='plus' onClick={this.addNewTargets.bind(this)} />
+          <Button disabled compact   />
+          <Button disabled={DISABLE}  >Refresh</Button>
+          <Button disabled compact  />
+          <Button disabled={DISABLE} icon='play'  onClick={this.playScheduler.bind(this)}/>
+          <Button disabled={NOT_DISABLE} icon='stop' onClick={this.stopScheduler.bind(this)} />
+       </Button.Group>
      )
   }
 
   addNewTargets() {
     // get the id for the new object
     var out = addNewTargetSession();
+    // now popup the modal...
   };
 
   render() {
@@ -188,14 +189,20 @@ class TargetSessionMenu extends Component {
 
     return (
       <div>
-        <h1>Target Plans</h1>{this.targetButtons(
+        <h1>Targets</h1>
+        {this.targetButtons(
           RUNNING
           , ACTIVE
         )}
         <br />
         {this.props.targets.map((target)=>{
           return (
-             <Target key={target._id} target={target} scheduler_running={this.props.scheduler_running} tool_active={this.props.tool_active} />
+             <Target
+              key={target._id}
+              target={target}
+              scheduler_running={this.props.scheduler_running}
+              tool_active={this.props.tool_active}
+            />
           )
         })}
       </div>
@@ -204,6 +211,5 @@ class TargetSessionMenu extends Component {
 }
 export default withTracker(() => {
     return {
-      // targets: TargetSessions.find({}, { sort: { enabledActive: -1, targetFindName: 1, } }).fetch(),
   };
 })(TargetSessionMenu);

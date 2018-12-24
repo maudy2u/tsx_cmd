@@ -166,8 +166,15 @@ class Toolbox extends Component {
   }
 
   // *******************************
+  rotateCameraFOV() {
+    Meteor.call( 'rotateCamera', 0, function(error, result) {
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+    }.bind(this));
+  }
+
   rotateCamera() {
-    Meteor.call( 'rotateCamera', function(error, result) {
+    Meteor.call( 'rotateCamera', 1, function(error, result) {
       console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
@@ -181,6 +188,45 @@ class Toolbox extends Component {
       console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
+  }
+
+  rotateFOV( state, ROTATOR_TYPE, ROTATOR_NUM, active ) {
+    var typeOptions =
+    [
+      {
+        text: 'Position',
+        value: 'Position',
+      },
+      {
+        text: 'Angle',
+        value: 'Angle',
+      },
+      {
+        text: '',
+        value: '',
+      },
+    ];
+    let DISABLE = true;
+    let NOT_DISABLE = false;
+    // then use as needed disabled={DISABLE} or disabled={NOT_DISABLE}
+    if( state == 'Stop'  && active == false ){
+      DISABLE = false;
+      NOT_DISABLE = true;
+    }
+
+    return (
+      <div>
+        <Button.Group icon>
+             <Button disabled={DISABLE} onClick={this.rotateCameraFOV.bind(this)}>Set FOV</Button>
+       </Button.Group>
+       <Input
+         name='tool_rotator_num'
+         placeholder='eg. 19826, or 0.5'
+         value={ROTATOR_NUM}
+         onChange={this.handleChange}/>
+       <br/>Enter the FOV angle for ImageLink
+      </div>
+    )
   }
 
   rotateTool( state, ROTATOR_TYPE, ROTATOR_NUM, active ) {
@@ -199,34 +245,26 @@ class Toolbox extends Component {
         value: '',
       },
     ];
-    if( state == 'Stop' && active == false) {
-      return (
-        <div>
-          <Button.Group icon>
-               <Button  onClick={this.rotateCamera.bind(this)}>Set FOV</Button>
-         </Button.Group> <Input
-           name='tool_rotator_num'
-           placeholder='eg. 19826, or 0.5'
-           value={ROTATOR_NUM}
-           onChange={this.handleChange}/>
-         <br/>Enter the Angle desired
-        </div>
-      )
+    let DISABLE = true;
+    let NOT_DISABLE = false;
+    // then use as needed disabled={DISABLE} or disabled={NOT_DISABLE}
+    if( state == 'Stop'  && active == false ){
+      DISABLE = false;
+      NOT_DISABLE = true;
     }
-    else {
-      return (
-        <div>
-          <Button.Group icon>
-             <Button  disabled onClick={this.rotateCamera.bind(this)}>Set FOV</Button>
-          </Button.Group> <Input
-            name='tool_rotator_num'
-            placeholder='eg. 19826, or 0.5'
-            value={ROTATOR_NUM}
-            onChange={this.handleChange}/>
-          <br/>Enter the Angle desired
-        </div>
-      )
-    }
+
+    return (
+      <div>
+        <Button.Group icon>
+             <Button disabled={DISABLE} onClick={this.rotateCamera.bind(this)}>Set Position</Button>
+       </Button.Group> <Input
+         name='tool_rotator_num'
+         placeholder='eg. 19826, or 0.5'
+         value={ROTATOR_NUM}
+         onChange={this.handleChange}/>
+       <br/>Enter the rotator position desired
+      </div>
+    )
   }
 
   calibrateTools( state
@@ -255,58 +293,39 @@ class Toolbox extends Component {
         value: '',
       },
     ];
-    if( state == 'Stop' && active == false) {
-      return (
-        <div>
-        <Button.Group icon>
-            <Button  onClick={this.calibrateGuider.bind(this)}>Calibrate</Button>
-         </Button.Group>
-         <Dropdown
-            name='tool_calibrate_via'
-            placeholder='Slew via...'
-            selection options={slewOptions}
-            value={calType}
-            onChange={this.handleChange}
-          /><Form.Input
-            name='tool_calibrate_location'
-            placeholder='Target name, Ra, or Alt: '
-            value={calLocation}
-            onChange={this.handleChange}/>
-          <Form.Input
-            name='tool_calibrate_dec_az'
-            placeholder='Dec, or azimuth: '
-            value={calDecAz}
-            onChange={this.handleChange}/>
-            <br/>(Optionaly select a slew type and specify a location, e.g 5.95, 21.99)
-       </div>
-      )
+
+    let DISABLE = true;
+    let NOT_DISABLE = false;
+    // then use as needed disabled={DISABLE} or disabled={NOT_DISABLE}
+    if( state == 'Stop'  && active == false ){
+      DISABLE = false;
+      NOT_DISABLE = true;
     }
-    else {
-      return (
-        <div>
-         <Button.Group icon>
-            <Button  disabled onClick={this.calibrateGuider.bind(this)}>Calibrate</Button>
-            </Button.Group>
-            <Dropdown
-               name='tool_calibrate_via'
-               placeholder='Slew via...'
-               selection options={slewOptions}
-               value={calType}
-               onChange={this.handleChange}
-           /><Form.Input
-             name='tool_calibrate_location'
-             placeholder='Target name, Ra, or Alt: '
-             value={calLocation}
-             onChange={this.handleChange}/>
-           <Form.Input
-             name='tool_calibrate_dec_az'
-             placeholder='Dec, or azimuth: '
-             value={calDecAz}
-             onChange={this.handleChange}/>
-             <br/>(Optionaly select a slew type and specify a location, e.g 5.95, 21.99)
-       </div>
-      )
-    }
+
+    return (
+      <div>
+      <Button.Group icon>
+          <Button  disabled={DISABLE} onClick={this.calibrateGuider.bind(this)}>Calibrate</Button>
+       </Button.Group>
+       <Dropdown
+          name='tool_calibrate_via'
+          placeholder='Slew via...'
+          selection options={slewOptions}
+          value={calType}
+          onChange={this.handleChange}
+        /><Form.Input
+          name='tool_calibrate_location'
+          placeholder='Target name, Ra, or Alt: '
+          value={calLocation}
+          onChange={this.handleChange}/>
+        <Form.Input
+          name='tool_calibrate_dec_az'
+          placeholder='Dec, or azimuth: '
+          value={calDecAz}
+          onChange={this.handleChange}/>
+          <br/>(Optionaly select a slew type and specify a location, e.g 5.95, 21.99)
+     </div>
+    )
   }
 
   render() {
@@ -339,12 +358,24 @@ class Toolbox extends Component {
         </Segment>
         <Segment raised>
         <Header>Rotate FOV</Header>
-          {this.rotateTool(
+        <Segment.Group horizontal>
+        <Segment>
+          {this.rotateFOV(
             this.props.scheduler_running.value
             , this.state.tool_rotator_type
             , this.state.tool_rotator_num
             , this.props.tool_active.value
           )}
+          </Segment>
+          <Segment>
+            {this.rotateTool(
+              this.props.scheduler_running.value
+              , this.state.tool_rotator_type
+              , this.state.tool_rotator_num
+              , this.props.tool_active.value
+            )}
+            </Segment>
+        </Segment.Group>
         </Segment>
         <Segment>
         Future idea - launch a filteroffset script to collect the filters focus offset and then average.

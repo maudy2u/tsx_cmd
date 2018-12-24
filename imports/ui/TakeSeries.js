@@ -20,7 +20,10 @@ import React, { Component } from 'react'
 import { withTracker } from 'meteor/react-meteor-data';
 import { Button, Modal, Segment, Item, Header, Icon, Table, } from 'semantic-ui-react'
 
-import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
+import {
+  TakeSeriesTemplates,
+  seriesDescription,
+} from '../api/takeSeriesTemplates.js';
 import { TargetSessions } from '../api/targetSessions.js';
 import { Seriess } from '../api/seriess.js';
 
@@ -95,26 +98,7 @@ class TakeSeries extends Component {
 
   seriesDetails() {
 
-    // CURRENTLY: 0:33x3s, 1:33x3s, 2:33x3s, 3:33x3s
-    // WANT: LIGHT:LUM@33X3S
-
-    var template = this.props.seriesTemplate;
-    var seriesArray = template.series;
-    var details = "";
-    var repeating = '';
-    if( template.repeatSeries ) {
-      repeating = 'Repeating: ';
-    }
-    for (var i = 0; i < seriesArray.length; i++) {
-      var series = Seriess.findOne({_id:seriesArray[i].id});
-      if( typeof series == 'undefined') {
-        continue;
-      }
-      if(details != "") { details += ", "};
-      details += series.frame +':' + series.filter + '@' + series.exposure + 'sec x'  + series.repeat;
-    }
-
-    return repeating + details;
+    return seriesDescription( this.props.seriesTemplate );
   }
 
   render() {
@@ -148,7 +132,7 @@ class TakeSeries extends Component {
                 open={this.state.editOpen}
                 onClose={this.editClose}
                 closeIcon>
-                <Modal.Header>Editing Series</Modal.Header>
+                <Modal.Header>Editing Imaging Series</Modal.Header>
                 <Modal.Content>
                   <Modal.Description>
                     <TakeSeriesTemplateEditor key={this.props.seriesTemplate._id} template={this.props.seriesTemplate}/>

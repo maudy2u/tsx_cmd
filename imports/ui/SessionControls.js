@@ -115,7 +115,6 @@ class SessionControls extends Component {
     return (
       <Segment.Group size='mini'>
         <Segment>{/* use this icon fro the Model settings configure */}
-          <h3 className="ui header">Session Controls</h3>
             <Form.Checkbox
               label='Enable Meridian Flip '
               name='defaultMeridianFlip'

@@ -18,15 +18,14 @@ tsx cmd - A web page to send commands to TheSkyX server
 
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
+import { Checkbox, Confirm, Input, Icon, Grid, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
+
 import {
   TargetAngles,
   eraseAllAngles,
 } from '../api/targetAngles.js';
-
-import { Confirm, Input, Icon, Grid, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
 
 import {
   tsx_ServerStates,
@@ -48,23 +47,28 @@ import {
   addFlatSeries,
   addFlatFilter,
   resetStoredFlat,
+  flatSeriesDescription,
+  flatSeriesName,
 } from '../api/flatSeries.js';
 
 // Import the UI
+import {
+  Series,
+  seriesDescription,
+} from './Series.js';
 import Target  from './Target.js';
 import TargetSessionMenu from './TargetSessionMenu.js';
-// import Filter from './Filter.js';
-import Series from './Series.js';
 import FlatGrid from './FlatGrid.js';
+import FlatMenuItem from './FlatMenuItem.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 //import TheSkyXInfo from './TheSkyXInfo.js';
 
-class Flats extends Component {
+class FlatsMenu extends Component {
 
   constructor() {
     super();
     this.state = {
-      showModal: false,
+      showModalFlatSettings: false,
 
       flatPosition: '',
       tool_flats_via: '',
@@ -73,12 +77,12 @@ class Flats extends Component {
     };
   }
 
-  showModal() {
-    this.setState({showModal: true });
+  showModalFlatSettings() {
+    this.setState({showModalFlatSettings: true });
   }
 
-  closeModal() {
-    this.setState({showModal: false });
+  closeModalFlatSettings() {
+    this.setState({showModalFlatSettings: false });
   }
 
   // used for the modal exposure settings for flats
@@ -154,7 +158,7 @@ class Flats extends Component {
   startFlats() {
     // obtain calibration targetSession
     var targets = TargetSessions.find({ isCalibrationFrames: true }).fetch();
-
+    console.log( ' Number of calibration targets found: ' + targets.length );
     Meteor.call( 'processCalibrationTargets', targets, function(error, result) {
       console.log('result: ' + result);
     }.bind(this));
@@ -197,55 +201,28 @@ class Flats extends Component {
         value: '',
       },
     ];
-
-    if( state == 'Stop'  && active == false ) {
-      return (
-        <div>
-         <Dropdown
-            name='tool_flats_via'
-            placeholder='Slew via...'
-            selection options={slewOptions}
-            value={flatSlewType}
-            onChange={this.handleChange}
-          />
-         <br/>Provide a location (position) for OTA
-         <br/>Location: <Form.Input
-           name='tool_flats_location'
-           placeholder='Target name, Ra, or Alt: '
-           value={flatRa}
-           onChange={this.handleChange}/>
-         <Form.Input
-           name='tool_flats_dec_az'
-           placeholder='Dec, or azimuth: '
-           value={flatDec}
-           onChange={this.handleChange}/>
-       </div>
-      )
-    }
-    else {
-      return (
-        <div>
-         <Dropdown
-            name='tool_flats_via'
-            placeholder='Slew via...'
-            selection options={slewOptions}
-            value={flatSlewType}
-            onChange={this.handleChange}
-          />
-         <br/>Provide a location (position) for OTA
-         <br/>Location: <Form.Input
-           name='tool_flats_location'
-           placeholder='Target name, Ra, or Alt: '
-           value={flatRa}
-           onChange={this.handleChange}/>
-         <Form.Input
-           name='tool_flats_dec_az'
-           placeholder='Dec, or azimuth: '
-           value={flatDec}
-           onChange={this.handleChange}/>
-       </div>
-      )
-    }
+    return (
+      <div>
+       <Dropdown
+          name='tool_flats_via'
+          placeholder='Slew via...'
+          selection options={slewOptions}
+          value={flatSlewType}
+          onChange={this.handleChange}
+        />
+        <br/><Label>Provide a location (position) for OTA</Label>
+        <br/><Label>Location: </Label><Form.Input
+         name='tool_flats_location'
+         placeholder='Target name, Ra, or Alt: '
+         value={flatRa}
+         onChange={this.handleChange}/>
+       <Form.Input
+         name='tool_flats_dec_az'
+         placeholder='Dec, or azimuth: '
+         value={flatDec}
+         onChange={this.handleChange}/>
+     </div>
+    )
   }
 
   addFilterForFlats(
@@ -262,11 +239,10 @@ class Flats extends Component {
     }
     return (
       <Button.Group icon>
-         <Button disabled={DISABLE} icon='plus' disabled onClick={addFlatSeries.bind(this)} />
-         <Button disabled={DISABLE} icon='minus' disabled onClick={this.gotoFlatPosition.bind(this)} />
-         <Button disabled={DISABLE} icon=''  />
+         <Button disabled={DISABLE} icon='plus' onClick={addFlatSeries.bind(this)} />
+         <Button disabled  compact />
          <Button disabled={DISABLE} onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
-         <Button disabled={DISABLE} icon=''  />
+         <Button disabled  compact  />
          <Button disabled={DISABLE} icon='play' onClick={this.startFlats.bind(this)} />
          <Button disabled={NOT_DISABLE} icon='stop' onClick={this.stopScheduler.bind(this)} />
       </Button.Group>
@@ -303,37 +279,32 @@ class Flats extends Component {
   }
 
   flatSettings() {
+    let DISABLED = true;
+
     if( this.props.scheduler_running.value == 'Stop'  && this.props.tool_active.value == false ){
-      return (
-        <Button.Group basic size='mini' floated='right'>
-          <Button icon='recycle' onClick={this.resetAngles.bind(this)}/>
-          <Button icon='settings' onClick={this.showModal.bind(this)}/>
-        </Button.Group>
-      )
+      DISABLED = false;
     }
-    else {
-      return (
-        <Button.Group basic size='mini' floated='right'>
-          <Button disabled icon='recycle' onClick={this.resetAngles.bind(this)}/>
-          <Button disabled icon='settings' onClick={this.showModal.bind(this)}/>
-        </Button.Group>
-      )
-    }
+    return (
+      <Button.Group basic size='mini' floated='right'>
+        <Button disabled={DISABLED} icon='recycle' onClick={this.resetAngles.bind(this)}/>
+        <Button disabled={DISABLED} icon='settings' onClick={this.showModalFlatSettings.bind(this)}/>
+      </Button.Group>
+    )
   }
 
-  render() {
-
+  renderModalFlatSettings() {
     return (
-      <div>
-        <h1>FLATs</h1>
-        {this.addFilterForFlats(
-          this.props.scheduler_running
-          , this.props.tool_active
-        )}
-        { this.flatSettings() }
-          <br />
+      <Modal
+        open={this.state.showModalFlatSettings}
+        onClose={this.closeModalFlatSettings.bind(this)}
+        basic
+        size='small'
+        closeIcon>
+        <Modal.Header>Settings</Modal.Header>
+        <Modal.Content>
+        <Segment secondary >
           <Segment raised>
-            <h4>Flat position</h4>
+            <Label>Flat position</Label>
             {this.flatsTools(
               this.props.scheduler_running.value
               , this.props.tool_active.value
@@ -342,59 +313,79 @@ class Flats extends Component {
               , this.state.tool_flats_dec_az
             )}
           </Segment>
-          <h4>FLAT Series</h4>
-          {
-            this.props.flatSeries.map((flat)=>{
-              return (
-                <FlatGrid
-                  key={flat._id}
-                  flat={flat}
-                  scheduler_report={this.props.scheduler_report}
-                  tsxInfo={this.props.tsxInfo}
-                  scheduler_running={this.props.scheduler_running}
-                  tool_active = {this.props.tool_active}
-                  flatSeries = {this.props.flatSeries}
-                />
-            )})
-          }
-        <Modal
-          open={this.state.showModal}
-          onClose={this.closeModal.bind(this)}
-          basic
-          size='small'
-          closeIcon>
-          <Modal.Header>Flat Filter Exposures</Modal.Header>
-          <Modal.Content>
-          Enter the default exposure settings for each filter.
-            <Segment raised>
-              <Form>
-                <Form.Field inline >
-                    <Label>Filter</Label>
-                    <Label>Exposure</Label>
-                    <br/>
-                </Form.Field>
-                {this.props.filters.map((filter)=>{
-                  return (
-                    <Form.Field key={filter._id} inline>
-                      <Label>
-                        {filter.name}
-                      </Label>
-                      <Input
-                        placeholder='Exposure'
-                        name={filter._id}
-                        value={filter.flat_exposure}
-                        onChange={this.handleFilterChange}
-                      />
-                </Form.Field>
-                )})}
-              </Form>
-            </Segment>
-          </Modal.Content>
-          <Modal.Description>
-          </Modal.Description>
-          <Modal.Actions>
-          </Modal.Actions>
-        </Modal>
+          <Segment raised>
+            <Label>Enter the default exposure settings for each filter.</Label>
+            <Form>
+              <Form.Field inline >
+                  <Label>Filter</Label>
+                  <Label>Exposure</Label>
+                  <br/>
+              </Form.Field>
+              {this.props.filters.map((filter)=>{
+                return (
+                  <Form.Field key={filter._id} inline>
+                    <Label>
+                      {filter.name}
+                    </Label>
+                    <Input
+                      placeholder='Exposure'
+                      name={filter._id}
+                      value={filter.flat_exposure}
+                      onChange={this.handleFilterChange}
+                    />
+              </Form.Field>
+              )})}
+            </Form>
+          </Segment>
+          </Segment>
+        </Modal.Content>
+        <Modal.Description>
+        </Modal.Description>
+        <Modal.Actions>
+        </Modal.Actions>
+      </Modal>
+    )
+  }
+  renderModalFlatGrid( flat ) {
+    return (
+      <FlatGrid
+        key={flat._id}
+        flat={flat}
+        scheduler_report={this.props.scheduler_report}
+        tsxInfo={this.props.tsxInfo}
+        scheduler_running={this.props.scheduler_running}
+        tool_active = {this.props.tool_active}
+        flatSeries = {this.props.flatSeries}
+      />
+    )
+  }
+
+  render() {
+
+    return (
+      <div>
+        <h1>FLaTs</h1>
+        {this.addFilterForFlats(
+          this.props.scheduler_running
+          , this.props.tool_active
+        )}
+        { this.flatSettings() }
+        {this.renderModalFlatSettings()}
+        <br />
+        {
+          this.props.flatSeries.map((flat)=>{
+//            return this.renderModalFlatGrid( flat );
+//seriesDescription( this.props.seriesTemplate );
+            return (
+              <FlatMenuItem
+                key={flat._id}
+                flat={flat}
+                scheduler_running={this.props.scheduler_running}
+                tool_active = {this.props.tool_active}
+              />
+            )
+          })
+        }
     </div>
     )
   }
@@ -402,4 +393,4 @@ class Flats extends Component {
 export default withTracker(() => {
   return {
 };
-})(Flats);
+})(FlatsMenu);

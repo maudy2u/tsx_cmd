@@ -103,7 +103,7 @@ function rotate( targetAng, imageScale ) {
     var imageLinkAng=ImageLinkResults.imagePositionAngle; // the real sky position
     var rotPos = CCDSC.rotatorPositionAngle(); // the real position
     var newPos = calcNewPostion( imageLinkAng, rotPos, targetAng);
-    var resMsg = "imageLinkAng="+ Number(imageLinkAng).toFixed(2) + "|targetAngle=" + Number(targetAng).toFixed(2) + "|rotPos=" + rotPos + "|newPos=" + newPos;
+    var resMsg = "imageLinkAng="+ Number(imageLinkAng).toFixed(3) + "|targetAngle=" + Number(targetAng).toFixed(3) + "|rotPos=" + rotPos + "|newPos=" + newPos;
     OUT = "Success|" + resMsg;
     RunJavaScriptOutput.writeLine (resMsg);
     // VERIFY ANGLE and if not rotate

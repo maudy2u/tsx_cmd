@@ -714,7 +714,7 @@ function tsx_CLS_target( target, filter ) {
         UpdateStatusErr(' !!! Centring Failed. Error: ' + tsx_return);
       }
       else {
-        tsxInfo(' ' + target + ': Centred' );
+        tsxInfo(' ' + target + ': centred' );
         var angle = tsx_return.split('|')[1].trim();
         clsSuccess.angle = angle;
         tsxInfo(' ' + target + ': Position Angle: ' + clsSuccess.angle );
@@ -980,7 +980,7 @@ function SetUpForImagingRun(target) {
   }
 
   // needs initial focus temp
-  UpdateStatus( ' ' + target.targetFindName + ': Centred' );
+  UpdateStatus( ' ' + target.targetFindName + ': centred' );
 
   // Get Mount Coords and Orientations
 	var mntOrient = tsx_GetMountReport();
@@ -1133,11 +1133,16 @@ function tsx_DeviceInfo() {
 
        var index = 28; // the next position after the numFilters
        for (var i = 0; i < numFilters; i++) {
-         var name = tsx_return.split('|')[index+i].trim();
+         let name = tsx_return.split('|')[index+i].trim();
+         let filter = Filters.findOne({name: name });
+         let exp = 0;
+         if( typeof filter != 'undefined' ) {
+           exp = filter.flat_exposure;
+         }
          Filters.upsert( {slot: i }, {
            $set: {
              name: name,
-             flat_exposure: 0,
+             flat_exposure: exp,
             }
          });
        }
@@ -1303,7 +1308,7 @@ function isMeridianFlipNeed( target ) {
   var lastDir = tsx_GetServerStateValue('lastTargetDirection');
   var curDir = target.report.AZ;
   tsx_SetServerState('lastTargetDirection', curDir);
-  tsxLog( ' ' + target.targetFindName + ': pointing (' + lastDir + '), cf. previous (' + curDir +')');
+  tsxLog( ' -check pointing (' + lastDir + '), cf. previous (' + curDir +')');
   if( curDir == 'West' && lastDir == 'East') {
     // we need to flip
     tsxDebug( ' ' + target.targetFindName + ': merdian flip needed.' );
@@ -1352,7 +1357,7 @@ function isFocusingNeeded(target) {
   }
   var focusDiff = Math.abs(curFocusTemp - lastFocusTemp).toFixed(2);
   var targetDiff = target.tempChg; // diff for this target
-  tsxLog(' ' + target.targetFindName + ': Focus diff('+targetDiff+'): ' + focusDiff + '='+curFocusTemp +'-'+lastFocusTemp );
+  tsxLog(' -check focus ('+targetDiff+'): ' + focusDiff + '='+curFocusTemp +'-'+lastFocusTemp );
   if( focusDiff >= targetDiff ) {
   // returning true tell caller to run  @Focus3
     return true;
@@ -1536,7 +1541,7 @@ function tsx_dither( target ) {
   var Out = false;
   var dCount = lastDither +1;
   var doDither = (Math.round(dCount) >= Math.round(ditherTarget));
-  UpdateStatus( ' ' + target.targetFindName + 'dither: ' + doDither );
+  tsxLog( ' -check dither needed: ' + doDither );
   if( ditherTarget != 0 ) {
     if( doDither ) { // adding a plus one so the zero works and if one is passed it will rung once.
 
@@ -1564,7 +1569,7 @@ function tsx_dither( target ) {
               }
               else {
                 // tsxLog('Dither success');
-                UpdateStatus(' ' + target.targetFindName +': Dither succeeded.');
+                UpdateStatus(' ' + target.targetFindName +': dither succeeded');
                 tsx_SetServerState('imagingSessionDither', 0);
               }
               Out = true;
@@ -1835,7 +1840,7 @@ function tsx_MatchRotation( target ) {
           var resMsg = tsx_return.split('|')[2].trim();
           var pos = resMsg.split('=')[1].trim();
           // targetReportRotatorPosition( target, pos );
-          UpdateStatus(' Rotator position: ' + pos);
+          UpdateStatus(' Rotator position: ' + Number(pos).toFixed(3));
         }
       }
       tsx_is_waiting = false;
@@ -1899,7 +1904,7 @@ export function tsx_RotateCamera( position, cls ) {
   cmd = cmd.replace('$001', pixelSize);
   cmd = cmd.replace('$002', focalLength);
   cmd = cmd.replace('$003', ACCURACY);
-  cmd = cmd.replace('$004', cls); // just do position
+  cmd = cmd.replace('$004', cls); // 1 = rotate; 0 = imagelink
   UpdateStatus(' Rotator/Camera rotating FOV: ' + position);
   let tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
@@ -1916,7 +1921,7 @@ export function tsx_RotateCamera( position, cls ) {
       tsxLog( resMsg);
       var pos = resMsg.split('=')[1].trim();
       // targetReportRotatorPosition( pos );
-     UpdateStatus(' Rotator/Camera set: ' + pos);
+     UpdateStatus(' Rotator/Camera set: ' + Number(pos).toFixed(3));
     }
     tsx_is_waiting = false;
   }));
@@ -2063,7 +2068,7 @@ function tsx_takeImage( filterNum, exposure, frame, tName ) {
             if( rotPos == 'rotatorPosition') {
               // the position is stored
               let ang = tsx_return.split('|')[2].trim();
-              tsxLog( ' ' + tName + ' Rotator position: ' + Number(ang).toFixed(3) );
+              tsxLog( ' ' + tName + ': rotator position: ' + Number(ang).toFixed(3) );
               // the stoed position can be used for flats
               recordRotatorPosition( tName, Number(ang).toFixed(3) );
             }
@@ -2394,7 +2399,7 @@ export function findTargetSession() {
   // priotiry
   if( foundSession ) {
     validSession = getHigherPriorityTarget( validSession );
-    UpdateStatus( ' ' + validSession.targetFindName + ': Choosen' );
+    UpdateStatus( ' chose: ' + validSession.targetFindName );
   }
   tsxDebug('************************');
   return validSession;
@@ -2435,7 +2440,7 @@ function getHigherPriorityTarget( validSession ) {
         var chk = valPriority - chkPriority;
         if( (chk > 0) ) {
               validSession = chkSession;
-              UpdateStatus( ' Priority Candidate: ' + validSession.targetFindName);
+              UpdateStatus( ' priority given: ' + validSession.targetFindName);
         }
       }
     }
@@ -2591,7 +2596,7 @@ export function canTargetSessionStart( target ) {
   var minAlt = tsx_reachedMinAlt( target );
   tsxDebug( ' Is target minAlt: ' + minAlt );
   if( minAlt ) {
-    UpdateStatus( ' ' + target.targetFindName + ' altitude below: ' + target.minAlt );
+    UpdateStatus( ' -below alt.(' + target.minAlt + '): ' + target.targetFindName );
     return false;
   }
 

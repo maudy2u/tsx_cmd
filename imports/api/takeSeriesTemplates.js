@@ -17,6 +17,7 @@ tsx cmd - A web page to send commands to TheSkyX server
  */
 
 import { Mongo } from 'meteor/mongo';
+import { Seriess } from './seriess.js';
 
 // Used to store the sessions for a Target - the actual imaging
 export const TakeSeriesTemplates = new Mongo.Collection('takeSeriesTemplates');
@@ -36,3 +37,25 @@ export function addNewTakeSeriesTemplate() {
 
   return id;
 }
+
+export function seriesDescription( template ) {
+
+    // CURRENTLY: 0:33x3s, 1:33x3s, 2:33x3s, 3:33x3s
+    // WANT: LIGHT:LUM@33X3S
+    let seriesArray = template.series;
+    let details = "";
+    let repeating = '';
+    if( template.repeatSeries ) {
+      repeating = 'Repeating: ';
+    }
+    for (let i = 0; i < seriesArray.length; i++) {
+      let series = Seriess.findOne({_id:seriesArray[i].id});
+      if( typeof series == 'undefined') {
+        continue;
+      }
+      if(details != "") { details += ", "};
+      details += series.frame +':' + series.filter + '@' + series.exposure + 'sec x'  + series.repeat;
+    }
+
+    return repeating + details;
+  }

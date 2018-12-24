@@ -226,8 +226,10 @@ function startServerProcess() {
 
       if( schedule.scheduleType == 'calibration') {
         // *******************************
-        tsxDebug(" Checking for targets");
+        UpdateStatus(" === Starting calibration targets");
 
+        tsx_Connect();
+        
         for( var i=0; i<schedule.targets.length;i++ ) {
           var target = schedule.targets[i];
           // what is the FOV position??
@@ -245,6 +247,9 @@ function startServerProcess() {
         // the job is used to run the scheduler.
         while( tsx_GetServerStateValue('currentJob') != '' ) {
 
+          UpdateStatus(" === Starting imaging targets");
+
+
            // tsxDebug('@6');
             tsx_MntUnpark();
             isParked = false;
@@ -252,7 +257,7 @@ function startServerProcess() {
 
             // Find a session
             // Get the target to shoot
-            tsxInfo( ' Validating Targets...');
+//            tsxInfo( ' Validating Targets...');
 
             /* #TODO
             So working on the cloud detection to PAUSE.
@@ -574,12 +579,12 @@ Meteor.methods({
     return res;
   },
 
-  rotateCamera() {
+  rotateCamera( cls ) {
     tsx_SetServerState( 'tool_active', true );
     try {
       tsxLog(' Rotating Camera');
       var num  = tsx_GetServerStateValue('tool_rotator_num');
-      var res = tsx_RotateCamera( num, 0 ); // tool needs to use CLS use 0
+      var res = tsx_RotateCamera( num, cls ); // tool needs to use CLS use 0
     }
     finally {
       tsx_SetServerState( 'tool_active', false );

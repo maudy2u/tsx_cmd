@@ -95,7 +95,7 @@ class TakeSeriesTemplateEditor extends Component {
         order: order,
         exposure: 1,
         binning: 1,
-        frame: '',
+        frame: 'Light',
         filter: '',
         repeat: 1,
         takeSeriesTemplate: tid,
@@ -130,6 +130,11 @@ class TakeSeriesTemplateEditor extends Component {
   render() {
 
     var a = this.props.template.series;
+    /*
+    <Grid.Column>
+    <b>Frame</b>
+    </Grid.Column>
+    */
 
     return (
       <div>
@@ -184,9 +189,6 @@ class TakeSeriesTemplateEditor extends Component {
             <Grid.Column width={1}/>
             <Grid.Column>
             <b>Exposure</b>
-            </Grid.Column>
-            <Grid.Column>
-            <b>Frame</b>
             </Grid.Column>
             <Grid.Column>
             <b>Filter</b>

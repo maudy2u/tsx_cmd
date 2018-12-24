@@ -429,7 +429,7 @@ class DefaultSettings extends Component {
         <Segment raised>
           <Form.Group>
             <Form.Input
-              label='AutoGuide Exposure '
+              label='AutoGuider Exposure '
               name='defaultGuideExposure'
               placeholder='Enter number seconds'
               value={this.state.defaultGuideExposure}

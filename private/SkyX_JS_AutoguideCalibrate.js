@@ -55,7 +55,8 @@ if( CCDSC.ImageUseDigitizedSkySurvey == "1" ){ // Simulator
 ccdsoftAutoguider.Asynchronous = false;		// Turn on so we don't get stuck waiting for an endless process
 
 try{
-  var res = ccdAG.Calibrate(0);
+  // var res = ccdAG.Calibrate(0);
+  var res = ccdAG.Calibrate(0); // removing the 0 to see if this removes the dialog
   Out = 'Success|' + res;
 }
 catch(e) {

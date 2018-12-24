@@ -18,10 +18,12 @@ tsx cmd - A web page to send commands to TheSkyX server
 
 import React, { Component } from 'react';
 import { withTracker } from 'meteor/react-meteor-data';
-import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
-
 import { Modal, Button, Item, Radio, Icon, Table, Segment, } from 'semantic-ui-react'
 
+import {
+  TakeSeriesTemplates,
+  addNewTakeSeriesTemplate,
+} from '../api/takeSeriesTemplates.js';
 import TakeSeries from './TakeSeries.js'
 
 // Filter component - represents a single filter item
@@ -48,13 +50,60 @@ class TakeSeriesTemplateMenu extends Component {
     console.log('test');
   }
 
+  addNewTakeSeries() {
+    var out = addNewTakeSeriesTemplate();
+  };
+
+  takeSeriesButtons(
+    state
+    , active
+    ) {
+
+    var DISABLE = true;
+    var NOT_DISABLE = false;
+    // then use as needed disabled={DISABLE} or disabled={NOT_DISABLE}
+    if( state == 'Stop'  && active == false ){
+      DISABLE = false;
+      NOT_DISABLE = true;
+    }
+/*
+<Button.Group basic size='mini' floated='right'>
+  <Button disabled={DISABLE} icon='recycle' />
+  <Button disabled={DISABLE} icon='settings' />
+</Button.Group>
+<Button disabled={DISABLE}  >Refresh</Button>
+<Button disabled compact  />
+<Button disabled compact   />
+<Button disabled={DISABLE} icon='play'  onClick={this.playScheduler.bind(this)}/>
+<Button disabled={NOT_DISABLE} icon='stop' onClick={this.stopScheduler.bind(this)} />
+*/
+    return (
+      <Button.Group>
+          <Button disabled={DISABLE} icon='plus' onClick={this.addNewTakeSeries.bind(this)} />
+       </Button.Group>
+     )
+  }
+
   render() {
 
-    var test0 = this.props.seriesList;
-//    var test1 = this.props.seriesList.series;
+    var RUNNING = '';
+    var ACTIVE = false;
+    try {
+      RUNNING = this.props.scheduler_running.value;
+      ACTIVE = this.props.tool_active.value;
+    } catch (e) {
+      RUNNING = '';
+      ACTIVE=false;
+    }
 
     return (
       <div>
+      <h1>Take Series</h1>
+      {this.takeSeriesButtons(
+        RUNNING
+        , ACTIVE
+      )}
+      <br />
        {this.props.seriesList.map( (takeSeriesTemplate)=>{
            return (
              <TakeSeries key={takeSeriesTemplate._id} seriesTemplate={takeSeriesTemplate} />

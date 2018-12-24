@@ -42,7 +42,7 @@ class TakeSeriesEditor extends Component {
     id: '',
     order: 0,
     exposure: 0,
-    frame: 'Frame',
+    frame: 'Light',
     filter: 'Filter',
     repeat: 0,
     binning: 0,
@@ -197,6 +197,19 @@ class TakeSeriesEditor extends Component {
 
   render() {
 
+    /*
+    <Grid.Column>
+      <Dropdown
+        fluid
+        name='frame'
+        options={this.renderDropDownFrames()}
+        placeholder='Frame'
+        text={this.state.frame}
+        onChange={this.handleChange}
+      />
+    </Grid.Column>
+     */
+
     return (
       <Grid.Row>
         <Grid.Column width={1}>
@@ -209,16 +222,6 @@ class TakeSeriesEditor extends Component {
             placeholder='Exposure'
             name='exposure'
             value={this.state.exposure}
-            onChange={this.handleChange}
-          />
-        </Grid.Column>
-        <Grid.Column>
-          <Dropdown
-            fluid
-            name='frame'
-            options={this.renderDropDownFrames()}
-            placeholder='Frame'
-            text={this.state.frame}
             onChange={this.handleChange}
           />
         </Grid.Column>

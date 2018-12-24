@@ -560,12 +560,10 @@ class Monitor extends Component {
 
     return (
       <div>
-         <Segment raised>
            <h3>Target: {TARGETNAME}</h3>
            <Button.Group icon>
             {this.playButtons(RUNNING) }
           </Button.Group>
-        </Segment>
         <Segment raised>
           <Grid columns={3}>
             <Grid.Column width={4}>
@@ -584,121 +582,6 @@ class Monitor extends Component {
             </Grid.Column>
           </Grid>
         </Segment>
-        <Segment.Group size='mini'>
-          <Segment>{/* use this icon fro the Model settings configure */}
-            <h3 className="ui header">Session Controls</h3>
-              <Form.Checkbox
-                label='Enable Meridian Flip '
-                name='defaultMeridianFlip'
-                toggle
-                placeholder= 'Enable auto meridian flip'
-                checked={this.state.defaultMeridianFlip}
-                onChange={this.handleToggle.bind(this)}
-              />
-              <Form.Checkbox
-                label='Enable CLS '
-                name='defaultCLSEnabled'
-                toggle
-                placeholder= 'Enable CLS'
-                checked={this.state.defaultCLSEnabled}
-                onChange={this.handleToggle.bind(this)}
-              />
-              <Form.Checkbox
-                label='Enable Soft Parking (Stop tracking) '
-                name='defaultSoftPark'
-                toggle
-                placeholder= 'Enable soft parking'
-                checked={this.state.defaultSoftPark}
-                onChange={this.handleToggle.bind(this)}
-              />
-              <br /><Form.Checkbox
-                label='Enable FOV Rotator Angle/Position Matching '
-                name='isFOVAngleEnabled'
-                toggle
-                placeholder= 'Enable using the targets angle'
-                checked={this.state.isFOVAngleEnabled}
-                onChange={this.handleToggle.bind(this)}
-              />
-              <Form.Checkbox
-                label='Enable Autofocus (@Focus3) '
-                name='isFocus3Enabled'
-                toggle
-                placeholder= 'Enable focus checking'
-                checked={this.state.isFocus3Enabled}
-                onChange={this.handleToggle.bind(this)}
-              />
-              <br /><Form.Checkbox
-                label='Enable Autoguiding '
-                name='isAutoguidingEnabled'
-                toggle
-                placeholder= 'Enable Autoguiding checking'
-                checked={this.state.isAutoguidingEnabled}
-                onChange={this.handleToggle.bind(this)}
-              />
-              <Form.Checkbox
-                label='Enable Autoguide Calibrating '
-                name='isCalibrationEnabled'
-                toggle
-                placeholder= 'Enable Autoguiding Calibrating'
-                checked={this.state.isCalibrationEnabled}
-                onChange={this.handleToggle.bind(this)}
-              />
-              <Form.Checkbox
-                label='Enable Guiding Settling '
-                name='isGuideSettlingEnabled'
-                toggle
-                placeholder= 'Enable Autoguiding Settling'
-                checked={this.state.isGuideSettlingEnabled}
-                onChange={this.handleToggle.bind(this)}
-              />
-              {/* <Form.Checkbox
-                label='Bin 2x2 Focus Enabled '
-                name='isFocus3Binned'
-                toggle
-                placeholder= 'Enable to bin when focusing'
-                checked={this.state.isFocus3Binned}
-                onChange={this.handleToggle.bind(this)}
-              /> */}
-              {/* <Form.Checkbox
-                label='Enable Imaging Cooler '
-                name='enableImagingCooler'
-                toggle
-                placeholder= 'Cool down camera'
-                checked={this.state.enableImagingCooler}
-                onChange={this.handleToggle.bind(this)}
-              /> */}
-              <br /><Form.Checkbox
-                label='Enable Cloud Check (periodic CLS) '
-                name='isCLSRepeatEnabled'
-                toggle
-                placeholder= 'CLS every X secs'
-                checked={this.state.isCLSRepeatEnabled}
-                onChange={this.handleToggle.bind(this)}
-              />
-              <Form.Checkbox
-                label='Enable Twilight Check '
-                name='isTwilightEnabled'
-                toggle
-                placeholder= 'Enable twilight check'
-                checked={this.state.isTwilightEnabled}
-                onChange={this.handleToggle.bind(this)}
-              />
-          </Segment>
-        </Segment.Group>
-        {/*  */}
-        {/* <Segment>
-          <h3>Focuser  <Label>Temp<Label.Detail>{this.state.focusTemp}</Label.Detail></Label>
-          <Label>Position<Label.Detail>{this.state.focusPos}</Label.Detail></Label>
-          </h3>
-        </Segment>
-        <Segment>
-          <h3>Camera <Label>Temp<Label.Detail>{this.state.cameraTemp}</Label.Detail></Label>
-            <Label>Filter<Label.Detail>{this.state.filter}</Label.Detail></Label>
-            <Label>Binning<Label.Detail>{this.state.binning}</Label.Detail></Label>
-          </h3>
-          <Progress percent='50' progress>Current Exposure</Progress>
-          <Progress value='3' total='5' progress='ratio'>Frames per Filter</Progress>
-        </Segment> */}
         <Confirm
           header='Start an imaging session'
           name='confirmOpen'

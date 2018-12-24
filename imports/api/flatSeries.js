@@ -31,6 +31,11 @@ import { TargetSessions } from './targetSessions.js'
   enabledActive:false,
   filtergroup: [],
   target_id,
+  flatExposures: [
+    {name: lum, exposire: value},
+    {name: lum, exposire: value},
+    {name: lum, exposire: value},
+  ]
  */
 
 const defaultFlat = {
@@ -200,3 +205,35 @@ export function deleteFlatFilter(flatSeries_id, filter_id ){
     }
   });
 }
+
+export function flatSeriesDescription( fsid ) {
+    var fs = FlatSeries.findOne({_id:fsid});
+    let details = "";
+    for (let i = 0; i < fs.filtergroup.length; i++) {
+      let fg = fs.filtergroup[i];
+      if( typeof fg == 'undefined') {
+        continue;
+      }
+      if(details != "") { details += ", "};
+      details += fg.filter + '@' + fg.exposure + 'sec x'  + fg.repeat;
+    }
+
+    return details;
+  }
+
+  export function flatSeriesName( fsid ) {
+      var fs = FlatSeries.findOne({_id:fsid});
+      let name = "";
+      for (let i = 0; i < fs.filtergroup.length; i++) {
+        let fg = fs.filtergroup[i];
+        if( typeof fg == 'undefined') {
+          continue;
+        }
+        if(name != "") { name += "-"};
+        name += fg.filter;
+      }
+      if( name == '') {
+        name = '!New so edit me :)';
+      }
+      return name;
+    }
