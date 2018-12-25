@@ -57,6 +57,8 @@ session
 ostrio:logger
 #ostrio:autoform-files # may have removed semantic-ui icons
 ostrio:files
-meteortoys:allthings@7.0.1 # crashs due to vsivsi:job-collection
+#meteortoys:allthings@7.0.1 # crashs due to vsivsi:job-collection
+#
+# *******************************
 # job-collection needs to be the last in the package file
 vsivsi:job-collection
