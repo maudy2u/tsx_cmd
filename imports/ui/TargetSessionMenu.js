@@ -137,6 +137,11 @@ class TargetSessionMenu extends Component {
     )
   }
 
+  refreshTargetReports() {
+    Meteor.call("refreshTargetReports", function (error, result) {
+      }.bind(this));
+  }
+
   targetButtons(
     state
     , active
@@ -159,7 +164,7 @@ class TargetSessionMenu extends Component {
       <Button.Group>
           <Button disabled={DISABLE} icon='plus' onClick={this.addNewTargets.bind(this)} />
           <Button disabled compact   />
-          <Button disabled={DISABLE}  >Refresh</Button>
+          <Button disabled={DISABLE} onClick={this.refreshTargetReports.bind(this)} >Refresh</Button>
           <Button disabled compact  />
           <Button disabled={DISABLE} icon='play'  onClick={this.playScheduler.bind(this)}/>
           <Button disabled={NOT_DISABLE} icon='stop' onClick={this.stopScheduler.bind(this)} />
@@ -196,10 +201,13 @@ class TargetSessionMenu extends Component {
         )}
         <br />
         {this.props.targets.map((target)=>{
+            let report = this.props.target_reports.find(function(element) {
+              return element.target_id == target._id;});
           return (
              <Target
               key={target._id}
               target={target}
+              report={report}
               scheduler_running={this.props.scheduler_running}
               tool_active={this.props.tool_active}
             />

@@ -46,6 +46,7 @@ class Target extends Component {
     altitude: '0',
     azimuth: '0',
     currentAlt: '',
+    HA: '',
 
     description: '',
     priority: 10,
@@ -276,6 +277,22 @@ class Target extends Component {
       TOOL_ACTIVE = false;
     }
 
+    let DTIME = '';
+    try {
+      let year = this.props.report.updatedAt.getFullYear();
+      let mon = this.props.report.updatedAt.getMonth()+1;
+      let day = this.props.report.updatedAt.getDate();
+      let hours = this.props.report.updatedAt.getHours();
+      let minutes = this.props.report.updatedAt.getMinutes();
+      DTIME = hours + ':' + minutes + ', ' + year +'-'+mon+'-'+day;
+    }
+    catch( e ) {
+      console.log( ' failed to get updatedAt');
+    }
+    finally {
+      //
+    }
+
     return (
     <Segment raised>
       <Item>
@@ -288,18 +305,29 @@ class Target extends Component {
           onChange={this.handleToggleEnabled.bind(this)}
           />
         <Item.Header as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, TOOL_ACTIVE)}>
-          {this.props.target.targetFindName}
+          {this.props.target.targetFindName} <small>{this.props.target.description}</small>
+
           </Item.Header>
           <Item.Description>
-            {this.props.target.description}
           </Item.Description>
           <Item.Meta>
-          <Label>Images: <Label.Detail>{this.props.target.totalImagesTaken()}/{this.props.target.totalImagesPlanned()}</Label.Detail></Label>
-          <Label>Priority: <Label.Detail>{this.props.target.priority}</Label.Detail></Label>
-          <Label>Start: <Label.Detail>{this.props.target.startTime}</Label.Detail></Label>
-          <Label>Stop: <Label.Detail>{this.props.target.stopTime}</Label.Detail></Label>
-          <Label>Min. Alt.: <Label.Detail>{this.props.target.minAlt}</Label.Detail></Label>
-          <Label>Cur. Alt.: <Label.Detail>{this.state.currentAlt}</Label.Detail></Label>
+            <Segment>
+              <small>Constraints:</small><br/>
+              <Label>Images: <Label.Detail>{this.props.target.totalImagesTaken()}/{this.props.target.totalImagesPlanned()}</Label.Detail></Label>
+              <Label>Priority: <Label.Detail>{this.props.target.priority}</Label.Detail></Label>
+              <Label>Start: <Label.Detail>{this.props.target.startTime}</Label.Detail></Label>
+              <Label>Stop: <Label.Detail>{this.props.target.stopTime}</Label.Detail></Label>
+              <Label>Min. Alt.: <Label.Detail>{this.props.target.minAlt}</Label.Detail></Label>
+            </Segment>
+            <Segment>
+              <small>Updated: {DTIME}</small><br/>
+              <Label>Alt.: <Label.Detail>{Number(this.props.report.ALT).toFixed(3)}</Label.Detail></Label>
+              <Label>HA: <Label.Detail>{Number(this.props.report.HA).toFixed(3)}</Label.Detail></Label>
+              <Label>Transit: <Label.Detail>{Number(this.props.report.TRANSIT).toFixed(3)}</Label.Detail></Label>
+              <Label>RA: <Label.Detail>{Number(this.props.report.RA).toFixed(3)}</Label.Detail></Label>
+              <Label>DEC: <Label.Detail>{Number(this.props.report.DEC).toFixed(3)}</Label.Detail></Label>
+              <Label>Point: <Label.Detail>{this.props.report.direction}</Label.Detail></Label>
+            </Segment>
           </Item.Meta>
           <Item.Extra>
             <Label.Group>
@@ -315,7 +343,7 @@ class Target extends Component {
             //   checked={CALIBRATION}
             //   onChange={this.handleToggleEnabled.bind(this)}
             // />
-          }
+            }
             <Modal
               open={this.state.modalOpen}
               onClose={this.handleClose}

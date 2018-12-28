@@ -102,9 +102,8 @@ function initServerStates() {
   tsx_SetServerState('scheduler_report', '');
   tsx_SetServerState('lastTargetDirection', '');
   tsx_SetServerState('lastCheckMinSunAlt', '');
-  tsx_SetServerState('lastFocusPos', '');
-  tsx_SetServerState('lastFocusTemp', '');
-  tsx_SetServerState('initialFocusTemperature', '');
+  // tsx_SetServerState('lastFocusPos', '');
+  // tsx_SetServerState('lastFocusTemp', '');
   tsx_SetServerState('imagingSessionDither', 0);
   tsx_SetServerState('currentJob', '');
   tsx_SetServerState('scheduler_running', 'Stop');
@@ -209,7 +208,7 @@ function startServerProcess() {
   // Do not assume Autoguider calibrated, will be done once guide star found
   var workers = scheduler.processJobs( 'runScheduler',
     function (job, cb) {
-      UpdateStatus(' Scheduler Started');
+      UpdateStatus(' === Scheduler Started');
       var schedule = job.data;
       tsxDebug( schedule );
       tsxDebug( job.data );
@@ -229,7 +228,7 @@ function startServerProcess() {
         UpdateStatus(" === Starting calibration targets");
 
         tsx_Connect();
-        
+
         for( var i=0; i<schedule.targets.length;i++ ) {
           var target = schedule.targets[i];
           // what is the FOV position??
@@ -246,14 +245,10 @@ function startServerProcess() {
         // *******************************
         // the job is used to run the scheduler.
         while( tsx_GetServerStateValue('currentJob') != '' ) {
+          tsxDebug(" === Starting imaging targets");
 
-          UpdateStatus(" === Starting imaging targets");
-
-
-           // tsxDebug('@6');
             tsx_MntUnpark();
             isParked = false;
-            // tsxDebug('@7');
 
             // Find a session
             // Get the target to shoot
@@ -339,7 +334,6 @@ function startServerProcess() {
       tsxLog( ' Scheduler exited.');
       // While ended... exit process
       setSchedulerState('Stop' );
-      UpdateStatus( ' Idle');
       // tsx_Disconnect();
       job.done();
 
@@ -404,7 +398,6 @@ Meteor.startup(() => {
   tsx_UpdateDevice('focuser', 'Not connected ', '' );
 
   tsxLog( ' Logfile', logFileForClient() );
-  UpdateStatus( ' idle');
   tsxLog(' ******* TSX_CMD ONLINE ******', '');
 
   return;

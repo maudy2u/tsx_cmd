@@ -418,6 +418,7 @@ class App extends TrackerReact(Component) {
         <div>
           <TargetSessionMenu
             targets={this.props.targetSessions}
+            target_reports={this.props.target_reports}
             tool_active = {this.props.tool_active}
             scheduler_running={this.props.scheduler_running}
             tool_active = {this.props.tool_active}
@@ -809,7 +810,7 @@ export default withTracker(() => {
     flatSeries: FlatSeries.find({}).fetch(),
     takeSeriesTemplates: TakeSeriesTemplates.find({ isCalibrationFrames: false }, { sort: { name: 1 } }).fetch(),
     targetSessions: TargetSessions.find({ isCalibrationFrames: false }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
-//      targetSessions: TargetSessions.find({ }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
-    targetReports: TargetReports.find({}).fetch(),
+    // targetSessions: TargetSessions.find({ }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
+    target_reports: TargetReports.find({}).fetch(),
   };
 })(App);

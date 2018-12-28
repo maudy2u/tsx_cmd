@@ -17,10 +17,18 @@ var isGuideSettlingEnabled = $007;
 var CCDSC = ccdsoftCamera;
 var CCDAG = ccdsoftAutoguider;
 var TSXI = ccdsoftCameraImage;
-var wait = ((CCDAG.AutoguiderExposureTime + CCDAG.Delay + 1) * 1000);
+
+CCDSC.Asynchronous = false;		// We are going to wait for it
+CCDSC.ExposureTime = aExpTime;		// Set the exposure time based on the second parameter from tsxfeeder
+CCDSC.AutoSaveOn = true;		// Keep the image
+CCDSC.ImageReduction = 0;		// Don't do autodark, change this if you do want some other calibration (1=AD, 2=full)
+CCDSC.Frame = aFrame;			// It's a light frame
+CCDSC.Subframe = false;			// Not a subframe
+
+var WAIT = ((CCDAG.AutoguiderExposureTime + CCDAG.Delay + 1) * 1000);
 
 function isGuidingGood( camImageScale, guiderImageScale, pixelTolerance ) {
-	var wait = ((CCDAG.AutoguiderExposureTime + CCDAG.Delay + 1) * 1000);
+//	var wait = ((CCDAG.AutoguiderExposureTime + CCDAG.Delay + 1) * 1000);
 
 	var isGuiding = false;
 	if( SelectedHardware.autoguiderCameraModel !== '<No Camera Selected>' ) {
@@ -37,21 +45,21 @@ function isGuidingGood( camImageScale, guiderImageScale, pixelTolerance ) {
 			var errorY = CCDAG.GuideErrorY;
 			var Quality =" ";
 
-			imageScaleRatio = (camImageScale / guiderImageScale);
-			imageScaleRatio = imageScaleRatio.toFixed(2);
+			var imageScaleRatio = (camImageScale / guiderImageScale);
+			var imageScaleRatio = imageScaleRatio.toFixed(2);
 
 			if (imageScaleRatio < 0.2)
 			//
 			// I have doubts about measuring this level of accuracy with
 			// a centroid calculation at such an undersampled image scale.
 			//
-			// Relax it a little. Maybe best for user to set in main script
-			//
 			{
-				imageScaleRatio = 0.2;
+				imageScaleRatio = 0.2; // default for "GOOD"
 			}
-
 			var pixelLimit = imageScaleRatio;
+
+			// If user provides a pixelTolerance then use it instead of the
+			// calculated tolerance
 			if( pixelTolerance > 0 ) {
 				pixelLimit = pixelTolerance;
 			}
@@ -60,10 +68,10 @@ function isGuidingGood( camImageScale, guiderImageScale, pixelTolerance ) {
 			// Measure the error regardless of where the limit came from
 			//
 			if ( (Math.abs(errorX) < pixelLimit) && (Math.abs(errorY) < pixelLimit)  )	{
-				Quality = "Good|" + errorX.toFixed(2) + ", " +  errorY.toFixed(2) +'|'+pixelLimit;
+				Quality = "Good|" + Number(errorX).toFixed(2) + ", " +  Number(errorY).toFixed(2) +'|'+pixelLimit;
 			}
 			else {
-				Quality = "Poor|" + errorX.toFixed(2) + ", " +  errorY.toFixed(2) +'|'+pixelLimit;
+				Quality = "Poor|" + Number(errorX).toFixed(2) + ", " +  Number(errorY).toFixed(2) +'|'+pixelLimit;
 			}
 			if ( CCDAG.ImageUseDigitizedSkySurvey == "1" )
 			//
@@ -91,13 +99,6 @@ while (!CCDSC.State == 0)
 	sky6Web.Sleep (1000);
 }
 
-CCDSC.Asynchronous = false;		// We are going to wait for it
-CCDSC.ExposureTime = aExpTime;		// Set the exposure time based on the second parameter from tsxfeeder
-CCDSC.AutoSaveOn = true;		// Keep the image
-CCDSC.ImageReduction = 0;		// Don't do autodark, change this if you do want some other calibration (1=AD, 2=full)
-CCDSC.Frame = aFrame;			// It's a light frame
-CCDSC.Subframe = false;			// Not a subframe
-
 if ( SelectedHardware.filterWheelModel !== "<No Filter Wheel Selected>" )
 //
 // This test looks to see if there is a filter wheel. If so, change filters as instructed.
@@ -110,14 +111,14 @@ if ( SelectedHardware.filterWheelModel !== "<No Filter Wheel Selected>" )
 // *******************************
 // check guiding...
 // if good, continue... if not then wait for X SECONDS and then check again...
-var chk_guiding = isGuideSettlingEnabled;
 var chk_count = 0;
-var max_chk = 3;
+var max_chk = 8; // use nice number... :)
 var guideQuality = "Poor";
-while( chk_guiding && (chk_count < max_chk) && (guideQuality === "Poor") ) {
+while( isGuideSettlingEnabled && (chk_count < max_chk) && (guideQuality === "Poor") ) {
 	var res = isGuidingGood( camScale, guiderScale, guidingPixelErrorTolerance );
 	guideQuality = res.split('|')[0].trim();
-	sky6Web.Sleep (wait);
+	sky6Web.Sleep (WAIT);
+	RunJavaScriptOutput.writeLine (guideQuality);
 	chk_count++;
 }
 
@@ -148,8 +149,6 @@ if( tName != '$003' ) {
 //Set save path and save
 //TSXI.Path = targetImageDataPath;
 TSXI.Save();
-
-
 
 Out;
 /* Socket End Packet */

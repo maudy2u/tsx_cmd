@@ -115,86 +115,94 @@ class SessionControls extends Component {
     return (
       <Segment.Group size='mini'>
         <Segment>{/* use this icon fro the Model settings configure */}
-            <Form.Checkbox
-              label='Enable Meridian Flip '
-              name='defaultMeridianFlip'
-              toggle
-              placeholder= 'Enable auto meridian flip'
-              checked={this.state.defaultMeridianFlip}
-              onChange={this.handleToggleAndSave.bind(this)}
-            />
-            <Form.Checkbox
-              label='Enable CLS '
-              name='defaultCLSEnabled'
-              toggle
-              placeholder= 'Enable CLS'
-              checked={this.state.defaultCLSEnabled}
-              onChange={this.handleToggleAndSave.bind(this)}
-            />
-            <Form.Checkbox
-              label='Enable Soft Parking (Stop tracking) '
-              name='defaultSoftPark'
-              toggle
-              placeholder= 'Enable soft parking'
-              checked={this.state.defaultSoftPark}
-              onChange={this.handleToggleAndSave.bind(this)}
-            />
-            <br /><Form.Checkbox
-              label='Enable FOV Rotator Angle/Position Matching '
-              name='isFOVAngleEnabled'
-              toggle
-              placeholder= 'Enable using the targets angle'
-              checked={this.state.isFOVAngleEnabled}
-              onChange={this.handleToggleAndSave.bind(this)}
-            />
-            <Form.Checkbox
-              label='Enable Autofocus (@Focus3) '
-              name='isFocus3Enabled'
-              toggle
-              placeholder= 'Enable focus checking'
-              checked={this.state.isFocus3Enabled}
-              onChange={this.handleToggleAndSave.bind(this)}
-            />
-            <br /><Form.Checkbox
-              label='Enable Autoguiding '
-              name='isAutoguidingEnabled'
-              toggle
-              placeholder= 'Enable Autoguiding checking'
-              checked={this.state.isAutoguidingEnabled}
-              onChange={this.handleToggleAndSave.bind(this)}
-            />
-            <Form.Checkbox
-              label='Enable Autoguide Calibrating '
-              name='isCalibrationEnabled'
-              toggle
-              placeholder= 'Enable Autoguiding Calibrating'
-              checked={this.state.isCalibrationEnabled}
-              onChange={this.handleToggleAndSave.bind(this)}
-            />
-            <Form.Checkbox
-              label='Enable Guiding Settling '
-              name='isGuideSettlingEnabled'
-              toggle
-              placeholder= 'Enable Autoguiding Settling'
-              checked={this.state.isGuideSettlingEnabled}
-              onChange={this.handleToggleAndSave.bind(this)}
-            />
-            <br /><Form.Checkbox
-              label='Enable Cloud Check (periodic CLS) '
-              name='isCLSRepeatEnabled'
-              toggle
-              placeholder= 'CLS every X secs'
-              checked={this.state.isCLSRepeatEnabled}
-              onChange={this.handleToggleAndSave.bind(this)}
-            />
-            <Form.Checkbox
-              label='Enable Twilight Check '
-              name='isTwilightEnabled'
-              toggle
-              placeholder= 'Enable twilight check'
-              checked={this.state.isTwilightEnabled}
-              onChange={this.handleToggleAndSave.bind(this)}
-            />
+          <Form.Checkbox
+            label='Enable Twilight Check '
+            name='isTwilightEnabled'
+            toggle
+            placeholder= 'Enable twilight check'
+            checked={this.state.isTwilightEnabled}
+            onChange={this.handleToggleAndSave.bind(this)}
+          />
+          <br/>
+          <Form.Checkbox
+            label='Enable Meridian Flip '
+            name='defaultMeridianFlip'
+            toggle
+            placeholder= 'Enable auto meridian flip'
+            checked={this.state.defaultMeridianFlip}
+            onChange={this.handleToggleAndSave.bind(this)}
+          />
+          <Form.Checkbox
+            label='Enable CLS '
+            name='defaultCLSEnabled'
+            toggle
+            placeholder= 'Enable CLS'
+            checked={this.state.defaultCLSEnabled}
+            onChange={this.handleToggleAndSave.bind(this)}
+          />
+          <Form.Checkbox
+            label='Enable Soft Parking (Stop tracking) '
+            name='defaultSoftPark'
+            toggle
+            placeholder= 'Enable soft parking'
+            checked={this.state.defaultSoftPark}
+            onChange={this.handleToggleAndSave.bind(this)}
+          />
+          <br />
+          <Form.Checkbox
+            label='Enable Autofocus (@Focus3) '
+            name='isFocus3Enabled'
+            toggle
+            placeholder= 'Enable focus checking'
+            checked={this.state.isFocus3Enabled}
+            onChange={this.handleToggleAndSave.bind(this)}
+          />
+          <br /><Form.Checkbox
+            label='Enable Autoguiding '
+            name='isAutoguidingEnabled'
+            toggle
+            placeholder= 'Enable Autoguiding checking'
+            checked={this.state.isAutoguidingEnabled}
+            onChange={this.handleToggleAndSave.bind(this)}
+          />
+          <Form.Checkbox
+            label='Enable Guiding Settling '
+            name='isGuideSettlingEnabled'
+            toggle
+            placeholder= 'Enable Autoguiding Settling'
+            checked={this.state.isGuideSettlingEnabled}
+            onChange={this.handleToggleAndSave.bind(this)}
+          />
+          <br />
+          <br />
+          <Form.Checkbox
+            label='Enable Autoguide Calibrating '
+            name='isCalibrationEnabled'
+            toggle
+            placeholder= 'Enable Autoguiding Calibrating'
+            checked={this.state.isCalibrationEnabled}
+            onChange={this.handleToggleAndSave.bind(this)}
+          />
+          <br />
+          <br />
+          <Form.Checkbox
+            label='Enable FOV Rotator Angle/Position Matching '
+            name='isFOVAngleEnabled'
+            toggle
+            placeholder= 'Enable using the targets angle'
+            checked={this.state.isFOVAngleEnabled}
+            onChange={this.handleToggleAndSave.bind(this)}
+          />
+          <br />
+          <br />
+          <Form.Checkbox
+            label='Enable Cloud Check (periodic CLS) '
+            name='isCLSRepeatEnabled'
+            toggle
+            placeholder= 'CLS every X secs'
+            checked={this.state.isCLSRepeatEnabled}
+            onChange={this.handleToggleAndSave.bind(this)}
+          />
         </Segment>
       </Segment.Group>
     );

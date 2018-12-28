@@ -181,7 +181,7 @@ function fileNameDate( today ) {
 // // tsxDebug('Root: ' + src);
 // srcPath = srcPath +'/server/logs/';
 var logFolder = '';
-if( Meteor.settings.log_file_location === '') {
+if( Meteor.settings.log_file_location === '' || typeof Meteor.settings.log_file_location === 'undefined' ) {
   logFolder = Meteor.absolutePath;
 }
 else {
@@ -189,14 +189,14 @@ else {
 }
 
 export function logFileForClient() {
-  var time = new Date();
   var logFolder = '';
-  if( Meteor.settings.log_file_location === '') {
+  if( Meteor.settings.log_file_location === '' || typeof Meteor.settings.log_file_location === 'undefined' ) {
     logFolder = Meteor.absolutePath;
   }
   else {
     logFolder = Meteor.settings.log_file_location;
   }
+  var time = new Date();
   var location = logFolder + '/logs/';
   var fileName = fileNameDate(time) + "_tsx_cmd.log";
 
