@@ -458,18 +458,18 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
   tsxDebug(' *** tsx_CalibrateAutoGuide' );
   var enabled = tsx_GetServerStateValue('isCalibrationEnabled');
   if( !enabled ) {
-    UpdateStatus(' @Calibration disabled');
+    UpdateStatus(' *** Autoguider calibration disabled');
     return false;
   }
   enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
   if( !enabled ) {
-    UpdateStatus(' @Autoguiding disabled ');
+    UpdateStatus(' *** Autoguider disabled ');
     return false;
   }
   var fSize = tsx_GetServerStateValue('calibrationFrameSize');
   if( typeof fSize == 'undefined' || fSize === '' ) {
     fSize = 300;
-    UpdateStatus(' @Guider calibration frame needs setting ');
+    UpdateStatus(' *** Autoguider calibration frame needs setting ');
   }
 
   tsx_is_waiting = true;
@@ -483,7 +483,7 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     var result = tsx_return.split('|')[0].trim();
     if( result != 'Success') {
-      UpdateStatus(' FAILED -Calibrting Guider: ' + result);
+      UpdateStatus(' *** FAILED- calibrating autoguider: ' + result);
     }
     else {
       success = true;
@@ -504,7 +504,7 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
   tsxDebug(' *** tsx_StartAutoGuide' );
   var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
   if( !enabled ) {
-    UpdateStatus(' @Autoguiding disabled ');
+    UpdateStatus(' *** Autoguider disabled ');
     return;
   }
 
@@ -518,7 +518,7 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     var result = tsx_return.split('|')[0].trim();
     if( result != 'Success') {
-      UpdateStatus(' Starting Guiding Failed: ' + result);
+      UpdateStatus(' *** Autoguiding Failed: ' + result);
     }
 
     tsx_is_waiting = false;
@@ -543,7 +543,7 @@ function tsx_Slew( target ) {
     // tsxDebug('Any error?: ' + result);
     if( result != 'Success') {
       forceAbort = true;
-      UpdateStatus('Slew Failed. Error: ' + result);
+      UpdateStatus(' *** Slew failed: ' + result);
     }
     tsx_is_waiting = false;
   }));
@@ -565,7 +565,7 @@ export function tsx_SlewTargetName( target ) {
     // tsxDebug('Any error?: ' + result);
     if( result != 'Success') {
       forceAbort = true;
-      tsxDebug(' Slew Failed. Error: ' + result);
+      tsxDebug(' *** Slew failed: ' + result);
     }
     else {
       tsxDebug(' Slew finished');
@@ -784,6 +784,8 @@ function tsx_RunFocus3( target ) {
   var doCLS = tsx_GetServerStateValue( 'defaultCLSEnabled' );
   tsxDebug(' ??? @Focus3 enabled found to be: ' + enabled );
   if( enabled == true  ) {
+
+
     var focusFilter = getFilterSlot(target.focusFilter);
     var focusExp = target.focusExposure;
     var focusTarget = target.focusTarget;
@@ -868,7 +870,9 @@ function InitialFocus( target ) {
   tsxInfo( ' *** ' + target.targetFindName +': Initial Focus temp: ' + temp );
   // var temp = result.split('|')[0].trim();
   //  var temp = tsx_GetFocusTemp( target ); // temp and position set inside
-  tsx_SetServerState( 'initialFocusTemperature', temp);
+  if( temp != '') {
+    tsx_SetServerState( 'initialFocusTemperature', temp);    
+  }
 }
 
 // **************************************************************
@@ -1331,36 +1335,38 @@ function isFocusingNeeded(target) {
   // tsxDebug('************************');
   tsxDebug(' *** isFocusingNeeded: ' + target.targetFindName);
 
-  var lastFocusTemp = tsx_GetServerStateValue( 'initialFocusTemperature' ); // get last temp
-  tsxDebug( ' lastFocus temp: ' + lastFocusTemp );
+  let lastFocusTemp = tsx_GetServerStateValue( 'initialFocusTemperature' ); // get last temp
+
   if( lastFocusTemp == 'Simulator' ) {
     tsxDebug(' !!! Simulator will not do focus calculations');
     return false;
   }
-  else if( lastFocusTemp == '' ) {
-    tsxLog(' ' + target.targetFindName + ': Initial focus not found trying again.');
+  else if( lastFocusTemp == '' || typeof lastFocusTemp == 'undefined' ) {
+    tsxLog(' *** ' + target.targetFindName + ': Initial focus not found trying again.');
     return true;
   }
-  else if( typeof lastFocusTemp == 'undefined' ) {
-    tsxLog(' ' + target.targetFindName + ': Initial focus not found trying again.');
-    return true;
-  }
+  tsxDebug( ' lastFocus temp: ' + lastFocusTemp );
 
-    // Start of code to check last time focusing was done.
-    var lastFocusTempDate = tsx_GetServerStateValue( 'initialFocusTemperatureDate' ); // get last temp
-    tsxDebug( ' lastFocus date: ' + lastFocusTempDate );
-
-  var curFocusTemp = target.report.focusTemp; // read new temp
-  tsxDebug( ' curFocusTemp temp: ' + curFocusTemp );
-  if( typeof curFocusTemp == 'undefined' ) {
-    curFocusTemp = lastFocusTemp;
-  }
-  var focusDiff = Math.abs(curFocusTemp - lastFocusTemp).toFixed(2);
-  var targetDiff = target.tempChg; // diff for this target
-  tsxLog(' -check focus ('+targetDiff+'): ' + focusDiff + '='+curFocusTemp +'-'+lastFocusTemp );
-  if( focusDiff >= targetDiff ) {
-  // returning true tell caller to run  @Focus3
+  let time_t = lastFocusTemp.timestamp;
+  // assume needed within 6 hours: 60sec *60 min * 6 hr
+  let didTimePass = hasTimePassed( 21600, time_t );
+  if( didTimePass ) {
     return true;
+  }
+  // check temp difference
+  else {
+    let curFocusTemp = target.report.focusTemp; // read new temp
+    tsxDebug( ' curFocusTemp temp: ' + curFocusTemp );
+    if( typeof curFocusTemp == 'undefined' ) {
+      curFocusTemp = lastFocusTemp;
+    }
+    let focusDiff = Math.abs(curFocusTemp - lastFocusTemp).toFixed(2);
+    let targetDiff = target.tempChg; // diff for this target
+    tsxLog(' -check focus ('+targetDiff+'): ' + focusDiff + '='+curFocusTemp +'-'+lastFocusTemp );
+    if( focusDiff >= targetDiff ) {
+    // returning true tell caller to run  @Focus3
+      return true;
+    }
   }
   return false;
 }
@@ -1484,7 +1490,7 @@ function isTargetConditionInValid(target) {
     tsx_AbortGuider();
     InitialFocus( target );
     // no need to return false... can keep going.
-    SetUpAutoGuiding( target, false );			// Setup & Start Auto-Guiding.
+      SetUpAutoGuiding( target, false );			// Setup & Start Auto-Guiding.
   }
 
   // check if time to redo CLS
@@ -2036,6 +2042,10 @@ function tsx_takeImage( filterNum, exposure, frame, tName ) {
   var guiderScale = tsx_GetServerStateValue( 'guiderPixelSize');
   var guidingPixelErrorTolerance = tsx_GetServerStateValue( 'guidingPixelErrorTolerance');
   var isGuideSettlingEnabled = tsx_GetServerStateValue( 'isGuideSettlingEnabled');
+  tsxDebug( ' Settle autoguider: ' + isGuideSettlingEnabled ) ;
+  tsxDebug( ' camScale: ' + camScale ) ;
+  tsxDebug( ' guiderScale: ' + guiderScale ) ;
+  tsxDebug( ' guidingPixelErrorTolerance: ' + guidingPixelErrorTolerance ) ;
   if( typeof camScale === 'undefined' || camScale === '') {
     camScale = 0;
   }
@@ -2048,7 +2058,13 @@ function tsx_takeImage( filterNum, exposure, frame, tName ) {
   if( typeof isGuideSettlingEnabled === 'undefined' || isGuideSettlingEnabled === '') {
     isGuideSettlingEnabled = false;
   }
-
+  // Need to convert booleans to 0~false, 1~true, else fails in TSX
+  if( isGuideSettlingEnabled == true ) {
+    isGuideSettlingEnabled = 1;
+  }
+  else {
+    isGuideSettlingEnabled = 0;
+  }
   cmd = cmd.replace("$004", camScale ); // set cameraImageScale
   cmd = cmd.replace("$005", guiderScale ); // set guiderImageScale
   cmd = cmd.replace("$006", guidingPixelErrorTolerance ); // set guidingPixelErrorTolerance
@@ -2426,7 +2442,10 @@ function getHigherPriorityTarget( validSession ) {
   // tsxDebug('************************');
   tsxDebug(' *** getHigherPriorityTarget: ' + validSession.targetFindName);
 
-  var targetSessions = TargetSessions.find({enabledActive: true }).fetch();
+  var targetSessions = TargetSessions.find({
+    enabledActive: true,
+    isCalibrationFrames: false,
+  }).fetch();
   var numSessions = targetSessions.length;
 
   for (var i = 0; i < numSessions; i++) {
@@ -2562,7 +2581,7 @@ export function canTargetSessionStart( target ) {
   // check for target not ready
   var isComplete = isTargetComplete( target );
   tsxDebug( ' Is target complete: ' + isComplete );
-  if( isComplete ) {
+  if( isComplete && target.isCalibrationFrames == false ) {
     UpdateStatus( ' ' + target.targetFindName + ': is completed' );
     return false;
   }
@@ -2596,7 +2615,7 @@ export function canTargetSessionStart( target ) {
   var minAlt = tsx_reachedMinAlt( target );
   tsxDebug( ' Is target minAlt: ' + minAlt );
   if( minAlt ) {
-    UpdateStatus( ' -below alt.(' + target.minAlt + '): ' + target.targetFindName );
+    UpdateStatus( ' - '+target.targetFindName+' currently ()'+target.report.ALT+')' + ' vs. minimum (' + target.minAlt + ')');
     return false;
   }
 
@@ -2842,6 +2861,23 @@ Use this to set the last focus
     UpdateStatus( ' Received report' );
     tsx_SetServerState( 'tool_active', false );
     return result;
+  },
+
+  refreshTargetReports() {
+    tsx_SetServerState( 'tool_active', true );
+    UpdateStatus( ' Refreshing targets' );
+    let reports = TargetReports.find({}).fetch();
+
+    for (let i = 0; i < reports.length; i++) {
+      let report = reports[i];
+      let target = TargetSessions.findOne({ _id: report.target_id });
+      if( typeof target != 'undefined') {
+        tsx_TargetReport( target );
+        UpdateStatus( ' --- Refreshed: ' + target.targetFindName );
+      }
+    }
+    UpdateStatus( ' Refresh complete' );
+    tsx_SetServerState( 'tool_active', false );
   },
 
   park( ) {
