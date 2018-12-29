@@ -101,7 +101,7 @@ class TargetSessionMenu extends Component {
 
   playScheduler() {
     Meteor.call("startScheduler", function (error, result) {
-      this.forceUpdate();
+      // this.forceUpdate();
       }.bind(this));
   }
 

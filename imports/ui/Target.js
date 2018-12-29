@@ -267,14 +267,34 @@ class Target extends Component {
     let ENABLEACTIVE ='';
     let CALIBRATION = '';
     let TOOL_ACTIVE = false;
+    let ALT = '';
+    let HA = '';
+    let TRANSIT = '';
+    let RA = '';
+    let DEC = '';
+    let POINT = '';
     try {
       ENABLEACTIVE = this.props.target.enabledActive;
       CALIBRATION = this.props.target.isCalibrationFrames;
       TOOL_ACTIVE = this.props.tool_active.value;
+
+      ALT = Number(this.props.report.ALT).toFixed(3);
+      HA = Number(this.props.report.HA).toFixed(3);
+      TRANSIT = Number(this.props.report.TRANSIT).toFixed(3);
+      RA = Number(this.props.report.RA).toFixed(3);
+      DEC = Number(this.props.report.DEC).toFixed(3);
+      POINT = this.props.report.direction;
     } catch (e) {
       ENABLEACTIVE = this.state.enabledActive;
       CALIBRATION = this.state.isCalibrationFrames;
       TOOL_ACTIVE = false;
+
+      ALT = '';
+      HA = '';
+      TRANSIT = '';
+      RA = '';
+      DEC = '';
+      POINT = '';
     }
 
     let DTIME = '';
@@ -287,7 +307,6 @@ class Target extends Component {
       DTIME = hours + ':' + minutes + ', ' + year +'-'+mon+'-'+day;
     }
     catch( e ) {
-      console.log( ' failed to get updatedAt');
     }
     finally {
       //
@@ -321,12 +340,12 @@ class Target extends Component {
             </Segment>
             <Segment>
               <small>Updated: {DTIME}</small><br/>
-              <Label>Alt.: <Label.Detail>{Number(this.props.report.ALT).toFixed(3)}</Label.Detail></Label>
-              <Label>HA: <Label.Detail>{Number(this.props.report.HA).toFixed(3)}</Label.Detail></Label>
-              <Label>Transit: <Label.Detail>{Number(this.props.report.TRANSIT).toFixed(3)}</Label.Detail></Label>
-              <Label>RA: <Label.Detail>{Number(this.props.report.RA).toFixed(3)}</Label.Detail></Label>
-              <Label>DEC: <Label.Detail>{Number(this.props.report.DEC).toFixed(3)}</Label.Detail></Label>
-              <Label>Point: <Label.Detail>{this.props.report.direction}</Label.Detail></Label>
+              <Label>Alt.: <Label.Detail>{ALT}</Label.Detail></Label>
+              <Label>HA: <Label.Detail>{HA}</Label.Detail></Label>
+              <Label>Transit: <Label.Detail>{TRANSIT}</Label.Detail></Label>
+              <Label>RA: <Label.Detail>{RA}</Label.Detail></Label>
+              <Label>DEC: <Label.Detail>{DEC}</Label.Detail></Label>
+              <Label>Point: <Label.Detail>{POINT}</Label.Detail></Label>
             </Segment>
           </Item.Meta>
           <Item.Extra>

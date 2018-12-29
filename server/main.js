@@ -125,7 +125,7 @@ function initServerStates() {
 
 function ParkMount( isParked ) {
   if( !isParked ) {
-    UpdateStatus(' No valid sessions - parking...');
+    UpdateStatus(' Parking...');
     var defaultFilter = tsx_GetServerStateValue('defaultFilter');
     var softPark = Boolean(tsx_GetServerStateValue('defaultSoftPark'));
     tsx_AbortGuider();
@@ -133,7 +133,7 @@ function ParkMount( isParked ) {
   }
   isParked = true;
   var sleepTime = tsx_GetServerStateValue('defaultSleepTime');
-  UpdateStatus( ' No valid target, waiting: '+ sleepTime + ' min');
+  UpdateStatus( ' Parked, waiting: '+ sleepTime + ' min');
   var timeout = 0;
   var msSleep = Number(sleepTime); // number of seconds
   postProgressTotal(sleepTime);
@@ -208,7 +208,9 @@ function startServerProcess() {
   // Do not assume Autoguider calibrated, will be done once guide star found
   var workers = scheduler.processJobs( 'runScheduler',
     function (job, cb) {
-      UpdateStatus(' === Scheduler Started');
+      tsxLog( ' ******************************* ');
+
+      UpdateStatus(' *** Scheduler Started');
       var schedule = job.data;
       tsxDebug( schedule );
       tsxDebug( job.data );
@@ -237,7 +239,15 @@ function startServerProcess() {
             // rotate to a specific position
             var res = tsx_RotateCamera( target.rotator_position );
           }
-          processTargetTakeSeries( target );
+          try {
+            processTargetTakeSeries( target );
+          }
+          catch( err ) {
+            // did we get a CLS Failure???
+            if( err == ' !!! ERROR: CLS failed' ) {
+              UpdateStatus( ' *** ENDING - centring failed. Check for clouds' );
+            }
+          }
         }
         tsx_SetServerState( 'tool_active', false );
       }
@@ -279,12 +289,41 @@ function startServerProcess() {
               tsxDebug ( ' ' + target.targetFindName + ' Preparing target...');
 
               // Point, Focus, Guide
-              var ready = prepareTargetForImaging( target );
+              var ready = false;
+              try {
+                ready = prepareTargetForImaging( target );
+              }
+              catch( err ) {
+                // did we get a CLS Failure???
+                if( err == ' !!! ERROR: CLS failed' ) {
+                  UpdateStatus( ' *** ENDING - centring failed. Check for clouds' );
+                  ParkMount( isParked );
+                  isParked = true;
+                }
+                else {
+                  UpdateStatus( ' !!! SOMETHING WRONG - human needs to check ');
+                  break;
+                }
+              }
               if( ready ) {
                 // target images per Take Series
                 tsxDebug ( ' ************************1*');
-                UpdateStatus ( ' ' +target.targetFindName  + ' *** Start imaging');
-                processTargetTakeSeries( target );
+                UpdateStatus ( ' ' +target.targetFindName  + ': start imaging');
+                try {
+                  processTargetTakeSeries( target );
+                }
+                catch( err ) {
+                  // did we get a CLS Failure???
+                  if( err == ' !!! ERROR: CLS failed' ) {
+                    UpdateStatus( ' *** ENDING - centring failed. Check for clouds' );
+                    ParkMount( isParked );
+                    isParked = true;
+                  }
+                  else {
+                    UpdateStatus( ' !!! SOMETHING WRONG - human needs to check ');
+                    break;
+                  }
+                }
                 tsxDebug ( ' ************************2*');
               }
               else {
@@ -297,11 +336,8 @@ function startServerProcess() {
               isParked = true;
             }
 
-            // See if there are calibration frames to do (Bias/Darl/Flats)
-            var calFrames = findCalibrationSession(); // temp var
-
             // Check if sun is up and no cal frames
-            if( (!isDarkEnough()) && (calFrames == '') && tsx_GetServerStateValue('currentJob') != '' ) {
+            if( (!isDarkEnough()) && tsx_GetServerStateValue('currentJob') != '' ) {
               ParkMount( isParked );
               isParked = true;
               var approachingDawn = isTimeBeforeCurrentTime('3:00');
@@ -314,31 +350,16 @@ function startServerProcess() {
                 tsx_AbortGuider();
                 tsx_MntPark(defaultFilter, softPark);
                 UpdateStatus( ' Scheduler stopped: not dark.');
-                UpdateStatus( ' ^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
                 break;
               }
             }
-            // check of cal frames and no target
-            else if ( calFrames != '' && (typeof target == 'undefined') && tsx_GetServerStateValue('currentJob') != '' ) {
-              for( var i = 0; i < calFrames.length; i++ ) {
-                  // process the
-                  // Need to prompt user to continuw...
-                  // If flat... put on panel
-                  // if Dark put on lense cover...
-                //  processTargetTakeSeries( calFrames[i] );
-              }
-            }
         }
-
       }
-      tsxLog( ' Scheduler exited.');
       // While ended... exit process
       setSchedulerState('Stop' );
-      // tsx_Disconnect();
+      tsxLog( ' Scheduler exited.');
+      tsxLog( ' ******************************* ');
       job.done();
-
-      // Be sure to invoke the callback
-      // when work on this job has finished
       cb();
     }
   );
@@ -351,7 +372,7 @@ Meteor.startup(() => {
   // FlatSeries.remove({});
   // TargetAngles.remove({});
 
-  tsxLog(' ******* STARTED ******', '');
+  tsxLog(' ******* TSX_CMD ******', '');
 
   var version_dat = {};
   version_dat = JSON.parse(Assets.getText('version.json'));
@@ -398,7 +419,7 @@ Meteor.startup(() => {
   tsx_UpdateDevice('focuser', 'Not connected ', '' );
 
   tsxLog( ' Logfile', logFileForClient() );
-  tsxLog(' ******* TSX_CMD ONLINE ******', '');
+  tsxLog(' ************ READY ************ ', '');
 
   return;
 
@@ -420,8 +441,9 @@ export function srvStopScheduler() {
   tsx_SetServerState('targetName', 'No Active Target');
   tsx_SetServerState('scheduler_report', '');
   tsx_AbortGuider();
-  UpdateStatus(' *** Manually STOPPED scheduler ***');
+  UpdateStatus(' *** Manually STOPPING scheduler ***');
   setSchedulerState('Stop' );
+  tsxLog( ' ******************************* ');
 }
 
 Meteor.methods({
@@ -453,8 +475,7 @@ Meteor.methods({
 
         // Confirm whether the there is a script running...
         if( !tsx_ServerIsOnline() ) {
-          tsxLog('Check TSX... script running');
-          UpdateStatus('Check TSX... script running');
+          UpdateStatus('Check TSX... script running, or server not online.');
           return;
         }
 
@@ -517,6 +538,11 @@ Meteor.methods({
       tsxLog(' Calibrating AutoGuider');
       CalibrateAutoGuider();
     }
+    catch( e ) {
+      if( e == 'TsxError' ) {
+        UpdateStatus('!!! TheSkyX connection is no longer there!');
+      }
+    }
     finally {
       tsx_SetServerState( 'tool_active', false );
     }
@@ -547,6 +573,9 @@ Meteor.methods({
     catch( e ) {
       UpdateStatus('Slewing failed');
       res = 'Failed slewing';
+      if( e == 'TsxError' ) {
+        UpdateStatus('!!! TheSkyX connection is no longer there!');
+      }
     }
     finally {
       tsx_SetServerState( 'tool_active', false );
@@ -562,6 +591,9 @@ Meteor.methods({
         catch (e) {
           UpdateStatus('Stop tracking failed');
           res = 'Stop tracking failed';
+          if( e == 'TsxError' ) {
+            UpdateStatus('!!! TheSkyX connection is no longer there!');
+          }
         }
         finally {
           tsx_SetServerState( 'tool_active', false );
@@ -578,6 +610,11 @@ Meteor.methods({
       tsxLog(' Rotating Camera');
       var num  = tsx_GetServerStateValue('tool_rotator_num');
       var res = tsx_RotateCamera( num, cls ); // tool needs to use CLS use 0
+    }
+    catch( e ) {
+      if( e == 'TsxError' ) {
+        UpdateStatus('!!! TheSkyX connection is no longer there!');
+      }
     }
     finally {
       tsx_SetServerState( 'tool_active', false );
@@ -605,7 +642,18 @@ Meteor.methods({
 
    getUpdateTargetReport(target) {
      tsxLog( ' TargetReport: ' + target.targetFindName );
-     var rpt = UpdateImagingTargetReport( target )
+     var rpt = '';
+     try {
+       rpt = UpdateImagingTargetReport( target )
+     }
+     catch( e ) {
+       if( e == 'TsxError' ) {
+         UpdateStatus('!!! TheSkyX connection is no longer there!');
+       }
+       rpt = {
+         ready: false,
+       }
+     }
      return rpt;
    },
 

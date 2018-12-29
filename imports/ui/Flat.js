@@ -27,7 +27,6 @@ import {
 
 // Import the API Model
 import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
-import { TargetSessions } from '../api/targetSessions.js';
 import { TargetReports } from '../api/targetReports.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 import {

@@ -63,9 +63,11 @@ export function tsx_feeder( cmd, callback ) {
   var net = require('net');
   var tsx = new net.Socket({writeable: true}); //writeable true does not appear to help
   tsx.setEncoding(); // used to set the string type of return
+
   tsx.on('close', function() {
        Meteor._debug('tsx_close');
   });
+
   tsx.on('write', function() {
        // Meteor._debug('Writing to TheSkyX.');
   });
@@ -75,12 +77,8 @@ export function tsx_feeder( cmd, callback ) {
     console.error(" ******************************* ");
     console.error( 'Connection error: ' + err );
     console.error(" ******************************* ");
-    console.error(cmd);
-    console.error(" ******************************* ");
-    // console.error( new Error().stack );
-    // not sure if the call back out should be used...
-    // tsx.close;
-    // callback('TsxError|' + err);
+
+    callback('TsxError|' + err + '|' + cmd );
     stop_tsx_is_waiting();
   });
 
@@ -97,6 +95,7 @@ export function tsx_feeder( cmd, callback ) {
 
   tsx.connect(port, ip, function() {
   });
+
   tsx.write(cmd, (err) => {
      // Meteor._debug('Sending tsxCmd: ' + cmd);
   });

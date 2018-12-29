@@ -27,6 +27,19 @@ import { TargetSessions } from './targetSessions.js'
 
 
 /* Flat Series is:
+  It is a wrapper and pointer to reuse the target and takeseries routines,
+  and use them for taking calibration files.
+
+  Creating a flatseries allows the user to create a seriess of calibtration
+  subframes to take. The Target is a calibration TargetSessions that is identified
+  with the "isCalibrationFrames" set to true
+
+  The series is a TakeSeriesTemplates had the "isCalibrationFrames" set to true.
+
+  It is the name field of the TargetSessions and the TakeSeriesTemplates that
+  ties the flatSeries to them... the flatSeries ID is used in the name.
+
+
   rotatorPosition: 0,
   enabledActive:false,
   filtergroup: [],

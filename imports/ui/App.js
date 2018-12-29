@@ -61,6 +61,7 @@ import TargetSessionMenu from './TargetSessionMenu.js';
 import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 import SessionControls from './SessionControls.js';
+import TestModal from './TestModal.js';
 
 import {
   tsx_ServerStates,
@@ -89,6 +90,7 @@ class App extends TrackerReact(Component) {
       port: '3040',
       currentStage: ' Loading....',
       modalOpenWindowSessionControls: false,
+      modalOpen: false,
     };
   }
 
@@ -110,6 +112,9 @@ class App extends TrackerReact(Component) {
 
   modalOpenSessionsControls = () => this.setState({ modalOpenWindowSessionControls: true });
   modalCloseSessionsControls = () => this.setState({ modalOpenWindowSessionControls: false });
+
+  modalOpenTest = () => this.setState({ modalOpenTest: true });
+  modalCloseTest = () => this.setState({ modalOpenTest: false });
 
   saveTSXServerIp() {
     this.modalEnterIpClose();
@@ -596,6 +601,7 @@ class App extends TrackerReact(Component) {
 
     return (
       <Button.Group basic size='small' floated='right'>
+        <Button icon='cloud download' onClick={this.modalOpenTest}/>
         <Button icon='detective' onClick={this.modalOpenSessionsControls}/>
         <Button disabled={DISABLE} icon='cloud upload' onClick={this.loadSkySafari.bind(this)}/>
         <Button disabled compact />
@@ -631,6 +637,62 @@ class App extends TrackerReact(Component) {
     )
   }
 
+  renderTestModal() {
+    return(
+      <Modal
+        open={this.state.modalOpenTest}
+        onClose={this.modalCloseTest}
+        basic
+        size='small'
+        closeIcon>
+        <Modal.Header>test</Modal.Header>
+        <Modal.Content>
+          <TestModal
+            tsxInfo = { this.props.tsxInfo }
+            target_reports={this.props.target_reports}
+            tool_active = {this.props.tool_active}
+            scheduler_running={this.props.scheduler_running}
+            scheduler_report={this.props.scheduler_report}
+            tsxInfo = {this.props.tsxInfo}
+            currentStage= {this.props.currentStage}
+          />
+        </Modal.Content>
+        <Modal.Description>
+        </Modal.Description>
+        <Modal.Actions>
+        </Modal.Actions>
+      </Modal>
+    )
+  }
+
+/* This is a sample template to add in a modal
+  renderTestModal() {
+    return(
+      <Modal
+        open={this.state.modalOpenTest}
+        onClose={this.modalCloseTest}
+        basic
+        size='small'
+        closeIcon>
+        <Modal.Header>test</Modal.Header>
+        <Modal.Content>
+          <TestModal
+            tsxInfo = { this.props.tsxInfo }
+            target_reports={this.props.target_reports}
+            tool_active = {this.props.tool_active}
+            scheduler_running={this.props.scheduler_running}
+            scheduler_report={this.props.scheduler_report}
+            tsxInfo = {this.props.tsxInfo}
+          />
+        </Modal.Content>
+        <Modal.Description>
+        </Modal.Description>
+        <Modal.Actions>
+        </Modal.Actions>
+      </Modal>
+    )
+  }
+*/
   render() {
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
     */
@@ -720,6 +782,7 @@ class App extends TrackerReact(Component) {
 
           *******************************             */}
           {this.renderSessionControls()}
+          {this.renderTestModal()}
           <Modal
             open={this.state.modalConnectionFailed}
             onClose={this.modalConnectionFailedClose.bind(this)}
@@ -790,13 +853,13 @@ export default withTracker(() => {
     isTwilightEnabled: TheSkyXInfos.findOne({name: 'isTwilightEnabled'}),
 
     // App stuf
+    currentStage: TheSkyXInfos.findOne({name: 'currentStage'}),
     tsxInfo: TheSkyXInfos.find({}).fetch(),
     tsx_version: TheSkyXInfos.findOne({name: 'tsx_version'}),
     tsx_date: TheSkyXInfos.findOne({name: 'tsx_date'}),
     tsxIP: TheSkyXInfos.findOne({name: 'ip'}),
     tsxPort: TheSkyXInfos.findOne({name: 'port'}),
     srvLog: AppLogsDB.find({}, {sort:{time:-1}}).fetch(10),
-    currentStage: TheSkyXInfos.findOne({name: 'currentStage'}),
     activeMenu: TheSkyXInfos.findOne({name: 'activeMenu'}),
 
     flatSettings: TheSkyXInfos.findOne({name: 'flatSettings'}),
