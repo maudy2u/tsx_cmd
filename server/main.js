@@ -243,8 +243,8 @@ function startServerProcess() {
             processTargetTakeSeries( target );
           }
           catch( err ) {
-            // did we get a CLS Failure???
-            if( err == ' !!! ERROR: CLS failed' ) {
+            var res = err.split('|')[0].trim();
+            if( res == 'TSX_ERROR' ) {
               UpdateStatus( ' *** ENDING - centring failed. Check for clouds' );
             }
           }
@@ -295,7 +295,8 @@ function startServerProcess() {
               }
               catch( err ) {
                 // did we get a CLS Failure???
-                if( err == ' !!! ERROR: CLS failed' ) {
+                var res = err.split('|')[0].trim();
+                if( res == 'TSX_ERROR' ) {
                   UpdateStatus( ' *** ENDING - centring failed. Check for clouds' );
                   ParkMount( isParked );
                   isParked = true;
@@ -314,7 +315,8 @@ function startServerProcess() {
                 }
                 catch( err ) {
                   // did we get a CLS Failure???
-                  if( err == ' !!! ERROR: CLS failed' ) {
+                  var res = err.split('|')[0].trim();
+                  if( res == 'TSX_ERROR' ) {
                     UpdateStatus( ' *** ENDING - centring failed. Check for clouds' );
                     ParkMount( isParked );
                     isParked = true;
@@ -372,8 +374,6 @@ Meteor.startup(() => {
   // FlatSeries.remove({});
   // TargetAngles.remove({});
 
-  tsxLog(' ******* TSX_CMD ******', '');
-
   var version_dat = {};
   version_dat = JSON.parse(Assets.getText('version.json'));
   if( version_dat.version != '') {
@@ -419,7 +419,7 @@ Meteor.startup(() => {
   tsx_UpdateDevice('focuser', 'Not connected ', '' );
 
   tsxLog( ' Logfile', logFileForClient() );
-  tsxLog(' ************ READY ************ ', '');
+  tsxLog(' ******* TSX_CMD ONLINE ******', '');
 
   return;
 

@@ -494,6 +494,8 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
+  if( !success ) {
+  }
   return success;
 }
 
@@ -536,6 +538,7 @@ function tsx_Slew( target ) {
 
   var cmd = tsx_cmd('SkyX_JS_Slew');
   cmd = cmd.replace('$000',  target.targetFindName  );
+  let Out = false;
 
   var tsx_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
@@ -545,16 +548,20 @@ function tsx_Slew( target ) {
       forceAbort = true;
       UpdateStatus(' *** Slew failed: ' + result);
     }
+    else {
+      Out = true;
+    }
     tsx_is_waiting = false;
   }));
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
+  return Out;
 }
 
 export function tsx_SlewTargetName( target ) {
   // tsxDebug('************************');
-  tsxDebug(' *** tsx_Slew: ' + target );
+  tsxDebug(' *** tsx_SlewTargetName: ' + target );
 
   var cmd = tsx_cmd('SkyX_JS_SlewTarget');
   cmd = cmd.replace('$000',  target  );
@@ -580,7 +587,7 @@ export function tsx_SlewTargetName( target ) {
 
 export function tsx_SlewCmdCoords( cmd, ra, dec ) {
   // tsxDebug('************************');
-  tsxDebug(' *** tsx_Slew: ' + ra + ', ' + dec );
+  tsxDebug(' *** tsx_SlewCmdCoords: ' + ra + ', ' + dec );
 
   var result = '';
   var cmd = tsx_cmd(cmd);
@@ -664,33 +671,25 @@ function tsx_CLS( target ) {
   var doCLS = tsx_GetServerStateValue( 'defaultCLSEnabled' );
   if( doCLS == false ) {
     tsxInfo(' *** tsx_CLS: disabled, slewing' );
-
     // If CLS not enabled then Slew...
-    var res = tsx_Slew( target );
-
+    Out = tsx_Slew( target );
     return Out;
   }
 
   var clsSuccess = tsx_CLS_target( target.targetFindName, target.clsFilter );
   // Update the target angle...
-  if( clsSuccess.angle != -1 ) {
-    targetReportAngle( target, clsSuccess.angle );
-    Out = clsSuccess;
+  if( clsSuccess ) {
+    Out = true;
   }
-  else {
-    updateTargetIsCloudy( target, clsSuccess.angle );
-  }
-  // tsxInfo( ' clsSuccess angle: ' + clsSuccess.angle );
-  return clsSuccess;
+  updateTargetIsCloudy( target, clsSuccess );
+
+  return Out;
 }
 
 function tsx_CLS_target( target, filter ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_CLS_target: ' + target );
-  var clsSuccess = {
-    angle: -1, // not set
-    rotPos: -1, // not set
-  };
+  var clsSuccess =false;
   var tsx_is_waiting = true;
   var retries = tsx_GetServerStateValue( 'defaultCLSRetries' );
   if( typeof retries === 'undefined' || retries === '' ) {
@@ -706,25 +705,25 @@ function tsx_CLS_target( target, filter ) {
   cmd = cmd.replace("$001", slot);
   cmd = cmd.replace("$002", retries);
 
+  let tsx_err = false;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+      tsx_err = tsx_has_error( tsx_return );
       tsxInfo( ' CLS res: ' + tsx_return );
       var result = tsx_return.split('|')[0].trim();
       if( result != 'Success') {
         // So if we fail here... what do we do...
         UpdateStatusErr(' !!! Centring Failed. Error: ' + tsx_return);
-        // do we throw here????
-        tsx_is_error( tsx_return );
       }
       else {
+        clsSuccess = true;
         tsxInfo(' ' + target + ': centred' );
         var angle = tsx_return.split('|')[1].trim();
-        clsSuccess.angle = angle;
-        tsxInfo(' ' + target + ': Position Angle: ' + clsSuccess.angle );
+        tsxInfo(' ' + target + ': Position Angle: ' + angle );
         targetReportAngle( target, angle );
         var rotPos;
         try {
           rotPos = tsx_return.split('|')[2].trim();
-          clsSuccess.rotPos = rotPos;
+          tsxWarn( ' tsx_CLS_target did not set rotator position');
         }
         finally {
           // all good do nothing
@@ -737,6 +736,9 @@ function tsx_CLS_target( target, filter ) {
 
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
+  }
+  if( tsx_err != false ) {
+    throw( 'TSX_ERROR|Cloudy? Is Tsx Running?');
   }
   return clsSuccess;
 }
@@ -796,8 +798,7 @@ function tsx_RunFocus3( target ) {
       }
       else {
         var res = tsx_CLS_target( focusTarget, target.clsFilter);
-        // #TODO set the target.isCloudy = false;
-        updateTargetIsCloudy( target, res.angle );
+        updateTargetIsCloudy( target, res );
       }
     }
 
@@ -851,7 +852,7 @@ function tsx_RunFocus3( target ) {
       }
     }
 
-    UpdateStatus(' **** ' + target.targetFindName +': @Focus3 finished');
+    UpdateStatus(' ' + target.targetFindName +': @Focus3 finished');
   }
   else {
     UpdateStatus(' *** ' + target.targetFindName +': @Focus3 disabled');
@@ -966,7 +967,7 @@ function SetUpForImagingRun(target) {
   var tryTarget = UpdateImagingTargetReport( target );
 	if( !tryTarget.ready ) {
     tsxDebug(target.targetFindName + ' ' + tryTarget.msg);
-    return false;
+    throw( 'TSX_ERROR|Target Report Failed. TSX Running?');
   }
   else {
     // Used to update the monitor, as it is this target to continue
@@ -975,9 +976,9 @@ function SetUpForImagingRun(target) {
 
   UpdateStatus( ' ' + target.targetFindName + ': centring' );
 	var cls = tsx_CLS(target); 						//# Call the Closed-Loop-Slew function to go to the target
-  if( cls.angle == -1 ) {
+  if( !cls ) {
     UpdateStatus( ' Target centred FAILED: ' + cls.angle);
-    return false; // the angle should be set other than -1
+    throw( 'TSX_ERROR|Cloudy? Is Tsx Running?');
   }
   if( isSchedulerStopped() ) {
     return false; // exit
@@ -1456,6 +1457,7 @@ function isTargetConditionInValid(target) {
   // *******************************
   UpdateStatus( ' --- check stop conditions');
   if( isSchedulerStopped() ) {
+    forceAbort = true;
     return true; // exit
   }
 
@@ -1463,6 +1465,7 @@ function isTargetConditionInValid(target) {
   // reassess the target state
   if( !(canTargetSessionStart( target )) ) {
     tsxDebug(' ' + target.targetFindName + ' cannot continue!!');
+    forceAbort = true;
     return true;
   }
   else {
@@ -1475,6 +1478,7 @@ function isTargetConditionInValid(target) {
   var priorityTarget = getHigherPriorityTarget( target ); // no return
   if( priorityTarget.targetFindName != target.targetFindName ) {
     tsxDebug(' ' + target.targetFindName + ' has been replaced by ' + priorityTarget.targetFindName );
+    forceAbort = true;
     return true;
   }
 
@@ -1488,26 +1492,12 @@ function isTargetConditionInValid(target) {
     // prepare target of imaging again...
     // no need to focus or dither as done in prerun
     UpdateStatus( ' *** Meridian flip...');
-    prepareTargetForImaging( target ) ;
+    let res = prepareTargetForImaging( target ) ;
 
     return false; // all good continue
   }
 
   // *******************************
-  // NOW CONTINUE ON WITH CURRENT SPOT...
-  // FOCUS AND DITHER IF NEEDED
-  //
-	// *******************************
-	// check if reFocusTemp - needs to refocus
-  var runFocus3 = isFocusingNeeded( target );
-  if( runFocus3 ) {
-    tsx_AbortGuider();
-    InitialFocus( target );
-    // no need to return false... can keep going.
-    UpdateStatus( ' --- refocused, and redo autoguider');
-    SetUpAutoGuiding( target, false );			// Setup & Start Auto-Guiding.
-  }
-
   // check if time to redo CLS
   var isCLSRepeatEnabled = tsx_GetServerStateValue('isCLSRepeatEnabled');
   if( isCLSRepeatEnabled === true ) {
@@ -1528,6 +1518,7 @@ function isTargetConditionInValid(target) {
       if( doCLS === true ) {
         UpdateStatus( ' *** Time to centre again.');
         SetUpForImagingRun( target );
+
         tsx_SetServerState('defaultCLSRepeat', defaultCLSRepeat.value);
         return false;
       }
@@ -1540,11 +1531,33 @@ function isTargetConditionInValid(target) {
     }
   }
 
+  // *******************************
+  // NOW CONTINUE ON WITH CURRENT SPOT...
+  // FOCUS AND DITHER IF NEEDED
+  //
+	// *******************************
+	// check if reFocusTemp - needs to refocus
+  var runFocus3 = isFocusingNeeded( target );
+  var doDither = isDitheringNeeded( target );
+  if( runFocus3 ) {
+    tsx_AbortGuider();
+    InitialFocus( target );
+    // no need to return false... can keep going.
+    UpdateStatus( ' --- refocused, and redo autoguider');
+    let didDither = false;
+    if( doDither ) {
+      didDither = tsx_dither( target );
+    }
+    if( !didDither ) {
+      SetUpAutoGuiding( target, false );			// Setup & Start Auto-Guiding.
+    }
+  }
+
   //
   // *******************************
-  // check if a dither is needed
-  var ditherTarget = tsx_GetServerStateValue('defaultDithering');
-  if( ditherTarget > 0 ) {
+  // Recheck if a dither is needed
+  doDither = isDitheringNeeded( target );
+  if( doDither ) {
     var dither = tsx_dither( target );
   }
 
@@ -1552,22 +1565,33 @@ function isTargetConditionInValid(target) {
   return false;
 }
 
-// **************************************************************
-function tsx_dither( target ) {
-  // tsxDebug('************************');
+function isDitheringNeeded (target ) {
   tsxDebug(' *** tsx_dither: ' + target.targetFindName);
 
   var ditherTarget = Number(tsx_GetServerStateValue('defaultDithering'));
+  if( !(ditherTarget > 0) ) {
+    return false;
+  }
   var lastDither = Number(tsx_GetServerStateValue('imagingSessionDither'));
-  var Out = false;
   var dCount = lastDither +1;
   var doDither = (Math.round(dCount) >= Math.round(ditherTarget));
   tsxLog( ' --- check dither needed: ' + doDither );
-  if( ditherTarget != 0 ) {
+  return doDither;
+}
+
+// **************************************************************
+function tsx_dither( target ) {
+  // tsxDebug('************************');
+  var Out = false;
+  var ditherTarget = Number(tsx_GetServerStateValue('defaultDithering'));
+  var lastDither = Number(tsx_GetServerStateValue('imagingSessionDither'));
+  var doDither = isDitheringNeeded( target );
+
+  if( !(ditherTarget > 0) ) {
     if( doDither ) { // adding a plus one so the zero works and if one is passed it will rung once.
 
         // first abort Guiding
-        // tsx_AbortGuider(); // put into dither
+        // tsx_AbortGuider(); // not needed as put into dither
 
         var cmd = tsx_cmd('SkyX_JS_NewDither');
 
@@ -1586,7 +1610,7 @@ function tsx_dither( target ) {
               var result = tsx_return.split('|')[0].trim();
               tsxDebug('Any error?: ' + result);
               if( result != 'Success') {
-                tsxWarn('!!! SkyX_JS_NewDither Failed. Error: ' + result);
+                UpdateStatusWarn('!!! SkyX_JS_NewDither Failed. Error: ' + result);
               }
               else {
                 // tsxLog('Dither success');
@@ -1618,7 +1642,7 @@ function tsx_dither( target ) {
 
 }
 
-export function tsx_is_error( tsx_return ) {
+export function tsx_has_error( tsx_return ) {
   let cmdErr = tsx_return.split('|')[0].trim();
   if( cmdErr == 'TsxError') {
     UpdateStatusErr('!!! TheSkyX connection is no longer there!');
@@ -1656,7 +1680,7 @@ function tsx_TargetReport( target ) {
   };
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-    if( tsx_is_error(tsx_return) != false ) {
+    if( tsx_has_error(tsx_return) != false ) {
       tsx_is_waiting = false;
       return Out;
     }
@@ -2370,7 +2394,7 @@ export function processTargetTakeSeries( target ) {
 export function prepareTargetForImaging( target ) {
   tsxDebug(' ***********************');
   tsxDebug(' *** prepareTargetForImaging: ' + target.targetFindName);
-
+  forceAbort = false;
   if( typeof target == 'undefined') {
     target = 'No target found. Check constraints.'
     UpdateStatus( " Selecting failed: "+ target);
