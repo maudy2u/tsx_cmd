@@ -2716,7 +2716,7 @@ Meteor.methods({
       shell.exit(1);
       return;
     }
-    if (shell.exec('mongodump --uri=mongodb://127.0.0.1:3001/meteor -o /tmp/tsx_cmd_db_export --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB').code !== 0) {
+    if (shell.exec('mongodump -d tsx_cmd -o /tmp/tsx_cmd_db_export --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB').code !== 0) {
       UpdateStatus('Error: Failed to run mongodump to create DB backup');
       shell.exit(1);
       return;
