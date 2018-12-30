@@ -101,16 +101,31 @@ class TakeSeries extends Component {
     return seriesDescription( this.props.seriesTemplate );
   }
 
+  canHeaderClick( state, active ) {
+    if( state == 'Stop' && active == false ) {
+      return this.editEntry.bind(this);
+    }
+  }
+
   render() {
     let DESCRIPTION = '';
     if( this.props.seriesTemplate.description != '') {
       DESCRIPTION = this.props.seriesTemplate.description;
     }
+    let ENABLEACTIVE ='';
+    let TOOL_ACTIVE = false;
+    try {
+      ENABLEACTIVE = this.props.target.enabledActive;
+      TOOL_ACTIVE = this.props.tool_active.value;
+    } catch (e) {
+      ENABLEACTIVE = this.state.enabledActive;
+      TOOL_ACTIVE = false;
+    }
     return (
       <Segment raised>
         <Item>
           <Item.Content>
-            <Item.Header as='a' onClick={this.editEntry.bind(this)}>
+            <Item.Header as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, TOOL_ACTIVE)}>
               {this.props.seriesTemplate.name}
             </Item.Header>
             <Button.Group basic size='mini' floated='right'>

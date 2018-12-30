@@ -106,7 +106,12 @@ class TakeSeriesTemplateMenu extends Component {
       <br />
        {this.props.seriesList.map( (takeSeriesTemplate)=>{
            return (
-             <TakeSeries key={takeSeriesTemplate._id} seriesTemplate={takeSeriesTemplate} />
+             <TakeSeries
+              key={takeSeriesTemplate._id}
+              seriesTemplate={takeSeriesTemplate}
+              scheduler_running={this.props.scheduler_running}
+              tool_active={this.props.tool_active}
+            />
            )
        })}
      </div>

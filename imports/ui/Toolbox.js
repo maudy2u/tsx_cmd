@@ -289,8 +289,8 @@ class Toolbox extends Component {
         value: 'Target name',
       },
       {
-        text: '',
-        value: '',
+        text: 'Do not slew',
+        value: 'Do not slew',
       },
     ];
 
