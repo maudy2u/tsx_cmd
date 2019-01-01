@@ -37,7 +37,7 @@ conky.config = {
 }
 
 conky.text = [[
-${scroll 16 $nodename - $sysname $kernel on $machine | }
+${scroll 32 $nodename - $sysname $kernel on $machine | }
 $hr
 ${color grey}Uptime:$color $uptime
 ${color grey}Frequency (in MHz):$color $freq
@@ -49,6 +49,8 @@ ${color grey}Processes:$color $processes  ${color grey}Running:$color $running_p
 $hr
 ${color grey}File systems:
  / $color${fs_used /}/${fs_size /} ${fs_bar 6 /}
+ / ${if_existing /media/odroid/PENSIVE2} ${color SlateBlue1} ${fs_used /media/odroid/PENSIVE2}/${fs_size /media/odroid/PENSIVE2} ${fs_bar /media/odroid/PENSIVE2}
+ / ${if_existing /media/odroid/PENSIVE3} ${color SlateBlue3} ${fs_used /media/odroid/PENSIVE3}/${fs_size /media/odroid/PENSIVE3} ${fs_bar /media/odroid/PENSIVE3}
 ${color grey}Networking:
 Up:$color ${upspeed eth0} ${color grey} - Down:$color ${downspeed eth0}
 $hr
