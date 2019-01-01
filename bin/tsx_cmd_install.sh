@@ -94,16 +94,20 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     elif [ "$(uname -p)" == "armv7l" ]; then
 
       echo " *******************************"
+      echo "         WARNING WARNING"
+      echo " *******************************"
       echo "Mongodb - BUILD - NEED TO BE BUILT FOR ARMv7"
       echo "run the following (it can take a while on ODroid-XU4)"
       echo " ./bin/mongod_arm_build.sh"
       echo " *******************************"
-
+      echo "         WARNING WARNING"
+      echo " *******************************"
+      echo ""
       echo " *******************************"
       echo "nodejs - Download and extract"
+      #curl https://nodejs.org/dist/latest-v6.x/node-v6.14.4-linux-armv7l.tar.gz -o node-v6.14.4-linux-armv7l.tar.gz
       echo " *******************************"
-      # armv7
-      curl https://nodejs.org/dist/latest-v6.x/node-v6.14.4-linux-armv7l.tar.gz -o node-v6.14.4-linux-armv7l.tar.gz
+      curl https://nodejs.org/dist/v6.14.4/node-v6.14.4-linux-armv7l.tar.gz  -o node-v6.14.4-linux-armv7l.tar.gz
       tar -xf node-v6.14.4-linux-armv7l.tar.gz
       rm ${install_dir}/node-v6.14.4-linux-armv7l.tar.gz
       # FIX for odroid - 2018-11-16 no longer needed
