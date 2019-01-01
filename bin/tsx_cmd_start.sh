@@ -26,10 +26,10 @@ export ROOT_URL='http://127.0.0.1'
 export METEOR_SETTINGS="$(cat ${install_dir}/settings.json)"
 
 if [ "$(uname)" == "Darwin" ]; then
-  if [ "substr $(uname -p)" == "i386" ]; then
+  if [ "$(uname -p)" == "i386" ]; then
     echo Mac in ${install_dir}
     export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-darwin-x64/bin:$PATH
-    mongod --inMemorySizeGB 1 --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log &
+    mongod --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log &
   else
     echo "$(expr substr $(uname -s) 1 10)" - not yet supported
     exit 5
