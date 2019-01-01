@@ -522,21 +522,35 @@ Meteor.methods({
    },
 
   calibrateGuider( slew, location, dec_az ) {
+    tsxDebug(' *** tsx_CalibrateAutoGuide' );
+    var enabled = tsx_GetServerStateValue('isCalibrationEnabled');
+    if( !enabled ) {
+      UpdateStatus(' *** Calibration disabled - enable to continue');
+      return false;
+    }
+
     tsx_SetServerState( 'tool_active', true );
     try {
+      let res = true;
       if( slew != '' ) {
         if( slew == 'Alt/Az'&& location !='' && dec_az != '') {
-          tsx_SlewCmdCoords( 'SkyX_JS_SlewAltAz', location, dec_az );
+          UpdateStatus(' Tool: slewing to Alt/Az: ' + location + '/' + dec_az );
+          res = tsx_SlewCmdCoords( 'SkyX_JS_SlewAltAz', location, dec_az );
         }
         else if( slew == 'Ra/Dec' && location !='' && dec_az != '') {
-          tsx_SlewCmdCoords( 'SkyX_JS_SlewRaDec', location, dec_az );
+          UpdateStatus(' Tool: slewing to Ra/Dec: ' + location + '/' + dec_az );
+          res = tsx_SlewCmdCoords( 'SkyX_JS_SlewRaDec', location, dec_az );
         }
         else if( slew == 'Target name' && location !='') {
-          tsx_SlewTargetName( location  );
+          UpdateStatus(' Tool: slewing to target: ' + location );
+          res = tsx_SlewTargetName( location  );
         }
       }
-      tsxLog(' Calibrating AutoGuider');
-      CalibrateAutoGuider();
+      if( res = true ) {
+        UpdateStatus(' Tool: slew finished');
+        tsxLog(' Tool: calibrating autoGuider');
+        CalibrateAutoGuider();
+      }
     }
     catch( e ) {
       if( e == 'TsxError' ) {

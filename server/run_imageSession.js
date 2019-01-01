@@ -589,7 +589,7 @@ export function tsx_SlewCmdCoords( cmd, ra, dec ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_SlewCmdCoords: ' + ra + ', ' + dec );
 
-  var result = '';
+  var result = false;
   var cmd = tsx_cmd(cmd);
   cmd = cmd.replace('$000',  ra  );
   cmd = cmd.replace('$001',  dec  );
@@ -604,6 +604,7 @@ export function tsx_SlewCmdCoords( cmd, ra, dec ) {
     }
     else {
       tsxDebug('Slew finished');
+      result = true;
     }
     tsx_is_waiting = false;
   }));
@@ -1557,6 +1558,7 @@ function isTargetConditionInValid(target) {
   // *******************************
   // Recheck if a dither is needed
   doDither = isDitheringNeeded( target );
+  tsxInfo( ' --- check dither needed: ' + doDither );
   if( doDither ) {
     var dither = tsx_dither( target );
   }
@@ -1575,7 +1577,7 @@ function isDitheringNeeded (target ) {
   var lastDither = Number(tsx_GetServerStateValue('imagingSessionDither'));
   var dCount = lastDither +1;
   var doDither = (Math.round(dCount) >= Math.round(ditherTarget));
-  tsxLog( ' --- check dither needed: ' + doDither );
+  tsxDebug( ' --- check dither needed: ' + doDither );
   return doDither;
 }
 
