@@ -869,8 +869,7 @@ function InitialFocus( target ) {
 
   var temp = tsx_RunFocus3( target ); // need to get the focus position
   tsxInfo( ' *** ' + target.targetFindName +': Initial Focus temp: ' + temp );
-  // var temp = result.split('|')[0].trim();
-  //  var temp = tsx_GetFocusTemp( target ); // temp and position set inside
+
   if( temp != '') {
     tsx_SetServerState( 'initialFocusTemperature', temp);
   }
