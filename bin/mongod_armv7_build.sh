@@ -35,7 +35,7 @@ echo ************************
 echo Clone GitHub Mongod v3.0.7 and prep code
 git clone --branch "r3.0.7" --depth 1 https://github.com/mongodb/mongo.git
 cd mongo
-cp ../misc/SConscript src/third_party/v8-3.25/SConscript
+cp ../SConscript src/third_party/v8-3.25/SConscript
 
 echo ************************
 echo Build Mongod

@@ -98,7 +98,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
       echo " *******************************"
       echo "Mongodb - BUILD - NEED TO BE BUILT FOR ARMv7"
       echo "run the following (it can take a while on ODroid-XU4)"
-      echo " ./bin/mongod_arm_build.sh"
+      echo " ./bin/mongod_armv7_build.sh"
       echo " *******************************"
       echo "         WARNING WARNING"
       echo " *******************************"
@@ -163,3 +163,16 @@ EOF
 echo " *******************************"
 echo " TSX_CMD - installed"
 echo " *******************************"
+
+if [ "$(uname -p)" == "armv7l" ]; then
+  echo " *******************************"
+  echo "         WARNING WARNING"
+  echo " *******************************"
+  echo "Mongodb - BUILD - NEED TO BE BUILT FOR ARMv7"
+  echo "run the following (it can take a while on ODroid-XU4)"
+  echo " ./bin/mongod_armv7_build.sh"
+  echo " *******************************"
+  echo "         WARNING WARNING"
+  echo " *******************************"
+  echo ""
+fi
