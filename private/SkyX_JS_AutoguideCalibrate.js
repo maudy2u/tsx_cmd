@@ -12,10 +12,15 @@ var frameHalf = frameSize/2;
 var Out = '';			// Form the output string
 
 //open TSX camera and get the last image
-var ccdAG = ccdsoftAutoguider;
+var CCDAG = ccdsoftAutoguider;
+var CCDAGI = ccdsoftAutoguiderImage;
 
-var W =ccdAG.WidthInPixels;
-var H = ccdAG.HeightInPixels;
+CCDAG.GuideStarX = GUIDE_STAR_X * CCDAGI.FITSKeyword ("XBINNING") ;
+CCDAG.GuideStarY = GUIDE_STAR_Y * CCDAGI.FITSKeyword ("YBINNING") ;
+
+
+var W =CCDAG.WidthInPixels;
+var H = CCDAG.HeightInPixels;
 
 var L=0, T=0, R=W, B=H;
 if( (guideStarX - frameHalf) > 0 ) {
@@ -32,46 +37,46 @@ if( (guideStarY + frameHalf) < H ) {
 }
 
 // Grab original settings
-var oL = ccdAG.SubframeLeft;
-var oT = ccdAG.SubframeTop;
-var oR = ccdAG.SubframeRight;
-var oB = ccdAG.SubframeBottom;
-var oSave = ccdAG.AutoSaveOn;
-var oSub= ccdAG.Subframe;
-var oFrame = ccdAG.Frame;
+var oL = CCDAG.SubframeLeft;
+var oT = CCDAG.SubframeTop;
+var oR = CCDAG.SubframeRight;
+var oB = CCDAG.SubframeBottom;
+var oSave = CCDAG.AutoSaveOn;
+var oSub= CCDAG.Subframe;
+var oFrame = CCDAG.Frame;
 
-ccdAG.SubframeLeft = L;
-ccdAG.SubframeTop = T;
-ccdAG.SubframeRight = R;
-ccdAG.SubframeBottom = B;
-ccdAG.GuideStarX = guideStarX * ccdsoftAutoguiderImage.FITSKeyword ("XBINNING") ;
-ccdAG.GuideStarY = guideStarY * ccdsoftAutoguiderImage.FITSKeyword ("YBINNING") ;
+CCDAG.SubframeLeft = L;
+CCDAG.SubframeTop = T;
+CCDAG.SubframeRight = R;
+CCDAG.SubframeBottom = B;
+CCDAG.GuideStarX = guideStarX * CCDAGI.FITSKeyword ("XBINNING") ;
+CCDAG.GuideStarY = guideStarY * CCDAGI.FITSKeyword ("YBINNING") ;
 
-ccdAG.AutoSaveOn = false;		// Dont save these images.
-ccdAG.Subframe = true;		// Use a subframe around the star.
+CCDAG.AutoSaveOn = false;		// Dont save these images.
+CCDAG.Subframe = true;		// Use a subframe around the star.
 if( CCDSC.ImageUseDigitizedSkySurvey == "1" ){ // Simulator
-  ccdAG.Frame = 1;			// Light Frame
+  CCDAG.Frame = 1;			// Light Frame
 }
 ccdsoftAutoguider.Asynchronous = false;		// Turn on so we don't get stuck waiting for an endless process
 
 try{
-  // var res = ccdAG.Calibrate(0);
-  var res = ccdAG.Calibrate(0); // removing the 0 to see if this removes the dialog
+  // var res = CCDAG.Calibrate(0);
+  var res = CCDAG.Calibrate(0); // removing the 0 to see if this removes the dialog
   Out = 'Success|' + res;
 }
 catch(e) {
   Out = 'Failed|' + e;
 }
 
-ccdAG.AutoSaveOn = oSave;
-ccdAG.Frame = oFrame;
-ccdAG.SubframeLeft = oL;
-ccdAG.SubframeTop = oT;
-ccdAG.SubframeRight = oR;
-ccdAG.SubframeBottom = oB;
-ccdAG.Subframe = oSub;		// Use a subframe around the star.
+CCDAG.AutoSaveOn = oSave;
+CCDAG.Frame = oFrame;
+CCDAG.SubframeLeft = oL;
+CCDAG.SubframeTop = oT;
+CCDAG.SubframeRight = oR;
+CCDAG.SubframeBottom = oB;
+CCDAG.Subframe = oSub;		// Use a subframe around the star.
 
-//Out = 'W: ' + W + ', H: ' + H + ', L:' + ccdAG.SubframeLeft + ', T:' + ccdAG.SubframeTop + ', R:' + ccdAG.SubframeRight + ', B:' + ccdAG.SubframeBottom
+//Out = 'W: ' + W + ', H: ' + H + ', L:' + CCDAG.SubframeLeft + ', T:' + CCDAG.SubframeTop + ', R:' + CCDAG.SubframeRight + ', B:' + CCDAG.SubframeBottom
 Out;
 
 /* Socket End Packet */

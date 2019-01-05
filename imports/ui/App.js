@@ -28,7 +28,7 @@ import { LoggerFile } from 'meteor/ostrio:loggerfile';
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { TextArea, Form, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Radio } from 'semantic-ui-react'
+import { TextArea, Grid, Form, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Radio } from 'semantic-ui-react'
 
 // Import the API Model
 import {
@@ -91,6 +91,8 @@ class App extends TrackerReact(Component) {
       currentStage: ' Loading....',
       modalOpenWindowSessionControls: false,
       modalOpen: false,
+      modalOpenTest: false,
+      nightPlan: false,
     };
   }
 
@@ -115,6 +117,8 @@ class App extends TrackerReact(Component) {
 
   modalOpenTest = () => this.setState({ modalOpenTest: true });
   modalCloseTest = () => this.setState({ modalOpenTest: false });
+  modalOpenTest2 = () => this.setState({ nightPlan: true });
+  modalCloseTest2 = () => this.setState({ nightPlan: false });
 
   saveTSXServerIp() {
     this.modalEnterIpClose();
@@ -583,10 +587,65 @@ class App extends TrackerReact(Component) {
     )
   };
 
-  loadSkySafari() {
+  renderLoadSkySafari() {
     // pop up the upload dialog
     // send the file to server
     // server parses file "key=value"
+
+    const colors = [
+      'red',
+      'orange',
+      'yellow',
+      'olive',
+      'green',
+      'teal',
+      'blue',
+      'violet',
+      'purple',
+      'pink',
+      'brown',
+      'grey',
+      'black',
+    ];
+
+    let times = 16;
+    let col = [];
+    for (let i = 0; i < times; i++) {
+      col.push(
+        <Grid.Column key={i}>
+            Cell {i}
+        </Grid.Column>
+      );
+    }
+
+    return(
+      <Modal
+        open={this.state.nightPlan}
+        onClose={this.modalCloseTest2}
+        basic
+        size='small'
+        closeIcon>
+        <Modal.Header>Night Plan</Modal.Header>
+        <Modal.Content>
+          <Segment secondary>
+          <Grid columns={5} padded>
+            {colors.map(color => (
+              <Grid.Column color={color} key={color}>
+                {color}
+              </Grid.Column>
+            ))}
+          </Grid>
+          </Segment>
+        </Modal.Content>
+        <Modal.Description>
+        <Segment secondary>
+          <Grid>{col}</Grid>
+        </Segment>
+        </Modal.Description>
+        <Modal.Actions>
+        </Modal.Actions>
+      </Modal>
+    )
   }
 
   parkButtons( state, active ) {
@@ -603,7 +662,7 @@ class App extends TrackerReact(Component) {
       <Button.Group basic size='small' floated='right'>
         <Button icon='cloud download' onClick={this.modalOpenTest}/>
         <Button icon='detective' onClick={this.modalOpenSessionsControls}/>
-        <Button disabled={DISABLE} icon='cloud upload' onClick={this.loadSkySafari.bind(this)}/>
+        <Button disabled={DISABLE} icon='cloud upload' onClick={this.modalOpenTest2}/>
         <Button disabled compact />
         <Button disabled={DISABLE} icon='wifi' onClick={this.connectToTSX.bind(this)}/>
         <Button disabled={DISABLE} icon='car' onClick={this.park.bind(this)}/>
@@ -783,6 +842,7 @@ class App extends TrackerReact(Component) {
           *******************************             */}
           {this.renderSessionControls()}
           {this.renderTestModal()}
+          {this.renderLoadSkySafari()}
           <Modal
             open={this.state.modalConnectionFailed}
             onClose={this.modalConnectionFailedClose.bind(this)}

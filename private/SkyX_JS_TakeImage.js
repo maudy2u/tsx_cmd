@@ -114,13 +114,13 @@ if ( SelectedHardware.filterWheelModel !== "<No Filter Wheel Selected>" )
 var chk_count = 0;
 var max_chk = 8; // use nice number... :)
 var guideQuality = "Poor";
-while( isGuideSettlingEnabled && (chk_count < max_chk) && (guideQuality === "Poor") ) {
-	var res = isGuidingGood( camScale, guiderScale, guidingPixelErrorTolerance );
-	guideQuality = res.split('|')[0].trim();
-	sky6Web.Sleep (WAIT);
-	RunJavaScriptOutput.writeLine (guideQuality);
-	chk_count++;
-}
+// while( isGuideSettlingEnabled && (chk_count < max_chk) && (guideQuality === "Poor") ) {
+// 	var res = isGuidingGood( camScale, guiderScale, guidingPixelErrorTolerance );
+// 	guideQuality = res.split('|')[0].trim();
+// 	sky6Web.Sleep (WAIT);
+// 	RunJavaScriptOutput.writeLine (guideQuality);
+// 	chk_count++;
+// }
 
 // *******************************
 // now take image...
