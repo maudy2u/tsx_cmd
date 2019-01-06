@@ -300,7 +300,7 @@ class Target extends Component {
     let DTIME = '';
     try {
       let year = this.props.report.updatedAt.getFullYear();
-      let mon = ('0'  + this.props.report.updatedAt.getMonth()+1).slice(-2)+1; // 0-11, so plus 1
+      let mon = ('0'  + this.props.report.updatedAt.getMonth()+1).slice(-2); // 0-11, so plus 1
       let day = ('0'  + this.props.report.updatedAt.getDate()).slice(-2);
       let hours = ('0'  + this.props.report.updatedAt.getHours()).slice(-2);
       let minutes = ('0'  + this.props.report.updatedAt.getMinutes()).slice(-2);

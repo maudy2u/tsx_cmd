@@ -17,11 +17,19 @@ tsx cmd - A web page to send commands to TheSkyX server
  */
 
 import { Mongo } from 'meteor/mongo';
+import { Random } from 'meteor/random';
+import {
+  tsxInfo,
+  tsxLog,
+  tsxErr,
+  tsxWarn,
+  tsxDebug,
+  logFileForClient,
+  AppLogsDB
+} from './theLoggers.js';
+
 // Used to store the filters currently available/active on TSX
 export const TargetAngles = new Mongo.Collection('targetAngles');
-import { Random } from 'meteor/random';
-import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug, logFileForClient, AppLogsDB } from './theLoggers.js';
-
 
 
 /*
