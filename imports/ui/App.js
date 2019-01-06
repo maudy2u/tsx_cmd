@@ -119,7 +119,7 @@ class App extends TrackerReact(Component) {
   modalOpenTest = () => this.setState({ modalOpenTest: true });
   modalCloseTest = () => this.setState({ modalOpenTest: false });
 
-  modalOpenTest2 = () => {
+  modalTargetReport = () => {
     this.planData(); // get the data from the server.
     // console.log( 'need to uncomment this.planData()' );
     this.setState({ nightPlan: true });
@@ -604,7 +604,7 @@ class App extends TrackerReact(Component) {
     return val;
   }
 
-  renderLoadSkySafari( night_planned ) {
+  renderTargetReport( night_planned ) {
     // pop up the upload dialog
     // send the file to server
     // server parses file "key=value"
@@ -760,6 +760,9 @@ class App extends TrackerReact(Component) {
         continue;
       }
       let oName = obj.target;
+      if( oName == 'Sun' ) {
+        continue;
+      }
       let alt = obj.alt;
       let sTime = obj.start;
       let eTime = obj.end;
@@ -864,7 +867,7 @@ class App extends TrackerReact(Component) {
       <Button.Group basic size='small' floated='right'>
         <Button icon='cloud download' onClick={this.modalOpenTest}/>
         <Button icon='detective' onClick={this.modalOpenSessionsControls}/>
-        <Button disabled={DISABLE} icon='cloud upload' onClick={this.modalOpenTest2}/>
+        <Button disabled={DISABLE} icon='chart bar' onClick={this.modalTargetReport}/>
         <Button disabled compact />
         <Button disabled={DISABLE} icon='wifi' onClick={this.connectToTSX.bind(this)}/>
         <Button disabled={DISABLE} icon='car' onClick={this.park.bind(this)}/>
@@ -1044,7 +1047,7 @@ class App extends TrackerReact(Component) {
           *******************************             */}
           {this.renderSessionControls()}
           {this.renderTestModal()}
-          {this.renderLoadSkySafari(this.props.night_plan)}
+          {this.renderTargetReport(this.props.night_plan)}
           <Modal
             open={this.state.modalConnectionFailed}
             onClose={this.modalConnectionFailedClose.bind(this)}
