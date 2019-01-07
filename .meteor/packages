@@ -1,0 +1,64 @@
+# tsx cmd - A web page to send commands to TheSkyX server
+#     Copyright (C) 2018  Stephen Townsend
+#
+#     This program is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU Affero General Public License as
+#     published by the Free Software Foundation, either version 3 of the
+#     License, or (at your option) any later version.
+#
+#     This program is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU Affero General Public License for more details.
+#
+#     You should have received a copy of the GNU Affero General Public License
+#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# Meteor packages used by this project, one per line.
+# Check this file (and the other files in this directory) into your repository.
+#
+# 'meteor add' and 'meteor remove' will edit this file for you,
+# but you can also edit it by hand.
+
+autopublish             # Publish all data to the clients (for prototyping)
+
+meteor-base             # Packages every Meteor app needs to have
+mobile-experience       # Packages for a great mobile UX
+mongo                   # The database Meteor supports right now
+blaze-html-templates    # Compile .html files into Meteor Blaze views
+reactive-var            # Reactive variable for tracker
+jquery                  # Helpful client-side library
+tracker                 # Meteor's client-side reactive programming library
+
+## INSERT A NEW IDEA...
+ultimatejs:tracker-react
+
+
+standard-minifier-css   # CSS minifier run for production mode
+standard-minifier-js    # JS minifier run for production mode
+es5-shim                # ECMAScript 5 compatibility for older browsers.
+ecmascript              # Enable ECMAScript2015+ syntax in app code
+
+insecure                # Allow all DB writes from clients (for prototyping)
+semantic:ui@=2.2.6_5
+flemay:less-autoprefixer
+react-meteor-data
+froatsnook:sleep
+package-stats-opt-out
+ostrio:meteor-root
+ostrio:loggerfile
+ostrio:loggerconsole
+dburles:collection-helpers
+#dburles:mongo-collection-instances
+ostrio:loggermongo
+akasha:shelljs
+session
+ostrio:logger
+#ostrio:autoform-files # may have removed semantic-ui icons
+ostrio:files
+#meteortoys:allthings@7.0.1 # crashs due to vsivsi:job-collection
+#
+# *******************************
+# job-collection needs to be the last in the package file
+vsivsi:job-collection

@@ -1,0 +1,5 @@
+alias SDBs='cd ~/Library/Application\ Support/Software\ Bisque/TheSkyX\ Professional\ Edition/SDBs'
+alias meteor='~/meteor/meteor'
+alias tsx-start='~/tsx_cmd/tsx_cmd_start.sh'
+alias tsx-stop='~/tsx_cmd/tsx_cmd_stop.sh'
+alias tsx-update='~/tsx_cmd/tsx_cmd_update.sh'
