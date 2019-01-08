@@ -1,7 +1,7 @@
 # tsx_cmd
 meteor-react javascript server for TheSkyX and astrophotography
 
-This is hobbist solution to imaging with TheSkyX using a web page and a nodejs server. The nodejs server is a meteor and mongoDB solution. The server is intended to be a clean install and removal, i.e. delete the directory and it is gone.
+This is a hobbist solution to imaging with TheSkyX using a web page and a nodejs server. The nodejs server is a meteor and mongoDB solution. The server is intended to be a clean install and removal, i.e. delete the directory and it is gone.
 
 ## Use case:
 - All equipement is setup correctly: mount (Myt), imaing camera, rotator, autoguider, filter wheel, focuser.
