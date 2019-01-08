@@ -20,17 +20,23 @@
 # alias meteor=$HOME/meteor/meteor
 
 # PREPARE THE NEW METEOR PROJECT
-~/meteor/meteor add semantic:ui@=2.2.6_5 flemay:less-autoprefixer jquery
-~/meteor/meteor add react-meteor-data
-~/meteor/meteor add froatsnook:sleep package-stats-opt-out akasha:shelljs session
-~/meteor/meteor add ostrio:logger ostrio:loggerconsole ostrio:loggerfile ostrio:meteor-root ostrio:loggermongo
-~/meteor/meteor add dburles:collection-helpers
-~/meteor/meteor add vsivsi:job-collection
-~/meteor/meteor npm install --save @babel/runtime react-simple-range react-datetime-bootstrap react-timekeeper react@15.6.2 react-dom@15.6.2 shelljs
-~/meteor/meteor npm install --save-dev babel-plugin-transform-class-properties@6.24.1
-~/meteor/meteor npm install --save semantic-ui-react@0.78.3
+if [ "$(uname)" == "Darwin" ]; then
+  METEOR=~/.meteor/meteor
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+  METEOR=~/meteor/meteor
+fi
+  #statements
+${METEOR} add semantic:ui@=2.2.6_5 flemay:less-autoprefixer jquery
+${METEOR}  add react-meteor-data
+${METEOR}  add froatsnook:sleep package-stats-opt-out akasha:shelljs session
+${METEOR}  add ostrio:logger ostrio:loggerconsole ostrio:loggerfile ostrio:meteor-root ostrio:loggermongo
+${METEOR}  add dburles:collection-helpers
+${METEOR}  add vsivsi:job-collection
+${METEOR}  npm install --save @babel/runtime react-simple-range react-datetime-bootstrap react-timekeeper react@15.6.2 react-dom@15.6.2 shelljs
+${METEOR}  npm install --save-dev babel-plugin-transform-class-properties@6.24.1
+${METEOR}  npm install --save semantic-ui-react@0.78.3
 # used for a semantic-ui less error
-~/meteor/meteor npm install --save-dev postcss@6.0.22 postcss-load-config@1.2.0
+${METEOR}  npm install --save-dev postcss@6.0.22 postcss-load-config@1.2.0
 
 echo " *******************************"
 echo "jq - Download and extract"
@@ -40,4 +46,4 @@ echo " *******************************"
 sudo apt install jq
 
 # meteortyos breaks job-collection
-# ~/meteor/meteor add meteortoys:allthings
+# ${METEOR}  add meteortoys:allthings
