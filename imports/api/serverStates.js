@@ -94,6 +94,7 @@ export const tsx_ServerStates = {
   isTwilightEnabled: 'isTwilightEnabled',
   isFocus3Enabled: 'isFocus3Enabled',
   isFocus3Binned: 'isFocus3Binned',
+  isAutoguidingEnabled: 'isAutoguidingEnabled',
   isGuideSettlingEnabled: 'isGuideSettlingEnabled',
   guidingPixelErrorTolerance: 'guidingPixelErrorTolerance',
   guiderPixelSize: 'guiderPixelSize',
