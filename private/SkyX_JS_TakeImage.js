@@ -9,11 +9,6 @@ var aExpTime = $001;
 var aFrame = $002; //  cdLight =1, cdBias, cdDark, cdFlat
 var tName = '$003';
 
-var camScale = $004;
-var guiderScale = $005;
-var guidingPixelErrorTolerance = $006;
-var isGuideSettlingEnabled = $007;
-
 var CCDSC = ccdsoftCamera;
 var CCDAG = ccdsoftAutoguider;
 var TSXI = ccdsoftCameraImage;
@@ -109,22 +104,16 @@ if ( SelectedHardware.filterWheelModel !== "<No Filter Wheel Selected>" )
 }
 
 // *******************************
-// check guiding...
-// if good, continue... if not then wait for X SECONDS and then check again...
-var chk_count = 0;
-var max_chk = 8; // use nice number... :)
-var guideQuality = "Poor";
-// while( isGuideSettlingEnabled && (chk_count < max_chk) && (guideQuality === "Poor") ) {
-// 	var res = isGuidingGood( camScale, guiderScale, guidingPixelErrorTolerance );
-// 	guideQuality = res.split('|')[0].trim();
-// 	sky6Web.Sleep (WAIT);
-// 	RunJavaScriptOutput.writeLine (guideQuality);
-// 	chk_count++;
-// }
-
-// *******************************
 // now take image...
 CCDSC.TakeImage();
+
+//Enter the rotator angle
+if( CCDSC.rotatorIsConnected ) {
+	var rotatorPosition = CCDSC.rotatorPositionAngle();
+  TSXI.setFITSKeyword("ROTATOR_POS", rotatorPosition);
+	Out = Out+'rotatorPosition|'+rotatorPosition;
+}
+CCDSC.Asynchronous = true;		// We are going to wait for it
 
 // *******************************
 //Add some FITSKeywords for future reference
@@ -135,12 +124,7 @@ var success = TSXI.AttachToActiveImager();
 if( CCDSC.focIsConnected ) {
   TSXI.setFITSKeyword("FOCUS_POS", CCDSC.focPosition);
 }
-//Enter the rotator angle
-if( CCDSC.rotatorIsConnected ) {
-	var rotatorPosition = CCDSC.rotatorPositionAngle();
-  TSXI.setFITSKeyword("ROTATOR_POS", rotatorPosition);
-	Out = Out+'rotatorPosition|'+rotatorPosition;
-}
+
 //Enter the custom object name
 if( tName != '$003' ) {
 	//Correct the OBJECT Keyword if using coordinates instead of a target name

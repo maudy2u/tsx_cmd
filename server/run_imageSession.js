@@ -517,6 +517,38 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
   cmd = cmd.replace('$000', guideStarX );
   cmd = cmd.replace('$001', guideStarY );
 
+  var camScale = tsx_GetServerStateValue( 'imagingPixelSize');
+  var guiderScale = tsx_GetServerStateValue( 'guiderPixelSize');
+  var guidingPixelErrorTolerance = tsx_GetServerStateValue( 'guidingPixelErrorTolerance');
+  var isGuideSettlingEnabled = tsx_GetServerStateValue( 'isGuideSettlingEnabled');
+  tsxDebug( ' Settle autoguider: ' + isGuideSettlingEnabled ) ;
+  tsxDebug( ' camScale: ' + camScale ) ;
+  tsxDebug( ' guiderScale: ' + guiderScale ) ;
+  tsxDebug( ' guidingPixelErrorTolerance: ' + guidingPixelErrorTolerance ) ;
+  if( typeof camScale === 'undefined' || camScale === '') {
+    camScale = 0;
+  }
+  if( typeof guiderScale === 'undefined' || guiderScale === '') {
+    guiderScale = 0;
+  }
+  if( typeof guidingPixelErrorTolerance === 'undefined' || guidingPixelErrorTolerance === '') {
+    guidingPixelErrorTolerance = 0;
+  }
+  if( typeof isGuideSettlingEnabled === 'undefined' || isGuideSettlingEnabled === '') {
+    isGuideSettlingEnabled = false;
+  }
+  // Need to convert booleans to 0~false, 1~true, else fails in TSX
+  if( isGuideSettlingEnabled == true ) {
+    isGuideSettlingEnabled = 1;
+  }
+  else {
+    isGuideSettlingEnabled = 0;
+  }
+  cmd = cmd.replace("$004", camScale ); // set cameraImageScale
+  cmd = cmd.replace("$005", guiderScale ); // set guiderImageScale
+  cmd = cmd.replace("$006", guidingPixelErrorTolerance ); // set guidingPixelErrorTolerance
+  cmd = cmd.replace("$007", isGuideSettlingEnabled ); // set guidingPixelErrorTolerance
+
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     var result = tsx_return.split('|')[0].trim();
     if( result != 'Success') {
@@ -2094,38 +2126,6 @@ function tsx_takeImage( filterNum, exposure, frame, tName ) {
   cmd = cmd.replace("$001", exposure ); // set exposure
   cmd = cmd.replace("$002", frame ); // set exposure
   cmd = cmd.replace("$003", tName ); // set exposure
-
-  var camScale = tsx_GetServerStateValue( 'imagingPixelSize');
-  var guiderScale = tsx_GetServerStateValue( 'guiderPixelSize');
-  var guidingPixelErrorTolerance = tsx_GetServerStateValue( 'guidingPixelErrorTolerance');
-  var isGuideSettlingEnabled = tsx_GetServerStateValue( 'isGuideSettlingEnabled');
-  tsxDebug( ' Settle autoguider: ' + isGuideSettlingEnabled ) ;
-  tsxDebug( ' camScale: ' + camScale ) ;
-  tsxDebug( ' guiderScale: ' + guiderScale ) ;
-  tsxDebug( ' guidingPixelErrorTolerance: ' + guidingPixelErrorTolerance ) ;
-  if( typeof camScale === 'undefined' || camScale === '') {
-    camScale = 0;
-  }
-  if( typeof guiderScale === 'undefined' || guiderScale === '') {
-    guiderScale = 0;
-  }
-  if( typeof guidingPixelErrorTolerance === 'undefined' || guidingPixelErrorTolerance === '') {
-    guidingPixelErrorTolerance = 0;
-  }
-  if( typeof isGuideSettlingEnabled === 'undefined' || isGuideSettlingEnabled === '') {
-    isGuideSettlingEnabled = false;
-  }
-  // Need to convert booleans to 0~false, 1~true, else fails in TSX
-  if( isGuideSettlingEnabled == true ) {
-    isGuideSettlingEnabled = 1;
-  }
-  else {
-    isGuideSettlingEnabled = 0;
-  }
-  cmd = cmd.replace("$004", camScale ); // set cameraImageScale
-  cmd = cmd.replace("$005", guiderScale ); // set guiderImageScale
-  cmd = cmd.replace("$006", guidingPixelErrorTolerance ); // set guidingPixelErrorTolerance
-  cmd = cmd.replace("$007", isGuideSettlingEnabled ); // set guidingPixelErrorTolerance
 
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
