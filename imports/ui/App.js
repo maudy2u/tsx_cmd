@@ -93,7 +93,7 @@ class App extends TrackerReact(Component) {
       modalOpenWindowSessionControls: false,
       modalOpen: false,
       modalOpenTest: false,
-      nightPlan: false,
+      modalNightPlans: false,
       planData: [],
     };
   }
@@ -122,10 +122,9 @@ class App extends TrackerReact(Component) {
 
   modalTargetReport = () => {
     this.planData(); // get the data from the server.
-    // console.log( 'need to uncomment this.planData()' );
-    this.setState({ nightPlan: true });
+    this.setState({ modalNightPlans: true });
   };
-  modalCloseTest2 = () => this.setState({ nightPlan: false });
+  modalCloseTest2 = () => this.setState({ modalNightPlans: false });
 
   saveTSXServerIp() {
     this.modalEnterIpClose();
@@ -630,26 +629,27 @@ class App extends TrackerReact(Component) {
       return element.name == 'defaultStopTime';
     }));
 
-
+    /*
     // Sun: use white for day light, and blue for night
+    // Moon: use blue during Moon UP
     // Nautical Twilight is 12 degree below horizon -12, or use the time user set
     // Target: use white for no imaging, and green for imaging
-
-    const colors = [
+    const possibleColors = [
       'red',
       'orange',
       'yellow',
       'olive',
-      'green', // imaging time
-      'teal', // start time
-      'blue',
+      'green', // Target imaging time
+      'teal', // Before/After start/end time
+      'blue', // Moon is UP
       'violet',
       'purple',
       'pink',
       'brown',
       'grey',
-      'black', // nothing
+      'black', // dark
     ];
+    */
     let startHr=0, endHr=0,  bufHr = 1, cols=16;
 
     try {
@@ -661,23 +661,83 @@ class App extends TrackerReact(Component) {
       endHr = 0;
     }
 
-    let numCols = 24-startHr+endHr+bufHr+bufHr;
-    let startCol = 24-startHr+bufHr;
-    let endCol = endHr+bufHr;
+    let plannerIndex = [];
+    if( startHr-bufHr < 24 && startHr-bufHr > endHr+bufHr ) {
+        for( let i=startHr-bufHr; i < 24; i++ ) {
+          plannerIndex.push( i );
+        }
+    }
+    if( endHr+bufHr == 0 || endHr+bufHr < startHr-bufHr ) {
+      for( let i=0; i < endHr+bufHr; i++ ) {
+        plannerIndex.push( i );
+      }
+    }
+
+    // *******************************
+    // GET MOON data
+    // Get any moon data.
+    let MOONRISE= '0:0';
+    let MOONRISE_HR= 0;
+    let MOONSET = '0:0';
+    let MOONSET_HR = 0;
+    for( let i=0; i<PLAN.length; i ++ ) {
+      let obj = PLAN[i];
+      if( typeof obj == 'undefined' ) {
+        continue;
+      }
+      let oName = obj.target;
+      if( oName != 'Moon') {
+        continue;
+      }
+      let alt = obj.alt;
+      let sTime = obj.start;
+      let eTime = obj.end;
+      MOONRISE = obj.alt_start;
+      MOONSET = obj.alt_end;
+      MOONRISE_HR = Number(MOONRISE.split(':')[0].trim());
+      MOONSET_HR = Number(MOONSET.split(':')[0].trim());
+
+      let hrLimit = plannerIndex[plannerIndex.length-1];
+      MOONRISE_HR = this.adjHour( MOONRISE_HR, hrLimit );
+      MOONSET_HR = this.adjHour( MOONSET_HR, hrLimit );
+      if( MOONSET_HR < MOONRISE_HR ) {
+        MOONSET_HR = MOONSET_HR + 24;
+      }
+      if(MOONSET_HR < 12 ) {
+        MOONSET_HR=+24;
+      }
+    }
+
+    // *******************************
+    // createt the GRID
 
     let colHours = [];
     let planner = [];
     // setup first half
+
     if( startHr-bufHr < 24 && startHr-bufHr > endHr+bufHr ) {
         for( let i=startHr-bufHr; i < 24; i++ ) {
           colHours.push( i );
           let colour = 'black';
-          if( i < startHr ) {
+          if( i < startHr || i > endHr ) {
             colour = 'teal';
           }
+          if( i >= MOONRISE_HR && i <= MOONSET_HR) {
+            colour = 'blue';
+          }
+          let note = i;
+          if( i == MOONRISE_HR ) {
+            note = MOONRISE;
+          }
+          else if( i == MOONSET_HR ) {
+            note = MOONSET;
+          }
+
+          // add in moonlight hour colouring...
+          // i.e. if within the moonrise hours... make text Colours XXX
           planner.push(
             <Grid.Column key={i} color={colour}>
-                {i}
+                {note}
             </Grid.Column>
           );
         }
@@ -704,7 +764,7 @@ class App extends TrackerReact(Component) {
     //
     return(
       <Modal
-        open={this.state.nightPlan}
+        open={this.state.modalNightPlans}
         onClose={this.modalCloseTest2}
         basic
 //        size='small'
@@ -761,7 +821,7 @@ class App extends TrackerReact(Component) {
         continue;
       }
       let oName = obj.target;
-      if( oName == 'Sun' ) {
+      if( oName == 'Sun' || oName == 'Moon') {
         continue;
       }
       let alt = obj.alt;
@@ -1092,7 +1152,6 @@ export default withTracker(() => {
   Meteor.subscribe('scheduler_report');
   Meteor.subscribe('currentStage');
   Meteor.subscribe('tsxInfo');
-  Meteor.subscribe('nightPlan');
   return {
     tool_calibrate_via: TheSkyXInfos.findOne({name: 'tool_calibrate_via'}),
     tool_calibrate_location: TheSkyXInfos.findOne({name: 'tool_calibrate_location'}),
@@ -1144,5 +1203,6 @@ export default withTracker(() => {
     target_reports: TargetReports.find({}).fetch(),
 
     night_plan: TheSkyXInfos.findOne({name: 'NightPlan'}),
+    night_plan_updating: TheSkyXInfos.findOne({name: 'night_plan_updating'}),
   };
 })(App);

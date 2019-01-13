@@ -1869,12 +1869,14 @@ function tsx_MatchRotation( target ) {
     cmd = cmd.replace('$001', pixelSize);
     cmd = cmd.replace('$002', focalLength);
     cmd = cmd.replace('$003', ACCURACY);
-    if( foundFOV ) {
+
+    // foundPos is the overide
+    if( foundFOV && !foundPos ) {
       UpdateStatus( ' ' + target.targetFindName + ': Setting FOV to ('+ angle +')' );
       cmd = cmd.replace('$000', angle );
       cmd = cmd.replace('$004', 0); // ImageLink Angle
     }
-    else if( foundPos && foundFOV == false )  {
+    else if( foundPos )  {
       UpdateStatus( ' ' + target.targetFindName + ': Setting Rotator to ('+ position +')' );
       cmd = cmd.replace('$000', position );
       cmd = cmd.replace('$004', 1); // just rotate

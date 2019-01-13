@@ -130,6 +130,8 @@ export const tsx_ServerStates = {
   tool_flats_location: 'tool_flats_location',
   tool_flats_dec_az: 'tool_flats_dec_az',
 
+  night_plan_updating: 'night_plan_updating',
+
 };
 
 export function saveDefaultStateValue( param, val ) {

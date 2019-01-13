@@ -108,6 +108,7 @@ function initServerStates() {
   tsx_SetServerState('currentJob', '');
   tsx_SetServerState('scheduler_running', 'Stop');
   tsx_SetServerState('tool_active', false );
+  tsx_SetServerState('night_plan_updating', false );
 
   for (var m in tsx_ServerStates){
     var state = tsx_ServerStates[m];

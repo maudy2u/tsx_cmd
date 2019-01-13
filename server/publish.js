@@ -45,30 +45,32 @@ Meteor.publish("targetSessions", function pub_targetSessions() {
   return TargetSessions.find();
 });
 
-Meteor.publish("nightPlan", function pub_nightPlan() {
-});
+export function TargetPlans() {
 
-export function TargetPlan() {
+  // Get teh users planned start and stop hours
   let STARTTIME = tsx_GetServerStateValue('defaultStartTime');
   if( STARTTIME == '' || typeof STARTTIME == 'undefined') {
-    STARTTIME = '18:00'; // Nautical Twilight
+    STARTTIME = '18:00'; // guess
   }
   let ENDTIME = tsx_GetServerStateValue('defaultStopTime');
   if( ENDTIME == '' || typeof ENDTIME == 'undefined') {
-    ENDTIME = '6:00'; // Nautical Twilight
+    ENDTIME = '6:00'; // guess
   }
+
+  // Get the users planned Sun Altitude limit times
   let SUNALT = tsx_GetServerStateValue('defaultMinSunAlt');
-
   if( SUNALT == '' || typeof SUNALT == 'undefined') {
-    SUNALT = -12; // Nautical Twilight
+    SUNALT = -12; // Use Nautical Twilight
   }
 
-  // sun time:
+  let MOONRISE = 'Moon|0';
+  let SUNRISE = 'Sun|'+SUNALT;
+  // Object/Target times:
   // tsx_method: object, altitude
 
-  // get Nautical and user setting
+  // Get the targets to report
   let targets = TargetSessions.find({ isCalibrationFrames: false, enabledActive: true }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch();
-  let tsx_data = 'Sun|-12##Sun|'+SUNALT;
+  let tsx_data = MOONRISE + '##' + SUNRISE;
   // get all targets and their limiting altitudes
   for( let i=0; i<targets.length; i++ ) {
     let target = targets[i];
@@ -90,7 +92,6 @@ export function TargetPlan() {
     ]
   */
   let plan = tsx_AltTimesForTargets( tsx_data );
-
   // plan = target.targetFindName +'|'+ target.minAlt +'|'+ target.startTime +'|'+target.stopTime +'##';
 
   return plan;
@@ -99,7 +100,7 @@ export function TargetPlan() {
 Meteor.methods({
 
   planData() {
-    return TargetPlan();
+    return TargetPlans();
   },
 
 });
@@ -144,32 +145,24 @@ export function tsx_AltTimesForTargets( targets ) {
         /*
         tsx_AltTimesForTargets: Sun|-12|06:49|18:00##Sun|-11.5|06:52|17:57##M81|30|18:22|12:14|No error. Error = 0.
         */
-        tsxLog( '1');
         let result = tsx_return.split('##');
         tsxLog( 'result: ' + result );
         /*
         result: Sun|-12|06:49|18:00##Sun|-11.5|06:52|17:57##M81|30|18:22|12:14
         */
-        tsxLog( '2');
         for( let i=0; i<result.length; i++ ) {
-          tsxLog( result);
           let rpt = result[i].trim();
-          tsxLog( '4');
           let obj = rpt.split('|')[0].trim();
-          tsxLog( '5');
           let alt = rpt.split('|')[1].trim();
-          tsxLog( '7');
           let sTime = rpt.split('|')[2].trim();
-          tsxLog( '8');
           let eTime = rpt.split('|')[3].trim();
           tsxLog( 'eTime: ' + eTime);
-          if( obj != 'Sun') {
+          if( obj != 'Sun' && obj != 'Moon') {
             let target = TargetSessions.findOne({ targetFindName: obj });
             if( typeof target == 'undefined' ) {
               tsxLog( ' cannot find: ' + obj);
               continue;
             }
-            tsxLog( '6');
             Out.push({
               target: obj,
               alt: alt,
