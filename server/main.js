@@ -291,7 +291,7 @@ function startServerProcess() {
               // Point, Focus, Guide
               var ready = false;
               try {
-                ready = prepareTargetForImaging( target, true ); // true = do rotator
+                ready = prepareTargetForImaging( target, true ); // true = do the rotator
               }
               catch( err ) {
                 // did we get a CLS Failure???
