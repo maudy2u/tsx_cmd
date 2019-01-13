@@ -952,7 +952,7 @@ function tsx_GetMountReport() {
 }
 
 // **************************************************************
-function SetUpForImagingRun(target) {
+function SetUpForImagingRun(target, doRotator ) {
   tsxDebug('************************');
   tsxDebug(' *** SetUpForImagingRun: ' + target.targetFindName );
   //#
@@ -999,9 +999,11 @@ function SetUpForImagingRun(target) {
   //      a) if entered for session
   //      b) obtained from image
   var rotateSucess = false;
-//  UpdateStatus( ' ' + target.targetFindName + ': matching angle' );
-  rotateSucess = tsx_MatchRotation( target );
-//  UpdateStatus( ' ' + target.targetFindName + ': matched angle (' + rotateSucess + ')' );
+  //  UpdateStatus( ' ' + target.targetFindName + ': matching angle' );
+  if( doRotator ) {
+    rotateSucess = tsx_MatchRotation( target );
+  }
+  //  UpdateStatus( ' ' + target.targetFindName + ': matched angle (' + rotateSucess + ')' );
 
   // get initial focus....
   // #TODO: get the focus to create date/time of last focus... before redoing...
@@ -1493,7 +1495,7 @@ function isTargetConditionInValid(target) {
     // prepare target of imaging again...
     // no need to focus or dither as done in prerun
     UpdateStatus( ' *** Meridian flip...');
-    let res = prepareTargetForImaging( target ) ;
+    let res = prepareTargetForImaging( target, false ) ;
 
     return false; // all good continue
   }
@@ -1518,7 +1520,7 @@ function isTargetConditionInValid(target) {
       var doCLS = hasTimePassed( defaultCLSRepeat.value, defaultCLSRepeat.timestamp )
       if( doCLS === true ) {
         UpdateStatus( ' *** Time to centre again.');
-        SetUpForImagingRun( target );
+        SetUpForImagingRun( target, false );
 
         tsx_SetServerState('defaultCLSRepeat', defaultCLSRepeat.value);
         return false;
@@ -2393,7 +2395,7 @@ export function processTargetTakeSeries( target ) {
 }
 
 // **************************************************************
-export function prepareTargetForImaging( target ) {
+export function prepareTargetForImaging( target, doRotator ) {
   tsxDebug(' ***********************');
   tsxDebug(' *** prepareTargetForImaging: ' + target.targetFindName);
   forceAbort = false;
@@ -2413,7 +2415,7 @@ export function prepareTargetForImaging( target ) {
     tsx_SetServerState('lastTargetDirection', curDir);
     UpdateStatus( ' '+ target.targetFindName + ": points " + curDir);
 
-    var ready = SetUpForImagingRun( target);
+    var ready = SetUpForImagingRun( target, doRotator );
     if( ready ) {
 //      var rpt = TargetReports.findOne({ target_id: target._id })
       tsx_SetServerState('scheduler_report', target.report );
