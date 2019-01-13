@@ -26,6 +26,21 @@ if( TARGETANG < 0 ) {
 else if( TARGETANG > 360 ) {
 	TARGETANG = TARGETANG %360;
 }
+function getPointing() {
+	var BTP = sky6RASCOMTele.DoCommandOutput;
+	var pointing = '';
+	if (BTP == 1)
+	{
+	  pointing = 'EAST';
+	} else if (BTP == 0) {
+
+	  pointing = 'WEST';
+	}
+	else {
+	  pointing = 'Unknown';
+	}
+	return pointing;
+}
 function calcNewPostion( imageLinkAng, rotPos, targetAng)  {
   var diff = imageLinkAng - targetAng; // difference between the actual and target
   var newPos = 0; // new possition for the rotator
@@ -157,6 +172,14 @@ else {
 	CCDSC.Frame = 1;			// It's a light frame
 
 	// Start the Rotation
+	if( getPointing() == "WEST" ) {
+			if( TARGETANG < 180 ) {
+				TARGETANG += 180;
+			}
+			else {
+				TARGETANG -= 180;
+			}
+	}
 	// Could also pick a bin and set the imagescale
 	rotate( TARGETANG, AILSSCALE ); // SIMULATOR USES 1.7 and Rotator CCW=false
 

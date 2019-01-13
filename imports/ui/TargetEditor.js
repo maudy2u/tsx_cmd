@@ -401,7 +401,7 @@ class TargetEditor extends Component {
                     value={this.state.rotator_position}
                     onChange={this.handleChange}/>
               <Form.Input
-                  label='FOV ImageLink Angle (optional)'
+                  label='East Pointing FOV ImageLink Angle (optional)'
                   name='angle'
                   placeholder='Position angle per ImageLink (e.g. 0 for PEC capture)'
                   value={this.state.angle}
