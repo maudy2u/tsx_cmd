@@ -45,10 +45,10 @@ var oSave = CCDAG.AutoSaveOn;
 var oSub= CCDAG.Subframe;
 var oFrame = CCDAG.Frame;
 
-CCDAG.SubframeLeft = L;
-CCDAG.SubframeTop = T;
-CCDAG.SubframeRight = R;
-CCDAG.SubframeBottom = B;
+CCDAG.SubframeLeft = L* CCDAGI.FITSKeyword ("XBINNING");
+CCDAG.SubframeTop = T* CCDAGI.FITSKeyword ("YBINNING") ;
+CCDAG.SubframeRight = R* CCDAGI.FITSKeyword ("XBINNING");
+CCDAG.SubframeBottom = B* CCDAGI.FITSKeyword ("YBINNING");
 
 CCDAG.AutoSaveOn = false;		// Dont save these images.
 CCDAG.Subframe = true;		// Use a subframe around the star.
