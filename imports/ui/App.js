@@ -95,6 +95,7 @@ class App extends TrackerReact(Component) {
       modalOpenTest: false,
       modalNightPlans: false,
       planData: [],
+      planDataLoading: true,
     };
   }
 
@@ -121,6 +122,7 @@ class App extends TrackerReact(Component) {
   modalCloseTest = () => this.setState({ modalOpenTest: false });
 
   modalTargetReport = () => {
+    this.setState({planDataLoading: true});
     this.planData(); // get the data from the server.
     this.setState({ modalNightPlans: true });
   };
@@ -787,7 +789,15 @@ class App extends TrackerReact(Component) {
           <Segment secondary>
             Defaults: starts={STARTTIME}, ends={ENDTIME}<br/>Teal=Waiting, Blue=Moon, Green=Imaging<br/>
             <Segment>
-              {this.renderLoadingPlanner(planner.length, planner, PLAN, colHours)}
+              <Dimmer active={this.state.planDataLoading}>
+                  <Loader size='small'>Loading</Loader>
+              </Dimmer>
+              <Grid columns={planner.length}>
+                <Grid.Row>
+                  {planner}
+                </Grid.Row>
+                {this.renderTargetRow( PLAN, colHours )}
+              </Grid>
             </Segment>
 {/*            {PLAN.map((O)=>{
                 return (
@@ -813,31 +823,6 @@ class App extends TrackerReact(Component) {
         </Modal.Actions>
       </Modal>
     )
-  }
-
-  renderLoadingPlanner(length, planner, PLAN, colHours) {
-    let LOADING = false;
-    let Out = '';
-    if( LOADING == true ) {
-      return (
-        <Segment>
-          <Dimmer active={LOADING}>
-            <Loader size='medium'>Loading</Loader>
-          </Dimmer>
-
-          <br/>
-          <br/>
-        </Segment>
-      );
-    }
-    return(
-      <Grid columns={length}>
-        <Grid.Row>
-          {planner}
-        </Grid.Row>
-        {this.renderTargetRow( PLAN, colHours )}
-      </Grid>
-    );
   }
 
   adjHour( hr, limit ) {
@@ -945,6 +930,7 @@ class App extends TrackerReact(Component) {
       this.setState({
         planData: result,
       });
+      this.setState({planDataLoading: false});
     }.bind(this));
   }
 

@@ -15,9 +15,9 @@ var Out = '';			// Form the output string
 var CCDAG = ccdsoftAutoguider;
 var CCDAGI = ccdsoftAutoguiderImage;
 
-CCDAG.GuideStarX = GUIDE_STAR_X * CCDAGI.FITSKeyword ("XBINNING") ;
-CCDAG.GuideStarY = GUIDE_STAR_Y * CCDAGI.FITSKeyword ("YBINNING") ;
-
+CCDAGI.AttachToActiveAutoguider ();
+CCDAG.GuideStarX = guideStarX * CCDAGI.FITSKeyword ("XBINNING") ;
+CCDAG.GuideStarY = guideStarY * CCDAGI.FITSKeyword ("YBINNING") ;
 
 var W =CCDAG.WidthInPixels;
 var H = CCDAG.HeightInPixels;
@@ -49,8 +49,6 @@ CCDAG.SubframeLeft = L;
 CCDAG.SubframeTop = T;
 CCDAG.SubframeRight = R;
 CCDAG.SubframeBottom = B;
-CCDAG.GuideStarX = guideStarX * CCDAGI.FITSKeyword ("XBINNING") ;
-CCDAG.GuideStarY = guideStarY * CCDAGI.FITSKeyword ("YBINNING") ;
 
 CCDAG.AutoSaveOn = false;		// Dont save these images.
 CCDAG.Subframe = true;		// Use a subframe around the star.
