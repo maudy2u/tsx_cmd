@@ -442,7 +442,7 @@ function tsx_FindGuideStar() {
   // var cmd = tsxCmdFindGuideStar();
   var cmd = tsx_cmd('SkyX_JS_FindAutoGuideStar');
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        tsxLog(' Guide star info: ' + tsx_return);
+        tsxDebug(' Guide star info: ' + tsx_return);
         guideStarX = tsx_return.split('|')[0].trim();
         guideStarY = tsx_return.split('|')[1].trim();
         UpdateStatus( " --- Guide star: "+guideStarX+", "+guideStarY );
