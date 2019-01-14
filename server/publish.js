@@ -141,12 +141,12 @@ export function tsx_AltTimesForTargets( targets ) {
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       try {
         tsx_err = tsx_has_error( tsx_return );
-        tsxLog( ' tsx_AltTimesForTargets: ' + tsx_return );
+        tsxDebug( ' tsx_AltTimesForTargets: ' + tsx_return );
         /*
         tsx_AltTimesForTargets: Sun|-12|06:49|18:00##Sun|-11.5|06:52|17:57##M81|30|18:22|12:14|No error. Error = 0.
         */
         let result = tsx_return.split('##');
-        tsxLog( 'result: ' + result );
+        tsxDebug( 'result: ' + result );
         /*
         result: Sun|-12|06:49|18:00##Sun|-11.5|06:52|17:57##M81|30|18:22|12:14
         */
@@ -156,7 +156,6 @@ export function tsx_AltTimesForTargets( targets ) {
           let alt = rpt.split('|')[1].trim();
           let sTime = rpt.split('|')[2].trim();
           let eTime = rpt.split('|')[3].trim();
-          tsxLog( 'eTime: ' + eTime);
           if( obj != 'Sun' && obj != 'Moon') {
             let target = TargetSessions.findOne({ targetFindName: obj });
             if( typeof target == 'undefined' ) {

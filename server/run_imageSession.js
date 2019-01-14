@@ -2679,7 +2679,7 @@ export function canTargetSessionStart( target ) {
   var minAlt = tsx_reachedMinAlt( target );
   tsxDebug( ' Is target minAlt: ' + minAlt );
   if( minAlt ) {
-    UpdateStatus( ' --- check current alt. '+target.targetFindName+': ('+result.report.ALT+')' + ' vs. minimum (' + target.minAlt + ')');
+    UpdateStatus( ' --- check current alt. '+target.targetFindName+': ('+result.ALT+')' + ' vs. minimum (' + target.minAlt + ')');
     return false;
   }
 
