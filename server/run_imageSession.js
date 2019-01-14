@@ -388,9 +388,15 @@ function SetUpAutoGuiding( target, doCalibration ) {
     if( cal_res ) {
       UpdateStatus(' ' + target.targetFindName + ": AutoGuider Calibrated");
     }
+    if( isSchedulerStopped() ) {
+      return;
+    }
   }
 
   tsx_StartAutoGuide( star.guideStarX, star.guideStarY );
+  if( isSchedulerStopped() ) {
+    return;
+  }
   UpdateStatus(' ' + target.targetFindName + ": autoguiding");
 }
 
@@ -436,7 +442,7 @@ function tsx_FindGuideStar() {
   // var cmd = tsxCmdFindGuideStar();
   var cmd = tsx_cmd('SkyX_JS_FindAutoGuideStar');
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        // tsxDebug('Any error?: ' + tsx_return);
+        tsxLog(' Guide star info: ' + tsx_return);
         guideStarX = tsx_return.split('|')[0].trim();
         guideStarY = tsx_return.split('|')[1].trim();
         UpdateStatus( " --- Guide star: "+guideStarX+", "+guideStarY );
@@ -1001,8 +1007,8 @@ function SetUpForImagingRun(target, doRotator ) {
   // UpdateStatus(  " Stopping autoguider" );
   // tsx_AbortGuider(); // now done in CLS
 
-  UpdateStatus( ' ' + target.targetFindName + ': refresh info' );
   var tryTarget = UpdateImagingTargetReport( target );
+  UpdateStatus( ' ' + target.targetFindName + ': refreshed info' );
 	if( !tryTarget.ready ) {
     tsxDebug(target.targetFindName + ' ' + tryTarget.msg);
     throw( 'TSX_ERROR|Target Report Failed. TSX Running?');
@@ -1841,6 +1847,7 @@ function tsx_TargetReport( target ) {
   while( tsx_is_waiting ) {
     Meteor.sleep( 1000 );
   }
+  tsxDebug( target.targetFindName + ' ' + Out.ALT);
   return Out;
 }
 
@@ -2644,10 +2651,15 @@ export function canTargetSessionStart( target ) {
   // check for target not ready
   var isComplete = isTargetComplete( target );
   tsxDebug( ' Is target complete: ' + isComplete );
-  let isRepeating = TakeSeriesTemplates.findOne({_id: target.series._id }).repeatSeries;
-  if( isComplete && target.isCalibrationFrames == false && !isRepeating ) {
-    UpdateStatus( ' ' + target.targetFindName + ': is completed' );
-    return false;
+  try {
+    let isRepeating = TakeSeriesTemplates.findOne({_id: target.series._id }).repeatSeries;
+    if( isComplete && target.isCalibrationFrames == false && !isRepeating ) {
+      UpdateStatus( ' ' + target.targetFindName + ': is completed' );
+      return false;
+    }
+  }
+  catch( e ) {
+    UpdateStatus( ' !!! Needs serie assigned: ' + target.targetFindName);
   }
 
   // check start time pasted

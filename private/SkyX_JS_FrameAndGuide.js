@@ -29,11 +29,12 @@ var CCDAGI = ccdsoftCameraImage;
 
 CCDSC.Asynchronous = false;		// We are going to wait for it
 
+CCDAGI.AttachToActiveAutoguider ();
 CCDAG.GuideStarX = GUIDE_STAR_X * CCDAGI.FITSKeyword ("XBINNING") ;
 CCDAG.GuideStarY = GUIDE_STAR_Y * CCDAGI.FITSKeyword ("YBINNING") ;
 
 CCDAG.AutoSaveOn = false;		// Dont save these images.
-CCDAG.Subframe = true;		// Use a subframe around the star.
+CCDAG.Subframe = false;		// Use a subframe around the star.
 CCDAG.Frame = 1;			// Light Frame
 
 CCDAG.Asynchronous = true;		// Turn on so we don't get stuck waiting for an endless process
