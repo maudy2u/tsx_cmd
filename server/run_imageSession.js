@@ -819,7 +819,12 @@ function tsx_RunFocus3( target ) {
   tsxDebug(' ??? @Focus3 enabled found to be: ' + enabled );
   if( enabled == true  ) {
 
-
+    var runFocus3 = isFocusingNeeded( target );
+    if( runFocus3 == false ) {
+      UpdateStatus(' *** ' + target.targetFindName +': @Focus3 not needed');
+      Out = ''; // get last temp
+      return Out;
+    }
     var focusFilter = getFilterSlot(target.focusFilter);
     var focusExp = target.focusExposure;
     var focusTarget = target.focusTarget;
@@ -2674,7 +2679,7 @@ export function canTargetSessionStart( target ) {
   var minAlt = tsx_reachedMinAlt( target );
   tsxDebug( ' Is target minAlt: ' + minAlt );
   if( minAlt ) {
-    UpdateStatus( ' --- check current alt. '+target.targetFindName+': ('+target.report.ALT+')' + ' vs. minimum (' + target.minAlt + ')');
+    UpdateStatus( ' --- check current alt. '+target.targetFindName+': ('+result.report.ALT+')' + ' vs. minimum (' + target.minAlt + ')');
     return false;
   }
 

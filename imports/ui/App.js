@@ -29,7 +29,7 @@ import { LoggerFile } from 'meteor/ostrio:loggerfile';
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { TextArea, Grid, Form, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Radio } from 'semantic-ui-react'
+import { TextArea, Dimmer, Loader, Grid, Form, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Radio } from 'semantic-ui-react'
 
 // Import the API Model
 import {
@@ -612,7 +612,6 @@ class App extends TrackerReact(Component) {
     // get the time for the sun at Altitiude above and below
     // repeat for each enabled target
     // rows for start and end times....
-
     let PLAN = [];
     try {
       PLAN = night_planned.value;
@@ -722,6 +721,8 @@ class App extends TrackerReact(Component) {
           if( i < startHr || i > endHr ) {
             colour = 'teal';
           }
+
+          // Colour the Moon
           if( i >= MOONRISE_HR && i <= MOONSET_HR) {
             colour = 'blue';
           }
@@ -737,22 +738,34 @@ class App extends TrackerReact(Component) {
           // i.e. if within the moonrise hours... make text Colours XXX
           planner.push(
             <Grid.Column key={i} color={colour}>
-                {note}
+                <small>{note}</small>
             </Grid.Column>
           );
         }
     }
     // setup last half
     if( endHr+bufHr == 0 || endHr+bufHr < startHr-bufHr ) {
-      for( let i=0; i < endHr+bufHr; i++ ) {
-        colHours.push( i );
+      for( let j=0; j < endHr+bufHr; j++ ) {
+        colHours.push( j );
         let colour = 'black';
-        if( i > endHr ) {
+        if( j > endHr ) {
           colour = 'teal';
         }
+        // Colour the Moon
+        if( j+24 >= MOONRISE_HR && j+24 <= MOONSET_HR) {
+          colour = 'blue';
+        }
+        let note = j;
+        if( j+24 == MOONRISE_HR ) {
+          note = MOONRISE;
+        }
+        else if( j+24 == MOONSET_HR ) {
+          note = MOONSET;
+        }
+
         planner.push(
-          <Grid.Column key={i} color={colour}>
-              {i}
+          <Grid.Column key={j} color={colour}>
+            <small>{note}</small>
           </Grid.Column>
         );
       }
@@ -772,13 +785,10 @@ class App extends TrackerReact(Component) {
         <Modal.Header>Night Plan</Modal.Header>
         <Modal.Content>
           <Segment secondary>
-            Starts: {STARTTIME}, Ends:{ENDTIME}<br/><br/>
-            <Grid columns={planner.length}>
-              <Grid.Row>
-                {planner}
-              </Grid.Row>
-              {this.renderTargetRow( PLAN, colHours )}
-            </Grid>
+            Defaults: starts={STARTTIME}, ends={ENDTIME}<br/>Teal=Waiting, Blue=Moon, Green=Imaging<br/>
+            <Segment>
+              {this.renderLoadingPlanner(planner.length, planner, PLAN, colHours)}
+            </Segment>
 {/*            {PLAN.map((O)=>{
                 return (
                    <div>
@@ -803,6 +813,31 @@ class App extends TrackerReact(Component) {
         </Modal.Actions>
       </Modal>
     )
+  }
+
+  renderLoadingPlanner(length, planner, PLAN, colHours) {
+    let LOADING = false;
+    let Out = '';
+    if( LOADING == true ) {
+      return (
+        <Segment>
+          <Dimmer active={LOADING}>
+            <Loader size='medium'>Loading</Loader>
+          </Dimmer>
+
+          <br/>
+          <br/>
+        </Segment>
+      );
+    }
+    return(
+      <Grid columns={length}>
+        <Grid.Row>
+          {planner}
+        </Grid.Row>
+        {this.renderTargetRow( PLAN, colHours )}
+      </Grid>
+    );
   }
 
   adjHour( hr, limit ) {
@@ -846,9 +881,9 @@ class App extends TrackerReact(Component) {
           if( dHr < rHr ) {
             dHr = dHr + 24;
           }
-          console.log(
-             'HR: ' + hr + ', OBJ: ' + oName + ',ALT: ' + alt + ',S: ' + startHr + ',E: ' + endHr + ',R: ' + rHr + ',D: ' + dHr
-          )
+          // console.log(
+          //    'HR: ' + hr + ', OBJ: ' + oName + ',ALT: ' + alt + ',S: ' + startHr + ',E: ' + endHr + ',R: ' + rHr + ',D: ' + dHr
+          // )
         }
         catch( e ) {
           startHr = 0;
@@ -888,7 +923,7 @@ class App extends TrackerReact(Component) {
 
         COL.push(
           <Grid.Column key={j} color={colour}>
-              {note}
+              <small>{note}</small>
           </Grid.Column>
         );
       }
