@@ -113,7 +113,7 @@ if( CCDSC.rotatorIsConnected ) {
   TSXI.setFITSKeyword("ROTATOR_POS", rotatorPosition);
 	Out = Out+'rotatorPosition|'+rotatorPosition;
 }
-CCDSC.Asynchronous = true;		// We are going to wait for it
+//CCDSC.Asynchronous = true;		// We are going to wait for it
 
 // *******************************
 //Add some FITSKeywords for future reference

@@ -1538,7 +1538,7 @@ function isTargetConditionInValid(target) {
     // prepare target of imaging again...
     // no need to focus or dither as done in prerun
     UpdateStatus( ' *** Meridian flip...');
-    let res = prepareTargetForImaging( target, false ) ;
+    let res = prepareTargetForImaging( target, false, false ) ;
 
     return false; // all good continue
   }
@@ -1563,7 +1563,9 @@ function isTargetConditionInValid(target) {
       var doCLS = hasTimePassed( defaultCLSRepeat.value, defaultCLSRepeat.timestamp )
       if( doCLS === true ) {
         UpdateStatus( ' *** Time to centre again.');
-        SetUpForImagingRun( target, false );
+        // This will cause a calibration to happen...
+        // do not need to calibrate wth a meridian flip
+        SetUpForImagingRun( target, false, false );
 
         tsx_SetServerState('defaultCLSRepeat', defaultCLSRepeat.value);
         return false;
@@ -2409,7 +2411,7 @@ export function processTargetTakeSeries( target ) {
 }
 
 // **************************************************************
-export function prepareTargetForImaging( target, doRotator ) {
+export function prepareTargetForImaging( target, doRotator, doCalibration ) {
   tsxDebug(' ***********************');
   tsxDebug(' *** prepareTargetForImaging: ' + target.targetFindName);
   forceAbort = false;
@@ -2429,7 +2431,7 @@ export function prepareTargetForImaging( target, doRotator ) {
     tsx_SetServerState('lastTargetDirection', curDir);
     UpdateStatus( ' '+ target.targetFindName + ": points " + curDir);
 
-    var ready = SetUpForImagingRun( target, doRotator );
+    var ready = SetUpForImagingRun( target, doRotator, doCalibration );
     if( ready ) {
 //      var rpt = TargetReports.findOne({ target_id: target._id })
       tsx_SetServerState('scheduler_report', target.report );
