@@ -558,7 +558,6 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
   cmd = cmd.replace("$005", guiderScale ); // set guiderImageScale
   cmd = cmd.replace("$006", guidingPixelErrorTolerance ); // set guidingPixelErrorTolerance
   cmd = cmd.replace("$007", isGuideSettlingEnabled ); // set guidingPixelErrorTolerance
-
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
 
     tsx_is_waiting = false;
@@ -615,17 +614,22 @@ function tsx_SettleAutoGuide() {
   cmd = cmd.replace("$006", guidingPixelErrorTolerance ); // set guidingPixelErrorTolerance
   cmd = cmd.replace("$007", isGuideSettlingEnabled ); // set guidingPixelErrorTolerance
 
+  UpdateStatus(' --- Autoguider Settling to: ' + guidingPixelErrorTolerance );
+  let quality = 'unknown';
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     var result = tsx_return.split('|')[0].trim();
     if( result != 'Success') {
       UpdateStatus(' *** Autoguiding Failed: ' + result);
     }
-
+    else {
+      quality = tsx_return.split('|')[1].trim()
+    }
     tsx_is_waiting = false;
   }));
   while( tsx_is_waiting ) {
     Meteor.sleep( 1000 );
   }
+  UpdateStatus(' --- Autoguider Settling: ' + quality );
 }
 
 // **************************************************************
