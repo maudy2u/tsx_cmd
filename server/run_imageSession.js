@@ -560,9 +560,6 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
   cmd = cmd.replace("$007", isGuideSettlingEnabled ); // set guidingPixelErrorTolerance
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-    if( result != 'Success') {
-      UpdateStatus(' *** Settling Failed: ' + result);
-    }
 
     tsx_is_waiting = false;
   }));
