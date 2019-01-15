@@ -1649,31 +1649,31 @@ function isTargetConditionInValid(target) {
   //
 	// *******************************
 	// check if reFocusTemp - needs to refocus
-  var runFocus3 = isFocusingNeeded( target );
-  var doDither = isDitheringNeeded( target );
+  let runFocus3 = isFocusingNeeded( target );
   if( runFocus3 ) {
     tsx_AbortGuider();
     InitialFocus( target );
     // no need to return false... can keep going.
     UpdateStatus( ' --- refocused, and redo autoguider');
     let didDither = false;
+    let doDither = isDitheringNeeded( target );
     if( doDither ) {
-      didDither = tsx_dither( target );
+      didDither = tsx_dither( target ); //  runs SetUpAutoGuiding
     }
-    if( !didDither ) {
+    else {
       SetUpAutoGuiding( target, false );			// Setup & Start Auto-Guiding.
     }
   }
-
-  //
-  // *******************************
-  // Recheck if a dither is needed
-  doDither = isDitheringNeeded( target );
-  tsxInfo( ' --- check dither needed: ' + doDither );
-  if( doDither ) {
-    var dither = tsx_dither( target );
+  else {
+    //
+    // *******************************
+    // Recheck if only dither is needed
+    let doDither = isDitheringNeeded( target );
+    let didDither = false;
+    if( doDither ) {
+      didDither = tsx_dither( target ); //  runs SetUpAutoGuiding
+    }
   }
-
   tsxDebug( ' isTargetConditionInValid return false to continue.');
   return false;
 }
@@ -1688,7 +1688,7 @@ function isDitheringNeeded (target ) {
   var lastDither = Number(tsx_GetServerStateValue('imagingSessionDither'));
   var dCount = lastDither +1;
   var doDither = (Math.round(dCount) >= Math.round(ditherTarget));
-  tsxDebug( ' --- check dither needed: ' + doDither );
+  UpdateStatus( ' --- check dither needed: ' + doDither );
   return doDither;
 }
 
