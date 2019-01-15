@@ -397,6 +397,10 @@ function SetUpAutoGuiding( target, doCalibration ) {
   if( isSchedulerStopped() ) {
     return;
   }
+  tsx_SettleAutoGuide();
+  if( isSchedulerStopped() ) {
+    return;
+  }
   UpdateStatus(' ' + target.targetFindName + ": autoguiding");
 }
 
@@ -522,6 +526,66 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
   var cmd = tsx_cmd('SkyX_JS_FrameAndGuide');
   cmd = cmd.replace('$000', guideStarX );
   cmd = cmd.replace('$001', guideStarY );
+
+  var camScale = tsx_GetServerStateValue( 'imagingPixelSize');
+  var guiderScale = tsx_GetServerStateValue( 'guiderPixelSize');
+  var guidingPixelErrorTolerance = tsx_GetServerStateValue( 'guidingPixelErrorTolerance');
+  var isGuideSettlingEnabled = tsx_GetServerStateValue( 'isGuideSettlingEnabled');
+  tsxDebug( ' Settle autoguider: ' + isGuideSettlingEnabled ) ;
+  tsxDebug( ' camScale: ' + camScale ) ;
+  tsxDebug( ' guiderScale: ' + guiderScale ) ;
+  tsxDebug( ' guidingPixelErrorTolerance: ' + guidingPixelErrorTolerance ) ;
+  if( typeof camScale === 'undefined' || camScale === '') {
+    camScale = 0;
+  }
+  if( typeof guiderScale === 'undefined' || guiderScale === '') {
+    guiderScale = 0;
+  }
+  if( typeof guidingPixelErrorTolerance === 'undefined' || guidingPixelErrorTolerance === '') {
+    guidingPixelErrorTolerance = 0;
+  }
+  if( typeof isGuideSettlingEnabled === 'undefined' || isGuideSettlingEnabled === '') {
+    isGuideSettlingEnabled = false;
+  }
+  // Need to convert booleans to 0~false, 1~true, else fails in TSX
+  if( isGuideSettlingEnabled == true ) {
+    isGuideSettlingEnabled = 1;
+  }
+  else {
+    isGuideSettlingEnabled = 0;
+  }
+  cmd = cmd.replace("$004", camScale ); // set cameraImageScale
+  cmd = cmd.replace("$005", guiderScale ); // set guiderImageScale
+  cmd = cmd.replace("$006", guidingPixelErrorTolerance ); // set guidingPixelErrorTolerance
+  cmd = cmd.replace("$007", isGuideSettlingEnabled ); // set guidingPixelErrorTolerance
+
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+    var result = tsx_return.split('|')[0].trim();
+    if( result != 'Success') {
+      UpdateStatus(' *** Autoguiding Failed: ' + result);
+    }
+
+    tsx_is_waiting = false;
+  }));
+  while( tsx_is_waiting ) {
+    Meteor.sleep( 1000 );
+  }
+}
+
+// **************************************************************
+function tsx_SettleAutoGuide() {
+  // tsxDebug('************************');
+  tsxDebug(' *** tsx_SettleAutoGuide' );
+  var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
+  if( !enabled ) {
+    UpdateStatus(' *** Autoguider disabled ');
+    return;
+  }
+
+  // star guiding
+  tsx_is_waiting = true;
+  // var cmd = tsxCmdFindGuideStar();
+  var cmd = tsx_cmd('SkyX_JS_GuideSettle');
 
   var camScale = tsx_GetServerStateValue( 'imagingPixelSize');
   var guiderScale = tsx_GetServerStateValue( 'guiderPixelSize');
