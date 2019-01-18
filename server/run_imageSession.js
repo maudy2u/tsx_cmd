@@ -1657,7 +1657,7 @@ function isTargetConditionInValid(target) {
     UpdateStatus( ' --- refocused, and redo autoguider');
     let didDither = false;
     let doDither = isDitheringNeeded( target );
-    if( doDither ) {
+    if( doDither == true  ) {
       didDither = tsx_dither( target ); //  runs SetUpAutoGuiding
     }
     else {
@@ -1670,7 +1670,7 @@ function isTargetConditionInValid(target) {
     // Recheck if only dither is needed
     let doDither = isDitheringNeeded( target );
     let didDither = false;
-    if( doDither ) {
+    if( doDither == true ) {
       didDither = tsx_dither( target ); //  runs SetUpAutoGuiding
     }
   }
@@ -1682,13 +1682,13 @@ function isDitheringNeeded (target ) {
   tsxDebug(' *** tsx_dither: ' + target.targetFindName);
 
   var ditherTarget = Number(tsx_GetServerStateValue('defaultDithering'));
-  if( !(ditherTarget > 0) ) {
+  if( ditherTarget <= 0 ) {
     return false;
   }
   var lastDither = Number(tsx_GetServerStateValue('imagingSessionDither'));
   var dCount = lastDither +1;
   var doDither = (Math.round(dCount) >= Math.round(ditherTarget));
-  UpdateStatus( ' --- check dither needed: ' + doDither );
+  UpdateStatus( ' --- Dithering needed: ' + doDither );
   return doDither;
 }
 
@@ -1699,57 +1699,55 @@ function tsx_dither( target ) {
   var ditherTarget = Number(tsx_GetServerStateValue('defaultDithering'));
   var lastDither = Number(tsx_GetServerStateValue('imagingSessionDither'));
   var doDither = isDitheringNeeded( target );
-
-  if( !(ditherTarget > 0) ) {
+  if( ditherTarget > 0 ) {
     if( doDither ) { // adding a plus one so the zero works and if one is passed it will rung once.
 
-        // first abort Guiding
-        // tsx_AbortGuider(); // not needed as put into dither
+      // first abort Guiding
+      // tsx_AbortGuider(); // not needed as put into dither
 
-        var cmd = tsx_cmd('SkyX_JS_NewDither');
+      var cmd = tsx_cmd('SkyX_JS_NewDither');
 
-        var pixelSize = tsx_GetServerStateValue('imagingPixelSize');
-        tsxDebug(' *** pixelSize: ' + pixelSize);
-        var minDitherFactor = tsx_GetServerStateValue('minDitherFactor');
-        tsxDebug(' *** minDitherFactor: ' + minDitherFactor);
-        var maxDitherFactor = tsx_GetServerStateValue('maxDitherFactor');
-        tsxDebug(' *** maxDitherFactor: ' + maxDitherFactor);
+      var pixelSize = tsx_GetServerStateValue('imagingPixelSize');
+      tsxDebug(' *** pixelSize: ' + pixelSize);
+      var minDitherFactor = tsx_GetServerStateValue('minDitherFactor');
+      tsxDebug(' *** minDitherFactor: ' + minDitherFactor);
+      var maxDitherFactor = tsx_GetServerStateValue('maxDitherFactor');
+      tsxDebug(' *** maxDitherFactor: ' + maxDitherFactor);
 
-        cmd = cmd.replace("$000", pixelSize ); // var pixelSize = $000; // 3.8;
-        cmd = cmd.replace("$001", minDitherFactor ); // var minDitherFactor = $001; // 3
-        cmd = cmd.replace("$002", maxDitherFactor ); // var maxDitherFactor = $002;  // 7;
+      cmd = cmd.replace("$000", pixelSize ); // var pixelSize = $000; // 3.8;
+      cmd = cmd.replace("$001", minDitherFactor ); // var minDitherFactor = $001; // 3
+      cmd = cmd.replace("$002", maxDitherFactor ); // var maxDitherFactor = $002;  // 7;
 
-        tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-              var result = tsx_return.split('|')[0].trim();
-              tsxDebug('Any error?: ' + result);
-              if( result != 'Success') {
-                UpdateStatusWarn('!!! SkyX_JS_NewDither Failed. Error: ' + result);
-              }
-              else {
-                // tsxLog('Dither success');
-                UpdateStatus(' ' + target.targetFindName +': dither succeeded');
-                tsx_SetServerState('imagingSessionDither', 0);
-              }
-              Out = true;
-              tsx_is_waiting = false;
+      tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+            var result = tsx_return.split('|')[0].trim();
+            tsxDebug('Any error?: ' + result);
+            if( result != 'Success') {
+              UpdateStatusWarn('!!! SkyX_JS_NewDither Failed. Error: ' + result);
             }
-          )
-        );
-        while( tsx_is_waiting ) {
-          Meteor.sleep( 1000 );
-        }
-
-        // now redo Autoguiding...
-        tsxDebug( ' Dither commands AutoGuide Redo');
-        SetUpAutoGuiding( target, false );
+            else {
+              // tsxLog('Dither success');
+              UpdateStatus(' ' + target.targetFindName +': dither succeeded');
+              tsx_SetServerState('imagingSessionDither', 0);
+            }
+            Out = true;
+            tsx_is_waiting = false;
+          }
+        )
+      );
+      while( tsx_is_waiting ) {
+        Meteor.sleep( 1000 );
+      }
+      // now redo Autoguiding...
+      tsxDebug( ' Dither commands AutoGuide Redo');
+      SetUpAutoGuiding( target, false );
     }
     else {
       tsx_SetServerState('imagingSessionDither', lastDither+1);
-      tsxDebug(' ' + target.targetFindName +': not dithering');
+      tsxLog(' ' + target.targetFindName +': not dithering');
     }
   }
   else{
-    tsxDebug(' ' + target.targetFindName +': Dithering disabled');
+    tsxLog(' ' + target.targetFindName +': Dithering disabled');
   }
   return Out;
 
@@ -2385,7 +2383,7 @@ export function processTargetTakeSeries( target ) {
           taken = takenImagesFor(target, series._id);
         }
         // need to check if we repeat the list
-        if( taken < series.repeat ) {
+        if( taken < series.repeat && template.repeatSeries != true ) {
           // series has more images so repeat across
           remainingImages = true;
         }

@@ -318,6 +318,7 @@ function startServerProcess() {
                 }
                 catch( err ) {
                   // did we get a CLS Failure???
+                  tsxLog( ' !!! Error processing series: ' + err );
                   var res = err.split('|')[0].trim();
                   if( res == 'TSX_ERROR' ) {
                     UpdateStatus( ' *** ENDING - centring failed. Check for clouds' );
