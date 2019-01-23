@@ -2417,7 +2417,9 @@ export function processTargetTakeSeries( target ) {
         // #TODO - check end conditions - and skip if NOT light Frame
         if( series.frame == 'Light' ) { // if frame is light....
           stopTarget = isTargetConditionInValid(target);
-          let didDither = tsx_dither( target );
+          if( stopTarget != true ) {
+            let didDither = tsx_dither( target );
+          }
         }
         else {
           tsxInfo(' Skipping end conditions - not Light Frame');
@@ -2469,7 +2471,9 @@ export function processTargetTakeSeries( target ) {
         // check end conditions
         if( series.frame == 'Light' ) { // if frame is light....
           stopTarget = isTargetConditionInValid(target);
-          let didDither = tsx_dither( target );
+          if( stopTarget != true ) {
+            let didDither = tsx_dither( target );
+          }
         }
         else {
           tsxInfo(' *** Skipping end conditions - not Light Frame');
