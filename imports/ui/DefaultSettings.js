@@ -467,13 +467,14 @@ class DefaultSettings extends Component {
               value={this.state.maxDitherFactor}
               onChange={this.handleChange}
             />
-            <Form.Input
-              label='Dither after X images (0 disables): '
-              name='defaultDithering'
-              placeholder='Images before dither'
-              value={this.state.defaultDithering}
-              onChange={this.handleChange}
-            />
+            {/* <Form.Input
+            //   label='Dither after X images (0 disables): '
+            //   name='defaultDithering'
+            //   placeholder='Images before dither'
+            //   value={this.state.defaultDithering}
+            //   onChange={this.handleChange}
+            // />
+            */}
           </Form.Group>
         </Segment>
         <Segment raised>

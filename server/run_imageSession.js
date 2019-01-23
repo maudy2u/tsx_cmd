@@ -339,7 +339,7 @@ export function CalibrateAutoGuider() {
   // tsxDebug('************************');
   var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
   if( !enabled ) {
-    UpdateStatus(' @Autoguiding disabled');
+    UpdateStatus(' *** @Autoguiding disabled');
     return;
   }
 
@@ -366,7 +366,7 @@ function SetUpAutoGuiding( target, doCalibration ) {
   tsxDebug(' *** SetUpAutoGuiding: ' + target.targetFindName );
   var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
   if( !enabled ) {
-    UpdateStatus(' @Autoguiding disabled: ' + target.targetFindName);
+    UpdateStatus(' *** @Autoguiding disabled: ' + target.targetFindName);
     return;
   }
 
@@ -409,7 +409,7 @@ function tsx_TakeAutoGuideImage( ) {
   // tsxDebug('************************');
   var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
   if( !enabled ) {
-    UpdateStatus(' @Autoguiding disabled ');
+    UpdateStatus(' *** @Autoguiding disabled ');
     return;
   }
 
@@ -436,7 +436,7 @@ function tsx_FindGuideStar() {
   tsxDebug(' *** tsx_FindGuideStar' );
   var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
   if( !enabled ) {
-    UpdateStatus(' @Autoguiding disabled: ' + target.targetFindName);
+    UpdateStatus(' *** @Autoguiding disabled: ' + target.targetFindName);
     return;
   }
 
@@ -1314,7 +1314,7 @@ function tsx_isDarkEnough(target) {
     }
 	}
   else {
-    tsxDebug(' Twilight disabled');
+    tsxDebug(' *** Twilight disabled');
     return true;
   }
 }
@@ -1361,7 +1361,7 @@ export function tsx_isDark() {
     }
 	}
   else {
-    tsxDebug(' Twilight disabled');
+    tsxDebug(' *** Twilight disabled');
     return true;
   }
 }
@@ -1654,7 +1654,7 @@ function isTargetConditionInValid(target) {
     tsx_AbortGuider();
     InitialFocus( target );
     // no need to return false... can keep going.
-    UpdateStatus( ' --- refocused, and redo autoguider');
+    UpdateStatus( ' --- refocus, and redo autoguider');
     let didDither = false;
     let doDither = isDitheringNeeded( target );
     if( doDither == true  ) {
@@ -1668,27 +1668,27 @@ function isTargetConditionInValid(target) {
     //
     // *******************************
     // Recheck if only dither is needed
-    let doDither = isDitheringNeeded( target );
     let didDither = false;
+    let doDither = isDitheringNeeded( target );
     if( doDither == true ) {
       didDither = tsx_dither( target ); //  runs SetUpAutoGuiding
     }
   }
-  tsxDebug( ' isTargetConditionInValid return false to continue.');
+  tsxDebug( ' isTargetConditionInValid returns false to continue.');
   return false;
 }
 
 function isDitheringNeeded (target ) {
-  tsxDebug(' *** tsx_dither: ' + target.targetFindName);
+  tsxDebug(' *** isDitheringNeeded: ' + target.targetFindName);
 
-  var ditherTarget = Number(tsx_GetServerStateValue('defaultDithering'));
-  if( ditherTarget <= 0 ) {
+  var ditherAt = targetDither( target );
+  if( ditherAt <= 0 ) {
     return false;
   }
   var lastDither = Number(tsx_GetServerStateValue('imagingSessionDither'));
-  var dCount = lastDither +1;
-  var doDither = (Math.round(dCount) >= Math.round(ditherTarget));
-  UpdateStatus( ' --- Dithering needed: ' + doDither );
+  var dCount = lastDither;; // +1;
+  var doDither = (Math.round(dCount) >= Math.round(ditherAt));
+  tsxDebug( ' --- check dithering needed: ' + doDither );
   return doDither;
 }
 
@@ -1696,7 +1696,7 @@ function isDitheringNeeded (target ) {
 function tsx_dither( target ) {
   // tsxDebug('************************');
   var Out = false;
-  var ditherTarget = Number(tsx_GetServerStateValue('defaultDithering'));
+  var ditherTarget = targetDither( target );
   var lastDither = Number(tsx_GetServerStateValue('imagingSessionDither'));
   var doDither = isDitheringNeeded( target );
   if( ditherTarget > 0 ) {
@@ -1727,6 +1727,7 @@ function tsx_dither( target ) {
             else {
               // tsxLog('Dither success');
               UpdateStatus(' ' + target.targetFindName +': dither succeeded');
+              // dither succeeded so reset count
               tsx_SetServerState('imagingSessionDither', 0);
             }
             Out = true;
@@ -1742,12 +1743,13 @@ function tsx_dither( target ) {
       SetUpAutoGuiding( target, false );
     }
     else {
-      tsx_SetServerState('imagingSessionDither', lastDither+1);
-      tsxLog(' ' + target.targetFindName +': not dithering');
+      // moved this line to happen right after taking a light Image
+      // tsx_SetServerState('imagingSessionDither', lastDither+1);
+      tsxDebug(' ' + target.targetFindName +': not dithering');
     }
   }
   else{
-    tsxLog(' ' + target.targetFindName +': Dithering disabled');
+    tsxLog(' --- check dithering disabled');
   }
   return Out;
 
@@ -2021,7 +2023,7 @@ function tsx_MatchRotation( target ) {
     }
   }
   else {
-    var str = ' ' + target.targetFindName + ': match angle disabled';
+    var str = ' *** ' + target.targetFindName + ': match angle disabled';
     tsxDebug( str );
     rotateSucess = false;
   }
@@ -2200,8 +2202,8 @@ function tsx_takeImage( filterNum, exposure, frame, tName ) {
 
   cmd = cmd.replace("$000", filterNum ); // set filter
   cmd = cmd.replace("$001", exposure ); // set exposure
-  cmd = cmd.replace("$002", frame ); // set exposure
-  cmd = cmd.replace("$003", tName ); // set exposure
+  cmd = cmd.replace("$002", frame ); // set Light/Dark/Flat/Bias
+  cmd = cmd.replace("$003", tName ); // set target
 
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
@@ -2223,7 +2225,11 @@ function tsx_takeImage( filterNum, exposure, frame, tName ) {
             }
           }
           finally{
-            // do nothing
+            if( frame == '1 ' ) { // 1 = Light
+              // increment Dither count
+              var lastDither = Number(tsx_GetServerStateValue('imagingSessionDither'));
+              tsx_SetServerState('imagingSessionDither', lastDither+1);
+            }
           }
         }
         else {
@@ -2315,6 +2321,25 @@ function takeSeriesImage(target, series) {
   return;
 }
 
+function targetDither( target ) {
+  let ditherAt = 0;
+  let template;
+  try {
+    template = TakeSeriesTemplates.findOne( {_id:target.series._id});
+    let ditherTarget = template.defaultDithering;
+    if( ditherTarget == '' || typeof ditherTarget == 'undefined') {
+      ditherAt = 0;
+    }
+    else {
+      ditherAt = ditherTarget;
+    }
+  }
+  catch( e ) {
+    UpdateStatus(' !!! Failed - series dither: ' + target.targetFindName + '>> ' + e);
+  }
+  return Number( ditherAt );
+}
+
 // **************************************************************
 export function processTargetTakeSeries( target ) {
   // process for each filter
@@ -2350,7 +2375,7 @@ export function processTargetTakeSeries( target ) {
   tsxDebug(' Sorted series order: ' + takeSeries.length);
 
   // create report
-  var seriesReport = ' --- Using: ' +template.name;
+  var seriesReport = ' --- Series Name: ' +template.name;
   UpdateStatus( seriesReport );
   UpdateStatus(' --- Process: ' + template.processSeries);
   for (var i = 0; i < numSeries; i++) {
@@ -2359,6 +2384,7 @@ export function processTargetTakeSeries( target ) {
       UpdateStatus(' --- Filter: ' + series.filter + '@' + series.exposure + ' sec, ' + series.repeat + ' times');
     }
   }
+  UpdateStatus(' --- Dithering: ' + targetDither( target ));
 
   // set up for the cycle through the filters
   var stopTarget = false; // #IDEA #TODO can use the current jobId to potentially stop
@@ -2391,6 +2417,7 @@ export function processTargetTakeSeries( target ) {
         // #TODO - check end conditions - and skip if NOT light Frame
         if( series.frame == 'Light' ) { // if frame is light....
           stopTarget = isTargetConditionInValid(target);
+          let didDither = tsx_dither( target );
         }
         else {
           tsxInfo(' Skipping end conditions - not Light Frame');
@@ -2442,6 +2469,7 @@ export function processTargetTakeSeries( target ) {
         // check end conditions
         if( series.frame == 'Light' ) { // if frame is light....
           stopTarget = isTargetConditionInValid(target);
+          let didDither = tsx_dither( target );
         }
         else {
           tsxInfo(' *** Skipping end conditions - not Light Frame');
@@ -2708,7 +2736,7 @@ export function canTargetSessionStart( target ) {
   var canStart = true;
   tsxDebug( ' Is target active: ' + target.enabledActive );
   if(!target.enabledActive){
-    UpdateStatus( ' ' + target.targetFindName + ': not enabled' );
+    UpdateStatus( ' *** ' + target.targetFindName + ': not enabled' );
     return false; // the session is disabled
   }
 

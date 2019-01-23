@@ -47,6 +47,7 @@ class TakeSeriesEditor extends Component {
     repeat: 0,
     binning: 0,
     takeSeriesTemplate: '',
+    dithering: 0,
   };
 
   // // change states
@@ -87,6 +88,7 @@ class TakeSeriesEditor extends Component {
       repeat: definedSeries.repeat,
       binning: definedSeries.binning,
       takeSeriesTemplate: definedSeries.takeSeriesTemplate,
+      dithering: definedSeries.dithering,
     });
   }
 

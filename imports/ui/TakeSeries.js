@@ -81,6 +81,7 @@ class TakeSeries extends Component {
         name: orgSeries.name + ' Duplicated',
         description: orgSeries.description,
         processSeries: orgSeries.processSeries,
+        defaultDithering: orgSeries.defaultDithering,
         repeatSeries: orgSeries.repeatSeries,
         createdAt: new Date(),
         series: [],

@@ -37,12 +37,13 @@ class TakeSeriesTemplateEditor extends Component {
     seriesProcess: "",
     seriesContainer: [],
     repeatSeries: false,
-    defaultDithering: 1,
+    defaultDithering: 0,
     seriesOrderFix: '',
   };
 
   nameChange = (e, { value }) => this.setState({ name: value });
   descriptionChange = (e, { value }) => this.setState({ description: value });
+  handleDitherChange = (e, { value }) => this.setState({ defaultDithering: value });
   seriesProcessChange = (e, { value }) => this.setState({ seriesProcess: value });
   updateSeriesContainer = (e, { value }) => this.setState({ seriesContainer: value });
 
@@ -53,16 +54,20 @@ class TakeSeriesTemplateEditor extends Component {
     });
   };
 
-  nameChange = (e, { value }) => this.setState({ name: value });
-
   componentWillMount() {
     // do not modify the state directly
     this.setState({name: this.props.template.name});
-    this.setState({description: this.props.template.defaultDithering});
     this.setState({description: this.props.template.description});
     this.setState({seriesProcess: this.props.template.processSeries});
     this.setState({seriesContainer: this.props.template.series});
     this.setState({repeatSeries: this.props.template.repeatSeries});
+
+    // make sure dithering is set
+    if( this.props.template.defaultDithering == '' 
+    || typeof this.props.template.defaultDithering == 'undefined' ) {
+      this.props.template.defaultDithering = 0;
+    }
+    this.setState({defaultDithering: this.props.template.defaultDithering});
   }
 
   componentWillReceiveProps(nextProps) {
@@ -176,10 +181,10 @@ class TakeSeriesTemplateEditor extends Component {
             <br/>
             <Form.Input
               label='Dither after: '
-              name='defaultDithering'
+              type='text'
               placeholder='Images before dither'
-              value={this.state.defaultDithering}
-              onChange={this.handleChange}
+              defaultValue={this.state.defaultDithering}
+              onChange={this.handleDitherChange}
             />
           </Form.Group>
         </Form>
