@@ -66,8 +66,6 @@ import {
   tsx_StopTracking,
 } from './run_imageSession.js';
 
-import { tsx_feeder, stop_tsx_is_waiting } from './tsx_feeder.js';
-
 import {shelljs} from 'meteor/akasha:shelljs';
 
 /*
@@ -373,7 +371,7 @@ function startServerProcess() {
 }
 
 Meteor.startup(() => {
-
+  tsxLog(' ****** TSX_CMD STARTING *****', '');
   AppLogsDB.remove({});
   // FlatSeries.remove({});
   // TargetAngles.remove({});

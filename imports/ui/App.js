@@ -63,6 +63,7 @@ import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 import SessionControls from './SessionControls.js';
 import TestModal from './TestModal.js';
+import NightPlanner from './NightPlanner.js';
 
 import {
   tsx_ServerStates,
@@ -93,10 +94,11 @@ class App extends TrackerReact(Component) {
       modalOpenWindowSessionControls: false,
       modalOpen: false,
       modalOpenTest: false,
-      modalNightPlans: false,
+      modalViewNightPlanner: false,
       planData: [],
       planDataLoading: true,
     };
+    this.planDataLoaded = this.planDataLoaded.bind(this);
   }
 
   handleToggle = (e, { name, value }) => this.setState({ [name]: Boolean(!eval('this.state.'+name)) })
@@ -121,12 +123,25 @@ class App extends TrackerReact(Component) {
   modalOpenTest = () => this.setState({ modalOpenTest: true });
   modalCloseTest = () => this.setState({ modalOpenTest: false });
 
-  modalTargetReport = () => {
+  modalShowTargetReport = () => {
     this.setState({planDataLoading: true});
-    this.planData(); // get the data from the server.
-    this.setState({ modalNightPlans: true });
+    this.loadPlanData();
+    this.setState({ modalViewNightPlanner: true });
   };
-  modalCloseTest2 = () => this.setState({ modalNightPlans: false });
+  modalCloseNightPlanner = () => {
+    this.setState({ modalViewNightPlanner: false });
+  };
+
+  propValue( prop ) {
+    let val = '';
+    try {
+      val = prop.value;
+    }
+    catch( e ) {
+      val = ''
+    }
+    return val;
+  }
 
   saveTSXServerIp() {
     this.modalEnterIpClose();
@@ -347,7 +362,7 @@ class App extends TrackerReact(Component) {
       }
       else {
         this.setState({activeMenu: 'Devices'});
-        saveDefaultState('activeMenu');
+        this.saveDefaultState('activeMenu');
       }
     }.bind(this));
   }
@@ -495,7 +510,7 @@ class App extends TrackerReact(Component) {
         />
       )
     }
-    saveDefaultState('activeMenu');
+    this.saveDefaultState('activeMenu');
   }
 
   renderIPEditor() {
@@ -595,28 +610,43 @@ class App extends TrackerReact(Component) {
     )
   };
 
-  propValue( prop ) {
-    let val = '';
-    try {
-      val = prop.value;
-    }
-    catch( e ) {
-      val = ''
-    }
-    return val;
+
+  // *******************************
+  // Night planner
+  planDataLoaded() {
+    //this.state.enabledActive
+    this.setState({
+      planDataLoading: false
+    })
   }
 
-  renderTargetReport2( night_planned ) {
+  loadPlanData() {
+    // these are all working methods
+    // on the client
+    Meteor.call("planData", function (error, result) {
+      // identify the error
+      this.setState({
+        planData: result,
+        planDataLoading: false,
+      });
+    }.bind(this));
+  }
+
+  renderTargetReport( night_plans ) {
     return (
       <Modal
-      open={this.state.modalNightPlans}
-      onClose={this.modalCloseTest2}
+      open={this.state.modalViewNightPlanner}
+      onClose={this.modalCloseNightPlanner}
       basic
       closeIcon>
         <Modal.Header>Night Plan</Modal.Header>
         <Modal.Content>
-          <SessionControls
-            tsxInfo = { this.props.tsxInfo }
+          <NightPlanner
+            night_plan_updating = {night_plans}
+            planDataLoading = {this.state.planDataLoading}
+            planDataLoaded = {this.planDataLoaded}
+            night_plan = {this.props.night_plan}
+            tsxInfo= {this.props.tsxInfo}
           />
         </Modal.Content>
         <Modal.Description>
@@ -626,371 +656,6 @@ class App extends TrackerReact(Component) {
       </Modal>
     )
   }
-
-  renderTargetReport( night_planned ) {
-    // pop up the upload dialog
-    // send the file to server
-    // server parses file "key=value"
-
-    // get the time for the sun at Altitiude above and below
-    // repeat for each enabled target
-    // rows for start and end times....
-    let PLAN = [];
-    try {
-      PLAN = night_planned.value;
-    }
-    catch( e ) {
-      PLAN = [];
-      return;
-    }
-
-    const STARTTIME = this.propValue(this.props.tsxInfo.find(function(element) {
-      return element.name == 'defaultStartTime';
-    }));
-    const ENDTIME = this.propValue(this.props.tsxInfo.find(function(element) {
-      return element.name == 'defaultStopTime';
-    }));
-
-    /*
-    // Sun: use white for day light, and blue for night
-    // Moon: use blue during Moon UP
-    // Nautical Twilight is 12 degree below horizon -12, or use the time user set
-    // Target: use white for no imaging, and green for imaging
-    const possibleColors = [
-      'red',
-      'orange',
-      'yellow',
-      'olive',
-      'green', // Target imaging time
-      'teal', // Before/After start/end time
-      'blue', // Moon is UP
-      'violet',
-      'purple',
-      'pink',
-      'brown',
-      'grey',
-      'black', // dark
-    ];
-    */
-    let startHr=0, endHr=0,  bufHr = 1, cols=16;
-
-    try {
-      startHr = Number(STARTTIME.split(':')[0].trim());
-      endHr = Number(ENDTIME.split(':')[0].trim());
-    }
-    catch( e ) {
-      startHr = 0;
-      endHr = 0;
-    }
-
-    let plannerIndex = [];
-    if( startHr-bufHr < 24 && startHr-bufHr > endHr+bufHr ) {
-        for( let i=startHr-bufHr; i < 24; i++ ) {
-          plannerIndex.push( i );
-        }
-    }
-    if( endHr+bufHr == 0 || endHr+bufHr < startHr-bufHr ) {
-      for( let i=0; i < endHr+bufHr; i++ ) {
-        plannerIndex.push( i );
-      }
-    }
-
-    // *******************************
-    // GET MOON data
-    // Get any moon data.
-    let MOONRISE= '0:0';
-    let MOONRISE_HR= 0;
-    let MOONSET = '0:0';
-    let MOONSET_HR = 0;
-    let SUNRISE= '0:0';
-    let SUNRISE_HR= 0;
-    let SUNSET = '0:0';
-    let SUNSET_HR = 0;
-    for( let i=0; i<PLAN.length; i ++ ) {
-      let obj = PLAN[i];
-      if( typeof obj == 'undefined' ) {
-        continue;
-      }
-      let oName = obj.target;
-      if( oName == 'Moon') {
-        let alt = obj.alt;
-        let sTime = obj.start;
-        let eTime = obj.end;
-        MOONRISE = obj.alt_start;
-        MOONSET = obj.alt_end;
-        MOONRISE_HR = Number(MOONRISE.split(':')[0].trim());
-        MOONSET_HR = Number(MOONSET.split(':')[0].trim());
-
-        let hrLimit = plannerIndex[plannerIndex.length-1];
-        MOONRISE_HR = this.adjHour( MOONRISE_HR, hrLimit );
-        MOONSET_HR = this.adjHour( MOONSET_HR, hrLimit );
-        if( MOONSET_HR < MOONRISE_HR ) {
-          MOONSET_HR = MOONSET_HR + 24;
-        }
-        if(MOONSET_HR < 12 ) {
-          MOONSET_HR=+24;
-        }
-      }
-      else if( oName == 'Sun') {
-        let alt = obj.alt;
-        let sTime = obj.start;
-        let eTime = obj.end;
-        SUNRISE = obj.alt_start;
-        SUNSET = obj.alt_end;
-        SUNRISE_HR = Number(SUNRISE.split(':')[0].trim());
-        SUNSET_HR = Number(SUNSET.split(':')[0].trim());
-
-        let hrLimit = plannerIndex[plannerIndex.length-1];
-        SUNRISE_HR = this.adjHour( SUNRISE_HR, hrLimit );
-        SUNSET_HR = this.adjHour( SUNSET_HR, hrLimit );
-      }
-
-    }
-
-    // *******************************
-    // createt the GRID
-
-    let colHours = [];
-    let planner = [];
-    // setup first half
-
-    if( startHr-bufHr < 24 && startHr-bufHr > endHr+bufHr ) {
-        for( let i=startHr-bufHr; i < 24; i++ ) {
-          colHours.push( i );
-          let colour = 'black';
-          // Colour the Moon
-          if( i >= MOONRISE_HR && i <= MOONSET_HR) {
-            colour = 'blue';
-          }
-          // Colour the Sun
-          if( i <= SUNSET_HR || i >= SUNRISE_HR ) {
-             colour = 'teal';
-          }
-          // if( (i < startHr || i > endHr) ) {
-          //   colour = 'teal';
-          // }
-
-          let note = i;
-          if( i == MOONRISE_HR ) {
-            note = MOONRISE;
-          }
-          else if( i == MOONSET_HR ) {
-            note = MOONSET;
-          }
-          else if( i == SUNRISE_HR ) {
-            note = SUNRISE;
-          }
-          else if( i == SUNSET_HR ) {
-            note = SUNSET;
-          }
-
-          // add in moonlight hour colouring...
-          // i.e. if within the moonrise hours... make text Colours XXX
-          planner.push(
-            <Grid.Column key={i} color={colour}>
-                <small>{note}</small>
-            </Grid.Column>
-          );
-        }
-    }
-    // setup last half
-    if( endHr+bufHr == 0 || endHr+bufHr < startHr-bufHr ) {
-      for( let j=0; j < endHr+bufHr; j++ ) {
-        colHours.push( j );
-        let colour = 'black';
-        if( j > endHr ) {
-          colour = 'teal';
-        }
-        // Colour the Moon
-        if( j+24 >= MOONRISE_HR && j+24 <= MOONSET_HR) {
-          colour = 'blue';
-        }
-        // Colour the Sun
-        if( j+24 >= SUNRISE_HR ) {
-           colour = 'teal';
-        }
-
-        let note = j;
-        if( j+24 == MOONRISE_HR ) {
-          note = MOONRISE;
-        }
-        else if( j+24 == MOONSET_HR ) {
-          note = MOONSET;
-        }
-        else if( j+24 == SUNRISE_HR ) {
-          note = SUNRISE;
-        }
-
-
-        planner.push(
-          <Grid.Column key={j} color={colour}>
-            <small>{note}</small>
-          </Grid.Column>
-        );
-      }
-    }
-
-    // if( planner.length == 0 ) {
-    //   return;
-    // }
-    //
-    return(
-      <Modal
-        open={this.state.modalNightPlans}
-        onClose={this.modalCloseTest2}
-        basic
-//        size='small'
-        closeIcon>
-        <Modal.Header>Night Plan</Modal.Header>
-        <Modal.Content>
-            <Segment>
-              <Dimmer active={this.state.planDataLoading}>
-                  <Loader size='small'>Loading</Loader>
-              </Dimmer>
-              <Grid padded columns={planner.length}>
-                <Grid.Row>
-                  {planner}
-                </Grid.Row>
-                {this.renderTargetRow( PLAN, colHours )}
-              </Grid>
-            </Segment>
-{/*            {PLAN.map((O)=>{
-                return (
-                   <div>
-                    OBJ:{O.target},ALT:{O.alt},S:{O.start},E:{O.end},R:{O.alt_start},D:{O.alt_end}
-                  </div>
-                )
-              })}
-*/}
-        </Modal.Content>
-        <Modal.Description>
-{/*          <Segment secondary>
-            <Grid columns={5} padded>
-              {colors.map(color => (
-                <Grid.Column color={color} key={color}>
-                  {color}
-                </Grid.Column>
-              ))}
-            </Grid>
-          </Segment>
-*/}
-          <center><small>Defaults: start time={STARTTIME}, end time={ENDTIME}<br/>Teal=Twilight, Blue=Moon, Green=Imaging<br/></small></center>
-        </Modal.Description>
-        <Modal.Actions>
-        </Modal.Actions>
-      </Modal>
-    )
-  }
-
-  adjHour( hr, limit ) {
-    if( hr <= limit ) {
-      hr = hr + 24;
-    }
-    return hr;
-  }
-
-  renderTargetRow( DATA, colHours ) {
-
-    let Out = [];
-    for( let i=0; i<DATA.length; i ++ ) {
-      let obj = DATA[i];
-      if( typeof obj == 'undefined' ) {
-        continue;
-      }
-      let oName = obj.target;
-      if( oName == 'Sun' || oName == 'Moon') {
-        continue;
-      }
-      let alt = obj.alt;
-      let sTime = obj.start;
-      let eTime = obj.end;
-      let rise = obj.alt_start;
-      let down = obj.alt_end;
-      let COL = [];
-      // only do the planner number of cols
-      let hrLimit = colHours[colHours.length-1];
-      for( let j=0; j< colHours.length; j++ ) {
-
-        let hr = this.adjHour( colHours[j], hrLimit );
-
-        let startHr=0,endHr=0,rHr=0,dHr=0;
-        let colour = 'black';
-        try {
-          startHr = this.adjHour( Number(sTime.split(':')[0].trim()), hrLimit );
-          endHr = this.adjHour( Number(eTime.split(':')[0].trim()), hrLimit );
-          rHr = this.adjHour( Number(rise.split(':')[0].trim()), hrLimit );
-          dHr = this.adjHour( Number(down.split(':')[0].trim()), hrLimit );
-          if( dHr < rHr ) {
-            dHr = dHr + 24;
-          }
-          // console.log(
-          //    'HR: ' + hr + ', OBJ: ' + oName + ',ALT: ' + alt + ',S: ' + startHr + ',E: ' + endHr + ',R: ' + rHr + ',D: ' + dHr
-          // )
-        }
-        catch( e ) {
-          startHr = 0;
-          endHr = 0;
-          rHr = 0;
-          dHr = 0;
-        }
-        if(
-          (hr >= startHr
-          && hr >= rHr
-          )
-          &&
-          (
-          hr <= endHr
-          && hr <= dHr
-          )
-        ) {
-          colour = 'green';
-        }
-        var note = '';
-
-        if( j == 0 ) {
-          note = oName;
-        }
-        else if( hr == dHr ) {
-          note = down;
-        }
-        else if( hr == endHr ) {
-          note = eTime;
-        }
-        else if( hr == startHr ) {
-          note = sTime;
-        }
-        else if( hr == rHr ) {
-          note = rise;
-        }
-
-        COL.push(
-          <Grid.Column key={j} color={colour}>
-              <small>{note}</small>
-          </Grid.Column>
-        );
-      }
-      Out.push(
-        <Grid.Row key={oName+i}>
-          {COL}
-        </Grid.Row>
-      )
-    }
-    return Out;
-  }
-
-  planData() {
-
-    // these are all working methods
-    // on the client
-    Meteor.call("planData", function (error, result) {
-      // identify the error
-      this.setState({
-        planData: result,
-      });
-      this.setState({planDataLoading: false});
-    }.bind(this));
-  }
-
 
   parkButtons( state, active ) {
     // detective
@@ -1006,7 +671,7 @@ class App extends TrackerReact(Component) {
       <Button.Group basic size='small' floated='right'>
         <Button icon='cloud download' onClick={this.modalOpenTest}/>
         <Button icon='detective' onClick={this.modalOpenSessionsControls}/>
-        <Button disabled={DISABLE} icon='chart bar' onClick={this.modalTargetReport}/>
+        <Button disabled={DISABLE} icon='chart bar' onClick={this.modalShowTargetReport}/>
         <Button disabled compact />
         <Button disabled={DISABLE} icon='wifi' onClick={this.connectToTSX.bind(this)}/>
         <Button disabled={DISABLE} icon='car' onClick={this.park.bind(this)}/>
@@ -1186,7 +851,7 @@ class App extends TrackerReact(Component) {
           *******************************             */}
           {this.renderSessionControls()}
           {this.renderTestModal()}
-          {this.renderTargetReport(this.props.night_plan)}
+          {this.renderTargetReport(this.props.night_plan_updating)}
           <Modal
             open={this.state.modalConnectionFailed}
             onClose={this.modalConnectionFailedClose.bind(this)}
@@ -1224,12 +889,12 @@ class App extends TrackerReact(Component) {
 // *******************************
 // THIS IS THE DEFAULT EXPORT AND IS WHERE THE LOADING OF THE COMPONENT STARTS
 export default withTracker(() => {
-  Meteor.subscribe('targetSessions');
-  Meteor.subscribe('tsxIP');
-  Meteor.subscribe('scheduler_running');
-  Meteor.subscribe('scheduler_report');
-  Meteor.subscribe('currentStage');
-  Meteor.subscribe('tsxInfo');
+  // Meteor.subscribe('targetSessions');
+  // Meteor.subscribe('tsxIP');
+  // Meteor.subscribe('scheduler_running');
+  // Meteor.subscribe('scheduler_report');
+  // Meteor.subscribe('currentStage');
+  // Meteor.subscribe('tsxInfo');
   return {
     tool_calibrate_via: TheSkyXInfos.findOne({name: 'tool_calibrate_via'}),
     tool_calibrate_location: TheSkyXInfos.findOne({name: 'tool_calibrate_location'}),

@@ -29,18 +29,18 @@ if (Meteor.isServer) {
   //   console.log('FOund ip: ' + ip);
   //   return ip;
   // });
-  Meteor.publish('tsx_progress', function tsxPortPublication() {
-    var param = TheSkyXInfos.findOne({name: 'tsx_progress'});
-    if( typeof param == 'undefined') {
-      var did = TheSkyXInfos.upsert({name: 'tsx_progress'}, {
-        $set: {
-          value: '',
-        }
-      });
-      param = TheSkyXInfos.findOne({_id: did});
-    }
-    return param.value;
-  });
+  // Meteor.publish('tsx_progress', function tsxPortPublication() {
+  //   var param = TheSkyXInfos.findOne({name: 'tsx_progress'});
+  //   if( typeof param == 'undefined') {
+  //     var did = TheSkyXInfos.upsert({name: 'tsx_progress'}, {
+  //       $set: {
+  //         value: '',
+  //       }
+  //     });
+  //     param = TheSkyXInfos.findOne({_id: did});
+  //   }
+  //   return param.value;
+  // });
 }
 
 // used to help Helpers return the device, or init

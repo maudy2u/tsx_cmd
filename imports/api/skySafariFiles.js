@@ -55,9 +55,9 @@ if (Meteor.isClient) {
 }
 
 if (Meteor.isServer) {
-  Meteor.publish('files.skySafari.all', () => {
-    return SkySafariFiles.collection.find({});
-  });
+  // Meteor.publish('files.skySafari.all', () => {
+  //   return SkySafariFiles.collection.find({});
+  // });
 }
 
 /*

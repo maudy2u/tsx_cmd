@@ -29,7 +29,35 @@ import {
   postProgressIncrement,
  } from '../imports/api/serverStates.js'
 
+ import {
+   tsxInfo,
+   tsxLog,
+   tsxErr,
+   tsxWarn,
+   tsxDebug,
+ } from '../imports/api/theLoggers.js';
+
+
 var tsx_waiting = false;
+
+// **************************************************************
+export function tsx_cmd(script) {
+  var src = Assets.getText(script+'.js');
+  tsxInfo(' *** tsx_cmd: ' + script);
+  return src;
+}
+
+export function tsx_has_error( tsx_return ) {
+  let cmdErr = tsx_return.split('|')[0].trim();
+  if( cmdErr == 'TsxError') {
+    UpdateStatusErr('!!! TheSkyX connection is no longer there!');
+    let err = tsx_return.split('|')[1].trim()
+    let errCmd = tsx_return.split('|')[2].trim()
+    tsxDebug( err );
+    return 'TsxError|' + err;
+  }
+  return false;
+}
 
 export function tsx_is_waiting() {
   return tsx_waiting;
@@ -37,6 +65,7 @@ export function tsx_is_waiting() {
 export function stop_tsx_is_waiting() {
   tsx_waiting = false;
 }
+
 function start_tsx_is_waiting() {
   tsx_waiting = true;
 }

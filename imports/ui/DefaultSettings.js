@@ -347,7 +347,7 @@ class DefaultSettings extends Component {
         <Segment raised>
           <Form.Group>
             <Form.Input
-              label='Twilight Alittude for Sun '
+              label='Twilight Altitude for Sun '
               name='defaultMinSunAlt'
               placeholder='Enter negative degrees below horizon'
               value={this.state.defaultMinSunAlt}

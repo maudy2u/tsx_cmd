@@ -52,7 +52,11 @@ import {
   UpdateImagingSesionID,
  } from '../imports/api/serverStates.js'
 
-import { tsx_feeder } from './tsx_feeder.js'
+import {
+  tsx_feeder,
+  tsx_cmd,
+  tsx_has_error,
+ } from './tsx_feeder.js'
 
 import {shelljs} from 'meteor/akasha:shelljs';
 var shell = require('shelljs');
@@ -119,14 +123,6 @@ function getFrame(frame) {
 // **************************************************************
 export function string_replace(haystack, find, sub) {
     return haystack.split(find).join(sub);
-}
-
-// **************************************************************
-export function tsx_cmd(script) {
-  tsxInfo(' *** tsx_cmd: ' + script);
-
-  var src = Assets.getText(script+'.js');
-  return src;
 }
 
 // **************************************************************
@@ -255,9 +251,9 @@ export function tsx_MntUnpark() {
         tsx_is_waiting = false;
   }));
   tsxDebug ( ' unpark waiting ') ;
-  // while( tsx_is_waiting ) {
-  //   Meteor.sleep( 1000 );
-  // }
+  while( tsx_is_waiting ) {
+    Meteor.sleep( 1000 );
+  }
   tsxDebug ( ' unpark done ') ;
   return Out;
 }
@@ -304,9 +300,9 @@ export function tsx_MntPark(defaultFilter, softPark) {
         tsx_is_waiting = false;
   }));
   tsxDebug( ' Park waiting' );
-  // while( tsx_is_waiting ) {
-  //  Meteor.sleep( 1000 );
-  // }
+  while( tsx_is_waiting ) {
+   Meteor.sleep( 1000 );
+  }
   tsxDebug( ' Park wait done' );
   return Out;
 }
@@ -921,32 +917,30 @@ function tsx_RunFocus3( target ) {
 
     tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       //[[B^[[B^[[BI20180708-01:53:13.485(-3)?   [SERVER]|2018-07-08|01:53:13|[DEBUG]| ??? @Focusing-3 returned: TypeError: Error code = 5 (5). No additional information is available.|No error. Error = 0
-          tsxDebug( ' ??? @Focusing-3 returned: ' + tsx_return );
-          var temp = tsx_return.split('|')[1].trim();
-          var position = tsx_return.split('|')[0].trim();
-          if( temp == 'TypeError: Error code = 5 (5). No additional information is available.') {
-              temp = tsx_GetServerStateValue( 'initialFocusTemperature' );
-              UpdateStatus( ' !!! Error find focus.' );
-          }
-          //TypeError: @Focus diverged.  Error = 7001
-          else if (temp =='TypeError: @Focus diverged.  Error = 7001.') {
-            temp = tsx_GetServerStateValue( 'initialFocusTemperature' );
-            UpdateStatus( ' !!! Error find focus.' );
-          }
-          else if( typeof temp == 'undefined' || temp === 'No error. Error = 0.') {
-            temp = '';
-          }
-          if( position == 'Simulator') {
-            temp = position;
-          }
-          // Focuser postion (1232345345) using LUM Filter
-          UpdateStatus(' *** Focuser postion (' + position + ') and temp ('+temp+') using ' + target.focusFilter + ' filter.');
+      tsxDebug( ' ??? @Focusing-3 returned: ' + tsx_return );
+      var temp = tsx_return.split('|')[1].trim();
+      var position = tsx_return.split('|')[0].trim();
+      if( temp == 'TypeError: Error code = 5 (5). No additional information is available.') {
+          temp = tsx_GetServerStateValue( 'initialFocusTemperature' );
+          UpdateStatus( ' !!! Error find focus.' );
+      }
+      //TypeError: @Focus diverged.  Error = 7001
+      else if (temp =='TypeError: @Focus diverged.  Error = 7001.') {
+        temp = tsx_GetServerStateValue( 'initialFocusTemperature' );
+        UpdateStatus( ' !!! Error find focus.' );
+      }
+      else if( typeof temp == 'undefined' || temp === 'No error. Error = 0.') {
+        temp = '';
+      }
+      if( position == 'Simulator') {
+        temp = position;
+      }
+      // Focuser postion (1232345345) using LUM Filter
+      UpdateStatus(' *** Focuser postion (' + position + ') and temp ('+temp+') using ' + target.focusFilter + ' filter.');
 
-          Out = temp;
-          tsx_is_waiting = false;
-        }
-      )
-    )
+      Out = temp;
+      tsx_is_waiting = false;
+    }));
     while( tsx_is_waiting ) {
      Meteor.sleep( 1000 );
     }
@@ -999,22 +993,20 @@ export function tsx_GetFocusTemp( target ) {
 
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-      // tsxDebug('Any error?: ' + tsx_return);
-      lastFocusTemp = tsx_return.split('|')[0].trim();
-      tsx_SetServerState( 'lastFocusTemp', lastFocusTemp );
-      tsxDebug(' *** focusTemp: ' + lastFocusTemp);
+    // tsxDebug('Any error?: ' + tsx_return);
+    lastFocusTemp = tsx_return.split('|')[0].trim();
+    tsx_SetServerState( 'lastFocusTemp', lastFocusTemp );
+    tsxDebug(' *** focusTemp: ' + lastFocusTemp);
 
-      lastFocusPos = tsx_return.split('|')[1].trim();
-      tsx_SetServerState( 'lastFocusPos', lastFocusPos );
-      tsxDebug(' *** focPosition: ' + lastFocusPos);
-      Out = {
-        focusTemp: lastFocusTemp,
-        focPosition: lastFocusPos,
-      };
-      tsx_is_waiting = false;
-      }
-    )
-  )
+    lastFocusPos = tsx_return.split('|')[1].trim();
+    tsx_SetServerState( 'lastFocusPos', lastFocusPos );
+    tsxDebug(' *** focPosition: ' + lastFocusPos);
+    Out = {
+      focusTemp: lastFocusTemp,
+      focPosition: lastFocusPos,
+    };
+    tsx_is_waiting = false;
+  }));
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
@@ -1032,26 +1024,24 @@ function tsx_GetMountReport() {
 
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-       tsxDebug(tsx_return);
-        Out = {
-          ra: tsx_return.split('|')[0].trim(),
-          dec: tsx_return.split('|')[1].trim(),
-          hms: tsx_return.split('|')[2].trim(),
-          direction: tsx_return.split('|')[3].trim(),
-          altitude: tsx_return.split('|')[4].trim(),
-          pointing: tsx_return.split('|')[5].trim(),
-        }
-        tsx_SetServerState( 'mntMntRA', Out.ra );
-        tsx_SetServerState( 'mntMntDEC', Out.dec );
-        tsx_SetServerState( 'mntMntMHS', Out.hms );
-        tsx_SetServerState( 'mntMntDir', Out.direction );
-        tsx_SetServerState( 'mntMntAlt', Out.altitude );
-        tsx_SetServerState( 'mntMntPointing', Out.pointing );
+   tsxDebug(tsx_return);
+    Out = {
+      ra: tsx_return.split('|')[0].trim(),
+      dec: tsx_return.split('|')[1].trim(),
+      hms: tsx_return.split('|')[2].trim(),
+      direction: tsx_return.split('|')[3].trim(),
+      altitude: tsx_return.split('|')[4].trim(),
+      pointing: tsx_return.split('|')[5].trim(),
+    }
+    tsx_SetServerState( 'mntMntRA', Out.ra );
+    tsx_SetServerState( 'mntMntDEC', Out.dec );
+    tsx_SetServerState( 'mntMntMHS', Out.hms );
+    tsx_SetServerState( 'mntMntDir', Out.direction );
+    tsx_SetServerState( 'mntMntAlt', Out.altitude );
+    tsx_SetServerState( 'mntMntPointing', Out.pointing );
 
-        tsx_is_waiting = false;
-      }
-    )
-  )
+    tsx_is_waiting = false;
+  }));
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
@@ -1300,7 +1290,6 @@ function tsx_isDarkEnough(target) {
   UpdateImagingTargetReport( target );
 	var chkTwilight = tsx_GetServerStateValue('isTwilightEnabled');
   tsxDebug(' Twilight check enabled: ' + chkTwilight);
-  var tsx_is_waiting = true;
 	if( chkTwilight ) {
     // tsxDebug(target.report);
     tsxDebug('Dark enough for ' + target.targetFindName +': ' + target.report.isDark);
@@ -1332,20 +1321,18 @@ export function tsx_isDark() {
     var cmd = tsx_cmd('SkyX_JS_Twilight');
     cmd = cmd.replace('$000', defaultMinSunAlt );
     tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-          var result = tsx_return.split('|')[0].trim();
-          tsxDebug('Any error?: ' + result);
-          if( result == "Light" || result == "Dark" ) {
-            isDark = result;
-            tsxLog( ' Sun altitude: ' + tsx_return.split('|')[1].trim());
-          }
-          else {
-            forceAbort = true;
-            tsxLog('SkyX_JS_Twilight Failed. Error: ' + result);
-          }
-          tsx_is_waiting = false;
-        }
-      )
-    );
+      var result = tsx_return.split('|')[0].trim();
+      tsxDebug('Any error?: ' + result);
+      if( result == "Light" || result == "Dark" ) {
+        isDark = result;
+        tsxLog( ' Sun altitude: ' + tsx_return.split('|')[1].trim());
+      }
+      else {
+        forceAbort = true;
+        tsxLog('SkyX_JS_Twilight Failed. Error: ' + result);
+      }
+      tsx_is_waiting = false;
+    }));
     while( tsx_is_waiting ) {
       Meteor.sleep( 1000 );
     }
@@ -1719,22 +1706,20 @@ function tsx_dither( target ) {
       cmd = cmd.replace("$002", maxDitherFactor ); // var maxDitherFactor = $002;  // 7;
 
       tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-            var result = tsx_return.split('|')[0].trim();
-            tsxDebug('Any error?: ' + result);
-            if( result != 'Success') {
-              UpdateStatusWarn('!!! SkyX_JS_NewDither Failed. Error: ' + result);
-            }
-            else {
-              // tsxLog('Dither success');
-              UpdateStatus(' ' + target.targetFindName +': dither succeeded');
-              // dither succeeded so reset count
-              tsx_SetServerState('imagingSessionDither', 0);
-            }
-            Out = true;
-            tsx_is_waiting = false;
-          }
-        )
-      );
+        var result = tsx_return.split('|')[0].trim();
+        tsxDebug('Any error?: ' + result);
+        if( result != 'Success') {
+          UpdateStatusWarn('!!! SkyX_JS_NewDither Failed. Error: ' + result);
+        }
+        else {
+          // tsxLog('Dither success');
+          UpdateStatus(' ' + target.targetFindName +': dither succeeded');
+          // dither succeeded so reset count
+          tsx_SetServerState('imagingSessionDither', 0);
+        }
+        Out = true;
+        tsx_is_waiting = false;
+      }));
       while( tsx_is_waiting ) {
         Meteor.sleep( 1000 );
       }
@@ -1753,18 +1738,6 @@ function tsx_dither( target ) {
   }
   return Out;
 
-}
-
-export function tsx_has_error( tsx_return ) {
-  let cmdErr = tsx_return.split('|')[0].trim();
-  if( cmdErr == 'TsxError') {
-    UpdateStatusErr('!!! TheSkyX connection is no longer there!');
-    let err = tsx_return.split('|')[1].trim()
-    let errCmd = tsx_return.split('|')[2].trim()
-    tsxDebug( errCmd );
-    return 'TsxError|' + err;
-  }
-  return false;
 }
 
 // **************************************************************
@@ -1793,127 +1766,123 @@ function tsx_TargetReport( target ) {
   };
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-    if( tsx_has_error(tsx_return) != false ) {
-      tsx_is_waiting = false;
-      return Out;
-    }
-    // e.g.
-    // false|6.812618943699146|
-    // true|West|42.2|5.593339690591149|22.023446766485247|3.4187695344846833|16.2723491463255240.0|0|
-    // No error. Error = 0.
+    if( tsx_has_error(tsx_return) == false ) {
+      // e.g.
+      // false|6.812618943699146|
+      // true|West|42.2|5.593339690591149|22.023446766485247|3.4187695344846833|16.2723491463255240.0|0|
+      // No error. Error = 0.
 
-    var result = tsx_return.split('|')[0].trim();
-    if( result == 'TypeError: Object not found. Error = 250.') {
-      UpdateStatusErr('!!! TargetReport failed. Target not found.');
-      tsxDebug( tsx_return );
-      tsx_is_waiting = false;
-      return Out;
-    }
-
-    var isDark = tsx_return.split('|')[0].trim();
-    var sunAlt = tsx_return.split('|')[1].trim();
-    var isValid = tsx_return.split('|')[2].trim();
-
-    // isValid will be false if not found or exception within script
-    if( isValid != 'true' ) {
-      tsxDebug( tsx_return );
-      UpdateStatusErr('!!! TargetReport failed. Not found ('+target.targetFindName+'): ' + isValid);
-      tsx_is_waiting = false;
-      return Out;
-    }
-
-    var az, alt, ra, dec, ha,
-      transit, focTemp, focPostion,
-      ready, readyMsg, pointing;
-
-    // #TODO can add star detect in case of clouds...
-
-    // if( isValid ) {
-    az = tsx_return.split('|')[3].trim();
-    alt = tsx_return.split('|')[4].trim();
-    ra = tsx_return.split('|')[5].trim();
-    dec = tsx_return.split('|')[6].trim();
-    ha = tsx_return.split('|')[7].trim();
-    transit = tsx_return.split('|')[8].trim();
-    ready = tsx_return.split('|')[9].trim();
-    readyMsg = tsx_return.split('|')[10].trim();
-    pointing = tsx_return.split('|')[11].trim();
-    try { // try to get focuser info
-      focTemp = tsx_return.split('|')[12].trim();
-      focPostion = tsx_return.split('|')[13].trim();
-    }
-    catch(e) {
-        // no need
-        focTemp='';
-        focPostion='';
-    }
-    var update = new Date();
-    Out = {
-      scale: '',
-      isValid: isValid,
-      AZ: az,
-      direction: az,
-      ALT: alt,
-      RA:  ra,
-      DEC: dec,
-      HA: ha,
-      TRANSIT: transit,
-      isDark: isDark,
-      sunAltitude: sunAlt,
-      focusTemp: focTemp,
-      focusPostion: focPostion,
-      updatedAt: update,
-      ready: ready,
-      readyMsg: readyMsg,
-      pointing: pointing,
-    };
-
-    var rid = TargetReports.upsert( { target_id: target._id }, {
-
-      $set: {
-        isValid: isValid,
-        RA:  ra,
-        DEC: dec,
-        ALT: alt,
-        AZ: az,
-        HA: ha,
-        direction: az,
-        scale: '',
-        TRANSIT: transit,
-        isDark: isDark,
-        sunAltitude: sunAlt,
-        focusTemp: focTemp,
-        focusPostion: focPostion,
-        updatedAt: update,
-        ready: ready,
-        readyMsg: readyMsg,
-        pointing: pointing,
+      var result = tsx_return.split('|')[0].trim();
+      if( result == 'TypeError: Object not found. Error = 250.') {
+        UpdateStatusErr('!!! TargetReport failed. Target not found.');
+        tsxDebug( tsx_return );
       }
-    });
-    TargetSessions.update({_id: target._id} , {
-      $set: {
-        report_id: rid,
-        report: Out,
+      else {
+        var isDark = tsx_return.split('|')[0].trim();
+        var sunAlt = tsx_return.split('|')[1].trim();
+        var isValid = tsx_return.split('|')[2].trim();
+
+        // isValid will be false if not found or exception within script
+        if( isValid != 'true' ) {
+          tsxDebug( tsx_return );
+          UpdateStatusErr('!!! TargetReport failed. Not found ('+target.targetFindName+'): ' + isValid);
+        }
+        else {
+          var az, alt, ra, dec, ha,
+            transit, focTemp, focPostion,
+            ready, readyMsg, pointing;
+
+          // #TODO can add star detect in case of clouds...
+
+          // if( isValid ) {
+          az = tsx_return.split('|')[3].trim();
+          alt = tsx_return.split('|')[4].trim();
+          ra = tsx_return.split('|')[5].trim();
+          dec = tsx_return.split('|')[6].trim();
+          ha = tsx_return.split('|')[7].trim();
+          transit = tsx_return.split('|')[8].trim();
+          ready = tsx_return.split('|')[9].trim();
+          readyMsg = tsx_return.split('|')[10].trim();
+          pointing = tsx_return.split('|')[11].trim();
+          try { // try to get focuser info
+            focTemp = tsx_return.split('|')[12].trim();
+            focPostion = tsx_return.split('|')[13].trim();
+          }
+          catch(e) {
+              // no need
+              focTemp='';
+              focPostion='';
+          }
+          var update = new Date();
+          Out = {
+            scale: '',
+            isValid: isValid,
+            AZ: az,
+            direction: az,
+            ALT: alt,
+            RA:  ra,
+            DEC: dec,
+            HA: ha,
+            TRANSIT: transit,
+            isDark: isDark,
+            sunAltitude: sunAlt,
+            focusTemp: focTemp,
+            focusPostion: focPostion,
+            updatedAt: update,
+            ready: ready,
+            readyMsg: readyMsg,
+            pointing: pointing,
+          };
+
+          var rid = TargetReports.upsert( { target_id: target._id }, {
+
+            $set: {
+              isValid: isValid,
+              RA:  ra,
+              DEC: dec,
+              ALT: alt,
+              AZ: az,
+              HA: ha,
+              direction: az,
+              scale: '',
+              TRANSIT: transit,
+              isDark: isDark,
+              sunAltitude: sunAlt,
+              focusTemp: focTemp,
+              focusPostion: focPostion,
+              updatedAt: update,
+              ready: ready,
+              readyMsg: readyMsg,
+              pointing: pointing,
+            }
+          });
+          TargetSessions.update({_id: target._id} , {
+            $set: {
+              report_id: rid,
+              report: Out,
+            }
+          });
+          // }
+          // tsxDebug(Out);
+          target.report = Out;
+
+          tsx_SetServerState( tsx_ServerStates.targetRA, ra );
+          tsx_SetServerState( tsx_ServerStates.targetDEC, dec );
+          tsx_SetServerState( tsx_ServerStates.targetALT, alt );
+          tsx_SetServerState(tsx_ServerStates.targetAZ, az );
+          tsx_SetServerState( tsx_ServerStates.targetHA, ha );
+          tsx_SetServerState( tsx_ServerStates.targetTransit, transit );
+          tsx_SetServerState( 'mntMntPointing', pointing );
+
+          tsxDebug( target.targetFindName + ' ' + Out.ALT);
+        }
       }
-    });
-    // }
-    // tsxDebug(Out);
-    target.report = Out;
-
-    tsx_SetServerState( tsx_ServerStates.targetRA, ra );
-    tsx_SetServerState( tsx_ServerStates.targetDEC, dec );
-    tsx_SetServerState( tsx_ServerStates.targetALT, alt );
-    tsx_SetServerState(tsx_ServerStates.targetAZ, az );
-    tsx_SetServerState( tsx_ServerStates.targetHA, ha );
-    tsx_SetServerState( tsx_ServerStates.targetTransit, transit );
-    tsx_SetServerState( 'mntMntPointing', pointing );
-
+    }
     tsx_is_waiting = false;
   }));
   while( tsx_is_waiting ) {
     Meteor.sleep( 1000 );
   }
-  tsxDebug( target.targetFindName + ' ' + Out.ALT);
   return Out;
 }
 
@@ -2207,40 +2176,38 @@ function tsx_takeImage( filterNum, exposure, frame, tName ) {
 
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        var result = tsx_return.split('|')[0].trim();
-        tsxDebug(' Image: ' + result);
-        tsxDebug( tsx_return );
-        if( result === "Success") {
-          success = true;
-          // check for rotatorPositionAngle
-          try {
-            tsxDebug( 'found rotator position: ' + tsx_return );
-            var rotPos = tsx_return.split('|')[1].trim()
-            if( rotPos == 'rotatorPosition') {
-              // the position is stored
-              let ang = tsx_return.split('|')[2].trim();
-              tsxLog( ' --- rotator position: ' + Number(ang).toFixed(3) );
-              // the stoed position can be used for flats
-              recordRotatorPosition( tName, Number(ang).toFixed(3) );
-            }
-          }
-          finally{
-            if( frame == '1 ' ) { // 1 = Light
-              // increment Dither count
-              var lastDither = Number(tsx_GetServerStateValue('imagingSessionDither'));
-              tsx_SetServerState('imagingSessionDither', lastDither+1);
-            }
-          }
+    var result = tsx_return.split('|')[0].trim();
+    tsxDebug(' Image: ' + result);
+    tsxDebug( tsx_return );
+    if( result === "Success") {
+      success = true;
+      // check for rotatorPositionAngle
+      try {
+        tsxDebug( 'found rotator position: ' + tsx_return );
+        var rotPos = tsx_return.split('|')[1].trim()
+        if( rotPos == 'rotatorPosition') {
+          // the position is stored
+          let ang = tsx_return.split('|')[2].trim();
+          tsxLog( ' --- rotator position: ' + Number(ang).toFixed(3) );
+          // the stoed position can be used for flats
+          recordRotatorPosition( tName, Number(ang).toFixed(3) );
         }
-        else {
-          tsxWarn(' Image failed: ' + tsx_return);
-        }
-        Meteor.sleep( 500 ); // needs a sleep before next image
-        tsx_is_waiting = false;
-
       }
-    )
-  )
+      finally{
+        if( frame == '1 ' ) { // 1 = Light
+          // increment Dither count
+          var lastDither = Number(tsx_GetServerStateValue('imagingSessionDither'));
+          tsx_SetServerState('imagingSessionDither', lastDither+1);
+        }
+      }
+    }
+    else {
+      tsxWarn(' Image failed: ' + tsx_return);
+    }
+    Meteor.sleep( 500 ); // needs a sleep before next image
+    tsx_is_waiting = false;
+
+  }));
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
    if( isSchedulerStopped() ) {
