@@ -606,6 +606,27 @@ class App extends TrackerReact(Component) {
     return val;
   }
 
+  renderTargetReport2( night_planned ) {
+    return (
+      <Modal
+      open={this.state.modalNightPlans}
+      onClose={this.modalCloseTest2}
+      basic
+      closeIcon>
+        <Modal.Header>Night Plan</Modal.Header>
+        <Modal.Content>
+          <SessionControls
+            tsxInfo = { this.props.tsxInfo }
+          />
+        </Modal.Content>
+        <Modal.Description>
+        </Modal.Description>
+        <Modal.Actions>
+        </Modal.Actions>
+      </Modal>
+    )
+  }
+
   renderTargetReport( night_planned ) {
     // pop up the upload dialog
     // send the file to server
@@ -681,32 +702,49 @@ class App extends TrackerReact(Component) {
     let MOONRISE_HR= 0;
     let MOONSET = '0:0';
     let MOONSET_HR = 0;
+    let SUNRISE= '0:0';
+    let SUNRISE_HR= 0;
+    let SUNSET = '0:0';
+    let SUNSET_HR = 0;
     for( let i=0; i<PLAN.length; i ++ ) {
       let obj = PLAN[i];
       if( typeof obj == 'undefined' ) {
         continue;
       }
       let oName = obj.target;
-      if( oName != 'Moon') {
-        continue;
-      }
-      let alt = obj.alt;
-      let sTime = obj.start;
-      let eTime = obj.end;
-      MOONRISE = obj.alt_start;
-      MOONSET = obj.alt_end;
-      MOONRISE_HR = Number(MOONRISE.split(':')[0].trim());
-      MOONSET_HR = Number(MOONSET.split(':')[0].trim());
+      if( oName == 'Moon') {
+        let alt = obj.alt;
+        let sTime = obj.start;
+        let eTime = obj.end;
+        MOONRISE = obj.alt_start;
+        MOONSET = obj.alt_end;
+        MOONRISE_HR = Number(MOONRISE.split(':')[0].trim());
+        MOONSET_HR = Number(MOONSET.split(':')[0].trim());
 
-      let hrLimit = plannerIndex[plannerIndex.length-1];
-      MOONRISE_HR = this.adjHour( MOONRISE_HR, hrLimit );
-      MOONSET_HR = this.adjHour( MOONSET_HR, hrLimit );
-      if( MOONSET_HR < MOONRISE_HR ) {
-        MOONSET_HR = MOONSET_HR + 24;
+        let hrLimit = plannerIndex[plannerIndex.length-1];
+        MOONRISE_HR = this.adjHour( MOONRISE_HR, hrLimit );
+        MOONSET_HR = this.adjHour( MOONSET_HR, hrLimit );
+        if( MOONSET_HR < MOONRISE_HR ) {
+          MOONSET_HR = MOONSET_HR + 24;
+        }
+        if(MOONSET_HR < 12 ) {
+          MOONSET_HR=+24;
+        }
       }
-      if(MOONSET_HR < 12 ) {
-        MOONSET_HR=+24;
+      else if( oName == 'Sun') {
+        let alt = obj.alt;
+        let sTime = obj.start;
+        let eTime = obj.end;
+        SUNRISE = obj.alt_start;
+        SUNSET = obj.alt_end;
+        SUNRISE_HR = Number(SUNRISE.split(':')[0].trim());
+        SUNSET_HR = Number(SUNSET.split(':')[0].trim());
+
+        let hrLimit = plannerIndex[plannerIndex.length-1];
+        SUNRISE_HR = this.adjHour( SUNRISE_HR, hrLimit );
+        SUNSET_HR = this.adjHour( SUNSET_HR, hrLimit );
       }
+
     }
 
     // *******************************
@@ -720,20 +758,30 @@ class App extends TrackerReact(Component) {
         for( let i=startHr-bufHr; i < 24; i++ ) {
           colHours.push( i );
           let colour = 'black';
-          if( i < startHr || i > endHr ) {
-            colour = 'teal';
-          }
-
           // Colour the Moon
           if( i >= MOONRISE_HR && i <= MOONSET_HR) {
             colour = 'blue';
           }
+          // Colour the Sun
+          if( i <= SUNSET_HR || i >= SUNRISE_HR ) {
+             colour = 'teal';
+          }
+          // if( (i < startHr || i > endHr) ) {
+          //   colour = 'teal';
+          // }
+
           let note = i;
           if( i == MOONRISE_HR ) {
             note = MOONRISE;
           }
           else if( i == MOONSET_HR ) {
             note = MOONSET;
+          }
+          else if( i == SUNRISE_HR ) {
+            note = SUNRISE;
+          }
+          else if( i == SUNSET_HR ) {
+            note = SUNSET;
           }
 
           // add in moonlight hour colouring...
@@ -757,6 +805,11 @@ class App extends TrackerReact(Component) {
         if( j+24 >= MOONRISE_HR && j+24 <= MOONSET_HR) {
           colour = 'blue';
         }
+        // Colour the Sun
+        if( j+24 >= SUNRISE_HR ) {
+           colour = 'teal';
+        }
+
         let note = j;
         if( j+24 == MOONRISE_HR ) {
           note = MOONRISE;
@@ -764,6 +817,10 @@ class App extends TrackerReact(Component) {
         else if( j+24 == MOONSET_HR ) {
           note = MOONSET;
         }
+        else if( j+24 == SUNRISE_HR ) {
+          note = SUNRISE;
+        }
+
 
         planner.push(
           <Grid.Column key={j} color={colour}>
@@ -786,13 +843,11 @@ class App extends TrackerReact(Component) {
         closeIcon>
         <Modal.Header>Night Plan</Modal.Header>
         <Modal.Content>
-          <Segment secondary>
-            Defaults: starts={STARTTIME}, ends={ENDTIME}<br/>Teal=Waiting, Blue=Moon, Green=Imaging<br/>
             <Segment>
               <Dimmer active={this.state.planDataLoading}>
                   <Loader size='small'>Loading</Loader>
               </Dimmer>
-              <Grid columns={planner.length}>
+              <Grid padded columns={planner.length}>
                 <Grid.Row>
                   {planner}
                 </Grid.Row>
@@ -806,7 +861,7 @@ class App extends TrackerReact(Component) {
                   </div>
                 )
               })}
-*/}          </Segment>
+*/}
         </Modal.Content>
         <Modal.Description>
 {/*          <Segment secondary>
@@ -818,7 +873,9 @@ class App extends TrackerReact(Component) {
               ))}
             </Grid>
           </Segment>
-*/}        </Modal.Description>
+*/}
+          <center><small>Defaults: start time={STARTTIME}, end time={ENDTIME}<br/>Teal=Twilight, Blue=Moon, Green=Imaging<br/></small></center>
+        </Modal.Description>
         <Modal.Actions>
         </Modal.Actions>
       </Modal>

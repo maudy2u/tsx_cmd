@@ -14,7 +14,13 @@ var targets = request.split('##');
 for( var i=0; i<targets.length; i++ ) {
 	var object = targets[i].split('|')[0].trim();
 	var alt = targets[i].split('|')[1].trim();
-	SCHART.Find(object);
+	try {
+		SCHART.Find(object);
+	}
+	catch( e ) {
+		TSX.writeLine("Object not found: " + object);
+		continue;
+	}
 
 	TSX.writeLine("Object: " + object);
 	TSX.writeLine("Desired Altitiude: " + alt);
