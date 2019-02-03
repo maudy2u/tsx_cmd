@@ -337,9 +337,7 @@ class Target extends Component {
               <Label>Start: <Label.Detail>{this.props.target.startTime}</Label.Detail></Label>
               <Label>Stop: <Label.Detail>{this.props.target.stopTime}</Label.Detail></Label>
               <Label>Min. Alt.: <Label.Detail>{this.props.target.minAlt}</Label.Detail></Label>
-            </Segment>
-            <Segment>
-              <small>Updated: {DTIME}</small><br/>
+              <br/><small>Last position: {DTIME}</small><br/>
               <Label>Alt.: <Label.Detail>{ALT}</Label.Detail></Label>
               <Label>HA: <Label.Detail>{HA}</Label.Detail></Label>
               <Label>Transit: <Label.Detail>{TRANSIT}</Label.Detail></Label>
@@ -353,7 +351,9 @@ class Target extends Component {
               {/*
               <Label>Direction: <Label.Detail>{this.state.azimuth}</Label.Detail></Label> */}
             </Label.Group>
-            {this.targetButtons(this.props.scheduler_running.value, TOOL_ACTIVE)}
+            <center>
+              {this.targetButtons(this.props.scheduler_running.value, TOOL_ACTIVE)}
+            </center>
             {
             // <Checkbox
             //   label=' Calibration Target'

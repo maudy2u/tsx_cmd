@@ -26,9 +26,7 @@ import { withTracker } from 'meteor/react-meteor-data';
 import { Form, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Radio } from 'semantic-ui-react'
 
 // Import the API Model
-import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
 import { Filters } from '../api/filters.js';
-import { TargetSessions } from '../api/targetSessions.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 
 // Import the UI
@@ -51,47 +49,40 @@ import Timekeeper from 'react-timekeeper';
 // App component - represents the whole app
 class DefaultSettings extends Component {
 
-  state = {
-    activeItem: 'Targets',
-    saveServerFailed: false,
-    modalEnterIp: false,
-    modalEnterPort: false,
-    modalConnectionFailed: false,
-    showMonitor: false, // this needs to be a server session variable
-
-    // ip: 'Not connected',
-    // port: 'Not connected',
-    defaultMinSunAlt: -15,
-    defaultMinAlt: 30,
-    defaultCoolTemp: -20,
-    defaultFocusTempDiff: 0.7,
-    defaultMeridianFlip: true,
-    defaultSoftPark: false,
-    defaultStartTime: '20:00',
-    defaultStopTime: '6:00',
-    defaultPriority: 9,
-    defaultSleepTime: 5,
-    defaultDithering: 1,
-    defaultFilter: '',
-    currentStage: '',
-    isTwilightEnabled: true,
-    isFocus3Enabled: false,
-    isFocus3Binned: false,
-    defaultGuideExposure: 7,
-    defaultFocusExposure: 1,
-    minDitherFactor: 3,
-    maxDitherFactor: 7,
-    imagingPixelSize: 3.8,
-    imagingFocalLength: 2800,
-    guiderPixelSize: 3.8,
-    guidingPixelErrorTolerance: 0.9,
-    defaultCLSEnabled: true,
-    fovPositionAngleTolerance: 0.5,
-    defaultFOVExposure: 4,
-    defaultCLSRetries: 1,
-    defaultCLSRepeat: 3600,
-    calibrationFrameSize: 100,
-  };
+  // constructor() {
+  //   super();
+    state = {
+      defaultMinSunAlt: -15,
+      defaultMinAlt: 30,
+      defaultFocusTempDiff: 0.7,
+      defaultMeridianFlip: true,
+      defaultSoftPark: false,
+      defaultStartTime: '20:00',
+      defaultStopTime: '6:00',
+      defaultPriority: 9,
+      defaultSleepTime: 5,
+      defaultDithering: 1,
+      defaultFilter: '',
+      currentStage: '',
+      isTwilightEnabled: true,
+      isFocus3Enabled: false,
+      isFocus3Binned: false,
+      defaultGuideExposure: 7,
+      defaultFocusExposure: 1,
+      minDitherFactor: 3,
+      maxDitherFactor: 7,
+      imagingPixelSize: 3.8,
+      imagingFocalLength: 2800,
+      guiderPixelSize: 3.8,
+      guidingPixelErrorTolerance: 0.9,
+      defaultCLSEnabled: true,
+      fovPositionAngleTolerance: 0.5,
+      defaultFOVExposure: 4,
+      defaultCLSRetries: 1,
+      defaultCLSRepeat: 3600,
+      calibrationFrameSize: 100,
+    };
+  // }
 
   // requires the ".bind(this)", on the callers
   handleToggle = (e, { name, value }) => {
@@ -191,9 +182,6 @@ class DefaultSettings extends Component {
       }).value,
       defaultSleepTime: nextProps.tsxInfo.find(function(element) {
         return element.name == 'defaultSleepTime';
-      }).value,
-      defaultPriority: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultPriority';
       }).value,
       isTwilightEnabled: nextProps.tsxInfo.find(function(element) {
         return element.name == 'isTwilightEnabled';
@@ -297,10 +285,10 @@ class DefaultSettings extends Component {
 
   }
 
-  getDropDownFilters() {
+  getDropDownFilters( pFilters ) {
 
     var filterArray = [];
-    for (var i = 0; i < this.props.filters.length; i++) {
+    for (var i = 0; i < pFilters.length; i++) {
       filterArray.push({
         key: this.props.filters[i]._id,
         text: this.props.filters[i].name,
@@ -319,7 +307,17 @@ class DefaultSettings extends Component {
       // icons: time,
       // minDate: new Date(),
     };
-    var filters = this.getDropDownFilters();
+    let aFilters = '';
+    let FILTERS = '';
+    let numFilters = '';
+    try {
+      numFilters = this.props.filters.length
+      aFilters = this.props.filters;
+      FILTERS = this.getDropDownFilters( aFilters );
+    }
+    catch ( e ) {
+      FILTERS = [];
+    }
 
     // const handleToggle = () => this.handleToggle;
 
@@ -337,7 +335,7 @@ class DefaultSettings extends Component {
               fluid
               label='Default Filter'
               name='defaultFilter'
-              options={filters}
+              options={FILTERS}
               placeholder='Used CLS and Focusing'
               text={this.state.defaultFilter}
               onChange={this.handleChange}
@@ -532,11 +530,8 @@ class DefaultSettings extends Component {
 // THIS IS THE DEFAULT EXPORT AND IS WHERE THE LOADING OF THE COMPONENT STARTS
 // USE THIS POINT TO GRAB THE FILTERS
 export default withTracker(() => {
-
     return {
       tsxInfo: TheSkyXInfos.find({}).fetch(),
       filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
-      takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
-      targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
   };
 })(DefaultSettings);

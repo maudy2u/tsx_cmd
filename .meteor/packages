@@ -58,8 +58,8 @@ ostrio:logger
 ostrio:files@=1.6.6
 less
 juliancwirko:postcss
-#meteortoys:allthings@7.0.1 # crashs due to vsivsi:job-collection
-#
+# meteortoys:allthings@7.0.1 # NOT FOR USE ON ARMV7/8
+
 # *******************************
 # job-collection needs to be the last in the package file
 vsivsi:job-collection

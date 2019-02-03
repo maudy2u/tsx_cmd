@@ -203,6 +203,8 @@ class FlatsMenu extends Component {
     ];
     return (
       <div>
+        Pointing (position) for OTA calibration<br/>
+        <br/>
        <Dropdown
           name='tool_flats_via'
           placeholder='Slew via...'
@@ -210,8 +212,9 @@ class FlatsMenu extends Component {
           value={flatSlewType}
           onChange={this.handleChange}
         />
-        <br/><Label>Provide a location (position) for OTA</Label>
-        <br/><Label>Location: </Label><Form.Input
+        location:<br/>
+        <br/>
+        <Form.Input
          name='tool_flats_location'
          placeholder='Target name, Ra, or Alt: '
          value={flatRa}
@@ -300,11 +303,10 @@ class FlatsMenu extends Component {
         basic
         size='small'
         closeIcon>
-        <Modal.Header>Settings</Modal.Header>
+        <Modal.Header>Calibration Settings</Modal.Header>
         <Modal.Content>
         <Segment secondary >
           <Segment raised>
-            <Label>Flat position</Label>
             {this.flatsTools(
               this.props.scheduler_running.value
               , this.props.tool_active.value
@@ -314,12 +316,9 @@ class FlatsMenu extends Component {
             )}
           </Segment>
           <Segment raised>
-            <Label>Enter the default exposure settings for each filter.</Label>
+            Enter the default exposure settings for each filter.<br/>
             <Form>
               <Form.Field inline >
-                  <Label>Filter</Label>
-                  <Label>Exposure</Label>
-                  <br/>
               </Form.Field>
               {this.props.filters.map((filter)=>{
                 return (

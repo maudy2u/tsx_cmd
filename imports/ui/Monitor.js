@@ -560,12 +560,13 @@ class Monitor extends Component {
 
     return (
       <div>
-           <h3>Target: {TARGETNAME}</h3>
-           <Button.Group icon>
-            {this.playButtons(RUNNING) }
-          </Button.Group>
+
+        <Button.Group icon>
+          {this.playButtons(RUNNING) }
+        </Button.Group>
+        <h1>{" " + TARGETNAME}</h1>
         <Segment raised>
-          <Grid columns={3}>
+          <Grid columns={2}>
             <Grid.Column width={4}>
               <Label>Atl <Label.Detail>{Number(this.props.scheduler_report.value.ALT).toFixed(4)}</Label.Detail></Label>
               <br /><Label>Az <Label.Detail>{this.props.scheduler_report.value.AZ}</Label.Detail></Label>
@@ -578,7 +579,7 @@ class Monitor extends Component {
               <br /><Label>DEC <Label.Detail>{Number(this.props.scheduler_report.value.DEC).toFixed(4)}</Label.Detail></Label>
             </Grid.Column>
             <Grid.Column stretched >
-              <TextArea value={LOG} rows={3} style={{ minHeight: 200, minWidth:225 }} />
+                <TextArea value={LOG} rows={3} style={{ minHeight: 200 }} />
             </Grid.Column>
           </Grid>
         </Segment>

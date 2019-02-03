@@ -421,7 +421,7 @@ Meteor.startup(() => {
   tsx_UpdateDevice('focuser', 'Not connected ', '' );
 
   tsxLog( ' Logfile', logFileForClient() );
-  tsxLog(' ******* TSX_CMD ONLINE ******', '');
+  UpdateStatus(' ******* TSX_CMD ONLINE ******' );
 
   return;
 
@@ -477,7 +477,7 @@ Meteor.methods({
 
         // Confirm whether the there is a script running...
         if( !tsx_ServerIsOnline() ) {
-          UpdateStatus('Check TSX... script running, or server not online.');
+          UpdateStatus('Check TSX... is another script running, or is server not online.');
           return;
         }
 

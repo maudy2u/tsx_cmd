@@ -78,10 +78,10 @@ import Timekeeper from 'react-timekeeper';
 // App component - represents the whole app
 class App extends TrackerReact(Component) {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
-      activeMenu: 'Targets',
+      activeMenu: 'Targets', 
       saveServerFailed: false,
       modalEnterIp: false,
       modalEnterPort: false,
@@ -90,6 +90,7 @@ class App extends TrackerReact(Component) {
 
       ip: 'localhost',
       port: '3040',
+
       currentStage: ' Loading....',
       modalOpenWindowSessionControls: false,
       modalOpen: false,
@@ -385,28 +386,28 @@ class App extends TrackerReact(Component) {
     const { activeMenu  } = this.state;
     return(
       <div>
-        <Menu tabular icon>
-          <Menu.Item name='Monitor' active={activeMenu === 'Monitor'} onClick={this.handleMenuItemClick}>
-            <Icon name='eye' />
+        <Menu tabular icon size='huge'>
+          <Menu.Item fitted name='Monitor' active={activeMenu === 'Monitor'} onClick={this.handleMenuItemClick}>
+            <Icon name='eye' size='large' />
           </Menu.Item>
-          <Menu.Item name='Targets' active={activeMenu === 'Targets'} onClick={this.handleMenuItemClick}>
-            <Icon name='target' />
+          <Menu.Item fitted name='Targets' active={activeMenu === 'Targets'} onClick={this.handleMenuItemClick}>
+            <Icon name='target' size='large' />
           </Menu.Item>
-          <Menu.Item name='Series' active={activeMenu === 'Series'} onClick={this.handleMenuItemClick}>
-            <Icon name='list ol' />
+          <Menu.Item fitted name='Series' active={activeMenu === 'Series'} onClick={this.handleMenuItemClick}>
+            <Icon name='list ol' size='large' />
           </Menu.Item>
-          <Menu.Item name='Flats' active={activeMenu === 'Flats'} onClick={this.handleMenuItemClick}>
-            <Icon name="area graph" />
+          <Menu.Item fitted name='Flats' active={activeMenu === 'Flats'} onClick={this.handleMenuItemClick}>
+            <Icon name="area graph" size='large' />
           </Menu.Item>
-          <Menu.Item name='Toolbox' active={activeMenu === 'Toolbox'} onClick={this.handleMenuItemClick}>
-            <Icon name='briefcase' />
+          <Menu.Item fitted name='Toolbox' active={activeMenu === 'Toolbox'} onClick={this.handleMenuItemClick}>
+            <Icon name='briefcase' size='large' />
           </Menu.Item>
-          <Dropdown  item name='More' icon='angle double down'>
-            <Dropdown.Menu>
-              <Dropdown.Item name='Devices' icon='power cord' active={activeMenu === 'Devices'} onClick={this.handleMenuItemClick}/>
-              <Dropdown.Item name='Settings' icon='configure' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick}/>
-            </Dropdown.Menu>
-          </Dropdown>
+          <Menu.Item fitted name='Devices' active={activeMenu === 'Devices'} onClick={this.handleMenuItemClick}>
+            <Icon name='power cord' size='large' />
+          </Menu.Item>
+            <Menu.Item fitted name='Settings' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick}>
+            <Icon name='configure' size='large'/>
+          </Menu.Item>
         </Menu>
         {this.renderMenuSegments( MENU )}
       </div>
@@ -511,6 +512,7 @@ class App extends TrackerReact(Component) {
       )
     }
     this.saveDefaultState('activeMenu');
+
   }
 
   renderIPEditor() {
@@ -657,7 +659,7 @@ class App extends TrackerReact(Component) {
     )
   }
 
-  parkButtons( state, active ) {
+  appButtons( state, active ) {
     // detective
     var DISABLE = true;
     var NOT_DISABLE = false;
@@ -666,13 +668,12 @@ class App extends TrackerReact(Component) {
       DISABLE = false;
       NOT_DISABLE = true;
     }
-
+//        <Button disabled compact />
     return (
-      <Button.Group basic size='small' floated='right'>
+      <Button.Group compact size='mini' floated='right'>
         <Button icon='cloud download' onClick={this.modalOpenTest}/>
         <Button icon='detective' onClick={this.modalOpenSessionsControls}/>
         <Button disabled={DISABLE} icon='chart bar' onClick={this.modalShowTargetReport}/>
-        <Button disabled compact />
         <Button disabled={DISABLE} icon='wifi' onClick={this.connectToTSX.bind(this)}/>
         <Button disabled={DISABLE} icon='car' onClick={this.park.bind(this)}/>
       </Button.Group>
@@ -773,7 +774,7 @@ class App extends TrackerReact(Component) {
     var RUNNING = '';
     var ACTIVE = false;
     let PROGRESS = 0;
-    let TOTAL = 0;
+    let TOTAL = 60;
     try {
       IP = this.props.tsxIP.value;
       PORT = this.props.tsxPort.value;
@@ -795,10 +796,13 @@ class App extends TrackerReact(Component) {
       RUNNING = '';
       ACTIVE=false;
       PROGRESS = 0;
-      TOTAL = 0;
+      TOTAL = 60;
     }
     var LOG = [];
     var num = 0;
+    if( TOTAL == 0 ) {
+      TOTAL = 60;
+    }
     try {
       num = this.props.srvLog.length;
     }
@@ -811,39 +815,39 @@ class App extends TrackerReact(Component) {
 
     return (
       <div className="container">
-          <Segment>
-            <Segment.Group>
-              <Segment.Group horizontal size='mini'>
-                <Segment>
-                  <Label onClick={this.modalEnterIpOpen.bind(this)}>TSX ip:
-                    <Label.Detail>
-                      {IP}
-                    </Label.Detail>
-                  </Label>
-                  <Label onClick={this.modalEnterPortOpen.bind(this)}>
-                    TSX port:
-                    <Label.Detail>
-                      {PORT}
-                    </Label.Detail>
-                  </Label>
-                </Segment>
-                <Segment>
-                  {this.parkButtons(RUNNING, ACTIVE)}
-                </Segment>
-                {this.renderIPEditor()}
-                {this.renderPortEditor()}
-              </Segment.Group>
-              <Segment raised>
-                <Label>Status: <Label.Detail>{STATUS}</Label.Detail></Label>
-                <br/>
-                <Progress value={PROGRESS} total={TOTAL} progress='ratio'>Processing</Progress>
-              </Segment>
-          </Segment.Group>
           <Segment.Group>
+              <Segment size='mini' clearing>
+                {this.appButtons(RUNNING, ACTIVE)}
+                <Label onClick={this.modalEnterIpOpen.bind(this)}>TSX ip:
+                  <Label.Detail>
+                    {IP}
+                  </Label.Detail>
+                </Label>
+                <Label onClick={this.modalEnterPortOpen.bind(this)}>
+                  TSX port:
+                  <Label.Detail>
+                    {PORT}
+                  </Label.Detail>
+                </Label>
+                <br/>
+                {this.renderIPEditor()}
+                {this.renderPortEditor()}                </Segment>
               <Segment>
-            { this.renderMenu( MENU, RUNNING ) }
+              <Progress
+                indicating
+                size='medium'
+                value={PROGRESS}
+                total={TOTAL}
+                autoSuccess
+                progress='ratio'>
+                <Label>
+                  {STATUS}
+                </Label>
+              </Progress>
+              </Segment>
+            <Segment>
+              { this.renderMenu( MENU, RUNNING ) }
             </Segment>
-          </Segment.Group>
           {/* *******************************
 
           THIS IS FOR A FAILED CONNECTION TO TSX
@@ -852,33 +856,33 @@ class App extends TrackerReact(Component) {
           {this.renderSessionControls()}
           {this.renderTestModal()}
           {this.renderTargetReport(this.props.night_plan_updating)}
-          <Modal
-            open={this.state.modalConnectionFailed}
-            onClose={this.modalConnectionFailedClose.bind(this)}
-            basic
-            size='small'
-            closeIcon>
-            <Modal.Header>TSX Connection Failed</Modal.Header>
-            <Modal.Content>
-              <h3>Check that TheSkyX server is available, and the IP and Port to use to connect to the TSX Server.</h3>
-            </Modal.Content>
-            <Modal.Description>
-              <Input
-                label='IP:'
-                value={this.state.ip}
-              />
-              <Input
-                label='Port:'
-                value={this.state.port}
-              />
-            </Modal.Description>
-            <Modal.Actions>
-              <Button onClick={this.modalConnectionFailedClose.bind(this)} inverted>
-                <Icon name='stop' />Stop
-              </Button>
-            </Modal.Actions>
-          </Modal>
-        </Segment>
+        </Segment.Group>
+        <Modal
+          open={this.state.modalConnectionFailed}
+          onClose={this.modalConnectionFailedClose.bind(this)}
+          basic
+          size='small'
+          closeIcon>
+          <Modal.Header>TSX Connection Failed</Modal.Header>
+          <Modal.Content>
+            <h3>Check that TheSkyX server is available, and the IP and Port to use to connect to the TSX Server.</h3>
+          </Modal.Content>
+          <Modal.Description>
+            <Input
+              label='IP:'
+              value={this.state.ip}
+            />
+            <Input
+              label='Port:'
+              value={this.state.port}
+            />
+          </Modal.Description>
+          <Modal.Actions>
+            <Button onClick={this.modalConnectionFailedClose.bind(this)} inverted>
+              <Icon name='stop' />Stop
+            </Button>
+          </Modal.Actions>
+        </Modal>
         <Label>tsx cmd - A web page to send commands to TheSkyX server</Label>
         <Label>version <Label.Detail>{VERSION}</Label.Detail></Label>
         <Label>date <Label.Detail>{DATE}</Label.Detail></Label>

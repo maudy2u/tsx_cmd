@@ -7,7 +7,7 @@
 var TARGETANG= $000;
 var PIXELSIZE =$001; // 23.07 ... for simulator with 1.7 imagescale and 2800 FL
 var FOCALLENGTH = $002; // use 2800 on SIM
-var ACCURACY = $003; // acceptable difference between target angle and ImageLink angle
+var ACCURACY = $003; // DIFF target angle VS. ImageLink angle
 var JUSTROTATE = $004;
 var OUT="";
 var MAXTRIES = 5;
@@ -63,7 +63,7 @@ function calcNewPostion( imageLinkAng, rotPos, targetAng)  {
 }
 
 // *******************************
-// Prepare Filter Wheel if present
+// Prepare Filter Wheel
 function setupFilterWheel() {
   // Setup the Filter if connected to the AILS
   if( CCDSC.filterWheelIsConnected() ) {
@@ -102,21 +102,18 @@ function calcBin() {
 // Rotate to within accuracy
 function rotate( targetAng, imageScale ) {
   if( NUMTRIES > MAXTRIES ) {
-    OUT = "Failed|Maxmimu Number of attempts reached";
+    OUT = "Failed|Maxmimu attempts reached";
     return;
   }
   NUMTRIES++;
   CCDSC.TakeImage();
 
-  /// process ref image
   try{
     ImageLink.scale = imageScale; // SEEMS THIS MAY BE IGNORED
     ImageLink.pathToFITS = CCDSC.LastImageFileName;
     ImageLink.execute();
-
-    // Use image results to determine rotation
-    var imageLinkAng=ImageLinkResults.imagePositionAngle; // the real sky position
-    var rotPos = CCDSC.rotatorPositionAngle(); // the real position
+    var imageLinkAng=ImageLinkResults.imagePositionAngle;//sky position
+    var rotPos = CCDSC.rotatorPositionAngle();//ROT position
     var newPos = calcNewPostion( imageLinkAng, rotPos, targetAng);
     var resMsg = "imageLinkAng="+ Number(imageLinkAng).toFixed(3) + "|targetAngle=" + Number(targetAng).toFixed(3) + "|rotPos=" + rotPos + "|newPos=" + newPos;
     OUT = "Success|" + resMsg;
@@ -135,8 +132,6 @@ function rotate( targetAng, imageScale ) {
 }
 
 // *******************************
-// Okay.. let's getting going....
-// connect to the camera
 CCDSC.Connect();
 if( JUSTROTATE == 1 ) {
 	CCDSC.rotatorGotoPositionAngle(TARGETANG);
@@ -146,7 +141,7 @@ if( JUSTROTATE == 1 ) {
 }
 else {
 
-	// Grab current settings so it can be restored
+	// Grab settings
 	var oFrame = CCDSC.Subframe;
 	var oExp = CCDSC.ExposureTime;
 	var obinX = CCDSC.BinX;
@@ -154,24 +149,23 @@ else {
 	var oSave = CCDSC.AutoSaveOn;
 	setupFilterWheel();
 
-	// USE AutoImageLink settings to take ref image
+	// take ref image
 	var ailsBin = calcBin()
-	CCDSC.Subframe = false; // turn off
-	CCDSC.ExposureTime=AILSEXPOSURE; // use AILS exposure
+	CCDSC.Subframe = false;
+	CCDSC.ExposureTime=AILSEXPOSURE;
 	// Make sure bin is valid.
 	try {
 	  CCDSC.BinX = ailsBin; // use AILS bin
 	  CCDSC.BinY = ailsBin; // use AILS bin
 	}
 	catch( err ) {
-	  OUT = "FAILED|BIN NOT CALCULATED CORRECTLY";
+	  OUT = "FAILED|BIN INVALID";
 	  return OUT;
 	}
-	CCDSC.AutoSaveOn = 1; // save so can link
-	CCDSC.Asynchronous = false;		// We are going to wait for it
-	CCDSC.Frame = 1;			// It's a light frame
+	CCDSC.AutoSaveOn = 1;// save4link
+	CCDSC.Asynchronous = false;
+	CCDSC.Frame = 1;// light frame
 
-	// Start the Rotation
 	if( getPointing() == "WEST" ) {
 			if( TARGETANG < 180 ) {
 				TARGETANG += 180;
@@ -180,10 +174,8 @@ else {
 				TARGETANG -= 180;
 			}
 	}
-	// Could also pick a bin and set the imagescale
-	rotate( TARGETANG, AILSSCALE ); // SIMULATOR USES 1.7 and Rotator CCW=false
-
-	// Restore current settings
+  // SIMULATOR 1.7 and CCW=false
+	rotate( TARGETANG, AILSSCALE );
 	CCDSC.BinX = obinX;
 	CCDSC.BinY = obinY;
 	CCDSC.Subframe = oFrame;

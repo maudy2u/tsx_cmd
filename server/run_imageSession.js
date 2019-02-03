@@ -2260,11 +2260,11 @@ function takeSeriesImage(target, series) {
   var num = taken+1;
   if( (remainingImages <= series.repeat) && (remainingImages > 0) ) {
     tsxLog( ' -------------------------------');
-    UpdateStatus( ' ' + target.targetFindName + ': Take - ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds: ' + num + '/' +series.repeat );
+    UpdateStatus( ' ' + target.targetFindName + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds, taking: ' + num + '/' +series.repeat );
 
     var res = tsx_takeImage( slot, series.exposure, frame, target.targetFindName.trim() );
     if( res != false ) {
-      UpdateStatus( ' ' + target.targetFindName + ': Done - ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds: ' + num + '/' +series.repeat );
+      UpdateStatus( ' ' + target.targetFindName + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds, done: ' + num + '/' +series.repeat );
       // *******************************
       // Update progress
       // tsxLog(' *** Image taken: ' + series.filter + ' at ' + series.exposure + ' seconds');
