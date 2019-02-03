@@ -84,6 +84,7 @@ class Toolbox extends Component {
       tool_calibrate_via: '',
       tool_calibrate_location: '',
       tool_calibrate_dec_az: '',
+      tool_rotator_fov: '',
       tool_rotator_num: '',
       tool_rotator_type: '',
   };
@@ -137,6 +138,10 @@ class Toolbox extends Component {
       this.setState({
         tool_rotator_num: nextProps.tsxInfo.find(function(element) {
           return element.name == 'tool_rotator_num';
+      }).value});
+      this.setState({
+        tool_rotator_fov: nextProps.tsxInfo.find(function(element) {
+          return element.name == 'tool_rotator_fov';
       }).value});
     }
   }
@@ -220,11 +225,11 @@ class Toolbox extends Component {
              <Button disabled={DISABLE} onClick={this.rotateCameraFOV.bind(this)}>Set FOV</Button>
        </Button.Group>
        <Input
-         name='tool_rotator_num'
+         name='tool_rotator_fov'
          placeholder='eg. 19826, or 0.5'
          value={ROTATOR_NUM}
          onChange={this.handleChange}/>
-       <br/>Enter the FOV angle for ImageLink
+       <br/>Enter the FOV angle for ImageLink, e.g. 0 for PEC
       </div>
     )
   }
@@ -262,7 +267,7 @@ class Toolbox extends Component {
          placeholder='eg. 19826, or 0.5'
          value={ROTATOR_NUM}
          onChange={this.handleChange}/>
-       <br/>Enter the rotator position desired
+       <br/>Enter the rotator position, e.g. 49.02
       </div>
     )
   }
@@ -357,13 +362,13 @@ class Toolbox extends Component {
          )}
         </Segment>
         <Segment raised>
-        <Header>Rotate FOV</Header>
+        <Header>Rotator FOV/Position</Header>
         <Segment.Group horizontal>
         <Segment>
           {this.rotateFOV(
             this.props.scheduler_running.value
             , this.state.tool_rotator_type
-            , this.state.tool_rotator_num
+            , this.state.tool_rotator_fov
             , this.props.tool_active.value
           )}
           </Segment>

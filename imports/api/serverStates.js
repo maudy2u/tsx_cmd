@@ -120,6 +120,7 @@ export const tsx_ServerStates = {
 
   tool_rotator_type: 'tool_rotator_type',
   tool_rotator_num: 'tool_rotator_num',
+  tool_rotator_fov: 'tool_rotator_fov',
 
   tool_active: 'tool_active',
 

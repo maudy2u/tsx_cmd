@@ -623,8 +623,14 @@ Meteor.methods({
   rotateCamera( cls ) {
     tsx_SetServerState( 'tool_active', true );
     try {
+      let num = '';
       tsxLog(' Rotating Camera');
-      var num  = tsx_GetServerStateValue('tool_rotator_num');
+      if( cls == 1 ) {
+        num  = tsx_GetServerStateValue('tool_rotator_num');
+      }
+      else {
+        num  = tsx_GetServerStateValue('tool_rotator_fov');
+      }
       var res = tsx_RotateCamera( num, cls ); // tool needs to use CLS use 0
     }
     catch( e ) {

@@ -2047,7 +2047,12 @@ export function tsx_RotateCamera( position, cls ) {
   cmd = cmd.replace('$002', focalLength);
   cmd = cmd.replace('$003', ACCURACY);
   cmd = cmd.replace('$004', cls); // 1 = rotate; 0 = imagelink
-  UpdateStatus(' Rotator/Camera rotating FOV: ' + position);
+  if( cls == 1) {
+    UpdateStatus(' Rotator/Camera rotating position: ' + position);
+  }
+  else {
+    UpdateStatus(' Rotator/Camera rotating FOV: ' + position);
+  }
   let tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     let result = tsx_return.split('|')[0].trim();
