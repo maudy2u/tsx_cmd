@@ -23,7 +23,19 @@ import { Session } from 'meteor/session'
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { Form, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Radio } from 'semantic-ui-react'
+import {
+  Label,
+  Segment,
+  Button,
+  Progress,
+} from 'semantic-ui-react'
+
+import {
+  Form,
+  Input,
+  Dropdown,
+  Radio,
+} from 'formsy-semantic-ui-react';
 
 // Import the API Model
 import { Filters } from '../api/filters.js';
@@ -45,6 +57,12 @@ import {
 
 import ReactSimpleRange from 'react-simple-range';
 import Timekeeper from 'react-timekeeper';
+
+const XRegExp = require('xregexp');
+const XRegExpPosNum = XRegExp('^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$');
+const XRegExpNonZeroPosInt = XRegExp('[1-9][0-9]*');
+const XRegExpZeroOrPosInt = XRegExp('[0]|[1-9][0-9]*');
+const XRegExpZeroToNine = XRegExp('[0-9]');
 
 // App component - represents the whole app
 class DefaultSettings extends Component {
@@ -320,6 +338,7 @@ class DefaultSettings extends Component {
     }
 
     // const handleToggle = () => this.handleToggle;
+    const ERRORLABEL = <Label color="red" pointing/>
 
     return (
       <Form>
@@ -350,6 +369,9 @@ class DefaultSettings extends Component {
               placeholder='Enter negative degrees below horizon'
               value={this.state.defaultMinSunAlt}
               onChange={this.handleChange}
+              validations="isNumeric"
+              validationErrors={{ isNumeric: 'Must be a number' }}
+              errorLabel={ ERRORLABEL }
             />
             <Form.Input
               label='Minimum Altitude '
@@ -357,6 +379,11 @@ class DefaultSettings extends Component {
               placeholder='Enter Minimum Altitude to start/stop'
               value={this.state.defaultMinAlt}
               onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 45, 43.7, 1.1"
+              errorLabel={ ERRORLABEL }
             />
             <Form.Input
               label='Time to sleep when no target '
@@ -364,6 +391,11 @@ class DefaultSettings extends Component {
               placeholder='Minutes to sleep'
               value={this.state.defaultSleepTime}
               onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, .7, 1.1"
+              errorLabel={ ERRORLABEL }
             />
           </Form.Group>
         </Segment>
@@ -375,6 +407,11 @@ class DefaultSettings extends Component {
               placeholder='i.e. guider pixel scale'
               value={this.state.guiderPixelSize}
               onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, .7, 1.1"
+              errorLabel={ ERRORLABEL }
             />
             <Form.Input
               label='Image Camera Pixel Size: '
@@ -382,6 +419,11 @@ class DefaultSettings extends Component {
               placeholder='i.e. image scale for dithering, and angle match'
               value={this.state.imagingPixelSize}
               onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, .7, 1.1"
+              errorLabel={ ERRORLABEL }
             />
             <Form.Input
               label='Focal Length: '
@@ -389,6 +431,11 @@ class DefaultSettings extends Component {
               placeholder='i.e. focal length in mm of OTA'
               value={this.state.imagingFocalLength}
               onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
+              errorLabel={ ERRORLABEL }
             />
           </Form.Group>
         </Segment>
@@ -400,6 +447,11 @@ class DefaultSettings extends Component {
               placeholder='i.e. pixel scale to settle before starting image'
               value={this.state.guidingPixelErrorTolerance}
               onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, .7, 1.1"
+              errorLabel={ ERRORLABEL }
             />
             <Form.Input
               label='FOV Angle Tolerance '
@@ -407,6 +459,11 @@ class DefaultSettings extends Component {
               placeholder='e.g. 0.5 (zero disables)'
               value={this.state.fovPositionAngleTolerance}
               onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, .7, 1.1"
+              errorLabel={ ERRORLABEL }
             />
             <Form.Input
               label='Focus Temp Tolerance '
@@ -414,6 +471,11 @@ class DefaultSettings extends Component {
               placeholder='Temp diff to run auto focus'
               value={this.state.defaultFocusTempDiff}
               onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, .7, 1.1"
+              errorLabel={ ERRORLABEL }
             />
             <Form.Input
               label='Calibration Frame '
@@ -421,6 +483,11 @@ class DefaultSettings extends Component {
               placeholder='Frame size (pixels) '
               value={this.state.calibrationFrameSize}
               onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
+              errorLabel={ ERRORLABEL }
             />
           </Form.Group>
         </Segment>
@@ -432,6 +499,11 @@ class DefaultSettings extends Component {
               placeholder='Enter number seconds'
               value={this.state.defaultGuideExposure}
               onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, .7, 1.1"
+              errorLabel={ ERRORLABEL }
             />
             <Form.Input
               label='Starting Focusing Exposure '
@@ -439,6 +511,11 @@ class DefaultSettings extends Component {
               placeholder='Enter seconds'
               value={this.state.defaultFocusExposure}
               onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, .7, 1.1"
+              errorLabel={ ERRORLABEL }
             />
             <Form.Input
               label='FOV Angle Exposure '
@@ -446,6 +523,11 @@ class DefaultSettings extends Component {
               placeholder='Enter number seconds'
               value={this.state.defaultFOVExposure}
               onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, .7, 1.1"
+              errorLabel={ ERRORLABEL }
             />
           </Form.Group>
         </Segment>
@@ -457,6 +539,11 @@ class DefaultSettings extends Component {
               placeholder='Minimum number of pixels'
               value={this.state.minDitherFactor}
               onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
+              errorLabel={ ERRORLABEL }
             />
             <Form.Input
               label='Dithering Maximum Pixel Move '
@@ -464,15 +551,12 @@ class DefaultSettings extends Component {
               placeholder='Maximum number of pixels'
               value={this.state.maxDitherFactor}
               onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
+              errorLabel={ ERRORLABEL }
             />
-            {/* <Form.Input
-            //   label='Dither after X images (0 disables): '
-            //   name='defaultDithering'
-            //   placeholder='Images before dither'
-            //   value={this.state.defaultDithering}
-            //   onChange={this.handleChange}
-            // />
-            */}
           </Form.Group>
         </Segment>
         <Segment raised>
@@ -483,6 +567,11 @@ class DefaultSettings extends Component {
               placeholder='Number of CLS retries - think cloud checking'
               value={this.state.defaultCLSRetries}
               onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpZeroToNine, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be between 0-9"
+              errorLabel={ ERRORLABEL }
             />
             <Form.Input
               label='CloseLoopSlew Redo  '
@@ -490,6 +579,11 @@ class DefaultSettings extends Component {
               placeholder='Number seconds before CLS redo - think cloud checking'
               value={this.state.defaultCLSRepeat}
               onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpZeroOrPosInt, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 0, 5, 1800, 3600"
+              errorLabel={ ERRORLABEL }
             />
           </Form.Group>
         </Segment>

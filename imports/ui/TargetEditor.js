@@ -26,11 +26,33 @@ import { TargetSessions } from '../api/targetSessions.js';
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 import TakeSeriesTemplateEditor from './TakeSeriesTemplateEditor.js';
 
-import { Form, Label, Tab, Segment, Button, Radio, Input, Table, Dropdown, Checkbox, } from 'semantic-ui-react';
+import {
+  Tab,
+  Label,
+  Segment,
+  Button,
+  Progress,
+} from 'semantic-ui-react'
+
+import {
+  Form,
+  Checkbox,
+  Input,
+  Dropdown,
+  Radio,
+} from 'formsy-semantic-ui-react';
+const ERRORLABEL = <Label color="red" pointing/>
+const XRegExp = require('xregexp');
+const XRegExpPosNum = XRegExp('^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$');
+const XRegExpNonZeroPosInt = XRegExp('[1-9][0-9]*');
+const XRegExpZeroOrPosInt = XRegExp('[0]|[1-9][0-9]*');
+const XRegExpZeroToNine = XRegExp('[0-9]');
+
 
 import ReactSimpleRange from 'react-simple-range';
 // import { DateTime } from 'react-datetime-bootstrap';
 import Timekeeper from 'react-timekeeper';
+
 
 class TargetEditor extends Component {
 
@@ -399,12 +421,18 @@ class TargetEditor extends Component {
                     name='rotator_position'
                     placeholder='Position for rotator (i.e. used with flats)'
                     value={this.state.rotator_position}
+                    validations="isNumeric"
+                    validationErrors={{ isNumeric: 'Must be a number' }}
+                    errorLabel={ ERRORLABEL }
                     onChange={this.handleChange}/>
               <Form.Input
                   label='East Pointing FOV ImageLink Angle (optional)'
                   name='angle'
                   placeholder='Position angle per ImageLink (e.g. 0 for PEC capture)'
                   value={this.state.angle}
+                  validations="isNumeric"
+                  validationErrors={{ isNumeric: 'Must be a number' }}
+                  errorLabel={ ERRORLABEL }
                   onChange={this.handleChange}/>
               </Form.Group>
               <Form.Group>
@@ -415,6 +443,9 @@ class TargetEditor extends Component {
                 toggle
                 checked={this.state.rotator_180_flip}
                 onChange={this.handleToggle}
+                validations="isNumeric"
+                validationErrors={{ isNumeric: 'Must be a number' }}
+                errorLabel={ ERRORLABEL }
               />
               <Checkbox
                 label=' On angle is WestSide, off EastSide'
@@ -423,6 +454,9 @@ class TargetEditor extends Component {
                 toggle
                 checked={this.state.rotator_angle_westside}
                 onChange={this.handleToggle}
+                validations="isNumeric"
+                validationErrors={{ isNumeric: 'Must be a number' }}
+                errorLabel={ ERRORLABEL }
               />
             </Form.Group>
           </Segment>
@@ -545,6 +579,11 @@ class TargetEditor extends Component {
                   placeholder='e.g. 0.7'
                   value={this.state.focusExposure}
                   onChange={this.handleChange}
+                  validations={{
+                    matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+                  }}
+                  validationError="Must be a positive number, e.g 1, .7, 1.1"
+                  errorLabel={ ERRORLABEL }
                 />
                 <Form.Input
                   label='Use a focusing target '
@@ -562,6 +601,11 @@ class TargetEditor extends Component {
                   placeholder='e.g. 0.7'
                   value={this.state.tempChg}
                   onChange={this.handleChange}
+                  validations={{
+                    matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+                  }}
+                  validationError="Must be a positive number, e.g 1, .7, 1.1"
+                  errorLabel={ ERRORLABEL }
                 />
 
               </Segment>

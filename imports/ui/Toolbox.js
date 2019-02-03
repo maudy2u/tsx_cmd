@@ -21,7 +21,19 @@ import React, { Component } from 'react';
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { Header, Confirm, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
+import {
+  Header,
+  Label,
+  Segment,
+  Button,
+} from 'semantic-ui-react'
+
+import {
+  Form,
+  Input,
+  Dropdown,
+} from 'formsy-semantic-ui-react';
+const ERRORLABEL = <Label color="red" pointing/>
 
 import {
   tsx_ServerStates,
@@ -90,6 +102,12 @@ class Toolbox extends Component {
   };
 
   handleChange = (e, { name, value }) => {
+    this.setState({ [name]: value.trim() });
+    this.saveDefaultStateValue( name, value.trim() );
+  };
+
+  handleNumericChange = (e, { name, value }) => {
+
     this.setState({ [name]: value.trim() });
     this.saveDefaultStateValue( name, value.trim() );
   };
@@ -224,11 +242,17 @@ class Toolbox extends Component {
         <Button.Group icon>
              <Button disabled={DISABLE} onClick={this.rotateCameraFOV.bind(this)}>Set FOV</Button>
        </Button.Group>
-       <Input
+       <Form>
+       <Form.Input
          name='tool_rotator_fov'
          placeholder='eg. 19826, or 0.5'
          value={ROTATOR_NUM}
-         onChange={this.handleChange}/>
+         onChange={this.handleChange}
+         validations="isNumeric"
+         validationErrors={{ isNumeric: 'Must be a number' }}
+         errorLabel={ ERRORLABEL }
+        />
+        </Form>
        <br/>Enter the FOV angle for ImageLink, e.g. 0 for PEC
       </div>
     )
@@ -262,11 +286,18 @@ class Toolbox extends Component {
       <div>
         <Button.Group icon>
              <Button disabled={DISABLE} onClick={this.rotateCamera.bind(this)}>Set Position</Button>
-       </Button.Group> <Input
-         name='tool_rotator_num'
-         placeholder='eg. 19826, or 0.5'
-         value={ROTATOR_NUM}
-         onChange={this.handleChange}/>
+       </Button.Group>
+       <Form>
+         <Form.Input
+           name= 'tool_rotator_num'
+           placeholder='eg. 19826, or 0.5'
+           value={ROTATOR_NUM}
+           onChange={this.handleChange}
+           validations="isNumeric"
+           validationErrors={{ isNumeric: 'Must be a number' }}
+           errorLabel={ ERRORLABEL }
+          />
+        </Form>
        <br/>Enter the rotator position, e.g. 49.02
       </div>
     )
@@ -312,23 +343,31 @@ class Toolbox extends Component {
       <Button.Group icon>
           <Button  disabled={DISABLE} onClick={this.calibrateGuider.bind(this)}>Calibrate</Button>
        </Button.Group>
-       <Dropdown
-          name='tool_calibrate_via'
-          placeholder='Slew via...'
-          selection options={slewOptions}
-          value={calType}
-          onChange={this.handleChange}
-        /><Form.Input
-          name='tool_calibrate_location'
-          placeholder='Target name, Ra, or Alt: '
-          value={calLocation}
-          onChange={this.handleChange}/>
-        <Form.Input
-          name='tool_calibrate_dec_az'
-          placeholder='Dec, or azimuth: '
-          value={calDecAz}
-          onChange={this.handleChange}/>
-          <br/>(Optionaly select a slew type and specify a location, e.g 5.95, 21.99)
+       <Form>
+         <Dropdown
+            name='tool_calibrate_via'
+            placeholder='Slew via...'
+            selection options={slewOptions}
+            value={calType}
+            onChange={this.handleChange}
+          />
+          <Input
+            name='tool_calibrate_location'
+            placeholder='Target name, Ra, or Alt: '
+            value={calLocation}
+            onChange={this.handleChange}
+          />
+          <Input
+            name='tool_calibrate_dec_az'
+            placeholder='Dec, or azimuth: '
+            value={calDecAz}
+            onChange={this.handleChange}
+            validations="isNumeric"
+            validationErrors={{ isNumeric: 'Must be a number' }}
+            errorLabel={ ERRORLABEL }
+          />
+        </Form>
+        <br/>(Optionaly select a slew type and specify a location, e.g 5.95, 21.99)
      </div>
     )
   }
