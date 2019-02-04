@@ -31,7 +31,7 @@ ${METEOR} remove standard-minifier-css
 ${METEOR} add ostrio:files@=1.6.6
 ${METEOR} add semantic:ui@=2.2.6_5 juliancwirko:postcss less jquery
 ${METEOR} npm install --save-dev postcss@6.0.22 postcss-load-config@1.2.0
-${METEOR} npm install autoprefixer --save-dev
+${METEOR} npm install --save-dev autoprefixer
 ${METEOR} npm install postcss-easy-import postcss-nested postcss-simple-vars rucksack-css
 ${METEOR}  add react-meteor-data
 ${METEOR}  add froatsnook:sleep package-stats-opt-out akasha:shelljs session
@@ -41,6 +41,7 @@ ${METEOR}  add vsivsi:job-collection
 ${METEOR}  npm install --save @babel/runtime react-simple-range react-datetime-bootstrap react-timekeeper react@15.6.2 react-dom@15.6.2 shelljs bootstrap@^3.3
 ${METEOR}  npm install --save-dev babel-plugin-transform-class-properties@6.24.1
 ${METEOR}  npm install --save semantic-ui-react@0.78.3
+${METEOR}  npm install --save formsy-semantic-ui-react formsy-react xregexp
 ## used for a semantic-ui less error
 ${METEOR} npm install
 
@@ -49,7 +50,11 @@ echo "jq - Download and extract"
 echo " "
 echo " used when bundling e.g. tsx_cmd_bundle.sh"
 echo " *******************************"
-#sudo apt install jq
+if [ "$(uname)" == "Darwin" ]; then
+  echo " MUST INSTALL MANUALLY"
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+  sudo apt install jq
+fi
 
 # meteortyos breaks job-collection
 # ${METEOR}  add meteortoys:allthings
