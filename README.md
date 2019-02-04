@@ -21,8 +21,51 @@ doing 1 or more targets in a night
 - Automatically stopping sessions once sun reached altitude, such as -11.5 degrees
 - Failed CLS pause the session for some time, and then keep trying CLS peridocialy until stopped
 - Periodic CLS to check for clouds
+---
+## Install TSX_cmd
+[Project - TSX Command](bear://x-callback-url/open-note?id=CD71E4DF-EF35-414B-8543-4038D2330CB3-1082-00000289114BA390)
+1. Create a directory for tsx_cmd, it can need ~500MB once installed:
+2. Download: (Or clone this repository)
+	* `bin/tsx_cmd_install.sh` to install the environment:
+		* nodejs
+		* mongodb
+		* tsx_cmd
+	* `bin/tsx_cmd_update.sh`
+	* `bin/tsx_cmd_start.sh`
+	* `bin/tsx_cmd_stop.sh`
 
+## Start TSX
+2. Start up TSX, use simulator to test as you wish:
+	* turn on the server
+	* turn off script debugger
+
+## Start TSX_CMD
+3. Open command prompt
+	1. Run `tsx_cmd_install.sh` from the directory you installed tsx_cmd.
+	2. Run `tsx_cmd_start.sh`
+
+## Setup TSX
+4. Open a browser: http://localhost:3000/ (or replace with the ip of the PC/SBC running tsx_cmd)
+	1. Click on TSXIP and TSXport to set to the TSX server
+	2. Click on the wifi symbol in top right - to load filter wheel, and equipment details to confirm connections. ::This needs to be redone when filters change::
+	3. Click the Wrench to setup your imaging equipment details: focal length, pixels, twilight… *If there is no Default filter, return  to step 2.*
+	4. Click Calibration icon, if doing flats for the filter exposures
+
+## Create your Night session
+	4. Open a browser: http://localhost:3000/ (or replace with the ip of the PC/SBC running tsx_cmd)
+	5. Click the Series button to define the Imaging session: LLRGD, SHO…
+	6. Click the Targets Menu to create your Objects, assigning a series, and its constraints
+		* Enable targets
+
+## Start up
+	4. Open a browser: http://localhost:3000/ (or replace with the ip of the PC/SBC running tsx_cmd)
+	5. Click the Scheduler at top to view night plans
+	6. Click Agent button to toggle, meridian flip, re-focusing, autoguiding, twilight checks…
+	7. Click Play button to start.
+---
 ## Versions:
 - Targets and take series work
 - Calibration of autoguider does not worked binned
 - Beta version of cloud checking implemented.
+
+#tsx_cmd #./how-to
