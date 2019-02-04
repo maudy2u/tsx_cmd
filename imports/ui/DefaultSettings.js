@@ -59,10 +59,11 @@ import ReactSimpleRange from 'react-simple-range';
 import Timekeeper from 'react-timekeeper';
 
 const XRegExp = require('xregexp');
-const XRegExpPosNum = XRegExp('^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$');
-const XRegExpNonZeroPosInt = XRegExp('[1-9][0-9]*');
-const XRegExpZeroOrPosInt = XRegExp('[0]|[1-9][0-9]*');
-const XRegExpZeroToNine = XRegExp('[0-9]');
+const XRegExpPosNum = XRegExp('^0$|(^([1-9]\\d*(\\.\\d+)?)$)|(^0?\\.\\d*[1-9]\\d*)$');
+const XRegExpNonZeroPosInt = XRegExp('^([1-9]\\d*)$');
+const XRegExpZeroOrPosInt = XRegExp('^(\\d|[1-9]\\d*)$');
+const XRegExpZeroToNine = XRegExp('^\\d$');
+
 
 // App component - represents the whole app
 class DefaultSettings extends Component {

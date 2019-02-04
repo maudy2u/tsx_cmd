@@ -26,7 +26,30 @@ import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 import { Seriess } from '../api/seriess.js';
 import { Filters } from '../api/filters.js';
 
-import { Form, Grid, Input, Table, Button, Dropdown, } from 'semantic-ui-react'
+// import { Form, Grid, Input, Table, Button, Dropdown, } from 'semantic-ui-react'
+import {
+  // Tab,
+  Grid,
+  Label,
+  // Segment,
+  Button,
+  // Progress,
+} from 'semantic-ui-react'
+
+import {
+  Form,
+  // Checkbox,
+  Input,
+  Dropdown,
+  Radio,
+} from 'formsy-semantic-ui-react';
+const ERRORLABEL = <Label color="red" pointing/>
+const XRegExp = require('xregexp');
+const XRegExpPosNum = XRegExp('^0$|(^([1-9]\\d*(\\.\\d+)?)$)|(^0?\\.\\d*[1-9]\\d*)$');
+const XRegExpNonZeroPosInt = XRegExp('^([1-9]\\d*)$');
+const XRegExpZeroOrPosInt = XRegExp('^(\\d|[1-9]\\d*)$');
+const XRegExpZeroToNine = XRegExp('^\\d$');
+
 
 var frames = [
   'Light',
@@ -219,16 +242,24 @@ class TakeSeriesEditor extends Component {
           {/* <b><label>{this.state.order}</label></b> */}
         </Grid.Column>
         <Grid.Column>
-          <Input
-            fluid
-            placeholder='Exposure'
-            name='exposure'
-            value={this.state.exposure}
-            onChange={this.handleChange}
-          />
+          <Form>
+            <Form.Input
+              fluid
+              placeholder='Exposure'
+              name='exposure'
+              value={this.state.exposure}
+              onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, .7, 1.1"
+              errorLabel={ ERRORLABEL }
+              />
+          </Form>
         </Grid.Column>
         <Grid.Column>
-          <Dropdown
+          <Form>
+          <Form.Dropdown
               fluid
               name='filter'
               options={this.renderDropDownFilters()}
@@ -236,15 +267,23 @@ class TakeSeriesEditor extends Component {
               text={this.state.filter}
               onChange={this.handleChange}
             />
+            </Form>
           </Grid.Column>
           <Grid.Column>
-          <Input
+          <Form>
+          <Form.Input
             fluid
             placeholder='Repeat'
             name='repeat'
             value={this.state.repeat}
             onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExpZeroOrPosInt, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be a positive number, e.g 0, 5, 1800, 3600"
+            errorLabel={ ERRORLABEL }
           />
+          </Form>
         </Grid.Column>
         {/* <Grid.Column>
           <Input

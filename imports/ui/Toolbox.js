@@ -34,6 +34,11 @@ import {
   Dropdown,
 } from 'formsy-semantic-ui-react';
 const ERRORLABEL = <Label color="red" pointing/>
+const XRegExp = require('xregexp');
+const XRegExpPosNum = XRegExp('^0$|(^([1-9]\\d*(\\.\\d+)?)$)|(^0?\\.\\d*[1-9]\\d*)$');
+const XRegExpNonZeroPosInt = XRegExp('^([1-9]\\d*)$');
+const XRegExpZeroOrPosInt = XRegExp('^(\\d|[1-9]\\d*)$');
+const XRegExpZeroToNine = XRegExp('^\\d$');
 
 import {
   tsx_ServerStates,
@@ -248,8 +253,10 @@ class Toolbox extends Component {
          placeholder='eg. 19826, or 0.5'
          value={ROTATOR_NUM}
          onChange={this.handleChange}
-         validations="isNumeric"
-         validationErrors={{ isNumeric: 'Must be a number' }}
+         validations={{
+           matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+         }}
+         validationError="Must be a positive number, e.g 0, 5.1, 1800, 3600"
          errorLabel={ ERRORLABEL }
         />
         </Form>
@@ -293,8 +300,10 @@ class Toolbox extends Component {
            placeholder='eg. 19826, or 0.5'
            value={ROTATOR_NUM}
            onChange={this.handleChange}
-           validations="isNumeric"
-           validationErrors={{ isNumeric: 'Must be a number' }}
+           validations={{
+             matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+           }}
+           validationError="Must be a positive number, e.g 0, 5.1, 1800, 3600"
            errorLabel={ ERRORLABEL }
           />
         </Form>
@@ -362,8 +371,10 @@ class Toolbox extends Component {
             placeholder='Dec, or azimuth: '
             value={calDecAz}
             onChange={this.handleChange}
-            validations="isNumeric"
-            validationErrors={{ isNumeric: 'Must be a number' }}
+            validations={{
+              matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be a positive number, e.g 0, 5.1, 1800, 3600"
             errorLabel={ ERRORLABEL }
           />
         </Form>

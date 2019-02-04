@@ -25,7 +25,35 @@ import { withTracker } from 'meteor/react-meteor-data';
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
 import { Seriess } from '../api/seriess.js';
 
-import { Form, Grid, Item, Button, Radio, Input, Table, } from 'semantic-ui-react'
+import {
+  // Tab,
+  Grid,
+  Label,
+  // Segment,
+  Button,
+  // Progress,
+
+  // Form,
+  Checkbox,
+  // Input,
+  Dropdown,
+  Radio,
+} from 'semantic-ui-react'
+
+import {
+  Form,
+//   Checkbox,
+  Input,
+//   Dropdown,
+//   Radio,
+} from 'formsy-semantic-ui-react';
+const ERRORLABEL = <Label color="red" pointing/>
+const XRegExp = require('xregexp');
+const XRegExpPosNum = XRegExp('^0$|(^([1-9]\\d*(\\.\\d+)?)$)|(^0?\\.\\d*[1-9]\\d*)$');
+const XRegExpNonZeroPosInt = XRegExp('^([1-9]\\d*)$');
+const XRegExpZeroOrPosInt = XRegExp('^(\\d|[1-9]\\d*)$');
+const XRegExpZeroToNine = XRegExp('^\\d$');
+
 
 import TakeSeriesEditor from './TakeSeriesEditor.js';
 
@@ -63,7 +91,7 @@ class TakeSeriesTemplateEditor extends Component {
     this.setState({repeatSeries: this.props.template.repeatSeries});
 
     // make sure dithering is set
-    if( this.props.template.defaultDithering == '' 
+    if( this.props.template.defaultDithering == ''
     || typeof this.props.template.defaultDithering == 'undefined' ) {
       this.props.template.defaultDithering = 0;
     }
@@ -116,12 +144,12 @@ class TakeSeriesTemplateEditor extends Component {
   renderTakeSeries( container ) {
     // this.props.template.series.. this is a series ID
     // does not work:       this.props.template.series.map({sort: {order:1}}, (definedSeries)=>{
-    console.log(this.props.template.series);
+    // console.log(this.props.template.series);
     return (
       this.props.template.series.sort(
         function(a, b) {
-          console.log(a.id);
-          console.log(b.id);
+          // console.log(a.id);
+          // console.log(b.id);
           var aO = Seriess.findOne({_id: a.id});
           var bO = Seriess.findOne({_id: b.id});
           return aO.order- bO.order;
@@ -149,19 +177,21 @@ class TakeSeriesTemplateEditor extends Component {
           <Form.Group widths='equal'>
           <Form.Field>
             <Input
+              name='name_title'
               label='Name:'
               type='text'
               placeholder='Name for the series'
-              defaultValue={this.state.name}
+              value={this.state.name}
               onChange={this.nameChange}
             />
           </Form.Field>
           <Form.Field>
             <Input
+              name='description'
               label='Description:'
               type='text'
               placeholder='Describe the series'
-              defaultValue={this.state.description}
+              value={this.state.description}
               onChange={this.descriptionChange}
             />
           </Form.Field>
@@ -180,11 +210,16 @@ class TakeSeriesTemplateEditor extends Component {
             <br/>
             <br/>
             <Form.Input
+              name='dither'
               label='Dither after: '
-              type='text'
               placeholder='Images before dither'
-              defaultValue={this.state.defaultDithering}
+              value={this.state.defaultDithering}
               onChange={this.handleDitherChange}
+              validations={{
+                matchRegexp: XRegExpZeroOrPosInt, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 0, 5, 1800, 3600"
+              errorLabel={ ERRORLABEL }
             />
           </Form.Group>
         </Form>
