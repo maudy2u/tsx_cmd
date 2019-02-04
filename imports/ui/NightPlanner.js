@@ -139,6 +139,9 @@ class NightPlanner extends Component {
           if( dHr < rHr ) {
             dHr = dHr + 24;
           }
+          if( endHr < startHr ) {
+            endHr = endHr + 24;
+          }
           // console.log(
           //    'HR: ' + hr + ', OBJ: ' + oName + ',ALT: ' + alt + ',S: ' + startHr + ',E: ' + endHr + ',R: ' + rHr + ',D: ' + dHr
           // )
