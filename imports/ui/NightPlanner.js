@@ -256,12 +256,12 @@ class NightPlanner extends Component {
 
     let plannerIndex = [];
     if( startHr-bufHr < 24 && startHr-bufHr > endHr+bufHr ) {
-        for( let i=startHr-bufHr; i < 24; i++ ) {
+        for( var i=startHr-bufHr; i < 24; i++ ) {
           plannerIndex.push( i );
         }
     }
     if( endHr+bufHr == 0 || endHr+bufHr < startHr-bufHr ) {
-      for( let i=0; i < endHr+bufHr; i++ ) {
+      for( var i=0; i < endHr+bufHr; i++ ) {
         plannerIndex.push( i );
       }
     }
@@ -277,7 +277,7 @@ class NightPlanner extends Component {
     let SUNRISE_HR= 0;
     let SUNSET = '0:0';
     let SUNSET_HR = 0;
-    for( let i=0; i<PLAN.length; i ++ ) {
+    for( var i=0; i<PLAN.length; i ++ ) {
       let obj = PLAN[i];
       if( typeof obj == 'undefined' ) {
         continue;
@@ -299,7 +299,7 @@ class NightPlanner extends Component {
           MOONSET_HR = MOONSET_HR + 24;
         }
         if(MOONSET_HR < 12 ) {
-          MOONSET_HR=+24;
+          MOONSET_HR=MOONSET_HR+24;
         }
       }
       else if( oName == 'Sun') {
@@ -312,7 +312,9 @@ class NightPlanner extends Component {
         SUNSET_HR = Number(SUNSET.split(':')[0].trim());
 
         let hrLimit = plannerIndex[plannerIndex.length-1];
-        SUNRISE_HR = this.adjHour( SUNRISE_HR, hrLimit );
+        if(SUNRISE_HR < 12 ) {
+          SUNRISE_HR=SUNRISE_HR+24;
+        }
         SUNSET_HR = this.adjHour( SUNSET_HR, hrLimit );
       }
 
@@ -323,42 +325,42 @@ class NightPlanner extends Component {
 
     let colHours = [];
     let planner = [];
-    // setup first half
 
+    // setup first half
     if( startHr-bufHr < 24 && startHr-bufHr > endHr+bufHr ) {
-        for( let i=startHr-bufHr; i < 24; i++ ) {
-          colHours.push( i );
+        for( var k=startHr-bufHr; k < 24; k++ ) {
+          colHours.push( k );
           let colour = 'black';
           // Colour the Moon
-          if( i >= MOONRISE_HR && i <= MOONSET_HR) {
+          if( k >= MOONRISE_HR && k <= MOONSET_HR) {
             colour = 'blue';
           }
           // Colour the Sun
-          if( i <= SUNSET_HR || i >= SUNRISE_HR ) {
+          if( k <= SUNSET_HR ) {
              colour = 'teal';
           }
-          // if( (i < startHr || i > endHr) ) {
+          // if( (k < startHr || k > endHr) ) {
           //   colour = 'teal';
           // }
 
-          let note = i;
-          if( i == MOONRISE_HR ) {
+          let note = k;
+          if( k == MOONRISE_HR ) {
             note = MOONRISE;
           }
-          else if( i == MOONSET_HR ) {
+          else if( k == MOONSET_HR ) {
             note = MOONSET;
           }
-          else if( i == SUNRISE_HR ) {
+          else if( k == SUNRISE_HR ) {
             note = SUNRISE;
           }
-          else if( i == SUNSET_HR ) {
+          else if( k == SUNSET_HR ) {
             note = SUNSET;
           }
 
           // add in moonlight hour colouring...
           // i.e. if within the moonrise hours... make text Colours XXX
           planner.push(
-            <Grid.Column key={i} color={colour}>
+            <Grid.Column key={k} color={colour}>
                 <small>{note}</small>
             </Grid.Column>
           );
@@ -369,9 +371,9 @@ class NightPlanner extends Component {
       for( let j=0; j < endHr+bufHr; j++ ) {
         colHours.push( j );
         let colour = 'black';
-        if( j > endHr ) {
-          colour = 'teal';
-        }
+        // if( j > endHr ) {
+        //   colour = 'teal';
+        // }
         // Colour the Moon
         if( j+24 >= MOONRISE_HR && j+24 <= MOONSET_HR) {
           colour = 'blue';

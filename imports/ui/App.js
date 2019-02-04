@@ -81,7 +81,7 @@ class App extends TrackerReact(Component) {
   constructor(props) {
     super(props);
     this.state = {
-      activeMenu: 'Targets', 
+      activeMenu: 'Targets',
       saveServerFailed: false,
       modalEnterIp: false,
       modalEnterPort: false,
@@ -634,14 +634,35 @@ class App extends TrackerReact(Component) {
     }.bind(this));
   }
 
+  formatDate( today ) {
+    // desired format:
+    // 2018-01-01 hh:mm:ss
+
+    var HH = today.getHours();
+    var MM = today.getMinutes();
+    var SS = today.getSeconds();
+    var mm = today.getMonth()+1; // month is zero based
+    var dd = today.getDate();
+    var yyyy = today.getFullYear();
+
+    return yyyy +'-'+ ('0'  + mm).slice(-2) +'-'+ ('0'  + dd).slice(-2);
+    // + ',  '
+    // + ('0'  + HH).slice(-2) + ':'
+    // + ('0'  + MM).slice(-2) + ':'
+    // + ('0'  + SS).slice(-2);
+  }
+
   renderTargetReport( night_plans ) {
+
+    // Night Plan for 2019-02-04
+
     return (
       <Modal
       open={this.state.modalViewNightPlanner}
       onClose={this.modalCloseNightPlanner}
       basic
       closeIcon>
-        <Modal.Header>Night Plan</Modal.Header>
+        <Modal.Header>Night Plan - {this.formatDate(new Date())} </Modal.Header>
         <Modal.Content>
           <NightPlanner
             night_plan_updating = {night_plans}
