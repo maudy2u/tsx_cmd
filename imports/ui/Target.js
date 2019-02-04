@@ -32,7 +32,7 @@ import TargetEditor from './TargetEditor.js';
 
 function totalImages (target) {
   var series = target.takeSeries.series.takeSeries;
-  console.log('Number of series found: ' + series.takeSeries.length);
+  // console.log('Number of series found: ' + series.takeSeries.length);
 }
 
 // export default
@@ -97,7 +97,7 @@ class Target extends Component {
   }
 
   editEntry() {
-    console.log('In the DefineTemplate editEntry');
+    // console.log('In the DefineTemplate editEntry');
     this.handleOpen();
     this.forceUpdate();
   }
@@ -128,7 +128,7 @@ class Target extends Component {
   }
 
   copyEntry() {
-    console.log('In the DefineTemplate editEntry');
+    // console.log('In the DefineTemplate editEntry');
 
     orgTarget = this.props.target;
 

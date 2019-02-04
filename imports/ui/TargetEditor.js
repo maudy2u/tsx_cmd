@@ -86,7 +86,7 @@ class TargetEditor extends Component {
     priority: 10,           // Priority: 1 is highest
     tempChg: 0.7,
     currentAlt:0,
-    minAlt: 29.5,
+    minAlt: 29,
     report: '',
 
     seriesTemplate: {},
@@ -276,7 +276,7 @@ class TargetEditor extends Component {
       // options.push({key:series._id, text:series.name, value: { _id:series._id, text:series.name, value:series.name }});
       options.push({key:series._id, text:series.name, value: series.name });
       count++;
-      console.log(`Found series._id: ${series._id}, name: ${series.name}`);
+      // console.log(`Found series._id: ${series._id}, name: ${series.name}`);
     });
     return options;
   }
@@ -286,7 +286,7 @@ class TargetEditor extends Component {
     this.setState({dec: ''});
     this.setState({alt: ''});
 
-    console.log('targetFind: ' + this.props.target.targetFindName );
+    // console.log('targetFind: ' + this.props.target.targetFindName );
     Meteor.call(
       'targetFind',
       this.props.target ,
@@ -294,8 +294,8 @@ class TargetEditor extends Component {
 
 //    Meteor.call("targetFind", this.state.targetFindName , function(error, result) {
       // identify the error
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
+      // console.log('Error: ' + error);
+      // console.log('result: ' + result);
       // if success then TheSkyX has made this point the target...
       // now get the coordinates
       cmdSuccess = true;
@@ -303,19 +303,6 @@ class TargetEditor extends Component {
       this.setState({dec: result.DEC});
       this.setState({alt: result.ALT});
     }.bind(this));
-  }
-
-
-  // *******************************
-  findTarget() {
-    // on the client
-    console.log('deferred functionality');
-
-  }
-
-  getImageLinkAngle() {
-    console.log('deferred functionality');
-    return 0;
   }
 
   // *******************************
@@ -334,11 +321,11 @@ class TargetEditor extends Component {
     // DROP DOWN CONSTANTS
     var takeSeries = this.getTakeSeriesTemplates();
     var filters = this.getDropDownFilters();
-    var targetPriority = `${this.state.priority}`;
+    var TARGETPRIORITY = this.state.priority;
 
     // *******************************
     // var for ra and DATEPICKER
-    var minimumAlt = `${this.state.minAlt}`;
+    var MINIMUMALT = this.state.minAlt;
     var targetRa = `${this.state.ra}`;
     var targetDec = `${this.state.dec}`;
     var targetAngle = `${this.state.angle}`;
@@ -501,26 +488,26 @@ class TargetEditor extends Component {
         <h3 className="ui header">Constraints</h3>
 
         <Segment>
-          <h4 className="ui header">Priority: {targetPriority}</h4>
+          <h4 className="ui header">Priority: {TARGETPRIORITY}</h4>
           <ReactSimpleRange
             label
             step={1}
             min={1}
             max={19}
-            value={targetPriority}
+            value={TARGETPRIORITY}
             sliderSize={12}
             thumbSize={18}
             onChange={this.handlePriorityChange}
           />
         </Segment>
         <Segment>
-          <h4 className="ui header">Minimum Altitude: {minimumAlt}</h4>
+          <h4 className="ui header">Minimum Altitude: {MINIMUMALT}</h4>
           <ReactSimpleRange
             label
             step={.5}
             min={0}
             max={90}
-            value={minimumAlt}
+            value={MINIMUMALT}
             sliderSize={12}
             thumbSize={18}
             onChange={this.handleMinAltChange}
