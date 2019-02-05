@@ -62,7 +62,7 @@ if [ "${1}" == "init" ]; then
       echo " ./bin/mongod_arm_build.sh"
       export APP='https://github.com/maudy2u/tsx_cmd/releases/download/untagged-ec07f491dbd476c97cdf/tsx_cmd_Linux_armv7_build_355_v3.4.5_2018-12-27_RC8.tar'
       export MONGO='https://github.com/maudy2u/tsx_cmd/releases/download/armv7_mongo/mongoDB_armv7.tar'
-      export NODEJS='https://nodejs.org/dist/latest-v6.x/node-v6.14.4-linux-armv7l.tar.gz'
+      export NODEJS='https://nodejs.org/dist/v6.16.0/node-v6.16.0-linux-armv7l.tar.gz'
       export MONGO_PARAMS="-C ./mongodb"
     else
       echo $(uname -s) $(uname -p) - NO NODEJS supported... yet
