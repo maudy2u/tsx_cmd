@@ -60,10 +60,10 @@ if [ "${1}" == "init" ]; then
       echo "Mongodb - BUILD CAN BE CHECKED HERE"
       echo " (it can take a while on ODroid-XU4)"
       echo " ./bin/mongod_arm_build.sh"
-      export APP='https://github.com/maudy2u/tsx_cmd/releases/download/untagged-ec07f491dbd476c97cdf/tsx_cmd_Linux_armv7_build_355_v3.4.5_2018-12-27_RC8.tar'
+      export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC8/tsx_cmd_Linux_armv7_build_355_v3.4.5_2018-12-27_RC8.tar'
       export MONGO='https://github.com/maudy2u/tsx_cmd/releases/download/armv7_mongo/mongoDB_armv7.tar'
       export NODEJS='https://nodejs.org/dist/v6.16.0/node-v6.16.0-linux-armv7l.tar.gz'
-      export MONGO_PARAMS="-C ./mongodb"
+      export MONGO_PARAMS="-C ./mongodb/bin"
     else
       echo $(uname -s) $(uname -p) - NO NODEJS supported... yet
       echo $(uname -s) $(uname -p) - NO mongoDB supported... yet
@@ -102,9 +102,9 @@ else
   echo " *******************************"
   echo "Mongodb - Download and extract"
   echo " *******************************"
-  mkdir -p ./mongodb
+  mkdir -p ./mongodb/bin
   curl -L "${MONGO}" -o mongodb.tgz
-  tar -xf mongodb.tgz -C ${MONGO_PARAMS}
+  tar -xf mongodb.tgz ${MONGO_PARAMS}
   rm ${install_dir}/mongodb.tgz
 fi
 
