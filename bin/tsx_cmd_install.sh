@@ -40,7 +40,7 @@ if [ "${1}" == "init" ]; then
     echo MAC in ${install_dir}
     export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC8/tsx_cmd_Darwin_i386_build_355_v3.4.5_2018-12-27_RC8.tar'
     export MONGO='https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-4.0.0.tgz'
-    export NODEJS='https://nodejs.org/dist/v8.11.3/node-v8.11.3-darwin-x64.tar.gz'
+    export NODEJS='https://nodejs.org/dist/v8.11.1/node-v8.11.1-darwin-x64.tar.gz'
     export MONGO_PARAMS="-C ./mongodb --strip-components=1"
   elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     if [ "$(uname -p)" == "aarch64" ]; then
@@ -130,16 +130,19 @@ rm ${install_dir}/tsx_cmd.tar
 cd ${install_dir}/bundle/programs/server
 echo ""
 echo " *******************************"
-echo " TSX_CMD - update npm installs"
-echo " *******************************"
-npm install amdefine ansi-styles chalk escape-string-regexp has-ansi promise source-map strip-ansi type-of ansi-regex asap eachline meteor-promise semver source-map-support supports-color underscore
-
-echo ""
-echo " *******************************"
 echo " TSX_CMD - fix for fibers deploy"
 echo " *******************************"
 npm uninstall fibers
 npm install fibers
+
+if [ "$(uname)" == "Darwin" ]; then
+  echo ""
+  echo " *******************************"
+  echo " TSX_CMD - update npm installs"
+  echo " *******************************"
+  npm install amdefine ansi-styles chalk escape-string-regexp has-ansi promise source-map strip-ansi type-of ansi-regex asap eachline meteor-promise semver source-map-support supports-color underscore
+fi
+
 cd ${install_dir}
 
 echo ""

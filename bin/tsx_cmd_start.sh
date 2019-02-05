@@ -54,6 +54,4 @@ else
 fi
 
 cd ${install_dir}/bundle
-echo AUNCH NODE
-node main.js &
-echo DONE
+node main.js
