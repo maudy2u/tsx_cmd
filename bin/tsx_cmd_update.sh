@@ -35,25 +35,20 @@ if [ $# -eq 0 ]
     exit 1
 fi
 
-for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ./bundle/programs/server/assets/app/version.json ); do
-    export $s
-done
-
 echo " *******************************"
 echo " Update TSX Cmd v1.0"
 echo " *******************************"
 
 if [ "$(uname)" == "Darwin" ]; then
     echo Mac in ${install_dir}
-    export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-darwin-x64/bin:$PATH
 
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     # Do something under GNU/Linux platform
     echo Linux
     if [ "$(uname -p)" == "aarch64" ]; then
-      export PATH=${install_dir}/node-v8.11.3-linux-armv7l/bin:$PATH
+        echo ARMV8 in ${install_dir}
     elif [ "$(uname -p)" == "armv7l" ]; then
-      export PATH=${install_dir}/node-v6.14.4-linux-armv7l/bin:$PATH
+        echo ARMV7 in ${install_dir}
     else
       echo NO NODEJS supported
       echo $(uname -s) $(uname -p) - Not Supported
@@ -65,29 +60,38 @@ else
     exit 5
 fi
 
+# *******************************
+# grab current bundle variables
+for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ./bundle/programs/server/assets/app/version.json ); do
+    export $s
+done
+
+export PATH=${install_dir}/mongodb/bin:${install_dir}/nodejs/bin:$PATH
+
 echo " *******************************"
 echo " Updating tsx_cmd in ${install_dir}"
 echo " *******************************"
 echo ""
-# tsx_info=${install_dir}/bundle/programs/server/assets/app/version.json
-# for s in $(echo $tsx_info | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ); do
-#     export $s
-# done
 mv ./bundle ./bundle_${version}_${date}
 echo " ./bundle backed up to ./bundle_${version}_${date}"
 
 echo " *******************************"
 echo " TSX_CMD - Extract" ${1}
 echo " *******************************"
-# https://drive.google.com/drive/folders/1yUPU6A0gbBv5UnuSp308lvctY4d6aUtw?usp=sharing
+echo ""
 tar -xf ${1}
 
 cd ${install_dir}/bundle/programs/server
 echo " *******************************"
 echo " TSX_CMD - fix for fibers deploy"
 echo " *******************************"
+echo ""
 npm uninstall fibers
 npm install fibers
+echo " *******************************"
+echo " TSX_CMD - reinstall npm"
+echo " *******************************"
+echo ""
 npm install amdefine ansi-styles chalk escape-string-regexp has-ansi promise source-map strip-ansi type-of ansi-regex asap eachline meteor-promise semver source-map-support supports-color underscore
 cd ${install_dir}
 
