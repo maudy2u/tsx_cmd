@@ -16,6 +16,22 @@
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 install_dir=$(pwd)
+if [ $# -eq 0 ]
+  then
+    echo ""
+    echo " *******************************"
+    echo "Bundling TSX Cmd v1.1"
+    echo " *******************************"
+    echo ": You need to provide one parameter to build - a comment."
+    echo ": e.g."
+    echo ""
+    echo " tsx_cmd_build.sh test"
+    echo " tsx_cmd_build.sh alpha"
+    echo ""
+    echo " *******************************"
+    echo ""
+    exit 1
+fi
 
 echo ""
 echo " *******************************"
@@ -28,7 +44,7 @@ if [ "$(uname -s)" == "Darwin" ]; then
     echo " *******************************"
     echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}.tar
     echo " *******************************"
-    meteor build --directory ../app
+    meteor build --directory ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}
     growlnotify -n "Build $(git rev-list --all --count) of TSX Cmd" -s -m "Completed"
   else
     echo $(uname -s) $(uname -p) - Not Supported
@@ -41,14 +57,14 @@ elif [ "$(uname -s)" == "Linux" ]; then
     echo " *******************************"
     echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_aarch64_build_$(git rev-list --all --count)_${1}.tar
     echo " *******************************"
-    ~/meteor/meteor  build --directory ../app
+    ~/meteor/meteor  build --directory ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}
 
   elif [ "$(uname -p)" == "armv7l" ]; then
     echo ""
     echo " *******************************"
     echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_armv7_build_$(git rev-list --all --count)_${1}.tar
     echo " *******************************"
-    ~/meteor/meteor  build --directory ../app
+    ~/meteor/meteor  build --directory ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}
   else
     echo $(uname -s) $(uname -p) - Not Supported
     exit 5

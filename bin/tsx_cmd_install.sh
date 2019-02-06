@@ -34,12 +34,11 @@ if [ $# -eq 0 ]
     exit 1
 fi
 
-#if [ "${1}" != "update-only" ]; then
 if [ "${1}" == "init" ]; then
   if [ "$(uname)" == "Darwin" ]; then
     echo MAC in ${install_dir}
     export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC8/tsx_cmd_Darwin_i386_build_355_v3.4.5_2018-12-27_RC8.tar'
-    export MONGO='https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-4.0.0.tgz'
+    export MONGO='https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-4.0.5.tgz'
     export NODEJS='https://nodejs.org/dist/v8.11.1/node-v8.11.1-darwin-x64.tar.gz'
     export MONGO_PARAMS="-C ./mongodb --strip-components=1"
   elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
@@ -52,12 +51,11 @@ if [ "${1}" == "init" ]; then
       echo " MongoDB is apt installed"
       export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC8/tsx_cmd_Linux_armv7_build_355_v3.4.5_2018-12-27_RC8.tar'
       export NODEJS='https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz'
-      # MONGO is available via apt
     elif [ "$(uname -p)" == "armv7l" ]; then
       echo armv7 in ${install_dir}
       echo ""
       echo " *******************************"
-      echo "Mongodb - BUILD CAN BE CHECKED HERE"
+      echo " Mongodb - CAN BE BUILT MANUALLY. CHECKED HERE:"
       echo " (it can take a while on ODroid-XU4)"
       echo " ./bin/mongod_arm_build.sh"
       export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC8/tsx_cmd_Linux_armv7_build_355_v3.4.5_2018-12-27_RC8.tar'
@@ -89,7 +87,7 @@ cd ${install_dir}
 if [ "$(uname -p)" == "aarch64" ]; then
   echo ""
   echo " *******************************"
-  echo "Mongodb - apt-get install"
+  echo "Mongodb - apt-get install mongodb-enterprise 3.6 multiverse"
   echo " *******************************"
   # source: https://andyfelong.com/2018/02/update-mongodb-3-6-on-odroid-c2-with-ubuntu-16-04-3-arm64/
   sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
@@ -100,7 +98,7 @@ if [ "$(uname -p)" == "aarch64" ]; then
 else
   echo ""
   echo " *******************************"
-  echo "Mongodb - Download and extract"
+  echo "Mongodb - Download and extract" ${MONGO}
   echo " *******************************"
   mkdir -p ./mongodb/bin
   curl -L "${MONGO}" -o mongodb.tgz
@@ -118,7 +116,6 @@ tar -xf nodejs.tar.gz -C ./nodejs --strip-components=1
 rm ${install_dir}/nodejs.tar.gz
 export PATH=${install_dir}/mongodb/bin:${install_dir}/nodejs/bin:$PATH
 
-# install tsx__cmd - assumes already downloaded
 echo ""
 echo " *******************************"
 echo " TSX_CMD - Extract" ${APP}
@@ -135,13 +132,11 @@ echo " *******************************"
 npm uninstall fibers
 npm install fibers
 
-if [ "$(uname)" == "Darwin" ]; then
-  echo ""
-  echo " *******************************"
-  echo " TSX_CMD - update npm installs"
-  echo " *******************************"
-  npm install amdefine ansi-styles chalk escape-string-regexp has-ansi promise source-map strip-ansi type-of ansi-regex asap eachline meteor-promise semver source-map-support supports-color underscore
-fi
+echo ""
+echo " *******************************"
+echo " TSX_CMD - update npm installs"
+echo " *******************************"
+npm install amdefine ansi-styles chalk escape-string-regexp has-ansi promise source-map strip-ansi type-of ansi-regex asap eachline meteor-promise semver source-map-support supports-color underscore
 
 cd ${install_dir}
 

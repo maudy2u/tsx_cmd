@@ -29,7 +29,8 @@ export PATH=${install_dir}/mongodb/bin:${install_dir}/nodejs/bin:$PATH
 if [ "$(uname)" == "Darwin" ]; then
   if [ "$(uname -p)" == "i386" ]; then
     echo Mac in ${install_dir}
-    mongod --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log &
+    ulimit -n 1024
+    mongod --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log --journal &
   else
     echo "$(expr substr $(uname -s) 1 10)" - not yet supported1
     exit 5
@@ -37,7 +38,6 @@ if [ "$(uname)" == "Darwin" ]; then
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   if [ "$(uname -p)" == "aarch64" ]; then
     echo Linux aarch64_$(uname -p) in ${install_dir}
-    # 64bit
     # export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-linux-arm64/bin:$PATH
     # https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz
     mongod --inMemorySizeGB 1 --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log &
