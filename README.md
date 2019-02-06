@@ -23,15 +23,19 @@ doing 1 or more targets in a night
 - Periodic CLS to check for clouds
 ---
 ## Install TSX_cmd
-1. Create a directory for tsx_cmd, it can need ~500MB once installed:
-2. Download: (Or clone this repository)
-	* `bin/tsx_cmd_install.sh` to install the environment:
+[Project - TSX Command](bear://x-callback-url/open-note?id=CD71E4DF-EF35-414B-8543-4038D2330CB3-1082-00000289114BA390)
+1. Create a directory for tsx_cmd, it can need ~500MB once installed
+2. Decide to install precompile or development versions
+	* **RECOMMENDED:** Fast starting: ([Release 1.8 Initial release to GitHub · maudy2u/tsx_cmd · GitHub](https://github.com/maudy2u/tsx_cmd/releases/tag/RC8)) - fast start
+	* Development… clone this repository
+3. Fast start, just download these scripts:
+	* `bin/tsx_cmd_install.sh`
 		* nodejs
 		* mongodb
 		* tsx_cmd
-	* `bin/tsx_cmd_update.sh`
-	* `bin/tsx_cmd_start.sh`
-	* `bin/tsx_cmd_stop.sh`
+	* `bin/tsx_cmd_start.sh` - run once install completes
+	* `bin/tsx_cmd_stop.sh` - use another terminal to stop
+	* `bin/tsx_cmd_update.sh` - future - used to install new binary release
 
 ## Start TSX
 Start up TSX, use simulator to test as you wish:
@@ -40,9 +44,11 @@ Start up TSX, use simulator to test as you wish:
 
 ## Start TSX_CMD
 
-Open command prompt
-	1. Run `tsx_cmd_install.sh` from the directory you installed tsx_cmd.
+Open command prompt (Assumes Fast start)
+	1. Run `tsx_cmd_install.sh init` from the directory you installed tsx_cmd.
 	2. Run `tsx_cmd_start.sh`
+
+If Development version, experience with meteor is assumed.
 
 ## Setup TSX
 
@@ -67,9 +73,10 @@ Open a browser: http://localhost:3000/ (or replace with the ip of the PC/SBC run
 	3. Click Agent button to toggle, meridian flip, re-focusing, autoguiding, twilight checks…
 	4. Click Play button to start.
 ---
-## Versions:
-- Targets and take series work
-- Calibration of autoguider does not worked binned
+## History:
+- Targets and take series improvements
+- Calibration of autoguider improvements
 - Beta version of cloud checking implemented.
+- Added Night planner
 
 #tsx_cmd #./how-to
