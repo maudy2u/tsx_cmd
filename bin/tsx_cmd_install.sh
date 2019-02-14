@@ -95,6 +95,16 @@ if [ "$(uname -p)" == "aarch64" ]; then
   sudo apt update
   sudo apt install g++ build-essential -y
   sudo apt install mongodb-enterprise -y
+  echo ""
+  echo " *******************************"
+  echo " NodeJS - Download " ${MONGO}
+  echo " *******************************"
+  wget -o nodejs.tar.gz "${NODEJS}" 
+  echo ""
+  echo " *******************************"
+  echo "TSX_CMD - Download " ${APP}
+  echo " *******************************"
+  wget -o tsx_cmd.tar "${APP}"
 else
   echo ""
   echo " *******************************"
@@ -104,14 +114,23 @@ else
   curl -L "${MONGO}" -o mongodb.tgz
   tar -xf mongodb.tgz ${MONGO_PARAMS}
   rm ${install_dir}/mongodb.tgz
+  echo ""
+  echo " *******************************"
+  echo " NodeJS - Download " ${MONGO}
+  echo " *******************************"
+  curl -L "${NODEJS}" -o nodejs.tar.gz
+  echo ""
+  echo " *******************************"
+  echo "TSX_CMD - Download " ${APP}
+  echo " *******************************"
+  curl -L "${APP}" -o tsx_cmd.tar
 fi
 
 echo ""
 echo " *******************************"
-echo " NODEJS - Download and Extract" ${NODEJS}
+echo " NODEJS - Extract" ${NODEJS}
 echo " *******************************"
 mkdir -p ./nodejs
-curl -L "${NODEJS}" -o nodejs.tar.gz
 tar -xf nodejs.tar.gz -C ./nodejs --strip-components=1
 rm ${install_dir}/nodejs.tar.gz
 export PATH=${install_dir}/mongodb/bin:${install_dir}/nodejs/bin:$PATH
@@ -120,7 +139,6 @@ echo ""
 echo " *******************************"
 echo " TSX_CMD - Extract" ${APP}
 echo " *******************************"
-curl -L "${APP}" -o tsx_cmd.tar
 tar -xf tsx_cmd.tar
 rm ${install_dir}/tsx_cmd.tar
 
