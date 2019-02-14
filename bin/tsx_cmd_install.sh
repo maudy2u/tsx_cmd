@@ -99,12 +99,12 @@ if [ "$(uname -p)" == "aarch64" ]; then
   echo " *******************************"
   echo " NodeJS - Download " ${MONGO}
   echo " *******************************"
-  wget -o nodejs.tar.gz "${NODEJS}" 
+  wget -O nodejs.tar.gz "${NODEJS}" 
   echo ""
   echo " *******************************"
   echo "TSX_CMD - Download " ${APP}
   echo " *******************************"
-  wget -o tsx_cmd.tar "${APP}"
+  wget -O tsx_cmd.tar "${APP}"
 else
   echo ""
   echo " *******************************"
