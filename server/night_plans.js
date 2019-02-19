@@ -145,8 +145,8 @@ export function tsx_AltTimesForTargets( targets ) {
         }
       }
       catch ( e ) {
-        # This is need in case the trim function fails
-        UpdateStatus( ' Check if TheSkyX is running.');
+        // This is need in case the trim function fails
+        UpdateStatus( ' !!! Check if TheSkyX is running: - ' + e );
       }
       finally {
         tsx_is_waiting = false;

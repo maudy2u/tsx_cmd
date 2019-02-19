@@ -454,8 +454,8 @@ function tsx_FindGuideStar() {
         guideStarY: guideStarY,
       };
     }
-    catch() {
-      UpdateStatus( " --- Guide star: NOT FOUND" );
+    catch( e ) {
+      UpdateStatus( " --- Guide star: NOT FOUND - " + e );
     }
     finally {
       tsx_is_waiting = false;
