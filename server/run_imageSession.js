@@ -339,18 +339,17 @@ export function CalibrateAutoGuider() {
     return;
   }
 
-  tsxDebug("1");
   tsx_TakeAutoGuideImage();
-  tsxDebug("2");
   var star = tsx_FindGuideStar();
-  tsxDebug("3");
 
-  // Calibrate....
-  var cal_res = tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
-  if( cal_res ) {
-    UpdateStatus(' AutoGuider Calibrated');
+  // Handle no star found
+  if ( star !== '') {
+    // Calibrate....
+    var cal_res = tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
+    if( cal_res ) {
+      UpdateStatus(' AutoGuider Calibrated');
+    }
   }
-  tsxDebug("4");
 }
 
 // **************************************************************
@@ -378,26 +377,28 @@ function SetUpAutoGuiding( target, doCalibration ) {
     return;
   }
 
-  // Calibrate....
-  if( doCalibration ) {
-    var cal_res = tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
-    if( cal_res ) {
-      UpdateStatus(' ' + target.targetFindName + ": AutoGuider Calibrated");
+  // Calibrate.... only if a star is found...
+  if( star !== '') {
+    if( doCalibration ) {
+      var cal_res = tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
+      if( cal_res ) {
+        UpdateStatus(' ' + target.targetFindName + ": AutoGuider Calibrated");
+      }
+      if( isSchedulerStopped() ) {
+        return;
+      }
     }
+
+    tsx_StartAutoGuide( star.guideStarX, star.guideStarY );
     if( isSchedulerStopped() ) {
       return;
     }
+    tsx_SettleAutoGuide();
+    if( isSchedulerStopped() ) {
+      return;
+    }
+    UpdateStatus(' ' + target.targetFindName + ": autoguiding");
   }
-
-  tsx_StartAutoGuide( star.guideStarX, star.guideStarY );
-  if( isSchedulerStopped() ) {
-    return;
-  }
-  tsx_SettleAutoGuide();
-  if( isSchedulerStopped() ) {
-    return;
-  }
-  UpdateStatus(' ' + target.targetFindName + ": autoguiding");
 }
 
 // **************************************************************
@@ -431,6 +432,7 @@ function tsx_FindGuideStar() {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_FindGuideStar' );
   var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
+  var out = '';
   if( !enabled ) {
     UpdateStatus(' *** @Autoguiding disabled: ' + target.targetFindName);
     return;
@@ -442,15 +444,22 @@ function tsx_FindGuideStar() {
   // var cmd = tsxCmdFindGuideStar();
   var cmd = tsx_cmd('SkyX_JS_FindAutoGuideStar');
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        tsxDebug(' Guide star info: ' + tsx_return);
-        guideStarX = tsx_return.split('|')[0].trim();
-        guideStarY = tsx_return.split('|')[1].trim();
-        UpdateStatus( " --- Guide star: "+guideStarX+", "+guideStarY );
-        out = {
-          guideStarX: guideStarX,
-          guideStarY: guideStarY,
-        };
-        tsx_is_waiting = false;
+    try {
+      tsxDebug(' Guide star info: ' + tsx_return);
+      guideStarX = tsx_return.split('|')[0].trim();
+      guideStarY = tsx_return.split('|')[1].trim();
+      UpdateStatus( " --- Guide star: "+guideStarX+", "+guideStarY );
+      out = {
+        guideStarX: guideStarX,
+        guideStarY: guideStarY,
+      };
+    }
+    catch() {
+      UpdateStatus( " --- Guide star: NOT FOUND" );
+    }
+    finally {
+      tsx_is_waiting = false;
+    }
   }));
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );

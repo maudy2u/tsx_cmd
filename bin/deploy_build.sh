@@ -38,6 +38,15 @@ echo " *******************************"
 echo "Building TSX Cmd v1.0"
 echo " *******************************"
 
+if [ "${2}" ]; then
+  echo ""
+  echo " *******************************"
+  echo build_tsx_cmd.sh is file: ../tsx_cmd_${2}_build_$(git rev-list --all --count)_${1}.tar
+  echo " *******************************"
+  meteor build --architecture ${2} --directory ../tsx_cmd_${2}_build_$(git rev-list --all --count)_${1}
+  exit 0
+fi
+
 if [ "$(uname -s)" == "Darwin" ]; then
   if [ "$(uname -p)" == "i386" ]; then
     echo ""

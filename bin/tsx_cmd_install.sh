@@ -50,7 +50,8 @@ if [ "${1}" == "init" ]; then
       echo " Currently uses the same armv7 versions"
       echo " MongoDB is apt installed"
       export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC8/tsx_cmd_Linux_armv7_build_355_v3.4.5_2018-12-27_RC8.tar'
-      export NODEJS='https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz'
+#      export NODEJS='https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz'
+      export NODEJS='https://nodejs.org/dist/v6.16.0/node-v6.16.0-linux-armv7l.tar.gz'
     elif [ "$(uname -p)" == "armv7l" ]; then
       echo armv7 in ${install_dir}
       echo ""
@@ -99,7 +100,7 @@ if [ "$(uname -p)" == "aarch64" ]; then
   echo " *******************************"
   echo " NodeJS - Download " ${MONGO}
   echo " *******************************"
-  wget -O nodejs.tar.gz "${NODEJS}" 
+  wget -O nodejs.tar.gz "${NODEJS}"
   echo ""
   echo " *******************************"
   echo "TSX_CMD - Download " ${APP}
