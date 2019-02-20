@@ -447,6 +447,9 @@ function tsx_FindGuideStar() {
     try {
       tsxDebug(' Guide star info: ' + tsx_return);
       guideStarX = tsx_return.split('|')[0].trim();
+      if( guideStarX == "TypeError:") {
+        throw("Guider Star not found!")
+      }
       guideStarY = tsx_return.split('|')[1].trim();
       UpdateStatus( " --- Guide star: "+guideStarX+", "+guideStarY );
       out = {

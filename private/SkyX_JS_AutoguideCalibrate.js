@@ -52,7 +52,7 @@ CCDAG.SubframeBottom = B* CCDAGI.FITSKeyword ("YBINNING");
 
 CCDAG.AutoSaveOn = false;		// Dont save these images.
 CCDAG.Subframe = true;		// Use a subframe around the star.
-if( CCDSC.ImageUseDigitizedSkySurvey == "1" ){ // Simulator
+if( CCDAG.ImageUseDigitizedSkySurvey == "1" ){ // Simulator
   CCDAG.Frame = 1;			// Light Frame
 }
 ccdsoftAutoguider.Asynchronous = false;		// Turn on so we don't get stuck waiting for an endless process
