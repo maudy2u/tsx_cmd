@@ -562,6 +562,13 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
   else {
     isGuideSettlingEnabled = 0;
   }
+  var fSize = tsx_GetServerStateValue('calibrationFrameSize');
+  if( typeof fSize == 'undefined' || fSize === '' ) {
+    fSize = 300;
+    UpdateStatus(' *** Autoguider calibration frame needs setting ');
+  }
+
+  cmd = cmd.replace("$002", fSize ); // set subframe
   cmd = cmd.replace("$004", camScale ); // set cameraImageScale
   cmd = cmd.replace("$005", guiderScale ); // set guiderImageScale
   cmd = cmd.replace("$006", guidingPixelErrorTolerance ); // set guidingPixelErrorTolerance
@@ -797,6 +804,16 @@ function tsx_CLS( target ) {
   return Out;
 }
 
+function resetCLSTimeCheck () {
+  var defaultCLSRepeat = tsx_GetServerState('defaultCLSRepeat');
+  if( typeof defaultCLSRepeat === 'undefined' ) {
+    tsxDebug( ' Check if to CLS again - needs a value.');
+    tsx_SetServerState('defaultCLSRepeat', 0); // default is off
+    defaultCLSRepeat = tsx_GetServerState('defaultCLSRepeat');
+  }
+  tsx_SetServerState('defaultCLSRepeat', defaultCLSRepeat.value);
+}
+
 function tsx_CLS_target( target, filter ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_CLS_target: ' + target );
@@ -839,6 +856,7 @@ function tsx_CLS_target( target, filter ) {
         finally {
           // all good do nothing
           // reset dithering....
+          resetCLSTimeCheck();
           tsx_SetServerState('imagingSessionDither', 0);
         }
       }
@@ -1614,7 +1632,7 @@ function isTargetConditionInValid(target) {
     var defaultCLSRepeat = tsx_GetServerState('defaultCLSRepeat');
     if( typeof defaultCLSRepeat === 'undefined' ) {
       tsxDebug( ' Check if to CLS again - needs a value.');
-      tsx_SetServerState('defaultCLSRepeat', 0); // default to one hour
+      tsx_SetServerState('defaultCLSRepeat', 0); // default is off
       defaultCLSRepeat = tsx_GetServerState('defaultCLSRepeat');
     }
     tsxLog( ' --- check CLS every: ' + defaultCLSRepeat.value + ' sec');
@@ -1629,8 +1647,6 @@ function isTargetConditionInValid(target) {
         // This will cause a calibration to happen...
         // do not need to calibrate wth a meridian flip
         SetUpForImagingRun( target, false, false );
-
-        tsx_SetServerState('defaultCLSRepeat', defaultCLSRepeat.value);
         return false;
       }
       else {
