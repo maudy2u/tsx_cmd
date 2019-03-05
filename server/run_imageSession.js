@@ -66,12 +66,13 @@ var tsxFooter = '/* Socket End Packet */';
 var forceAbort = false;
 
 // *******************************
-function isSchedulerStopped() {
+export function isSchedulerStopped() {
   // tsxDebug('************************');
   tsxDebug(' *** isSchedulerStopped ' );
   var sched = tsx_GetServerStateValue('scheduler_running');
+  var currentJob =   tsx_SetServerState('currentJob', '');
   if(
-    (sched != 'Stop')
+    (sched != 'Stop' && currentJob != '')
   ) {
     tsxDebug('scheduler_running: ' + sched);
     return false; // exit
@@ -87,9 +88,17 @@ function isSchedulerStopped() {
 // **************************************************************
 function getFilterSlot(filterName) {
   // need to look up the filters in TSX
-  var filter = Filters.findOne({name: filterName});
-  tsxDebug(' Found Filter ' + filterName + ' at slot: ' + filter.slot);
-  return filter.slot;
+  var slot = '';
+  try {
+    var filter = Filters.findOne({name: filterName});
+    tsxDebug(' Found Filter ' + filterName + ' at slot: ' + filter.slot);
+    slot = filter.slot;
+  }
+  catch( e ) {
+    // no slot found - assumed to be the err
+    slot = 0;
+  }
+  return slot;
 }
 // **************************************************************
 //  cdLight =1, cdBias, cdDark, cdFlat
@@ -379,7 +388,7 @@ function SetUpAutoGuiding( target, doCalibration ) {
 
   // Calibrate.... only if a star is found...
   if( star !== '') {
-    if( doCalibration ) {
+    if( doCalibration == true ) {
       var cal_res = tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
       if( cal_res ) {
         UpdateStatus(' ' + target.targetFindName + ": AutoGuider Calibrated");
@@ -1567,26 +1576,37 @@ function isTargetConditionInValid(target) {
   tsxDebug(' *** isTargetConditionInValid: ' + target.targetFindName );
   tsxDebug(' ' + target.targetFindName + ': target evaluation');
 
+  // *******************************
+  UpdateStatus( ' --- check stop conditions');
+
   // Were checks just run
   let timeToCheck = tsx_GetServerStateValue('isTargetConditionInValidExpired');
   if( typeof timeToCheck == 'undefined') {
     timeToCheck = new Date();
     tsx_SetServerState('isTargetConditionInValidExpired', timeToCheck );
   }
+
+  // Only check ever minute
   let didTimePass = hasTimePassed( 60, timeToCheck ); // expire after one minute
   if( !didTimePass ) {
-    return false;
+    if( isSchedulerStopped() ) {
+      forceAbort = true;
+      return true;
+    }
+    else {
+      return false;
+    }
   }
   else {
     timeToCheck = new Date();
     tsx_SetServerState('isTargetConditionInValidExpired', timeToCheck );
   }
-  // *******************************
-  UpdateStatus( ' --- check stop conditions');
+
   if( isSchedulerStopped() ) {
     forceAbort = true;
     return true; // exit
   }
+
 
   // *******************************
   // reassess the target state
@@ -1646,7 +1666,11 @@ function isTargetConditionInValid(target) {
         UpdateStatus( ' *** Time to centre again.');
         // This will cause a calibration to happen...
         // do not need to calibrate wth a meridian flip
-        SetUpForImagingRun( target, false, false );
+        //  SetUpForImagingRun( target, false, false );
+        tsx_CLS( target );
+        // UpdateStatus( " Setup guider: " + target.targetFindName );
+      	SetUpAutoGuiding( target, false );			// Setup & Start Auto-Guiding.
+
         return false;
       }
       else {
@@ -2818,36 +2842,6 @@ export function canTargetSessionStart( target ) {
 // **************************************************************
 // **************************************************************
 Meteor.methods({
-
-
-  GetBackupOfDatabase() {
-    tsx_SetServerState( 'tool_active', true );
-
-    // run the shell Script
-    // Run external tool synchronously
-    // mongodump --uri=mongodb://127.0.0.1:3001/meteor -o ./export --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB
-
-    UpdateStatus( ' Backup starting');
-    let err = shell.mkdir( '-p', '/tmp/tsx_cmd_db_export').code;
-    tsxLog( err );
-    if ( err !== 0) {
-      UpdateStatus('Error: failed to database backup ');
-      shell.exit(1);
-      return;
-    }
-    if (shell.exec('mongodump -d tsx_cmd -o /tmp/tsx_cmd_db_export --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB').code !== 0) {
-      UpdateStatus('Error: Failed to run mongodump to create DB backup');
-      shell.exit(1);
-      return;
-    }
-    if (shell.exec('tar -cf /tmp/export_db.tar /tmp/tsx_cmd_db_export').code !== 0) {
-      UpdateStatus('Error: failed to tar the backup for uploading.');
-      shell.exit(1);
-      return;
-    }
-    UpdateStatus( ' Backup ready.');
-    tsx_SetServerState( 'tool_active', false );
-  },
 
   // **************************************************************
   connectToTSX() {

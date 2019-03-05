@@ -63,6 +63,7 @@ import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 import SessionControls from './SessionControls.js';
 import TestModal from './TestModal.js';
+import BackupModal from './BackupModal.js';
 import NightPlanner from './NightPlanner.js';
 
 import {
@@ -95,6 +96,7 @@ class App extends TrackerReact(Component) {
       modalOpenWindowSessionControls: false,
       modalOpen: false,
       modalOpenTest: false,
+      modalOpenBackup: false,
       modalViewNightPlanner: false,
       planData: [],
       planDataLoading: true,
@@ -121,8 +123,11 @@ class App extends TrackerReact(Component) {
   modalOpenSessionsControls = () => this.setState({ modalOpenWindowSessionControls: true });
   modalCloseSessionsControls = () => this.setState({ modalOpenWindowSessionControls: false });
 
-  modalOpenTest = () => this.setState({ modalOpenTest: true });
-  modalCloseTest = () => this.setState({ modalOpenTest: false });
+
+modalOpenTest = () => this.setState({ modalOpenTest: true });
+modalCloseTest = () => this.setState({ modalOpenTest: false });
+modalOpenBackup = () => this.setState({ modalOpenBackup: true });
+modalCloseBackup = () => this.setState({ modalOpenBackup: false });
 
   modalShowTargetReport = () => {
     this.setState({planDataLoading: true});
@@ -692,7 +697,7 @@ class App extends TrackerReact(Component) {
 //        <Button disabled compact />
     return (
       <Button.Group compact size='mini' floated='right'>
-        <Button icon='cloud download' onClick={this.modalOpenTest}/>
+        <Button icon='cloud download' onClick={this.modalOpenBackup}/>
         <Button icon='detective' onClick={this.modalOpenSessionsControls}/>
         <Button disabled={DISABLE} icon='chart bar' onClick={this.modalShowTargetReport}/>
         <Button disabled={DISABLE} icon='wifi' onClick={this.connectToTSX.bind(this)}/>
@@ -738,6 +743,34 @@ class App extends TrackerReact(Component) {
         <Modal.Header>test</Modal.Header>
         <Modal.Content>
           <TestModal
+            tsxInfo = { this.props.tsxInfo }
+            target_reports={this.props.target_reports}
+            tool_active = {this.props.tool_active}
+            scheduler_running={this.props.scheduler_running}
+            scheduler_report={this.props.scheduler_report}
+            tsxInfo = {this.props.tsxInfo}
+            currentStage= {this.props.currentStage}
+          />
+        </Modal.Content>
+        <Modal.Description>
+        </Modal.Description>
+        <Modal.Actions>
+        </Modal.Actions>
+      </Modal>
+    )
+  }
+
+  renderBackupModal() {
+    return(
+      <Modal
+        open={this.state.modalOpenBackup}
+        onClose={this.modalCloseBackup}
+        basic
+        size='small'
+        closeIcon>
+        <Modal.Header>Backup tsx_cmd DB</Modal.Header>
+        <Modal.Content>
+          <BackupModal
             tsxInfo = { this.props.tsxInfo }
             target_reports={this.props.target_reports}
             tool_active = {this.props.tool_active}
@@ -876,6 +909,7 @@ class App extends TrackerReact(Component) {
           *******************************             */}
           {this.renderSessionControls()}
           {this.renderTestModal()}
+          {this.renderBackupModal()}
           {this.renderTargetReport(this.props.night_plan_updating)}
         </Segment.Group>
         <Modal

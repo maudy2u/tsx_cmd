@@ -64,6 +64,7 @@ import {
   tsx_SlewTargetName,
   tsx_SlewCmdCoords,
   tsx_StopTracking,
+  isSchedulerStopped,
 } from './run_imageSession.js';
 
 import {shelljs} from 'meteor/akasha:shelljs';
@@ -96,15 +97,11 @@ function initServerStates() {
   tsx_SetServerState('targetAZ', '');
   tsx_SetServerState('targetHA', '');
   tsx_SetServerState('targetTransit', '');
-  tsx_SetServerState('targetName', 'No Active Target');
-  tsx_SetServerState('scheduler_report', '');
   tsx_SetServerState('lastTargetDirection', '');
   tsx_SetServerState('lastCheckMinSunAlt', '');
   // tsx_SetServerState('lastFocusPos', '');
   // tsx_SetServerState('lastFocusTemp', '');
   tsx_SetServerState('imagingSessionDither', 0);
-  tsx_SetServerState('currentJob', '');
-  tsx_SetServerState('scheduler_running', 'Stop');
   tsx_SetServerState('tool_active', false );
   tsx_SetServerState('night_plan_updating', false );
 
@@ -131,22 +128,27 @@ function ParkMount( isParked ) {
     tsx_MntPark(defaultFilter, softPark);
   }
   isParked = true;
+}
+
+function sleepScheduler( isParked ) {
   var sleepTime = tsx_GetServerStateValue('defaultSleepTime');
+  if( isParked == false ) {
+    ParkMount( isParked );
+  }
   UpdateStatus( ' Parked, waiting: '+ sleepTime + ' min');
   var timeout = 0;
   var msSleep = Number(sleepTime); // number of seconds
   postProgressTotal(sleepTime);
   postProgressMessage('Waiting ~' + sleepTime + 'min.');
-  while( timeout < msSleep && tsx_GetServerStateValue('currentJob') != '') { //
+
+  while( timeout < msSleep && isSchedulerStopped() == false ) { //
     var min = 1000*60; // one minute in milliseconds
     Meteor.sleep( min );
     timeout = timeout + 1;
     postProgressIncrement( timeout );
   }
-  if( tsx_GetServerStateValue('currentJob') == '' ) {
+  if( isSchedulerStopped() != false ) {
     UpdateStatus( ' Canceled sessions');
-    tsx_SetServerState('targetName', 'No Active Target');
-    tsx_SetServerState('scheduler_report', '');
   }
   else {
     UpdateStatus(' WAKING UP...');
@@ -170,26 +172,24 @@ function CleanUpJobs() {
   // *******************************
   // Server restarts and it means no session
   // get rid of any old processes/jobs
-  var jobs = scheduler.find().fetch();
-  var jid = tsx_GetServerStateValue('currentJob');
-  scheduler.remove( jid );
+  scheduler.remove({});
+//  var jobs = scheduler.find().fetch();
+//  var jid = tsx_GetServerStateValue('currentJob');
+//  scheduler.remove( jid );
   tsx_SetServerState('currentJob', '');
-  UpdateImagingSesionID( '' );
-  tsx_SetServerState('targetName', 'No Active Target');
-  tsx_SetServerState('scheduler_report', '');
 
   // Clean up the scheduler process collections...
   // Persistence across reboots is not needed at this time.
-  tsxDebug('Number of Jobs found: ' + jobs.length);
-  if( jobs.length > 0 ) {
-    tsxDebug( ' Cleaning up DB');
-    for (var i = 0; i < jobs.length; i++) {
-      if( typeof jobs[i] != 'undefined') {
-        scheduler.remove(jobs[i]._id);
-      }
-    }
-    tsxDebug(' Cleaned DB');
-  }
+  // tsxDebug('Number of Jobs found: ' + jobs.length);
+  // if( jobs.length > 0 ) {
+  //   tsxDebug( ' Cleaning up DB');
+  //   for (var i = 0; i < jobs.length; i++) {
+  //     if( typeof jobs[i] != 'undefined') {
+  //       scheduler.remove(jobs[i]._id);
+  //     }
+  //   }
+  //   tsxDebug(' Cleaned DB');
+  // }
   return;
 }
 
@@ -208,15 +208,14 @@ function startServerProcess() {
   var workers = scheduler.processJobs( 'runScheduler',
     function (job, cb) {
       tsxLog( ' ******************************* ');
+      // This will only be called if a 'runScheduler' job is obtained
+      setSchedulerState( 'Running' );
+      tsx_SetServerState('currentJob', job);
 
       UpdateStatus(' *** Scheduler Started');
       var schedule = job.data;
       tsxDebug( schedule );
       tsxDebug( job.data );
-
-      // This will only be called if a 'runScheduler' job is obtained
-      setSchedulerState( 'Running' );
-      tsx_SetServerState('currentJob', job);
 
       job.log("Entered the scheduler process",
         {level: 'info'}
@@ -224,22 +223,31 @@ function startServerProcess() {
 
       var isParked = '';
 
-      if( schedule.scheduleType == 'calibration') {
+      if( schedule.scheduleType == 'calibration' &&
+        isSchedulerStopped() == false )
+      {
         // *******************************
         UpdateStatus(" === Starting calibration targets");
 
         tsx_Connect();
 
         for( var i=0; i<schedule.targets.length;i++ ) {
+          if( isSchedulerStopped() != false ) {
+            break;
+          }
           var target = schedule.targets[i];
           // what is the FOV position??
           tsxLog( ' Calibration rotator: ' + target.rotator_position );
           if( target.rotator_position != '' ) {
             // rotate to a specific position
-            var res = tsx_RotateCamera( target.rotator_position );
+            if( isSchedulerStopped() == false ) {
+              var res = tsx_RotateCamera( target.rotator_position );
+            }
           }
           try {
-            processTargetTakeSeries( target );
+            if( isSchedulerStopped() == false ) {
+              processTargetTakeSeries( target );
+            }
           }
           catch( err ) {
             var res = err.split('|')[0].trim();
@@ -253,49 +261,88 @@ function startServerProcess() {
       else {
         // *******************************
         // the job is used to run the scheduler.
-        while( tsx_GetServerStateValue('currentJob') != '' ) {
+        while( isSchedulerStopped() == false ) {
           tsxDebug(" === Starting imaging targets");
 
-            tsx_MntUnpark();
-            isParked = false;
+          tsx_MntUnpark();
+          isParked = false;
+          if( isSchedulerStopped() != false ) {
+            break;
+          }
 
-            // Find a session
-            // Get the target to shoot
+          // Find a session
+          // Get the target to shoot
 //            tsxInfo( ' Validating Targets...');
 
-            /* #TODO
-            So working on the cloud detection to PAUSE.
+          /* #TODO
+          So working on the cloud detection to PAUSE.
 
-            1.  getValidTargetSession returns a target.
-                It needs to a add a check that if isCloudy = false then it is skipped
-            2.  prepareTargetForImaging can return false.. meaning the chosen target
-                could not be prepared... CLS failed. If so then market the target as FAILED
-                (The start of the job needs to "reset" all targets as isCloudy = false.)
+          1.  getValidTargetSession returns a target.
+              It needs to a add a check that if isCloudy = false then it is skipped
+          2.  prepareTargetForImaging can return false.. meaning the chosen target
+              could not be prepared... CLS failed. If so then market the target as FAILED
+              (The start of the job needs to "reset" all targets as isCloudy = false.)
 
-            */
+          */
 
-            // Process Targets
-            var target = getValidTargetSession(); // no return
-            // if no valid target then check for calibration sessions...
-            // how to detect calibation sessions...
-            // Create Calibration sessions similar to Targets..
-            // New database... uses calibration images...
-            // Means there are edits... i.e. assign/copy a series
-            // anything else? enable/disable... Flat/Dark/Bias
-            // remove dark/bias/flat from targets...
+          // Process Targets
+          var target = getValidTargetSession(); // no return
+          // if no valid target then check for calibration sessions...
+          // how to detect calibation sessions...
+          // Create Calibration sessions similar to Targets..
+          // New database... uses calibration images...
+          // Means there are edits... i.e. assign/copy a series
+          // anything else? enable/disable... Flat/Dark/Bias
+          // remove dark/bias/flat from targets...
 
-            if (typeof target != 'undefined' && tsx_GetServerStateValue('currentJob') != '' ) {
-              tsxDebug ( ' ' + target.targetFindName + ' Preparing target...');
+          if (typeof target != 'undefined' && isSchedulerStopped() == false ) {
+            tsxDebug ( ' ' + target.targetFindName + ' Preparing target...');
 
-              // Point, Focus, Guide
-              var ready = false;
+            // Point, Focus, Guide
+            var ready = false;
+            // Get a target, if CLS fails - assumed cloudy
+            try {
+              // First true = do the rotator
+              // Second true = do the calibration
+              ready = prepareTargetForImaging( target, true, true );
+              if( isSchedulerStopped() == true ) {
+                break;
+              }
+            }
+            catch( err ) {
+              // did we get a CLS Failure???
+              var res = '';
               try {
-                // First true = do the rotator
-                // Second true = do the calibration
-                ready = prepareTargetForImaging( target, true, true );
+                res = err.split('|')[0].trim();
+                if( res == 'TSX_ERROR' ) {
+                  UpdateStatus( ' *** ENDING - centring failed. Check for clouds' );
+                  ParkMount( isParked );
+                  isParked = true;
+                }
+                else {
+                  UpdateStatus( ' !!! SOMETHING WRONG - human needs to check ');
+                  break;
+                }
+              }
+              catch( e ) {
+                // split may fail
+                UpdateStatus( ' !!! SOMETHING WRONG - human needs to check: ' + err );
+                break;
+              }
+            }
+            if( ready ) {
+              // target images per Take Series
+              tsxDebug ( ' ************************1*');
+              UpdateStatus ( ' ' +target.targetFindName  + ': start imaging');
+              try {
+                processTargetTakeSeries( target );
+                if( isSchedulerStopped() == true ) {
+                  break;
+                }
               }
               catch( err ) {
                 // did we get a CLS Failure???
+                tsxLog( ' !!! Error processing series: ' + err );
                 var res = err.split('|')[0].trim();
                 if( res == 'TSX_ERROR' ) {
                   UpdateStatus( ' *** ENDING - centring failed. Check for clouds' );
@@ -307,60 +354,42 @@ function startServerProcess() {
                   break;
                 }
               }
-              if( ready ) {
-                // target images per Take Series
-                tsxDebug ( ' ************************1*');
-                UpdateStatus ( ' ' +target.targetFindName  + ': start imaging');
-                try {
-                  processTargetTakeSeries( target );
-                }
-                catch( err ) {
-                  // did we get a CLS Failure???
-                  tsxLog( ' !!! Error processing series: ' + err );
-                  var res = err.split('|')[0].trim();
-                  if( res == 'TSX_ERROR' ) {
-                    UpdateStatus( ' *** ENDING - centring failed. Check for clouds' );
-                    ParkMount( isParked );
-                    isParked = true;
-                  }
-                  else {
-                    UpdateStatus( ' !!! SOMETHING WRONG - human needs to check ');
-                    break;
-                  }
-                }
-                tsxDebug ( ' ************************2*');
-              }
-              else {
-                ParkMount( isParked );
-                isParked = true;
-              }
+              tsxDebug ( ' ************************2*');
             }
+            // No target found so sleep and try again...
             else {
               ParkMount( isParked );
               isParked = true;
+              sleepScheduler( isParked );
             }
+          }
+          // Scheduler stopped so park
+          else {
+            ParkMount( isParked );
+            isParked = true;
+          }
 
-            // Check if sun is up and no cal frames
-            if( (!isDarkEnough()) && tsx_GetServerStateValue('currentJob') != '' ) {
-              ParkMount( isParked );
-              isParked = true;
-              var approachingDawn = isTimeBeforeCurrentTime('3:00');
-              tsxDebug( ' Is approachingDawn: ' + approachingDawn);
-              // var stillDaytime = isTimeBeforeCurrentTime('15:00');
-              // tsxDebug( ' Is stillDaytime: ' + stillDaytime);
-              if( approachingDawn ) {
-                var defaultFilter = tsx_GetServerStateValue('defaultFilter');
-                var softPark = false;
-                tsx_AbortGuider();
-                tsx_MntPark(defaultFilter, softPark);
-                UpdateStatus( ' Scheduler stopped: not dark.');
-                break;
-              }
+          // Check if sun is up and no cal frames
+          if( (!isDarkEnough()) && isSchedulerStopped() == false ) {
+            ParkMount( isParked );
+            isParked = true;
+            var approachingDawn = isTimeBeforeCurrentTime('3:00');
+            tsxDebug( ' Is approachingDawn: ' + approachingDawn);
+            // var stillDaytime = isTimeBeforeCurrentTime('15:00');
+            // tsxDebug( ' Is stillDaytime: ' + stillDaytime);
+            if( approachingDawn ) {
+              var defaultFilter = tsx_GetServerStateValue('defaultFilter');
+              var softPark = false;
+              tsx_AbortGuider();
+              tsx_MntPark(defaultFilter, softPark);
+              UpdateStatus( ' Scheduler stopped: not dark.');
+              break;
             }
+          }
         }
       }
       // While ended... exit process
-      setSchedulerState('Stop' );
+      srvStopScheduler();
       tsxLog( ' Scheduler exited.');
       tsxLog( ' ******************************* ');
       job.done();
@@ -370,11 +399,27 @@ function startServerProcess() {
   return scheduler.startJobServer();
 }
 
+function getSchedulerState() {
+  var state = tsx_GetServerStateValue('scheduler_running');
+  return state;
+}
+
+function setSchedulerState( value ) {
+  tsx_SetServerState('scheduler_running', value);
+}
+
+export function srvStopScheduler() {
+  CleanUpJobs();
+  UpdateImagingSesionID( '' );
+  tsx_SetServerState('targetName', 'No Active Target');
+  tsx_SetServerState('scheduler_report', '');
+  setSchedulerState('Stop' );
+}
+
 Meteor.startup(() => {
   tsxLog(' ****** TSX_CMD STARTING *****', '');
   AppLogsDB.remove({});
-  // FlatSeries.remove({});
-  // TargetAngles.remove({});
+  srvStopScheduler();
 
   var version_dat = {};
   version_dat = JSON.parse(Assets.getText('version.json'));
@@ -409,7 +454,6 @@ Meteor.startup(() => {
   tsxLog('   IP',  dbIp );
   tsxLog(' port', dbPort );
 
-  CleanUpJobs();
   initServerStates();
 
   // Initialze the server on startup
@@ -426,27 +470,6 @@ Meteor.startup(() => {
   return;
 
 });
-
-function getSchedulerState() {
-  var state = tsx_GetServerStateValue('scheduler_running');
-  return state;
-}
-
-function setSchedulerState( value ) {
-  tsx_SetServerState('scheduler_running', value);
-}
-
-export function srvStopScheduler() {
-  CleanUpJobs();
-  UpdateImagingSesionID( '' );
-  tsx_SetServerState('SchedulerStatus', 'Stop');
-  tsx_SetServerState('targetName', 'No Active Target');
-  tsx_SetServerState('scheduler_report', '');
-  tsx_AbortGuider();
-  UpdateStatus(' *** Manually STOPPING scheduler ***');
-  setSchedulerState('Stop' );
-  tsxLog( ' ******************************* ');
-}
 
 Meteor.methods({
 
@@ -515,7 +538,7 @@ Meteor.methods({
 
    stopScheduler() {
      if( getSchedulerState() != 'Stop' ) {
-       tsxDebug('Stopping');
+       UpdateStatus(' *** Manually STOPPING scheduler ***');
        srvStopScheduler();
      }
      else {

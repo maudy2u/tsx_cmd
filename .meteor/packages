@@ -55,8 +55,8 @@ akasha:shelljs
 session
 ostrio:logger
 #ostrio:autoform-files # may have removed semantic-ui icons
-ostrio:files@=1.6.6
 less
+ostrio:files@1.6.6           # this version works with ARMV7
 juliancwirko:postcss
 # meteortoys:allthings@7.0.1 # NOT FOR USE ON ARMV7/8
 
