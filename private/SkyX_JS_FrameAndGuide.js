@@ -39,17 +39,17 @@ var W =CCDAG.WidthInPixels;
 var H = CCDAG.HeightInPixels;
 
 var L=0, T=0, R=W, B=H;
-if( (guideStarX - frameHalf) > 0 ) {
-  L = guideStarX - frameHalf;
+if( (GUIDE_STAR_X - frameHalf) > 0 ) {
+  L = GUIDE_STAR_X - frameHalf;
 }
-if( (guideStarY - frameHalf) > 0 ) {
-  T = guideStarY - frameHalf;
+if( (GUIDE_STAR_Y - frameHalf) > 0 ) {
+  T = GUIDE_STAR_Y - frameHalf;
 }
-if( (guideStarX + frameHalf) < W ) {
-  R = guideStarX + frameHalf;
+if( (GUIDE_STAR_X + frameHalf) < W ) {
+  R = GUIDE_STAR_X + frameHalf;
 }
-if( (guideStarY + frameHalf) < H ) {
-  B = guideStarY + frameHalf;
+if( (GUIDE_STAR_Y + frameHalf) < H ) {
+  B = GUIDE_STAR_Y + frameHalf;
 }
 
 // Grab original settings

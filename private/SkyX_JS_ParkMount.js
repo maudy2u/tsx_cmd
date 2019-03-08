@@ -31,30 +31,32 @@ ccdsoftCamera.Frame = 1;			// It's a light frame
 ccdsoftCamera.Delay = 1;			// Pause one second
 ccdsoftCamera.Subframe = false;			// Not a subframe
 ccdsoftCamera.FilterIndexZeroBased = lumFilter;	// Set the filter to Luminance
-try
-{
-	ccdsoftAutoguider.Disconnect();
-}
-catch (repErr)
-//
-//	If error, report it.
-//
-{
-	errMsgs += "Guider: " + refErr + cr;
-}
+// If soft park do not disconnect camera to keep it cooling?
+if (!softPark ) {
+	try
+	{
+		ccdsoftAutoguider.Disconnect();
+	}
+	catch (repErr)
+	//
+	//	If error, report it.
+	//
+	{
+		errMsgs += "Guider: " + refErr + cr;
+	}
 
-try
-{
-	ccdsoftCamera.Disconnect();
+	try
+	{
+		ccdsoftCamera.Disconnect();
+	}
+	catch (repErr)
+	//
+	//	If error, report it.
+	//
+	{
+		errMsgs += "Camera: " + refErr + cr;
+	}
 }
-catch (repErr)
-//
-//	If error, report it.
-//
-{
-	errMsgs += "Camera: " + refErr + cr;
-}
-
 if( SelectedHardware.mountModel !== "Telescope Mount Simulator" ) {
 	if (!softPark ) {
 		try {
