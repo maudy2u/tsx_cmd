@@ -68,8 +68,8 @@ CCDAG.SubframeBottom = B* CCDAGI.FITSKeyword ("YBINNING");
 
 CCDAG.Frame = 1;			// Light Frame
 CCDAG.AutoSaveOn = false;		// Dont save these images.
-//CCDAG.Subframe = false;		// Use a subframe around the star.
-CCDAG.Subframe = true;		// Use a subframe around the star.
+CCDAG.Subframe = false;		// Do not use a subframe around the star.
+//CCDAG.Subframe = true;		// Use a subframe around the star.
 
 CCDAG.Asynchronous = true;		// Turn on so we don't get stuck waiting for an endless process
 
