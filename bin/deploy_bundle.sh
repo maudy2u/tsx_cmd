@@ -72,7 +72,7 @@ elif [ "$(uname -s)" == "Linux" ]; then
     echo " *******************************"
     echo tsx_cmd_bundle.sh is creating file: ../tsx_cmd_$(uname -s)_armv7_${details}.tar
     echo " *******************************"
-    ~/meteor/meteor bundle ../tsx_cmd_$(uname -s)_linux_x86_64_${details}.tar
+    meteor bundle ../tsx_cmd_$(uname -s)_linux_x86_64_${details}.tar
   else
     echo $(uname -s) $(uname -p) - Not Supported
     exit 5
