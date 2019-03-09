@@ -62,7 +62,7 @@ if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     ./meteor --version
     cd ~
     alias meteor=$HOME/meteor/meteor
-  elif ["$(uname -p)" == "x86_64"]; then
+  elif [ "$(uname -p)" == "x86_64" ]; then
     cd ~
     curl https://install.meteor.com/ | sh
     ./meteor --version
