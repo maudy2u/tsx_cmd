@@ -42,6 +42,11 @@ if [ "${1}" == "init" ]; then
     export NODEJS='https://nodejs.org/dist/v8.11.1/node-v8.11.1-darwin-x64.tar.gz'
     export MONGO_PARAMS="-C ./mongodb --strip-components=1"
   elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    echo " *******************************"
+    echo " Installing mongo-tools"
+    echo " Needed for mongodump to backup database"
+    sudo apt install mongo-tools
+
     if [ "$(uname -p)" == "aarch64" ]; then
       echo armv8 in ${install_dir}
       echo ""
@@ -56,9 +61,9 @@ if [ "${1}" == "init" ]; then
       echo armv7 in ${install_dir}
       echo ""
       echo " *******************************"
-      echo " Mongodb - CAN BE BUILT MANUALLY. CHECKED HERE:"
+      echo " Mongodb - CAN BE BUILT MANUALLY."
       echo " (it can take a while on ODroid-XU4)"
-      echo " ./bin/mongod_arm_build.sh"
+      echo "  CHECK HERE: ./bin/mongod_arm_build.sh"
       export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC8/tsx_cmd_Linux_armv7_build_355_v3.4.5_2018-12-27_RC8.tar'
       export MONGO='https://github.com/maudy2u/tsx_cmd/releases/download/armv7_mongo/mongoDB_armv7.tar'
       export NODEJS='https://nodejs.org/dist/v6.16.0/node-v6.16.0-linux-armv7l.tar.gz'
@@ -168,5 +173,6 @@ echo '  "enable_log": "yes",' >> ./settings.json
 echo '  "enable_debug": "no",' >> ./settings.json
 echo '  "enable_info": "no",' >> ./settings.json
 echo '  "enable_warn": "yes",' >> ./settings.json
+echo '  "removed-to-enable: backup_location": "/home/odroid/app",' >> ./settings.json
 echo '  "removed-to-enable: log_file_location": "/media/odroid/PENSIVE2/tsx_cmd_logs"' >> ./settings.json
 echo '}' >> ./settings.json

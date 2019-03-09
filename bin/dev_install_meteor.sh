@@ -32,6 +32,8 @@
 
 echo *******************************
 install_dir=$(pwd)
+os = $(expr substr $(uname -s) 1 5)
+arch = $(uname -p)
 if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   if [ "$(uname -p)" == "aarch64" ]; then
     cd ~
@@ -60,6 +62,11 @@ if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     ./meteor --version
     cd ~
     alias meteor=$HOME/meteor/meteor
+  elif ["$(uname -p)" == "x86_64"]; then
+    cd ~
+    curl https://install.meteor.com/ | sh
+    ./meteor --version
+    cd ~
   else
     echo "$(expr substr $(uname -s) 1 10)" - not yet supported
     exit 5
