@@ -55,10 +55,21 @@ else {
 }
 
 Meteor.startup(function () {
-   // Images.load('https://raw.githubusercontent.com/VeliovGroup/Meteor-Files/master/logo.png', {
-   //   fileName: 'logo.png',
+
+// *******************************
+// Sample to add files
+// *******************************
+//   let logFolder = Meteor.absolutePath;
+   // let location = logFolder + '/logs/';
+   // let fileName = "2019_01_12_tsx_cmd.log";
+   //
+   // tsxLog(location + fileName );
+   // Backups.addFile( location + fileName, {
+   //   fileName: location + fileName,
    //   meta: {}
    // });
+// *******************************
+
 });
 
 Meteor.publish('files.backups.all', function () {
@@ -71,6 +82,11 @@ Meteor.publish('files.backups.all', function () {
 
 Meteor.methods({
 
+  RemoveFile( fid ) {
+    Backups.remove({_id: fid});
+    UpdateStatus( ' Backup removed file. ');
+  },
+
   GetBackupOfDatabase() {
     tsx_SetServerState( 'tool_active', true );
 
@@ -78,28 +94,53 @@ Meteor.methods({
     // Run external tool synchronously
     // mongodump --uri=mongodb://127.0.0.1:3001/meteor -o ./export --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB
 
-    UpdateStatus( ' Backup starting');
+    let backupLocation =  backupFolder + 'tsx_cmd_db_export';
 
-    let err = shell.mkdir( '-p', backupFolder + '/tsx_cmd_db_export').code;
-    err = shell.mkdir( '-p', '/tmp/tsx_cmd_db_export').code;
-    tsxLog( err );
-    if ( err !== 0) {
-      UpdateStatus('Error: failed to database backup ');
-      shell.exit(1);
-      return;
+    try {
+      UpdateStatus( ' Backup starting');
+      tsxLog( ' Using: ', backupLocation );
+      let err = shell.mkdir( '-p', backupLocation).code;
+//      err = shell.mkdir( '-p', '/tmp/tsx_cmd_db_export').code;
+      tsxLog( err );
+      if ( err !== 0) {
+        UpdateStatus('Error: failed to create backup location. ');
+        shell.exit(1);
+        return;
+      }
+    }
+    catch( e ) {
+      // If on mac do nothing...
+      UpdateStatus( ' Backup mkdir exception: ' + e );
     }
     try {
-      if (shell.exec('mongodump -d tsx_cmd -o /tmp/tsx_cmd_db_export --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB').code !== 0) {
+
+      // *******************************
+      // Is there a different development port for mongod?
+      let dump = 'mongodump --port 3001 --db=meteor -o ' + backupLocation + ' --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB'
+      tsxLog( ' Executing: ', dump );
+      if (shell.exec( dump ).code !== 0) {
         UpdateStatus('Error: Failed to run mongodump to create DB backup');
-//        shell.exit(1); // do not exit. kills server
-        return;
-      }
-      if (shell.exec('tar -cf '+ backupFolder + '/export_db.tar /tmp/tsx_cmd_db_export').code !== 0) {
-        UpdateStatus('Error: failed to tar the backup for uploading.');
-//        shell.exit(1); // do not exit. kills server
+        // shell.exit(1); // do not exit. kills server
         return;
       }
 
+      // *******************************
+      // Is there a different development port for mongod?
+      // tsxLog( ' Executing: ', 'mongodump -d tsx_cmd -o ' + backupLocation + ' --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB' );
+      // if (shell.exec('mongodump -d tsx_cmd -o ' + backupLocation + ' --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB').code !== 0) {
+      //   UpdateStatus('Error: Failed to run mongodump to create DB backup');
+      //   // shell.exit(1); // do not exit. kills server
+      //   return;
+      // }
+
+      tsxLog( ' Executing: ', 'tar -cf '+ backupFolder + '/export_db.tar ' + backupLocation );
+      if (shell.exec('tar -cf '+ backupFolder + '/export_db.tar ' + backupLocation ).code !== 0) {
+        UpdateStatus('Error: failed to tar the backup for uploading.');
+        // shell.exit(1); // do not exit. kills server
+        return;
+      }
+
+      tsxLog( ' Storing backup: ', backupFolder + '/export_db.tar')
       Backups.addFile( backupFolder + '/export_db.tar', {
         fileName: 'db_backup.tar',
         meta: {}

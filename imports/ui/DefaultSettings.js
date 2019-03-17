@@ -595,7 +595,7 @@ class DefaultSettings extends Component {
               step={1}
               min={1}
               max={19}
-              value={this.state.defaultPriority}
+              value={Number(this.state.defaultPriority)}
               sliderSize={12}
               thumbSize={18}
               onChange={this.handlePriorityChange}

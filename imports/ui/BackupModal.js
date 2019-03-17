@@ -177,8 +177,8 @@ class BackupModal extends Component {
   }
 
   displayFiles() {
-    debug("Rendering FileUpload",this.props.docsReadyYet);
-    if (this.props.files ) { //&& this.props.docsReadyYet) {
+    console.log("Rendering FileUpload",this.props.docsReadyYet);
+    if (this.props.files && this.props.docsReadyYet) {
 
       let fileCursors = this.props.files;
 
@@ -186,7 +186,7 @@ class BackupModal extends Component {
       // (make sure the subscription only sends files owned by this user)
       let display = fileCursors.map((aFile, key) => {
         // console.log('A file: ', aFile.link(), aFile.get('name'))
-        let link = UserFiles.findOne({_id: aFile._id}).link();  //The "view/download" link
+        let link = Backups.findOne({_id: aFile._id}).link();  //The "view/download" link
 
         // Send out components that show details of each file
         return <div key={'file' + key}>
@@ -238,7 +238,7 @@ class BackupModal extends Component {
 }
 export default withTracker(( props ) => {
 
-  const filesHandle = Meteor.subscribe('files.all');
+  const filesHandle = Meteor.subscribe('files.backups.all');
   const docsReadyYet = filesHandle.ready();
   const files = Backups.find({}, {sort: {name: 1}}).fetch();
   return {

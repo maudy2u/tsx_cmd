@@ -25,6 +25,7 @@ doing 1 or more targets in a night
 ## Install TSX_cmd
 [Project - TSX Command](bear://x-callback-url/open-note?id=CD71E4DF-EF35-414B-8543-4038D2330CB3-1082-00000289114BA390)
 1. Create a directory for tsx_cmd, it can need ~500MB once installed
+	* or clone this whole repository: git clone https://github.com/maudy2u/tsx_cmd
 2. Decide to install precompile or development versions
 	* **RECOMMENDED:** Fast starting: ([Release 1.8 Initial release to GitHub · maudy2u/tsx_cmd · GitHub](https://github.com/maudy2u/tsx_cmd/releases/tag/RC8)) - fast start
 	* Development… clone this repository

@@ -503,10 +503,10 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
     } else if (this.state.activeMenu == 'Toolbox') {
       return (
         <Toolbox
-          scheduler_report={this.props.scheduler_report}
-          scheduler_running={this.props.scheduler_running}
-          tsxInfo = {this.props.tsxInfo}
-          tool_active = {this.props.tool_active}
+          scheduler_report={ this.props.scheduler_report }
+          scheduler_running={ this.props.scheduler_running }
+          tsxInfo = { this.props.tsxInfo }
+          tool_active = { this.props.tool_active }
         />
       )
     } else {

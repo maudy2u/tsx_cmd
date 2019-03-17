@@ -26,6 +26,7 @@ import {
   Label,
   Segment,
   Button,
+  Checkbox,
 } from 'semantic-ui-react'
 
 import {
@@ -43,7 +44,9 @@ const XRegExpZeroToNine = XRegExp('^\\d$');
 import {
   tsx_ServerStates,
   tsx_UpdateServerState,
-  tsx_GetServerState,
+  saveDefaultStateValue,
+  UpdateStatus,
+  // tsx_GetServerState,
 } from  '../api/serverStates.js';
 
 // Import the API Model
@@ -62,7 +65,23 @@ import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 
 class Toolbox extends Component {
 
-    state = {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isCalibrationEnabled: this.props.tsxInfo.find(function(element) {
+        return element.name == 'isCalibrationEnabled';}).value,
+      tool_calibrate_via: this.props.tsxInfo.find(function(element) {
+        return element.name == 'tool_calibrate_via';}).value,
+      tool_calibrate_location: this.props.tsxInfo.find(function(element) {
+        return element.name == 'tool_calibrate_location';}).value,
+      tool_calibrate_dec_az: this.props.tsxInfo.find(function(element) {
+        return element.name == 'tool_calibrate_dec_az';}).value,
+      tool_rotator_type: this.props.tsxInfo.find(function(element) {
+        return element.name == 'tool_rotator_type';}).value,
+      tool_rotator_num: this.props.tsxInfo.find(function(element) {
+        return element.name == 'tool_rotator_num';}).value,
+      tool_rotator_fov: this.props.tsxInfo.find(function(element) {
+        return element.name == 'tool_rotator_fov';}).value,
 
       focusPostion: '_',
 
@@ -96,14 +115,16 @@ class Toolbox extends Component {
 
       enableImagingCooler: false,
       isCLSRepeatEnabled: false,
-      isCalibrationEnabled: false,
+//      isCalibrationEnabled: false,
 
-      tool_calibrate_via: '',
-      tool_calibrate_location: '',
-      tool_calibrate_dec_az: '',
-      tool_rotator_fov: '',
-      tool_rotator_num: '',
-      tool_rotator_type: '',
+//      tool_calibrate_via: '',
+//      tool_calibrate_location: '',
+//      tool_calibrate_dec_az: '',
+//      tool_rotator_fov: '',
+//      tool_rotator_num: '',
+//      tool_rotator_type: '',
+
+    }
   };
 
   handleChange = (e, { name, value }) => {
@@ -118,56 +139,17 @@ class Toolbox extends Component {
   };
 
   // requires the ".bind(this)", on the callers
-  handleToggle = (e, { name, value }) => {
-
+  handleToggleAndSave = (e, { name, value }) => {
     var val = eval( 'this.state.' + name);
 
     this.setState({
       [name]: !val
     });
-    this.saveDefaultStateValue( name, !val );
+    saveDefaultStateValue( name, !val );
   };
 
   noFoundSessionOpen = () => this.setState({ noFoundSession: true })
   noFoundSessionClose = () => this.setState({ noFoundSession: false })
-
-  componentDidMount() {
-    this.updateDefaults(this.props);
-  }
-
-  updateDefaults(nextProps) {
-    if( typeof nextProps == 'undefined'  ) {
-      return;
-    }
-
-    if( typeof nextProps.tsxInfo != 'undefined'  ) {
-
-      this.setState({
-        tool_calibrate_via: nextProps.tsxInfo.find(function(element) {
-          return element.name == 'tool_calibrate_via';
-      }).value});
-      this.setState({
-        tool_calibrate_location: nextProps.tsxInfo.find(function(element) {
-          return element.name == 'tool_calibrate_location';
-      }).value});
-      this.setState({
-        tool_calibrate_dec_az: nextProps.tsxInfo.find(function(element) {
-          return element.name == 'tool_calibrate_dec_az';
-      }).value});
-      this.setState({
-        tool_rotator_type: nextProps.tsxInfo.find(function(element) {
-          return element.name == 'tool_rotator_type';
-      }).value});
-      this.setState({
-        tool_rotator_num: nextProps.tsxInfo.find(function(element) {
-          return element.name == 'tool_rotator_num';
-      }).value});
-      this.setState({
-        tool_rotator_fov: nextProps.tsxInfo.find(function(element) {
-          return element.name == 'tool_rotator_fov';
-      }).value});
-    }
-  }
 
   // Generic Method to determine default to save.
   saveDefaultState( param ) {
@@ -180,18 +162,19 @@ class Toolbox extends Component {
           Session.set("errorMessage", "Please fix.");
         }
     });//.bind(this));
-  }
+  };
+
   // Generic Method to determine default to save.
-  saveDefaultStateValue( param, val ) {
-
-    Meteor.call( 'updateServerState', param, val , function(error, result) {
-
-        if (error && error.error === "logged-out") {
-          // show a nice error message
-          Session.set("errorMessage", "Please fix.");
-        }
-    });//.bind(this));
-  }
+  // saveDefaultStateValue( param, val ) {
+  //
+  //   Meteor.call( 'updateServerState', param, val , function(error, result) {
+  //
+  //       if (error && error.error === "logged-out") {
+  //         // show a nice error message
+  //         Session.set("errorMessage", "Please fix.");
+  //       }
+  //   });//.bind(this));
+  // };
 
   // *******************************
   rotateCameraFOV() {
@@ -199,14 +182,14 @@ class Toolbox extends Component {
       console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
-  }
+  };
 
   rotateCamera() {
     Meteor.call( 'rotateCamera', 1, function(error, result) {
       console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
-  }
+  };
 
   calibrateGuider() {
     var slew = this.state.tool_calibrate_via;
@@ -216,7 +199,7 @@ class Toolbox extends Component {
       console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
-  }
+  };
 
   rotateFOV( state, ROTATOR_TYPE, ROTATOR_NUM, active ) {
     var typeOptions =
@@ -263,7 +246,7 @@ class Toolbox extends Component {
        <br/>Enter the FOV angle for ImageLink, e.g. 0 for PEC
       </div>
     )
-  }
+  };
 
   rotateTool( state, ROTATOR_TYPE, ROTATOR_NUM, active ) {
     var typeOptions =
@@ -310,7 +293,7 @@ class Toolbox extends Component {
        <br/>Enter the rotator position, e.g. 49.02
       </div>
     )
-  }
+  };
 
   calibrateTools( state
     , calType
@@ -349,9 +332,18 @@ class Toolbox extends Component {
 
     return (
       <div>
+      <Header>Calibrate Autoguider</Header>
       <Button.Group icon>
           <Button  disabled={DISABLE} onClick={this.calibrateGuider.bind(this)}>Calibrate</Button>
        </Button.Group>
+       <Checkbox
+         label='Enable Calibrating '
+         name='isCalibrationEnabled'
+         toggle
+         placeholder= 'Enable Autoguiding Calibrating'
+         checked={Boolean(this.state.isCalibrationEnabled)}
+         onChange={this.handleToggleAndSave.bind(this)}
+       />
        <Form>
          <Dropdown
             name='tool_calibrate_via'
@@ -381,7 +373,7 @@ class Toolbox extends Component {
         <br/>(Optionaly select a slew type and specify a location, e.g 5.95, 21.99)
      </div>
     )
-  }
+  };
 
   render() {
 
@@ -402,7 +394,6 @@ class Toolbox extends Component {
     return (
       <div>
         <Segment raised>
-          <Header>Calibrate Autoguider</Header>
          {this.calibrateTools(
            this.props.scheduler_running.value
            , this.state.tool_calibrate_via
@@ -433,11 +424,13 @@ class Toolbox extends Component {
         </Segment.Group>
         </Segment>
         <Segment>
-        Future idea - launch a filteroffset script to collect the filters focus offset and then average.
+        Future ideas <br/>
+        - launch a filteroffset script to collect the filters focus offset and then average. <br/>
+        - launch a PEC load from Mount to save and then average. <br/>
         </Segment>
     </div>
     )
-  }
+  };
 }
 export default withTracker(() => {
   return {
