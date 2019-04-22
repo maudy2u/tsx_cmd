@@ -43,6 +43,7 @@ if [ "${1}" == "init" ]; then
     export MONGO_PARAMS="-C ./mongodb --strip-components=1"
   elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     echo " *******************************"
+    echo " tsx_cmd - Mac"
     echo " Installing mongo-tools"
     echo " Needed for mongodump to backup database"
     sudo apt install mongo-tools
@@ -52,15 +53,14 @@ if [ "${1}" == "init" ]; then
       echo ""
       echo " *******************************"
       echo " tsx_cmd - armv8"
-      echo " Currently uses the same armv7 versions"
-      echo " MongoDB is apt installed"
-      export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC8/tsx_cmd_Linux_armv7_build_355_v3.4.5_2018-12-27_RC8.tar'
-#      export NODEJS='https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz'
-      export NODEJS='https://nodejs.org/dist/v6.16.0/node-v6.16.0-linux-armv7l.tar.gz'
+      export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC9_aarch64/tsx_cmd_Linux_aarch64_build_374_v3.4.6_2019-02-17_RC9.tar'
+      export MONGO='http://downloads.mongodb.org/linux/mongodb-linux-arm64-ubuntu1604-3.6.8.tgz'
+      export NODEJS='https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-arm64.tar.xz'
     elif [ "$(uname -p)" == "armv7l" ]; then
       echo armv7 in ${install_dir}
       echo ""
       echo " *******************************"
+      echo " tsx_cmd - armv7"
       echo " Mongodb - CAN BE BUILT MANUALLY."
       echo " (it can take a while on ODroid-XU4)"
       echo "  CHECK HERE: ./bin/mongod_arm_build.sh"
@@ -90,28 +90,6 @@ export ROOT_URL='http://127.0.0.1'
 
 cd ${install_dir}
 
-if [ "$(uname -p)" == "aarch64" ]; then
-  echo ""
-  echo " *******************************"
-  echo "Mongodb - apt-get install mongodb-enterprise 3.6 multiverse"
-  echo " *******************************"
-  # source: https://andyfelong.com/2018/02/update-mongodb-3-6-on-odroid-c2-with-ubuntu-16-04-3-arm64/
-  sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
-  echo "deb [ arch=amd64,arm64,ppc64el,s390x ] http://repo.mongodb.com/apt/ubuntu xenial/mongodb-enterprise/3.6 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-enterprise.list
-  sudo apt update
-  sudo apt install g++ build-essential -y
-  sudo apt install mongodb-enterprise -y
-  echo ""
-  echo " *******************************"
-  echo " NodeJS - Download " ${MONGO}
-  echo " *******************************"
-  wget -O nodejs.tar.gz "${NODEJS}"
-  echo ""
-  echo " *******************************"
-  echo "TSX_CMD - Download " ${APP}
-  echo " *******************************"
-  wget -O tsx_cmd.tar "${APP}"
-else
   echo ""
   echo " *******************************"
   echo "Mongodb - Download and extract" ${MONGO}
@@ -130,7 +108,7 @@ else
   echo "TSX_CMD - Download " ${APP}
   echo " *******************************"
   curl -L "${APP}" -o tsx_cmd.tar
-fi
+
 
 echo ""
 echo " *******************************"
