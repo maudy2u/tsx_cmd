@@ -41,7 +41,6 @@ ecmascript              # Enable ECMAScript2015+ syntax in app code
 
 insecure                # Allow all DB writes from clients (for prototyping)
 semantic:ui@=2.2.6_5
-#flemay:less-autoprefixer
 react-meteor-data
 froatsnook:sleep
 package-stats-opt-out
@@ -49,17 +48,19 @@ ostrio:meteor-root
 ostrio:loggerfile
 ostrio:loggerconsole
 dburles:collection-helpers
-#dburles:mongo-collection-instances
 ostrio:loggermongo
 akasha:shelljs
 session
 ostrio:logger
-#ostrio:autoform-files # may have removed semantic-ui icons
-less
-ostrio:files@1.6.6           # this version works with ARMV7
-juliancwirko:postcss
-# meteortoys:allthings@7.0.1 # NOT FOR USE ON ARMV7/8
+ostrio:files@1.6.6        # this version works with ARMV7
+#ostrio:files@1.6.0       # this version works with aarch64
+#flemay:less-autoprefixer # add for aarch64, can work for armhf
+#standard-minifier-css    # add for aarch64, can work for armhf
+#flemay:less-autoprefixer # add for aarch64
+juliancwirko:postcss      # remove for aarch64
+less                      # remove for aarch64
 
+# meteortoys:allthings@7.0.1 # NOT FOR USE ON ARMV7/8
 # *******************************
 # job-collection needs to be the last in the package file
 vsivsi:job-collection

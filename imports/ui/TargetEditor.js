@@ -356,6 +356,9 @@ class TargetEditor extends Component {
                     value={this.state.targetFindName}
                     onChange={this.handleChange}/>
               </Form.Group>
+              <small>     e.g. M31 or, 11h 33m 48s, 55d 57m 18s</small>
+              <Form.Group>
+              </Form.Group>
               <Form.Group>
                 <Form.Field control={Input}
                   label='Description'
