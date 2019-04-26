@@ -37,7 +37,7 @@ fi
    ${METEOR} npm install --save @babel/runtime react-simple-range react-datetime-bootstrap react-timekeeper react@15.6.2 react-dom@15.6.2 shelljs bootstrap@^3.3 semantic-ui-react@0.78.3 formsy-semantic-ui-react formsy-react xregexp
  else
    ${METEOR} remove standard-minifier-css
-   ${METEOR} add ostrio:files@=1.6.6 semantic:ui@=2.2.6_5 juliancwirko:postcss less jquery react-meteor-data froatsnook:sleep package-stats-opt-out akasha:shelljs session vsivsi:job-collection dburles:collection-helpers ostrio:logger ostrio:loggerconsole ostrio:loggerfile ostrio:meteor-root ostrio:loggermongo
+   ${METEOR} add ostrio:files@1.6.6 semantic:ui@=2.2.6_5 juliancwirko:postcss less jquery react-meteor-data froatsnook:sleep package-stats-opt-out akasha:shelljs session vsivsi:job-collection dburles:collection-helpers ostrio:logger ostrio:loggerconsole ostrio:loggerfile ostrio:meteor-root ostrio:loggermongo
    ${METEOR} npm install --save-dev babel-plugin-transform-class-properties@6.24.1 postcss@6.0.22 postcss-load-config@1.2.0 autoprefixer
    ${METEOR} npm install --save @babel/runtime react-simple-range react-datetime-bootstrap react-timekeeper react@15.6.2 react-dom@15.6.2 shelljs bootstrap@^3.3 semantic-ui-react@0.78.3 formsy-semantic-ui-react formsy-react xregexp postcss-easy-import postcss-nested postcss-simple-vars rucksack-css
  fi
