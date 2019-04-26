@@ -36,14 +36,14 @@ fi
 
 if [ "${1}" == "init" ]; then
   if [ "$(uname)" == "Darwin" ]; then
-    echo MAC in ${install_dir}
+    echo " *******************************"
+    echo " tsx_cmd - Mac in" ${install_dir}
     export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC8/tsx_cmd_Darwin_i386_build_355_v3.4.5_2018-12-27_RC8.tar'
     export MONGO='https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-4.0.5.tgz'
     export NODEJS='https://nodejs.org/dist/v8.11.1/node-v8.11.1-darwin-x64.tar.gz'
     export MONGO_PARAMS="-C ./mongodb --strip-components=1"
   elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     echo " *******************************"
-    echo " tsx_cmd - Mac"
     echo " Installing mongo-tools"
     echo " Needed for mongodump to backup database"
     sudo apt install mongo-tools
@@ -141,6 +141,18 @@ echo " *******************************"
 npm install amdefine ansi-styles chalk escape-string-regexp has-ansi promise source-map strip-ansi type-of ansi-regex asap eachline meteor-promise semver source-map-support supports-color underscore
 
 cd ${install_dir}
+#curl -L "https://raw.githubusercontent.com/maudy2u/tsx_cmd/master/bin/tsx_cmd_install.sh" -o "tsx_cmd_install.sh"
+#chmod +x "./tsx_cmd_install.sh"
+echo ""
+echo " *******************************"
+echo " TSX_CMD - getting shell scripts"
+echo " *******************************"
+curl -L "https://raw.githubusercontent.com/maudy2u/tsx_cmd/master/bin/tsx_cmd_start.sh" -o "tsx_cmd_start.sh"
+chmod +x "./tsx_cmd_start.sh"
+curl -L "https://raw.githubusercontent.com/maudy2u/tsx_cmd/master/bin/tsx_cmd_stop.sh" -o "tsx_cmd_stop.sh"
+chmod +x "./tsx_cmd_stop.sh"
+curl -L "https://raw.githubusercontent.com/maudy2u/tsx_cmd/master/bin/tsx_cmd_update.sh" -o "tsx_cmd_update.sh"
+chmod +x "./tsx_cmd_update.sh"
 
 echo ""
 echo " *******************************"
