@@ -124,8 +124,31 @@ class DefaultSettings extends Component {
     this.saveDefaultState( name );
   };
 
-  handleStartChange = ( value ) => this.setState({defaultStartTime: value.formatted24 });
-  handleStopChange = ( value ) => this.setState({defaultStopTime: value.formatted24 });
+  handleStartChange = ( value ) => {
+    console.log( ' Found start: ' + value.formatted24);
+    this.setState({defaultStartTime: value.formatted24 });
+    console.log( ' Saved start: ' + this.state.defaultStartTime );
+    Meteor.call( 'updateServerState', 'defaultStartTime', value.formatted24 , function(error, result) {
+
+        if (error && error.error === "logged-out") {
+          // show a nice error message
+          Session.set("errorMessage", "Please fix.");
+        }
+    });//.bind(this));
+
+  }
+  handleStopChange = ( value ) => {
+    this.setState({defaultStopTime: value.formatted24 });
+    Meteor.call( 'updateServerState', 'defaultStopTime', value.formatted24 , function(error, result) {
+
+        if (error && error.error === "logged-out") {
+          // show a nice error message
+          Session.set("errorMessage", "Please fix.");
+        }
+    });//.bind(this));
+
+  }
+
   handlePriorityChange = ( value ) => this.setState({defaultPriority: value.value });
 
   handleMenuItemClick = (e, { name }) => this.setState({ activeItem: name });
@@ -154,7 +177,6 @@ class DefaultSettings extends Component {
   // Generic Method to determine default to save.
   saveDefaultState( param ) {
     var value = eval("this.state."+param);
-
     Meteor.call( 'updateServerState', param, value , function(error, result) {
 
         if (error && error.error === "logged-out") {
@@ -337,6 +359,9 @@ class DefaultSettings extends Component {
     catch ( e ) {
       FILTERS = [];
     }
+
+    var startT = `${this.state.defaultStartTime}`
+    var stopT = `${this.state.defaultStopTime}`
 
     // const handleToggle = () => this.handleToggle;
     const ERRORLABEL = <Label color="red" pointing/>
@@ -605,6 +630,7 @@ class DefaultSettings extends Component {
             <h4 className="ui header">Set Default START time</h4>
             <Timekeeper
               time={this.state.defaultStartTime}
+              value={startT}
               onChange={this.handleStartChange}
             />
           </Segment>
@@ -613,6 +639,7 @@ class DefaultSettings extends Component {
             {/* <DateTime />pickerOptions={{format:"LL"}} value="2017-04-20"/> */}
             <Timekeeper
               time={this.state.defaultStopTime}
+              value={stopT}
               onChange={this.handleStopChange}
             />
           </Segment>

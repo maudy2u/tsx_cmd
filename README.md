@@ -75,7 +75,8 @@ Open a browser: http://localhost:3000/ (or replace with the ip of the PC/SBC run
 
 	1. Click on TSXIP and TSXPort to set to the TSX server
 	2. Click on the wifi symbol in top right - to load filter wheel, and equipment details to confirm connections. ::This needs to be redone when filters change::
-	3. Click the Wrench to setup your imaging equipment details: focal length, pixels, twilight… *If there is no Default filter, return  to step 2.*
+	3. Click the Wrench to setup your imaging equipment details: focal length, pixels, twilight…
+		- **If there is no Default filter, return  to step 2.**
 	4. Click Calibration icon, if doing flats for the filter exposures
 
 ## Create your Night session

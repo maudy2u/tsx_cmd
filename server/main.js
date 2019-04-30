@@ -105,6 +105,17 @@ function initServerStates() {
   tsx_SetServerState('tool_active', false );
   tsx_SetServerState('night_plan_updating', false );
 
+  // check the setting of the start/stop time initialization
+  var startT = TheSkyXInfos.findOne({name: 'defaultStartTime'}).value;
+  if( startT == '' ) {
+    tsx_SetServerState('defaultStartTime', '21:00');
+  }
+  var stopT = TheSkyXInfos.findOne({name: 'defaultStopTime'}).value;
+  if( startT == '' ) {
+    tsx_SetServerState('defaultStopTime', '5:00');
+  }
+
+
   for (var m in tsx_ServerStates){
     var state = tsx_ServerStates[m];
     try {

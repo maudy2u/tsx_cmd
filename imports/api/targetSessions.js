@@ -29,6 +29,8 @@ export function addNewTargetSession() {
 
   // get defaults
   var clsFilter = TheSkyXInfos.findOne({name: 'defaultFilter'}).value;
+  var startT = TheSkyXInfos.findOne({name: 'defaultStartTime'}).value;
+  var stopT = TheSkyXInfos.findOne({name: 'defaultStopTime'}).value;
 
   const id  = TargetSessions.insert(
     {
@@ -64,8 +66,8 @@ export function addNewTargetSession() {
       focusExposure: TheSkyXInfos.findOne({name: 'defaultFocusExposure'}).value,
       guideExposure: '',
       guideDelay: '',
-      startTime: TheSkyXInfos.findOne({name: 'defaultStartTime'}).value,
-      stopTime: TheSkyXInfos.findOne({name: 'defaultStopTime'}).value,
+      startTime: startT,
+      stopTime: stopT,
       priority: TheSkyXInfos.findOne({name: 'defaultPriority'}).value,
       tempChg: TheSkyXInfos.findOne({name: 'defaultFocusTempDiff'}).value,
       currentAlt: 0, // set to zero for now.

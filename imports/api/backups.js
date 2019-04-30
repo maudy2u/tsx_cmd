@@ -1,5 +1,6 @@
-import { FilesCollection } from 'meteor/ostrio:files';
-this.Backups = new FilesCollection({collectionName: 'backups'});
+import { Meteor } from 'meteor/meteor'
+//import { FilesCollection } from 'meteor/ostrio:files';
+//this.Backups = new FilesCollection({collectionName: 'backups'});
 
 // Used to store the sessions for a Target - the actual imaging
 /*export const Backups = new FilesCollection( {
