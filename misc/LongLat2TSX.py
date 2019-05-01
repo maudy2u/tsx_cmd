@@ -14,7 +14,23 @@
 # The python is mainly from the work by Anat Ruangrassamee, Ph.D.
 # The javascript scripts are mainly from the work by Ken Sturrock.
 #
-# 2018-01-20
+# 20190501
+
+CR = "\n"
+GPSHost = "localhost"		# localhost is the default, assumed, it needs to point to GPSD
+GPSPort = "2947"			# 2947 is the default, it needs to match setting in GPSD
+TSXHost = "127.0.0.1"		# You can set this if you want to run the functions remotely
+                            # The "*Remote functions" already handle that internally.
+TSXPort = 3040              # 3040 is the default, it can be changed
+BUFFER_SIZE = 1024
+javaP = "/* Java Script */" + CR
+startP = "/* Socket Start Packet */" + CR
+endP = "/* Socket End Packet */" +CR
+
+NorthOrSouth = 0			# var sk6DocProp_Latitude = 0; // 0=North
+EastOrWest = 1				#var sk6DocProp_Longitude = 1; // 1=West
+
+debugMsg = False
 
 import socket
 import sys
@@ -23,12 +39,12 @@ import gps
 
 def setLongLat( ):
 	# Listen on port 2947 (gpsd) of localhost
-	session = gps.gps("localhost", "2947")
+	session = gps.gps(GPSHost, GPSPort)
 	session.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
 	report = session.next()
 	notFound = True
-	while notFound:
-		try:
+	try:
+		while notFound:
 			report = session.next()
 			# Wait for a 'TPV' report and display the current time
 			# To see all report data, uncomment the line below
@@ -37,38 +53,53 @@ def setLongLat( ):
 				print ' '
 				print report.time
 				print '----------------------------------------'
-				print 'latitude    ' , session.fix.latitude
+				print 'latitude    ' , session.fix.latitude;
 				print 'longitude   ' , session.fix.longitude
 				print 'time utc    ' , session.utc, session.fix.time
 				print 'altitude    ' , session.fix.altitude
 				print '----------------------------------------'
-				TCP_IP = '10.9.8.32'
-				TCP_PORT = 3040
-				BUFFER_SIZE = 1024
-				MESSAGE = " \
-				/* Java Script */\
-				var sk6DocProp_Latitude = 0;\
-				var sk6DocProp_Longitude = 1;\
-				sky6StarChart.SetDocumentProperty(sk6DocProp_Latitude, " + str(session.fix.latitude) + ");\
-				sky6StarChart.SetDocumentProperty(sk6DocProp_Longitude," + str(session.fix.longitude) + ");\
-				"
-				s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-				s.connect((TCP_IP, TCP_PORT))
-				s.send(MESSAGE)
-				data = s.recv(BUFFER_SIZE)
-				s.close()
 				notFound = False
-				print "   " + data
-		except KeyError:
-			print "GPSD terminated with KeyError"
-			pass
-		except KeyboardInterrupt:
-			print "GPSD terminated via KeyboardInterrupt"
-			quit()
-		
-		except StopIteration:
-			session = None
-			print "GPSD has terminated"
+
+		MESSAGE = " \
+var OUT = 'Success';"+CR+"\
+try {"+CR+"\
+var sk6DocProp_Latitude = " + str( EastOrWest ) + ";" +CR+"\
+var sk6DocProp_Longitude = "+ str ( NorthOrSouth ) + ";"+CR+"\
+var LO = Math.abs(" +  str( session.fix.longitude ) + ");"+CR+"\
+var LA = Math.abs(" + str( session.fix.latitude ) + " );"+CR+"\
+sky6StarChart.SetDocumentProperty(sk6DocProp_Latitude, LA);"+CR+"\
+sky6StarChart.SetDocumentProperty(sk6DocProp_Longitude, LO );"+CR+"\
+}"+CR+"\
+catch (e) {"+CR+"\
+Out = 'Failed with ' +  e;"+CR+"\
+}"+CR+"\
+Out";
+
+		fullMessage =  javaP + MESSAGE + CR
+#		fullMessage =  "/* Java Script */" + CR + startP + MESSAGE + CR + endP
+		if debugMsg:
+			print 'vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv'
+			print fullMessage
+			print '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
+
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		s.connect((TSXHost, TSXPort))
+		s.send(fullMessage)
+		data = s.recv(BUFFER_SIZE)
+		s.close()
+
+		print data
+	except KeyError:
+		print "GPSD terminated with KeyError"
+		pass
+	except KeyboardInterrupt:
+		print "GPSD terminated via KeyboardInterrupt"
+		quit()
+
+	except StopIteration:
+		session = None
+		print "GPSD has terminated"
+
 	return
 
 def main( ):
@@ -81,4 +112,3 @@ def main( ):
 
 if __name__ == "__main__":
     main( )
-

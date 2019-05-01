@@ -49,25 +49,25 @@ if [ "${1}" == "init" ]; then
     sudo apt install mongo-tools
 
     if [ "$(uname -p)" == "aarch64" ]; then
-      echo armv8 in ${install_dir}
       echo ""
       echo " *******************************"
-      echo " tsx_cmd - armv8"
+      echo " tsx_cmd - aarch64/armv8 in" ${install_dir}
       export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC9_aarch64/tsx_cmd_Linux_aarch64_build_374_v3.4.6_2019-02-17_RC9.tar'
       export MONGO='http://downloads.mongodb.org/linux/mongodb-linux-arm64-ubuntu1604-3.6.8.tgz'
       export NODEJS='https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-arm64.tar.xz'
+      export MONGO_PARAMS="-C ./mongodb/bin  --strip-components=1"
     elif [ "$(uname -p)" == "armv7l" ]; then
       echo armv7 in ${install_dir}
       echo ""
       echo " *******************************"
-      echo " tsx_cmd - armv7"
+      echo " tsx_cmd - armhf/armv7 in" ${install_dir}
       echo " Mongodb - CAN BE BUILT MANUALLY."
-      echo " (it can take a while on ODroid-XU4)"
+      echo " (it can take a few hours to build)"
       echo "  CHECK HERE: ./bin/mongod_arm_build.sh"
       export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC8/tsx_cmd_Linux_armv7_build_355_v3.4.5_2018-12-27_RC8.tar'
       export MONGO='https://github.com/maudy2u/tsx_cmd/releases/download/armv7_mongo/mongoDB_armv7.tar'
       export NODEJS='https://nodejs.org/dist/v6.16.0/node-v6.16.0-linux-armv7l.tar.gz'
-      export MONGO_PARAMS="-C ./mongodb/bin"
+      export MONGO_PARAMS="-C ./mongodb/bin  --strip-components=1"
     else
       echo $(uname -s) $(uname -p) - NO NODEJS supported... yet
       echo $(uname -s) $(uname -p) - NO mongoDB supported... yet
@@ -92,7 +92,7 @@ cd ${install_dir}
 
   echo ""
   echo " *******************************"
-  echo "Mongodb - Download and extract" ${MONGO}
+  echo "Mongodb - Download and extract " ${MONGO}
   echo " *******************************"
   mkdir -p ./mongodb/bin
   curl -L "${MONGO}" -o mongodb.tgz
@@ -100,24 +100,17 @@ cd ${install_dir}
   rm ${install_dir}/mongodb.tgz
   echo ""
   echo " *******************************"
-  echo " NodeJS - Download " ${MONGO}
+  echo " NodeJS - Download and extract " ${NODEJS}
   echo " *******************************"
+  mkdir -p ./nodejs
   curl -L "${NODEJS}" -o nodejs.tar.gz
+  tar -xf nodejs.tar.gz -C ./nodejs --strip-components=1
+  rm ${install_dir}/nodejs.tar.gz
   echo ""
   echo " *******************************"
   echo "TSX_CMD - Download " ${APP}
   echo " *******************************"
   curl -L "${APP}" -o tsx_cmd.tar
-
-
-echo ""
-echo " *******************************"
-echo " NODEJS - Extract" ${NODEJS}
-echo " *******************************"
-mkdir -p ./nodejs
-tar -xf nodejs.tar.gz -C ./nodejs --strip-components=1
-rm ${install_dir}/nodejs.tar.gz
-export PATH=${install_dir}/mongodb/bin:${install_dir}/nodejs/bin:$PATH
 
 echo ""
 echo " *******************************"
@@ -131,6 +124,8 @@ echo ""
 echo " *******************************"
 echo " TSX_CMD - fix for fibers deploy"
 echo " *******************************"
+export PATH=${install_dir}/mongodb/bin:${install_dir}/nodejs/bin:$PATH
+
 npm uninstall fibers
 npm install fibers
 
