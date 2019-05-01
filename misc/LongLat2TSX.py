@@ -27,9 +27,6 @@ javaP = "/* Java Script */" + CR
 startP = "/* Socket Start Packet */" + CR
 endP = "/* Socket End Packet */" +CR
 
-NorthOrSouth = 0			# var sk6DocProp_Latitude = 0; // 0=North
-EastOrWest = 1				#var sk6DocProp_Longitude = 1; // 1=West
-
 debugMsg = False
 
 import socket
@@ -43,6 +40,8 @@ def setLongLat( ):
 	session.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
 	report = session.next()
 	notFound = True
+        NorthOrSouth = 0			# var sk6DocProp_Latitude = 0; // 0=North
+        EastOrWest = 0				#var sk6DocProp_Longitude = 1; // 1=West
 	try:
 		while notFound:
 			report = session.next()
@@ -59,14 +58,20 @@ def setLongLat( ):
 				print 'altitude    ' , session.fix.altitude
 				print '----------------------------------------'
 				notFound = False
-
+                
+                lon  = session.fix.longitude
+                lat = session.fix.latitude
+                if lon < 0:
+                  NorthOrSouth = 1
+                if lat < 0:
+                  EastOrWest = 1
 		MESSAGE = " \
 var OUT = 'Success';"+CR+"\
 try {"+CR+"\
 var sk6DocProp_Latitude = " + str( EastOrWest ) + ";" +CR+"\
 var sk6DocProp_Longitude = "+ str ( NorthOrSouth ) + ";"+CR+"\
-var LO = Math.abs(" +  str( session.fix.longitude ) + ");"+CR+"\
-var LA = Math.abs(" + str( session.fix.latitude ) + " );"+CR+"\
+var LO = Math.abs(" +  str( lon  ) + ");"+CR+"\
+var LA = Math.abs(" + str( lat ) + " );"+CR+"\
 sky6StarChart.SetDocumentProperty(sk6DocProp_Latitude, LA);"+CR+"\
 sky6StarChart.SetDocumentProperty(sk6DocProp_Longitude, LO );"+CR+"\
 }"+CR+"\
