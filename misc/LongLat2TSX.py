@@ -16,13 +16,13 @@
 #
 # 20190501
 
-CR = "\n"
 GPSHost = "localhost"		# localhost is the default, assumed, it needs to point to GPSD
-GPSPort = "2947"			# 2947 is the default, it needs to match setting in GPSD
+GPSPort = "2947"		# 2947 is the default, it needs to match setting in GPSD
 TSXHost = "127.0.0.1"		# You can set this if you want to run the functions remotely
-                            # The "*Remote functions" already handle that internally.
-TSXPort = 3040              # 3040 is the default, it can be changed
+                            	# The "*Remote functions" already handle that internally.
+TSXPort = 3040              	# 3040 is the default, it can be changed
 BUFFER_SIZE = 1024
+CR = "\n"
 javaP = "/* Java Script */" + CR
 startP = "/* Socket Start Packet */" + CR
 endP = "/* Socket End Packet */" +CR
@@ -59,21 +59,24 @@ def setLongLat( ):
 				print '----------------------------------------'
 				notFound = False
                 
-                lon  = session.fix.longitude
+                lon = session.fix.longitude
                 lat = session.fix.latitude
                 if lon < 0:
                   NorthOrSouth = 1
                 if lat < 0:
                   EastOrWest = 1
 		MESSAGE = " \
-var OUT = 'Success';"+CR+"\
+var Out = 'Success';"+CR+"\
 try {"+CR+"\
 var sk6DocProp_Latitude = " + str( EastOrWest ) + ";" +CR+"\
 var sk6DocProp_Longitude = "+ str ( NorthOrSouth ) + ";"+CR+"\
+var sk6DocProp_ElevationInMeters =3;" + CR + "\
+var ALT = "+ str ( session.fix.altitude ) + ";"+CR+"\
 var LO = Math.abs(" +  str( lon  ) + ");"+CR+"\
 var LA = Math.abs(" + str( lat ) + " );"+CR+"\
 sky6StarChart.SetDocumentProperty(sk6DocProp_Latitude, LA);"+CR+"\
 sky6StarChart.SetDocumentProperty(sk6DocProp_Longitude, LO );"+CR+"\
+sky6StarChart.SetDocumentProperty(sk6DocProp_ElevationInMeters, ALT );"+CR+"\
 }"+CR+"\
 catch (e) {"+CR+"\
 Out = 'Failed with ' +  e;"+CR+"\
