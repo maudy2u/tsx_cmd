@@ -32,8 +32,8 @@
 
 echo *******************************
 install_dir=$(pwd)
-os = $(expr substr $(uname -s) 1 5)
-arch = $(uname -p)
+#os = $(expr substr $(uname -s) 1 5)
+#arch = $(uname -p)
 if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   if [ "$(uname -p)" == "aarch64" ]; then
     cd ~

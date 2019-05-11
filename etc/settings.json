@@ -5,6 +5,6 @@
   "enable_warn": "yes",
   "tsx_cmd_db": "tsx_cmd",
   "mongo_port": "27017",
-  "removed-to-enable: backup_location": "/media/odroid/PENSIVE2/tsx_cmd_db_backups",
+  "removed-to-enable: backup_location": "/media/odroid/PENSIVE2/tsx_cmd_db_backups/",
   "removed-to-enable: log_file_location": "/media/odroid/PENSIVE2/tsx_cmd_logs"
 }

@@ -187,6 +187,12 @@ class BackupModal extends Component {
       let display = fileCursors.map((aFile, key) => {
         // console.log('A file: ', aFile.link(), aFile.get('name'))
         let link = Backups.findOne({_id: aFile._id}).link();  //The "view/download" link
+        // need to replce the "host" address with the tsxip
+        let tsxIP = TheSkyXInfos.findOne({name: 'ip'}).value;
+        console.log( tsxIP);
+        link.replace('localhost',tsxIP);
+        link.replace('127.0.0.1',tsxIP);
+        console.log( link );
 
         // Send out components that show details of each file
         return <div key={'file' + key}>

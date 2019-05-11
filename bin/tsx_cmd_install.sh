@@ -55,7 +55,7 @@ if [ "${1}" == "init" ]; then
       export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC9_aarch64/tsx_cmd_Linux_aarch64_build_374_v3.4.6_2019-02-17_RC9.tar'
       export MONGO='http://downloads.mongodb.org/linux/mongodb-linux-arm64-ubuntu1604-3.6.8.tgz'
       export NODEJS='https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-arm64.tar.xz'
-      export MONGO_PARAMS="-C ./mongodb/bin  --strip-components=1"
+      export MONGO_PARAMS="-C ./mongodb  --strip-components=1"
     elif [ "$(uname -p)" == "armv7l" ]; then
       echo armv7 in ${install_dir}
       echo ""
