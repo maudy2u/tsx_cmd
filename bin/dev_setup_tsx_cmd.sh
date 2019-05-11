@@ -55,5 +55,22 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   sudo apt install jq
 fi
 
+echo " *******************************"
+echo " TSX_CMD - installed"
+echo " *******************************"
+echo '{' > ./settings.json
+echo '  "enable_log": "yes",' >> ./settings.json
+echo '  "enable_debug": "no",' >> ./settings.json
+echo '  "enable_info": "no",' >> ./settings.json
+echo '  "enable_warn": "yes",' >> ./settings.json
+echo '  "tsx_cmd_db": "tsx_cmd",' >> ./settings.json
+echo '  "mongo_port": "27017",' >> ./settings.json
+echo '  "removed-to-enable: backup_location": "/home/odroid/app",' >> ./settings.json
+echo '  "removed-to-enable: log_file_location": "/media/odroid/PENSIVE2/tsx_cmd_logs"' >> ./settings.json
+echo '}' >> ./settings.json
+sed -i.bak s/tsx_cmd/meteor/g ./settings.json
+sed -i.bak s/271017/3001/g ./settings.json
+
+
 # meteortyos breaks job-collection
 # ${METEOR}  add meteortoys:allthings

@@ -54,12 +54,32 @@ else {
   backupFolder = Meteor.settings.backup_location;
 }
 
+// if these variables are defined then use their settings... else it is dev mode
+//  "tsx_cmd_db": "tsx_cmd",
+//  "mongo_port": "27017"
+var tsx_cmd_db = '';
+if( Meteor.settings.tsx_cmd_db === '' || typeof Meteor.settings.tsx_cmd_db === 'undefined' ) {
+  tsx_cmd_db = 'meteor';
+}
+else {
+  tsx_cmd_db = Meteor.settings.tsx_cmd_db;
+}
+var mongo_port = '';
+if( Meteor.settings.mongo_port === '' || typeof Meteor.settings.mongo_port === 'undefined' ) {
+  mongo_port = "3001";
+}
+else {
+  mongo_port = Meteor.settings.mongo_port;
+}
+
+
+
 Meteor.startup(function () {
 
 // *******************************
 // Sample to add files
 // *******************************
-//   let logFolder = Meteor.absolutePath;
+   // let logFolder = Meteor.absolutePath;
    // let location = logFolder + '/logs/';
    // let fileName = "2019_01_12_tsx_cmd.log";
    //
@@ -116,7 +136,7 @@ Meteor.methods({
 
       // *******************************
       // Is there a different development port for mongod?
-      let dump = 'mongodump --port 3001 --db=meteor -o ' + backupLocation + ' --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB'
+      let dump = 'mongodump --port ' + mongo_port + ' --db='+ tsx_cmd_db +' -o ' + backupLocation + ' --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB --forceTableScan'
       tsxLog( ' Executing: ', dump );
       if (shell.exec( dump ).code !== 0) {
         UpdateStatus('Error: Failed to run mongodump to create DB backup');
@@ -133,15 +153,16 @@ Meteor.methods({
       //   return;
       // }
 
-      tsxLog( ' Executing: ', 'tar -cf '+ backupFolder + '/export_db.tar ' + backupLocation );
-      if (shell.exec('tar -cf '+ backupFolder + '/export_db.tar ' + backupLocation ).code !== 0) {
+      tsxLog( ' Executing: ', 'tar -C '+ backupLocation +' -cf '+ backupFolder + 'export_db.tar ./' );
+      // tar -C /Users/stephen/Documents/code/tsx_cmd/backup/tsx_cmd_db_export/ -cf /Users/stephen/Documents/code/tsx_cmd/backup/export_db.tar .
+      if (shell.exec('tar -C '+ backupLocation + ' -cf '+backupFolder+'export_db.tar ./' ).code !== 0) {
         UpdateStatus('Error: failed to tar the backup for uploading.');
         // shell.exit(1); // do not exit. kills server
         return;
       }
 
-      tsxLog( ' Storing backup: ', backupFolder + '/export_db.tar')
-      Backups.addFile( backupFolder + '/export_db.tar', {
+      tsxLog( ' Storing backup: ', backupFolder + 'export_db.tar')
+      Backups.addFile( backupFolder + 'export_db.tar', {
         fileName: 'db_backup.tar',
         meta: {}
       });
