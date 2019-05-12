@@ -12,6 +12,7 @@ class IndividualFile extends Component {
 
     this.removeFile = this.removeFile.bind(this);
     this.renameFile = this.renameFile.bind(this);
+    this.restoreFile = this.restoreFile.bind(this);
 
   }
 
@@ -32,6 +33,16 @@ class IndividualFile extends Component {
     }
   }
 
+  restoreFile() {
+    let conf = confirm('Are you sure you want to restore this database file?') || false;
+    if (conf == true) {
+      Meteor.call('RestoreFile', this.props.fileId, function (err, res) {
+        if (err)
+          console.log(err);
+      })
+    }
+  }
+
   renameFile(){
 
     let validName = /[^a-zA-Z0-9 \.:\+()\-_%!&]/gi;
@@ -43,7 +54,7 @@ class IndividualFile extends Component {
       prompt.trim();
     }
 
-    if (!_.isEmpty(prompt)) {
+    if (prompt != '' && prompt != 'undefined' ) {
       Meteor.call('RenameFile', this.props.fileId, prompt, function (err, res) {
         if (err)
           console.log(err);
@@ -61,6 +72,9 @@ class IndividualFile extends Component {
              target="_blank">View</a>
           <button onClick={this.removeFile} className="btn btn-outline btn-danger btn-sm">
             Delete
+          </button>
+          <button onClick={this.restoreFile} className="btn btn-outline btn-danger btn-sm">
+            Restore
           </button>
           Size: {this.props.fileSize}
           <br/><hr/>

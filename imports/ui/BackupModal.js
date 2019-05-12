@@ -99,8 +99,8 @@ class BackupModal extends Component {
         return element.name == 'isTwilightEnabled';}).value,
 
     };
-    this.removeFile = this.removeFile.bind(this);
-    this.renameFile = this.renameFile.bind(this);
+    // this.removeFile = this.removeFile.bind(this);
+    // this.renameFile = this.renameFile.bind(this);
 
   }
 
@@ -121,35 +121,6 @@ class BackupModal extends Component {
     fileSize: PropTypes.number.isRequired,
     fileUrl: PropTypes.string,
     fileId: PropTypes.string.isRequired
-  }
-
-  removeFile(){
-    let conf = confirm('Are you sure you want to delete the file?') || false;
-    if (conf == true) {
-      Meteor.call('RemoveFile', this.props.fileId, function (err, res) {
-        if (err)
-          console.log(err);
-      })
-    }
-  }
-
-  renameFile(){
-
-    let validName = /[^a-zA-Z0-9 \.:\+()\-_%!&]/gi;
-    let prompt    = window.prompt('New file name?', this.props.fileName);
-
-    // Replace any non valid characters, also do this on the server
-    if (prompt) {
-      prompt = prompt.replace(validName, '-');
-      prompt.trim();
-    }
-
-    if (!_.isEmpty(prompt)) {
-      Meteor.call('RenameFile', this.props.fileId, prompt, function (err, res) {
-        if (err)
-          console.log(err);
-      })
-    }
   }
 
   backupAndDownloadDatabase() {
@@ -177,7 +148,7 @@ class BackupModal extends Component {
   }
 
   displayFiles() {
-    console.log("Rendering FileUpload",this.props.docsReadyYet);
+    //console.log("Rendering FileUpload",this.props.docsReadyYet);
     if (this.props.files && this.props.docsReadyYet) {
 
       let fileCursors = this.props.files;
@@ -185,14 +156,8 @@ class BackupModal extends Component {
       // Run through each file that the user has stored
       // (make sure the subscription only sends files owned by this user)
       let display = fileCursors.map((aFile, key) => {
-        // console.log('A file: ', aFile.link(), aFile.get('name'))
-        let link = Backups.findOne({_id: aFile._id}).link();  //The "view/download" link
-        // need to replce the "host" address with the tsxip
-//        let tsxIP = TheSkyXInfos.findOne({name: 'ip'}).value;
-//        console.log( tsxIP);
-//        link.replace('localhost',tsxIP);
-//        link.replace('127.0.0.1',tsxIP);
-        console.log( link );
+
+        let link = Backups.findOne({_id: aFile._id}).link('version');  // 'version' is needed in the case the file is renamed.
 
         // Send out components that show details of each file
         return <div key={'file' + key}>
