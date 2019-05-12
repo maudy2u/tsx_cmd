@@ -69,7 +69,7 @@ class IndividualFile extends Component {
             Rename
           </button>
           <a href={this.props.fileUrl} className="btn btn-outline btn-primary btn-sm"
-             target="_blank">View</a>
+             target="_blank">Download</a>
           <button onClick={this.removeFile} className="btn btn-outline btn-danger btn-sm">
             Delete
           </button>

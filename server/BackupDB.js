@@ -149,6 +149,11 @@ Meteor.publish('files.backups.all', function () {
 
 Meteor.methods({
 
+  UploadBackupOfDatabase( fid, name ) {
+
+    UpdateStatus( ' Upload database file. ');
+  },
+
   RemoveFile( fid ) {
     Backups.remove({_id: fid});
     UpdateStatus( ' Backup removed file. ');

@@ -71,56 +71,128 @@ class BackupModal extends Component {
     super(props);
 
     this.state = {
-
-        defaultMeridianFlip: this.props.tsxInfo.find(function(element) {
-        return element.name == 'defaultMeridianFlip';}).value,
-        defaultCLSEnabled: this.props.tsxInfo.find(function(element) {
-        return element.name == 'defaultCLSEnabled';}).value,
-        defaultSoftPark: this.props.tsxInfo.find(function(element) {
-        return element.name == 'defaultSoftPark';}).value,
-
-        isFOVAngleEnabled: this.props.tsxInfo.find(function(element) {
-        return element.name == 'isFOVAngleEnabled';}).value,
-        isFocus3Enabled: this.props.tsxInfo.find(function(element) {
-        return element.name == 'isFocus3Enabled';}).value,
-        isFocus3Binned: this.props.tsxInfo.find(function(element) {
-        return element.name == 'isFocus3Binned';}).value,
-
-        isAutoguidingEnabled: this.props.tsxInfo.find(function(element) {
-        return element.name == 'isAutoguidingEnabled';}).value,
-        isCalibrationEnabled: this.props.tsxInfo.find(function(element) {
-        return element.name == 'isCalibrationEnabled';}).value,
-        isGuideSettlingEnabled: this.props.tsxInfo.find(function(element) {
-        return element.name == 'isGuideSettlingEnabled';}).value,
-
-        isCLSRepeatEnabled: this.props.tsxInfo.find(function(element) {
-        return element.name == 'isCLSRepeatEnabled';}).value,
-        isTwilightEnabled: this.props.tsxInfo.find(function(element) {
-        return element.name == 'isTwilightEnabled';}).value,
-
+      uploading: [],
+      progress: 0,
+      inProgress: false
     };
-    // this.removeFile = this.removeFile.bind(this);
-    // this.renameFile = this.renameFile.bind(this);
 
+    this.uploadIt = this.uploadIt.bind(this);
   }
-
-  handleToggle = (e, { name, value }) => this.setState({ [name]: Boolean(!eval('this.state.'+name)) })
-
-  handleToggleAndSave = (e, { name, value }) => {
-    var val = eval( 'this.state.' + name);
-
-    this.setState({
-      [name]: !val
-    });
-    saveDefaultStateValue( name, !val );
-  };
-
 
   propTypes: {
     fileName: PropTypes.string.isRequired,
     fileSize: PropTypes.number.isRequired,
     fileUrl: PropTypes.string,
     fileId: PropTypes.string.isRequired
+  }
+
+  uploadIt(e) {
+    e.preventDefault();
+
+    let self = this;
+
+    if (e.currentTarget.files && e.currentTarget.files[0]) {
+     // We upload only one file, in case
+     // there was multiple files selected
+     var file = e.currentTarget.files[0];
+
+     if (file) {
+       let uploadInstance = Backups.insert({
+         file: file,
+         meta: {
+           locator: self.props.fileLocator,
+           // userId: Meteor.userId() // Optional, used to check on server for file tampering
+         },
+         streams: 'dynamic',
+         chunkSize: 'dynamic',
+         allowWebWorkers: true // If you see issues with uploads, change this to false
+       }, false)
+
+       self.setState({
+         uploading: uploadInstance, // Keep track of this instance to use below
+         inProgress: true // Show the progress bar now
+       });
+
+       // These are the event functions, don't need most of them, it shows where we are in the process
+       uploadInstance.on('start', function () {
+         console.log('Starting');
+       })
+
+       uploadInstance.on('end', function (error, fileObj) {
+         console.log('On end File Object: ', fileObj);
+       })
+
+       uploadInstance.on('uploaded', function (error, fileObj) {
+         console.log('uploaded: ', fileObj);
+
+         // Remove the filename from the upload box
+         self.refs['fileinput'].value = '';
+
+         // Reset our state for the next file
+         self.setState({
+           uploading: [],
+           progress: 0,
+           inProgress: false
+         });
+       })
+
+       uploadInstance.on('error', function (error, fileObj) {
+         console.log('Error during upload: ' + error)
+       });
+
+       uploadInstance.on('progress', function (progress, fileObj) {
+         console.log('Upload Percentage: ' + progress)
+         // Update our progress bar
+         self.setState({
+           progress: progress
+         });
+       });
+
+       uploadInstance.start(); // Must manually start the upload
+     }
+    }
+  }
+
+  showUploads() {
+   console.log('**********************************', this.state.uploading);
+
+   if (this.state.uploading.length > 0) {
+     return <div>
+       {this.state.uploading.file.name}
+
+       <div className="progress progress-bar-default">
+         <div style={{width: this.state.progress + '%'}} aria-valuemax="100"
+            aria-valuemin="0"
+            aria-valuenow={this.state.progress || 0} role="progressbar"
+            className="progress-bar">
+           <span className="sr-only">{this.state.progress}% Complete (success)</span>
+           <span>{this.state.progress}%</span>
+         </div>
+       </div>
+     </div>
+   }
+  }
+
+  uploadDatabase() {
+    let validName = /[^a-zA-Z0-9 \.:\+()\-_%!&]/gi;
+    let prompt    = window.prompt('New file name?', this.props.fileName);
+
+    // Replace any non valid characters, also do this on the server
+    if (prompt) {
+      prompt = prompt.replace(validName, '-');
+      prompt.trim();
+    }
+
+    if (prompt != '' && prompt != 'undefined' ) {
+      // Meteor.call('RenameFile', this.props.fileId, prompt, function (err, res) {
+      //   if (err)
+      //     console.log(err);
+      // })
+      Meteor.call('UploadBackupOfDatabase', function (err, res) {
+        if (err)
+          console.log(err);
+      })
+    }
   }
 
   backupAndDownloadDatabase() {
@@ -143,6 +215,7 @@ class BackupModal extends Component {
     return (
       <Button.Group basic size='small' floated='right'>
         <Button icon='cloud download' onClick={this.backupAndDownloadDatabase.bind(this)}/>
+        <Button icon='cloud upload' onClick={this.uploadDatabase.bind(this)}/>
       </Button.Group>
     )
   }
@@ -192,12 +265,21 @@ class BackupModal extends Component {
         <Segment secondary>{/* use this icon fro the Model settings configure */}
           <Label>Status: <Label.Detail>{STATUS}</Label.Detail></Label>
           <Segment>
+            <h1>Instructions</h1>
             {this.databaseButtons( this.props.scheduler_running, this.props.tool_active ) }
             <br/>
             Do a backup of the database and then download the file to save it...
             <br/>1. send meteor command to backup
             <br/>2. button to download the backup file
             <br/>3. Button to upload and restore database file
+          </Segment>
+          <Segment>
+            <p>Upload New File:</p>
+            <input type="file" id="fileinput" disabled={this.state.inProgress} ref="fileinput"
+              onChange={this.uploadIt}/>
+          </Segment>
+          <Segment>
+            {this.showUploads()}
           </Segment>
           <Segment>
           {this.displayFiles()}
