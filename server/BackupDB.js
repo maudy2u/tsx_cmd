@@ -43,8 +43,10 @@ import {
   tsx_has_error,
 } from './tsx_feeder.js'
 
-import {shelljs} from 'meteor/akasha:shelljs';
-var shell = require('shelljs');
+// grab npm version
+import shelljs from 'shelljs';
+// this is equivalent to the standard node require:
+const Shelljs = require('shelljs');
 
 var backupFolder = '';
 if( Meteor.settings.backup_location === '' || typeof Meteor.settings.backup_location === 'undefined' ) {
@@ -119,12 +121,11 @@ Meteor.methods({
     try {
       UpdateStatus( ' Backup starting');
       tsxLog( ' Using: ', backupLocation );
-      let err = shell.mkdir( '-p', backupLocation).code;
+      let err = Shelljs.mkdir( '-p', backupLocation).code;
 //      err = shell.mkdir( '-p', '/tmp/tsx_cmd_db_export').code;
       tsxLog( err );
       if ( err !== 0) {
-        UpdateStatus('Error: failed to create backup location. ');
-        shell.exit(1);
+        UpdateStatus('Error: failed to create backup location: ' + err);
         return;
       }
     }
@@ -138,26 +139,26 @@ Meteor.methods({
       // Is there a different development port for mongod?
       let dump = 'mongodump --port ' + mongo_port + ' --db='+ tsx_cmd_db +' -o ' + backupLocation + ' --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB --forceTableScan'
       tsxLog( ' Executing: ', dump );
-      if (shell.exec( dump ).code !== 0) {
+      if (Shelljs.exec( dump ).code !== 0) {
         UpdateStatus('Error: Failed to run mongodump to create DB backup');
-        // shell.exit(1); // do not exit. kills server
+        // Shelljs.exit(1); // do not exit. kills server
         return;
       }
 
       // *******************************
       // Is there a different development port for mongod?
       // tsxLog( ' Executing: ', 'mongodump -d tsx_cmd -o ' + backupLocation + ' --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB' );
-      // if (shell.exec('mongodump -d tsx_cmd -o ' + backupLocation + ' --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB').code !== 0) {
+      // if (Shelljs.exec('mongodump -d tsx_cmd -o ' + backupLocation + ' --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB').code !== 0) {
       //   UpdateStatus('Error: Failed to run mongodump to create DB backup');
-      //   // shell.exit(1); // do not exit. kills server
+      //   // Shelljs.exit(1); // do not exit. kills server
       //   return;
       // }
 
       tsxLog( ' Executing: ', 'tar -C '+ backupLocation +' -cf '+ backupFolder + 'export_db.tar ./' );
       // tar -C /Users/stephen/Documents/code/tsx_cmd/backup/tsx_cmd_db_export/ -cf /Users/stephen/Documents/code/tsx_cmd/backup/export_db.tar .
-      if (shell.exec('tar -C '+ backupLocation + ' -cf '+backupFolder+'export_db.tar ./' ).code !== 0) {
+      if (Shelljs.exec('tar -C '+ backupLocation + ' -cf '+backupFolder+'export_db.tar ./' ).code !== 0) {
         UpdateStatus('Error: failed to tar the backup for uploading.');
-        // shell.exit(1); // do not exit. kills server
+        // Shelljs.exit(1); // do not exit. kills server
         return;
       }
 

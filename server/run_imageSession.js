@@ -58,9 +58,6 @@ import {
   tsx_has_error,
  } from './tsx_feeder.js'
 
-import {shelljs} from 'meteor/akasha:shelljs';
-var shell = require('shelljs');
-
 var tsxHeader =  '/* Java Script *//* Socket Start Packet */';
 var tsxFooter = '/* Socket End Packet */';
 var forceAbort = false;

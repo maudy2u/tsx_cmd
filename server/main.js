@@ -67,8 +67,6 @@ import {
   isSchedulerStopped,
 } from './run_imageSession.js';
 
-import {shelljs} from 'meteor/akasha:shelljs';
-
 /*
 tsx_SetServerState
 currentStage: 'currentStage', // this is a status line update for the dashboard
@@ -440,11 +438,11 @@ Meteor.startup(() => {
   version_dat = JSON.parse(Assets.getText('version.json'));
   if( version_dat.version != '') {
     tsx_SetServerState('tsx_version', version_dat.version);
-    tsxLog(' Version', version_dat.version);
+    tsxLog('      Version', version_dat.version);
   }
   if( version_dat.date != '') {
     tsx_SetServerState('tsx_date', version_dat.date);
-    tsxLog(' Date', version_dat.date);
+    tsxLog('         Date', version_dat.date);
   }
 
   var dbIp = '';
@@ -466,8 +464,8 @@ Meteor.startup(() => {
 
   // removing so can start up easier without error.
   // var dbMinAlt = TheSkyXInfos.findOne().defaultMinAltitude();
-  tsxLog('   IP',  dbIp );
-  tsxLog(' port', dbPort );
+  tsxLog('   TheSkyX IP',  dbIp );
+  tsxLog(' TheSkyX port', dbPort );
 
   initServerStates();
 
@@ -479,7 +477,7 @@ Meteor.startup(() => {
   tsx_UpdateDevice('efw', 'Not connected ', '' );
   tsx_UpdateDevice('focuser', 'Not connected ', '' );
 
-  tsxLog( ' Logfile', logFileForClient() );
+  tsxLog( '      Logfile', logFileForClient() );
   UpdateStatus(' ******* TSX_CMD ONLINE ******' );
 
   return;

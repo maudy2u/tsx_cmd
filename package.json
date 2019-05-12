@@ -16,7 +16,7 @@
     "react-simple-range": "^1.6.0",
     "react-timekeeper": "^1.0.9",
     "semantic-ui-react": "^0.78.3",
-    "shelljs": "^0.8.3"
+    "shelljs": "^0.7.8"
   },
   "devDependencies": {
     "autoprefixer": "^6.7.7",

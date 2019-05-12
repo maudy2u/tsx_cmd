@@ -23,11 +23,13 @@ if [ $# -eq 0 ]
     echo "Install TSX Cmd v1.0"
     echo " *******************************"
     echo ": e.g."
-    echo ": tsx_cmd_install.sh init"
+    echo ": tsx_cmd_install.sh init 192.168.0.1"
     echo ""
     echo ": 1. Run this from the directory you wish to install."
     echo ": 2. You need to pass the INIT variable."
     echo ": 3. If you are updating then please use tsx_cmd_update.sh"
+    echo ": 4. Enter the IP address you wish tsx_cmd to use, needed"
+    echo ":    for downloads and uploads."
     echo ": "
     echo " *******************************"
     echo ""
@@ -163,3 +165,8 @@ echo '  "mongo_port": "27017",' >> ./settings.json
 echo '  "removed-to-enable: backup_location": "/home/odroid/app",' >> ./settings.json
 echo '  "removed-to-enable: log_file_location": "/media/odroid/PENSIVE2/tsx_cmd_logs"' >> ./settings.json
 echo '}' >> ./settings.json
+
+
+if [ "${2}" != "" ]; then
+  sed -i.bak s/127.0.0.1/${2}/g ./tsx_cmd_start.sh
+fi
