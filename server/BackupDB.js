@@ -17,7 +17,10 @@ tsx cmd - A web page to send commands to TheSkyX server
  */
 
 import { Meteor } from 'meteor/meteor';
-import { Backups } from '../imports/api/backups.js';
+import {
+  Backups,
+  backupFolder,
+ } from '../imports/api/backups.js';
 
 import {
   tsxInfo,
@@ -48,14 +51,6 @@ import shelljs from 'shelljs';
 // this is equivalent to the standard node require:
 const Shelljs = require('shelljs');
 
-var backupFolder = '';
-if( Meteor.settings.backup_location === '' || typeof Meteor.settings.backup_location === 'undefined' ) {
-  backupFolder = Meteor.absolutePath + '/backup/';
-}
-else {
-  backupFolder = Meteor.settings.backup_location;
-}
-
 // if these variables are defined then use their settings... else it is dev mode
 //  "tsx_cmd_db": "tsx_cmd",
 //  "mongo_port": "27017"
@@ -78,21 +73,71 @@ else {
 
 Meteor.startup(function () {
 
-// *******************************
-// Sample to add files
-// *******************************
-   // let logFolder = Meteor.absolutePath;
-   // let location = logFolder + '/logs/';
-   // let fileName = "2019_01_12_tsx_cmd.log";
-   //
-   // tsxLog(location + fileName );
-   // Backups.addFile( location + fileName, {
-   //   fileName: location + fileName,
-   //   meta: {}
-   // });
-// *******************************
+  // *******************************
+  // check for files to load
+  // *******************************
+  // Backups.remove({});
+  try {
+    var files = Shelljs.ls( backupFolder );
+    if ( files.code !== 0) {
+      UpdateStatus('There are no  backups: ' + files.code );
+      return;
+    }
+    // get all files in the Backups and confirm exists
+    tsxLog( ' Integrity check of file store');
+    let fileCursors = Backups.find({}, {sort: {name: 1}}).fetch();
+    let display = fileCursors.map((aFile, key) => {
+      let err = Shelljs.test( '-e', aFile.path );
+      if( err != true ) {
+        tsxLog( ' Dropping file not found: ' + aFile.path );
+        Backups.remove({ _id: aFile._id });
+      }
+    })
+    // confirm all files in the folder and in the Backups
+    tsxLog( ' Resync file store');
+    fileCursors = Backups.find({}, {sort: {name: 1}}).fetch();
+    for( var s = 0; s < files.length; s ++ ) {
+      var found = false;
+      let display = fileCursors.map((aFile, key) => {
+        let pFile = Backups.findOne({_id: aFile._id}).name;  //The "view/download" link
+        if( pFile == files[s] || pFile == 'undefined' ) {
+          found = true;
+          return;
+        }
+      })
+      // if not found then add it in
+      if( found == false ) {
+        tsxLog( ' resync ' + backupFolder +'' + files[s] );
+        Backups.addFile( backupFolder +'' + files[s], {
+          name: files[s],
+          meta: {}
+        });
+      }
+    }
+  }
+  catch( e ) {
+    // If on mac do nothing...
+    UpdateStatus( ' Could not resync files: ' + e );
+  }
 
 });
+
+function fileNameDate( today ) {
+  // desired format:
+  // 2018-01-01
+
+  var HH = today.getHours();
+  var MM = today.getMinutes();
+  var SS = today.getSeconds();
+  var mm = today.getMonth()+1; // month is zero based
+  var dd = today.getDate();
+  var yyyy = today.getFullYear();
+
+  // set to the date of the "night" session
+  ((HH < 8) ? dd=dd-1 : dd=dd);
+
+  return yyyy +'_'+ ('0'  + mm).slice(-2) +'_'+ ('0'  + dd).slice(-2)+'_HH'+ ('0'  + HH).slice(-2)+'_MM'+ ('0'  + MM).slice(-2)+'_SS'+ ('0'  + SS).slice(-2);
+}
 
 Meteor.publish('files.backups.all', function () {
   return Backups.find().cursor;
@@ -107,6 +152,75 @@ Meteor.methods({
   RemoveFile( fid ) {
     Backups.remove({_id: fid});
     UpdateStatus( ' Backup removed file. ');
+  },
+
+  RenameFile( fid, fName ) {
+    let aFile = Backups.findOne({_id: fid});
+    let oFile = aFile.path;
+    let nFile = aFile.path.replace( aFile.name, fName );
+    let err = Shelljs.mv( oFile, nFile ).code;
+    if ( err !== 0) {
+      UpdateStatus('Error: failed mv file: ' + err);
+      return;
+    }
+
+    UpdateStatus( ' File found: ' + aFile.name);
+    Backups.update( fid, {
+      $set: {
+        name: fName,
+        path: nFile,
+      },
+    });
+    aFile = Backups.findOne({_id: fid});
+    UpdateStatus( ' File renamed: ' + aFile.name);
+  },
+
+  RestoreFile( fid ) {
+    let aFile = Backups.findOne({_id: fid});
+    UpdateStatus( ' File found: ' + aFile.name);
+    let restoreLocation = '/tmp/tsx_cmd_import/'+tsx_cmd_db;
+    try {
+      UpdateStatus( ' restore starting');
+      tsxLog( ' Using: ', restoreLocation );
+      let err = Shelljs.mkdir( '-p', restoreLocation ).code;
+      tsxLog( err );
+      if ( err !== 0) {
+        UpdateStatus('Error: failed to create import location: ' + err);
+        return;
+      }
+      err = Shelljs.exec( 'tar -C ' +restoreLocation+ ' -xf ' +  aFile.path + ' --strip-components=2').code;
+      tsxLog( err );
+      if ( err !== 0) {
+        UpdateStatus('Error: failed to extract to import location: ' + err);
+        return;
+      }
+    }
+    catch( e ) {
+      // If on mac do nothing...
+      UpdateStatus( ' Restore exception: ' + e );
+    }
+
+    try {
+      // *******************************
+      // Is there a different development port for mongod?
+      // mongorestore --drop -d tsx_cmd "${install_dir}/import/export/tsx_cmd"
+
+      let dump = 'mongorestore --drop --port=' + mongo_port + ' -d '+ tsx_cmd_db + ' ' + restoreLocation;
+      tsxLog( ' Executing: ', dump );
+      if (Shelljs.exec( dump ).code !== 0) {
+        UpdateStatus('Error: Failed to run mongorestore to restore DB backup');
+        // Shelljs.exit(1); // do not exit. kills server
+        return;
+      }
+
+      UpdateStatus( ' Database restored: ' + aFile.name);
+    }
+    catch( e ) {
+      UpdateStatus( ' Restore FAILED: ' + e );
+    }
+    finally {
+      tsx_SetServerState( 'tool_active', false );
+    }
   },
 
   GetBackupOfDatabase() {
@@ -154,19 +268,27 @@ Meteor.methods({
       //   return;
       // }
 
-      tsxLog( ' Executing: ', 'tar -C '+ backupLocation +' -cf '+ backupFolder + 'export_db.tar ./' );
+      let tod = fileNameDate( new Date() );
+      let fName = 'db_export_'+tod+'.tar'
+
+      tsxLog( ' Executing: ', 'tar -C '+ backupLocation +' -cf '+ backupFolder + fName + ' ./' );
       // tar -C /Users/stephen/Documents/code/tsx_cmd/backup/tsx_cmd_db_export/ -cf /Users/stephen/Documents/code/tsx_cmd/backup/export_db.tar .
-      if (Shelljs.exec('tar -C '+ backupLocation + ' -cf '+backupFolder+'export_db.tar ./' ).code !== 0) {
+      if (Shelljs.exec('tar -C '+ backupLocation + ' -cf '+backupFolder+ fName + ' ./' ).code !== 0) {
         UpdateStatus('Error: failed to tar the backup for uploading.');
         // Shelljs.exit(1); // do not exit. kills server
         return;
       }
 
-      tsxLog( ' Storing backup: ', backupFolder + 'export_db.tar')
-      Backups.addFile( backupFolder + 'export_db.tar', {
-        fileName: 'db_backup.tar',
+      tsxLog( ' Storing backup: ', backupFolder + fName )
+      Backups.addFile( backupFolder + fName, {
+        name: fName,
         meta: {}
       });
+      if (Shelljs.exec('rm -rf '+ backupLocation ).code !== 0) {
+        UpdateStatus('Error: failed removing backup location.');
+        // Shelljs.exit(1); // do not exit. kills server
+        return;
+      }
 
       UpdateStatus( ' Backup ready.');
     }
