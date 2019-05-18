@@ -46,7 +46,7 @@ export function seriesDescription( template ) {
     let details = "";
     let repeating = '';
     if( template.repeatSeries ) {
-      repeating = 'Repeating: ';
+      repeating = 'repeating, ';
     }
     for (let i = 0; i < seriesArray.length; i++) {
       let series = Seriess.findOne({_id:seriesArray[i].id});
@@ -57,5 +57,7 @@ export function seriesDescription( template ) {
       details += series.frame +':' + series.filter + '@' + series.exposure + 'sec x'  + series.repeat;
     }
 
-    return repeating + details;
+
+
+    return 'Series: ' + repeating + 'dithering ' + template.defaultDithering + ', ' + details;
   }

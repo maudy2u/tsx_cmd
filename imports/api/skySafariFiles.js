@@ -20,15 +20,25 @@ tsx cmd - A web page to send commands to TheSkyX server
 
 
 import { Mongo } from 'meteor/mongo';
-import SimpleSchema from 'simpl-schema';
+import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug, logFileForClient, AppLogsDB } from './theLoggers.js';
 import { FilesCollection } from 'meteor/ostrio:files';
-
 // Used to store the filters currently available/active on TSX
 import { Random } from 'meteor/random';
-import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug, logFileForClient, AppLogsDB } from './theLoggers.js';
+// import SimpleSchema from 'simpl-schema';
 
-const SkySafariFiles = new FilesCollection({
-  collectionName: 'skySafari',
+// Used to store the sessions for a Target - the actual imaging
+// check here for extras: https://github.com/VeliovGroup/Meteor-Files/wiki/Constructor
+var folder = '';
+if( Meteor.settings.skySafari_files === '' || typeof Meteor.settings.skySafari_files === 'undefined' ) {
+  folder = Meteor.absolutePath + '/skySafari_files/';
+}
+else {
+  folder = Meteor.settings.skySafari_files;
+}
+export const skySafariFilesFolder = folder;
+export const SkySafariFiles = new FilesCollection({
+  storagePath: skySafariFilesFolder,
+  collectionName: 'skySafariFiles',
   allowClientCode: true, // Required to let you remove uploaded file
   onBeforeUpload(file) {
     // Allow upload files under 10MB, and only in png/jpg/jpeg formats
@@ -40,15 +50,16 @@ const SkySafariFiles = new FilesCollection({
   }
 });
 export default SkySafariFiles; // To be imported in other files
+// *******************************
 
-SimpleSchema.setDefaultMessages({
-  initialLanguage: 'en',
-  messages: {
-    en: {
-      uploadError: '{{value}}', //File-upload
-    },
-  }
-});
+// SimpleSchema.setDefaultMessages({
+//   initialLanguage: 'en',
+//   messages: {
+//     en: {
+//       uploadError: '{{value}}', //File-upload
+//     },
+//   }
+// });
 
 if (Meteor.isClient) {
   Meteor.subscribe('files.skySafari.all');
@@ -71,7 +82,7 @@ if (Meteor.isServer) {
 
 // *******************************
 // Get the filters from TheSkyX
-SkySafariFiles.helpers({
+//SkySafariFiles.helpers({
 
   // renderDropDownFilters: function() {
   //   var filters = Filters.find().fetch();
@@ -89,4 +100,4 @@ SkySafariFiles.helpers({
   //   return filter.slot;
   // },
 
-});
+//});

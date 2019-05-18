@@ -211,11 +211,11 @@ class BackupModal extends Component {
       DISABLE = false;
       NOT_DISABLE = true;
     }
+//         <Button icon='cloud upload' onClick={this.uploadDatabase.bind(this)}/>
 
     return (
       <Button.Group basic size='small' floated='right'>
         <Button icon='cloud download' onClick={this.backupAndDownloadDatabase.bind(this)}/>
-        <Button icon='cloud upload' onClick={this.uploadDatabase.bind(this)}/>
       </Button.Group>
     )
   }
@@ -277,9 +277,7 @@ class BackupModal extends Component {
             <p>Upload New File:</p>
             <input type="file" id="fileinput" disabled={this.state.inProgress} ref="fileinput"
               onChange={this.uploadIt}/>
-          </Segment>
-          <Segment>
-            {this.showUploads()}
+              {this.showUploads()}
           </Segment>
           <Segment>
           {this.displayFiles()}

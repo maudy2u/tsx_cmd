@@ -28,7 +28,16 @@ import { FlatSeries } from '../imports/api/flatSeries.js';
 import { TargetAngles } from '../imports/api/targetAngles.js';
 
 import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug,
-  logFileForClient, AppLogsDB } from '../imports/api/theLoggers.js';
+  logFileForClient, AppLogsDB
+} from '../imports/api/theLoggers.js';
+
+import {
+  backupFolder,
+} from '../imports/api/backups.js';
+
+import {
+  skySafariFilesFolder,
+} from '../imports/api/skySafariFiles.js';
 
 import {
   tsx_ServerStates,
@@ -438,11 +447,11 @@ Meteor.startup(() => {
   version_dat = JSON.parse(Assets.getText('version.json'));
   if( version_dat.version != '') {
     tsx_SetServerState('tsx_version', version_dat.version);
-    tsxLog('      Version', version_dat.version);
+    tsxLog('            Version', version_dat.version);
   }
   if( version_dat.date != '') {
     tsx_SetServerState('tsx_date', version_dat.date);
-    tsxLog('         Date', version_dat.date);
+    tsxLog('               Date', version_dat.date);
   }
 
   var dbIp = '';
@@ -464,8 +473,8 @@ Meteor.startup(() => {
 
   // removing so can start up easier without error.
   // var dbMinAlt = TheSkyXInfos.findOne().defaultMinAltitude();
-  tsxLog('   TheSkyX IP',  dbIp );
-  tsxLog(' TheSkyX port', dbPort );
+  tsxLog('         TheSkyX IP',  dbIp );
+  tsxLog('       TheSkyX port', dbPort );
 
   initServerStates();
 
@@ -477,7 +486,11 @@ Meteor.startup(() => {
   tsx_UpdateDevice('efw', 'Not connected ', '' );
   tsx_UpdateDevice('focuser', 'Not connected ', '' );
 
-  tsxLog( '      Logfile', logFileForClient() );
+  tsxLog( '            Logfile', logFileForClient() );
+  tsxLog( '   DB Backup Folder', backupFolder );
+  tsxLog( ' SkySafari Settings', skySafariFilesFolder );
+
+
   UpdateStatus(' ******* TSX_CMD ONLINE ******' );
 
   return;

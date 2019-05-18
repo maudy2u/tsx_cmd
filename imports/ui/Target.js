@@ -25,7 +25,11 @@ import { Segment, Item, Label, Button, Modal, Header, Icon, Table, Checkbox, Pro
 
 import { TargetReports } from '../api/targetReports.js';
 import { TargetSessions } from '../api/targetSessions.js';
-import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
+import {
+  TakeSeriesTemplates,
+  seriesDescription,
+} from '../api/takeSeriesTemplates.js';
+
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 
 import TargetEditor from './TargetEditor.js';
@@ -255,6 +259,13 @@ class Target extends Component {
     }
   }
 
+  seriesDetails() {
+    var tSeries = TakeSeriesTemplates.findOne({_id: this.props.target.series._id});
+    if( typeof tSeries != 'undefined') {
+      return seriesDescription(tSeries);
+    }
+  }
+
   render() {
     // Use the image for a stretched image in the Future
     //       <Item.Image size='tiny' src='' />
@@ -300,11 +311,12 @@ class Target extends Component {
     let DTIME = '';
     try {
       let year = this.props.report.updatedAt.getFullYear();
-      let mon = ('0'  + this.props.report.updatedAt.getMonth()+1).slice(-2); // 0-11, so plus 1
+      let mon = Number(this.props.report.updatedAt.getMonth())+1; // needed to pull out so not a string
+      let MM = ('0'  + mon ).slice(-2); // 0-11, so plus 1
       let day = ('0'  + this.props.report.updatedAt.getDate()).slice(-2);
       let hours = ('0'  + this.props.report.updatedAt.getHours()).slice(-2);
       let minutes = ('0'  + this.props.report.updatedAt.getMinutes()).slice(-2);
-      DTIME = hours + ':' + minutes + ', ' + year +'-'+mon+'-'+day;
+      DTIME = hours + ':' + minutes + ', ' + year +'-'+MM+'-'+day;
     }
     catch( e ) {
     }
@@ -343,13 +355,13 @@ class Target extends Component {
               <Label>Transit: <Label.Detail>{TRANSIT}</Label.Detail></Label>
               <Label>RA: <Label.Detail>{RA}</Label.Detail></Label>
               <Label>DEC: <Label.Detail>{DEC}</Label.Detail></Label>
-              <Label>Point: <Label.Detail>{POINT}</Label.Detail></Label>
+              <Label>Point: <Label.Detail>{POINT}</Label.Detail></Label><br/>
+              <small>{this.seriesDetails()}</small>
             </Segment>
           </Item.Meta>
           <Item.Extra>
             <Label.Group>
-              {/*
-              <Label>Direction: <Label.Detail>{this.state.azimuth}</Label.Detail></Label> */}
+              {/* <Label>Direction: <Label.Detail>{this.state.azimuth}</Label.Detail></Label> */}
             </Label.Group>
             <center>
               {this.targetButtons(this.props.scheduler_running.value, TOOL_ACTIVE)}
