@@ -129,13 +129,13 @@ class Toolbox extends Component {
 
   handleChange = (e, { name, value }) => {
     this.setState({ [name]: value.trim() });
-    this.saveDefaultStateValue( name, value.trim() );
+    saveDefaultStateValue( name, value.trim() );
   };
 
   handleNumericChange = (e, { name, value }) => {
 
     this.setState({ [name]: value.trim() });
-    this.saveDefaultStateValue( name, value.trim() );
+    saveDefaultStateValue( name, value.trim() );
   };
 
   // requires the ".bind(this)", on the callers
@@ -163,18 +163,6 @@ class Toolbox extends Component {
         }
     });//.bind(this));
   };
-
-  // Generic Method to determine default to save.
-  // saveDefaultStateValue( param, val ) {
-  //
-  //   Meteor.call( 'updateServerState', param, val , function(error, result) {
-  //
-  //       if (error && error.error === "logged-out") {
-  //         // show a nice error message
-  //         Session.set("errorMessage", "Please fix.");
-  //       }
-  //   });//.bind(this));
-  // };
 
   // *******************************
   rotateCameraFOV() {

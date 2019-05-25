@@ -135,6 +135,7 @@ export const tsx_ServerStates = {
 
 };
 
+// Should be using this version for all and not within the API
 export function saveDefaultStateValue( param, val ) {
 
   Meteor.call( 'updateServerState', param, val , function(error, result) {

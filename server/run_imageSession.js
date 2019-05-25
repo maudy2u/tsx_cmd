@@ -2061,7 +2061,7 @@ export function tsx_RotateCamera( position, cls ) {
   if(
     typeof position === 'undefined' || position === ''
   ) {
-    let str = ' Rotating: Exiting - type or position.';
+    let str = ' !!! Rotating failed: Exiting - type or position needed.';
     UpdateStatus( str );
     tsxErr( str );
     return rotateSucess;
