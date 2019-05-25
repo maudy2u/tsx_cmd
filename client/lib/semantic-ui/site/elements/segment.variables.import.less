@@ -5,11 +5,30 @@
 
 
 /*
-Buttons: #323232;
-Background: #242424;
-Borders: #2D2D2D;
-TEXT: #6C6C6C;
+@Buttons: #323232;
+@Background: #242424;
+@overallBackground: #333333;
+@overallBackground: #333333;
+@Borders: #2D2D2D;
+@activesBorders: #2D2D2D;
+@inactiveBorders: #2A2A2A;
+@TEXT: #6C6C6C;
+@lightButtonHighlight: #999999;
+@lightButtonHighlight: #999999;
+@darkerLightButtonHighlight: #666666;
+@darkerLightButtonHighlight: #666666;
 */
+
+@lightButtonHighlight: #999999;
+@darkerLightButtonHighlight: #666666;
+@overallBackground: #333333;
+@bordersSeparator: #2D2D2D;
+@activesBorders: #2D2D2D;
+@inactiveBorders: #2A2A2A;
+@activeButton: #2F2F2F;
+@labelBackground: #6C6C6C;
+@lightLabelBackground: #585858;
+
 
 @blue: #80A6CD;
 @green: #78CB5B;
@@ -17,13 +36,13 @@ TEXT: #6C6C6C;
 @black: #333333;
 @tsx_cmd: #242424;
 @primaryColor: @green;
-@borderColor: #2D2D2D;
+@borderColor: @lightButtonHighlight;
 @secondaryColor: @tsx_cmd;
 @backgroundColor: @tsx_cmd;
 @background: @backgroundColor;
 /* Ordinality */
-@secondaryBackground: @darkWhite;
-@secondaryColor: @mutedTextColor;
+@secondaryBackground: @borderColor;
+@secondaryColor: @borderColor;
 
-@tertiaryBackground:  @midWhite;
-@tertiaryColor: @mutedTextColor;
+@tertiaryBackground:  @borderColor;
+@tertiaryColor: @borderColor;
