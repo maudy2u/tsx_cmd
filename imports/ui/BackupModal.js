@@ -232,6 +232,14 @@ class BackupModal extends Component {
 
         let link = Backups.findOne({_id: aFile._id}).link('version');  // 'version' is needed in the case the file is renamed.
 
+        // get the TSXIP, and replace the "host with this value"
+        let tsxip = TheSkyXInfos.findOne({name: 'ip'});
+        if( typeof tsxip != 'undefined' || tsxip != '') {
+          var url = new URL(link);
+          url.hostname = tsxip.value;
+          link = url.href //'http://example.com:8080/one/two'
+        }
+
         // Send out components that show details of each file
         return <div key={'file' + key}>
           <IndividualFile
