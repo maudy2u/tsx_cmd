@@ -1652,9 +1652,11 @@ function isTargetConditionInValid(target) {
       tsx_SetServerState('defaultCLSRepeat', 0); // default is off
       defaultCLSRepeat = tsx_GetServerState('defaultCLSRepeat');
     }
-    tsxLog( ' --- check CLS every: ' + defaultCLSRepeat.value + ' sec');
 
     // only SetUpForImagingRun if greater than zero
+    var pTime = howMuchTimeHasPassed(defaultCLSRepeat.value, defaultCLSRepeat.timestamp);
+    tsxLog( ' --- checking CLS: ' + pTime+ ' of ' + defaultCLSRepeat.value + ' sec');
+
     if( defaultCLSRepeat.value > 0  ) {
       tsxDebug( ' Check if time to CLS again: ' + defaultCLSRepeat.value );
       tsxDebug( ' Check time: ' + defaultCLSRepeat.timestamp );
@@ -1664,7 +1666,11 @@ function isTargetConditionInValid(target) {
         // This will cause a calibration to happen...
         // do not need to calibrate wth a meridian flip
         //  SetUpForImagingRun( target, false, false );
-        tsx_CLS( target );
+        var cls = tsx_CLS(target); 						//# Call the Closed-Loop-Slew function to go to the target
+        if( !cls ) {
+          UpdateStatus( ' Target centred FAILED: ' + cls.angle);
+          throw( 'TSX_ERROR|Cloudy? Is Tsx Running?');
+        }
         // UpdateStatus( " Setup guider: " + target.targetFindName );
       	SetUpAutoGuiding( target, false );			// Setup & Start Auto-Guiding.
 
@@ -2675,7 +2681,13 @@ export function hasTimePassed( duration, timestamp ) {
   }
   return false;
 }
-
+// *************************** ***********************************
+// Assuming a time in seconds is provided and a Date Object
+export function howMuchTimeHasPassed( duration, timestamp ) {
+  var now = new Date();
+  var diff = parseInt(now - timestamp)/1000; // Difference in seconds
+  return diff;
+}
 
 export function hasStartTimePassed( target ) {
   // tsxDebug('************************');

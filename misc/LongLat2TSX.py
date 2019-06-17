@@ -61,6 +61,7 @@ def setLongLat( ):
 
                 lon  = session.fix.longitude
                 lat = session.fix.latitude
+                alt = session.fix.altitude
                 if lon < 0:
                   NorthOrSouth = 1
                 if lat < 0:
@@ -70,11 +71,13 @@ var Out = 'Success';"+CR+"\
 try {"+CR+"\
 var sk6DocProp_Latitude = " + str( EastOrWest ) + ";" +CR+"\
 var sk6DocProp_Longitude = "+ str ( NorthOrSouth ) + ";"+CR+"\
-var sk6DocProp_Altitude = "+ str ( session.fix.altitude ) + ";"+CR+"\
+var sk6DocProp_ElevationInMeters = 3;"+CR+"\
 var LO = Math.abs(" +  str( lon  ) + ");"+CR+"\
 var LA = Math.abs(" + str( lat ) + " );"+CR+"\
+var ALT = Math.abs(" + str( alt ) + " );"+CR+"\
 sky6StarChart.SetDocumentProperty(sk6DocProp_Latitude, LA);"+CR+"\
 sky6StarChart.SetDocumentProperty(sk6DocProp_Longitude, LO );"+CR+"\
+sky6StarChart.SetDocumentProperty(sk6DocProp_ElevationInMeters, ALT );"+CR+"\
 }"+CR+"\
 catch (e) {"+CR+"\
 Out = 'Failed with ' +  e;"+CR+"\
