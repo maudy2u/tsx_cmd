@@ -1494,12 +1494,20 @@ function isFocusingNeeded(target) {
       curFocusTemp = lastFocusTemp;
     }
     let focusDiff = Math.abs(curFocusTemp - lastFocusTemp).toFixed(2);
-    let targetDiff = target.tempChg; // diff for this target
-    tsxLog(' --- check focus temp diff('+targetDiff+'): ' + focusDiff + '='+curFocusTemp +'-'+lastFocusTemp );
-    if( focusDiff >= targetDiff ) {
-    // returning true tell caller to run  @Focus3
-      return true;
+//    let targetDiff = target.tempChg; // diff for this target
+    let targetDiff = tsx_GetServerStateValue( 'defaultFocusTempDiff' ); // get last temp
+    if( typeof targetDiff == 'undefined' ) {
+      tsxLog(' --- check focus temp diff('+targetDiff+'): ' + focusDiff + '='+curFocusTemp +'-'+lastFocusTemp );
+      if( focusDiff >= targetDiff ) {
+      // returning true tell caller to run  @Focus3
+        return true;
+      }
     }
+    else {
+      tsxWarn(' !!! Focus temp diff is not set in defaults');
+      return false;
+    }
+
   }
   return false;
 }
@@ -2248,7 +2256,7 @@ function tsx_takeImage( filterNum, exposure, frame, tName ) {
         if( rotPos == 'rotatorPosition') {
           // the position is stored
           let ang = tsx_return.split('|')[2].trim();
-          tsxLog( ' --- rotator position: ' + Number(ang).toFixed(3) );
+          tsxLog( ' --- rotator position angle: ' + Number(ang).toFixed(3) );
           // the stoed position can be used for flats
           recordRotatorPosition( tName, Number(ang).toFixed(3) );
         }

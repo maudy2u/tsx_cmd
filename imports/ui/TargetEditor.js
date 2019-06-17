@@ -584,6 +584,7 @@ class TargetEditor extends Component {
                 />
               </Form.Group>
               <Segment>
+              {/*
                 <h4 className="ui header">Focus Temperature Delta: {this.state.tempChg}</h4>
                 <Form.Input
                   label='Delta in temp to focus'
@@ -597,7 +598,7 @@ class TargetEditor extends Component {
                   validationError="Must be a positive number, e.g 1, .7, 1.1"
                   errorLabel={ ERRORLABEL }
                 />
-
+                */}
               </Segment>
       </Tab.Pane> },
 //

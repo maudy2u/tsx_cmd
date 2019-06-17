@@ -110,8 +110,14 @@ CCDSC.TakeImage();
 //Enter the rotator angle
 if( CCDSC.rotatorIsConnected ) {
 	var rotatorPosition = CCDSC.rotatorPositionAngle();
-  TSXI.setFITSKeyword("ROTATOR_POS", rotatorPosition);
+  TSXI.setFITSKeyword("ROTATOR_POS_ANGLE", rotatorPosition);
 	Out = Out+'rotatorPosition|'+rotatorPosition;
+
+	// ImageLink.scale = imageScale; // SEEMS THIS MAY BE IGNORED
+	// ImageLink.pathToFITS = CCDSC.LastImageFileName;
+	// ImageLink.execute();
+	// var imageLinkAng=ImageLinkResults.imagePositionAngle;//sky position
+	// Out = Out+'|positionAngle|'+Number(imageLinkAng).toFixed(3);
 }
 //CCDSC.Asynchronous = true;		// We are going to wait for it
 
