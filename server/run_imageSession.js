@@ -1496,7 +1496,7 @@ function isFocusingNeeded(target) {
     let focusDiff = Math.abs(curFocusTemp - lastFocusTemp).toFixed(2);
 //    let targetDiff = target.tempChg; // diff for this target
     let targetDiff = tsx_GetServerStateValue( 'defaultFocusTempDiff' ); // get last temp
-    if( typeof targetDiff == 'undefined' ) {
+    if( typeof targetDiff != 'undefined' ) {
       tsxLog(' --- check focus temp diff('+targetDiff+'): ' + focusDiff + '='+curFocusTemp +'-'+lastFocusTemp );
       if( focusDiff >= targetDiff ) {
       // returning true tell caller to run  @Focus3
@@ -3095,7 +3095,7 @@ Use this to set the last focus
     try {
       result = tsx_CLS( target);
       tsxLog( '??? Debuging the manual Centring: ' + result );
-      if( result.angle == -1 ) {
+      if( result.angle == -1 || result == false ) {
         UpdateStatus(' !!!Failed to centre: ' + target.targetFindName);
       }
       else {
