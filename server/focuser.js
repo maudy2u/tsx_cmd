@@ -97,7 +97,7 @@ Meteor.methods({
   focusCamera() {
     tsx_SetServerState( 'tool_active', true );
     var focusFilterName = tsx_GetServerStateValue( 'defaultFilter' );
-    var focusFilters = getFilterSlot( focusFilterName );
+    var focusFilter = getFilterSlot( focusFilterName );
     var focusExp = tsx_GetServerStateValue( 'defaultFocusExposure' ); // assuming 1, need to get from state
 
     try {
