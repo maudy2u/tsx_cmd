@@ -83,7 +83,7 @@ export function isSchedulerStopped() {
 }
 
 // **************************************************************
-function getFilterSlot(filterName) {
+export function getFilterSlot(filterName) {
   // need to look up the filters in TSX
   var slot = '';
   try {

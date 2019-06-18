@@ -179,6 +179,13 @@ class Toolbox extends Component {
     }.bind(this));
   };
 
+  runFocuser() {
+    Meteor.call( 'focusCamera', function(error, result) {
+      console.log('Error: ' + error);
+      console.log('result: ' + result);
+    }.bind(this));
+  };
+
   calibrateGuider() {
     var slew = this.state.tool_calibrate_via;
     var location = this.state.tool_calibrate_location;
@@ -363,6 +370,29 @@ class Toolbox extends Component {
     )
   };
 
+  focusTool( state
+    , active
+  ) {
+
+    let DISABLE = true;
+    let NOT_DISABLE = false;
+    // then use as needed disabled={DISABLE} or disabled={NOT_DISABLE}
+    if( state == 'Stop'  && active == false ){
+      DISABLE = false;
+      NOT_DISABLE = true;
+    }
+
+    return (
+      <div>
+      <Header>@Focus3</Header>
+      <Button.Group icon>
+          <Button  disabled={DISABLE} onClick={this.runFocuser.bind(this)}>@Focus3</Button>
+       </Button.Group>
+     </div>
+    )
+  };
+
+
   render() {
 
     var TARGETNAME ='';
@@ -389,6 +419,12 @@ class Toolbox extends Component {
            , this.state.tool_calibrate_dec_az
            , this.props.tool_active.value
          )}
+        </Segment>
+        <Segment raised>
+        {this.focusTool(
+          this.props.scheduler_running.value
+          , this.props.tool_active.value
+        )}
         </Segment>
         <Segment raised>
         <Header>Rotator FOV/Position</Header>
