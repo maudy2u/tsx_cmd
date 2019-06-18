@@ -3094,6 +3094,7 @@ Use this to set the last focus
     var result =  '';
     try {
       result = tsx_CLS( target);
+      tsxLog( '??? Debuging the manual Centring: ' + result );
       if( result.angle == -1 ) {
         UpdateStatus(' !!!Failed to centre: ' + target.targetFindName);
       }
