@@ -1495,19 +1495,18 @@ function isFocusingNeeded(target) {
     }
     let focusDiff = Math.abs(curFocusTemp - lastFocusTemp).toFixed(2);
 //    let targetDiff = target.tempChg; // diff for this target
-    let targetDiff = tsx_GetServerStateValue( 'defaultFocusTempDiff' ); // get last temp
-    if( typeof targetDiff != 'undefined' ) {
-      tsxLog(' --- check focus temp diff('+targetDiff+'): ' + focusDiff + '='+curFocusTemp +'-'+lastFocusTemp );
-      if( focusDiff >= targetDiff ) {
+    let tempDiff = tsx_GetServerStateValue( 'defaultFocusTempDiff' ); // get last temp
+    if( typeof tempDiff == 'undefined' ) {
+      tsxWarn(' !!! Focus temp diff is not set in defaults');
+      return false;
+    }
+    else {
+      tsxLog(' --- check temp diff('+tempDiff+'): ' + focusDiff + '='+curFocusTemp +'-'+lastFocusTemp );
+      if( focusDiff >= tempDiff ) {
       // returning true tell caller to run  @Focus3
         return true;
       }
     }
-    else {
-      tsxWarn(' !!! Focus temp diff is not set in defaults');
-      return false;
-    }
-
   }
   return false;
 }
