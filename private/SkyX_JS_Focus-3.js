@@ -65,13 +65,11 @@ if ( Application.build >= 11177 )
 			// CCDSC.BinX = 2;
 			// CCDSC.Biny = 2;
 
-			// NOt needed in @Focus3: http://www.bisque.com/sc/forums/p/32837/169061.aspx#169061
+			// Not needed in @Focus3: http://www.bisque.com/sc/forums/p/32837/169061.aspx#169061
 			//CCDSC.ImageReduction = 1;
-			//
+
 			CCDSC.TakeImage();			// Snap the throw-away
-
 			CCDSC.AutoSaveOn = true;		// Keep the images for the future
-
 
 			// Finally! Focus the camera!
 			// Use three samples per point and let @F3 figure out the rest.
@@ -79,7 +77,12 @@ if ( Application.build >= 11177 )
 			var temp = '';
 			var pos = '';
 			try {
-				res1 = CCDSC.AtFocus3(numFocSamples, 1);
+				CCDSC.FocusExposureTime = focusExp; // direct from example: atfocus3.js
+				res1 = CCDSC.AtFocus3(1, true); // direct from example: atfocus3.js
+//				res1 = CCDSC.AtFocus3(numFocSamples, true);
+// there have been crashes with the @Focus3 method...
+// Not sure if this is a fault of the return type
+// suspect it was not the use of the `FocusExposureTime`, which is now set
 			} catch (e) {
 				res1 = 'Failed: focus failed.'
 			} finally {

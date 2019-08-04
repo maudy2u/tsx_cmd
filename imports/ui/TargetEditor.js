@@ -406,7 +406,7 @@ class TargetEditor extends Component {
           </Segment>
           <Segment>
             <Form.Group>
-              <Form.Input
+              {/*<Form.Input
                     label='Rotator Position (optional)'
                     name='rotator_position'
                     placeholder='Position for rotator (i.e. used with flats)'
@@ -415,6 +415,7 @@ class TargetEditor extends Component {
                     validationErrors={{ isNumeric: 'Must be a number' }}
                     errorLabel={ ERRORLABEL }
                     onChange={this.handleChange}/>
+              */}
               <Form.Input
                   label='East Pointing FOV ImageLink Angle (optional)'
                   name='angle'
@@ -424,19 +425,6 @@ class TargetEditor extends Component {
                   validationErrors={{ isNumeric: 'Must be a number' }}
                   errorLabel={ ERRORLABEL }
                   onChange={this.handleChange}/>
-              </Form.Group>
-              <Form.Group>
-              <Checkbox
-                label=' Rotate 180 after meridian flip'
-                name='rotator_180_flip'
-                disabled
-                toggle
-                checked={this.state.rotator_180_flip}
-                onChange={this.handleToggle}
-                validations="isNumeric"
-                validationErrors={{ isNumeric: 'Must be a number' }}
-                errorLabel={ ERRORLABEL }
-              />
               <Checkbox
                 label=' On angle is WestSide, off EastSide'
                 name='rotator_angle_westside'

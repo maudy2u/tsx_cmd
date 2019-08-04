@@ -19,13 +19,10 @@
 var CAMSCALE = $004;
 var GUIDERSCALE = $005;
 var GUIDING_PIXEL_ERROR_TOLERANCE = $006;
-var IS_GUIDE_SETTLING_ENABLED = $007;
-
-var CCDSC = ccdsoftCamera;
+var IS_GUIDE_SETTLING_ENABLED = $007; // 1 = true
 var CCDAG = ccdsoftAutoguider;
-var CCDAGI = ccdsoftCameraImage;
 
-CCDSC.Asynchronous = false;		// We are going to wait for it
+CCDAG.Asynchronous = false;		// We are going to wait for it
 
 var WAIT = ((CCDAG.AutoguiderExposureTime + CCDAG.Delay + 1) * 1000);
 

@@ -294,7 +294,7 @@ function startServerProcess() {
 
           // Find a session
           // Get the target to shoot
-//            tsxInfo( ' Validating Targets...');
+          // tsxInfo( ' Validating Targets...');
 
           /* #TODO
           So working on the cloud detection to PAUSE.

@@ -102,8 +102,8 @@ Meteor.methods({
 
     try {
       var cmd = tsx_cmd('SkyX_JS_Focus-3');
-      tsxLog( ' ??? @Focusing-3 filter: ' + focusFilter );
-      tsxLog( ' ??? @Focusing-3 exposure: ' + focusExp );
+      tsxDebug( ' ??? @Focusing-3 filter: ' + focusFilter );
+      tsxDebug( ' ??? @Focusing-3 exposure: ' + focusExp );
       cmd = cmd.replace("$000", focusFilter ); // set filter
       cmd = cmd.replace("$001", focusExp ); // set Bin
 
@@ -131,7 +131,7 @@ Meteor.methods({
           temp = position;
         }
         // Focuser postion (1232345345) using LUM Filter
-        UpdateStatus(' *** Focuser postion (' + position + ') and temp ('+temp+') using 0 filter.');
+        UpdateStatus(' *** Focuser postion (' + position + ') and temp ('+temp+') using filter: ' + focusFilterName);
 
         if( temp != '') {
           tsx_SetServerState( 'initialFocusTemperature', temp);
@@ -143,7 +143,7 @@ Meteor.methods({
       }
     }
     catch( e ) {
-      UpdateStatus( ' Focusing FAILED: ' + e );
+      UpdateStatus( ' !!! Focusing FAILED: ' + e );
     }
     finally {
       tsx_SetServerState( 'tool_active', false );
