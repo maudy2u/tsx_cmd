@@ -80,21 +80,21 @@ Meteor.startup(function () {
   try {
     var files = Shelljs.ls( backupFolder );
     if ( files.code !== 0) {
-      UpdateStatus('There are no  backups: ' + files.code );
+      tsxDebug('There are no  backups: ' + files.code );
       return;
     }
     // get all files in the Backups and confirm exists
-    tsxLog( ' Integrity check of file store');
+    tsxDebug( ' Integrity check of file store');
     let fileCursors = Backups.find({}, {sort: {name: 1}}).fetch();
     let display = fileCursors.map((aFile, key) => {
       let err = Shelljs.test( '-e', aFile.path );
       if( err != true ) {
-        tsxLog( ' Dropping file not found: ' + aFile.path );
+        tsxDebug( ' Dropping file not found: ' + aFile.path );
         Backups.remove({ _id: aFile._id });
       }
     })
     // confirm all files in the folder and in the Backups
-    tsxLog( ' Resync file store');
+    tsxDebug( ' Resync file store');
     fileCursors = Backups.find({}, {sort: {name: 1}}).fetch();
     for( var s = 0; s < files.length; s ++ ) {
       var found = false;
@@ -107,7 +107,7 @@ Meteor.startup(function () {
       })
       // if not found then add it in
       if( found == false ) {
-        tsxLog( ' resync ' + backupFolder +'' + files[s] );
+        tsxDebug( ' resync ' + backupFolder +'' + files[s] );
         Backups.addFile( backupFolder +'' + files[s], {
           name: files[s],
           meta: {}
@@ -117,7 +117,7 @@ Meteor.startup(function () {
   }
   catch( e ) {
     // If on mac do nothing...
-    UpdateStatus( ' Could not resync files: ' + e );
+    UpdateStatusErr( ' Could not resync files: ' + e );
   }
 
 });

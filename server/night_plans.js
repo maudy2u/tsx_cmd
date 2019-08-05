@@ -168,10 +168,10 @@ Meteor.methods({
 
   planData() {
     tsx_SetServerState( 'night_plan_updating', true );
-    tsxLog( ' --- Night Plan: Computing');
+    tsxDebug( ' --- Night Plan: Computing');
     let plan = TargetPlans();
     tsx_SetServerState( 'night_plan_updating', false );
-    tsxLog( ' --- Night Plan: Loaded');
+    tsxDebug( ' --- Night Plan: Loaded');
     return plan;
   },
 

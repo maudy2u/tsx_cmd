@@ -143,7 +143,7 @@ function initServerStates() {
 
 function ParkMount( isParked ) {
   if( !isParked ) {
-    UpdateStatus(' Parking...');
+    UpdateStatus(' Parking mount...');
     var defaultFilter = tsx_GetServerStateValue('defaultFilter');
     var softPark = Boolean(tsx_GetServerStateValue('defaultSoftPark'));
     tsx_AbortGuider();
@@ -157,7 +157,7 @@ function sleepScheduler( isParked ) {
   if( isParked == false ) {
     ParkMount( isParked );
   }
-  UpdateStatus( ' Parked, waiting: '+ sleepTime + ' min');
+  UpdateStatus( ' Parked mount, waiting: '+ sleepTime + ' min');
   var timeout = 0;
   var msSleep = Number(sleepTime); // number of seconds
   postProgressTotal(sleepTime);
@@ -170,7 +170,7 @@ function sleepScheduler( isParked ) {
     postProgressIncrement( timeout );
   }
   if( isSchedulerStopped() != false ) {
-    UpdateStatus( ' Canceled sessions');
+    UpdateStatus( ' CANCELING SCHEDULER');
   }
   else {
     UpdateStatus(' WAKING UP...');
@@ -229,12 +229,12 @@ function startServerProcess() {
   // Do not assume Autoguider calibrated, will be done once guide star found
   var workers = scheduler.processJobs( 'runScheduler',
     function (job, cb) {
-      tsxLog( ' ******************************* ');
+      tsxLog( '  ###############################  ');
       // This will only be called if a 'runScheduler' job is obtained
       setSchedulerState( 'Running' );
       tsx_SetServerState('currentJob', job);
 
-      UpdateStatus(' *** Scheduler Started');
+      UpdateStatus(' SCHEDULER STARTED');
       var schedule = job.data;
       tsxDebug( schedule );
       tsxDebug( job.data );
@@ -274,7 +274,7 @@ function startServerProcess() {
           catch( err ) {
             var res = err.split('|')[0].trim();
             if( res == 'TSX_ERROR' ) {
-              UpdateStatus( ' *** ENDING - centring failed. Check for clouds' );
+              UpdateStatusErr( ' *** ENDING - centring failed. Check for clouds' );
             }
           }
         }
@@ -337,25 +337,25 @@ function startServerProcess() {
               try {
                 res = err.split('|')[0].trim();
                 if( res == 'TSX_ERROR' ) {
-                  UpdateStatus( ' *** ENDING - centring failed. Check for clouds' );
+                  UpdateStatusErr( ' PARKING - CLS failed, check for clouds.' );
                   ParkMount( isParked );
                   isParked = true;
                 }
                 else {
-                  UpdateStatus( ' !!! SOMETHING WRONG - human needs to check ');
+                  UpdateStatusErr( ' !!! SOMETHING WRONG - human needs to check ');
                   break;
                 }
               }
               catch( e ) {
                 // split may fail
-                UpdateStatus( ' !!! SOMETHING WRONG - human needs to check: ' + err );
+                UpdateStatusErr( ' !!! SOMETHING WRONG - human needs to check: ' + err );
                 break;
               }
             }
             if( ready ) {
               // target images per Take Series
               tsxDebug ( ' ************************1*');
-              UpdateStatus ( ' ' +target.targetFindName  + ': start imaging');
+              tsxDebug ( ' ' +target.targetFindName  + ': start imaging');
               try {
                 processTargetTakeSeries( target );
                 if( isSchedulerStopped() == true ) {
@@ -364,10 +364,10 @@ function startServerProcess() {
               }
               catch( err ) {
                 // did we get a CLS Failure???
-                tsxLog( ' !!! Error processing series: ' + err );
+                tsxErr( ' !!! Error processing series: ' + err );
                 var res = err.split('|')[0].trim();
                 if( res == 'TSX_ERROR' ) {
-                  UpdateStatus( ' *** ENDING - centring failed. Check for clouds' );
+                  UpdateStatusErr( ' *** ENDING - centring failed. Check for clouds' );
                   ParkMount( isParked );
                   isParked = true;
                 }
@@ -412,8 +412,8 @@ function startServerProcess() {
       }
       // While ended... exit process
       srvStopScheduler();
-      tsxLog( ' Scheduler exited.');
-      tsxLog( ' ******************************* ');
+      tsxLog( ' SCHEDULER STOPPED');
+      tsxLog( ' ###############################  ');
       job.done();
       cb();
     }
@@ -439,7 +439,8 @@ export function srvStopScheduler() {
 }
 
 Meteor.startup(() => {
-  tsxLog(' ****** TSX_CMD STARTING *****', '');
+  tsxLog(' ******************************', '');
+  tsxLog(' ****** TSX_CMD STARTING', '');
   AppLogsDB.remove({});
   srvStopScheduler();
 
@@ -491,7 +492,8 @@ Meteor.startup(() => {
   tsxLog( ' SkySafari Settings', skySafariFilesFolder );
 
 
-  UpdateStatus(' ******* TSX_CMD ONLINE ******' );
+  UpdateStatus(' ******* TSX_CMD ONLINE' );
+  tsxLog(' ******************************', '');
 
   return;
 
@@ -564,7 +566,7 @@ Meteor.methods({
 
    stopScheduler() {
      if( getSchedulerState() != 'Stop' ) {
-       UpdateStatus(' *** Manually STOPPING scheduler ***');
+       UpdateStatus('MANUAL: STOPPING SCHEDULER');
        srvStopScheduler();
      }
      else {

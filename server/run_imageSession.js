@@ -64,7 +64,6 @@ var forceAbort = false;
 
 // *******************************
 export function isSchedulerStopped() {
-  // tsxDebug('************************');
   tsxDebug(' *** isSchedulerStopped ' );
   var sched = tsx_GetServerStateValue('scheduler_running');
   var currentJob =   tsx_SetServerState('currentJob', '');
@@ -238,7 +237,7 @@ export function tsx_IsParked() {
 // **************************************************************
 export function tsx_MntUnpark() {
   tsxDebug('************************');
-  tsxDebug(' *** tsx_MntUnpark' );
+  UpdateStatus(' Unparking mount' );
   var cmd = tsx_cmd('SkyX_JS_UnparkMount');
 
   var Out = '';
@@ -247,10 +246,10 @@ export function tsx_MntUnpark() {
         var result = tsx_return.split('|')[0].trim();
         tsxDebug( ' *** result: ' + result );
         if( result == 'unparked' ) {
-          UpdateStatus( ' *** Mount unparked' );
+          UpdateStatus(' Unparked mount' );
         }
         else {
-          UpdateStatus( ' !!! Unparking err: ' + result );
+          UpdateStatusErr( ' !!! Unparking err: ' + result );
         }
 
         Out = result;
@@ -299,7 +298,7 @@ export function tsx_MntPark(defaultFilter, softPark) {
           UpdateStatus( ' ' + result );
         }
         else {
-          UpdateStatus( ' !!! Parking err: ' + result );
+          UpdateStatusErr( ' !!! Parking err: ' + result );
         }
 
         Out = result;
@@ -335,13 +334,13 @@ export function tsx_AbortGuider() {
 // just do calibration
 export function CalibrateAutoGuider() {
   if( !isSchedulerStopped() ) {
-    UpdateStatus(' Calibrating Exiting - Scheduler active');
+    tsxDebug(' Calibrating Exiting - Scheduler active');
     return;
   }
   // tsxDebug('************************');
   var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
   if( !enabled ) {
-    UpdateStatus(' *** @Autoguiding disabled');
+    tsxDebug(' *** @Autoguiding disabled');
     return;
   }
 
@@ -353,7 +352,7 @@ export function CalibrateAutoGuider() {
     // Calibrate....
     var cal_res = tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
     if( cal_res ) {
-      UpdateStatus(' AutoGuider Calibrated');
+      tsxLog(' AutoGuider Calibrated');
     }
   }
 }
@@ -367,11 +366,11 @@ function SetUpAutoGuiding( target, doCalibration ) {
   tsxDebug(' *** SetUpAutoGuiding: ' + target.targetFindName );
   var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
   if( !enabled ) {
-    UpdateStatus(' *** @Autoguiding disabled: ' + target.targetFindName);
+    tsxDebug(' *** @Autoguiding disabled: ' + target.targetFindName);
     return;
   }
 
-  UpdateStatus(' ' + target.targetFindName + ": setup autoguider");
+  UpdateStatus(' ' + target.targetFindName + ": Autoguider setup");
   tsx_TakeAutoGuideImage( );
   if( isSchedulerStopped() ) {
     return;
@@ -385,6 +384,7 @@ function SetUpAutoGuiding( target, doCalibration ) {
   // Calibrate.... only if a star is found...
   if( star !== '') {
     if( doCalibration == true ) {
+      UpdateStatus(' ' + target.targetFindName + ": AutoGuider Calibration STARTED");
       var cal_res = tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
       if( cal_res ) {
         UpdateStatus(' ' + target.targetFindName + ": AutoGuider Calibrated");
@@ -398,11 +398,11 @@ function SetUpAutoGuiding( target, doCalibration ) {
     if( isSchedulerStopped() ) {
       return;
     }
-    tsx_SettleAutoGuide();
+    tsx_SettleAutoGuide( target );
     if( isSchedulerStopped() ) {
       return;
     }
-    UpdateStatus(' ' + target.targetFindName + ": autoguiding");
+    UpdateStatus(' ' + target.targetFindName + ": Autoguiding Active");
   }
 }
 
@@ -411,7 +411,7 @@ function tsx_TakeAutoGuideImage( ) {
   // tsxDebug('************************');
   var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
   if( !enabled ) {
-    UpdateStatus(' *** @Autoguiding disabled ');
+    tsxDebug(' *** @Autoguiding disabled ');
     return;
   }
 
@@ -439,7 +439,7 @@ function tsx_FindGuideStar() {
   var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
   var out = '';
   if( !enabled ) {
-    UpdateStatus(' *** @Autoguiding disabled: ' + target.targetFindName);
+    tsxDebug(' *** @Autoguiding disabled: ' + target.targetFindName);
     return;
   }
 
@@ -456,14 +456,14 @@ function tsx_FindGuideStar() {
         throw("Guider Star not found!")
       }
       guideStarY = tsx_return.split('|')[1].trim();
-      UpdateStatus( " --- Guide star: "+guideStarX+", "+guideStarY );
+      tsxDebug( " --- Guide star: "+guideStarX+", "+guideStarY );
       out = {
         guideStarX: guideStarX,
         guideStarY: guideStarY,
       };
     }
     catch( e ) {
-      UpdateStatus( " --- Guide star: NOT FOUND - " + e );
+      UpdateStatusErr( " --- Guide star: NOT FOUND - " + e );
     }
     finally {
       tsx_is_waiting = false;
@@ -481,18 +481,18 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
   tsxDebug(' *** tsx_CalibrateAutoGuide' );
   var enabled = tsx_GetServerStateValue('isCalibrationEnabled');
   if( !enabled ) {
-    UpdateStatus(' *** Autoguider calibration disabled');
+    tsxDebug(' *** Autoguider calibration disabled');
     return false;
   }
   enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
   if( !enabled ) {
-    UpdateStatus(' *** Autoguider disabled ');
+    tsxDebug(' *** Autoguider disabled ');
     return false;
   }
   var fSize = tsx_GetServerStateValue('calibrationFrameSize');
   if( typeof fSize == 'undefined' || fSize === '' ) {
     fSize = 300;
-    UpdateStatus(' *** Autoguider calibration frame needs setting ');
+    UpdateStatusErr(' *** Autoguider calibration frame needs setting ');
   }
 
   tsx_is_waiting = true;
@@ -506,7 +506,7 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     var result = tsx_return.split('|')[0].trim();
     if( result != 'Success') {
-      UpdateStatus(' *** FAILED- calibrating autoguider: ' + result);
+      UpdateStatusErr(' *** FAILED- calibrating autoguider: ' + result);
     }
     else {
       success = true;
@@ -525,11 +525,10 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
 
 // **************************************************************
 function tsx_StartAutoGuide(guideStarX, guideStarY) {
-  // tsxDebug('************************');
   tsxDebug(' *** tsx_StartAutoGuide' );
   var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
   if( !enabled ) {
-    UpdateStatus(' *** Autoguider disabled ');
+    tsxDebug(' *** Autoguider disabled ');
     return;
   }
 
@@ -588,12 +587,12 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
 }
 
 // **************************************************************
-function tsx_SettleAutoGuide() {
+function tsx_SettleAutoGuide( target ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_SettleAutoGuide' );
   var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
   if( !enabled ) {
-    UpdateStatus(' *** Autoguider disabled ');
+    tsxDebug(' *** Autoguider disabled ');
     return;
   }
 
@@ -603,7 +602,7 @@ function tsx_SettleAutoGuide() {
   }
 
   if( !isGuideSettlingEnabled ) {
-    UpdateStatus(' *** Autoguider Settling is disabled ');
+    tsxDebug(' *** Autoguider Settling is disabled ');
     return;
   }
 
@@ -640,12 +639,12 @@ function tsx_SettleAutoGuide() {
   cmd = cmd.replace("$006", guidingPixelErrorTolerance ); // set guidingPixelErrorTolerance
   cmd = cmd.replace("$007", isGuideSettlingEnabled ); // set guidingPixelErrorTolerance
 
-  UpdateStatus(' --- Autoguider Settling to: ' + guidingPixelErrorTolerance );
+  tsxDebug(' --- Autoguider Settling to: ' + guidingPixelErrorTolerance );
   let quality = 'unknown';
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     var result = tsx_return.split('|')[0].trim();
     if( result != 'Success') {
-      UpdateStatus(' *** Autoguiding Failed: ' + result);
+      UpdateStatusErr(' *** Autoguiding Failed: ' + result);
     }
     else {
       quality = tsx_return.split('|')[1].trim()
@@ -655,7 +654,7 @@ function tsx_SettleAutoGuide() {
   while( tsx_is_waiting ) {
     Meteor.sleep( 1000 );
   }
-  UpdateStatus(' --- Autoguider Settling: ' + quality );
+  UpdateStatus( ' ' + target.targetFindName + ': Autoguider Settling(' + guidingPixelErrorTolerance + '):' + quality );
 }
 
 // **************************************************************
@@ -831,7 +830,7 @@ function tsx_CLS_target( target, filter ) {
       var result = tsx_return.split('|')[0].trim();
       if( result != 'Success') {
         // So if we fail here... what do we do...
-        UpdateStatusErr(' !!! Centring Failed. Error: ' + tsx_return);
+        UpdateStatusErr(' !!! CLS Failed (centring): ' + tsx_return);
       }
       else {
         clsSuccess = true;
@@ -891,7 +890,7 @@ function tsx_RunFocus3( target ) {
 
     var runFocus3 = isFocusingNeeded( target );
     if( runFocus3 == false ) {
-      UpdateStatus(' *** ' + target.targetFindName +': @Focus3 not needed');
+      tsxDebug(' ??? ' + target.targetFindName +': @Focus3 not needed');
       Out = ''; // get last temp
       return Out;
     }
@@ -917,22 +916,30 @@ function tsx_RunFocus3( target ) {
     cmd = cmd.replace("$000", focusFilter ); // set filter
     cmd = cmd.replace("$001", focusExp ); // set Bin
 
+    var lastFocusTemp = tsx_GetServerStateValue( 'initialFocusTemperature' ); // get last temp
+    if( focusTarget != '' ) {
+      //  NGC7023: @Focus3 started: 13737 for temp 13.2
+      UpdateStatus(' ' + target.targetFindName +': @Focus3 started, using ' + focusTarget + ': for temp' + lastFocusTemp );
+    }
+    else {
+      UpdateStatus(' ' + target.targetFindName +': @Focus3 started: for temp' + lastFocusTemp );
+    }
+    var position = '';
+    var temp = '';
     var tsx_is_waiting = true;
-    UpdateStatus(' ' + target.targetFindName +': @Focus3 started');
-
     tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       //[[B^[[B^[[BI20180708-01:53:13.485(-3)?   [SERVER]|2018-07-08|01:53:13|[DEBUG]| ??? @Focusing-3 returned: TypeError: Error code = 5 (5). No additional information is available.|No error. Error = 0
       tsxDebug( ' ??? @Focusing-3 returned: ' + tsx_return );
-      var temp = tsx_return.split('|')[1].trim();
-      var position = tsx_return.split('|')[0].trim();
+      temp = tsx_return.split('|')[1].trim();
+      position = tsx_return.split('|')[0].trim();
       if( temp == 'TypeError: Error code = 5 (5). No additional information is available.') {
           temp = tsx_GetServerStateValue( 'initialFocusTemperature' );
-          UpdateStatus( ' !!! Error find focus.' );
+          UpdateStatusErr( ' !!! Error find focus.' );
       }
       //TypeError: @Focus diverged.  Error = 7001
       else if (temp =='TypeError: @Focus diverged.  Error = 7001.') {
         temp = tsx_GetServerStateValue( 'initialFocusTemperature' );
-        UpdateStatus( ' !!! Error find focus.' );
+        UpdateStatusErr( ' !!! Error find focus.' );
       }
       else if( typeof temp == 'undefined' || temp === 'No error. Error = 0.') {
         temp = '';
@@ -941,7 +948,7 @@ function tsx_RunFocus3( target ) {
         temp = position;
       }
       // Focuser postion (1232345345) using LUM Filter
-      UpdateStatus(' *** Focuser postion (' + position + ') and temp ('+temp+') using ' + target.focusFilter + ' filter.');
+      tsxDebug(' *** Focuser postion (' + position + ') and temp ('+temp+') using ' + target.focusFilter + ' filter.');
 
       Out = temp;
       tsx_is_waiting = false;
@@ -960,10 +967,10 @@ function tsx_RunFocus3( target ) {
       }
     }
 
-    UpdateStatus(' ' + target.targetFindName +': @Focus3 finished');
+    UpdateStatus(' ' + target.targetFindName +': @Focus3 finished: ' + position + ' for temp ' + temp);
   }
   else {
-    UpdateStatus(' *** ' + target.targetFindName +': @Focus3 disabled');
+    tsxDebug(' *** ' + target.targetFindName +': @Focus3 disabled');
     Out = ''; // get last temp
   }
   return Out;
@@ -1071,7 +1078,7 @@ function SetUpForImagingRun(target, doRotator, doCalibration ) {
   // tsx_AbortGuider(); // now done in CLS
 
   var tryTarget = UpdateImagingTargetReport( target );
-  UpdateStatus( ' ' + target.targetFindName + ': refreshed info' );
+  tsxInfo( ' ' + target.targetFindName + ': refreshed info' );
 	if( !tryTarget.ready ) {
     tsxDebug(target.targetFindName + ' ' + tryTarget.msg);
     throw( 'TSX_ERROR|Target Report Failed. TSX Running?');
@@ -1431,7 +1438,7 @@ function isMeridianFlipNeed( target ) {
   var lastDir = tsx_GetServerStateValue('lastTargetDirection');
   var curDir = target.report.AZ;
   tsx_SetServerState('lastTargetDirection', curDir);
-  tsxLog( ' --- check meridian (' + lastDir + '), cf. previous (' + curDir +')');
+  tsxDebug( ' --- check meridian (' + lastDir + '), cf. previous (' + curDir +')');
   if( curDir == 'West' && lastDir == 'East') {
     // we need to flip
     tsxDebug( ' ' + target.targetFindName + ': merdian flip needed.' );
@@ -1487,7 +1494,7 @@ function isFocusingNeeded(target) {
       return false;
     }
     else {
-      tsxLog(' --- check temp diff('+tempDiff+'): ' + focusDiff + '='+curFocusTemp +'-'+lastFocusTemp );
+      tsxDebug(' --- Check Focus('+tempDiff+'): ' + focusDiff + '='+curFocusTemp +'-'+lastFocusTemp );
       if( focusDiff >= tempDiff ) {
       // returning true tell caller to run  @Focus3
         return true;
@@ -1567,7 +1574,7 @@ function isTargetConditionInValid(target) {
   tsxDebug(' ' + target.targetFindName + ': target evaluation');
 
   // *******************************
-  UpdateStatus( ' --- check stop conditions');
+  tsxDebug( ' --- check stop conditions');
 
   // Were checks just run
   let timeToCheck = tsx_GetServerStateValue('isTargetConditionInValidExpired');
@@ -1648,21 +1655,21 @@ function isTargetConditionInValid(target) {
 
     // only SetUpForImagingRun if greater than zero
     var pTime = howMuchTimeHasPassed(defaultCLSRepeat.value, defaultCLSRepeat.timestamp);
-    tsxLog( ' --- checking CLS: ' + pTime+ ' of ' + defaultCLSRepeat.value + ' sec');
+    tsxDebug( ' --- checking CLS: ' + pTime+ ' of ' + defaultCLSRepeat.value + ' sec');
 
     if( defaultCLSRepeat.value > 0  ) {
       tsxDebug( ' Check if time to CLS again: ' + defaultCLSRepeat.value );
       tsxDebug( ' Check time: ' + defaultCLSRepeat.timestamp );
       var doCLS = hasTimePassed( defaultCLSRepeat.value, defaultCLSRepeat.timestamp )
       if( doCLS === true ) {
-        UpdateStatus( ' *** Time to centre again.');
+        UpdateStatus( ' === ' + target.targetFindName + ': time to recentre ' + pTime+ ' of ' + defaultCLSRepeat.value + ' sec');
         // This will cause a calibration to happen...
         // do not need to calibrate wth a meridian flip
         //  SetUpForImagingRun( target, false, false );
         var cls = tsx_CLS(target); 						//# Call the Closed-Loop-Slew function to go to the target
         updateTargetIsCloudy( target, cls );
         if( !cls ) {
-          UpdateStatus( ' Target centred FAILED: ' + cls.angle);
+          UpdateStatusErr( ' Target centred FAILED: ' + cls.angle);
           throw( 'TSX_ERROR|Cloudy? Is Tsx Running?');
         }
         // UpdateStatus( " Setup guider: " + target.targetFindName );
@@ -1963,14 +1970,14 @@ function tsx_MatchRotation( target ) {
       var pixelSize = tsx_GetServerStateValue( 'imagingPixelSize');
       if( typeof pixelSize === 'undefined') {
         var str =  ' *** Rotating failed: fix by setting default image pixel size';
-        UpdateStatus( str );
+        UpdateStatusErr( str );
         tsxError( str );
         return rotateSucess;
       }
       var focalLength = tsx_GetServerStateValue( 'imagingFocalLength');
       if( typeof focalLength === 'undefined') {
         var str =  ' *** Rotating failed: fix by setting default focal length';
-        UpdateStatus( str );
+        UpdateStatusErr( str );
         tsxError( str );
         return rotateSucess;
       }
@@ -1978,7 +1985,7 @@ function tsx_MatchRotation( target ) {
       if( typeof fovExposure === 'undefined') {
         tsx_SetServerState( 'fovExposure', 4 );
         var str = ' *** Rotating FIXED: set to a default 4 sec, check on default page';
-        UpdateStatus( str );
+        UpdateStatusErr( str );
         tsxWarn( str );
       }
       var ACCURACY = tsx_GetServerStateValue( 'fovPositionAngleTolerance');
@@ -2010,7 +2017,7 @@ function tsx_MatchRotation( target ) {
           var linkAngle = tsx_return.split('|')[1].trim();
           var angle = linkAngle.split('=')[1].trim();
           targetReportAngle( target, angle );
-          UpdateStatus(' Rotator FOV angle: ' + angle);
+          UpdateStatus(' ' + target.targetFindName + ': Rotator FOV angle: ' + angle);
         }
         tsx_is_waiting = false;
       }));
@@ -2020,12 +2027,12 @@ function tsx_MatchRotation( target ) {
     }
     else {
       var str = ' *** ' + target.targetFindName + ': match angle disabled, or no angle set.';
-      tsxLog( str );
+      tsxDebug( str );
     }
   }
   catch( e ) {
     var str = ' *** Match angle FAILED';
-    tsxLog( str );
+    tsxDebug( str );
   }
   return rotateSucess;
 }
@@ -2043,26 +2050,26 @@ export function tsx_RotateCamera( position, cls ) {
     typeof position === 'undefined' || position === ''
   ) {
     let str = ' !!! Rotating failed: Exiting - type or position needed.';
-    UpdateStatus( str );
+    UpdateStatusErr( str );
     tsxErr( str );
     return rotateSucess;
   }
   if( typeof pixelSize === 'undefined') {
     let str =  ' !!! Rotating failed: fix by setting default image pixel size';
-    UpdateStatus( str );
+    UpdateStatusErr( str );
     tsxErr( str );
     return rotateSucess;
   }
   if( typeof focalLength === 'undefined') {
     let str =  ' !!! Rotating failed: fix by setting default focal length';
-    UpdateStatus( str );
+    UpdateStatusErr( str );
     tsxErr( str );
     return rotateSucess;
   }
   if( typeof fovExposure === 'undefined') {
     tsx_SetServerState( 'fovExposure', 4 );
     let str = ' *** Rotating FIXED: set to a default 4 sec, check on default page';
-    UpdateStatus( str );
+    UpdateStatusErr( str );
     tsxWarn( str );
   }
   let ACCURACY = tsx_GetServerStateValue( 'fovPositionAngleTolerance');
@@ -2078,10 +2085,10 @@ export function tsx_RotateCamera( position, cls ) {
   cmd = cmd.replace('$003', ACCURACY);
   cmd = cmd.replace('$004', cls); // 1 = rotate; 0 = imagelink
   if( cls == 1) {
-    UpdateStatus(' Rotator/Camera rotating position: ' + position);
+    UpdateStatus(' MANUAL: Rotator/Camera rotating position: ' + position);
   }
   else {
-    UpdateStatus(' Rotator/Camera rotating FOV: ' + position);
+    UpdateStatus(' MANUAL: ImageLINK FOV: ' + position);
   }
   let tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
@@ -2097,7 +2104,7 @@ export function tsx_RotateCamera( position, cls ) {
       var resMsg = tsx_return.split('|')[3].trim();
       tsxLog( resMsg);
       var pos = resMsg.split('=')[1].trim();
-     UpdateStatus(' Rotator/Camera set: ' + Number(pos).toFixed(3));
+     UpdateStatus(' MANUAL: Rotator/Camera set: ' + Number(pos).toFixed(3));
     }
     tsx_is_waiting = false;
   }));
@@ -2222,7 +2229,7 @@ function tsx_takeImage( filterNum, exposure, frame, tName ) {
         if( rotPos == 'rotatorPosition') {
           // the position is stored
           let ang = tsx_return.split('|')[2].trim();
-          tsxLog( ' --- rotator position angle: ' + Number(ang).toFixed(3) );
+          tsxDebug( ' --- rotator position angle: ' + Number(ang).toFixed(3) );
           // the stoed position can be used for flats
           recordRotatorPosition( tName, Number(ang).toFixed(3) );
         }
@@ -2294,11 +2301,11 @@ function takeSeriesImage(target, series) {
   var num = taken+1;
   if( (remainingImages <= series.repeat) && (remainingImages > 0) ) {
     tsxLog( ' -------------------------------');
-    UpdateStatus( ' ' + target.targetFindName + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds, taking: ' + num + '/' +series.repeat );
+    UpdateStatus( ' ' + target.targetFindName + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds, ' + num + '/' +series.repeat + ' TAKING' );
 
     var res = tsx_takeImage( slot, series.exposure, frame, target.targetFindName.trim() );
     if( res != false ) {
-      UpdateStatus( ' ' + target.targetFindName + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds, done: ' + num + '/' +series.repeat );
+      UpdateStatus( ' ' + target.targetFindName + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds, ' + num + '/' +series.repeat + ' DONE' );
       // *******************************
       // Update progress
       // tsxLog(' *** Image taken: ' + series.filter + ' at ' + series.exposure + ' seconds');
@@ -2311,7 +2318,7 @@ function takeSeriesImage(target, series) {
     }
   }
   else {
-    UpdateStatus( ' *** Completed ' + target.targetFindName + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds: ' + num + '/' +series.repeat );
+    UpdateStatus( target.targetFindName + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds: ' + num + '/' +series.repeat + ' COMPLETED' );
   }
   var jid = tsx_GetServerState('currentJob');
   if( jid == '' ) {
@@ -2344,48 +2351,48 @@ function targetDither( target ) {
 // **************************************************************
 export function processTargetTakeSeries( target ) {
   // process for each filter
-  tsxLog( ' ############################### ');
-  UpdateStatus( ' ### ' + target.targetFindName + ": Target started");
-  tsxDebug(' *** processTargetTakeSeries: ' + target.targetFindName);
+  tsxLog( ' =============================== ');
+  tsxDebug( ' === ' + target.targetFindName + ": Target started");
+  tsxDebug(' === processTargetTakeSeries: ' + target.targetFindName);
 
   var template = TakeSeriesTemplates.findOne( {_id:target.series._id});
   if( typeof template == 'undefined') {
-    UpdateStatus(' !!! Failed - check series for: ' + target.targetFindName);
+    UpdateStatusErr(' !!! Failed - check series for: ' + target.targetFindName);
     return;
   }
-  tsxDebug(' Loading TakeSeriesTemplates:' + target.series.value );
+  tsxDebug(' === Loading TakeSeriesTemplates:' + target.series.value );
   var seriesProcess = template.processSeries;
-  tsxDebug(' Imaging process: ' + seriesProcess );
+  tsxDebug(' === Imaging process: ' + seriesProcess );
   var numSeries = template.series.length;
-  tsxDebug(' Number of takeSeries: ' + numSeries );
+  tsxDebug(' === Number of takeSeries: ' + numSeries );
 
   // load the filters
   var takeSeries = [];
   for (var i = 0; i < numSeries; i++) {
     var series = Seriess.findOne({_id:template.series[i].id});
     if( typeof series != 'undefined') {
-      tsxDebug(' Found - ' + template.name + ' - filter: ' + series.filter);
+      tsxDebug(' === Found - ' + template.name + ' - filter: ' + series.filter);
       takeSeries.push(series);
     }
   }
-  tsxDebug(' Number of filters: ' + takeSeries.length);
+  tsxDebug(' === Number of filters: ' + takeSeries.length);
 
   // sort the by the order.
   takeSeries.sort(function(a, b){return a.order-b.order});
-  tsxDebug(' Sorted series order: ' + takeSeries.length);
+  tsxDebug(' === Sorted series order: ' + takeSeries.length);
 
   // create report
-  var seriesReport = ' --- Series Name: ' +template.name;
+  var seriesReport = ' === Series Name: ' +template.name;
   UpdateStatus( seriesReport );
-  UpdateStatus(' --- Process: ' + template.processSeries);
+  UpdateStatus(' === Process: ' + template.processSeries);
   for (var i = 0; i < numSeries; i++) {
     var series = Seriess.findOne({_id:template.series[i].id});
     if( typeof series != 'undefined') {
-      UpdateStatus(' --- Filter: ' + series.filter + '@' + series.exposure + ' sec, ' + series.repeat + ' times');
+      UpdateStatus(' === Filter: ' + series.filter + '@' + series.exposure + ' sec, ' + series.repeat + ' times');
     }
   }
   // add in if it is a repeating series...
-  UpdateStatus(' --- Dithering: ' + targetDither( target ));
+  UpdateStatus(' === Dithering: ' + targetDither( target ));
 
   // set up for the cycle through the filters
   var stopTarget = false; // #IDEA #TODO can use the current jobId to potentially stop
@@ -2439,7 +2446,7 @@ export function processTargetTakeSeries( target ) {
       }
       else {
         if( template.repeatSeries == true ) {
-          UpdateStatus(' *** Repeating Series ***');
+          tsxDebug(' *** Repeating Series ***');
           for( var s = 0; s < takeSeries.length; s ++ ) {
               var ser = takeSeries[s];
               target.progress = resetTargetImageProcess( target, ser);
@@ -2500,8 +2507,8 @@ export function processTargetTakeSeries( target ) {
 
   tsx_AbortGuider();
   var filter = tsx_GetServerStateValue('defaultFilter');
-  UpdateStatus( ' ### ' + target.targetFindName + ": Target stopped");
-  tsxLog( ' ############################### ');
+  UpdateStatus( ' === ' + target.targetFindName + ": Target stopped");
+  tsxLog( ' =============================== ');
   return;
 }
 
@@ -2518,13 +2525,13 @@ export function prepareTargetForImaging( target, doRotator, doCalibration ) {
   else {
     UpdateImagingSesionID( target._id );
     tsxLog ( ' =========================');
-    UpdateStatus( ' '+ target.targetFindName + ": selected target");
+    UpdateStatus( ' '+ target.targetFindName + ": SELECTED");
     tsx_SetServerState('targetName', target.targetFindName);
 
     var targetCoords = UpdateImagingTargetReport( target );
     var curDir = targetCoords.direction;
     tsx_SetServerState('lastTargetDirection', curDir);
-    UpdateStatus( ' '+ target.targetFindName + ": points " + curDir);
+    UpdateStatus( ' '+ target.targetFindName + ": pointing " + curDir);
 
     var ready = SetUpForImagingRun( target, doRotator, doCalibration );
     if( ready ) {
@@ -2622,7 +2629,7 @@ function getHigherPriorityTarget( validSession ) {
         var chk = valPriority - chkPriority;
         if( (chk > 0) ) {
               validSession = chkSession;
-              UpdateStatus( ' *** priority given: ' + validSession.targetFindName);
+              tsxDebug( ' *** priority given: ' + validSession.targetFindName);
         }
       }
     }
@@ -2793,7 +2800,7 @@ export function canTargetSessionStart( target ) {
   var minAlt = tsx_reachedMinAlt( target );
   tsxDebug( ' Is target minAlt: ' + minAlt );
   if( minAlt ) {
-    UpdateStatus( ' --- check current alt. '+target.targetFindName+': ('+result.ALT+')' + ' vs. minimum (' + target.minAlt + ')');
+    UpdateStatus( target.targetFindName+': current alt. ('+result.ALT+')' + ' vs. minimum (' + target.minAlt + ')');
     return false;
   }
 
@@ -3011,14 +3018,14 @@ Use this to set the last focus
 
   centreTarget( target ) {
     tsx_SetServerState( 'tool_active', true );
-    UpdateStatus( ' Centring: ' + target.targetFindName );
+    UpdateStatus( ' MANUAL: centre' + target.targetFindName );
     var result =  '';
     try {
       result = tsx_CLS( target);
       updateTargetIsCloudy( target, result );
       tsxDebug( '??? Debuging the manual Centring: ' + result );
       if( result.angle == -1 || result == false ) {
-        UpdateStatus(' !!!Failed to centre: ' + target.targetFindName);
+        UpdateStatusErr('  !!! Failed centring: ' + target.targetFindName);
       }
       else {
         UpdateStatus(' Centred: ' + target.targetFindName);

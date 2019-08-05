@@ -23,27 +23,27 @@ if (Meteor.isServer) {
   const Shelljs = require('shelljs');
 
   try {
-    tsxLog('   DB Backups',  backupFolder );
+    tsxInfo('   DB Backups',  backupFolder );
     let err = Shelljs.test( '-e', backupFolder ); // -e tests for valid path, -d tests for directory
     if( err != true ) {
-      tsxLog( ' Backup folder file not found, creating: ' + backupFolder );
+      tsxErr( ' Backup folder file not found, creating: ' + backupFolder );
       let err = Shelljs.mkdir( '-p', backupFolder).code;
-      tsxLog( err );
+      tsxErr( err );
       if ( err !== 0) {
-        UpdateStatus('Error: failed to create backup location: ' + err);
+        tsxErr('Error: failed to create backup location: ' + err);
         return;
       }
     }
     else {
       let err = Shelljs.test( '-d', backupFolder ); // -e tests for valid path, -d tests for directory
       if( err != true ) {
-        tsxError( ' Backup path is not a valid directory: ' + backupFolder );
+        tsxErr( ' Backup path is not a valid directory: ' + backupFolder );
       }
     }
   }
   catch( e ) {
     // If on mac do nothing...
-    UpdateStatus( ' Backup mkdir exception: ' + e );
+    tsxErr( ' Backup mkdir exception: ' + e );
   }
 }
 
