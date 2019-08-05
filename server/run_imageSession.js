@@ -901,7 +901,14 @@ function tsx_RunFocus3( target ) {
 
     // do not bother CLS to star target... assume that the mount is prepared
     if( focusTarget != '' ) {
+      if( doCLS == false ) {
+        // If CLS not enabled then Slew...
         var res = tsx_Slew( target );
+      }
+      else {
+        var res = tsx_CLS( target );
+        updateTargetIsCloudy( target, res );
+      }
     }
 
     var cmd = tsx_cmd('SkyX_JS_Focus-3');
