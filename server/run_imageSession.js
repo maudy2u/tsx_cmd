@@ -903,10 +903,10 @@ function tsx_RunFocus3( target ) {
     if( focusTarget != '' ) {
       if( doCLS == false ) {
         // If CLS not enabled then Slew...
-        var res = tsx_Slew( target );
+        var res = tsx_SlewTargetName( focusTarget );
       }
       else {
-        var res = tsx_CLS( target );
+        var res = tsx_CLS_target( focusTarget );
         updateTargetIsCloudy( target, res );
       }
     }
