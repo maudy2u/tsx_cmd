@@ -46,6 +46,7 @@ import {
   tsx_UpdateDevice,
   tsx_GetServerStateValue,
   UpdateStatus,
+  UpdateStatusErr,
   postProgressTotal,
   postProgressIncrement,
   postProgressMessage,
