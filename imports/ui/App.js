@@ -661,7 +661,7 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
         // It is possible there is no plan to load...
         result = TheSkyXInfos.findOne({name: 'NightPlan'});
       }
-      catch {
+      catch(e) {
         // no plan so do not process
         result = '';
         this.setState({
