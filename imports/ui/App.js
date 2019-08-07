@@ -98,7 +98,7 @@ class App extends TrackerReact(Component) {
       modalOpenTest: false,
       modalOpenBackup: false,
       modalViewNightPlanner: false,
-      planData: [],
+      planData: '',
       planDataLoading: true,
     };
     this.planDataLoaded = this.planDataLoaded.bind(this);
@@ -132,7 +132,9 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
   modalShowTargetReport = () => {
     this.setState({planDataLoading: true});
     this.loadPlanData();
-    this.setState({ modalViewNightPlanner: true });
+    if( this.planData != '') {
+      this.setState({ modalViewNightPlanner: true });
+    }
   };
   modalCloseNightPlanner = () => {
     this.setState({ modalViewNightPlanner: false });
@@ -529,16 +531,19 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
         basic
         size='small'
         closeIcon>
-        <Modal.Header>TSX Server IP</Modal.Header>
+        <Modal.Header>Enter the IP to use to connect to the TSX Server.</Modal.Header>
         <Modal.Content>
-          <h3>Enter the IP to use to connect to the TSX Server.</h3>
+          <Form>
+          <Segment>
+              <Form.Input
+                label='IP:'
+                name='ip'
+                value={this.state.ip}
+                onChange={this.ipChange}/>
+          </Segment>
+          </Form>
         </Modal.Content>
         <Modal.Description>
-          <Input
-            label='IP:'
-            name='ip'
-            value={this.state.ip}
-            onChange={this.ipChange}/>
         </Modal.Description>
         <Modal.Actions>
           <Button onClick={this.modalEnterIpClose.bind(this)} inverted>
@@ -561,18 +566,23 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
         basic
         size='small'
         closeIcon>
-        <Modal.Header>TSX Server TCP Port</Modal.Header>
+        <Modal.Header>Enter the TCP Port to use to connect to the TSX Server.</Modal.Header>
         <Modal.Content>
-          <h3>Enter the TCP Port to use to connect to the TSX Server.</h3>
         </Modal.Content>
+          <Form>
+          <Segment>
+            <Form.Group>
+              <Form.Input
+                label='Port: '
+                name='port'
+                placeholder='Minutes to sleep'
+                value={this.state.port}
+                onChange={this.portChange}
+              />
+            </Form.Group>
+          </Segment>
+          </Form>
         <Modal.Description>
-          <Form.Input
-            label='Port: '
-            name='port'
-            placeholder='Minutes to sleep'
-            value={this.state.port}
-            onChange={this.portChange}
-          />
         </Modal.Description>
         <Modal.Actions>
           <Button onClick={this.modalEnterPortClose.bind(this)} inverted>
@@ -630,13 +640,51 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
   loadPlanData() {
     // these are all working methods
     // on the client
-    Meteor.call("planData", function (error, result) {
-      // identify the error
-      this.setState({
-        planData: result,
-        planDataLoading: false,
-      });
-    }.bind(this));
+    var RUNNING = '';
+    var ACTIVE = false;
+    try {
+      RUNNING = this.props.scheduler_running.value;
+      ACTIVE = this.props.tool_active.value;
+    } catch (e) {
+      RUNNING = '';
+      ACTIVE = false;
+    }
+
+    var RELOAD = true;
+    if( RUNNING == 'Stop'  && ACTIVE == false ){
+      RELOAD = false;
+    }
+
+    if( RELOAD ) {
+      let result = [];
+      try {
+        // It is possible there is no plan to load...
+        result = TheSkyXInfos.findOne({name: 'NightPlan'});
+      }
+      catch {
+        // no plan so do not process
+        result = '';
+        this.setState({
+          planData: '',
+          planDataLoading: true,
+        });
+      }
+      if( result != '') {
+        this.setState({
+          planData: result,
+          planDataLoading: false,
+        });
+      }
+    }
+    else {
+      Meteor.call("planData", function (error, result) {
+        // identify the error
+        this.setState({
+          planData: result,
+          planDataLoading: false,
+        });
+      }.bind(this));
+    }
   }
 
   formatDate( today ) {
@@ -699,7 +747,7 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
       <Button.Group compact size='mini' floated='right'>
         <Button icon='cloud download' onClick={this.modalOpenBackup}/>
         <Button icon='detective' onClick={this.modalOpenSessionsControls}/>
-        <Button disabled={DISABLE} icon='chart bar' onClick={this.modalShowTargetReport}/>
+        <Button icon='chart bar' onClick={this.modalShowTargetReport}/>
         <Button disabled={DISABLE} icon='wifi' onClick={this.connectToTSX.bind(this)}/>
         <Button disabled={DISABLE} icon='car' onClick={this.park.bind(this)}/>
       </Button.Group>
@@ -888,7 +936,6 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
                 {this.renderPortEditor()}                </Segment>
               <Segment>
               <Progress
-                indicating
                 size='medium'
                 value={PROGRESS}
                 total={TOTAL}

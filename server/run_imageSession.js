@@ -831,6 +831,7 @@ function tsx_CLS_target( target, filter ) {
       if( result != 'Success') {
         // So if we fail here... what do we do...
         UpdateStatusErr(' !!! CLS Failed (centring): ' + tsx_return);
+        tsx_err = true;
       }
       else {
         clsSuccess = true;
@@ -2391,8 +2392,11 @@ export function processTargetTakeSeries( target ) {
       UpdateStatus(' === Filter: ' + series.filter + '@' + series.exposure + ' sec, ' + series.repeat + ' times');
     }
   }
-  // add in if it is a repeating series...
+
   UpdateStatus(' === Dithering: ' + targetDither( target ));
+  if( template.repeatSeries == true ) {
+    UpdateStatus(' === Repeating: ' + template.repeatSeries );
+  }
 
   // set up for the cycle through the filters
   var stopTarget = false; // #IDEA #TODO can use the current jobId to potentially stop
@@ -3018,7 +3022,7 @@ Use this to set the last focus
 
   centreTarget( target ) {
     tsx_SetServerState( 'tool_active', true );
-    UpdateStatus( ' MANUAL: centre' + target.targetFindName );
+    UpdateStatus( ' TOOLBOX: centring (CLS) ' + target.targetFindName );
     var result =  '';
     try {
       result = tsx_CLS( target);
@@ -3028,7 +3032,7 @@ Use this to set the last focus
         UpdateStatusErr('  !!! Failed centring: ' + target.targetFindName);
       }
       else {
-        UpdateStatus(' Centred: ' + target.targetFindName);
+        UpdateStatus(' TOOLBOX: centred (CLS) ' + target.targetFindName);
       }
     }
     catch( e )  {
