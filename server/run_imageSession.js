@@ -918,12 +918,18 @@ function tsx_RunFocus3( target ) {
     cmd = cmd.replace("$001", focusExp ); // set Bin
 
     var lastFocusTemp = tsx_GetServerStateValue( 'initialFocusTemperature' ); // get last temp
+    let curFocusTemp = target.report.focusTemp; // read new temp
+    tsxDebug( ' curFocusTemp temp: ' + curFocusTemp );
+    if( typeof curFocusTemp == 'undefined' ) {
+      curFocusTemp = lastFocusTemp;
+    }
+
     if( focusTarget != '' ) {
       //  NGC7023: @Focus3 started: 13737 for temp 13.2
-      UpdateStatus(' ' + target.targetFindName +': @Focus3 started, using ' + focusTarget + ': for temp' + lastFocusTemp );
+      UpdateStatus(' ' + target.targetFindName +': @Focus3 started (using ' + focusTarget + ') for current temp ' + lastFocusTemp + ', vs ' + curFocusTemp );
     }
     else {
-      UpdateStatus(' ' + target.targetFindName +': @Focus3 started: for temp' + lastFocusTemp );
+      UpdateStatus(' ' + target.targetFindName +': @Focus3 started: for current temp ' + lastFocusTemp  + ', vs ' + curFocusTemp );
     }
     var position = '';
     var temp = '';
@@ -1636,7 +1642,7 @@ function isTargetConditionInValid(target) {
     // okay we have a lot to do...
     // prepare target of imaging again...
     // no need to focus or dither as done in prerun
-    UpdateStatus( ' *** Meridian flip...');
+    UpdateStatus( ' ' + target.targetFindName + ': MERIDIAN FLIP NEEDED...');
     let res = prepareTargetForImaging( target, false, false ) ;
 
     return false; // all good continue
@@ -1663,7 +1669,7 @@ function isTargetConditionInValid(target) {
       tsxDebug( ' Check time: ' + defaultCLSRepeat.timestamp );
       var doCLS = hasTimePassed( defaultCLSRepeat.value, defaultCLSRepeat.timestamp )
       if( doCLS === true ) {
-        UpdateStatus( ' === ' + target.targetFindName + ': time to recentre ' + pTime+ ' of ' + defaultCLSRepeat.value + ' sec');
+        UpdateStatus( ' ' + target.targetFindName + ': time to recentre ' + pTime+ ' of ' + defaultCLSRepeat.value + ' sec');
         // This will cause a calibration to happen...
         // do not need to calibrate wth a meridian flip
         //  SetUpForImagingRun( target, false, false );
@@ -1698,7 +1704,7 @@ function isTargetConditionInValid(target) {
     tsx_AbortGuider();
     InitialFocus( target );
     // no need to return false... can keep going.
-    UpdateStatus( ' --- refocus, and redo autoguider');
+    tsxDebug( ' --- refocus, and redo autoguider');
     let didDither = false;
     let doDither = isDitheringNeeded( target );
     if( doDither == true  ) {
@@ -2301,7 +2307,6 @@ function takeSeriesImage(target, series) {
   var frame = getFrame( series.frame );//  cdLight =1, cdBias, cdDark, cdFlat
   var num = taken+1;
   if( (remainingImages <= series.repeat) && (remainingImages > 0) ) {
-    tsxLog( ' -------------------------------');
     UpdateStatus( ' ' + target.targetFindName + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds, ' + num + '/' +series.repeat + ' TAKING' );
 
     var res = tsx_takeImage( slot, series.exposure, frame, target.targetFindName.trim() );
@@ -2352,7 +2357,6 @@ function targetDither( target ) {
 // **************************************************************
 export function processTargetTakeSeries( target ) {
   // process for each filter
-  tsxLog( ' =============================== ');
   tsxDebug( ' === ' + target.targetFindName + ": Target started");
   tsxDebug(' === processTargetTakeSeries: ' + target.targetFindName);
 
@@ -2397,7 +2401,7 @@ export function processTargetTakeSeries( target ) {
   if( template.repeatSeries == true ) {
     UpdateStatus(' === Repeating: ' + template.repeatSeries );
   }
-
+  tsxLog( ' -------------------------------');
   // set up for the cycle through the filters
   var stopTarget = false; // #IDEA #TODO can use the current jobId to potentially stop
   for (var i = 0; i < takeSeries.length && !stopTarget && (!isSchedulerStopped() ); i++) {
@@ -2495,7 +2499,7 @@ export function processTargetTakeSeries( target ) {
       // now switch to next filter
       // and check for a repeat...
       if( template.repeatSeries == true && (i+1) >= takeSeries.length) {
-          UpdateStatus(' *** Repeating Series ***');
+          tsxDebug(' *** Repeating Series ***');
           // reset series counts
           for( var s = 0; s < takeSeries.length; s ++ ) {
               var series = takeSeries[s];
@@ -2528,7 +2532,6 @@ export function prepareTargetForImaging( target, doRotator, doCalibration ) {
   }
   else {
     UpdateImagingSesionID( target._id );
-    tsxLog ( ' =========================');
     UpdateStatus( ' '+ target.targetFindName + ": SELECTED");
     tsx_SetServerState('targetName', target.targetFindName);
 

@@ -100,6 +100,7 @@ Meteor.methods({
     var focusFilter = getFilterSlot( focusFilterName );
     var focusExp = tsx_GetServerStateValue( 'defaultFocusExposure' ); // assuming 1, need to get from state
 
+    UpdateStatus(' TOOLBOX: @Focus3 STARTED');
     try {
       var cmd = tsx_cmd('SkyX_JS_Focus-3');
       tsxDebug( ' ??? @Focusing-3 filter: ' + focusFilter );
@@ -108,7 +109,6 @@ Meteor.methods({
       cmd = cmd.replace("$001", focusExp ); // set Bin
 
       var tsx_is_waiting = true;
-      UpdateStatus(' --- @Focus3 started');
 
       tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         //[[B^[[B^[[BI20180708-01:53:13.485(-3)?   [SERVER]|2018-07-08|01:53:13|[DEBUG]| ??? @Focusing-3 returned: TypeError: Error code = 5 (5). No additional information is available.|No error. Error = 0
@@ -131,7 +131,7 @@ Meteor.methods({
           temp = position;
         }
         // Focuser postion (1232345345) using LUM Filter
-        UpdateStatus(' *** Focuser postion (' + position + ') and temp ('+temp+') using filter: ' + focusFilterName);
+        UpdateStatus(' --- Focuser postion (' + position + ') and temp ('+temp+') using filter: ' + focusFilterName);
 
         if( temp != '') {
           tsx_SetServerState( 'initialFocusTemperature', temp);
@@ -146,6 +146,7 @@ Meteor.methods({
       UpdateStatus( ' !!! Focusing FAILED: ' + e );
     }
     finally {
+      UpdateStatus(' TOOLBOX: @Focus3 FINISHED');
       tsx_SetServerState( 'tool_active', false );
     }
   },

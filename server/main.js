@@ -275,7 +275,8 @@ function startServerProcess() {
           catch( err ) {
             var res = err.split('|')[0].trim();
             if( res == 'TSX_ERROR' ) {
-              UpdateStatusErr( ' *** ENDING - centring failed. Check for clouds' );
+              UpdateStatusErr( ' *** UNKNOWN ERROR - Calibrating failed.' );
+              // do not move mount/park as calibrating....
             }
           }
         }
@@ -338,7 +339,7 @@ function startServerProcess() {
               try {
                 res = err.split('|')[0].trim();
                 if( res == 'TSX_ERROR' ) {
-                  UpdateStatusErr( ' PARKING - CLS failed, check for clouds.' );
+                  UpdateStatusErr( ' PAUSING SCHEDULER - Could not prepare target (CLS failed). Checking for clouds.' );
                   ParkMount( isParked );
                   isParked = true;
                 }
@@ -368,7 +369,7 @@ function startServerProcess() {
                 tsxErr( ' !!! Error processing series: ' + err );
                 var res = err.split('|')[0].trim();
                 if( res == 'TSX_ERROR' ) {
-                  UpdateStatusErr( ' *** ENDING - centring failed. Check for clouds' );
+                  UpdateStatusErr( ' PAUSING SCHEDULER - CLS failed - checking for clouds.' );
                   ParkMount( isParked );
                   isParked = true;
                 }
@@ -583,26 +584,30 @@ Meteor.methods({
       return false;
     }
 
+    UpdateStatus(' TOOLBOX: Autoguider Calibration STARTED');
     tsx_SetServerState( 'tool_active', true );
     try {
       let res = true;
       if( slew != '' ) {
         if( slew == 'Alt/Az'&& location !='' && dec_az != '') {
-          UpdateStatus(' Tool: slewing to Alt/Az: ' + location + '/' + dec_az );
+          UpdateStatus(' --- slewing to Alt/Az: ' + location + '/' + dec_az );
           res = tsx_SlewCmdCoords( 'SkyX_JS_SlewAltAz', location, dec_az );
         }
         else if( slew == 'Ra/Dec' && location !='' && dec_az != '') {
-          UpdateStatus(' Tool: slewing to Ra/Dec: ' + location + '/' + dec_az );
+          UpdateStatus(' --- slewing to Ra/Dec: ' + location + '/' + dec_az );
           res = tsx_SlewCmdCoords( 'SkyX_JS_SlewRaDec', location, dec_az );
         }
         else if( slew == 'Target name' && location !='') {
           UpdateStatus(' Tool: slewing to target: ' + location );
           res = tsx_SlewTargetName( location  );
         }
+        UpdateStatus(' --- slew finished');
+      }
+      else {
+        UpdateStatus(' --- no slew, using current position');
       }
       if( res = true ) {
-        UpdateStatus(' Tool: slew finished');
-        tsxLog(' Tool: calibrating autoGuider');
+        tsxLog(' --- calibrating autoGuider');
         CalibrateAutoGuider();
       }
     }
@@ -612,6 +617,7 @@ Meteor.methods({
       }
     }
     finally {
+      UpdateStatus(' TOOLBOX: Autoguider Calibration FINISHED');
       tsx_SetServerState( 'tool_active', false );
     }
   },

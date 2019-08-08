@@ -414,9 +414,9 @@ class NightPlanner extends Component {
           </Grid.Row>
           {this.renderTargetRow( PLAN, colHours )}
         </Grid>
-        <center><black>
-          <small>Defaults: start time={STARTTIME}, end time={ENDTIME}<br/>Teal=Twilight, Blue=Moon, Green=Imaging<br/>
-          </small></black>
+        <center>
+          <small><font color="black">Defaults: start time={STARTTIME}, end time={ENDTIME}<br/>Teal=Twilight, Blue=Moon, Green=Imaging</font><br/>
+          </small>
         </center>
       </Segment>
     )
