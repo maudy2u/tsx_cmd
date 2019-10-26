@@ -69,7 +69,7 @@ if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   elif [ "$(uname -p)" == "x86_64" ]; then
     cd ~
     curl https://install.meteor.com/ | sh
-    ./meteor --version
+    meteor --version
     cd ~
   else
     echo "$(expr substr $(uname -s) 1 10)" - not yet supported

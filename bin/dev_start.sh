@@ -28,8 +28,7 @@ elif [ "$(uname -s)" == "Linux" ]; then
   elif [ "$(uname -p)" == "armv7l" ]; then
     ~/meteor/meteor --settings ./etc/settings.json
   else
-    echo $(uname -s) $(uname -p) - Not Supported
-    exit 5
+    meteor --settings ./etc/settings.json
   fi
 else
     # Do something under 64 bits Windows NT platform
