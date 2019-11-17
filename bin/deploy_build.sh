@@ -43,5 +43,5 @@ if [ $# -eq 1 ]; then
   echo " *******************************"
   echo  Building...
   echo " *******************************"
-  meteor build --directory ${1}
+  ~/meteor/meteor build --directory ${1}
 fi
