@@ -16,9 +16,7 @@
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 export app="Build All TSX Cmd v1.2"
-export version=build_$(git rev-list --all --count)_v${version}_${date}_${1}
-export install_dir=$(pwd)
-if [ $# < 2 ]
+if [ $# -lt 2 ]
   then
     echo ""
     echo " *******************************"
@@ -37,9 +35,14 @@ if [ $# < 2 ]
 fi
 
 export base_dir=${2}
+export install_dir=$(pwd)
+for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ./private/version.json ); do
+    export $s
+done
+export details=build_$(git rev-list --all --count)_v${version}_${date}_${1}
 
 build_tsx_cmd () {
-  folder=${base_dir}"tsx_cmd_"$1"_"${version}
+  folder=${base_dir}"tsx_cmd_"$1"_"${details}
   mkdir -p ${folder}
   echo " Building" ${folder}
   ~/meteor/meteor build --architecture $1 --directory ${folder}
@@ -56,7 +59,7 @@ echo " *******************************"
 echo ""
 if [ "$(uname -p)" == "aarch64" ]; then
   build_type="os.linux.aarch64"
-  folder=${base_dir}"tsx_cmd_"${build_type}"_"${version}
+  folder=${base_dir}"tsx_cmd_"${build_type}"_"${details}
   mkdir -p ${folder}
   echo " Building" ${folder}
   ~/meteor/meteor build --directory ${folder}

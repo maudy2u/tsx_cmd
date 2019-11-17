@@ -15,18 +15,19 @@
 #     You should have received a copy of the GNU Affero General Public License
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-install_dir=$(pwd)
+export install_dir=$(pwd)
+export app="Building TSX Cmd v1.2"
 if [ $# -eq 0 ]
   then
     echo ""
     echo " *******************************"
-    echo "Bundling TSX Cmd v1.1"
+    echo " "${app}
     echo " *******************************"
-    echo ": You need to provide one parameter to build - a comment."
+    echo ": You need to provide one parameter to build - this directory to use"
     echo ": e.g."
     echo ""
-    echo " tsx_cmd_build.sh test"
-    echo " tsx_cmd_build.sh alpha"
+    echo " tsx_cmd_build.sh ~/tsx_cmd"
+    echo " tsx_cmd_build.sh ~/app"
     echo ""
     echo " *******************************"
     echo ""
@@ -35,51 +36,17 @@ fi
 
 echo ""
 echo " *******************************"
-echo "Building TSX Cmd v1.0"
+echo " "${app}
 echo " *******************************"
 
-if [ "${2}" ]; then
+if [ $# -eq 1 ]; then
   echo ""
   echo " *******************************"
-  echo build_tsx_cmd.sh is file: ../tsx_cmd_${2}_build_$(git rev-list --all --count)_${1}.tar
+  echo  Building...
   echo " *******************************"
-  meteor build --architecture ${2} --directory ../tsx_cmd_${2}_build_$(git rev-list --all --count)_${1}
+  meteor build --directory ${1}
   exit 0
 fi
 
-if [ "$(uname -s)" == "Darwin" ]; then
-  if [ "$(uname -p)" == "i386" ]; then
-    echo ""
-    echo " *******************************"
-    echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}.tar
-    echo " *******************************"
-    meteor build --directory ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}
-    growlnotify -n "Build $(git rev-list --all --count) of TSX Cmd" -s -m "Completed"
-  else
-    echo $(uname -s) $(uname -p) - Not Supported
-    exit 5
-  fi
-elif [ "$(uname -s)" == "Linux" ]; then
-
-  if [ "$(uname -p)" == "aarch64" ]; then
-    echo ""
-    echo " *******************************"
-    echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_aarch64_build_$(git rev-list --all --count)_${1}.tar
-    echo " *******************************"
-    ~/meteor/meteor  build --directory ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}
-
-  elif [ "$(uname -p)" == "armv7l" ]; then
-    echo ""
-    echo " *******************************"
-    echo build_tsx_cmd.sh is creating file: ../tsx_cmd_$(uname -s)_armv7_build_$(git rev-list --all --count)_${1}.tar
-    echo " *******************************"
-    ~/meteor/meteor  build --directory ../tsx_cmd_$(uname -s)_$(uname -p)_build_$(git rev-list --all --count)_${1}
-  else
-    echo $(uname -s) $(uname -p) - Not Supported
-    exit 5
-  fi
-else
-    # Do something under 64 bits Windows NT platform
-    echo $(uname -s) $(uname -p) - Not Supported
-    exit 5
-fi
+echo "Error, should not be here"
+exit 1

@@ -26,14 +26,19 @@ export ROOT_URL='http://127.0.0.1'
 export METEOR_SETTINGS="$(cat ${install_dir}/settings.json)"
 export PATH=${install_dir}/mongodb/bin:${install_dir}/nodejs/bin:$PATH
 
+tsx_cmd() {
+  cd ${install_dir}/bundle
+  node main.js
+}
+
 if [ "$(uname)" == "Darwin" ]; then
   if [ "$(uname -p)" == "i386" ]; then
     echo Mac in ${install_dir}
     ulimit -n 1024
     mongod --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log --journal &
+    tsx_cmd
   else
     echo "$(expr substr $(uname -s) 1 10)" - not yet supported1
-    exit 5
   fi
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   if [ "$(uname -p)" == "aarch64" ]; then
@@ -41,17 +46,14 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     # export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-linux-arm64/bin:$PATH
     # https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz
     mongod --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log &
+    tsx_cmd
   elif [ "$(uname -p)" == "armv7l" ]; then
     echo Linux ARM-32bit_$(uname -p) in ${install_dir}
     mongod --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log --journal &
+    tsx_cmd
   else
     echo "$(expr substr $(uname -s) 1 10)" - not yet supported2
-    exit 5
   fi
 else
     echo "$(expr substr $(uname -s) 1 10)" - not yet supported3
-    exit 5
 fi
-
-cd ${install_dir}/bundle
-node main.js
