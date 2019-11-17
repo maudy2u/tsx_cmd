@@ -31,7 +31,6 @@ if [ $# -eq 0 ]
     echo ""
     echo " *******************************"
     echo ""
-    exit 1
 fi
 
 echo ""
@@ -45,8 +44,4 @@ if [ $# -eq 1 ]; then
   echo  Building...
   echo " *******************************"
   meteor build --directory ${1}
-  exit 0
 fi
-
-echo "Error, should not be here"
-exit 1
