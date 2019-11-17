@@ -32,7 +32,6 @@ if [ $# -eq 0 ]
     echo ""
     echo " *******************************"
     echo ""
-    exit 1
 fi
 
 echo " *******************************"
@@ -52,12 +51,10 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     else
       echo NO NODEJS supported
       echo $(uname -s) $(uname -p) - Not Supported
-      exit 5
     fi
 else
     # Do something under 64 bits Windows NT platform
     echo $(uname -s) $(uname -p) - Not Supported
-    exit 5
 fi
 
 # *******************************
