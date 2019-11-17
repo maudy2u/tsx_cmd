@@ -27,6 +27,11 @@ body {
   font-size: 14px;
 }
 
+.ui.scrolling.dropdown .menu,
+.ui.dropdown .scrolling.menu {
+  max-height: 200px !important;
+}
+
 .container {
   max-width: 600px;
   margin: 0 auto;

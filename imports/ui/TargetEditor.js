@@ -380,6 +380,10 @@ class TargetEditor extends Component {
               </Form.Group>
               <Form.Group>
                 <Form.Field control={Dropdown}
+                  button
+                  search
+                  wrapSelection
+                  scrolling
                   label='Series'
                   name='seriesTemplate'
                   options={takeSeries}
@@ -531,7 +535,10 @@ class TargetEditor extends Component {
       <Tab.Pane>
         <Form.Group widths='equal'>
           <Form.Field control={Dropdown}
-            fluid
+            button
+            search
+            wrapSelection
+            scrolling
             label='ClosedLoopSlew Filter'
             name='clsFilter'
             options={filters}
@@ -543,7 +550,11 @@ class TargetEditor extends Component {
             <h3 className="ui header">Focus</h3>
               <Form.Group widths='equal'>
                 <Form.Field control={Dropdown}
-                  fluid
+                  button
+                  search
+                  wrapSelection
+                  scrolling
+                  search
                   label='Focus Filter'
                   name='focusFilter'
                   options={filters}

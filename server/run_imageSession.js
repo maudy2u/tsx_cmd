@@ -1212,42 +1212,66 @@ function tsx_DeviceInfo() {
         UpdateStatus('The operation failed because there is no connection to the device.');
 	      return;
       }
+      try {
+        tsx_UpdateDevice(
+          'guider',
+          tsx_return.split('|')[1].trim(),
+          tsx_return.split('|')[3].trim(),
+        );
+      } catch (e) {
+        tsxDebug( ' No guider found.' );
+      }
 
-      tsx_UpdateDevice(
-        'guider',
-        tsx_return.split('|')[1].trim(),
-        tsx_return.split('|')[3].trim(),
-      );
+      try {
+        tsx_UpdateDevice(
+          'camera',
+          tsx_return.split('|')[5].trim(),
+          tsx_return.split('|')[7].trim(),
+        );
+      } catch (e) {
+        tsxDebug( ' No camera found.' );
+      }
 
-      tsx_UpdateDevice(
-        'camera',
-        tsx_return.split('|')[5].trim(),
-        tsx_return.split('|')[7].trim(),
-      );
+      try {
+        tsx_UpdateDevice(
+          'efw',
+          tsx_return.split('|')[9].trim(),
+          tsx_return.split('|')[11].trim(),
+        );
+      } catch (e) {
+        tsxDebug( ' No EFW found.' );
+      }
 
-      tsx_UpdateDevice(
-        'efw',
-        tsx_return.split('|')[9].trim(),
-        tsx_return.split('|')[11].trim(),
-      );
+      try {
+        tsx_UpdateDevice(
+          'focuser',
+          tsx_return.split('|')[13].trim(),
+          tsx_return.split('|')[15].trim(),
+        );
+      } catch (e) {
+        tsxDebug( ' No focuser found.' );
+      }
 
-      tsx_UpdateDevice(
-        'focuser',
-        tsx_return.split('|')[13].trim(),
-        tsx_return.split('|')[15].trim(),
-      );
+      try {
+        tsx_UpdateDevice(
+          'mount',
+          tsx_return.split('|')[17].trim(),
+          tsx_return.split('|')[19].trim(),
+        );
+      } catch (e) {
+        tsxErr( ' No mount found.' );
+      }
 
-      tsx_UpdateDevice(
-        'mount',
-        tsx_return.split('|')[17].trim(),
-        tsx_return.split('|')[19].trim(),
-      );
+      try {
+         tsx_UpdateDevice(
+           'rotator',
+           tsx_return.split('|')[21].trim(),
+           tsx_return.split('|')[23].trim(),
+         );
+       } catch (e) {
+         tsxDebug( ' No rotator found.' );
+       }
 
-       tsx_UpdateDevice(
-         'rotator',
-         tsx_return.split('|')[21].trim(),
-         tsx_return.split('|')[23].trim(),
-       );
 
        var numBins = tsx_return.split('|')[25].trim();
        tsx_SetServerState(
@@ -1813,7 +1837,7 @@ function tsx_TargetReport( target ) {
   cmd = cmd.replace('$000', target.targetFindName );
 
   var sunAlt = tsx_GetServerStateValue( 'defaultMinSunAlt');
-  if( typeof sunAlt === 'undefined') {
+  if( typeof sunAlt === 'undefined'  || sunAlt == '') {
     // hard coded to ~ nautical twilight
     // #TODO put the sun altitude into Settings
     sunAlt = -15;
@@ -1834,6 +1858,7 @@ function tsx_TargetReport( target ) {
       // false|6.812618943699146|
       // true|West|42.2|5.593339690591149|22.023446766485247|3.4187695344846833|16.2723491463255240.0|0|
       // No error. Error = 0.
+      tsxDebug( tsx_return );
 
       var result = tsx_return.split('|')[0].trim();
       if( result == 'TypeError: Object not found. Error = 250.') {
@@ -1847,7 +1872,6 @@ function tsx_TargetReport( target ) {
 
         // isValid will be false if not found or exception within script
         if( isValid != 'true' ) {
-          tsxDebug( tsx_return );
           UpdateStatusErr('!!! TargetReport failed. Not found ('+target.targetFindName+'): ' + isValid);
         }
         else {

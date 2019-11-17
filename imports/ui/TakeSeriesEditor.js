@@ -260,7 +260,10 @@ class TakeSeriesEditor extends Component {
         <Grid.Column>
           <Form>
           <Form.Dropdown
-              fluid
+              button
+              search
+              wrapSelection
+              scrolling
               name='filter'
               options={this.renderDropDownFilters()}
               placeholder='Filter'
