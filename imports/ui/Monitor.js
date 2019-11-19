@@ -560,7 +560,6 @@ class Monitor extends Component {
 
     return (
       <div>
-
         <Button.Group icon>
           {this.playButtons(RUNNING) }
         </Button.Group>
@@ -568,12 +567,12 @@ class Monitor extends Component {
         <Segment raised>
           <Grid columns={2}>
             <Grid.Column width={4}>
-              <Label>Atl <Label.Detail>{Number(this.props.scheduler_report.value.ALT).toFixed(4)}</Label.Detail></Label>
+              <Label>Alt <Label.Detail>{Number(this.props.scheduler_report.value.ALT).toFixed(4)}</Label.Detail></Label>
               <br /><Label>Az <Label.Detail>{this.props.scheduler_report.value.AZ}</Label.Detail></Label>
               <br /><Label>HA <Label.Detail>{Number(this.props.scheduler_report.value.HA).toFixed(4)}</Label.Detail></Label>
               <br /><Label>Transit <Label.Detail>{Number(this.props.scheduler_report.value.TRANSIT).toFixed(4)}</Label.Detail></Label>
               <br /><Label>Pointing <Label.Detail>{this.props.scheduler_report.value.pointing}</Label.Detail></Label>
-              <br /><Label>Rotator <Label.Detail>{Number(this.props.scheduler_report.value.focusPostion).toFixed(4)}</Label.Detail></Label>
+              <br /><Label>Focus Pos. <Label.Detail>{Number(this.props.scheduler_report.value.focusPostion).toFixed(4)}</Label.Detail></Label>
               <br /><Label>Angle <Label.Detail>{Number(this.props.scheduler_report.value.ANGLE).toFixed(4)}</Label.Detail></Label>
               <br /><Label>RA <Label.Detail>{Number(this.props.scheduler_report.value.RA).toFixed(4)}</Label.Detail></Label>
               <br /><Label>DEC <Label.Detail>{Number(this.props.scheduler_report.value.DEC).toFixed(4)}</Label.Detail></Label>

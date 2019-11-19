@@ -85,7 +85,9 @@ class DefaultSettings extends Component {
       currentStage: '',
       isTwilightEnabled: true,
       isFocus3Enabled: false,
+      focus3Samples: 5,
       isFocus3Binned: false,
+      focus3samples: 5,
       defaultGuideExposure: 7,
       defaultFocusExposure: 1,
       minDitherFactor: 3,
@@ -230,6 +232,9 @@ class DefaultSettings extends Component {
       isFocus3Enabled: nextProps.tsxInfo.find(function(element) {
         return element.name == 'isFocus3Enabled';
       }).value,
+      focus3Samples: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'focus3Samples';
+      }).value,
       isFocus3Binned: nextProps.tsxInfo.find(function(element) {
         return element.name == 'isFocus3Binned';
       }).value,
@@ -305,6 +310,7 @@ class DefaultSettings extends Component {
     this.saveDefaultState('defaultSleepTime');
     this.saveDefaultState('isTwilightEnabled');
     this.saveDefaultState('isFocus3Enabled');
+    this.saveDefaultState('focus3Samples');
     this.saveDefaultState('isFocus3Binned');
     this.saveDefaultState('defaultGuideExposure');
     this.saveDefaultState('defaultDithering');
@@ -412,7 +418,7 @@ class DefaultSettings extends Component {
               errorLabel={ ERRORLABEL }
             />
             <Form.Input
-              label='Time to sleep when no target '
+              label='Minutes to sleep when no target '
               name='defaultSleepTime'
               placeholder='Minutes to sleep'
               value={this.state.defaultSleepTime}
@@ -501,6 +507,18 @@ class DefaultSettings extends Component {
                 matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
               }}
               validationError="Must be a positive number, e.g 1, .7, 1.1"
+              errorLabel={ ERRORLABEL }
+            />
+            <Form.Input
+              label='@Focus3 samples '
+              name='focus2Samples'
+              placeholder='Number of samples to take'
+              value={this.state.focus3Samples}
+              onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, 2, 3, 5..."
               errorLabel={ ERRORLABEL }
             />
             <Form.Input

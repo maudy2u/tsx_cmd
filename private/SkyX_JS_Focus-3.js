@@ -17,7 +17,7 @@
 var CCDSC	= ccdsoftCamera;
 var focusingFilter = $000;
 var focusExp = $001;
-var numFocSamples = 1;
+var numFocSamples = $002;
 var initExp = CCDSC.ExposureTime;			// How long of an exposure does the camera use?
 // var initBinX = CCDSC.BinX;
 // var initBinY = CCDSC.BinY;

@@ -886,6 +886,12 @@ function tsx_RunFocus3( target ) {
   var Out;
   var enabled = tsx_GetServerStateValue('isFocus3Enabled');
   var doCLS = tsx_GetServerStateValue( 'defaultCLSEnabled' );
+  var samples = tsx_GetServerStateValue( 'focus3Samples' );
+  if( samples == '' || typeof samples == 'undefined') {
+    tsx_SetServerState('focus3Samples', 5 ); // arbitrary default
+    samples = 5;
+  }
+
   tsxDebug(' ??? @Focus3 enabled found to be: ' + enabled );
   if( enabled == true  ) {
 
@@ -916,6 +922,7 @@ function tsx_RunFocus3( target ) {
     tsxDebug( ' ??? @Focusing-3 exposure: ' + focusExp );
     cmd = cmd.replace("$000", focusFilter ); // set filter
     cmd = cmd.replace("$001", focusExp ); // set Bin
+    cmd = cmd.replace("$002", samples ); // set samples
 
     var lastFocusTemp = tsx_GetServerStateValue( 'initialFocusTemperature' ); // get last temp
     let curFocusTemp = target.report.focusTemp; // read new temp

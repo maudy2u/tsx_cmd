@@ -93,6 +93,7 @@ export const tsx_ServerStates = {
   defaultMinSunAlt: 'defaultMinSunAlt',
   isTwilightEnabled: 'isTwilightEnabled',
   isFocus3Enabled: 'isFocus3Enabled',
+  focus3Samples: 'focus3Samples',
   isFocus3Binned: 'isFocus3Binned',
   isAutoguidingEnabled: 'isAutoguidingEnabled',
   isGuideSettlingEnabled: 'isGuideSettlingEnabled',
