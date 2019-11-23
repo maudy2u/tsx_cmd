@@ -138,7 +138,7 @@ if [ "${2}" == "" ]; then
   curl -L "${APP}" -o tsx_cmd.tar
   tar -xf tsx_cmd.tar
   rm ${install_dir}/tsx_cmd.tar
-elif
+else
   tar -xf ${2}
 fi
 
