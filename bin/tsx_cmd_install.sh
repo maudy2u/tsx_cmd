@@ -121,11 +121,11 @@ curl -L "${NODEJS}" -o nodejs.tar.gz
 tar -xf nodejs.tar.gz -C ./nodejs --strip-components=1
 rm ${install_dir}/nodejs.tar.gz
 
-echo ""
-echo " *******************************"
-echo "TSX_CMD - Download " ${APP}
-echo " *******************************"
 if [ "${3}" == "" ]; then
+  echo ""
+  echo " *******************************"
+  echo "TSX_CMD - Download " ${APP}
+  echo " *******************************"
   curl -L "${APP}" -o tsx_cmd.tar
 fi
 
@@ -134,7 +134,6 @@ echo " *******************************"
 echo " TSX_CMD - Extract" ${APP}
 echo " *******************************"
 if [ "${3}" == "" ]; then
-  curl -L "${APP}" -o tsx_cmd.tar
   tar -xf tsx_cmd.tar
   rm ${install_dir}/tsx_cmd.tar
 else

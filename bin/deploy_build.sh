@@ -17,6 +17,29 @@
 #
 export install_dir=$(pwd)
 export app="Building TSX Cmd v1.2"
+
+update() {
+  export PATH=${1}/mongodb/bin:${1}/nodejs/bin:$PATH
+
+  cd ${1}/bundle/programs/server
+  echo " *******************************"
+  echo " TSX_CMD - fix for fibers deploy"
+  echo " *******************************"
+  echo ""
+  npm uninstall fibers
+  npm install fibers
+  echo " *******************************"
+  echo " TSX_CMD - reinstall npm"
+  echo " *******************************"
+  echo ""
+  npm install amdefine ansi-styles chalk escape-string-regexp has-ansi promise source-map strip-ansi type-of ansi-regex asap eachline meteor-promise semver source-map-support supports-color underscore
+  cd ${1}
+
+  echo " *******************************"
+  echo " TSX_CMD - updated"
+  echo " *******************************"
+}
+
 if [ $# -eq 0 ]
   then
     echo ""
@@ -43,25 +66,17 @@ if [ $# -eq 1 ]; then
   echo " *******************************"
   echo  Building...
   echo " *******************************"
-  ~/meteor/meteor build --directory ${1}
-
-  export PATH=${1}/mongodb/bin:${1}/nodejs/bin:$PATH
-
-  cd ${1}/bundle/programs/server
-  echo " *******************************"
-  echo " TSX_CMD - fix for fibers deploy"
-  echo " *******************************"
-  echo ""
-  npm uninstall fibers
-  npm install fibers
-  echo " *******************************"
-  echo " TSX_CMD - reinstall npm"
-  echo " *******************************"
-  echo ""
-  npm install amdefine ansi-styles chalk escape-string-regexp has-ansi promise source-map strip-ansi type-of ansi-regex asap eachline meteor-promise semver source-map-support supports-color underscore
-  cd ${1}
-
-  echo " *******************************"
-  echo " TSX_CMD - updated"
-  echo " *******************************"
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+  if [ "$(uname -p)" == "aarch64" ]; then
+    ~/meteor/meteor build --directory ${1}
+    update
+  elif [ "$(uname -p)" == "armv7l" ]; then
+    ~/meteor/meteor build --directory ${1}
+    update
+  elif [ "$(uname -p)" == "x86_64" ]; then
+    meteor build --directory ${1}
+    update
+  else
+    echo $(uname -s) $(uname -p) - NO NODEJS supported... yet
+  fi
 fi
