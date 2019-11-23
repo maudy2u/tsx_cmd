@@ -104,27 +104,32 @@ export ROOT_URL='http://127.0.0.1:3000'
 
 cd ${install_dir}
 
-  echo ""
-  echo " *******************************"
-  echo "Mongodb - Download and extract " ${MONGO}
-  echo " *******************************"
-  mkdir -p ./mongodb/bin
-  curl -L "${MONGO}" -o mongodb.tgz
-  tar -xf mongodb.tgz ${MONGO_PARAMS}
-  rm ${install_dir}/mongodb.tgz
-  echo ""
-  echo " *******************************"
-  echo " NodeJS - Download and extract " ${NODEJS}
-  echo " *******************************"
-  mkdir -p ./nodejs
+echo ""
+echo " *******************************"
+echo "Mongodb - Download and extract " ${MONGO}
+echo " *******************************"
+mkdir -p ./mongodb/bin
+curl -L "${MONGO}" -o mongodb.tgz
+tar -xf mongodb.tgz ${MONGO_PARAMS}
+rm ${install_dir}/mongodb.tgz
+echo ""
+echo " *******************************"
+echo " NodeJS - Download and extract " ${NODEJS}
+echo " *******************************"
+mkdir -p ./nodejs
+
+if [ "${2}" == "" ]; then
   curl -L "${NODEJS}" -o nodejs.tar.gz
   tar -xf nodejs.tar.gz -C ./nodejs --strip-components=1
   rm ${install_dir}/nodejs.tar.gz
-  echo ""
-  echo " *******************************"
-  echo "TSX_CMD - Download " ${APP}
-  echo " *******************************"
-  curl -L "${APP}" -o tsx_cmd.tar
+else
+  tar -xf ${2} -C ./nodejs --strip-components=1
+fi
+echo ""
+echo " *******************************"
+echo "TSX_CMD - Download " ${APP}
+echo " *******************************"
+curl -L "${APP}" -o tsx_cmd.tar
 
 echo ""
 echo " *******************************"
