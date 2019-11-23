@@ -18,6 +18,22 @@
 export install_dir=$(pwd)
 export app="Building TSX Cmd v1.2"
 
+if [ $# -eq 0 ]
+  then
+    echo ""
+    echo " *******************************"
+    echo " "${app}
+    echo " *******************************"
+    echo ": You need to provide one parameter to build - this directory to use"
+    echo ": e.g."
+    echo ""
+    echo " tsx_cmd_build.sh ~/tsx_cmd"
+    echo " tsx_cmd_build.sh ~/app"
+    echo ""
+    echo " *******************************"
+    echo ""
+fi
+
 update() {
   export PATH=${1}/mongodb/bin:${1}/nodejs/bin:$PATH
 
@@ -40,22 +56,6 @@ update() {
   echo " *******************************"
 }
 
-if [ $# -eq 0 ]
-  then
-    echo ""
-    echo " *******************************"
-    echo " "${app}
-    echo " *******************************"
-    echo ": You need to provide one parameter to build - this directory to use"
-    echo ": e.g."
-    echo ""
-    echo " tsx_cmd_build.sh ~/tsx_cmd"
-    echo " tsx_cmd_build.sh ~/app"
-    echo ""
-    echo " *******************************"
-    echo ""
-fi
-
 echo ""
 echo " *******************************"
 echo " "${app}
@@ -66,17 +66,25 @@ if [ $# -eq 1 ]; then
   echo " *******************************"
   echo  Building...
   echo " *******************************"
-elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-  if [ "$(uname -p)" == "aarch64" ]; then
-    ~/meteor/meteor build --directory ${1}
-    update
-  elif [ "$(uname -p)" == "armv7l" ]; then
-    ~/meteor/meteor build --directory ${1}
-    update
-  elif [ "$(uname -p)" == "x86_64" ]; then
-    meteor build --directory ${1}
-    update
-  else
-    echo $(uname -s) $(uname -p) - NO NODEJS supported... yet
+  if [ "$(uname)" == "Darwin" ]; then
+    if [ "$(uname -p)" == "i386" ]; then
+      echo Mac in ${install_dir}
+      meteor build --directory ${1}
+    else
+      echo "$(expr substr $(uname -s) 1 10)" - not yet supported1
+    fi
+  elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    if [ "$(uname -p)" == "aarch64" ]; then
+      echo ARM64 Build
+      ~/meteor/meteor build --directory ${1}
+    elif [ "$(uname -p)" == "armv7l" ]; then
+      echo armfh Build
+      ~/meteor/meteor build --directory ${1}
+    elif [ "$(uname -p)" == "x86_64" ]; then
+      echo Linux x86_64 Build
+      meteor build --directory ${1}
+    else
+      echo $(uname -s) $(uname -p) - NO NODEJS supported... yet
+    fi
   fi
 fi
