@@ -62,7 +62,7 @@ else {
 		// does focuser move automatically
 
 	}
-	Out = aFilter + '|' aExpTime + '|' aduResult;
+	Out = aFilter + '|' + aExpTime + '|' aduResult;
 }
 Out
 /* Socket End Packet */
