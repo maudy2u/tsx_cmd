@@ -57,22 +57,22 @@ elif [ "$(uname -s)" == "Linux" ]; then
   if [ "$(uname -p)" == "aarch64" ]; then
     echo ""
     echo " *******************************"
-    echo tsx_cmd_bundle.sh is creating file: ../tsx_cmd_$(uname -s)_aarch64_${details}.tar
+    echo tsx_cmd_bundle.sh is creating file: ../tsx_cmd_$(uname -s)_$(uname -p)_${details}.tar
     echo " *******************************"
-    ~/meteor/meteor bundle ../tsx_cmd_$(uname -s)_aarch64_${details}.tar
+    ~/meteor/meteor bundle ../tsx_cmd_$(uname -s)_$(uname -p)_${details}.tar
 
   elif [ "$(uname -p)" == "armv7l" ]; then
     echo ""
     echo " *******************************"
-    echo tsx_cmd_bundle.sh is creating file: ../tsx_cmd_$(uname -s)_armv7_${details}.tar
+    echo tsx_cmd_bundle.sh is creating file: ../tsx_cmd_$(uname -s)_$(uname -p)_${details}.tar
     echo " *******************************"
-    ~/meteor/meteor bundle ../tsx_cmd_$(uname -s)_armv7_${details}.tar
+    ~/meteor/meteor bundle ../tsx_cmd_$(uname -s)_$(uname -p)_${details}.tar
   elif [ "$(uname -p)" == "x86_64" ]; then
     echo ""
     echo " *******************************"
-    echo tsx_cmd_bundle.sh is creating file: ../tsx_cmd_$(uname -s)_armv7_${details}.tar
+    echo tsx_cmd_bundle.sh is creating file: ../tsx_cmd_$(uname -s)_$(uname -p)_${details}.tar
     echo " *******************************"
-    meteor bundle ../tsx_cmd_$(uname -s)_linux_x86_64_${details}.tar
+    meteor bundle ../tsx_cmd_$(uname -s)_$(uname -p)_${details}.tar
   else
     echo $(uname -s) $(uname -p) - Not Supported
     exit 5

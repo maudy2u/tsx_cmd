@@ -40,8 +40,6 @@ if [ $# -eq 0 ]
     helpinfo
 fi
 
-header
-
 install_tar_bundle() {
   if [ "$(uname)" == "Darwin" ]; then
       echo Mac in ${install_dir}
@@ -114,11 +112,10 @@ case ${1} in
 #          commands
 #          ;;
      help)
-          header
           helpinfo
           ;;
      *)
-          install_tar_bundle
-          update_fibers
+          install_tar_bundle;
+          update_fibers;
           ;;
 esac
