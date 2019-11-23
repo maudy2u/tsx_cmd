@@ -886,12 +886,6 @@ function tsx_RunFocus3( target ) {
   var Out;
   var enabled = tsx_GetServerStateValue('isFocus3Enabled');
   var doCLS = tsx_GetServerStateValue( 'defaultCLSEnabled' );
-  var samples = tsx_GetServerStateValue( 'focus3Samples' );
-  if( samples == '' || typeof samples == 'undefined') {
-    tsx_SetServerState('focus3Samples', 5 ); // arbitrary default
-    samples = 5;
-  }
-
   tsxDebug(' ??? @Focus3 enabled found to be: ' + enabled );
   if( enabled == true  ) {
 
@@ -901,6 +895,12 @@ function tsx_RunFocus3( target ) {
       Out = ''; // get last temp
       return Out;
     }
+    var focusSamples = tsx_GetServerStateValue( 'focus3Samples' );
+    if( focusSamples == '' || typeof focusSamples == 'undefined') {
+      tsx_SetServerState('focus3Samples', 5 ); // arbitrary default
+      focusSamples = 5;
+    }
+
     var focusFilter = getFilterSlot(target.focusFilter);
     var focusExp = target.focusExposure;
     var focusTarget = target.focusTarget;
@@ -918,9 +918,9 @@ function tsx_RunFocus3( target ) {
     }
 
     var cmd = tsx_cmd('SkyX_JS_Focus-3');
+    tsxDebug( ' ??? @Focusing-3 samples: ' + focusSamples );
     tsxDebug( ' ??? @Focusing-3 filter: ' + focusFilter );
     tsxDebug( ' ??? @Focusing-3 exposure: ' + focusExp );
-    tsxDebug( ' ??? @Focusing-3 samples: ' + samples );
     cmd = cmd.replace("$000", focusFilter ); // set filter
     cmd = cmd.replace("$001", focusExp ); // set Bin
     cmd = cmd.replace("$002", samples ); // set samples

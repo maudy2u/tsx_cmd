@@ -99,14 +99,21 @@ Meteor.methods({
     var focusFilterName = tsx_GetServerStateValue( 'defaultFilter' );
     var focusFilter = getFilterSlot( focusFilterName );
     var focusExp = tsx_GetServerStateValue( 'defaultFocusExposure' ); // assuming 1, need to get from state
+    var focusSamples = tsx_GetServerStateValue( 'focus3Samples' );
+    if( focusSamples == '' || typeof focusSamples == 'undefined') {
+      tsx_SetServerState('focus3Samples', 5 ); // arbitrary default
+      focusSamples = 5;
+    }
 
     UpdateStatus(' TOOLBOX: @Focus3 STARTED');
     try {
       var cmd = tsx_cmd('SkyX_JS_Focus-3');
       tsxDebug( ' ??? @Focusing-3 filter: ' + focusFilter );
       tsxDebug( ' ??? @Focusing-3 exposure: ' + focusExp );
+      tsxDebug( ' ??? @Focusing-3 samples: ' + focusSamples );
       cmd = cmd.replace("$000", focusFilter ); // set filter
       cmd = cmd.replace("$001", focusExp ); // set Bin
+      cmd = cmd.replace("$002", focusSamples ); // set Bin
 
       var tsx_is_waiting = true;
 
