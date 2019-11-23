@@ -48,6 +48,8 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
         echo ARMV8 in ${install_dir}
     elif [ "$(uname -p)" == "armv7l" ]; then
         echo ARMV7 in ${install_dir}
+    elif [ "$(uname -p)" == "x86_64" ]; then
+        echo x86_64 in ${install_dir}
     else
       echo NO NODEJS supported
       echo $(uname -s) $(uname -p) - Not Supported

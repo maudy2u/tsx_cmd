@@ -51,6 +51,12 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     echo Linux ARM-32bit_$(uname -p) in ${install_dir}
     mongod --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log --journal &
     tsx_cmd
+  elif [ "$(uname -p)" == "x86_64" ]; then
+    echo Linux x86_64_$(uname -p) in ${install_dir}
+    # export PATH=${install_dir}/mongodb-osx-x86_64-4.0.0/bin:${install_dir}/node-v8.11.3-linux-arm64/bin:$PATH
+    # https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz
+    mongod --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log &
+    tsx_cmd
   else
     echo "$(expr substr $(uname -s) 1 10)" - not yet supported2
   fi
