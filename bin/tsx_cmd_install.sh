@@ -78,8 +78,7 @@ if [ "${1}" == "init" ]; then
       echo " tsx_cmd - Linux X86_64 in" ${install_dir}
       #export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC9_aarch64/tsx_cmd_Linux_aarch64_build_374_v3.4.6_2019-02-17_RC9.tar'
       export MONGO='http://downloads.mongodb.org/linux/mongodb-linux-x86_64-ubuntu1804-4.0.5.tgz'
-      export NODEJS='https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-x86.tar.gz'
-      # https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-x64.tar.xz
+      export NODEJS='https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-x64.tar.xz'
       export MONGO_PARAMS="-C ./mongodb  --strip-components=1"
     else
       echo $(uname -s) $(uname -p) - NO NODEJS supported... yet
