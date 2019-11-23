@@ -923,7 +923,7 @@ function tsx_RunFocus3( target ) {
     tsxDebug( ' ??? @Focusing-3 exposure: ' + focusExp );
     cmd = cmd.replace("$000", focusFilter ); // set filter
     cmd = cmd.replace("$001", focusExp ); // set Bin
-    cmd = cmd.replace("$002", samples ); // set samples
+    cmd = cmd.replace("$002", focusSamples ); // set samples
 
     var lastFocusTemp = tsx_GetServerStateValue( 'initialFocusTemperature' ); // get last temp
     let curFocusTemp = target.report.focusTemp; // read new temp
