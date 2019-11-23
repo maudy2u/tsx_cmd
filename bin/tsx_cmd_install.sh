@@ -126,7 +126,7 @@ echo ""
 echo " *******************************"
 echo "TSX_CMD - Download " ${APP}
 echo " *******************************"
-if [ "${2}" == "" ]; then
+if [ "${3}" == "" ]; then
   curl -L "${APP}" -o tsx_cmd.tar
 fi
 
@@ -134,12 +134,12 @@ echo ""
 echo " *******************************"
 echo " TSX_CMD - Extract" ${APP}
 echo " *******************************"
-if [ "${2}" == "" ]; then
+if [ "${3}" == "" ]; then
   curl -L "${APP}" -o tsx_cmd.tar
   tar -xf tsx_cmd.tar
   rm ${install_dir}/tsx_cmd.tar
 else
-  tar -xf ${2}
+  tar -xf ${3}
 fi
 
 cd ${install_dir}/bundle/programs/server
