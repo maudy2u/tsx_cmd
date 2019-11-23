@@ -15,7 +15,7 @@
 #     You should have received a copy of the GNU Affero General Public License
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-install_dir=$(pwd)
+export install_dir=$(pwd)
 header() {
   echo " *******************************"
   echo " Update TSX Cmd v1.0"
@@ -39,6 +39,7 @@ if [ $# -eq 0 ]
   then
     helpinfo
 fi
+export tarfile=${1}
 
 install_tar_bundle() {
   if [ "$(uname)" == "Darwin" ]; then
@@ -70,10 +71,10 @@ install_tar_bundle() {
   echo " ./bundle backed up to ./bundle_${version}_${date}"
 
   echo " *******************************"
-  echo " TSX_CMD - Extract" ${1}
+  echo " TSX_CMD - Extract" ${tarfile}
   echo " *******************************"
   echo ""
-  tar xf ${1}
+  tar xf ${tarfile}
 }
 
 update_fibers() {
@@ -104,7 +105,7 @@ update_fibers() {
 
 export PATH=${install_dir}/mongodb/bin:${install_dir}/nodejs/bin:$PATH
 
-case ${1} in
+case ${tarfile} in
      update)
           update_fibers
           ;;
