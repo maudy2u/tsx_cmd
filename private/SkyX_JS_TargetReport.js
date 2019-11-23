@@ -80,11 +80,13 @@ try {
 
     OBJI.Property(58); // azimuth
     var azimuth = OBJI.ObjInfoPropOut;
-    if (azimuth < 179) {
-    	azimuth = "East";
-    } else {
-    	azimuth = "West";
-    }
+		azimuth = azimuth.toFixed(1);
+
+    // if (azimuth < 179) {
+    // 	azimuth = "East";
+    // } else {
+    // 	azimuth = "West";
+    // }
 
     OBJI.Property(54);  // RA				// Pull the RA value
     var targetRA = OBJI.ObjInfoPropOut; 		// Stuff RA into variable

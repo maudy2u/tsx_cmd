@@ -920,6 +920,7 @@ function tsx_RunFocus3( target ) {
     var cmd = tsx_cmd('SkyX_JS_Focus-3');
     tsxDebug( ' ??? @Focusing-3 filter: ' + focusFilter );
     tsxDebug( ' ??? @Focusing-3 exposure: ' + focusExp );
+    tsxDebug( ' ??? @Focusing-3 samples: ' + samples );
     cmd = cmd.replace("$000", focusFilter ); // set filter
     cmd = cmd.replace("$001", focusExp ); // set Bin
     cmd = cmd.replace("$002", samples ); // set samples

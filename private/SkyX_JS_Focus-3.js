@@ -78,8 +78,8 @@ if ( Application.build >= 11177 )
 			var pos = '';
 			try {
 				CCDSC.FocusExposureTime = focusExp; // direct from example: atfocus3.js
-				res1 = CCDSC.AtFocus3(1, true); // direct from example: atfocus3.js
-//				res1 = CCDSC.AtFocus3(numFocSamples, true);
+				//res1 = CCDSC.AtFocus3(1, true); // direct from example: atfocus3.js
+				res1 = CCDSC.AtFocus3(numFocSamples, true);
 // there have been crashes with the @Focus3 method...
 // Not sure if this is a fault of the return type
 // suspect it was not the use of the `FocusExposureTime`, which is now set
