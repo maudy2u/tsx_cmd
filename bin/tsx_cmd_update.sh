@@ -16,84 +16,109 @@
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 install_dir=$(pwd)
+header() {
+  echo " *******************************"
+  echo " Update TSX Cmd v1.0"
+  echo " *******************************"
+}
+helpinfo() {
+  echo ""
+  header
+  echo ": 1. You need to download tsx_cmd package before running this file."
+  echo ": 2. Put the file in the directory you wish to install tsx_cmd."
+  echo ": 3. Run this file from within the directory"
+  echo ": "
+  echo ": e.g."
+  echo ""
+  echo " tsx_cmd_install.sh tsx_cmd_20180708_05.tar"
+  echo ""
+  echo " *******************************"
+  echo ""
+}
 if [ $# -eq 0 ]
   then
-    echo ""
-    echo " *******************************"
-    echo "Update TSX Cmd v1.0"
-    echo " *******************************"
-    echo ": 1. You need to download tsx_cmd package before running this file."
-    echo ": 2. Put the file in the directory you wish to install tsx_cmd."
-    echo ": 3. Run this file from within the directory"
-    echo ": "
-    echo ": e.g."
-    echo ""
-    echo " tsx_cmd_install.sh tsx_cmd_20180708_05.tar"
-    echo ""
-    echo " *******************************"
-    echo ""
+    helpinfo
 fi
 
-echo " *******************************"
-echo " Update TSX Cmd v1.0"
-echo " *******************************"
+header
 
-if [ "$(uname)" == "Darwin" ]; then
-    echo Mac in ${install_dir}
+install_tar_bundle() {
+  if [ "$(uname)" == "Darwin" ]; then
+      echo Mac in ${install_dir}
 
-elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-    # Do something under GNU/Linux platform
-    echo Linux
-    if [ "$(uname -p)" == "aarch64" ]; then
-        echo ARMV8 in ${install_dir}
-    elif [ "$(uname -p)" == "armv7l" ]; then
-        echo ARMV7 in ${install_dir}
-    elif [ "$(uname -p)" == "x86_64" ]; then
-        echo x86_64 in ${install_dir}
-    else
-      echo NO NODEJS supported
+  elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+      # Do something under GNU/Linux platform
+      echo Linux
+      if [ "$(uname -p)" == "aarch64" ]; then
+          echo ARMV8 in ${install_dir}
+      elif [ "$(uname -p)" == "armv7l" ]; then
+          echo ARMV7 in ${install_dir}
+      elif [ "$(uname -p)" == "x86_64" ]; then
+          echo x86_64 in ${install_dir}
+      else
+        echo NO NODEJS supported
+        echo $(uname -s) $(uname -p) - Not Supported
+      fi
+  else
+      # Do something under 64 bits Windows NT platform
       echo $(uname -s) $(uname -p) - Not Supported
-    fi
-else
-    # Do something under 64 bits Windows NT platform
-    echo $(uname -s) $(uname -p) - Not Supported
-fi
+  fi
 
-# *******************************
-# grab current bundle variables
-for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ./bundle/programs/server/assets/app/version.json ); do
-    export $s
-done
+  echo " *******************************"
+  echo " Updating tsx_cmd in ${install_dir}"
+  echo " *******************************"
+  echo ""
+  mv ./bundle ./bundle_${version}_${date}
+  echo " ./bundle backed up to ./bundle_${version}_${date}"
+
+  echo " *******************************"
+  echo " TSX_CMD - Extract" ${1}
+  echo " *******************************"
+  echo ""
+  tar -xf ${1}
+}
+
+update_fibers() {
+  # *******************************
+  # grab current bundle variables
+  for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ./bundle/programs/server/assets/app/version.json ); do
+      export $s
+  done
+
+  cd ${install_dir}/bundle/programs/server
+  echo " *******************************"
+  echo " TSX_CMD - fix for fibers deploy"
+  echo " *******************************"
+  echo ""
+  npm uninstall fibers
+  npm install fibers
+  echo " *******************************"
+  echo " TSX_CMD - reinstall npm"
+  echo " *******************************"
+  echo ""
+  npm install amdefine ansi-styles chalk escape-string-regexp has-ansi promise source-map strip-ansi type-of ansi-regex asap eachline meteor-promise semver source-map-support supports-color underscore
+  cd ${install_dir}
+
+  echo " *******************************"
+  echo " TSX_CMD - updated"
+  echo " *******************************"
+}
 
 export PATH=${install_dir}/mongodb/bin:${install_dir}/nodejs/bin:$PATH
 
-echo " *******************************"
-echo " Updating tsx_cmd in ${install_dir}"
-echo " *******************************"
-echo ""
-mv ./bundle ./bundle_${version}_${date}
-echo " ./bundle backed up to ./bundle_${version}_${date}"
-
-echo " *******************************"
-echo " TSX_CMD - Extract" ${1}
-echo " *******************************"
-echo ""
-tar -xf ${1}
-
-cd ${install_dir}/bundle/programs/server
-echo " *******************************"
-echo " TSX_CMD - fix for fibers deploy"
-echo " *******************************"
-echo ""
-npm uninstall fibers
-npm install fibers
-echo " *******************************"
-echo " TSX_CMD - reinstall npm"
-echo " *******************************"
-echo ""
-npm install amdefine ansi-styles chalk escape-string-regexp has-ansi promise source-map strip-ansi type-of ansi-regex asap eachline meteor-promise semver source-map-support supports-color underscore
-cd ${install_dir}
-
-echo " *******************************"
-echo " TSX_CMD - updated"
-echo " *******************************"
+case ${1} in
+     update)
+          update_fibers
+          ;;
+#     pattern-3|pattern-4|pattern-5)
+#          commands
+#          ;;
+     help)
+          header
+          helpinfo
+          ;;
+     *)
+          install_tar_bundle
+          update_fibers
+          ;;
+esac
