@@ -112,31 +112,35 @@ mkdir -p ./mongodb/bin
 curl -L "${MONGO}" -o mongodb.tgz
 tar -xf mongodb.tgz ${MONGO_PARAMS}
 rm ${install_dir}/mongodb.tgz
+
 echo ""
 echo " *******************************"
 echo " NodeJS - Download and extract " ${NODEJS}
 echo " *******************************"
 mkdir -p ./nodejs
+curl -L "${NODEJS}" -o nodejs.tar.gz
+tar -xf nodejs.tar.gz -C ./nodejs --strip-components=1
+rm ${install_dir}/nodejs.tar.gz
 
-if [ "${2}" == "" ]; then
-  curl -L "${NODEJS}" -o nodejs.tar.gz
-  tar -xf nodejs.tar.gz -C ./nodejs --strip-components=1
-  rm ${install_dir}/nodejs.tar.gz
-else
-  tar -xf ${2} -C ./nodejs --strip-components=1
-fi
 echo ""
 echo " *******************************"
 echo "TSX_CMD - Download " ${APP}
 echo " *******************************"
-curl -L "${APP}" -o tsx_cmd.tar
+if [ "${2}" == "" ]; then
+  curl -L "${APP}" -o tsx_cmd.tar
+fi
 
 echo ""
 echo " *******************************"
 echo " TSX_CMD - Extract" ${APP}
 echo " *******************************"
-tar -xf tsx_cmd.tar
-rm ${install_dir}/tsx_cmd.tar
+if [ "${2}" == "" ]; then
+  curl -L "${APP}" -o tsx_cmd.tar
+  tar -xf tsx_cmd.tar
+  rm ${install_dir}/tsx_cmd.tar
+elif
+  tar -xf ${2}
+fi
 
 cd ${install_dir}/bundle/programs/server
 echo ""
