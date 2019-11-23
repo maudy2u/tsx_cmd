@@ -73,7 +73,7 @@ install_tar_bundle() {
   echo " TSX_CMD - Extract" ${1}
   echo " *******************************"
   echo ""
-  tar -xf ${1}
+  tar xf ${1}
 }
 
 update_fibers() {
