@@ -85,7 +85,7 @@ int send_cmd( std::string host, std::vector<std::string> cmd ) {
   msg = accumulate(begin(cmd), end(cmd), msg);
   cout<<"Sending commands: "<<msg<<endl;
 
-  rc = write(sockfd, msg.c_str(), 255);
+  rc = write(sockfd, msg.c_str(), msg.length());
   if (rc < 0)
       error("ERROR writing to socket");
   bzero(buffer, 256);
@@ -123,7 +123,7 @@ int main( int argc, char** argv ) {
     // NOTE: this is needed to skip the first when processing the command line
     int this_option_optind = optind ? optind : 1;
     int option_index = 0;
-    c = getopt_long(argc, argv, short_options,
+    c = getopt_long(argc, argv, _short_options,
              long_options, &option_index);
     if (c == -1)
         break;

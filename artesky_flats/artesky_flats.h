@@ -14,4 +14,5 @@ static struct option long_options[] = {
     {"disconnect",  no_argument,    0,  'x' },
     {0,         0,                   0,  0 }
 };
-const char* short_options = "h:d:c:l:OosvDLx";
+const char* _short_options = "h:d:c:l:OosvDLx";
+static std::string _whitespaces (" \t\f\v\n\r");
