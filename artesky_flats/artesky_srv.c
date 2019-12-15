@@ -11,6 +11,11 @@
 
 #include <iostream>
 #include <cctype>
+#include <cstdio>
+#include <vector>
+#include <string>
+#include <numeric>
+#include <algorithm>
 #include <getopt.h>
 #include "./artesky_flats.h"
 
@@ -56,6 +61,14 @@ std::string removeNewlineEscape(const std::string& line)
   return str;
 } // checkNewlineEscape
 
+std::string Communication_recv(int sock, int bytes) {
+    std::string output(bytes, 0);
+    if (read(sock, &output[0], bytes-1)<0) {
+        std::cerr << "Failed to read data from socket.\n";
+    }
+    return output;
+}
+
 // *****************************************************
 int main( int argc, char** argv ) {
     // Prep for artesky_cmd
@@ -70,7 +83,7 @@ int main( int argc, char** argv ) {
         {0,       0,                  0,  0 }
     };
 
-   c = getopt_long(argc, argv, "h:",
+   c = getopt_long(argc, argv, ":h:",
              long_options, &option_index);
    if (c == -1)
       return 1;
@@ -153,126 +166,103 @@ int main( int argc, char** argv ) {
     if (newsockfd < 0)
         cout<<"ERROR on accept"<<endl;
     else {
-      bzero(buffer, 256);
-      n = read(newsockfd, buffer, 255);
+/*      bzero(buffer, 256);
+      // create new vector with the buffer
+      std::vector<std::string> buffer;
+      buffer.resize(512);
+      n = read(newsockfd, &buffer[0], 512);
       if (n < 0)
         error("ERROR reading from socket");
-
+*/
+      std:string cmds = Communication_recv(newsockfd,256);
       std::string success = "successful";
       n = write(newsockfd, &success, 30);
       if (n < 0)
         error("ERROR writing to socket");
 
-      std::string cmd = removeNewlineEscape(buffer);
-#ifdef __DEBUG
-      cout<<"Processing command: "<<cmd<<endl;
-#endif
-      if (caseInSensStringCompare(cmd, (char *)"1"))
-      {
-//      ret = flat.connect(_serialPort.c_str());
-//        if (ret == ASL_NO_ERROR)
-//          cout << "Connected" << endl;
-//        else
-//          cout << "LIBRARY ERROR" << endl;
-          cout << "Matched COMMAND 1" << endl;
+      cout<<cmds<<endl;
 
-      }
-/*      else if (choice == 2)
-      {
-        ret = flat.disconnect();
-        if (ret == ASL_NO_ERROR)
-          cout << "Disconnected" << endl;
-        else
-          cout << "LIBRARY ERROR" << endl;
-      }
-      else if (choice == 3)
-      {
-        ret = flat.turnOn();
-        if (ret == ASL_NO_ERROR)
-          cout << "Lamp turned on" << endl;
-        else
-          cout << "LIBRARY ERROR" << endl;
-      }
-      else if (choice == 4)
-      {
-        ret = flat.turnOff();
-        if (ret == ASL_NO_ERROR)
-          cout << "Lamp turned off" << endl;
-        else
-          cout << "LIBRARY ERROR" << endl;
-      }
-      else if (choice == 5)
-      {
-        _level = 0;
-        cout << "Inset brightness level [0-255]: ";
-        cin >> _level;
-        ret = flat.setBrightness(_level);
-        if (ret == ASL_NO_ERROR)
-          cout << "Lamp brightness level set: " << _level << endl;
-        else
-          cout << "LIBRARY ERROR" << endl;
-      }
-      else if (choice == 6)
-      {
-        ret = flat.getBrightness(_level);
-        if (ret == ASL_NO_ERROR)
-          cout << "Lamp brightness level is: " << _level << endl;
-        else
-          cout << "LIBRARY ERROR" << endl;
-      }
-      else if (choice == 7)
-      {
-        ret = flat.getStatus(_status);
-        if (ret == ASL_NO_ERROR)
-        {
-          if (_status)
-            cout << "Status: Lamp is on" << endl;
-          else
-            cout << "Status: Lamp is off" << endl;
-        }
-        else
-          cout << "LIBRARY ERROR" << endl;
-      }
-      else if (choice == 8)
-      {
-        ret = flat.getAPIversion(_version);
-        if (ret == ASL_NO_ERROR)
-          cout << "API version: " << _version << endl;
-        else
-          cout << "LIBRARY ERROR" << endl;
-      }
-      else if (choice == 9)
-      {
-        ret = flat.isFlatConnected(_isConnected);
-        if (ret == ASL_NO_ERROR)
-        {
-          if (_isConnected)
-            cout << "Flat is connected" << endl;
-          else
-            cout << "Flat is disconnected" << endl;
-        }
-        else
-          cout << "LIBRARY ERROR" << endl;
-      }
-*/
-      else if (caseInSensStringCompare(cmd, (char *)"10"))
+  /*
+  while (1) {
+    int c;
+    int digit_optind = 0;
+    int this_option_optind = optind ? optind : 1;
+    int option_index = 0;
+    static struct option long_options[] = {
+        {"device",    required_argument,  0,  'd' },
+        {"connect",  required_argument, 0,  'c' },
+        {"level",   required_argument,  0,  'l' },
+        {"on",      no_argument,        0,  'O' },
+        {"off",     no_argument,        0,  'o'},
+        {"status",  no_argument,        0,  's' },
+        {"version",  no_argument,       0,  'v' },
+        {"getDevice",  no_argument,       0,  'P' },
+        {"getLevel",  no_argument,      0,  'L' },
+        {"exit",        no_argument,    0,  'e' },
+        {0,         0,                   0,  0 }
+    };
 
-      {
-//        ret = flat.getSerialPort(_serialPort);
-//        if (ret == ASL_NO_ERROR)
-//          cout << "Flat connection port: " << _serialPort;
-//        else
-          cout << "Matched COMMAND 10" << endl;
-      }
-      else if (caseInSensStringCompare(cmd, (char *)"exit"))
+    int x = buffer.size();
+    c = getopt_long( x, cmds, "d:c:l:OosvDLx",
+              long_options, &option_index);
+    if (c == -1)
+         break;
 
-      {
+    switch (c) {
+    case 'd':
+         _serialPort=optarg;
+         break;
+
+    case 'c':
+    //      ret = flat.connect(_serialPort.c_str());
+    //        if (ret == ASL_NO_ERROR)
+    //          cout << "Connected" << endl;
+    //        else
+    //          cout << "LIBRARY ERROR" << endl;
+         break;
+
+    case 'l':
+         printf("option l with value '%s'\n", optarg);
+         break;
+
+     case 'L':
+          printf("option l with value '%s'\n", optarg);
           break;
-      }
-      else {
-        cout<<"Ingored command: "<<cmd<<endl;
-        continue;
-      }
+
+      case 'D':
+           printf("option l with value '%s'\n", optarg);
+           break;
+
+    case 'v':
+        printf("option version\n");
+        break;
+
+    case 'O':
+       printf("option version\n");
+       break;
+
+    case 'o':
+      printf("option version\n");
+      break;
+
+    case 's':
+       printf("option version\n");
+       break;
+
+    case 'x':
+      printf("option version\n");
+      break;
+
+    case '?':
+         break;
+
+    default:
+         printf("?? getopt returned character code 0%o ??\n", c);
+     }
+    }
+    */
+
+
     }
     close(newsockfd);
   }
