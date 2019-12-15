@@ -1,0 +1,33 @@
+#make file overview :--
+#you can add a little description here.
+
+#variable declaration :-
+# this is the variable which is used in the target.
+cc=gcc
+MAKE=make
+RM =rm
+
+#targets .
+all: client server
+	$(cc) -o artesky_cmd artesky_cmd.c
+	$(cc) -o artesky_srv artesky_srv.c
+	#gnome-terminal -t server --working-directory=/home/parallels/src/tmp -e "./server"
+	sleep 10s
+	$(MAKE) client_target
+
+
+#another target for client
+server:
+	$(cc) -g -o artesky_srv artesky_srv.c
+
+client:
+	$(cc) -g -o artesky_cmd artesky_cmd.c
+
+#another target for client
+client_target:
+	./artesky_cmd
+
+
+clean:
+	$(RM) artesky_srv
+	$(RM) artesky_cmd
