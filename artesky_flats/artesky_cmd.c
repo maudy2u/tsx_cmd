@@ -7,10 +7,15 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <getopt.h>
 
 #include <iostream>
 #include <cctype>
-#include <getopt.h>
+#include <cstdio>
+#include <vector>
+#include <string>
+#include <numeric>
+#include <algorithm>
 
 #include "./artesky_flats.h"
 
@@ -42,7 +47,7 @@ static void show_usage(std::string name)
               << std::endl;
 }
 
-int send_cmd( std::string host, std::string cmd ) {
+int send_cmd( std::string host, std::vector<std::string> cmd ) {
   struct sockaddr_in serv_addr;
   struct hostent *server;
   const char *hostName = host.c_str();
@@ -76,7 +81,11 @@ int send_cmd( std::string host, std::string cmd ) {
 
 //  fgets(buffer, 255, cmd.c_str());
   //read or write function is used for the writing or reading the message in the socket stream.
-  rc = write(sockfd, cmd.c_str(), strlen(cmd.c_str()));
+  std::string msg;
+  msg = accumulate(begin(cmd), end(cmd), msg);
+  cout<<"Sending commands: "<<msg<<endl;
+
+  rc = write(sockfd, msg.c_str(), 255);
   if (rc < 0)
       error("ERROR writing to socket");
   bzero(buffer, 256);
@@ -97,8 +106,6 @@ int main( int argc, char** argv ) {
       show_usage(argv[0]);
       return 1;
   }
-  int c;
-  int digit_optind = 0;
   struct sockaddr_in serv_addr;
   struct hostent *server;
   char buffer[256];
@@ -108,80 +115,77 @@ int main( int argc, char** argv ) {
   std::string hostName = "localhost";
   std::string device = "ttyACM0";
   std::string level = "50";
-  std::string commands = "";
-
+  std::vector<std::string> commands;
 
  while (1) {
-      int this_option_optind = optind ? optind : 1;
-      int option_index = 0;
-      static struct option long_options[] = {
-          {"host",    required_argument,  0,  'h' },
-          {"device",    required_argument,  0,  'd' },
-          {"connect",  required_argument, 0,  'c' },
-          {"level",   required_argument,  0,  'l' },
-          {"on",      no_argument,        0,  'O' },
-          {"off",     no_argument,        0,  'o'},
-          {"status",  no_argument,        0,  's' },
-          {"version",  no_argument,       0,  'v' },
-          {"getPort",  no_argument,       0,  'P' },
-          {"getLevel",  no_argument,      0,  'L' },
-          {"disconnect",  no_argument,    0,  'x' },
-          {0,         0,                   0,  0 }
-      };
+    int c;
+    int digit_optind = 0;
+    // NOTE: this is needed to skip the first when processing the command line
+    int this_option_optind = optind ? optind : 1;
+    int option_index = 0;
+    c = getopt_long(argc, argv, short_options,
+             long_options, &option_index);
+    if (c == -1)
+        break;
 
-     c = getopt_long(argc, argv, "h:d:c:l:OosvPLx",
-               long_options, &option_index);
-     if (c == -1)
-          break;
+    switch (c) {
+    case 'h':
+        printf("Foundoption h  with value '%s'\n", optarg);
+        hostName=optarg;
+        break;
 
-     switch (c) {
-     case 'h':
-          printf("Foundoption h  with value '%s'\n", optarg);
-          hostName=optarg;
-          break;
+    case 'd':
+        printf("option p  with value '%s'\n", optarg);
+        device=optarg;
+        commands.push_back(" --device ");
+        commands.push_back(device);
+        break;
 
-     case 'd':
-          printf("option p  with value '%s'\n", optarg);
-          device=optarg;
-          commands+=" --device ";
-          commands+=device;
-          break;
+    case 'c':
+        printf("option connect with value '%s'\n", optarg);
+        commands.push_back(" --connect ");
+        break;
 
-     case 'c':
-          printf("option connect with value '%s'\n", optarg);
-          commands+=" --connect";
-          break;
+    case 'l':
+        printf("option l with value '%s'\n", optarg);
+        level=optarg;
+        commands.push_back(" --level ");
+        commands.push_back(level);
+        break;
 
-     case 'l':
+    case 'L':
+         printf("option l with value '%s'\n", optarg);
+         commands.push_back(" --getLevel ");
+         break;
+
+     case 'D':
           printf("option l with value '%s'\n", optarg);
-          level=optarg;
-          commands+=" --level ";
-          commands+=level;
+          commands.push_back(" --getDevice ");
           break;
 
     case 'v':
          printf("option version\n");
-         commands+=" --version";
+         commands.push_back(" --version ");
          break;
 
    case 'O':
         printf("option version\n");
-        commands+=" --on";
+        commands.push_back(" --on ");
         break;
 
   case 'o':
        printf("option version\n");
-       commands+=" --off";
+       commands.push_back(" --off ");
        break;
 
    case 's':
         printf("option version\n");
-        commands+=" --status";
+        commands.push_back(" --status ");
         break;
 
   case 'x':
        printf("option version\n");
-       commands+=" -exit";
+       commands.push_back(" --exit ");
        break;
 
      case '?':
@@ -192,8 +196,8 @@ int main( int argc, char** argv ) {
           printf("?? getopt returned character code 0%o ??\n", c);
       }
   }
-
- if (optind < argc) {
+  cout<<"optind="<<optind<<endl;
+  if (optind < argc) {
       printf("non-option ARGV-elements: ");
       while (optind < argc)
           printf("%s ", argv[optind++]);
@@ -202,8 +206,7 @@ int main( int argc, char** argv ) {
 
   cout<<hostName<<endl;
   cout<<device<<endl;
-  cout<<commands<<endl;
-
+  cout<<commands.size()<<endl;
   int rc = send_cmd(hostName, commands);
 
  exit(EXIT_SUCCESS);
