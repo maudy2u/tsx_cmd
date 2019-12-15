@@ -1,3 +1,4 @@
+# https://www.techbeamers.com/makefile-tutorial-create-client-server-program/
 #make file overview :--
 #you can add a little description here.
 
@@ -10,7 +11,7 @@ RM =rm
 
 #targets .
 all: client server
-	$(cc) -o artesky_cmd artesky_cmd.c
+	$(cpp) -o artesky_cmd artesky_cmd.c
 	$(cpp) -o artesky_srv artesky_srv.c
 	#gnome-terminal -t server --working-directory=/home/parallels/src/tmp -e "./server"
 	sleep 10s
@@ -22,7 +23,7 @@ server:
 	$(cpp) -g -o artesky_srv artesky_srv.c
 
 client:
-	$(cc) -g -o artesky_cmd artesky_cmd.c
+	$(cpp) -g -o artesky_cmd artesky_cmd.c
 
 #another target for client
 client_target:

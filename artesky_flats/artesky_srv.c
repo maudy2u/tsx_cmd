@@ -7,12 +7,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
+
 #include <iostream>
 #include <cctype>
-//#include <sys/socket.h>
-//#include <netinet/in.h>
-#include <arpa/inet.h>
-// #include "sock.h"
 #include "./artesky_flats.h"
 
 using namespace std;
