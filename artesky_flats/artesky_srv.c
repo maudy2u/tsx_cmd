@@ -17,14 +17,28 @@
 #include <numeric>
 #include <algorithm>
 #include <getopt.h>
-#include "./artesky_flats.h"
+
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/classification.hpp> // Include boost::for is_any_of
+#include <boost/algorithm/string/split.hpp> // Include for boost::split
 
 using namespace std;
+using namespace boost;
 //using namespace artesky;
+
+#include "./artesky_flats.h"
+
 
 void error(const char * msg) {
     perror(msg);
     exit(1);
+}
+
+char* convert(const std::string & s)
+{
+   char *pc = new char[s.size()+1];
+   std::strcpy(pc, s.c_str());
+   return pc;
 }
 
 bool compareChar(char & c1, char & c2)
@@ -49,8 +63,7 @@ bool compareChar(char & c1, char & c2)
 std::string removeNewlineEscape(const std::string& line)
 {
   std::string str = line;
-  std::string whitespaces (" \t\f\v\n\r");
-  std::size_t found = str.find_last_not_of(whitespaces);
+  std::size_t found = str.find_last_not_of(_whitespaces);
   if (found!=std::string::npos)
     str.erase(found+1);
   else
@@ -61,6 +74,7 @@ std::string removeNewlineEscape(const std::string& line)
   return str;
 } // checkNewlineEscape
 
+// https://stackoverflow.com/questions/21272997/c-read-from-socket-into-stdstring
 std::string Communication_recv(int sock, int bytes) {
     std::string output(bytes, 0);
     if (read(sock, &output[0], bytes-1)<0) {
@@ -83,7 +97,7 @@ int main( int argc, char** argv ) {
         {0,       0,                  0,  0 }
     };
 
-   c = getopt_long(argc, argv, ":h:",
+   c = getopt_long(argc, argv, "::h:",
              long_options, &option_index);
    if (c == -1)
       return 1;
@@ -157,9 +171,7 @@ int main( int argc, char** argv ) {
   clilen = sizeof(cli_addr);
 
     // accept function is called whose purpose is to accept the client request and
-    // return the new fileDescriptor or and
-    // the old file descriptor is for another (i.esockfd) client connections.
-
+    // return
   while(1) {
     newsockfd = accept(sockfd,
         (struct sockaddr *) &cli_addr, &clilen);
@@ -174,7 +186,8 @@ int main( int argc, char** argv ) {
       if (n < 0)
         error("ERROR reading from socket");
 */
-      std:string cmds = Communication_recv(newsockfd,256);
+      std:string cmds(256,0);
+      cmds = Communication_recv(newsockfd,256);
       std::string success = "successful";
       n = write(newsockfd, &success, 30);
       if (n < 0)
@@ -182,29 +195,50 @@ int main( int argc, char** argv ) {
 
       cout<<cmds<<endl;
 
-  /*
+      // https://stackoverflow.com/questions/5607589/right-way-to-split-an-stdstring-into-a-vectorstring
+     std::vector<std::string> str_v;
+     boost::split(str_v, cmds, boost::is_any_of(_whitespaces), boost::token_compress_on);
+
+     cout<<str_v.size()<<endl;
+     vector<string>::iterator it;  // declare an iterator to a vector of strings
+    for(it = str_v.begin(); it != str_v.end(); it++) {
+        cout<<*it<<endl;
+    }
+
+    // //https://stackoverflow.com/questions/7048888/stdvectorstdstring-to-char-array
+    std::vector<char*> s_argv;
+    std::transform(str_v.begin(), str_v.end(), std::back_inserter(s_argv), convert);
+    char *const * data = s_argv.data();
+
+
   while (1) {
-    int c;
     int digit_optind = 0;
     int this_option_optind = optind ? optind : 1;
     int option_index = 0;
-    static struct option long_options[] = {
-        {"device",    required_argument,  0,  'd' },
-        {"connect",  required_argument, 0,  'c' },
-        {"level",   required_argument,  0,  'l' },
-        {"on",      no_argument,        0,  'O' },
-        {"off",     no_argument,        0,  'o'},
-        {"status",  no_argument,        0,  's' },
-        {"version",  no_argument,       0,  'v' },
-        {"getDevice",  no_argument,       0,  'P' },
-        {"getLevel",  no_argument,      0,  'L' },
-        {"exit",        no_argument,    0,  'e' },
-        {0,         0,                   0,  0 }
-    };
+    int c = getopt_long( s_argv.size(), data
+          , _short_options
+          , _long_options
+          , &option_index);
+    cout<<"hi"<<endl;
+    if (c == -1)
+         break;
 
+   switch (c) {
+      case 'd':
+          _serialPort=optarg;
+          break;
+      case '?':
+         break;
+
+      default:
+         printf("?? getopt returned character code 0%o ??\n", c);
+    }
+}
+
+/*
     int x = buffer.size();
     c = getopt_long( x, cmds, "d:c:l:OosvDLx",
-              long_options, &option_index);
+              _long_options, &option_index);
     if (c == -1)
          break;
 

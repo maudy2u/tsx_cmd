@@ -1,6 +1,6 @@
 // Use this for common information
 int sockfd, newsockfd, portno, rc;
-static struct option long_options[] = {
+static struct option _long_options[] = {
     {"host",    required_argument,  0,  'h' },
     {"device",    required_argument,  0,  'd' },
     {"connect",  required_argument, 0,  'c' },
