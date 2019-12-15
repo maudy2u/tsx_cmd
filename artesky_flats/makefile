@@ -4,13 +4,14 @@
 #variable declaration :-
 # this is the variable which is used in the target.
 cc=gcc
+cpp=g++
 MAKE=make
 RM =rm
 
 #targets .
 all: client server
 	$(cc) -o artesky_cmd artesky_cmd.c
-	$(cc) -o artesky_srv artesky_srv.c
+	$(cpp) -o artesky_srv artesky_srv.c
 	#gnome-terminal -t server --working-directory=/home/parallels/src/tmp -e "./server"
 	sleep 10s
 	$(MAKE) client_target
@@ -18,7 +19,7 @@ all: client server
 
 #another target for client
 server:
-	$(cc) -g -o artesky_srv artesky_srv.c
+	$(cpp) -g -o artesky_srv artesky_srv.c
 
 client:
 	$(cc) -g -o artesky_cmd artesky_cmd.c
