@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <cctype>
+#include <getopt.h>
 #include "./artesky_flats.h"
 
 using namespace std;
@@ -55,8 +56,40 @@ std::string removeNewlineEscape(const std::string& line)
   return str;
 } // checkNewlineEscape
 
-int main() {
+// *****************************************************
+int main( int argc, char** argv ) {
     // Prep for artesky_cmd
+    int c;
+    std::string hostName = "localhost";
+
+    int digit_optind = 0;
+    int this_option_optind = optind ? optind : 1;
+    int option_index = 0;
+    static struct option long_options[] = {
+        {"ip",    required_argument,  0,  'h' },
+        {0,       0,                  0,  0 }
+    };
+
+   c = getopt_long(argc, argv, "h:",
+             long_options, &option_index);
+   if (c == -1)
+      return 1;
+
+   switch (c) {
+     case 'h':
+        printf("Foundoption h  with value '%s'\n", optarg);
+        hostName=optarg;
+        break;
+    default:
+      return 1;
+    }
+    if (optind < argc) {
+         printf("non-option ARGV-elements: ");
+         while (optind < argc)
+             printf("%s ", argv[optind++]);
+         printf("\n");
+         return 1;
+     }
 
 //    ASL_ERROR ret = ASL_NO_ERROR;
 //  	Flat flat;
@@ -102,7 +135,7 @@ int main() {
         error("ERROR opening socket");
     bzero((char *) &serv_addr, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    serv_addr.sin_addr.s_addr = inet_addr(hostName.c_str());
     serv_addr.sin_port = htons(portno);
     if (bind(sockfd, (struct sockaddr * ) &serv_addr, sizeof(serv_addr)) < 0)
         cout<<"ERROR on binding";
