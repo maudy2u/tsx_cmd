@@ -1,5 +1,20 @@
 // Use this for common information
 int sockfd, newsockfd, portno, rc;
+
+/*
+  cout << "1)  connect" << endl;
+  cout << "2)  disconnect" << endl;
+  cout << "3)  turnOn" << endl;
+  cout << "4)  turnOff" << endl;
+  cout << "5)  setBrightness" << endl;
+  cout << "6)  getBrightness" << endl;
+  cout << "7)  getStatus" << endl;
+  cout << "8)  getAPIversion" << endl;
+  cout << "9)  isFlatConnected" << endl;
+  cout << "10) getSerialPort" << endl;
+  cout << "11) EXIT" << endl;
+*/
+
 static struct option _long_options[] = {
     {"host",      required_argument,  0,  'h' },
     {"device",    required_argument,  0,  'd' },
