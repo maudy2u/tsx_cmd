@@ -160,6 +160,7 @@ int main( int argc, char** argv ) {
 
     // accept function is called whose purpose is to accept the client request and
     // return
+    int EXIT=0;
     while(1) {
       newsockfd = accept(sockfd,
         (struct sockaddr *) &cli_addr, &clilen);
@@ -188,114 +189,32 @@ int main( int argc, char** argv ) {
       }
 
       cout<<"Commands found: \'"<<s_argv.size()<<"\':"<<endl;
-      std::vector<char*>::iterator it_c;  // declare an iterator to a vector of strings
+      std::vector<string>::iterator it_c;  // declare an iterator to a vector of strings
       int i=1;
-      for(it_c = s_argv.begin(); it_c != s_argv.end(); it_c++,i++) {
+      for(it_c = str_v.begin(); it_c != str_v.end(); it_c++,i++) {
         cout<<"\t"<<i<<". \'"<<*it_c<<"\' "<<endl;
+        if( *it_c== "--device" ) {
+          cout<<"--device Found: "<<*it_c<<endl;
+          it_c++;
+          i++;
+          cout<<"Setting --device "<<*it_c<<endl;
+        }
+        else if( *it_c == "--on" ){
+          cout<<"--on Found: "<<*it_c<<endl;
+        }
+        else if( *it_c == "--off" ){
+          cout<<"--off Found: "<<*it_c<<endl;
+        }
+        else if( *it_c == "--exit" ){
+          cout<<"--exit Found: "<<*it_c<<endl;
+          EXIT=1;
+          break;
+        }
+        else {
+          cout<<"Uknown command: "<<*it_c<<endl;
+        }
       }
-
-  // process commands
-    optind=0;
-    opterr=0;
-    digit_optind = 0;
-     while (1) {
-      int this_option_optind = optind ? optind : 1;
-      int option_index = 0;
-      c = getopt_long( s_argv.size()-1, s_argv.data() //&s_argv[0]
-           , "d:c:l:OosvDLx012"
-          , _long_options
-          , &option_index);
-
-    if (c == -1) {
-      cout<<"Errors command \'"<<option_index<<"\', failed"<<endl;
-      cout<<"optind="<<optind<<endl;
-      cout<<"opterr="<<opterr<<endl;
-      cout<<"optopt="<<optopt<<endl;
-      break; // stop processing
-    }
-    cout<<"Processing \'"<<c<<"\' = "<<_long_options[option_index].name<<endl;
-
-    switch (c) {
-        case 0:
-          printf("option %s", _long_options[option_index].name);
-          if (optarg)
-              printf(" with arg %s", optarg);
-          printf("\n");
-          break;
-
-      case '0':
-      case '1':
-      case '2':
-        if (digit_optind != 0 && digit_optind != this_option_optind)
-          printf("digits occur in two different argv-elements.\n");
-        digit_optind = this_option_optind;
-        printf("option %c\n", c);
-        break;
-
-      case 'd':
-       _serialPort=optarg;
-       cout<<option_index<<". Setting device port: "<<optarg<<endl;
-       break;
-
-      case 'c':
-        cout<<option_index<<". Connecting to flatbox"<<endl;
-        break;
-
-      case 'l':
-          cout<<option_index<<". Setting brightness level: "<<optarg<<endl;
-         break;
-
-       case 'L':
-            cout<<option_index<<". Retrieving brightness level"<<endl;
-            break;
-
-        case 'D':
-            cout<<option_index<<". Disconnecting the panel"<<endl;
-             break;
-
-      case 'v':
-          cout<<option_index<<". Retrieving API version"<<endl;
-          break;
-
-      case 'O':
-        cout<<option_index<<". Turning Panel ON"<<endl;
-         break;
-
-      case 'o':
-        cout<<option_index<<". Turning Panel OFF"<<endl;
-        break;
-
-      case 's':
-        cout<<option_index<<". Retrieving panel status"<<endl;
-         break;
-
-      case 'x':
-        cout<<option_index<<". Exiting:"<<endl;
-        cout<<"\t- Turning Panel OFF"<<endl;
-        cout<<"\t- Disconnecting the panel"<<endl;
-        cout<<"\t- Stopping server"<<endl;
-        break;
-
-      case '?':
-            cout<<option_index<<". Exiting:"<<endl;
-           break;
-
-      default:
-           cout<<"?? getopt returned character code "<<c<<" ??"<<endl;
-           break;
-
-     } // end switch
     } // end while to process commands
-
-    if (optind < s_argv.size()) {
-        printf("non-option ARGV-elements: ");
-        while (optind < s_argv.size())
-//            cout<<optind;
-            printf("%s ", s_argv[optind++]);
-        printf("\n");
-    }
-  } // accept new connection
-
     // Can need to put this to the end
     std::string success = "successful";
     n = write(newsockfd, &success, 30);
@@ -303,7 +222,10 @@ int main( int argc, char** argv ) {
       error("ERROR writing to socket");
 
     close(newsockfd);
-  }
+    if( EXIT ) {
+      break;
+    }
+  } // accept new connection
   close(sockfd);
   return 0;
 }
