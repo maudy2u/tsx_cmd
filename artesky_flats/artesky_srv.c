@@ -41,24 +41,6 @@ char* convert(const std::string & s)
    return pc;
 }
 
-bool compareChar(char & c1, char & c2)
-{
-	if (c1 == c2)
-		return true;
-	else if (std::toupper(c1) == std::toupper(c2))
-		return true;
-	return false;
-}
-/*
- * Case Insensitive String Comparision
- */
- bool caseInSensStringCompare(std::string & str1, char* c2)
- {
-   std:string str2 = c2;
- 	return ( (str1.size() == str2.size() ) &&
- 			 std::equal(str1.begin(), str1.end(), str2.begin(), &compareChar) );
- }
-
 //http://www.cplusplus.com/reference/string/string/find_last_not_of/
 std::string removeNewlineEscape(const std::string& line)
 {
@@ -86,7 +68,7 @@ std::string Communication_recv(int sock, int bytes) {
 // *****************************************************
 int main( int argc, char** argv ) {
     // Prep for artesky_cmd
-    int c;
+    int c, newsockfd;
     std::string hostName = "localhost";
 
     int digit_optind = 0;
@@ -178,126 +160,129 @@ int main( int argc, char** argv ) {
     if (newsockfd < 0)
         cout<<"ERROR on accept"<<endl;
     else {
-/*      bzero(buffer, 256);
-      // create new vector with the buffer
-      std::vector<std::string> buffer;
-      buffer.resize(512);
-      n = read(newsockfd, &buffer[0], 512);
-      if (n < 0)
-        error("ERROR reading from socket");
-*/
-      std:string cmds(256,0);
+//      std:string cmds(256,0);
+      std:string cmds;
       cmds = Communication_recv(newsockfd,256);
-      std::string success = "successful";
-      n = write(newsockfd, &success, 30);
-      if (n < 0)
-        error("ERROR writing to socket");
+      cout<<"========RECEIVED NEW COMMANDS========"<<endl;
 
-      cout<<cmds<<endl;
-
-      // https://stackoverflow.com/questions/5607589/right-way-to-split-an-stdstring-into-a-vectorstring
+    // https://stackoverflow.com/questions/5607589/right-way-to-split-an-stdstring-into-a-vectorstring
+    // put buffer into a vector(should be able to remove this and go to Vector directly)
      std::vector<std::string> str_v;
      boost::split(str_v, cmds, boost::is_any_of(_whitespaces), boost::token_compress_on);
 
-     cout<<str_v.size()<<endl;
-     vector<string>::iterator it;  // declare an iterator to a vector of strings
-    for(it = str_v.begin(); it != str_v.end(); it++) {
-        cout<<*it<<endl;
+    // https://stackoverflow.com/questions/7048888/stdvectorstdstring-to-char-array
+    // Convert the vector to use with getopt_long
+    std::vector<char*> s_argv;
+    std::vector<string>::iterator it_s;  // declare an iterator to a vector of strings
+    for(it_s = str_v.begin(); it_s != str_v.end(); it_s++) {
+         if(*it_s > "") {
+           s_argv.push_back(convert(*it_s));
+           cout<<"\'"<<*it_s<<"\'"<<endl;
+         }
+     }
+
+   cout<<"Commands found: \'"<<s_argv.size()<<"\':"<<endl;
+   std::vector<char*>::iterator it_c;  // declare an iterator to a vector of strings
+   int i=1;
+   for(it_c = s_argv.begin(); it_c != s_argv.end(); it_c++,i++) {
+        cout<<"\t"<<i<<". \'"<<*it_c<<"\' "<<endl;
     }
 
-    // //https://stackoverflow.com/questions/7048888/stdvectorstdstring-to-char-array
-    std::vector<char*> s_argv;
-    std::transform(str_v.begin(), str_v.end(), std::back_inserter(s_argv), convert);
-    char *const * data = s_argv.data();
-
-
+  // process commands
   while (1) {
     int digit_optind = 0;
-    int this_option_optind = optind ? optind : 1;
+    int this_option_optind = 0;
     int option_index = 0;
-    int c = getopt_long( s_argv.size(), data
+    int c = getopt_long( s_argv.size(), s_argv.data() //&s_argv[0]
           , _short_options
           , _long_options
           , &option_index);
-    cout<<"hi"<<endl;
-    if (c == -1)
-         break;
 
-   switch (c) {
-      case 'd':
-          _serialPort=optarg;
-          break;
-      case '?':
-         break;
-
-      default:
-         printf("?? getopt returned character code 0%o ??\n", c);
+    if (c == -1) {
+      cerr<<"Errors command \'"<<option_index<<"\', failed"<<endl;
+      break;
     }
-}
-
-/*
-    int x = buffer.size();
-    c = getopt_long( x, cmds, "d:c:l:OosvDLx",
-              _long_options, &option_index);
-    if (c == -1)
-         break;
+    cout<<"Processing \'"<<c<<"\' = "<<_long_options[option_index].name<<endl;
 
     switch (c) {
-    case 'd':
-         _serialPort=optarg;
-         break;
-
-    case 'c':
-    //      ret = flat.connect(_serialPort.c_str());
-    //        if (ret == ASL_NO_ERROR)
-    //          cout << "Connected" << endl;
-    //        else
-    //          cout << "LIBRARY ERROR" << endl;
-         break;
-
-    case 'l':
-         printf("option l with value '%s'\n", optarg);
-         break;
-
-     case 'L':
-          printf("option l with value '%s'\n", optarg);
+        case 0:
+          printf("option %s", _long_options[option_index].name);
+          if (optarg)
+              printf(" with arg %s", optarg);
+          printf("\n");
           break;
 
-      case 'D':
-           printf("option l with value '%s'\n", optarg);
-           break;
-
-    case 'v':
-        printf("option version\n");
+      case '0':
+      case '1':
+      case '2':
+        if (digit_optind != 0 && digit_optind != this_option_optind)
+          printf("digits occur in two different argv-elements.\n");
+        digit_optind = this_option_optind;
+        printf("option %c\n", c);
         break;
 
-    case 'O':
-       printf("option version\n");
+      case 'd':
+       _serialPort=optarg;
+       cout<<option_index<<". Setting device port: "<<optarg<<endl;
        break;
 
-    case 'o':
-      printf("option version\n");
-      break;
+      case 'c':
+        cout<<option_index<<". Connecting to flatbox"<<endl;
+        break;
 
-    case 's':
-       printf("option version\n");
-       break;
-
-    case 'x':
-      printf("option version\n");
-      break;
-
-    case '?':
+      case 'l':
+          cout<<option_index<<". Setting brightness level: "<<optarg<<endl;
          break;
 
-    default:
-         printf("?? getopt returned character code 0%o ??\n", c);
-     }
-    }
-    */
+       case 'L':
+            cout<<option_index<<". Retrieving brightness level"<<endl;
+            break;
 
+        case 'D':
+            cout<<option_index<<". Disconnecting the panel"<<endl;
+             break;
 
-    }
+      case 'v':
+          cout<<option_index<<". Retrieving API version"<<endl;
+          break;
+
+      case 'O':
+        cout<<option_index<<". Turning Panel ON"<<endl;
+         break;
+
+      case 'o':
+        cout<<option_index<<". Turning Panel OFF"<<endl;
+        break;
+
+      case 's':
+        cout<<option_index<<". Retrieving panel status"<<endl;
+         break;
+
+      case 'x':
+        cout<<option_index<<". Exiting:"<<endl;
+        cout<<"\t- Turning Panel OFF"<<endl;
+        cout<<"\t- Disconnecting the panel"<<endl;
+        cout<<"\t- Stopping server"<<endl;
+        break;
+
+      case '?':
+            cout<<option_index<<". Exiting:"<<endl;
+           break;
+
+      default:
+           cout<<"?? getopt returned character code "<<c<<" ??"<<endl;
+           break;
+
+     } // end switch
+    } // end while to process commands
+  } // accept new connection
+
+    // Can need to put this to the end
+    std::string success = "successful";
+    n = write(newsockfd, &success, 30);
+    if (n < 0)
+      error("ERROR writing to socket");
+      
     close(newsockfd);
   }
   close(sockfd);

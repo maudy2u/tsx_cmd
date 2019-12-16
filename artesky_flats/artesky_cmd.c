@@ -143,6 +143,9 @@ int main( int argc, char** argv ) {
     if (c == -1)
         break;
 
+    cout<<"Processing \'"<<c<<"\' = "<<_long_options[option_index].name<<endl;
+
+
     switch (c) {
     case 'h':
         printf("Foundoption h  with value '%s'\n", optarg);
