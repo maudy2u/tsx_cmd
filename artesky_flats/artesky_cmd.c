@@ -55,7 +55,7 @@ int send_cmd( std::string host, std::vector<std::string> cmd ) {
   portno = 5570;
 
   // socket function which return the file descriptor which we will further bind or connect to address of the host machine or server .
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  int sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0)
       error("ERROR opening socket");
 
@@ -79,10 +79,25 @@ int send_cmd( std::string host, std::vector<std::string> cmd ) {
   if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
       error("ERROR connecting");
 
-//  fgets(buffer, 255, cmd.c_str());
+  cout<<"Processing \'"<<cmd.size()<<"\' commands:"<<endl;
+  vector<string>::iterator it;  // declare an iterator to a vector of strings
+  int i=1;
+  for(it = cmd.begin(); it != cmd.end(); it++,i++) {
+       cout<<i<<". \'"<<*it<<"\' "<<endl;
+   }
+
   //read or write function is used for the writing or reading the message in the socket stream.
   std::string msg;
-  msg = accumulate(begin(cmd), end(cmd), msg);
+  std::vector<string>::iterator it_s;  // declare an iterator to a vector of strings
+  for(it_s = cmd.begin(); it_s != cmd.end(); it_s++) {
+       msg+=*it_s;
+       msg+=" ";
+   }
+   // need to remove last
+   if(msg.length()>0)
+    msg.pop_back();
+
+//  msg = accumulate(begin(cmd), end(cmd), msg);
   cout<<"Sending commands: "<<msg<<endl;
 
   rc = write(sockfd, msg.c_str(), msg.length());
@@ -137,55 +152,55 @@ int main( int argc, char** argv ) {
     case 'd':
         printf("option p  with value '%s'\n", optarg);
         device=optarg;
-        commands.push_back(" --device ");
+        commands.push_back("--device");
         commands.push_back(device);
         break;
 
     case 'c':
         printf("option connect with value '%s'\n", optarg);
-        commands.push_back(" --connect ");
+        commands.push_back("--connect");
         break;
 
     case 'l':
         printf("option l with value '%s'\n", optarg);
         level=optarg;
-        commands.push_back(" --level ");
+        commands.push_back("--level");
         commands.push_back(level);
         break;
 
     case 'L':
          printf("option l with value '%s'\n", optarg);
-         commands.push_back(" --getLevel ");
+         commands.push_back("--getLevel");
          break;
 
      case 'D':
           printf("option l with value '%s'\n", optarg);
-          commands.push_back(" --getDevice ");
+          commands.push_back("--getDevice");
           break;
 
     case 'v':
          printf("option version\n");
-         commands.push_back(" --version ");
+         commands.push_back("--version");
          break;
 
    case 'O':
         printf("option version\n");
-        commands.push_back(" --on ");
+        commands.push_back("--on");
         break;
 
   case 'o':
        printf("option version\n");
-       commands.push_back(" --off ");
+       commands.push_back("--off");
        break;
 
    case 's':
         printf("option version\n");
-        commands.push_back(" --status ");
+        commands.push_back("--status");
         break;
 
   case 'x':
        printf("option version\n");
-       commands.push_back(" --exit ");
+       commands.push_back("--exit");
        break;
 
      case '?':
