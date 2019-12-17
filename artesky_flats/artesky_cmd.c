@@ -153,15 +153,26 @@ int main( int argc, char** argv ) {
         break;
 
     case 'd':
-        printf("option p  with value '%s'\n", optarg);
         device=optarg;
         commands.push_back("--device");
         commands.push_back(device);
         break;
 
+    case 'D':
+        commands.push_back("--getDevice");
+        commands.push_back(" ");
+        break;
+
+    case 'C':
+        commands.push_back("--isConnected");
+        commands.push_back(" ");
+
+        break;
+
     case 'c':
-        printf("option connect with value '%s'\n", optarg);
         commands.push_back("--connect");
+        commands.push_back(" ");
+
         break;
 
     case 'l':
@@ -174,36 +185,44 @@ int main( int argc, char** argv ) {
     case 'L':
          printf("option l with value '%s'\n", optarg);
          commands.push_back("--getLevel");
+        commands.push_back(" ");
          break;
-
-     case 'D':
-          printf("option l with value '%s'\n", optarg);
-          commands.push_back("--getDevice");
-          break;
 
     case 'v':
          printf("option version\n");
          commands.push_back("--version");
+        commands.push_back(" ");
          break;
 
    case 'O':
         printf("option version\n");
         commands.push_back("--on");
+        commands.push_back(" ");
         break;
 
   case 'o':
        printf("option version\n");
        commands.push_back("--off");
+        commands.push_back(" ");
+
        break;
 
    case 's':
         printf("option version\n");
         commands.push_back("--status");
+        commands.push_back(" ");
         break;
+
+  case 'X':
+       printf("option version\n");
+       commands.push_back("--exit");
+        commands.push_back(" ");
+       break;
 
   case 'x':
        printf("option version\n");
-       commands.push_back("--exit");
+       commands.push_back("--disconnect");
+        commands.push_back(" ");
        break;
 
      case '?':

@@ -21,10 +21,13 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/classification.hpp> // Include boost::for is_any_of
 #include <boost/algorithm/string/split.hpp> // Include for boost::split
+#include <boost/algorithm/string/predicate.hpp>
+
+#include "libartesky.h"
 
 using namespace std;
 using namespace boost;
-//using namespace artesky;
+using namespace artesky;
 
 #include "./artesky_flats.h"
 
@@ -68,8 +71,12 @@ std::string Communication_recv(int sock, int bytes) {
 
 // *****************************************************
 int main( int argc, char** argv ) {
-    // Prep for artesky_cmd
+
+
+    // =======================
+    // Prep for artesky_srv
     int c, newsockfd;
+
     std::string hostName = "localhost";
 
     int digit_optind = 0;
@@ -80,10 +87,14 @@ int main( int argc, char** argv ) {
         {0,       0,                  0,  0 }
     };
 
-   c = getopt_long(argc, argv, "::h:",
+
+   c = getopt_long(argc, argv, ":h:",
              long_options, &option_index);
-   if (c == -1)
+   if (c == -1) {
+
+
       return 1;
+	}
 
    switch (c) {
      case 0:
@@ -106,6 +117,8 @@ int main( int argc, char** argv ) {
         hostName=optarg;
         break;
     default:
+	cout<<"Hello"<<endl;
+
       return 1;
     }
     if (optind < argc) {
@@ -116,20 +129,18 @@ int main( int argc, char** argv ) {
          return 1;
      }
 
-//    ASL_ERROR ret = ASL_NO_ERROR;
-//  	Flat flat;
-  	int choice = 0;
-  	uint32_t _level = 0;
-  	bool _status = false;
-  	bool _isConnected = false;
-    std::string _srv_version = "1.0";
+
+    // Artesky specifics
+	ASL_ERROR ret = ASL_NO_ERROR;
+	Flat flat;
+	bool _status = false;
+	bool _isConnected = false;
+	uint32_t _level = 0;
+
+	std::string _serialPort = "ttyARTESKYFLAT";
+    	std::string _srv_version = "1.0";
   	std::string _version = "";
-  	std::string _serialPort = "";
-  #ifdef _WIN32
-  	_serialPort = "COM4";
-  #elif __linux
-  	_serialPort = "ttyACM0";
-  #endif
+
   #ifdef _WIN32
   system("CLS");
   #elif __linux
@@ -192,26 +203,134 @@ int main( int argc, char** argv ) {
       std::vector<string>::iterator it_c;  // declare an iterator to a vector of strings
       int i=1;
       for(it_c = str_v.begin(); it_c != str_v.end(); it_c++,i++) {
-        cout<<"\t"<<i<<". \'"<<*it_c<<"\' "<<endl;
-        if( *it_c== "--device" ) {
-          cout<<"--device Found: "<<*it_c<<endl;
+	std::string cmd = *it_c;
+	boost::algorithm::trim(cmd);
+        cout<<"\t"<<i<<". \'"<<cmd<<"\' "<<endl;
+	if( boost::iequals(cmd," ") ){
+        }
+	else if( boost::iequals(cmd,"") ){
+        }
+	else if( boost::iequals(cmd,"--on") ){
+		ret = flat.turnOn();
+		if (ret == ASL_NO_ERROR)
+			cout << "Lamp turned on" << endl;
+		else
+			cout << "LIBRARY ERROR" << endl;
+        }
+	else if( boost::iequals(cmd,"--isConnected") ){
+			ret = flat.isFlatConnected(_isConnected);
+			if (ret == ASL_NO_ERROR)
+			{
+				if (_isConnected)
+					cout << "Flat is connected" << endl;
+				else
+					cout << "Flat is disconnected" << endl;
+			}
+			else
+				cout << "LIBRARY ERROR" << endl;
+        }
+        else if( boost::iequals(cmd,"--device") ) {
+          cout<<"--device Found: "<<cmd<<endl;
           it_c++;
           i++;
-          cout<<"Setting --device "<<*it_c<<endl;
+  	  cmd = *it_c;
+	  boost::algorithm::trim(cmd);
+          cout<<"Setting --device "<<cmd<<endl;
+	  _serialPort = cmd;
         }
-        else if( *it_c == "--on" ){
-          cout<<"--on Found: "<<*it_c<<endl;
+        else if( boost::iequals(cmd, "--connect") ) {
+		ret = flat.connect(_serialPort.c_str());
+		if (ret == ASL_NO_ERROR)
+			cout << "Connected" << endl;
+		else
+			cout << "LIBRARY ERROR" << endl;
         }
-        else if( *it_c == "--off" ){
-          cout<<"--off Found: "<<*it_c<<endl;
+        else if( cmd == "--disconnect" ){
+		ret = flat.turnOff();
+		if (ret == ASL_NO_ERROR)
+			cout << "Lamp turned off" << endl;
+		else
+			cout << "LIBRARY ERROR" << endl;
+		ret = flat.disconnect();
+		if (ret == ASL_NO_ERROR)
+			cout << "Disconnected" << endl;
+		else
+			cout << "LIBRARY ERROR" << endl;
         }
-        else if( *it_c == "--exit" ){
-          cout<<"--exit Found: "<<*it_c<<endl;
+        else if( cmd == "--level" ){
+		_level = 0;
+	        it_c++;
+        	i++;
+	  	cmd = *it_c;
+		boost::algorithm::trim(cmd);
+		// convert cmd to integer
+		_level = std::stoi( cmd );
+		if( _level < 0 ) _level = 0;
+		if( _level > 255 ) _level = 255;
+			cout << "Lamp brightness level to: " << _level << endl;
+		ret = flat.setBrightness(_level);
+		if (ret == ASL_NO_ERROR)
+			cout << "Lamp brightness level set: " << _level << endl;
+		else
+			cout << "LIBRARY ERROR" << endl;
+        }
+        else if( cmd == "--getLevel" ){
+		ret = flat.getBrightness(_level);
+		if (ret == ASL_NO_ERROR)
+			cout << "Lamp brightness level is: " << _level << endl;
+		else
+			cout << "LIBRARY ERROR" << endl;
+        }
+        else if( boost::iequals(cmd,"--on") ){
+		ret = flat.turnOn();
+		if (ret == ASL_NO_ERROR)
+			cout << "Lamp turned on" << endl;
+		else
+			cout << "LIBRARY ERROR" << endl;
+        }
+        else if( boost::iequals(cmd,"--getDevice") ){
+			ret = flat.getSerialPort(_serialPort);
+			if (ret == ASL_NO_ERROR)
+				cout << "Flat connection port: " << _serialPort;
+			else
+				cout << "LIBRARY ERROR" << endl;
+        }
+        else if( boost::iequals(cmd,"--status") ){
+			ret = flat.getStatus(_status);
+			if (ret == ASL_NO_ERROR)
+			{
+				if (_status)
+					cout << "Status: Lamp is on" << endl;
+				else
+					cout << "Status: Lamp is off" << endl;
+			}
+			else
+				cout << "LIBRARY ERROR" << endl;
+        }
+        else if( cmd == "--off" ){
+		ret = flat.turnOff();
+		if (ret == ASL_NO_ERROR)
+			cout << "Lamp turned off" << endl;
+		else
+			cout << "LIBRARY ERROR" << endl;
+        }
+        else if( cmd == "--exit" ){
+          cout<<"--exit Found: "<<cmd<<endl;
+		ret = flat.turnOff();
+		if (ret == ASL_NO_ERROR)
+			cout << "Lamp turned off" << endl;
+		else
+			cout << "LIBRARY ERROR" << endl;
+		ret = flat.disconnect();
+		if (ret == ASL_NO_ERROR)
+			cout << "Disconnected" << endl;
+		else
+			cout << "LIBRARY ERROR" << endl;
           EXIT=1;
           break;
         }
         else {
-          cout<<"Uknown command: "<<*it_c<<endl;
+          cout<<"OUCH! Unknown command: \'"<<cmd<<"\'"<<endl;
         }
       }
     } // end while to process commands
@@ -227,5 +346,6 @@ int main( int argc, char** argv ) {
     }
   } // accept new connection
   close(sockfd);
+  cout<<"unbound."<<endl;
   return 0;
 }
