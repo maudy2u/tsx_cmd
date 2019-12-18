@@ -40,9 +40,9 @@ void error(const char * msg) {
 
 char* convert(const std::string & s)
 {
-	char *pc = new char[s.size()+2];
+	char *pc = new char[s.size()+1];
 	std::strcpy(pc, s.c_str());
-	std::strcat(pc, "\'");
+//	std::strcat(pc, "\'");
 	return pc;
 }
 
@@ -62,6 +62,7 @@ std::string removeNewlineEscape(const std::string& line)
 } // checkNewlineEscape
 
 // https://stackoverflow.com/questions/21272997/c-read-from-socket-into-stdstring
+// https://stackoverflow.com/questions/21272997/c-read-from-socket-into-stdstring
 std::string Communication_recv(int sock, int bytes) {
 	std::string output(bytes, 0);
 	if (read(sock, &output[0], bytes-1)<0) {
@@ -69,6 +70,14 @@ std::string Communication_recv(int sock, int bytes) {
 	}
 	return output;
 }
+
+// https://stackoverflow.com/questions/6911700/how-can-you-strip-non-ascii-characters-from-a-string-in-c
+struct InvalidChar
+{
+    bool operator()(char c) const {
+        return !isprint(static_cast<unsigned char>(c));
+    }
+};
 
 // http://www.cplusplus.com/articles/DEN36Up4/
 static void show_usage(std::string name)
@@ -196,8 +205,7 @@ int main( int argc, char** argv ) {
 		if (newsockfd < 0)
 			cout<<"ERROR on accept"<<endl;
 		else {
-			std:string cmds;
-			cmds = Communication_recv(newsockfd,256);
+			std:string cmds = Communication_recv(newsockfd,256);
 			cout<<"========RECEIVED NEW COMMANDS========"<<endl;
 			
 			// https://stackoverflow.com/questions/5607589/right-way-to-split-an-stdstring-into-a-vectorstring
@@ -205,26 +213,39 @@ int main( int argc, char** argv ) {
 			std::vector<std::string> str_v;
 			boost::split(str_v, cmds, boost::is_any_of(_whitespaces), boost::token_compress_on);
 			
-			// https://stackoverflow.com/questions/7048888/stdvectorstdstring-to-char-array
+/*
+		// https://stackoverflow.com/questions/7048888/stdvectorstdstring-to-char-array
 			// Convert the vector to use with getopt_long
 			std::vector<char*> s_argv;
 			std::vector<string>::iterator it_s;  // declare an iterator to a vector of strings
 			for(it_s = str_v.begin(); it_s != str_v.end(); it_s++) {
 				if(*it_s > "") {
-					s_argv.push_back(convert(*it_s));
+//					s_argv.push_back(convert(*it_s));
+					s_argv.push_back(const_cast<char*>((*it_s).c_str()));
 					cout<<"\'"<<*it_s<<"\'"<<endl;
 				}
 			}
-			
-			oss<<"Commands to process: \'"<<s_argv.size()<<"\':"<<endl;
+*/
+//			stripUnicode(str_v[0]);
+//			stripUnicode(str_v[1]);
+//			if(str_v[0] == str_v[1] ) {
+//				cout<<"matched"<<endl;
+//			}
+//			else {
+//				cout<<"NOT matched\n"
+//					<<"0. \'"<<str_v[0]<<"\'"<<str_v[0].size()<<"\n"
+//					<<"1. \'"<<str_v[1]<<"\'"<<str_v[1].size()<<endl;
+//			}
+			oss<<"Commands to process: \'"<<str_v.size()<<"\':"<<endl;
 			cout<<oss.str();
-			std::vector<string>::iterator it_c;  // declare an iterator to a vector of strings
-			int i=1;
-			for(it_c = str_v.begin(); it_c != str_v.end(); it_c++,i++) {
+			// std::vector<string>::iterator it_c;  // declare an iterator to a vector of strings
+			for(int i=0; i<str_v.size(); i++) {
 				cout<<i<<endl;
 				std::stringstream ocmd;
-				std::string cmd = *it_c;
+				std::string cmd = str_v[i];
 				boost::algorithm::trim(cmd);
+				cmd.erase(remove_if(cmd.begin(), cmd.end(), [](char c) { return !isalpha(c); } ), cmd.end());
+//				cmd.erase(std::remove_if(cmd.begin(),cmd.end(),InvalidChar()), cmd.end());
 				oss<<"\t"<<i<<". \'"<<cmd<<"\' "<<endl;
 				if( boost::iequals(cmd," ") ){
 				}
@@ -251,9 +272,8 @@ int main( int argc, char** argv ) {
 				}
 				else if( boost::iequals(cmd,"--device") ) {
 					oss<<"Current --device: "<<cmd<<endl;
-					it_c++;
 					i++;
-					cmd = *it_c;
+					cmd = str_v[i];
 					boost::algorithm::trim(cmd);
 					oss<<"Setting --device "<<cmd<<endl;
 					_serialPort = cmd;
@@ -279,9 +299,8 @@ int main( int argc, char** argv ) {
 				}
 				else if( cmd == "--level" ){
 					_level = 0;
-					it_c++;
 					i++;
-					cmd = *it_c;
+					cmd = str_v[i];
 					boost::algorithm::trim(cmd);
 					// convert cmd to integer
 					_level = std::stoi( cmd );

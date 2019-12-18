@@ -167,6 +167,15 @@ int main( int argc, char** argv ) {
 		printf("\n");
 	}
 	
+	if(commands[0] == commands[1] ) {
+		cout<<"matched"<<endl;
+	}
+	else {
+		cout<<"NOT matched\n"
+			<<"0. "<<commands[0].size()<<"\n"
+			<<"1. "<<commands[1].size()<<endl;
+	}
+
 	cout<<"artesky srv: "<<hostName<<endl;
 	cout<<"device: "<<device<<endl;
 	int rc = send_cmd(hostName, commands);
@@ -216,6 +225,7 @@ int send_cmd( std::string host, std::vector<std::string> cmd ) {
 	//read or write function is used for the writing or reading the message in the socket stream.
 	std::string msg;
 	std::vector<string>::iterator it_s;  // declare an iterator to a vector of strings
+	
 	for(it_s = cmd.begin(); it_s != cmd.end(); it_s++) {
 		msg+=*it_s;
 		msg+=" ";
@@ -223,12 +233,12 @@ int send_cmd( std::string host, std::vector<std::string> cmd ) {
 	// need to remove last
 	if(msg.length()>0)
 		msg.pop_back();
-	msg+="\0";
+	//msg+="\n";
 	
 	//  msg = accumulate(begin(cmd), end(cmd), msg);
 	cout<<"Sending: \'"<<msg<<"\'"<<endl;
 	
-	rc = write(sockfd, msg.data(), msg.length());
+	rc = write(sockfd, msg.data(), msg.size());
 	if (rc < 0)
 		error("ERROR writing to socket");
 	bzero(buffer, 256);
