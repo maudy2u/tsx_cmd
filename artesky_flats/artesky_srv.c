@@ -242,23 +242,23 @@ int main( int argc, char** argv ) {
 			for(int i=0; i<str_v.size(); i++) {
 				cout<<i<<endl;
 				std::stringstream ocmd;
-				std::string cmd = str_v[i];
-				boost::algorithm::trim(cmd);
-				cmd.erase(remove_if(cmd.begin(), cmd.end(), [](char c) { return !isalpha(c); } ), cmd.end());
-//				cmd.erase(std::remove_if(cmd.begin(),cmd.end(),InvalidChar()), cmd.end());
+				std::string tmp = str_v[i];
+				tmp.erase(remove_if(tmp.begin(), tmp.end(), [](char c) { return !isalpha(c); } ), tmp.end());
+				std::string cmd = "--";
+				cmd+=tmp;
 				oss<<"\t"<<i<<". \'"<<cmd<<"\' "<<endl;
 				if( boost::iequals(cmd," ") ){
 				}
 				else if( boost::iequals(cmd,"") ){
 				}
-				else if( boost::iequals(cmd,"on") ){
+				else if( boost::iequals(cmd,"--on") ){
 					ret = flat.turnOn();
 					if (ret == ASL_NO_ERROR)
 						oss << "Lamp turned on" << endl;
 					else
 						oss << "ERROR Lamp On" << endl;
 				}
-				else if( boost::iequals(cmd,"isConnected") ){
+				else if( boost::iequals(cmd,"--isConnected") ){
 					ret = flat.isFlatConnected(_isConnected);
 					if (ret == ASL_NO_ERROR)
 					{
@@ -270,22 +270,22 @@ int main( int argc, char** argv ) {
 					else
 						oss << "ERROR isConnected failed." << endl;
 				}
-				else if( boost::iequals(cmd,"device") ) {
-					oss<<"Current device: "<<cmd<<endl;
+				else if( boost::iequals(cmd,"--device") ) {
+					oss<<"Current --device: "<<cmd<<endl;
 					i++;
 					cmd = str_v[i];
 					boost::algorithm::trim(cmd);
-					oss<<"Setting device "<<cmd<<endl;
+					oss<<"Setting --device "<<cmd<<endl;
 					_serialPort = cmd;
 				}
-				else if( boost::iequals(cmd, "connect") ) {
+				else if( boost::iequals(cmd, "--connect") ) {
 					ret = flat.connect(_serialPort.c_str());
 					if (ret == ASL_NO_ERROR)
 						oss << "Connected" << endl;
 					else
 						oss << "ERROR Connecting Panel" << endl;
 				}
-				else if( cmd == "disconnect" ){
+				else if( cmd == "--disconnect" ){
 					ret = flat.turnOff();
 					if (ret == ASL_NO_ERROR)
 						oss << "Lamp turned off" << endl;
@@ -297,7 +297,7 @@ int main( int argc, char** argv ) {
 					else
 						oss << "ERROR Disconnecting panel" << endl;
 				}
-				else if( cmd == "level" ){
+				else if( cmd == "--level" ){
 					_level = 0;
 					i++;
 					cmd = str_v[i];
@@ -313,21 +313,21 @@ int main( int argc, char** argv ) {
 					else
 						oss<< "ERROR Setting light panel" << endl;
 				}
-				else if( cmd == "getLevel" ){
+				else if( cmd == "--getLevel" ){
 					ret = flat.getBrightness(_level);
 					if (ret == ASL_NO_ERROR)
 						oss << "Lamp brightness level is: " << _level << endl;
 					else
 						oss << "LIBRARY ERROR" << endl;
 				}
-				else if( boost::iequals(cmd,"getDevice") ){
+				else if( boost::iequals(cmd,"--getDevice") ){
 					ret = flat.getSerialPort(_serialPort);
 					if (ret == ASL_NO_ERROR)
 						oss << "Flat connection port: " << _serialPort;
 					else
 						oss << "LIBRARY ERROR" << endl;
 				}
-				else if( boost::iequals(cmd,"status") ){
+				else if( boost::iequals(cmd,"--status") ){
 					ret = flat.getStatus(_status);
 					if (ret == ASL_NO_ERROR)
 					{
@@ -339,22 +339,22 @@ int main( int argc, char** argv ) {
 					else
 						oss << "LIBRARY ERROR" << endl;
 				}
-				else if( cmd == "off" ){
+				else if( cmd == "--off" ){
 					ret = flat.turnOff();
 					if (ret == ASL_NO_ERROR)
 						oss << "Lamp turned off" << endl;
 					else
 						oss << "LIBRARY ERROR" << endl;
 				}
-				else if( cmd == "version" ){
+				else if( cmd == "--version" ){
 					ret = flat.getAPIversion(_version);
 					if (ret == ASL_NO_ERROR)
 						oss << "API version: " << _version << endl;
 					else
 						oss << "LIBRARY ERROR" << endl;
 				}
-				else if( cmd == "exit" ){
-					cout<<"exit Found: "<<cmd<<endl;
+				else if( cmd == "--exit" ){
+					cout<<"--exit Found: "<<cmd<<endl;
 					ret = flat.turnOff();
 					if (ret == ASL_NO_ERROR)
 						oss << "Lamp turned off" << endl;
