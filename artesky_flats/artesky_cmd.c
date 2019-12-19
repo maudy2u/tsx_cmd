@@ -81,11 +81,12 @@ int main( int argc, char** argv ) {
 		
 		switch (c) {
 			case 'h':
-				printf("Foundoption h  with value '%s'\n", optarg);
+				printf("option --host  with value '%s'\n", optarg);
 				hostName=optarg;
 				break;
 				
 			case 'd':
+				printf("option --device with value '%s'\n", optarg);
 				device=optarg;
 				commands.push_back("--device");
 				commands.push_back(device);
@@ -109,14 +110,13 @@ int main( int argc, char** argv ) {
 				break;
 				
 			case 'l':
-				printf("option l with value '%s'\n", optarg);
+				printf("option --level with value '%s'\n", optarg);
 				level=optarg;
 				commands.push_back("--level");
 				commands.push_back(level);
 				break;
 				
 			case 'L':
-				printf("option l with value '%s'\n", optarg);
 				commands.push_back("--getLevel");
 				// commands.push_back(" ");
 				break;
@@ -167,17 +167,10 @@ int main( int argc, char** argv ) {
 		printf("\n");
 	}
 	
-	if(commands[0] == commands[1] ) {
-		cout<<"matched"<<endl;
-	}
-	else {
-		cout<<"NOT matched\n"
-			<<"0. "<<commands[0].size()<<"\n"
-			<<"1. "<<commands[1].size()<<endl;
-	}
-
-	cout<<"artesky srv: "<<hostName<<endl;
-	cout<<"device: "<<device<<endl;
+	cout<<"*******************************"<<endl;
+	cout<<"Artesky srv: "<<hostName<<endl;
+	cout<<"Device: "<<device<<endl;
+	cout<<"==============================="<<endl;
 	int rc = send_cmd(hostName, commands);
 	
 	exit(EXIT_SUCCESS);
@@ -215,13 +208,13 @@ int send_cmd( std::string host, std::vector<std::string> cmd ) {
 	if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
 		error("ERROR connecting");
 	
-	cout<<"Processing \'"<<cmd.size()<<"\' commands:"<<endl;
+	cout<<"Found: ";
 	vector<string>::iterator it;  // declare an iterator to a vector of strings
 	int i=1;
 	for(it = cmd.begin(); it != cmd.end(); it++,i++) {
-		cout<<i<<". \'"<<*it<<"\' "<<endl;
+		cout<<i<<". \'"<<*it<<"\' ";
 	}
-	
+	cout<<endl;
 	//read or write function is used for the writing or reading the message in the socket stream.
 	std::string msg;
 	std::vector<string>::iterator it_s;  // declare an iterator to a vector of strings

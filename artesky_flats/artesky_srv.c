@@ -190,7 +190,7 @@ int main( int argc, char** argv ) {
 		cout<<"ERROR on binding"<<endl;
 		return 10;
 	}
-	cout<<"Server started: at " << inet_ntoa(serv_addr.sin_addr) << " and port " <<serv_addr.sin_port << endl;
+	cout<<"Artesky Server: " << inet_ntoa(serv_addr.sin_addr) << ", port " <<serv_addr.sin_port << endl;
 	listen(sockfd, 5);
 	clilen = sizeof(cli_addr);
 	
@@ -206,7 +206,7 @@ int main( int argc, char** argv ) {
 			cout<<"ERROR on accept"<<endl;
 		else {
 			std:string cmds = Communication_recv(newsockfd,256);
-			cout<<"========RECEIVED NEW COMMANDS========"<<endl;
+			cout<<endl<<"========RECEIVED NEW COMMANDS========"<<endl;
 			
 			// https://stackoverflow.com/questions/5607589/right-way-to-split-an-stdstring-into-a-vectorstring
 			// put buffer into a vector(should be able to remove this and go to Vector directly)
@@ -236,17 +236,15 @@ int main( int argc, char** argv ) {
 //					<<"0. \'"<<str_v[0]<<"\'"<<str_v[0].size()<<"\n"
 //					<<"1. \'"<<str_v[1]<<"\'"<<str_v[1].size()<<endl;
 //			}
-			oss<<"Commands to process: \'"<<str_v.size()<<"\':"<<endl;
+			oss<<"Processed:"<<endl;
 			cout<<oss.str();
 			// std::vector<string>::iterator it_c;  // declare an iterator to a vector of strings
 			for(int i=0; i<str_v.size(); i++) {
-				cout<<i<<endl;
 				std::stringstream ocmd;
-				std::string tmp = str_v[i];
-				tmp.erase(remove_if(tmp.begin(), tmp.end(), [](char c) { return !isalpha(c); } ), tmp.end());
-				std::string cmd = "--";
-				cmd+=tmp;
-				oss<<"\t"<<i<<". \'"<<cmd<<"\' "<<endl;
+				std::string cmd = str_v[i];
+				cmd.erase(remove_if(cmd.begin(), cmd.end(), [](char c) { return !isprint(c); } ), cmd.end());
+				cout<<i+1<<". "<<cmd<<", ";
+				oss<<"\t"<<i+1<<". "<<cmd<<":\t";
 				if( boost::iequals(cmd," ") ){
 				}
 				else if( boost::iequals(cmd,"") ){
@@ -288,9 +286,9 @@ int main( int argc, char** argv ) {
 				else if( cmd == "--disconnect" ){
 					ret = flat.turnOff();
 					if (ret == ASL_NO_ERROR)
-						oss << "Lamp turned off" << endl;
+						oss << "Lamp turned off, ";
 					else
-						oss << "ERROR Lamp off" << endl;
+						oss << "ERROR Lamp off, ";
 					ret = flat.disconnect();
 					if (ret == ASL_NO_ERROR)
 						oss << "Disconnected" << endl;
@@ -323,7 +321,7 @@ int main( int argc, char** argv ) {
 				else if( boost::iequals(cmd,"--getDevice") ){
 					ret = flat.getSerialPort(_serialPort);
 					if (ret == ASL_NO_ERROR)
-						oss << "Flat connection port: " << _serialPort;
+						oss << "Flat connection port: " << _serialPort  << endl;
 					else
 						oss << "LIBRARY ERROR" << endl;
 				}
@@ -354,7 +352,6 @@ int main( int argc, char** argv ) {
 						oss << "LIBRARY ERROR" << endl;
 				}
 				else if( cmd == "--exit" ){
-					cout<<"--exit Found: "<<cmd<<endl;
 					ret = flat.turnOff();
 					if (ret == ASL_NO_ERROR)
 						oss << "Lamp turned off" << endl;
@@ -374,6 +371,7 @@ int main( int argc, char** argv ) {
 			}
 		} // end while to process commands
 		// 	Can need to put this to the end
+		cout<<endl;
 		std::string success = oss.str();
 		n = write(newsockfd, success.data(), success.size());
 		if (n < 0)
@@ -385,6 +383,6 @@ int main( int argc, char** argv ) {
 		}
 	} // accept new connection
 	close(sockfd);
-	cout<<"Freed server address."<<endl;
+	cout<<"Server STOPPED."<<endl;
 	return 0;
 }
