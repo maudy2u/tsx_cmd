@@ -133,7 +133,7 @@ export function tsx_feeder( cmd, callback ) {
   // https://www.w3schools.com/js/js_timing.asp
   var waiting = 0; // create arbitarty timeout
   var imageChk = false;
-  var processId = tsx_GetServerStateValue( 'currentJob' );
+  var processId = tsx_GetServerStateValue( 'runScheduler' );
   if( typeof processId != 'undefined' && processId != '') {
     imageChk = true;
     // Meteor._debug('Image checking: ' + processId );
@@ -151,7 +151,7 @@ export function tsx_feeder( cmd, callback ) {
     // postStatus( 'tsx_waiting (sec): ' + waiting /sec  );
     // Meteor._debug('tsx_waiting (sec): ' + waiting /sec );
     if( imageChk ) {
-      processId = tsx_GetServerStateValue( 'currentJob' );
+      processId = tsx_GetServerStateValue( 'runScheduler' );
     }
   }
   postProgressTotal(0);

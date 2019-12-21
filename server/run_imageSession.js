@@ -66,9 +66,9 @@ var forceAbort = false;
 export function isSchedulerStopped() {
   tsxDebug(' *** isSchedulerStopped ' );
   var sched = tsx_GetServerStateValue('scheduler_running');
-  var currentJob =   tsx_SetServerState('currentJob', '');
+  var runScheduler =   tsx_SetServerState('runScheduler', '');
   if(
-    (sched != 'Stop' && currentJob != '')
+    (sched != 'Stop' && runScheduler != '')
   ) {
     tsxDebug('scheduler_running: ' + sched);
     return false; // exit
@@ -1056,7 +1056,8 @@ function tsx_GetMountReport() {
       ra: tsx_return.split('|')[0].trim(),
       dec: tsx_return.split('|')[1].trim(),
       hms: tsx_return.split('|')[2].trim(),
-      direction: tsx_return.split('|')[3].trim(),
+      azimuth: tsx_return.split('|')[3].trim(),
+      direction: tsx_return.split('|')[5].trim(),
       altitude: tsx_return.split('|')[4].trim(),
       pointing: tsx_return.split('|')[5].trim(),
     }
@@ -1065,6 +1066,7 @@ function tsx_GetMountReport() {
     tsx_SetServerState( 'mntMntMHS', Out.hms );
     tsx_SetServerState( 'mntMntDir', Out.direction );
     tsx_SetServerState( 'mntMntAlt', Out.altitude );
+    tsx_SetServerState( 'mntMntAz', Out.azimuth );
     tsx_SetServerState( 'mntMntPointing', Out.pointing );
 
     tsx_is_waiting = false;
@@ -1913,7 +1915,7 @@ function tsx_TargetReport( target ) {
             scale: '',
             isValid: isValid,
             AZ: az,
-            direction: az,
+            direction: pointing,
             ALT: alt,
             RA:  ra,
             DEC: dec,
@@ -1938,7 +1940,7 @@ function tsx_TargetReport( target ) {
               ALT: alt,
               AZ: az,
               HA: ha,
-              direction: az,
+              direction: pointing,
               scale: '',
               TRANSIT: transit,
               isDark: isDark,
@@ -2358,7 +2360,7 @@ function takeSeriesImage(target, series) {
   else {
     UpdateStatus( target.targetFindName + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds: ' + num + '/' +series.repeat + ' COMPLETED' );
   }
-  var jid = tsx_GetServerState('currentJob');
+  var jid = tsx_GetServerState('runScheduler');
   if( jid == '' ) {
     // the process was stopped...
     tsxDebug('Throwing in imaging...');

@@ -69,19 +69,19 @@ class CalibrationFrame extends Component {
   // Initialize states
   componentWillMount() {
     // // do not modify the state directly
-    if( typeof this.props.calibrationFrame == 'undefined') {
+    if( typeof this.props.calibration == 'undefined') {
       return;
     }
     this.setState({
-      id: this.props.calibrationFrame._id,
-      subFrameTypes: calibrationFrame.subFrameTypes,
-      filter: calibrationFrame.filter,
-      exposure: calibrationFrame.exposure,
-      level: calibrationFrame.level,
-      quantity: calibrationFrame.quantity,
-      rotation: calibrationFrame.rotation,
-      order: calibrationFrame.order,
-      binning: calibrationFrame.binning,
+      id: this.props.calibration._id,
+      subFrameTypes: this.props.calibration.subFrameTypes,
+      filter: this.props.calibration.filter,
+      exposure: this.props.calibration.exposure,
+      level: this.props.calibration.level,
+      quantity: this.props.calibration.quantity,
+      rotation: this.props.calibration.rotation,
+      order: this.props.calibration.order,
+      binning: this.props.calibration.binning,
     });
   }
 
@@ -89,7 +89,7 @@ class CalibrationFrame extends Component {
 
     this.setState({ [name]: value });
     updateCalibrationFrame(
-      this.props.calibrationFrame._id,
+      this.props.calibration._id,
       name,
       value,
     );
@@ -104,109 +104,68 @@ class CalibrationFrame extends Component {
       return;
     }
 
-    if( typeof nextProps.calibrationFrame != 'undefined'  ) {
+    if( typeof nextProps.calibration != 'undefined'  ) {
       this.setState({
-        id: nextProps.calibrationFrame._id
+        id: nextProps.calibration._id
       });
       this.setState({
-        subFrameTypes: nextProps.calibrationFrame.subFrameTypes
+        subFrameTypes: nextProps.calibration.subFrameTypes
       });
       this.setState({
-        filter: nextProps.calibrationFrame.filter
+        filter: nextProps.calibration.filter
       });
       this.setState({
-        exposure: nextProps.calibrationFrame.exposure
+        exposure: nextProps.calibration.exposure
       });
       this.setState({
-        level: nextProps.calibrationFrame.level
+        level: nextProps.calibration.level
       });
       this.setState({
-        quantity: nextProps.calibrationFrame.quantity
+        quantity: nextProps.calibration.quantity
       });
       this.setState({
-        rotation: nextProps.calibrationFrame.rotation
+        rotation: nextProps.calibration.rotation
       });
       this.setState({
-        order: nextProps.calibrationFrame.order
+        order: nextProps.calibration.order
       });
       this.setState({
-        binning: nextProps.calibrationFrame.binning
+        binning: nextProps.calibration.binning
       });
     }
   }
 
-  deleteEntry() {
-    // check if the series is used - if so cannot delete... list the Targets using it
-    CalibrationFrames.remove({_id:this.props.calibrationFrame._id});
-  }
+  // deleteEntry() {
+  //   // check if the series is used - if so cannot delete... list the Targets using it
+  //   CalibrationFrames.remove({_id:this.props.calibration._id});
+  // }
+  //          <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
+
 
   render() {
 
     return (
       <Table.Row>
-      <Table.Cell   >
-        <Dropdown
-          button
-          search
-          wrapSelection
-          scrolling
-          name='subFrameTypes'
-          options={calibrationTypes()}
-          placeholder='Type'
-          text={this.state.subFrameTypes}
-          onChange={this.handleChange}
-        />
-      </Table.Cell>
         <Table.Cell   >
-          <Dropdown
-              button
-              search
-              wrapSelection
-              scrolling
-              name='filter'
-              options={renderDropDownFilters()}
-              placeholder='Filter'
-              text={this.state.filter}
-              onChange={this.handleChange}
-            />
+        f
         </Table.Cell>
         <Table.Cell   >
-          <Input
-            fluid
-            name='exposure'
-            placeholder='Exposure'
-            value={this.state.exposure}
-            onChange={this.handleChange}
-          />
+        e
         </Table.Cell>
         <Table.Cell   >
-          <Input
-            fluid
-            name='quantity'
-            placeholder='Quantity'
-            value={this.state.quantity}
-            onChange={this.handleChange}
-          />
+          d
         </Table.Cell>
         <Table.Cell   >
-          <Input
-          fluid
-            name='level'
-            placeholder='Level'
-            value={this.state.level}
-            onChange={this.handleChange}
-          />
+        c
         </Table.Cell>
         <Table.Cell   >
-          <Input
-            fluid
-            name='level'
-            placeholder='-5'
-          />
+        b
+        </Table.Cell>
+        <Table.Cell   >
+        a
         </Table.Cell>
         <Table.Cell   >
          <Button.Group basic size='mini'>
-          <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
           </Button.Group>
         </Table.Cell>
       </Table.Row>

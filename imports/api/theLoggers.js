@@ -17,7 +17,15 @@ tsx cmd - A web page to send commands to TheSkyX server
  */
 
 import { Mongo } from 'meteor/mongo';
+
+// Store app information
 export const AppLogsDB = new Mongo.Collection('appLogsDB');
+
+// Store the session report when play buttin is pressed
+export const ReportDB = new Mongo.Collection('reportDB');
+
+// Store the Target Plan and Target information... (Filenames?)
+export const TargetPlanDB = new Mongo.Collection('targetPlanDB');
 
 import { Logger }     from 'meteor/ostrio:logger';
 // https://atmospherejs.com/ostrio/loggerfile
@@ -30,6 +38,7 @@ import { LoggerMongo } from 'meteor/ostrio:loggermongo';
 const logSession = new Logger();
 const logCon = new Logger();
 const logDB = new Logger();
+const logReport = new Logger();
 
 var log_levels = [];
 if( Meteor.settings.enable_log != 'no') {
@@ -51,6 +60,15 @@ var   filters = {
   client: true,
   server: true,
 };
+
+export function tsxReport( msg, data ) {
+  if( typeof data === 'undefined' || data == null ) {
+    data = '';
+  }
+
+//  logDB.log( '|'+ formatDate(dt) +'|' + msg + ' ' + data );
+  logDB.log( msg + ' ' + data );
+}
 
 export function tsxLog( msg, data ) {
   if( typeof data === 'undefined' || data == null ) {
@@ -148,7 +166,21 @@ function fileNameDate( today ) {
  * Separate settings and collection
  * for info, debug and other messages
  */
-(new LoggerMongo(logDB, {
+ (new LoggerMongo(logReport, {
+   collection: AppLogsDB,
+   format(opts) {
+     // var msgData= ((typeof opts.additional.info == 'undefined') ? '' : (' = ' + opts.additional.info));
+     var msgData= ((typeof opts.data === 'undefined' || opts.data === null || opts.data === '') ? '' : (' = ' + opts.data));
+     return {
+       date: formatDate( new Date() ),
+       level: opts.level,
+       message: opts.message,
+       additional: msgData,
+     }
+   }
+ })).enable( filters );
+
+ (new LoggerMongo(logDB, {
   collection: AppLogsDB,
   format(opts) {
     // var msgData= ((typeof opts.additional.info == 'undefined') ? '' : (' = ' + opts.additional.info));

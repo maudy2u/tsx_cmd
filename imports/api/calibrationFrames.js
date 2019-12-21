@@ -17,9 +17,7 @@ tsx cmd - A web page to send commands to TheSkyX server
  */
 
 import { Mongo } from 'meteor/mongo';
-// import SimpleSchema from 'simple-schema';
 
-// Used to store the sessions for a Target - the actual imaging
 export const CalibrationFrames = new Mongo.Collection('calibrationFrames');
 
 export function calibrationTypes() {
@@ -40,23 +38,20 @@ export function calibrationTypes() {
     rotation: '',
   };
 */
+// get defaults
+// e.g. var clsFilter = TheSkyXInfos.findOne({name: 'defaultFilter'}).value;
 export function addCalibrationFrame() {
-
-  // get defaults
-  // e.g. var clsFilter = TheSkyXInfos.findOne({name: 'defaultFilter'}).value;
-
   const id  = CalibrationFrames.insert(
     {
-      id: '',
-      subFrameTypes: 'Flat',
-      filter: '',
+      subFrameTypes: "Flat",
+      filter: "",
       exposure: 0,
       quantity: 0,
       level: 0,
-      rotation: '',
+      rotation: "",
       order: 0,
       binning: 1,
-    }
+    },
   );
   return id;
 }

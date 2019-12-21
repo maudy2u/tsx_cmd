@@ -48,6 +48,7 @@ export const tsx_ServerStates = {
   mntMHS: 'mntMHS',
   mntMntDir: 'mntMntDir',
   mntMntAlt: 'mntMntAlt',
+  mntMntAz: 'mntMntAz',
   mntMntPointing: 'mntMntPointing',
 
   targetName: 'targetName',
@@ -211,6 +212,12 @@ export function tsx_GetServerStateValue( name ) {
     }
   }
   return '';
+};
+
+// **************************************************************
+export function LogToReport( status ) {
+  tsx_SetServerState( 'currentStage', status );
+  tsxReport( status );
 };
 
 // **************************************************************

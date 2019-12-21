@@ -132,7 +132,7 @@ class CalibrationsMenu extends Component {
     }.bind(this));
   }
 
-  calibrationTools(
+  calibrationSettingsTools(
       state
     , active
     , flatSlewType
@@ -201,7 +201,7 @@ class CalibrationsMenu extends Component {
 
     return (
       <Button.Group icon>
-         <Button disabled={DISABLE} icon='plus' onClick={addCalibrationFrame.bind(this)} />
+         <Button disabled={DISABLE} icon='plus' onClick={this.addCalibration.bind(this)} />
          <Button disabled  compact />
          <Button disabled={DISABLE} onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
          <Button disabled  compact  />
@@ -209,6 +209,22 @@ class CalibrationsMenu extends Component {
          <Button disabled={NOT_DISABLE} icon='stop' onClick={this.stopButton.bind(this)} />
       </Button.Group>
     )
+  }
+
+  addCalibration() {
+    var out = addCalibrationFrame();
+    // const id  = CalibrationFrames.insert(
+    //   {
+    //     subFrameTypes: "Flat",
+    //     filter: "",
+    //     exposure: 0,
+    //     quantity: 0,
+    //     level: 0,
+    //     rotation: "",
+    //     order: 0,
+    //     binning: 1,
+    //   }
+    // );
   }
 
   stopButton() {
@@ -266,7 +282,7 @@ class CalibrationsMenu extends Component {
         <Modal.Content>
         <Segment secondary >
           <Segment raised>
-            {this.calibrationTools(
+            {this.calibrationSettingsTools(
               this.props.scheduler_running.value
               , this.props.tool_active.value
               , this.state.tool_flats_via
@@ -307,40 +323,14 @@ class CalibrationsMenu extends Component {
 
 
   render() {
-    // <Table.Footer>
-    //   <Table.Row>
-    //     <Table.HeaderCell colSpan='3'>
-    //       <Menu floated='right' pagination>
-    //         <Menu.Item as='a' icon>
-    //           <Icon name='chevron left' />
-    //         </Menu.Item>
-    //         <Menu.Item as='a'>1</Menu.Item>
-    //         <Menu.Item as='a'>2</Menu.Item>
-    //         <Menu.Item as='a'>3</Menu.Item>
-    //         <Menu.Item as='a'>4</Menu.Item>
-    //         <Menu.Item as='a' icon>
-    //           <Icon name='chevron right' />
-    //         </Menu.Item>
-    //       </Menu>
-    //     </Table.HeaderCell>
-    //   </Table.Row>
-    // </Table.Footer>
 
-    // <Table.Cell>
-    //   <Label ribbon>First</Label>
-    // </Table.Cell>
-
-//celled striped fixed compact stackable
-/*
-
-*/
     return (
       <div>
       <h1>FLaTs</h1>
       <br />
       <b>Slew Position</b>
       <b>Edit Slew position</b>
-      <Table basic celled unstackable={'false'}>
+      <Table basic celled unstackable >
            <Table.Header>
              <Table.Row >
               <Table.HeaderCell colSpan='7'  >
@@ -363,11 +353,21 @@ class CalibrationsMenu extends Component {
              </Table.Row>
           </Table.Header>
           <Table.Body>
-          {this.props.calibrationFrames.map((obj)=>{
+          <Table.Row>
+            <Table.Cell  >1</Table.Cell>
+            <Table.Cell  >2</Table.Cell>
+            <Table.Cell  >3.(s)</Table.Cell>
+            <Table.Cell  >4</Table.Cell>
+            <Table.Cell  >5</Table.Cell>
+            <Table.Cell  >6</Table.Cell>
+            <Table.Cell  >7</Table.Cell>
+          </Table.Row>
+          {this.props.calibrations.map((obj)=>{
             return (
                <CalibrationFrame
                 key={obj._id}
-                calibrationFrame={obj}
+                calibrations={this.props.calibrations}
+                calibration={obj}
                 scheduler_running={this.props.scheduler_running}
                 tool_active={this.props.tool_active}
               />

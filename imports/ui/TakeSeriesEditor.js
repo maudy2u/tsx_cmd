@@ -17,7 +17,7 @@ tsx cmd - A web page to send commands to TheSkyX server
  */
 
 import React, { Component } from 'react'
-import ReactDOM from 'react-dom';
+// import ReactDOM from 'react-dom';
 // import {mount} from 'react-mounter';
 
 import { withTracker } from 'meteor/react-meteor-data';

@@ -48,6 +48,7 @@ import {
  } from '../api/targetAngles.js'
 
 import { Filters } from '../api/filters.js';
+import { CalibrationFrames } from '../api/calibrationFrames.js';
 import { FlatSeries } from '../api/flatSeries.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 import { AppLogsDB } from '../api/theLoggers.js'
@@ -57,6 +58,7 @@ import DefaultSettings from './DefaultSettings.js';
 import Monitor from './Monitor.js';
 import Toolbox from './Toolbox.js';
 import FlatsMenu from './FlatsMenu.js';
+import CalibrationsMenu from './CalibrationsMenu.js';
 import TargetSessionMenu from './TargetSessionMenu.js';
 // import Filter from './Filter.js';
 import Series from './Series.js';
@@ -406,6 +408,9 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           <Menu.Item fitted name='Flats' active={activeMenu === 'Flats'} onClick={this.handleMenuItemClick}>
             <Icon name="area graph" size='large' />
           </Menu.Item>
+          <Menu.Item fitted name='Flats2' active={activeMenu === 'Flats2'} onClick={this.handleMenuItemClick}>
+            <Icon name="area graph" size='large' />
+          </Menu.Item>
           <Menu.Item fitted name='Toolbox' active={activeMenu === 'Toolbox'} onClick={this.handleMenuItemClick}>
             <Icon name='briefcase' size='large' />
           </Menu.Item>
@@ -484,6 +489,22 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           tool_active = {this.props.tool_active}
           filters = {this.props.filters}
           flatSeries = {this.props.flatSeries}
+          tool_flats_via = {this.props.tool_flats_via}
+          tool_flats_location = {this.props.tool_flats_location}
+          tool_flats_dec_az = {this.props.tool_flats_dec_az}
+        />
+      )
+    } else if (this.state.activeMenu == 'Flats2') {
+
+
+      return (
+        <CalibrationsMenu
+          scheduler_report={this.props.scheduler_report}
+          tsxInfo={this.props.tsxInfo}
+          scheduler_running={this.props.scheduler_running}
+          calibrations={this.props.calibrations}
+          filters = {this.props.filters}
+          tool_active = {this.props.tool_active}
           tool_flats_via = {this.props.tool_flats_via}
           tool_flats_location = {this.props.tool_flats_location}
           tool_flats_dec_az = {this.props.tool_flats_dec_az}
@@ -918,7 +939,7 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
     return (
       <div className="container">
           <Segment.Group>
-              <Segment size='mini' clearing>
+            <Segment size='mini' clearing>
                 {this.appButtons(RUNNING, ACTIVE)}
                 <Label onClick={this.modalEnterIpOpen.bind(this)}>TSX ip:
                   <Label.Detail>
@@ -933,8 +954,9 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
                 </Label>
                 <br/>
                 {this.renderIPEditor()}
-                {this.renderPortEditor()}                </Segment>
-              <Segment>
+                {this.renderPortEditor()}
+            </Segment>
+            <Segment>
               <Progress
                 size='medium'
                 value={PROGRESS}
@@ -945,7 +967,7 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
                   {STATUS}
                 </Label>
               </Progress>
-              </Segment>
+            </Segment>
             <Segment>
               { this.renderMenu( MENU, RUNNING ) }
             </Segment>
@@ -1045,6 +1067,8 @@ export default withTracker(() => {
     scheduler_running: TheSkyXInfos.findOne({name: 'scheduler_running'}),
     scheduler_report: TheSkyXInfos.findOne({name: 'scheduler_report'}),
     filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
+//    calibrations: CalibrationFrames.find({}, { sort: { order: 1 } }).fetch(),
+    calibrations: CalibrationFrames.find({}).fetch(),
     flatSeries: FlatSeries.find({}).fetch(),
     takeSeriesTemplates: TakeSeriesTemplates.find({ isCalibrationFrames: false }, { sort: { name: 1 } }).fetch(),
     targetSessions: TargetSessions.find({ isCalibrationFrames: false }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),

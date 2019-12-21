@@ -26,6 +26,7 @@ import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
 import { scheduler } from '../imports/api/theProcessors.js';
 import { FlatSeries } from '../imports/api/flatSeries.js';
 import { TargetAngles } from '../imports/api/targetAngles.js';
+import { CalibrationFrames } from '../imports/api/calibrationFrames.js';
 
 import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug,
   logFileForClient, AppLogsDB
@@ -196,10 +197,10 @@ function CleanUpJobs() {
   // Server restarts and it means no session
   // get rid of any old processes/jobs
   scheduler.remove({});
-//  var jobs = scheduler.find().fetch();
-//  var jid = tsx_GetServerStateValue('currentJob');
-//  scheduler.remove( jid );
-  tsx_SetServerState('currentJob', '');
+  //  var jobs = scheduler.find().fetch();
+  //  var jid = tsx_GetServerStateValue('runScheduler');
+  //  scheduler.remove( jid );
+  tsx_SetServerState('runScheduler', '');
 
   // Clean up the scheduler process collections...
   // Persistence across reboots is not needed at this time.
@@ -216,7 +217,12 @@ function CleanUpJobs() {
   return;
 }
 
-function startServerProcess() {
+function takeCalibrationImages() {
+  UpdateStatus(' ENTRY POINT TO GET THE CALIBRATION IMAGES');
+
+}
+
+function startSchedulerProcess() {
   // *******************************
   //   Imaging processs
   // *******************************
@@ -233,7 +239,7 @@ function startServerProcess() {
       tsxLog( '  ###############################  ');
       // This will only be called if a 'runScheduler' job is obtained
       setSchedulerState( 'Running' );
-      tsx_SetServerState('currentJob', job);
+      tsx_SetServerState('runScheduler', job);
 
       UpdateStatus(' SCHEDULER STARTED');
       var schedule = job.data;
@@ -260,16 +266,17 @@ function startServerProcess() {
           }
           var target = schedule.targets[i];
           // what is the FOV position??
-          tsxLog( ' Calibration rotator: ' + target.rotator_position );
-          if( target.rotator_position != '' ) {
-            // rotate to a specific position
-            if( isSchedulerStopped() == false ) {
-              var res = tsx_RotateCamera( target.rotator_position );
-            }
-          }
+          tsxLog( ' DEPRECATED>> Calibration rotator: ' + target.rotator_position );
+          // if( target.rotator_position != '' ) {
+          //   // rotate to a specific position
+          //   if( isSchedulerStopped() == false ) {
+          //     var res = tsx_RotateCamera( target.rotator_position );
+          //   }
+          // }
           try {
             if( isSchedulerStopped() == false ) {
-              processTargetTakeSeries( target );
+//              processTargetTakeSeries( target );
+                takeCalibrationImages();
             }
           }
           catch( err ) {
@@ -501,7 +508,57 @@ Meteor.startup(() => {
 
 });
 
+// need to look up statemodel design... see patterns
+// Scheduler states
+// Calibration states
+// processCalibrationTargets
+
+export function srvStartCalibrations() {
+  if(getSchedulerState() == 'Stop' ) {
+    CleanUpJobs();
+    UpdateImagingSesionID( '' );
+    tsx_SetServerState('targetName', 'No Active Target');
+    tsx_SetServerState('scheduler_report', '');
+    setSchedulerState('Stop' );
+  }
+}
+export function srvStopCalibrations() {
+  CleanUpJobs();
+  UpdateImagingSesionID( '' );
+  setCalibrationState('Stop' );
+}
+
 Meteor.methods({
+
+  processCalibrationTargets( targets ) {
+    if(
+      getSchedulerState() == 'Running'
+    ) {
+      tsxDebug("Running found");
+      tsxLog('Scheduler is alreadying running. Nothing to do.');
+      return;
+    }
+    else if( getSchedulerState() == 'Stop' ) {
+      tsx_SetServerState( 'tool_active', true );
+      tsxDebug(" Calibration File Processes");
+      startSchedulerProcess();
+      // Create a job:
+      var job = new Job(scheduler, 'runScheduler', // type of job
+        // Job data that you define, including anything the job
+        // needs to complete. May contain links to files, etc...
+        {
+          startTime: new Date(),
+          scheduleType: 'calibration',
+        }
+      );
+      job.priority('normal');
+      var jid = job.save();               // Commit it to the server
+    } else {
+        tsxErr("Invalid state found for scheduler.");
+        // logCon.error('Invalid state found for scheduler.');
+      }
+  },
+
 
    // the question with the scheduler is...
    // how to pause the "takeseries"
@@ -526,7 +583,7 @@ Meteor.methods({
         getSchedulerState() == 'Stop'
       ) {
         tsxDebug("Stop found");
-        startServerProcess();
+        startSchedulerProcess();
 
         // Confirm whether the there is a script running...
         if( !tsx_ServerIsOnline() ) {
@@ -699,25 +756,6 @@ Meteor.methods({
     finally {
       tsx_SetServerState( 'tool_active', false );
     }
-  },
-
-  processCalibrationTargets( targets ) {
-
-    tsx_SetServerState( 'tool_active', true );
-    tsxDebug(" Calibration File Processes");
-    startServerProcess();
-    // Create a job:
-    var job = new Job(scheduler, 'runScheduler', // type of job
-      // Job data that you define, including anything the job
-      // needs to complete. May contain links to files, etc...
-      {
-        startTime: new Date(),
-        scheduleType: 'calibration',
-        targets: targets,
-      }
-    );
-    job.priority('normal');
-    var jid = job.save();               // Commit it to the server
   },
 
    getUpdateTargetReport(target) {
