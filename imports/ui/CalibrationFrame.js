@@ -20,6 +20,7 @@ import React, { Component } from 'react'
 import { withTracker } from 'meteor/react-meteor-data';
 import {
   Button,
+  Checkbox,
   Dropdown,
   Label,
   Input,
@@ -64,6 +65,7 @@ class CalibrationFrame extends Component {
     rotation: '',
     order: 0,
     binning: 1,
+    enabled: true,
   }
 
   // Initialize states
@@ -82,11 +84,11 @@ class CalibrationFrame extends Component {
       rotation: this.props.calibration.rotation,
       order: this.props.calibration.order,
       binning: this.props.calibration.binning,
+      enabled: this.props.calibration.enabled,
     });
   }
 
   handleChange = (e, { name, value }) => {
-
     this.setState({ [name]: value });
     updateCalibrationFrame(
       this.props.calibration._id,
@@ -94,6 +96,18 @@ class CalibrationFrame extends Component {
       value,
     );
   };
+  handleToggle = (e, { name }) => {
+    var val = eval( 'this.state.' + name);
+    this.setState({
+      [name]: !val
+    });
+    updateCalibrationFrame(
+      this.props.calibration._id,
+      name,
+      !val,
+    );
+  };
+
 
   componentDidMount() {
     this.updateDefaults(this.props);
@@ -132,6 +146,9 @@ class CalibrationFrame extends Component {
       this.setState({
         binning: nextProps.calibration.binning
       });
+      this.setState({
+        enabled: nextProps.calibration.enabled
+      });
     }
   }
 
@@ -145,8 +162,17 @@ class CalibrationFrame extends Component {
     return (
       <Table.Row>
       <Table.Cell   >
+      <Checkbox
+        name='enabled'
+        label=''
+        checked={this.state.enabled }
+        onChange={this.handleToggle}
+        />
+      </Table.Cell   >
+      <Table.Cell   >
           <Dropdown
             button
+            size='mini'
             search
             wrapSelection
             scrolling
@@ -160,6 +186,7 @@ class CalibrationFrame extends Component {
         <Table.Cell   >
           <Dropdown
               button
+              size='mini'
               search
               wrapSelection
               scrolling
@@ -173,6 +200,7 @@ class CalibrationFrame extends Component {
         <Table.Cell   >
           <Input
             fluid
+            size='mini'
             name='exposure'
             placeholder='Exposure'
             value={this.state.exposure}
@@ -182,6 +210,7 @@ class CalibrationFrame extends Component {
         <Table.Cell   >
           <Input
             fluid
+            size='mini'
             name='quantity'
             placeholder='Quantity'
             value={this.state.quantity}
@@ -190,7 +219,8 @@ class CalibrationFrame extends Component {
         </Table.Cell>
         <Table.Cell   >
           <Input
-          fluid
+            fluid
+            size='mini'
             name='level'
             placeholder='Level'
             value={this.state.level}

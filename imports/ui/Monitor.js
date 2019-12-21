@@ -565,22 +565,24 @@ class Monitor extends Component {
         </Button.Group>
         <h1>{" " + TARGETNAME}</h1>
         <Segment raised>
-          <Grid columns={2}>
-            <Grid.Column width={4}>
-              <Label>Alt <Label.Detail>{Number(this.props.scheduler_report.value.ALT).toFixed(4)}</Label.Detail></Label>
-              <br /><Label>Az <Label.Detail>{this.props.scheduler_report.value.AZ}</Label.Detail></Label>
-              <br /><Label>HA <Label.Detail>{Number(this.props.scheduler_report.value.HA).toFixed(4)}</Label.Detail></Label>
-              <br /><Label>Transit <Label.Detail>{Number(this.props.scheduler_report.value.TRANSIT).toFixed(4)}</Label.Detail></Label>
-              <br /><Label>Pointing <Label.Detail>{this.props.scheduler_report.value.pointing}</Label.Detail></Label>
-              <br /><Label>Focus Pos. <Label.Detail>{Number(this.props.scheduler_report.value.focusPostion).toFixed(4)}</Label.Detail></Label>
-              <br /><Label>Angle <Label.Detail>{Number(this.props.scheduler_report.value.ANGLE).toFixed(4)}</Label.Detail></Label>
-              <br /><Label>RA <Label.Detail>{Number(this.props.scheduler_report.value.RA).toFixed(4)}</Label.Detail></Label>
-              <br /><Label>DEC <Label.Detail>{Number(this.props.scheduler_report.value.DEC).toFixed(4)}</Label.Detail></Label>
-            </Grid.Column>
-            <Grid.Column stretched >
-                <TextArea value={LOG} rows={3} style={{ minHeight: 200 }} />
-            </Grid.Column>
-          </Grid>
+        <Form unstackable>
+          <Form.Group>
+          <Label>Alt <Label.Detail>{Number(this.props.scheduler_report.value.ALT).toFixed(4)}</Label.Detail></Label>
+          <Label>Az <Label.Detail>{this.props.scheduler_report.value.AZ}</Label.Detail></Label>
+          <Label>RA <Label.Detail>{Number(this.props.scheduler_report.value.RA).toFixed(4)}</Label.Detail></Label>
+          <Label>DEC <Label.Detail>{Number(this.props.scheduler_report.value.DEC).toFixed(4)}</Label.Detail></Label>
+          <Label>Angle <Label.Detail>{Number(this.props.scheduler_report.value.ANGLE).toFixed(4)}</Label.Detail></Label>
+          </Form.Group>
+          <Form.Group>
+          <Label>HA <Label.Detail>{Number(this.props.scheduler_report.value.HA).toFixed(4)}</Label.Detail></Label>
+          <Label>Transit <Label.Detail>{Number(this.props.scheduler_report.value.TRANSIT).toFixed(4)}</Label.Detail></Label>
+          <Label>Pointing <Label.Detail>{this.props.scheduler_report.value.pointing}</Label.Detail></Label>
+          <Label>Focus Pos. <Label.Detail>{Number(this.props.scheduler_report.value.focusPostion).toFixed(4)}</Label.Detail></Label>
+          </Form.Group>
+          <Form.Group>
+          <TextArea value={LOG} rows={3} style={{ minHeight: 200 }} />
+          </Form.Group>
+        </Form>
         </Segment>
         <Confirm
           header='Start an imaging session'

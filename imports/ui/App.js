@@ -57,7 +57,6 @@ import { AppLogsDB } from '../api/theLoggers.js'
 import DefaultSettings from './DefaultSettings.js';
 import Monitor from './Monitor.js';
 import Toolbox from './Toolbox.js';
-import FlatsMenu from './FlatsMenu.js';
 import CalibrationsMenu from './CalibrationsMenu.js';
 import TargetSessionMenu from './TargetSessionMenu.js';
 // import Filter from './Filter.js';
@@ -405,10 +404,7 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           <Menu.Item fitted name='Series' active={activeMenu === 'Series'} onClick={this.handleMenuItemClick}>
             <Icon name='list ol' size='large' />
           </Menu.Item>
-          <Menu.Item fitted name='Flats' active={activeMenu === 'Flats'} onClick={this.handleMenuItemClick}>
-            <Icon name="area graph" size='large' />
-          </Menu.Item>
-          <Menu.Item fitted name='Flats2' active={activeMenu === 'Flats2'} onClick={this.handleMenuItemClick}>
+          <Menu.Item fitted name='Calibration' active={activeMenu === 'Calibration'} onClick={this.handleMenuItemClick}>
             <Icon name="area graph" size='large' />
           </Menu.Item>
           <Menu.Item fitted name='Toolbox' active={activeMenu === 'Toolbox'} onClick={this.handleMenuItemClick}>
@@ -480,23 +476,7 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           />
       </div>
       )
-    } else if (this.state.activeMenu == 'Flats') {
-      return (
-        <FlatsMenu
-          scheduler_report={this.props.scheduler_report}
-          tsxInfo={this.props.tsxInfo}
-          scheduler_running={this.props.scheduler_running}
-          tool_active = {this.props.tool_active}
-          filters = {this.props.filters}
-          flatSeries = {this.props.flatSeries}
-          tool_flats_via = {this.props.tool_flats_via}
-          tool_flats_location = {this.props.tool_flats_location}
-          tool_flats_dec_az = {this.props.tool_flats_dec_az}
-        />
-      )
-    } else if (this.state.activeMenu == 'Flats2') {
-
-
+    } else if (this.state.activeMenu == 'Calibration') {
       return (
         <CalibrationsMenu
           scheduler_report={this.props.scheduler_report}

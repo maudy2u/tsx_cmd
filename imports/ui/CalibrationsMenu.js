@@ -264,7 +264,7 @@ class CalibrationsMenu extends Component {
     }
     return (
       <Button.Group basic size='mini' floated='right'>
-        <Button disabled={DISABLED} icon='recycle' onClick={this.resetAngles.bind(this)}/>
+        <Button disabled={true} icon='recycle' onClick={this.resetAngles.bind(this)}/>
         <Button disabled={DISABLED} icon='settings' onClick={this.showModalCalibrationSettings.bind(this)}/>
       </Button.Group>
     )
@@ -290,28 +290,7 @@ class CalibrationsMenu extends Component {
               , this.state.tool_flats_dec_az
             )}
           </Segment>
-          <Segment raised>
-            Enter the default exposure settings for each filter.<br/>
-            <Form>
-              <Form.Field inline >
-              </Form.Field>
-              {this.props.filters.map((filter)=>{
-                return (
-                  <Form.Field key={filter._id} inline>
-                    <Label>
-                      {filter.name}
-                    </Label>
-                    <Input
-                      placeholder='Exposure'
-                      name={filter._id}
-                      value={filter.flat_exposure}
-                      onChange={this.handleFilterChange}
-                    />
-              </Form.Field>
-              )})}
-            </Form>
-          </Segment>
-          </Segment>
+         </Segment>
         </Modal.Content>
         <Modal.Description>
         </Modal.Description>
@@ -326,11 +305,9 @@ class CalibrationsMenu extends Component {
 
     return (
       <div>
-      <h1>FLaTs</h1>
+      <h1>Calibration files: FLaTs, DArKs, BIaS</h1>
       <br />
-      <b>Slew Position</b>
-      <b>Edit Slew position</b>
-      <Table basic celled unstackable >
+      <Table basic celled compact unstackable >
            <Table.Header>
              <Table.Row >
               <Table.HeaderCell colSpan='7'  >
@@ -343,11 +320,12 @@ class CalibrationsMenu extends Component {
               </Table.HeaderCell>
              </Table.Row>
              <Table.Row>
-               <Table.HeaderCell  >Type</Table.HeaderCell>
+               <Table.HeaderCell  >On/Off</Table.HeaderCell>
+               <Table.HeaderCell  >Frame</Table.HeaderCell>
                <Table.HeaderCell  >Filter</Table.HeaderCell>
                <Table.HeaderCell  >Exp.(s)</Table.HeaderCell>
-               <Table.HeaderCell  >Qty</Table.HeaderCell>
-               <Table.HeaderCell  >Lvl</Table.HeaderCell>
+               <Table.HeaderCell  >Repeat</Table.HeaderCell>
+               <Table.HeaderCell  >Level</Table.HeaderCell>
                <Table.HeaderCell  ></Table.HeaderCell>
              </Table.Row>
           </Table.Header>
