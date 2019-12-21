@@ -1,4 +1,4 @@
-CalibrationFrame/*
+/*
 tsx cmd - A web page to send commands to TheSkyX server
     Copyright (C) 2018  Stephen Townsend
 
@@ -42,14 +42,15 @@ import {
 import {
   Filters,
   renderDropDownFilters,
+  getFlatExposure,
 } from '../api/filters.js';
 
-// import {
-//   CalibrationFrames,
-//   calibrationTypes,
-//   addCalibrationFrame,
-//   updateCalibrationFrame,
-//  } from '../api/calibrationFrames.js';
+import {
+  CalibrationFrames,
+  calibrationTypes,
+  addCalibrationFrame,
+  updateCalibrationFrame,
+ } from '../api/calibrationFrames.js';
 
 class CalibrationFrame extends Component {
 
@@ -141,26 +142,21 @@ class CalibrationFrame extends Component {
 
   render() {
 
-/*
-
-
-options={calibrationTypes()}
-options={renderDropDownFilters()}
-
-*/
     return (
       <Table.Row>
       <Table.Cell   >
-          <Dropdown
-            button
-            search
-            wrapSelection
-            scrolling
-            name='subFrameTypes'
-            placeholder='subFrameTypes'
-            text='hi'
-          />
-        </Table.Cell>
+        <Dropdown
+          button
+          search
+          wrapSelection
+          scrolling
+          name='subFrameTypes'
+          options={calibrationTypes()}
+          placeholder='Type'
+          text={this.state.subFrameTypes}
+          onChange={this.handleChange}
+        />
+      </Table.Cell>
         <Table.Cell   >
           <Dropdown
               button
@@ -168,8 +164,10 @@ options={renderDropDownFilters()}
               wrapSelection
               scrolling
               name='filter'
+              options={renderDropDownFilters()}
               placeholder='Filter'
-              text='hi'
+              text={this.state.filter}
+              onChange={this.handleChange}
             />
         </Table.Cell>
         <Table.Cell   >
@@ -177,7 +175,8 @@ options={renderDropDownFilters()}
             fluid
             name='exposure'
             placeholder='Exposure'
-            value=''
+            value={this.state.exposure}
+            onChange={this.handleChange}
           />
         </Table.Cell>
         <Table.Cell   >
@@ -185,7 +184,8 @@ options={renderDropDownFilters()}
             fluid
             name='quantity'
             placeholder='Quantity'
-            value=''
+            value={this.state.quantity}
+            onChange={this.handleChange}
           />
         </Table.Cell>
         <Table.Cell   >
@@ -193,7 +193,8 @@ options={renderDropDownFilters()}
           fluid
             name='level'
             placeholder='Level'
-            value=''
+            value={this.state.level}
+            onChange={this.handleChange}
           />
         </Table.Cell>
         <Table.Cell   >
@@ -201,12 +202,11 @@ options={renderDropDownFilters()}
             fluid
             name='level'
             placeholder='-5'
-            value=''
           />
         </Table.Cell>
         <Table.Cell   >
          <Button.Group basic size='mini'>
-          <Button icon='delete'}/>
+          <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
           </Button.Group>
         </Table.Cell>
       </Table.Row>

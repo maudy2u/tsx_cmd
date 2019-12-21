@@ -34,7 +34,15 @@ import {
   updateFlatExposure,
 } from '../api/filters.js';
 
-//import CalibrationFrame from './CalibrationFrame.js';
+import {
+  CalibrationFrames,
+  calibrationTypes,
+  addCalibrationFrame,
+  updateCalibrationFrame,
+ } from '../api/calibrationFrames.js';
+
+
+import CalibrationFrame from './CalibrationFrame.js';
 
 
 // Import the UI
@@ -43,7 +51,7 @@ class CalibrationsMenu extends Component {
   constructor() {
     super();
     this.state = {
-      showModalFlatSettings: false,
+      showModalCalibrationSettings: false,
 
       flatPosition: '',
       tool_flats_via: '',
@@ -52,12 +60,12 @@ class CalibrationsMenu extends Component {
     };
   }
 
-  showModalFlatSettings() {
-    this.setState({showModalFlatSettings: true });
+  showModalCalibrationSettings() {
+    this.setState({showModalCalibrationSettings: true });
   }
 
-  closeModalFlatSettings() {
-    this.setState({showModalFlatSettings: false });
+  closeModalCalibrationSettings() {
+    this.setState({showModalCalibrationSettings: false });
   }
 
   // used for the modal exposure settings for flats
@@ -106,23 +114,7 @@ class CalibrationsMenu extends Component {
     }
   }
 
-  stopFlats() {
-    // this.tsxStopSession();
-    Meteor.call("stopScheduler", function (error, result) {
-        // identify the error
-        tsx_UpdateServerState(tsx_ServerStates.targetImageName, '');
-        tsx_UpdateServerState(tsx_ServerStates.targetDEC, '_');
-        tsx_UpdateServerState(tsx_ServerStates.targetRA, '_');
-        tsx_UpdateServerState(tsx_ServerStates.targetALT, '_');
-        tsx_UpdateServerState(tsx_ServerStates.targetAZ, '_');
-        tsx_UpdateServerState(tsx_ServerStates.targetHA, '_');
-        tsx_UpdateServerState(tsx_ServerStates.targetTransit, '_');
-//        tsx_UpdateServerState(tsx_ServerStates.currentStage, 'Stopped');
-
-      }.bind(this));
-  }
-
-  startFlats() {
+  playButton() {
     // obtain calibration targetSession
     console.log( ' Number of calibration targets found: ' + targets.length );
     Meteor.call( 'processCalibrationTargets', targets, function(error, result) {
@@ -140,7 +132,7 @@ class CalibrationsMenu extends Component {
     }.bind(this));
   }
 
-  flatsTools(
+  calibrationTools(
       state
     , active
     , flatSlewType
@@ -194,7 +186,7 @@ class CalibrationsMenu extends Component {
     )
   }
 
-  addCalibration(
+  calibrationTools(
     state
     , active
     ) {
@@ -213,13 +205,13 @@ class CalibrationsMenu extends Component {
          <Button disabled  compact />
          <Button disabled={DISABLE} onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
          <Button disabled  compact  />
-         <Button disabled={DISABLE} icon='play' onClick={this.startFlats.bind(this)} />
-         <Button disabled={NOT_DISABLE} icon='stop' onClick={this.stopScheduler.bind(this)} />
+         <Button disabled={DISABLE} icon='play' onClick={this.playButton.bind(this)} />
+         <Button disabled={NOT_DISABLE} icon='stop' onClick={this.stopButton.bind(this)} />
       </Button.Group>
     )
   }
 
-  stopScheduler() {
+  stopButton() {
     // this.tsxStopSession();
     Meteor.call("stopScheduler", function (error, result) {
         // identify the error
@@ -248,7 +240,7 @@ class CalibrationsMenu extends Component {
     this.render();
   }
 
-  flatSettings() {
+  calibrationSettings() {
     let DISABLED = true;
 
     if( this.props.scheduler_running.value == 'Stop'  && this.props.tool_active.value == false ){
@@ -257,16 +249,16 @@ class CalibrationsMenu extends Component {
     return (
       <Button.Group basic size='mini' floated='right'>
         <Button disabled={DISABLED} icon='recycle' onClick={this.resetAngles.bind(this)}/>
-        <Button disabled={DISABLED} icon='settings' onClick={this.showModalFlatSettings.bind(this)}/>
+        <Button disabled={DISABLED} icon='settings' onClick={this.showModalCalibrationSettings.bind(this)}/>
       </Button.Group>
     )
   }
 
-  renderModalFlatSettings() {
+  renderModalCalibrationSettings() {
     return (
       <Modal
-        open={this.state.showModalFlatSettings}
-        onClose={this.closeModalFlatSettings.bind(this)}
+        open={this.state.showModalCalibrationSettings}
+        onClose={this.closeModalCalibrationSettings.bind(this)}
         basic
         size='small'
         closeIcon>
@@ -274,7 +266,7 @@ class CalibrationsMenu extends Component {
         <Modal.Content>
         <Segment secondary >
           <Segment raised>
-            {this.flatsTools(
+            {this.calibrationTools(
               this.props.scheduler_running.value
               , this.props.tool_active.value
               , this.state.tool_flats_via
@@ -312,19 +304,7 @@ class CalibrationsMenu extends Component {
       </Modal>
     )
   }
-  renderModalFlatGrid( flat ) {
-    return (
-      <FlatGrid
-        key={flat._id}
-        flat={flat}
-        scheduler_report={this.props.scheduler_report}
-        tsxInfo={this.props.tsxInfo}
-        scheduler_running={this.props.scheduler_running}
-        tool_active = {this.props.tool_active}
-        flatSeries = {this.props.flatSeries}
-      />
-    )
-  }
+
 
   render() {
     // <Table.Footer>
@@ -353,72 +333,6 @@ class CalibrationsMenu extends Component {
 //celled striped fixed compact stackable
 /*
 
-<Table.Row>
-<Table.Cell   >
-  <Dropdown
-    fluid
-    placeholder='Type'
-  />
-</Table.Cell>
-  <Table.Cell   >
-    <Dropdown
-        button
-        search
-        wrapSelection
-        scrolling
-        name='filter'
-        options={this.renderDropDownFilters()}
-        placeholder='Filter'
-        text={this.state.filter}
-        onChange={this.handleChange}
-      />
-  </Table.Cell>
-  <Table.Cell   >
-    <Input
-      fluid
-      placeholder='Exposure'
-    />
-  </Table.Cell>
-  <Table.Cell   >
-    <Input
-    fluid
-      placeholder='Quantity'
-    />
-  </Table.Cell>
-  <Table.Cell   >
-    <Input
-    fluid
-      placeholder='Level'
-    />
-  </Table.Cell>
-  <Table.Cell   >
-    <Input
-    fluid
-      placeholder='-5'
-    />
-  </Table.Cell>
-  <Table.Cell   >
-   <Button.Group basic size='mini'>
-   <Button icon='delete' />
-    </Button.Group>
-  </Table.Cell>
-</Table.Row>
-
-
-
-{this.props.calibrationFrames.map((obj)=>{
-  return (
-     <CalibrationFrame
-      key={obj._id}
-      calibrationFrame={obj}
-      scheduler_running={this.props.scheduler_running}
-      tool_active={this.props.tool_active}
-    />
-  )
-})}
-
-
-
 */
     return (
       <div>
@@ -430,12 +344,12 @@ class CalibrationsMenu extends Component {
            <Table.Header>
              <Table.Row >
               <Table.HeaderCell colSpan='7'  >
-              {this.addCalibration(
+              {this.calibrationTools(
                 this.props.scheduler_running
                 , this.props.tool_active
               )}
-              { this.flatSettings() }
-              {this.renderModalFlatSettings()}
+              { this.calibrationSettings() }
+              {this.renderModalCalibrationSettings()}
               </Table.HeaderCell>
              </Table.Row>
              <Table.Row>
@@ -449,6 +363,16 @@ class CalibrationsMenu extends Component {
              </Table.Row>
           </Table.Header>
           <Table.Body>
+          {this.props.calibrationFrames.map((obj)=>{
+            return (
+               <CalibrationFrame
+                key={obj._id}
+                calibrationFrame={obj}
+                scheduler_running={this.props.scheduler_running}
+                tool_active={this.props.tool_active}
+              />
+            )
+          })}
           </Table.Body>
        </Table>
       </div>
