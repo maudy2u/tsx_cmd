@@ -22,9 +22,9 @@ export const CalibrationFrames = new Mongo.Collection('calibrationFrames');
 
 export function calibrationTypes() {
   var arr = [];
-  arr.push('Flat' );
-  arr.push( 'Dark' );
-  arr.push( 'Bias' );
+  arr.push({ key: 'Flat', text: 'Flat', value: 'Flat' } );
+  arr.push({ key: 'Dark', text: 'Dark', value: 'Dark' } );
+  arr.push({ key: 'Bias', text: 'Bias', value: 'Bias' } );
   return arr;
 };
 
@@ -83,7 +83,7 @@ export function updateCalibrationFrame( fid, name, value ) {
     else if( name == 'binning') {
       obj.binning = value;
     }
-    CalibrationFrames.update({_id: fs._id}, {
+    CalibrationFrames.update({_id: obj._id}, {
       $set: {
         subFrameTypes: obj.subFrameTypes,
         filter: obj.filter,

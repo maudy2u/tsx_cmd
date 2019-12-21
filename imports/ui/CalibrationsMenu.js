@@ -348,20 +348,10 @@ class CalibrationsMenu extends Component {
                <Table.HeaderCell  >Exp.(s)</Table.HeaderCell>
                <Table.HeaderCell  >Qty</Table.HeaderCell>
                <Table.HeaderCell  >Lvl</Table.HeaderCell>
-               <Table.HeaderCell  >Temp</Table.HeaderCell>
                <Table.HeaderCell  ></Table.HeaderCell>
              </Table.Row>
           </Table.Header>
           <Table.Body>
-          <Table.Row>
-            <Table.Cell  >1</Table.Cell>
-            <Table.Cell  >2</Table.Cell>
-            <Table.Cell  >3.(s)</Table.Cell>
-            <Table.Cell  >4</Table.Cell>
-            <Table.Cell  >5</Table.Cell>
-            <Table.Cell  >6</Table.Cell>
-            <Table.Cell  >7</Table.Cell>
-          </Table.Row>
           {this.props.calibrations.map((obj)=>{
             return (
                <CalibrationFrame

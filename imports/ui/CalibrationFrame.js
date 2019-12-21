@@ -135,37 +135,71 @@ class CalibrationFrame extends Component {
     }
   }
 
-  // deleteEntry() {
-  //   // check if the series is used - if so cannot delete... list the Targets using it
-  //   CalibrationFrames.remove({_id:this.props.calibration._id});
-  // }
-  //          <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
-
+  deleteEntry() {
+     // check if the series is used - if so cannot delete... list the Targets using it
+     CalibrationFrames.remove({_id:this.props.calibration._id});
+   }
 
   render() {
 
     return (
       <Table.Row>
-        <Table.Cell   >
-        f
+      <Table.Cell   >
+          <Dropdown
+            button
+            search
+            wrapSelection
+            scrolling
+            name='subFrameTypes'
+            options={calibrationTypes()}
+            placeholder='subFrameTypes'
+            text={this.state.subFrameTypes}
+            onChange={this.handleChange}
+          />
         </Table.Cell>
         <Table.Cell   >
-        e
+          <Dropdown
+              button
+              search
+              wrapSelection
+              scrolling
+              name='filter'
+              options={renderDropDownFilters()}
+              placeholder='Filter'
+              text={this.state.filter}
+              onChange={this.handleChange}
+            />
         </Table.Cell>
         <Table.Cell   >
-          d
+          <Input
+            fluid
+            name='exposure'
+            placeholder='Exposure'
+            value={this.state.exposure}
+            onChange={this.handleChange}
+          />
         </Table.Cell>
         <Table.Cell   >
-        c
+          <Input
+            fluid
+            name='quantity'
+            placeholder='Quantity'
+            value={this.state.quantity}
+            onChange={this.handleChange}
+          />
         </Table.Cell>
         <Table.Cell   >
-        b
-        </Table.Cell>
-        <Table.Cell   >
-        a
+          <Input
+          fluid
+            name='level'
+            placeholder='Level'
+            value={this.state.level}
+            onChange={this.handleChange}
+          />
         </Table.Cell>
         <Table.Cell   >
          <Button.Group basic size='mini'>
+            <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
           </Button.Group>
         </Table.Cell>
       </Table.Row>
