@@ -563,8 +563,7 @@ class Monitor extends Component {
         <Button.Group icon>
           {this.playButtons(RUNNING) }
         </Button.Group>
-        <h1>{" " + TARGETNAME}</h1>
-        <Segment raised>
+        <h1>{' ' + TARGETNAME}</h1>
         <Form unstackable>
           <Form.Group>
           <Label>Alt <Label.Detail>{Number(this.props.scheduler_report.value.ALT).toFixed(4)}</Label.Detail></Label>
@@ -579,11 +578,11 @@ class Monitor extends Component {
           <Label>Pointing <Label.Detail>{this.props.scheduler_report.value.pointing}</Label.Detail></Label>
           <Label>Focus Pos. <Label.Detail>{Number(this.props.scheduler_report.value.focusPostion).toFixed(4)}</Label.Detail></Label>
           </Form.Group>
+          <br/>
           <Form.Group>
           <TextArea value={LOG} rows={3} style={{ minHeight: 200 }} />
           </Form.Group>
         </Form>
-        </Segment>
         <Confirm
           header='Start an imaging session'
           name='confirmOpen'

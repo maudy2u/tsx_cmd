@@ -66,11 +66,13 @@ class CalibrationFrame extends Component {
     order: 0,
     binning: 1,
     enabled: true,
+    flatbox_enabled: false,
   }
 
   // Initialize states
   componentWillMount() {
     // // do not modify the state directly
+
     if( typeof this.props.calibration == 'undefined') {
       return;
     }
@@ -117,7 +119,11 @@ class CalibrationFrame extends Component {
     if( typeof nextProps == 'undefined'  ) {
       return;
     }
-
+    if( typeof nextProps.tsxInfo != 'undefined'  ) {
+      this.setState({
+        flatbox_enabled: nextProps.tsxInfo.flatbox_enabled
+      });
+    }
     if( typeof nextProps.calibration != 'undefined'  ) {
       this.setState({
         id: nextProps.calibration._id
@@ -155,7 +161,24 @@ class CalibrationFrame extends Component {
   deleteEntry() {
      // check if the series is used - if so cannot delete... list the Targets using it
      CalibrationFrames.remove({_id:this.props.calibration._id});
-   }
+  }
+
+  renderFlatbox_level() {
+    if( this.props.flatbox_enabled == true ) {
+      return (
+        <Table.Cell   >
+          <Input
+            fluid
+            size='mini'
+            name='level'
+            placeholder='Level'
+            value={this.state.level}
+            onChange={this.handleChange}
+          />
+        </Table.Cell>
+      )
+    }
+  }
 
   render() {
 
@@ -217,16 +240,7 @@ class CalibrationFrame extends Component {
             onChange={this.handleChange}
           />
         </Table.Cell>
-        <Table.Cell   >
-          <Input
-            fluid
-            size='mini'
-            name='level'
-            placeholder='Level'
-            value={this.state.level}
-            onChange={this.handleChange}
-          />
-        </Table.Cell>
+        { this.renderFlatbox_level()}
         <Table.Cell   >
          <Button.Group basic size='mini'>
             <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>

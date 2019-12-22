@@ -26,9 +26,11 @@ import {
   tsx_ServerStates,
   tsx_UpdateServerState,
   tsx_GetServerState,
+  saveDefaultStateValue,
 } from  '../api/serverStates.js';
 
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
+
 import {
   Filters,
   updateFlatExposure,
@@ -57,6 +59,8 @@ class CalibrationsMenu extends Component {
       tool_flats_via: '',
       tool_flats_location: '',
       tool_flats_dec_az: '',
+
+      flatbox_enabled: false,
     };
   }
 
@@ -71,21 +75,21 @@ class CalibrationsMenu extends Component {
   // used for the modal exposure settings for flats
   handleStateChange = (e, { name, value }) => {
     this.setState({ [name]: value.trim() });
-    this.saveDefaultStateValue( name, value.trim() );
+    saveDefaultStateValue( name, value.trim() );
     forceUpdate();
   };
 
-  // Generic Method to determine default to save.
-  saveDefaultStateValue( param, val ) {
+//  handleToggle = (e, { name, value }) => this.setState({
+//    [name]: Boolean(!eval('this.state.'+name)) })
 
-    Meteor.call( 'updateServerState', param, val , function(error, result) {
+  handleToggleAndSave = (e, { name, value }) => {
+    var val = eval( 'this.state.' + name);
 
-        if (error && error.error === "logged-out") {
-          // show a nice error message
-          Session.set("errorMessage", "Please fix.");
-        }
-    });//.bind(this));
-  }
+    this.setState({
+      [name]: !val
+    });
+    saveDefaultStateValue( name, !val );
+  };
 
   componentDidMount() {
     this.updateDefaults(this.props);
@@ -111,7 +115,13 @@ class CalibrationsMenu extends Component {
         tool_flats_location: nextProps.tsxInfo.find(function(element) {
           return element.name == 'tool_flats_location';
       }).value});
+
+      this.setState({
+        flatbox_enabled: nextProps.tsxInfo.find(function(element) {
+          return element.name == 'flatbox_enabled';
+      }).value});
     }
+
   }
 
   playButton() {
@@ -168,7 +178,7 @@ class CalibrationsMenu extends Component {
           placeholder='Slew via...'
           selection options={slewOptions}
           value={flatSlewType}
-          onChange={this.handleChange}
+          onChange={this.handleStateChange}
         />
         location:<br/>
         <br/>
@@ -176,12 +186,12 @@ class CalibrationsMenu extends Component {
          name='tool_flats_location'
          placeholder='Target name, Ra, or Alt: '
          value={flatRa}
-         onChange={this.handleChange}/>
+         onChange={this.handleStateChange}/>
        <Form.Input
          name='tool_flats_dec_az'
          placeholder='Dec, or azimuth: '
          value={flatDec}
-         onChange={this.handleChange}/>
+         onChange={this.handleStateChange}/>
      </div>
     )
   }
@@ -264,6 +274,7 @@ class CalibrationsMenu extends Component {
     }
     return (
       <Button.Group basic size='mini' floated='right'>
+        <Checkbox label='Artesky  .' name='flatbox_enabled' toggle checked={this.state.flatbox_enabled} onClick={this.handleToggleAndSave.bind(this)} />
         <Button disabled={true} icon='recycle' onClick={this.resetAngles.bind(this)}/>
         <Button disabled={DISABLED} icon='settings' onClick={this.showModalCalibrationSettings.bind(this)}/>
       </Button.Group>
@@ -300,6 +311,13 @@ class CalibrationsMenu extends Component {
     )
   }
 
+  renderFlatbox_level() {
+  if( this.state.flatbox_enabled == true ) {
+      return (
+        <Table.HeaderCell  >Level</Table.HeaderCell>
+      )
+    }
+  }
 
   render() {
 
@@ -325,7 +343,7 @@ class CalibrationsMenu extends Component {
                <Table.HeaderCell  >Filter</Table.HeaderCell>
                <Table.HeaderCell  >Exp.(s)</Table.HeaderCell>
                <Table.HeaderCell  >Repeat</Table.HeaderCell>
-               <Table.HeaderCell  >Level</Table.HeaderCell>
+               { this.renderFlatbox_level() }
                <Table.HeaderCell  ></Table.HeaderCell>
              </Table.Row>
           </Table.Header>
@@ -336,6 +354,8 @@ class CalibrationsMenu extends Component {
                 key={obj._id}
                 calibrations={this.props.calibrations}
                 calibration={obj}
+                flatbox_enabled={this.state.flatbox_enabled}
+                tsxInfo={this.props.tsxInfo}
                 scheduler_running={this.props.scheduler_running}
                 tool_active={this.props.tool_active}
               />

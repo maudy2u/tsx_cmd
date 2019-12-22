@@ -78,6 +78,9 @@ import {
   isSchedulerStopped,
 } from './run_imageSession.js';
 
+import {
+  collect_calibration_images,
+} from './run_calibration.js'
 /*
 tsx_SetServerState
 currentStage: 'currentStage', // this is a status line update for the dashboard
@@ -217,11 +220,6 @@ function CleanUpJobs() {
   return;
 }
 
-function takeCalibrationImages() {
-  UpdateStatus(' ENTRY POINT TO GET THE CALIBRATION IMAGES');
-
-}
-
 function startSchedulerProcess() {
   // *******************************
   //   Imaging processs
@@ -257,37 +255,7 @@ function startSchedulerProcess() {
       {
         // *******************************
         UpdateStatus(" === Starting calibration targets");
-
-        tsx_Connect();
-
-        for( var i=0; i<schedule.targets.length;i++ ) {
-          if( isSchedulerStopped() != false ) {
-            break;
-          }
-          var target = schedule.targets[i];
-          // what is the FOV position??
-          tsxLog( ' DEPRECATED>> Calibration rotator: ' + target.rotator_position );
-          // if( target.rotator_position != '' ) {
-          //   // rotate to a specific position
-          //   if( isSchedulerStopped() == false ) {
-          //     var res = tsx_RotateCamera( target.rotator_position );
-          //   }
-          // }
-          try {
-            if( isSchedulerStopped() == false ) {
-//              processTargetTakeSeries( target );
-                takeCalibrationImages();
-            }
-          }
-          catch( err ) {
-            var res = err.split('|')[0].trim();
-            if( res == 'TSX_ERROR' ) {
-              UpdateStatusErr( ' *** UNKNOWN ERROR - Calibrating failed.' );
-              // do not move mount/park as calibrating....
-            }
-          }
-        }
-        tsx_SetServerState( 'tool_active', false );
+          collect_calibration_images();
       }
       else {
         // *******************************

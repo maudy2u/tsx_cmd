@@ -134,6 +134,7 @@ export const tsx_ServerStates = {
   tool_flats_dec_az: 'tool_flats_dec_az',
 
   night_plan_updating: 'night_plan_updating',
+  flatbox_enabled: 'flatbox_enabled',
 
 };
 
@@ -191,12 +192,23 @@ export function tsx_UpdateDevice( name, man, mod) {
 
 export function tsx_UpdateServerState( name, value) {
   var tsx = tsx_GetServerState( name );
-  var id = TheSkyXInfos.update( {_id: tsx._id }, {
-    $set: {
-      value: value,
-      timestamp: new Date(),
-     }
-  })
+  if( typeof tsx == 'undefined' ) {
+    // state not found so create...
+    TheSkyXInfos.insert( {name: name }, {
+      $set: {
+        value: value,
+        timestamp: new Date(),
+       }
+    })
+  }
+  else {
+    var id = TheSkyXInfos.update( {_id: tsx._id }, {
+      $set: {
+        value: value,
+        timestamp: new Date(),
+       }
+    })
+  }
 };
 
 export function tsx_GetServerState( name ) {
