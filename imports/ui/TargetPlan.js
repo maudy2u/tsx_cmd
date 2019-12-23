@@ -80,6 +80,76 @@ function updateTargetPlan( fid, name, value ) {
 
 class TargetPlan extends Component {
 
+  state = {
+    name: '',
+    description: '',
+    startTime: '',
+    stopTime: '',
+    priority: 0,
+    minAlt: 45,
+    Comment: '',
+  }
+
+  // Initialize states
+  componentWillMount() {
+    // // do not modify the state directly
+
+    if( typeof this.props.targetPlan == 'undefined') {
+      return;
+    }
+    this.setState({
+      name: this.props.targetPlan.targetFindName,
+      description: this.props.targetPlan.description,
+      startTime: this.props.targetPlan.startTime,
+      stopTime: this.props.targetPlan.stopTime,
+      priority: this.props.targetPlan.priority,
+      minAlt: this.props.targetPlan.minAlt,
+    });
+  }
+
+  handleChange = (e, { name, value }) => {
+    this.setState({ [name]: value });
+    updateTargetPlan(
+      this.props.targetPlan._id,
+      name,
+      value,
+    );
+  };
+
+  componentDidMount() {
+    this.updateDefaults(this.props);
+  }
+
+  updateDefaults(nextProps) {
+    if( typeof nextProps == 'undefined'  ) {
+      return;
+    }
+    if( typeof nextProps.tsxInfo != 'undefined'  ) {
+      // this.setState({
+      //   flatbox_enabled: nextProps.tsxInfo.flatbox_enabled
+      // });
+    }
+    if( typeof nextProps.targetPlan != 'undefined'  ) {
+      this.setState({
+        name: nextProps.targetPlan.targetFindName
+      });
+      this.setState({
+        description: nextProps.targetPlan.description
+      });
+      this.setState({
+        startTime: nextProps.targetPlan.startTime
+      });
+      this.setState({
+        stopTime: nextProps.targetPlan.stopTime
+      });
+      this.setState({
+        priority: nextProps.targetPlan.priority
+      });
+      this.setState({
+        minAlt: nextProps.targetPlan.minAlt
+      });
+    }
+  }
 
   render() {
 
