@@ -145,6 +145,8 @@ export function collect_calibration_images() {
       for( var sub=0; sub<cal.quantity; sub++) {
         if( isSchedulerStopped() == false ) {
             takeCalibrationImages( cal );
+            var inc = sub+1;
+            UpdateStatus( ' Calibration: ' + cal.subFrameTypes + ' ' +  cal.filter + ' ' + cal.exposure + ' sec: '  +inc+'/' + cal.quantity    );
         }
         else {
           UpdateStatus( " --- Calibrations Manually stopped.");
@@ -173,7 +175,6 @@ function takeCalibrationImages( cal ) {
   var exposure = cal.exposure;
   var binning; //future
   var tName = "calibration_image";
-  UpdateStatus(' Took ' + cal.quantity + ' ' + tName + ' ' + frame + ' ' + cal.filter + ' ' + exposure  );
   // export function tsx_takeImage( filterNum, exposure, frame, tName ) {
 
 }
