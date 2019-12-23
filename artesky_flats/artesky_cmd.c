@@ -23,7 +23,7 @@ using namespace std;
 //using namespace artesky;
 
 int send_cmd( std::string host, std::vector<std::string> cmd );
-void error(const char * msg);
+void error(const char * msg, int rc);
 
 // http://www.cplusplus.com/articles/DEN36Up4/
 static void show_usage(std::string name)
@@ -50,7 +50,7 @@ static void show_usage(std::string name)
 
 // https://www.geeksforgeeks.org/command-line-arguments-in-c-cpp/
 int main( int argc, char** argv ) {
-	
+
 	if (argc < 2) { // filename = 1
 		show_usage(argv[0]);
 		return 1;
@@ -59,13 +59,13 @@ int main( int argc, char** argv ) {
 	struct hostent *server;
 	char buffer[256];
 	portno = 5570;
-	
+
 	// Parameters to control
 	std::string hostName = "localhost";
 	std::string device = "ttyACM0";
 	std::string level = "50";
 	std::vector<std::string> commands;
-	
+
 	int c;
 	int digit_optind = 0;
 	// NOTE: this is needed to skip the first when processing the command line
@@ -76,86 +76,86 @@ int main( int argc, char** argv ) {
 						_long_options, &option_index);
 		if (c == -1)
 			break;
-		
+
 		//cout<<"Processing \'"<<c<<"\' = "<<_long_options[optind].name<<endl;
-		
+
 		switch (c) {
 			case 'h':
 				printf("option --host  with value '%s'\n", optarg);
 				hostName=optarg;
 				break;
-				
+
 			case 'd':
 				printf("option --device with value '%s'\n", optarg);
 				device=optarg;
 				commands.push_back("--device");
 				commands.push_back(device);
 				break;
-				
+
 			case 'D':
 				commands.push_back("--getDevice");
 				// commands.push_back(" ");
 				break;
-				
+
 			case 'C':
 				commands.push_back("--isConnected");
 				// commands.push_back(" ");
-				
+
 				break;
-				
+
 			case 'c':
 				commands.push_back("--connect");
 				// commands.push_back(" ");
-				
+
 				break;
-				
+
 			case 'l':
 				printf("option --level with value '%s'\n", optarg);
 				level=optarg;
 				commands.push_back("--level");
 				commands.push_back(level);
 				break;
-				
+
 			case 'L':
 				commands.push_back("--getLevel");
 				// commands.push_back(" ");
 				break;
-				
+
 			case 'v':
 				commands.push_back("--version");
 				// commands.push_back(" ");
 				break;
-				
+
 			case 'O':
 				commands.push_back("--on");
 				// commands.push_back(" ");
 				break;
-				
+
 			case 'o':
 				commands.push_back("--off");
 				// commands.push_back(" ");
-				
+
 				break;
-				
+
 			case 's':
 				commands.push_back("--status");
 				// commands.push_back(" ");
 				break;
-				
+
 			case 'X':
 				commands.push_back("--exit");
 				// commands.push_back(" ");
 				break;
-				
+
 			case 'x':
 				commands.push_back("--disconnect");
 				// commands.push_back(" ");
 				break;
-				
+
 			case '?':
 				show_usage(argv[0]);
 				break;
-				
+
 			default:
 				printf("?? getopt returned character code 0%o ??\n", c);
 		}
@@ -166,13 +166,13 @@ int main( int argc, char** argv ) {
 			printf("%s ", argv[optind++]);
 		printf("\n");
 	}
-	
+
 	cout<<"*******************************"<<endl;
 	cout<<"Artesky srv: "<<hostName<<endl;
 	cout<<"Device: "<<device<<endl;
 	cout<<"==============================="<<endl;
 	int rc = send_cmd(hostName, commands);
-	
+
 	exit(EXIT_SUCCESS);
 }
 
@@ -182,16 +182,16 @@ int send_cmd( std::string host, std::vector<std::string> cmd ) {
 	const char *hostName = host.c_str();
 	char buffer[256];
 	portno = 5570;
-	
+
 	// socket function which return the file descriptor which we will further bind or connect to address of the host machine or server .
 	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0)
-		error("ERROR opening socket");
-	
+		error("ERROR opening socket", sockfd);
+
 	// here we search the host machine by their name (i.e called hostName).
-	// on linux we find out host name by command – hostname
-	// on window we find out the host name by command – ipconfig/all
-	
+	// on linux we find out host name by command â€ hostname
+	// on window we find out the host name by command â€ ipconfig/all
+
 	server = gethostbyname(hostName);
 	if (server == NULL) {
 		fprintf(stderr, "ERROR, no such host\n");
@@ -203,11 +203,12 @@ int send_cmd( std::string host, std::vector<std::string> cmd ) {
 		  (char *) &serv_addr.sin_addr.s_addr,
 		  server->h_length);
 	serv_addr.sin_port = htons(portno);
-	
+
 	// here we connect to thefile descriptor  with socket address
-	if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
-		error("ERROR connecting");
-	
+	int con_err = connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
+	if ( con_err < 0)
+		error("ERROR connecting", con_err);
+
 	cout<<"Found: ";
 	vector<string>::iterator it;  // declare an iterator to a vector of strings
 	int i=1;
@@ -218,7 +219,7 @@ int send_cmd( std::string host, std::vector<std::string> cmd ) {
 	//read or write function is used for the writing or reading the message in the socket stream.
 	std::string msg;
 	std::vector<string>::iterator it_s;  // declare an iterator to a vector of strings
-	
+
 	for(it_s = cmd.begin(); it_s != cmd.end(); it_s++) {
 		msg+=*it_s;
 		msg+=" ";
@@ -227,25 +228,24 @@ int send_cmd( std::string host, std::vector<std::string> cmd ) {
 	if(msg.length()>0)
 		msg.pop_back();
 	//msg+="\n";
-	
+
 	//  msg = accumulate(begin(cmd), end(cmd), msg);
 	cout<<"Sending: \'"<<msg<<"\'"<<endl;
-	
-	rc = write(sockfd, msg.data(), msg.size());
+
+	int rc = write(sockfd, msg.data(), msg.size());
 	if (rc < 0)
-		error("ERROR writing to socket");
+		error("ERROR writing to socket", rc);
 	bzero(buffer, 256);
 	rc = read(sockfd, buffer, 255);
 	if (rc < 0)
-		error("ERROR reading from socket");
+		error("ERROR reading from socket", rc);
 	printf("%s\n", buffer);
-	
+
 	close(sockfd);
 	return 0;
-	
 }
 
-void error(const char * msg) {
+void error(const char * msg, int rc) {
 	perror(msg);
-	exit(0);
+	exit(rc);
 }

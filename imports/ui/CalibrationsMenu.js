@@ -20,7 +20,24 @@ import React, { Component } from 'react';
 //import ReactDOM from 'react-dom';
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
-import { Checkbox, Confirm, Input, Icon, Grid, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
+import {
+  Checkbox,
+  Confirm,
+  Input,
+  Icon,
+  Grid,
+  Dropdown,
+  Label,
+  Table,
+  Menu,
+  Segment,
+  Button,
+  Progress,
+  Modal,
+  Form,
+  Radio,
+  Accordion,
+} from 'semantic-ui-react'
 
 import {
   tsx_ServerStates,
@@ -61,6 +78,8 @@ class CalibrationsMenu extends Component {
       tool_flats_dec_az: '',
 
       flatbox_enabled: false,
+      flatbox_ip: '127.0.0.1',
+      activeIndex: 1,
     };
   }
 
@@ -71,6 +90,15 @@ class CalibrationsMenu extends Component {
   closeModalCalibrationSettings() {
     this.setState({showModalCalibrationSettings: false });
   }
+
+  // used for Accordion
+  handleClick = (e, titleProps) => {
+   const { index } = titleProps
+   const { activeIndex } = this.state
+   const newIndex = activeIndex === index ? -1 : index
+
+   this.setState({ activeIndex: newIndex })
+ }
 
   // used for the modal exposure settings for flats
   handleStateChange = (e, { name, value }) => {
@@ -120,14 +148,17 @@ class CalibrationsMenu extends Component {
         flatbox_enabled: nextProps.tsxInfo.find(function(element) {
           return element.name == 'flatbox_enabled';
       }).value});
+      this.setState({
+        flatbox_ip: nextProps.tsxInfo.find(function(element) {
+          return element.name == 'flatbox_ip';
+      }).value});
     }
 
   }
 
   playButton() {
     // obtain calibration targetSession
-    console.log( ' Number of calibration targets found: ' + targets.length );
-    Meteor.call( 'processCalibrationTargets', targets, function(error, result) {
+    Meteor.call( 'processCalibrationTargets', function(error, result) {
       console.log('result: ' + result);
     }.bind(this));
   }
@@ -142,7 +173,7 @@ class CalibrationsMenu extends Component {
     }.bind(this));
   }
 
-  calibrationSettingsTools(
+  renderCalibrationMountPosition(
       state
     , active
     , flatSlewType
@@ -196,7 +227,7 @@ class CalibrationsMenu extends Component {
     )
   }
 
-  calibrationTools(
+  renderCalibrationControls(
     state
     , active
     ) {
@@ -223,18 +254,6 @@ class CalibrationsMenu extends Component {
 
   addCalibration() {
     var out = addCalibrationFrame();
-    // const id  = CalibrationFrames.insert(
-    //   {
-    //     subFrameTypes: "Flat",
-    //     filter: "",
-    //     exposure: 0,
-    //     quantity: 0,
-    //     level: 0,
-    //     rotation: "",
-    //     order: 0,
-    //     binning: 1,
-    //   }
-    // );
   }
 
   stopButton() {
@@ -266,7 +285,7 @@ class CalibrationsMenu extends Component {
     this.render();
   }
 
-  calibrationSettings() {
+  renderCalibrationButtonBar() {
     let DISABLED = true;
 
     if( this.props.scheduler_running.value == 'Stop'  && this.props.tool_active.value == false ){
@@ -293,7 +312,7 @@ class CalibrationsMenu extends Component {
         <Modal.Content>
         <Segment secondary >
           <Segment raised>
-            {this.calibrationSettingsTools(
+            {this.renderCalibrationMountPosition(
               this.props.scheduler_running.value
               , this.props.tool_active.value
               , this.state.tool_flats_via
@@ -319,6 +338,51 @@ class CalibrationsMenu extends Component {
     }
   }
 
+  renderCalibrationFlaxboxSettings() {
+    const { activeIndex } = this.state;
+    const eFlatbox = 0;
+
+    // if flatbox enabled
+    // if rotator enabled?
+    // enable rotation?
+    /*
+    validations={{
+      matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+    }}
+    validationError="Must be a positive number, e.g 1, .7, 1.1"
+    errorLabel={ ERRORLABEL }
+
+    content='Artesky Flatbox Setup'
+
+
+    */
+
+    if( this.state.flatbox_enabled == true ) {
+        return (
+          <Accordion styled>
+          <Accordion.Title
+            active={activeIndex === eFlatbox}
+            index={eFlatbox}
+            onClick={this.handleClick}
+            content='Artesky Flatbox Setup'
+            />
+          <Accordion.Content  active={activeIndex === eFlatbox} >
+          <Form>
+
+          <Form.Input
+            label='Connect IP '
+            name='flatbox_ip'
+            placeholder='127.0.0.1'
+            value={this.state.flatbox_ip}
+            onChange={this.handleStateChange}
+          />
+          </Form>
+
+        </Accordion.Content>
+        </Accordion>
+      )
+    }
+  }
   render() {
 
     return (
@@ -329,12 +393,13 @@ class CalibrationsMenu extends Component {
            <Table.Header>
              <Table.Row >
               <Table.HeaderCell colSpan='7'  >
-              {this.calibrationTools(
+              {this.renderCalibrationControls(
                 this.props.scheduler_running
                 , this.props.tool_active
               )}
-              { this.calibrationSettings() }
-              {this.renderModalCalibrationSettings()}
+              { this.renderCalibrationButtonBar() }
+              { this.renderCalibrationFlaxboxSettings() }
+              { this.renderModalCalibrationSettings()}
               </Table.HeaderCell>
              </Table.Row>
              <Table.Row>

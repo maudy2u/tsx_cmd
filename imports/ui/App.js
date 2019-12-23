@@ -749,7 +749,7 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
         <Button icon='cloud download' onClick={this.modalOpenBackup}/>
         <Button icon='detective' onClick={this.modalOpenSessionsControls}/>
         <Button icon='chart bar' onClick={this.modalShowTargetReport}/>
-        <Button disabled={DISABLE} icon='wifi' onClick={this.connectToTSX.bind(this)}/>
+        <Button disabled={DISABLE} icon='plug' onClick={this.connectToTSX.bind(this)}/>
         <Button disabled={DISABLE} icon='car' onClick={this.park.bind(this)}/>
       </Button.Group>
     )

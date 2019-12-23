@@ -28,6 +28,7 @@ import {
   Segment,
   Button,
   Progress,
+  Accordion,
 } from 'semantic-ui-react'
 
 import {
@@ -55,6 +56,10 @@ import {
   // tsx_GetServerState,
 } from  '../api/serverStates.js';
 
+import {
+  renderDropDownFilters,
+} from '../api/filters.js'
+
 import ReactSimpleRange from 'react-simple-range';
 import Timekeeper from 'react-timekeeper';
 
@@ -64,6 +69,17 @@ const XRegExpNonZeroPosInt = XRegExp('^([1-9]\\d*)$');
 const XRegExpZeroOrPosInt = XRegExp('^(\\d|[1-9]\\d*)$');
 const XRegExpZeroToNine = XRegExp('^\\d$');
 
+const ERRORLABEL = <Label color="red" pointing/>
+
+const eDefaultConstrainsts = 0;
+const eStartStop = 1;
+const eClouds = 2;
+const eGuider = 3;
+const eFocuser =4;
+const eFilterWheel = 5;
+const eRotator = 6;
+const eCamera =7;
+const eMount = 8;
 
 // App component - represents the whole app
 class DefaultSettings extends Component {
@@ -102,8 +118,17 @@ class DefaultSettings extends Component {
       defaultCLSRetries: 1,
       defaultCLSRepeat: 3600,
       calibrationFrameSize: 100,
+
+      activeIndex: 0,
     };
-  // }
+
+  handleClick = (e, titleProps) => {
+     const { index } = titleProps
+     const { activeIndex } = this.state
+     const newIndex = activeIndex === index ? -1 : index
+
+     this.setState({ activeIndex: newIndex })
+  }
 
   // requires the ".bind(this)", on the callers
   handleToggle = (e, { name, value }) => {
@@ -159,21 +184,6 @@ class DefaultSettings extends Component {
 
   componentDidMount() {
     this.updateDefaults(this.props);
-  }
-
-  getDefault( name ) {
-    var found;
-    var result;
-    try {
-      found = this.props.tsxInfo.find(function(element) {
-        return element.name == name;
-      });
-      result = found.value;
-    } catch (e) {
-      result = '';
-    } finally {
-      return result;
-    }
   }
 
   // Generic Method to determine default to save.
@@ -290,6 +300,12 @@ class DefaultSettings extends Component {
         return element.name == 'calibrationFrameSize';
       }).value,
 
+      flatbox_enabled: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'flatbox_enabled';
+      }).value,
+      flatbox_ip: nextProps.tsxInfo.find(function(element) {
+        return element.name == 'flatbox_ip';
+      }).value,
     });
 
   }
@@ -329,19 +345,452 @@ class DefaultSettings extends Component {
     this.saveDefaultState('defaultCLSRetries');
     this.saveDefaultState('defaultCLSRepeat');
     this.saveDefaultState('calibrationFrameSize');
-
+    this.saveDefaultState('flatbox_enabled');
+    this.saveDefaultState('flatbox_ip');
   }
 
-  getDropDownFilters( pFilters ) {
+  // *******************************
+  //
+  renderConstraints() {
+    const { activeIndex } = this.state
 
-    var filterArray = [];
-    for (var i = 0; i < pFilters.length; i++) {
-      filterArray.push({
-        key: this.props.filters[i]._id,
-        text: this.props.filters[i].name,
-        value: this.props.filters[i].name });
+    return (
+      <div>
+      <Accordion.Title
+        active={activeIndex === eDefaultConstrainsts}
+        content='Default Constraints'
+        index={eDefaultConstrainsts}
+        onClick={this.handleClick}
+        />
+      <Accordion.Content  active={activeIndex === eDefaultConstrainsts} >
+      <div>
+      <h4 className="ui header">Priority: {this.state.defaultPriority}</h4>
+      <ReactSimpleRange
+        label
+        step={1}
+        min={1}
+        max={19}
+        value={Number(this.state.defaultPriority)}
+        sliderSize={12}
+        thumbSize={18}
+        onChange={this.handlePriorityChange}
+      />
+      <Form>
+      <Form.Input
+        label='Twilight Altitude for Sun '
+        name='defaultMinSunAlt'
+        placeholder='Enter negative degrees below horizon'
+        value={this.state.defaultMinSunAlt}
+        onChange={this.handleChange}
+        validations="isNumeric"
+        validationErrors={{ isNumeric: 'Must be a number' }}
+        errorLabel={ ERRORLABEL }
+      />
+      <Form.Input
+        label='Minimum Altitude '
+        name='defaultMinAlt'
+        placeholder='Enter Minimum Altitude to start/stop'
+        value={this.state.defaultMinAlt}
+        onChange={this.handleChange}
+        validations={{
+          matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+        }}
+        validationError="Must be a positive number, e.g 45, 43.7, 1.1"
+        errorLabel={ ERRORLABEL }
+      />
+      </Form>
+      </div>
+    </Accordion.Content>
+    </div>
+    )
+  }
+
+  renderStartStopTimes() {
+    var startT = `${this.state.defaultStartTime}`
+    var stopT = `${this.state.defaultStopTime}`
+    const { activeIndex } = this.state
+
+    return (
+      <div>
+      <Accordion.Title
+        active={activeIndex === eStartStop}
+        content='Default Start/Stop Times'
+        index={eStartStop}
+        onClick={this.handleClick}
+        />
+      <Accordion.Content  active={activeIndex === eStartStop} >
+      <div>
+        <Segment raised>
+           <h4 className="ui header">Set Default START time</h4>
+           <Timekeeper
+             time={this.state.defaultStartTime}
+             value={startT}
+             onChange={this.handleStartChange}
+           />
+         </Segment>
+         <Segment raised>
+           <h4 className="ui header">Set Default STOP time</h4>
+           {/* <DateTime />pickerOptions={{format:"LL"}} value="2017-04-20"/> */}
+           <Timekeeper
+             time={this.state.defaultStopTime}
+             value={stopT}
+             onChange={this.handleStopChange}
+           />
+         </Segment>
+         </div>
+      </Accordion.Content>
+      </div>
+    )
+  }
+
+  renderMount() {
+    const { activeIndex } = this.state
+
+    return (
+      <div>
+      <Accordion.Title
+        active={activeIndex === eMount}
+        content='Mount'
+        index={eMount}
+        onClick={this.handleClick}
+        />
+      <Accordion.Content active={activeIndex === eMount} >
+        <Form>
+        <Form.Input
+          label='Focal Length: '
+          name='imagingFocalLength'
+          placeholder='i.e. focal length in mm of OTA'
+          value={this.state.imagingFocalLength}
+          onChange={this.handleChange}
+          validations={{
+            matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+          }}
+          validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
+          errorLabel={ ERRORLABEL }
+        />
+        <Form.Input
+          label='Dithering Minimum Pixel Move '
+          name='minDitherFactor'
+          placeholder='Minimum number of pixels'
+          value={this.state.minDitherFactor}
+          onChange={this.handleChange}
+          validations={{
+            matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+          }}
+          validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
+          errorLabel={ ERRORLABEL }
+        />
+        <Form.Input
+          label='Dithering Maximum Pixel Move '
+          name='maxDitherFactor'
+          placeholder='Maximum number of pixels'
+          value={this.state.maxDitherFactor}
+          onChange={this.handleChange}
+          validations={{
+            matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+          }}
+          validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
+          errorLabel={ ERRORLABEL }
+        />
+        </Form>
+      </Accordion.Content>
+      </div>
+    )
+  }
+
+  renderRotator() {
+    const { activeIndex } = this.state
+
+    return (
+      <div>
+      <Accordion.Title
+        active={activeIndex === eRotator}
+        content='Mount'
+        index={eRotator}
+        onClick={this.handleClick}
+        />
+      <Accordion.Content active={activeIndex === eRotator} >
+        <Form>
+          <Form.Input
+            label='FOV Angle Tolerance '
+            name='fovPositionAngleTolerance'
+            placeholder='e.g. 0.5 (zero disables)'
+            value={this.state.fovPositionAngleTolerance}
+            onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be a positive number, e.g 1, .7, 1.1"
+            errorLabel={ ERRORLABEL }
+          />
+          <Form.Input
+            label='FOV Angle Exposure '
+            name='defaultFOVExposure'
+            placeholder='Enter number seconds'
+            value={this.state.defaultFOVExposure}
+            onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be a positive number, e.g 1, .7, 1.1"
+            errorLabel={ ERRORLABEL }
+          />
+        </Form>
+      </Accordion.Content>
+      </div>
+    )
+  }
+
+  renderGuider() {
+    const { activeIndex } = this.state
+
+    return (
+      <div>
+      <Accordion.Title
+        active={activeIndex === eGuider}
+        content='Guider'
+        index={eGuider}
+        onClick={this.handleClick}
+        />
+      <Accordion.Content  active={activeIndex === eGuider} >
+        <Form>
+        <Form.Input
+          label='Guide Camera Pixel Size: '
+          name='guiderPixelSize'
+          placeholder='i.e. guider pixel scale'
+          value={this.state.guiderPixelSize}
+          onChange={this.handleChange}
+          validations={{
+            matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+          }}
+          validationError="Must be a positive number, e.g 1, .7, 1.1"
+          errorLabel={ ERRORLABEL }
+        />
+          <Form.Input
+            label='Guiding Tolerance '
+            name='guidingPixelErrorTolerance'
+            placeholder='i.e. pixel scale to settle before starting image'
+            value={this.state.guidingPixelErrorTolerance}
+            onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be a positive number, e.g 1, .7, 1.1"
+            errorLabel={ ERRORLABEL }
+          />
+          <Form.Input
+            label='AutoGuider Exposure '
+            name='defaultGuideExposure'
+            placeholder='Enter number seconds'
+            value={this.state.defaultGuideExposure}
+            onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be a positive number, e.g 1, .7, 1.1"
+            errorLabel={ ERRORLABEL }
+          />
+          <Form.Input
+            label='Calibration Frame '
+            name='calibrationFrameSize'
+            placeholder='Frame size (pixels) '
+            value={this.state.calibrationFrameSize}
+            onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
+            errorLabel={ ERRORLABEL }
+          />
+          </Form>
+      </Accordion.Content>
+      </div>
+    )
+  }
+
+  renderFilterWheel() {
+    const { activeIndex } = this.state;
+
+    let aFilters = '';
+    let FILTERS = '';
+    let numFilters = '';
+    try {
+      numFilters = this.props.filters.length
+      aFilters = this.props.filters;
+      FILTERS = renderDropDownFilters( aFilters );
     }
-    return filterArray;
+    catch ( e ) {
+      FILTERS = [];
+    }
+
+    return (
+      <div>
+      <Accordion.Title
+        active={activeIndex === eFilterWheel}
+        content='Filter Wheel'
+        index={eFilterWheel}
+        onClick={this.handleClick}
+        />
+      <Accordion.Content  active={activeIndex === eFilterWheel} >
+        <Form>
+        <Form.Field control={Dropdown}
+          fluid
+          label='Default Filter'
+          name='defaultFilter'
+          options={FILTERS}
+          placeholder='Used CLS and Focusing'
+          text={this.state.defaultFilter}
+          onChange={this.handleChange}
+        />
+        </Form>
+      </Accordion.Content>
+      </div>
+    )
+  }
+
+  renderImager() {
+    const { activeIndex } = this.state;
+
+    return (
+      <div>
+      <Accordion.Title
+        active={activeIndex === eCamera}
+        content='Imaging Camera'
+        index={eCamera}
+        onClick={this.handleClick}
+        />
+      <Accordion.Content  active={activeIndex === eCamera} >
+      <Form>
+      <Form.Input
+        label='Image Camera Pixel Size: '
+        name='imagingPixelSize'
+        placeholder='i.e. image scale for dithering, and angle match'
+        value={this.state.imagingPixelSize}
+        onChange={this.handleChange}
+        validations={{
+          matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+        }}
+        validationError="Must be a positive number, e.g 1, .7, 1.1"
+        errorLabel={ ERRORLABEL }
+      />
+      </Form>
+      </Accordion.Content>
+      </div>
+    )
+  }
+
+  renderFocuser() {
+    const { activeIndex } = this.state;
+
+    return (
+      <div>
+      <Accordion.Title
+        active={activeIndex === eFocuser}
+        content='Focuser'
+        index={eFocuser}
+        onClick={this.handleClick}
+        />
+      <Accordion.Content  active={activeIndex === eFocuser} >
+        <Form>
+
+          <Form.Input
+            label='Starting Focusing Exposure '
+            name='defaultFocusExposure'
+            placeholder='Enter seconds'
+            value={this.state.defaultFocusExposure}
+            onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be a positive number, e.g 1, .7, 1.1"
+            errorLabel={ ERRORLABEL }
+          />
+        <Form.Input
+          label='Focus Temp Tolerance '
+          name='defaultFocusTempDiff'
+          placeholder='Temp diff to run auto focus'
+          value={this.state.defaultFocusTempDiff}
+          onChange={this.handleChange}
+          validations={{
+            matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+          }}
+          validationError="Must be a positive number, e.g 1, .7, 1.1"
+          errorLabel={ ERRORLABEL }
+        />
+        <Form.Input
+          label='@Focus3 samples '
+          name='focus2Samples'
+          placeholder='Number of samples to take'
+          value={this.state.focus3Samples}
+          onChange={this.handleChange}
+          validations={{
+            matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+          }}
+          validationError="Must be a positive number, e.g 1, 2, 3, 5..."
+          errorLabel={ ERRORLABEL }
+        />
+        </Form>
+      </Accordion.Content>
+    </div>
+    )
+  }
+
+  renderClouds() {
+    const { activeIndex } = this.state;
+
+    return (
+      <div>
+      <Accordion.Title
+        active={activeIndex === eClouds}
+        content='Clouds'
+        index={eClouds}
+        onClick={this.handleClick}
+        />
+      <Accordion.Content  active={activeIndex === eClouds} >
+      <Form>
+
+      <Form.Input
+        label='Minutes to sleep when no target '
+        name='defaultSleepTime'
+        placeholder='Minutes to sleep'
+        value={this.state.defaultSleepTime}
+        onChange={this.handleChange}
+        validations={{
+          matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+        }}
+        validationError="Must be a positive number, e.g 1, .7, 1.1"
+        errorLabel={ ERRORLABEL }
+      />
+        <Form.Input
+          label='CloseLoopSlew Retries  '
+          name='defaultCLSRetries'
+          placeholder='Number of CLS retries - think cloud checking'
+          value={this.state.defaultCLSRetries}
+          onChange={this.handleChange}
+          validations={{
+            matchRegexp: XRegExpZeroToNine, // https://github.com/slevithan/xregexp#unicode
+          }}
+          validationError="Must be between 0-9"
+          errorLabel={ ERRORLABEL }
+        />
+        <Form.Input
+          label='CloseLoopSlew Redo  '
+          name='defaultCLSRepeat'
+          placeholder='Number seconds before CLS redo - think cloud checking'
+          value={this.state.defaultCLSRepeat}
+          onChange={this.handleChange}
+          validations={{
+            matchRegexp: XRegExpZeroOrPosInt, // https://github.com/slevithan/xregexp#unicode
+          }}
+          validationError="Must be a positive number, e.g 0, 5, 1800, 3600"
+          errorLabel={ ERRORLABEL }
+        />
+
+      </Form>
+
+    </Accordion.Content>
+    </div>
+    )
   }
 
   // *******************************
@@ -354,315 +803,26 @@ class DefaultSettings extends Component {
       // icons: time,
       // minDate: new Date(),
     };
-    let aFilters = '';
-    let FILTERS = '';
-    let numFilters = '';
-    try {
-      numFilters = this.props.filters.length
-      aFilters = this.props.filters;
-      FILTERS = this.getDropDownFilters( aFilters );
-    }
-    catch ( e ) {
-      FILTERS = [];
-    }
-
-    var startT = `${this.state.defaultStartTime}`
-    var stopT = `${this.state.defaultStopTime}`
-
     // const handleToggle = () => this.handleToggle;
-    const ERRORLABEL = <Label color="red" pointing/>
 
     return (
-      <Form>
-        <Segment>
-          <Button icon='save' onClick={this.saveDefaults.bind(this)} />
-          {/* <Button icon='save' onClick={this.saveTSXServerConnection.bind(this)}> Save Connection </Button>
-          {this.renderTSXConnetion()} */}
-        </Segment>
-        <Segment raised>
-          <h3 className="ui header">Defaults</h3>
-          <Form.Group>
-            <Form.Field control={Dropdown}
-              fluid
-              label='Default Filter'
-              name='defaultFilter'
-              options={FILTERS}
-              placeholder='Used CLS and Focusing'
-              text={this.state.defaultFilter}
-              onChange={this.handleChange}
-            />
-          </Form.Group>
-        </Segment>
-        <Segment raised>
-          <Form.Group>
-            <Form.Input
-              label='Twilight Altitude for Sun '
-              name='defaultMinSunAlt'
-              placeholder='Enter negative degrees below horizon'
-              value={this.state.defaultMinSunAlt}
-              onChange={this.handleChange}
-              validations="isNumeric"
-              validationErrors={{ isNumeric: 'Must be a number' }}
-              errorLabel={ ERRORLABEL }
-            />
-            <Form.Input
-              label='Minimum Altitude '
-              name='defaultMinAlt'
-              placeholder='Enter Minimum Altitude to start/stop'
-              value={this.state.defaultMinAlt}
-              onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 45, 43.7, 1.1"
-              errorLabel={ ERRORLABEL }
-            />
-            <Form.Input
-              label='Minutes to sleep when no target '
-              name='defaultSleepTime'
-              placeholder='Minutes to sleep'
-              value={this.state.defaultSleepTime}
-              onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 1, .7, 1.1"
-              errorLabel={ ERRORLABEL }
-            />
-          </Form.Group>
-        </Segment>
-        <Segment raised>
-          <Form.Group>
-            <Form.Input
-              label='Guide Camera Pixel Size: '
-              name='guiderPixelSize'
-              placeholder='i.e. guider pixel scale'
-              value={this.state.guiderPixelSize}
-              onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 1, .7, 1.1"
-              errorLabel={ ERRORLABEL }
-            />
-            <Form.Input
-              label='Image Camera Pixel Size: '
-              name='imagingPixelSize'
-              placeholder='i.e. image scale for dithering, and angle match'
-              value={this.state.imagingPixelSize}
-              onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 1, .7, 1.1"
-              errorLabel={ ERRORLABEL }
-            />
-            <Form.Input
-              label='Focal Length: '
-              name='imagingFocalLength'
-              placeholder='i.e. focal length in mm of OTA'
-              value={this.state.imagingFocalLength}
-              onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
-              errorLabel={ ERRORLABEL }
-            />
-          </Form.Group>
-        </Segment>
-        <Segment raised>
-          <Form.Group>
-            <Form.Input
-              label='Guiding Tolerance '
-              name='guidingPixelErrorTolerance'
-              placeholder='i.e. pixel scale to settle before starting image'
-              value={this.state.guidingPixelErrorTolerance}
-              onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 1, .7, 1.1"
-              errorLabel={ ERRORLABEL }
-            />
-            <Form.Input
-              label='FOV Angle Tolerance '
-              name='fovPositionAngleTolerance'
-              placeholder='e.g. 0.5 (zero disables)'
-              value={this.state.fovPositionAngleTolerance}
-              onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 1, .7, 1.1"
-              errorLabel={ ERRORLABEL }
-            />
-            <Form.Input
-              label='Focus Temp Tolerance '
-              name='defaultFocusTempDiff'
-              placeholder='Temp diff to run auto focus'
-              value={this.state.defaultFocusTempDiff}
-              onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 1, .7, 1.1"
-              errorLabel={ ERRORLABEL }
-            />
-            <Form.Input
-              label='@Focus3 samples '
-              name='focus2Samples'
-              placeholder='Number of samples to take'
-              value={this.state.focus3Samples}
-              onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 1, 2, 3, 5..."
-              errorLabel={ ERRORLABEL }
-            />
-            <Form.Input
-              label='Calibration Frame '
-              name='calibrationFrameSize'
-              placeholder='Frame size (pixels) '
-              value={this.state.calibrationFrameSize}
-              onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
-              errorLabel={ ERRORLABEL }
-            />
-          </Form.Group>
-        </Segment>
-        <Segment raised>
-          <Form.Group>
-            <Form.Input
-              label='AutoGuider Exposure '
-              name='defaultGuideExposure'
-              placeholder='Enter number seconds'
-              value={this.state.defaultGuideExposure}
-              onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 1, .7, 1.1"
-              errorLabel={ ERRORLABEL }
-            />
-            <Form.Input
-              label='Starting Focusing Exposure '
-              name='defaultFocusExposure'
-              placeholder='Enter seconds'
-              value={this.state.defaultFocusExposure}
-              onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 1, .7, 1.1"
-              errorLabel={ ERRORLABEL }
-            />
-            <Form.Input
-              label='FOV Angle Exposure '
-              name='defaultFOVExposure'
-              placeholder='Enter number seconds'
-              value={this.state.defaultFOVExposure}
-              onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 1, .7, 1.1"
-              errorLabel={ ERRORLABEL }
-            />
-          </Form.Group>
-        </Segment>
-        <Segment raised>
-          <Form.Group>
-            <Form.Input
-              label='Dithering Minimum Pixel Move '
-              name='minDitherFactor'
-              placeholder='Minimum number of pixels'
-              value={this.state.minDitherFactor}
-              onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
-              errorLabel={ ERRORLABEL }
-            />
-            <Form.Input
-              label='Dithering Maximum Pixel Move '
-              name='maxDitherFactor'
-              placeholder='Maximum number of pixels'
-              value={this.state.maxDitherFactor}
-              onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
-              errorLabel={ ERRORLABEL }
-            />
-          </Form.Group>
-        </Segment>
-        <Segment raised>
-          <Form.Group>
-            <Form.Input
-              label='CloseLoopSlew Retries  '
-              name='defaultCLSRetries'
-              placeholder='Number of CLS retries - think cloud checking'
-              value={this.state.defaultCLSRetries}
-              onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpZeroToNine, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be between 0-9"
-              errorLabel={ ERRORLABEL }
-            />
-            <Form.Input
-              label='CloseLoopSlew Redo  '
-              name='defaultCLSRepeat'
-              placeholder='Number seconds before CLS redo - think cloud checking'
-              value={this.state.defaultCLSRepeat}
-              onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpZeroOrPosInt, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 0, 5, 1800, 3600"
-              errorLabel={ ERRORLABEL }
-            />
-          </Form.Group>
-        </Segment>
-        <Segment raised>
-            <h4 className="ui header">Priority: {this.state.defaultPriority}</h4>
-            <ReactSimpleRange
-              label
-              step={1}
-              min={1}
-              max={19}
-              value={Number(this.state.defaultPriority)}
-              sliderSize={12}
-              thumbSize={18}
-              onChange={this.handlePriorityChange}
-            />
-        </Segment>
-        <Segment raised>
-            <h4 className="ui header">Set Default START time</h4>
-            <Timekeeper
-              time={this.state.defaultStartTime}
-              value={startT}
-              onChange={this.handleStartChange}
-            />
-          </Segment>
-          <Segment raised>
-            <h4 className="ui header">Set Default STOP time</h4>
-            {/* <DateTime />pickerOptions={{format:"LL"}} value="2017-04-20"/> */}
-            <Timekeeper
-              time={this.state.defaultStopTime}
-              value={stopT}
-              onChange={this.handleStopChange}
-            />
-          </Segment>
-    </Form>
+      <div>
+        <Button icon='save' onClick={this.saveDefaults.bind(this)} />
+        {/* <Button icon='save' onClick={this.saveTSXServerConnection.bind(this)}> Save Connection </Button>
+        {this.renderTSXConnetion()} */}
+        <Accordion styled>
+          {this.renderConstraints()}
+          {this.renderStartStopTimes()}
+          {this.renderClouds()}
+          {this.renderGuider()}
+          {this.renderFocuser()}
+          {this.renderFilterWheel()}
+          {this.renderRotator()}
+          {this.renderImager()}
+          {this.renderMount()}
 
+      </Accordion>
+    </div>
     );
   }
 }

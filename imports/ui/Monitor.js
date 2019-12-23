@@ -23,7 +23,13 @@ import { Session } from 'meteor/session'
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { Grid, TextArea, Divider, Confirm, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
+import {
+  Accordion,
+  Grid,
+  TextArea,
+  Divider,
+  Confirm,
+  Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
 
 import {
   tsx_ServerStates,
@@ -84,7 +90,17 @@ class Monitor extends Component {
       isCLSRepeatEnabled: false,
       isCalibrationEnabled: false,
 
+      activeIndex: 0,
+
   };
+
+  handleClick = (e, titleProps) => {
+   const { index } = titleProps
+   const { activeIndex } = this.state
+   const newIndex = activeIndex === index ? -1 : index
+
+   this.setState({ activeIndex: newIndex })
+ }
 
   handleChange = (e, { name, value }) => this.setState({ [name]: value });
 
@@ -558,27 +574,42 @@ class Monitor extends Component {
       }
     }
 
+    const { activeIndex } = this.state
+
     return (
       <div>
+
         <Button.Group icon>
           {this.playButtons(RUNNING) }
         </Button.Group>
         <h1>{' ' + TARGETNAME}</h1>
+        <Accordion styled>
+            <Accordion.Title
+              active={activeIndex === 0}
+              content='Details'
+              index={0}
+              onClick={this.handleClick}
+              />
+            <Accordion.Content fluid active={activeIndex === 0} >
+              <Form unstackable>
+                <Form.Group>
+                <Label>Alt <Label.Detail>{Number(this.props.scheduler_report.value.ALT).toFixed(4)}</Label.Detail></Label>
+                <Label>Az <Label.Detail>{this.props.scheduler_report.value.AZ}</Label.Detail></Label>
+                <Label>RA <Label.Detail>{Number(this.props.scheduler_report.value.RA).toFixed(4)}</Label.Detail></Label>
+                <Label>DEC <Label.Detail>{Number(this.props.scheduler_report.value.DEC).toFixed(4)}</Label.Detail></Label>
+                <Label>Angle <Label.Detail>{Number(this.props.scheduler_report.value.ANGLE).toFixed(4)}</Label.Detail></Label>
+                </Form.Group>
+                <Form.Group>
+                <Label>HA <Label.Detail>{Number(this.props.scheduler_report.value.HA).toFixed(4)}</Label.Detail></Label>
+                <Label>Transit <Label.Detail>{Number(this.props.scheduler_report.value.TRANSIT).toFixed(4)}</Label.Detail></Label>
+                <Label>Pointing <Label.Detail>{this.props.scheduler_report.value.pointing}</Label.Detail></Label>
+                <Label>Focus Pos. <Label.Detail>{Number(this.props.scheduler_report.value.focusPostion).toFixed(4)}</Label.Detail></Label>
+                </Form.Group>
+              </Form>
+            </Accordion.Content>
+        </Accordion>
+        <br/>
         <Form unstackable>
-          <Form.Group>
-          <Label>Alt <Label.Detail>{Number(this.props.scheduler_report.value.ALT).toFixed(4)}</Label.Detail></Label>
-          <Label>Az <Label.Detail>{this.props.scheduler_report.value.AZ}</Label.Detail></Label>
-          <Label>RA <Label.Detail>{Number(this.props.scheduler_report.value.RA).toFixed(4)}</Label.Detail></Label>
-          <Label>DEC <Label.Detail>{Number(this.props.scheduler_report.value.DEC).toFixed(4)}</Label.Detail></Label>
-          <Label>Angle <Label.Detail>{Number(this.props.scheduler_report.value.ANGLE).toFixed(4)}</Label.Detail></Label>
-          </Form.Group>
-          <Form.Group>
-          <Label>HA <Label.Detail>{Number(this.props.scheduler_report.value.HA).toFixed(4)}</Label.Detail></Label>
-          <Label>Transit <Label.Detail>{Number(this.props.scheduler_report.value.TRANSIT).toFixed(4)}</Label.Detail></Label>
-          <Label>Pointing <Label.Detail>{this.props.scheduler_report.value.pointing}</Label.Detail></Label>
-          <Label>Focus Pos. <Label.Detail>{Number(this.props.scheduler_report.value.focusPostion).toFixed(4)}</Label.Detail></Label>
-          </Form.Group>
-          <br/>
           <Form.Group>
           <TextArea value={LOG} rows={3} style={{ minHeight: 200 }} />
           </Form.Group>

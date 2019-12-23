@@ -256,6 +256,7 @@ function startSchedulerProcess() {
         // *******************************
         UpdateStatus(" === Starting calibration targets");
           collect_calibration_images();
+        UpdateStatus(" === Finished calibration targets");
       }
       else {
         // *******************************
@@ -498,7 +499,7 @@ export function srvStopCalibrations() {
 
 Meteor.methods({
 
-  processCalibrationTargets( targets ) {
+  processCalibrationTargets( ) {
     if(
       getSchedulerState() == 'Running'
     ) {
