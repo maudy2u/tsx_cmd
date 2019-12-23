@@ -27,7 +27,7 @@ import { Logger }     from 'meteor/ostrio:logger';
 import { LoggerFile } from 'meteor/ostrio:loggerfile';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { Grid, Dimmer, Segment, Loader,
+import { Table, Grid, Dimmer, Segment, Loader,
 } from 'semantic-ui-react'
 
 // Import the API Model
@@ -183,15 +183,15 @@ class NightPlanner extends Component {
         }
 
         COL.push(
-          <Grid.Column key={j} color={colour}>
+          <Table.Cell textAlign={'center'} key={j} style={{ backgroundColor: colour, color: 'white'  }}>
               <small>{note}</small>
-          </Grid.Column>
+          </Table.Cell>
         );
       }
       Out.push(
-        <Grid.Row key={oName+i}>
+        <Table.Row key={oName+i}>
           {COL}
-        </Grid.Row>
+        </Table.Row>
       )
     }
     return Out;
@@ -360,9 +360,9 @@ class NightPlanner extends Component {
           // add in moonlight hour colouring...
           // i.e. if within the moonrise hours... make text Colours XXX
           planner.push(
-            <Grid.Column key={k} color={colour}>
+            <Table.HeaderCell textAlign={'center'} key={k} style={{ backgroundColor: colour, color: 'white'  }}>
                 <small>{note}</small>
-            </Grid.Column>
+            </Table.HeaderCell>
           );
         }
     }
@@ -396,9 +396,9 @@ class NightPlanner extends Component {
 
 
         planner.push(
-          <Grid.Column key={j} color={colour}>
+          <Table.HeaderCell textAlign={'center'} key={j} style={{ backgroundColor: colour, color: 'white' }}>
             <small>{note}</small>
-          </Grid.Column>
+          </Table.HeaderCell>
         );
       }
     }
@@ -408,12 +408,16 @@ class NightPlanner extends Component {
         <Dimmer active={this.props.planDataLoading}>
             <Loader size='small'>Loading</Loader>
         </Dimmer>
-        <Grid padded columns={planner.length}>
-          <Grid.Row>
-            {planner}
-          </Grid.Row>
+        <Table celled compact basic >
+          <Table.Header>
+            <Table.Row>
+              {planner}
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
           {this.renderTargetRow( PLAN, colHours )}
-        </Grid>
+          </Table.Body>
+        </Table>
         <center>
           <small><font color="black">Defaults: start time={STARTTIME}, end time={ENDTIME}<br/>Teal=Twilight, Blue=Moon, Green=Imaging</font><br/>
           </small>
