@@ -438,5 +438,5 @@ class CalibrationsMenu extends Component {
 }
 export default withTracker(() => {
   return {
-};
+  };
 })(CalibrationsMenu);

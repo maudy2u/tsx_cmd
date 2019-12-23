@@ -78,7 +78,7 @@ function updateTargetPlan( fid, name, value ) {
   }
 }
 
-class TargetPlan extends Component {
+class TargetConstraints extends Component {
 
   state = {
     name: '',
@@ -156,7 +156,7 @@ class TargetPlan extends Component {
     return (
       <Table.Row>
         <Table.Cell>
-          {this.props.targetPlan.name +': ' + this.props.targetPlan.description}
+          {this.props.targetPlan.targetFindName +': ' + this.props.targetPlan.description}
         </Table.Cell>
         <Table.Cell>
           <Input
@@ -216,4 +216,4 @@ class TargetPlan extends Component {
 export default withTracker(() => {
     return {
   };
-})(TargetPlan);
+})(TargetConstraints);

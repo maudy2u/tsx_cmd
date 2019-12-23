@@ -27,7 +27,15 @@ import { Logger }     from 'meteor/ostrio:logger';
 import { LoggerFile } from 'meteor/ostrio:loggerfile';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { Table, Grid, Dimmer, Segment, Loader,
+import {
+  Table,
+  Grid,
+  Dimmer,
+  Segment,
+  Loader,
+  Header,
+  Input,
+  Divider,
 } from 'semantic-ui-react'
 
 // Import the API Model
@@ -59,6 +67,12 @@ import {
   // tsx_GetServerState,
 } from  '../api/serverStates.js';
 
+import {
+  formatDate,
+} from '../api/time_utils.js'
+
+import TargetConstraints from './TargetConstraints.js'
+
 // App component - represents the whole app
 class NightPlanner extends Component {
 
@@ -66,10 +80,6 @@ class NightPlanner extends Component {
     super(props);
 
     this.state = {
-
-        defaultMeridianFlip: this.props.tsxInfo.find(function(element) {
-        return element.name == 'defaultMeridianFlip';}).value,
-
         planData: [],
         planDataLoading: true,
     };
@@ -243,7 +253,7 @@ class NightPlanner extends Component {
       'black', // dark
     ];
     */
-    let startHr=0, endHr=0,  bufHr = 1, cols=16;
+    let startHr=0, endHr=0,  bufHr = 1;
 
     try {
       startHr = Number(STARTTIME.split(':')[0].trim());
@@ -404,29 +414,125 @@ class NightPlanner extends Component {
     }
 
     return (
-      <Segment secondary>
-        <Dimmer active={this.props.planDataLoading}>
-            <Loader size='small'>Loading</Loader>
-        </Dimmer>
-        <Table celled compact basic >
+      <div>
+        <Segment secondary>
+          <Header>Night Plan - {formatDate(new Date())} </Header>
+          <center>
+            <small><font color="black">Defaults: start time={STARTTIME}, end time={ENDTIME}; Teal=Twilight, Blue=Moon, Green=Imaging</font><br/>
+            </small>
+          </center>
+          <Dimmer active={this.props.planDataLoading}>
+              <Loader size='small'>Click button next to Refresh Plan</Loader>
+          </Dimmer>
+          <Table celled compact basic unstackable>
+            <Table.Header>
+              <Table.Row>
+                {planner}
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+            {this.renderTargetRow( PLAN, colHours )}
+            </Table.Body>
+          </Table>
+        </Segment>
+        <Table celled compact basic unstackable>
           <Table.Header>
             <Table.Row>
-              {planner}
+              <Table.HeaderCell content={'Target'+' Description'}/>
+              <Table.HeaderCell content='Start'/>
+              <Table.HeaderCell content='Stop'/>
+              <Table.HeaderCell content='Alt.'/>
+              <Table.HeaderCell content='Priority'/>
+              <Table.HeaderCell content='Comment'/>
             </Table.Row>
           </Table.Header>
           <Table.Body>
-          {this.renderTargetRow( PLAN, colHours )}
+          {this.props.enabledtargets.map((obj)=>{
+            return (
+              <TargetConstraints
+                key={obj._id}
+                targetPlan={obj}
+              />
+            )
+          })}
           </Table.Body>
         </Table>
-        <center>
-          <small><font color="black">Defaults: start time={STARTTIME}, end time={ENDTIME}<br/>Teal=Twilight, Blue=Moon, Green=Imaging</font><br/>
-          </small>
-        </center>
-      </Segment>
+      </div>
     )
   }
 }
+
 export default withTracker(() => {
     return {
   };
 })(NightPlanner);
+
+/*
+
+{this.props.enabledtargets.map((obj)=>{
+  return (
+    <TargetConstraints
+      key={obj._id}
+      allTargets={this.props.enabledtargets}
+      thetarget={obj}
+    />
+  )
+})}
+
+
+<Table.Row key={obj._id}>
+  <Table.Cell>
+    {obj.name +': ' + obj.description}
+  </Table.Cell>
+  <Table.Cell>
+    <Input
+      fluid
+      size='mini'
+      name='startTime'
+      placeholder='0:00'
+      value={obj.startTime}
+      onChange={this.handleChange}
+    />
+  </Table.Cell>
+  <Table.Cell>
+    <Input
+      fluid
+      size='mini'
+      name='stopTime'
+      placeholder='0:00'
+      value={obj.stopTime}
+      onChange={this.handleChange}
+    />
+  </Table.Cell>
+  <Table.Cell>
+    <Input
+      fluid
+      size='mini'
+      name='priority'
+      placeholder='10'
+      value={obj.priority}
+      onChange={this.handleChange}
+    />
+  </Table.Cell>
+  <Table.Cell>
+    <Input
+      fluid
+      size='mini'
+      name='minAlt'
+      placeholder='45'
+      value={obj.minAlt}
+      onChange={this.handleChange}
+    />
+  </Table.Cell>
+  <Table.Cell>
+    <Input
+      fluid
+      size='mini'
+      name='comment'
+      placeholder='...'
+      value='...'
+      onChange={this.handleChange}
+    />
+  </Table.Cell>
+</Table.Row>
+ */

@@ -29,7 +29,7 @@ import { LoggerFile } from 'meteor/ostrio:loggerfile';
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { TextArea, Dimmer, Loader, Grid, Form, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Radio } from 'semantic-ui-react'
+import { Header, TextArea, Dimmer, Loader, Grid, Form, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Radio } from 'semantic-ui-react'
 
 // Import the API Model
 import {
@@ -73,6 +73,10 @@ import {
   UpdateStatus,
   // tsx_GetServerState,
 } from  '../api/serverStates.js';
+
+import {
+  formatDate,
+} from '../api/time_utils.js'
 
 import ReactSimpleRange from 'react-simple-range';
 import Timekeeper from 'react-timekeeper';
@@ -398,6 +402,9 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           <Menu.Item fitted name='Monitor' active={activeMenu === 'Monitor'} onClick={this.handleMenuItemClick}>
             <Icon name='eye' size='large' />
           </Menu.Item>
+          <Menu.Item fitted name='Plan' active={activeMenu === 'Plan'} onClick={this.handleMenuItemClick}>
+            <Icon name='tasks' size='large' />
+          </Menu.Item>
           <Menu.Item fitted name='Targets' active={activeMenu === 'Targets'} onClick={this.handleMenuItemClick}>
             <Icon name='target' size='large' />
           </Menu.Item>
@@ -450,6 +457,20 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
             scheduler_running={this.props.scheduler_running}
             srvLog={this.props.srvLog}
             tool_active = {this.props.tool_active}
+          />
+        </div>
+      )
+    } else if (this.state.activeMenu == 'Plan' ) {
+      return (
+        <div>
+          <Button icon='refresh' onClick={this.loadPlanData.bind(this)} label='Refresh Plan'/>
+          <NightPlanner
+            enabledtargets={this.props.enabledTargetSessions}
+            night_plan_updating = {this.props.night_plan_updating}
+            planDataLoading = {this.state.planDataLoading}
+            planDataLoaded = {this.planDataLoaded}
+            night_plan = {this.props.night_plan}
+            tsxInfo= {this.props.tsxInfo}
           />
         </div>
       )
@@ -688,25 +709,7 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
     }
   }
 
-  formatDate( today ) {
-    // desired format:
-    // 2018-01-01 hh:mm:ss
-
-    var HH = today.getHours();
-    var MM = today.getMinutes();
-    var SS = today.getSeconds();
-    var mm = today.getMonth()+1; // month is zero based
-    var dd = today.getDate();
-    var yyyy = today.getFullYear();
-
-    return yyyy +'-'+ ('0'  + mm).slice(-2) +'-'+ ('0'  + dd).slice(-2);
-    // + ',  '
-    // + ('0'  + HH).slice(-2) + ':'
-    // + ('0'  + MM).slice(-2) + ':'
-    // + ('0'  + SS).slice(-2);
-  }
-
-  renderTargetReport( night_plans ) {
+  renderTargetReportModal( night_plans ) {
 
     // Night Plan for 2019-02-04
 
@@ -716,7 +719,7 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
       onClose={this.modalCloseNightPlanner}
       basic
       closeIcon>
-        <Modal.Header>Night Plan - {this.formatDate(new Date())} </Modal.Header>
+        <Modal.Header>Report</Modal.Header>
         <Modal.Content>
           <NightPlanner
             night_plan_updating = {night_plans}
@@ -959,7 +962,7 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           {this.renderSessionControls()}
           {this.renderTestModal()}
           {this.renderBackupModal()}
-          {this.renderTargetReport(this.props.night_plan_updating)}
+          {this.renderTargetReportModal(this.props.night_plan_updating)}
         </Segment.Group>
         <Modal
           open={this.state.modalConnectionFailed}
@@ -1052,6 +1055,7 @@ export default withTracker(() => {
     flatSeries: FlatSeries.find({}).fetch(),
     takeSeriesTemplates: TakeSeriesTemplates.find({ isCalibrationFrames: false }, { sort: { name: 1 } }).fetch(),
     targetSessions: TargetSessions.find({ isCalibrationFrames: false }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
+    enabledTargetSessions: TargetSessions.find({ enabledActive: true }, { sort: { priority: 1 } }).fetch(),
     // targetSessions: TargetSessions.find({ }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
     target_reports: TargetReports.find({}).fetch(),
 
