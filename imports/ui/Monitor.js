@@ -90,7 +90,7 @@ class Monitor extends Component {
       isCLSRepeatEnabled: false,
       isCalibrationEnabled: false,
 
-      activeIndex: 0,
+      activeIndex: 1,
 
   };
 
@@ -590,7 +590,7 @@ class Monitor extends Component {
               index={0}
               onClick={this.handleClick}
               />
-            <Accordion.Content fluid active={activeIndex === 0} >
+            <Accordion.Content active={activeIndex === 0} >
               <Form unstackable>
                 <Form.Group>
                 <Label>Alt <Label.Detail>{Number(this.props.scheduler_report.value.ALT).toFixed(4)}</Label.Detail></Label>

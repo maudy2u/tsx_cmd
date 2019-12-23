@@ -364,7 +364,7 @@ class DefaultSettings extends Component {
         />
       <Accordion.Content  active={activeIndex === eDefaultConstrainsts} >
       <div>
-      <h4 className="ui header">Priority: {this.state.defaultPriority}</h4>
+      <h4 style={{color: "#5FB343"}} className="ui header">Priority: {this.state.defaultPriority}</h4>
       <ReactSimpleRange
         label
         step={1}

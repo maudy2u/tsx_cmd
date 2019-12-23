@@ -53,7 +53,6 @@ import ReactSimpleRange from 'react-simple-range';
 // import { DateTime } from 'react-datetime-bootstrap';
 import Timekeeper from 'react-timekeeper';
 
-
 class TargetEditor extends Component {
 
   state = {
@@ -335,6 +334,11 @@ class TargetEditor extends Component {
     var focTemp= `${this.state.tempChg}`;
     var focExp = `${this.state.focusExposure}`
 
+    // let styles = {
+    //    heading: {
+    //      fontColor: '#5FB343'
+    //    }
+    // }
     // *******************************
     // this is not the render return... scroll down...
     const panes = [
@@ -483,7 +487,7 @@ class TargetEditor extends Component {
         <h3 className="ui header">Constraints</h3>
 
         <Segment>
-          <h4 className="ui header">Priority: {TARGETPRIORITY}</h4>
+          <h4 className="ui header" style={{color: "#5FB343"}}>Priority: {TARGETPRIORITY}</h4>
           <ReactSimpleRange
             label
             step={1}
@@ -496,7 +500,7 @@ class TargetEditor extends Component {
           />
         </Segment>
         <Segment>
-          <h4 className="ui header">Minimum Altitude: {MINIMUMALT}</h4>
+          <h4 className="ui header" style={{color: "#5FB343"}}>Minimum Altitude: {MINIMUMALT}</h4>
           <ReactSimpleRange
             label
             step={.5}

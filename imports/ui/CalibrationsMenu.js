@@ -37,6 +37,7 @@ import {
   Form,
   Radio,
   Accordion,
+  Divider,
 } from 'semantic-ui-react'
 
 import {
@@ -359,6 +360,8 @@ class CalibrationsMenu extends Component {
 
     if( this.state.flatbox_enabled == true ) {
         return (
+          <div>
+          <Divider/>
           <Accordion styled>
           <Accordion.Title
             active={activeIndex === eFlatbox}
@@ -380,6 +383,7 @@ class CalibrationsMenu extends Component {
 
         </Accordion.Content>
         </Accordion>
+        </div>
       )
     }
   }
