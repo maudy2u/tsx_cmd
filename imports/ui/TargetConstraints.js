@@ -168,10 +168,10 @@ class TargetConstraints extends Component {
 
     return (
       <Table.Row>
-        <Table.Cell>
+        <Table.Cell width={3}>
           {this.props.targetPlan.targetFindName +': ' + this.props.targetPlan.description}
         </Table.Cell>
-        <Table.Cell>
+        <Table.Cell width={1}>
         <Form>
           <Form.Input
             fluid
@@ -188,7 +188,7 @@ class TargetConstraints extends Component {
           />
           </Form>
         </Table.Cell>
-        <Table.Cell>
+        <Table.Cell width={1}>
         <Form>
           <Form.Input
             fluid
@@ -205,7 +205,7 @@ class TargetConstraints extends Component {
           />
           </Form>
         </Table.Cell>
-        <Table.Cell>
+        <Table.Cell width={1}>
         <Form>
           <Form.Input
             fluid
@@ -222,7 +222,7 @@ class TargetConstraints extends Component {
           />
           </Form>
         </Table.Cell>
-        <Table.Cell>
+        <Table.Cell width={1}>
         <Form>
           <Form.Input
             fluid
@@ -239,7 +239,7 @@ class TargetConstraints extends Component {
           />
           </Form>
         </Table.Cell>
-        <Table.Cell>
+        <Table.Cell width={2}>
           <Form>
             <Form.Input
               fluid

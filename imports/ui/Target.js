@@ -348,7 +348,7 @@ class Target extends Component {
     const { activeIndex } = this.state
 
     return (
-      <Accordion styled>
+      <Accordion styled fluid>
         <Accordion.Title
           active={activeIndex === 1}
           index={1}
