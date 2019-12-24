@@ -102,11 +102,7 @@ class App extends TrackerReact(Component) {
       modalOpen: false,
       modalOpenTest: false,
       modalOpenBackup: false,
-      planData: '',
-      planDataLoading: true,
-      night_plan_needs_updating: true,
     };
-    this.planDataLoaded = this.planDataLoaded.bind(this);
   }
 
   handleToggle = (e, { name, value }) => this.setState({ [name]: Boolean(!eval('this.state.'+name)) })
@@ -431,16 +427,13 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
     } else if (this.state.activeMenu == 'Plan' ) {
 
       return (
-        <div>
-          <Button icon='refresh' loading={this.state.night_plan_needs_updating} labelPosition='left' onClick={this.initialLoadPlanData.bind(this)} label='Refresh Plan'/>
           <NightPlanner
-            enabledtargets={this.props.enabledTargetSessions}
-            night_plan_updating = {this.props.night_plan_updating}
-            planDataLoading = {this.state.planDataLoading}
             night_plan = {this.props.night_plan}
+            enabledtargets={this.props.enabledTargetSessions}
             tsxInfo= {this.props.tsxInfo}
+            tool_active = {this.props.tool_active}
+            scheduler_running={this.props.scheduler_running}
           />
-        </div>
       )
     } else if (this.state.activeMenu == 'Targets' ) {
 //      <Button disabled={DISABLE} size='mini' onClick={this.addNewTargets.bind(this)}>Add Target</Button>
@@ -449,7 +442,6 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           <TargetSessionMenu
             targets={this.props.targetSessions}
             target_reports={this.props.target_reports}
-            tool_active = {this.props.tool_active}
             scheduler_running={this.props.scheduler_running}
             tool_active = {this.props.tool_active}
           />
@@ -616,81 +608,6 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
       </Modal>
     )
   };
-
-
-  // *******************************
-  // Night planner
-  planDataLoaded() {
-    //this.state.enabledActive
-    this.setState({
-      planDataLoading: false,
-      night_plan_needs_updating: false,
-    })
-  }
-
-  initialLoadPlanData() {
-    this.setState({
-      night_plan_needs_updating: true,
-    });
-    this.loadPlanData();
-  }
-
-  loadPlanData() {
-
-    // these are all working methods
-    // on the client
-    var RUNNING = '';
-    var ACTIVE = false;
-    try {
-      RUNNING = this.props.scheduler_running.value;
-      ACTIVE = this.props.tool_active.value;
-    } catch (e) {
-      RUNNING = '';
-      ACTIVE = false;
-    }
-
-    var RELOAD = true;
-    if( RUNNING == 'Stop'  && ACTIVE == false ){
-      RELOAD = false;
-    }
-
-    if( RELOAD ) {
-      let result = [];
-      try {
-        // It is possible there is no plan to load...
-        result = TheSkyXInfos.findOne({name: 'NightPlan'});
-      }
-      catch(e) {
-        // no plan so do not process
-        result = '';
-        this.setState({
-          planData: '',
-          planDataLoading: true,
-          night_plan_needs_updating: true,
-        });
-        tsx_UpdateServerState( 'night_plan_NeedsRefresh', 'yes' );
-      }
-      if( result != '') {
-        this.setState({
-          planData: result,
-          planDataLoading: false,
-          night_plan_needs_updating: false,
-        });
-        tsx_UpdateServerState( 'night_plan_NeedsRefresh', 'no' );
-      }
-    }
-    else {
-      Meteor.call("planData", function (error, result) {
-        // identify the error
-        this.setState({
-          planData: result,
-          planDataLoading: false,
-          night_plan_needs_updating: false,
-        });
-        tsx_UpdateServerState( 'night_plan_NeedsRefresh', 'no' );
-      }.bind(this));
-    }
-  }
 
   appButtons( state, active ) {
     // detective
@@ -1008,12 +925,11 @@ export default withTracker(() => {
     flatSeries: FlatSeries.find({}).fetch(),
     takeSeriesTemplates: TakeSeriesTemplates.find({ isCalibrationFrames: false }, { sort: { name: 1 } }).fetch(),
     targetSessions: TargetSessions.find({ isCalibrationFrames: false }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
-    enabledTargetSessions: TargetSessions.find({ enabledActive: true }, { sort: { priority: 1 } }).fetch(),
     // targetSessions: TargetSessions.find({ }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
     target_reports: TargetReports.find({}).fetch(),
 
     night_plan: TheSkyXInfos.findOne({name: 'NightPlan'}),
+    enabledTargetSessions: TargetSessions.find({ enabledActive: true }, { sort: { priority: 1 } }).fetch(),
     night_plan_updating: TheSkyXInfos.findOne({name: 'night_plan_updating'}),
-    night_plan_NeedsRefresh: TheSkyXInfos.findOne({name: 'night_plan_NeedsRefresh'}),
   };
 })(App);

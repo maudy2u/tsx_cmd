@@ -114,8 +114,7 @@ export function collect_calibration_images() {
     tsxLog( ' Flatbox: turned off by default')
   }
   if( fp_enabled ) {
-//    flatbox_connect();
-    tsxLog(' Flatbox: connected');
+    flatbox_connect();
   }
   // for loop for Quantity
   for( var i=0; i < cf.length; i ++ ) {
@@ -128,17 +127,12 @@ export function collect_calibration_images() {
 
     // check if level > 0; if so turn on light panel
     if( fp_enabled == true && cal.level > 0 ) {
-//      flatbox_on();
-      tsxLog(' Flatbox: on');
-//      flatbox_level( fp.level );
-      tsxLog(' Flatbox: level ' + cal.level);
-
+      flatbox_on();
+      flatbox_level( fp.level );
     }
     else if( fp_enabled == true && cal.level <= 0 ) {
-      //      flatbox_level( fp.level );
-            tsxLog(' Flatbox: level ' + cal.level);
-      //      flatbox_on();
-            tsxLog(' Flatbox: off');
+      flatbox_level( fp.level );
+      flatbox_off();
     }
     // take_image to actually take the picture
     try {
@@ -162,8 +156,7 @@ export function collect_calibration_images() {
     }
   }
   if( fp_enabled ) {
-//    flatbox_disconnect();
-    tsxLog(' Flatbox: disconnected');
+    flatbox_disconnect();
   }
 
   tsx_SetServerState( 'tool_active', false );

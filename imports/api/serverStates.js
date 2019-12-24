@@ -61,6 +61,7 @@ export const tsx_ServerStates = {
   targetDither: 'targetDither',
   curentTargetName: 'curentTargetName',
   currentImagingName: 'currentImagingName',
+  currentSessionReport: 'currentSessionReport',
 
   isCurrentlyImaging: 'isCurrentlyImaging',
   imagingSessionId: 'imagingSessionId',
@@ -134,7 +135,6 @@ export const tsx_ServerStates = {
   tool_flats_dec_az: 'tool_flats_dec_az',
 
   night_plan_updating: 'night_plan_updating',
-  night_plan_NeedsRefresh: 'night_plan_NeedsRefresh',
 
   flatbox_enabled: 'flatbox_enabled',
   flatbox_ip: 'flatbox_ip',

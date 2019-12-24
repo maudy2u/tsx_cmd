@@ -36,6 +36,7 @@ import {
   Header,
   Input,
   Divider,
+  Button,
 } from 'semantic-ui-react'
 
 // Import the API Model
@@ -82,7 +83,11 @@ class NightPlanner extends Component {
     this.state = {
         planData: [],
         planDataLoading: true,
+        plan_needs_updating: true,
+
     };
+    // Methods to pass as properties
+    this.loadPlanData = this.loadPlanData.bind(this);
   }
 
   handleToggle = (e, { name, value }) => this.setState({ [name]: Boolean(!eval('this.state.'+name)) })
@@ -95,6 +100,14 @@ class NightPlanner extends Component {
     });
     saveDefaultStateValue( name, !val );
   };
+
+  night_plan_needs_updating = () => {
+    this.setState({
+      planDataLoading: false,
+      plan_needs_updating: true,
+    })
+  }
+
 
   propValue( prop ) {
     let val = '';
@@ -115,6 +128,66 @@ class NightPlanner extends Component {
     return hr;
   }
 
+  // *******************************
+  // Night planner
+  loadPlanData() {
+    // these are all working methods
+    // on the client
+    var RUNNING = '';
+    var ACTIVE = false;
+    try {
+      RUNNING = this.props.scheduler_running.value;
+      ACTIVE = this.props.tool_active.value;
+    } catch (e) {
+      RUNNING = '';
+      ACTIVE = false;
+    }
+
+    var RELOAD = true;
+    if( RUNNING == 'Stop'  && ACTIVE == false ){
+      RELOAD = false;
+    }
+
+    // If scheduler is running then reload the report
+    // Cannot query TheSkyX if imaging... yet...
+    if( RELOAD ) {
+      let result = [];
+      try {
+        // It is possible there is no plan to load...
+        result = TheSkyXInfos.findOne({name: 'NightPlan'});
+      }
+      catch(e) {
+        // no plan so do not process
+        result = '';
+        this.setState({
+          planData: '',
+          planDataLoading: true,
+        });
+      }
+      if( result != '') {
+        this.setState({
+          planData: result,
+          planDataLoading: false,
+        });
+      }
+    }
+    else {
+      Meteor.call("planData", function (error, result) {
+        if( typeof error == 'undefined' ) {
+          // identify the error
+          this.setState({
+            planData: result,
+            planDataLoading: false,
+            plan_needs_updating: false,
+          });
+          tsx_UpdateServerState( 'night_plan_NeedsRefresh', 'no' );
+        }
+      }.bind(this));
+    }
+  }
+
+  // *******************************
+  // Create the Target Table Data
   renderTargetRow( DATA, colHours ) {
 
     let Out = [];
@@ -415,13 +488,14 @@ class NightPlanner extends Component {
 
     return (
       <div>
+        <Button icon='refresh' loading={this.state.plan_needs_updating} labelPosition='left' onClick={this.loadPlanData.bind(this)} label='Refresh Plan'/>
         <Segment secondary>
           <Header>Night Plan - {formatDate(new Date())} </Header>
           <center>
             <small><font color="black">Defaults: start time={STARTTIME}, end time={ENDTIME}; Teal=Twilight, Blue=Moon, Green=Imaging</font><br/>
             </small>
           </center>
-          <Dimmer active={this.props.planDataLoading}>
+          <Dimmer active={this.state.planDataLoading}>
               <Loader size='small'>Click button next to Refresh Plan</Loader>
           </Dimmer>
           <Table celled compact basic unstackable>
@@ -452,6 +526,7 @@ class NightPlanner extends Component {
               <TargetConstraints
                 key={obj._id}
                 targetPlan={obj}
+                night_plan_needs_updating={this.night_plan_needs_updating}
               />
             )
           })}
@@ -466,73 +541,3 @@ export default withTracker(() => {
     return {
   };
 })(NightPlanner);
-
-/*
-
-{this.props.enabledtargets.map((obj)=>{
-  return (
-    <TargetConstraints
-      key={obj._id}
-      allTargets={this.props.enabledtargets}
-      thetarget={obj}
-    />
-  )
-})}
-
-
-<Table.Row key={obj._id}>
-  <Table.Cell>
-    {obj.name +': ' + obj.description}
-  </Table.Cell>
-  <Table.Cell>
-    <Input
-      fluid
-      size='mini'
-      name='startTime'
-      placeholder='0:00'
-      value={obj.startTime}
-      onChange={this.handleChange}
-    />
-  </Table.Cell>
-  <Table.Cell>
-    <Input
-      fluid
-      size='mini'
-      name='stopTime'
-      placeholder='0:00'
-      value={obj.stopTime}
-      onChange={this.handleChange}
-    />
-  </Table.Cell>
-  <Table.Cell>
-    <Input
-      fluid
-      size='mini'
-      name='priority'
-      placeholder='10'
-      value={obj.priority}
-      onChange={this.handleChange}
-    />
-  </Table.Cell>
-  <Table.Cell>
-    <Input
-      fluid
-      size='mini'
-      name='minAlt'
-      placeholder='45'
-      value={obj.minAlt}
-      onChange={this.handleChange}
-    />
-  </Table.Cell>
-  <Table.Cell>
-    <Input
-      fluid
-      size='mini'
-      name='comment'
-      placeholder='...'
-      value='...'
-      onChange={this.handleChange}
-    />
-  </Table.Cell>
-</Table.Row>
- */

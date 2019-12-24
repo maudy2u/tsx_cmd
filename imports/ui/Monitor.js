@@ -29,7 +29,20 @@ import {
   TextArea,
   Divider,
   Confirm,
-  Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Form, Radio } from 'semantic-ui-react'
+  Input,
+  Icon,
+  Dropdown,
+  Label,
+  Table,
+  Menu,
+  Segment,
+  Button,
+  Progress,
+  Modal,
+  Form,
+  Radio,
+  Statistic,
+} from 'semantic-ui-react'
 
 import {
   tsx_ServerStates,
@@ -591,21 +604,46 @@ class Monitor extends Component {
               onClick={this.handleClick}
               />
             <Accordion.Content active={activeIndex === 0} >
-              <Form unstackable>
-                <Form.Group>
-                <Label>Alt <Label.Detail>{Number(this.props.scheduler_report.value.ALT).toFixed(4)}</Label.Detail></Label>
-                <Label>Az <Label.Detail>{this.props.scheduler_report.value.AZ}</Label.Detail></Label>
-                <Label>RA <Label.Detail>{Number(this.props.scheduler_report.value.RA).toFixed(4)}</Label.Detail></Label>
-                <Label>DEC <Label.Detail>{Number(this.props.scheduler_report.value.DEC).toFixed(4)}</Label.Detail></Label>
-                <Label>Angle <Label.Detail>{Number(this.props.scheduler_report.value.ANGLE).toFixed(4)}</Label.Detail></Label>
-                </Form.Group>
-                <Form.Group>
-                <Label>HA <Label.Detail>{Number(this.props.scheduler_report.value.HA).toFixed(4)}</Label.Detail></Label>
-                <Label>Transit <Label.Detail>{Number(this.props.scheduler_report.value.TRANSIT).toFixed(4)}</Label.Detail></Label>
-                <Label>Pointing <Label.Detail>{this.props.scheduler_report.value.pointing}</Label.Detail></Label>
-                <Label>Focus Pos. <Label.Detail>{Number(this.props.scheduler_report.value.focusPostion).toFixed(4)}</Label.Detail></Label>
-                </Form.Group>
-              </Form>
+              <Segment>
+                <Statistic size='mini'>
+                  <Statistic.Label>Alt</Statistic.Label>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.ALT).toFixed(4)}</Statistic.Value>
+                </Statistic>
+                <Statistic size='mini'>
+                  <Statistic.Label>Az</Statistic.Label>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.AZ).toFixed(4)}</Statistic.Value>
+                </Statistic>
+                <Statistic size='mini'>
+                  <Statistic.Label>RA</Statistic.Label>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.RA).toFixed(4)}</Statistic.Value>
+                </Statistic>
+                <Statistic size='mini'>
+                  <Statistic.Label>DEC</Statistic.Label>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.DEC).toFixed(4)}</Statistic.Value>
+                </Statistic>
+                <Statistic size='mini'>
+                  <Statistic.Label>Pointing</Statistic.Label>
+                  <Statistic.Value>{this.props.scheduler_report.value.pointing}</Statistic.Value>
+                </Statistic>
+              </Segment>
+              <Segment>
+                <Statistic size='mini'>
+                  <Statistic.Label>FOV</Statistic.Label>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.ANGLE).toFixed(4)}</Statistic.Value>
+                </Statistic>
+                <Statistic size='mini'>
+                  <Statistic.Label>HA</Statistic.Label>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.HA).toFixed(4)}</Statistic.Value>
+                </Statistic>
+                <Statistic size='mini'>
+                  <Statistic.Label>Trans</Statistic.Label>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.TRANSIT).toFixed(4)}</Statistic.Value>
+                </Statistic>
+                <Statistic size='mini'>
+                  <Statistic.Label>Foc. Pos.</Statistic.Label>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.focusPostion).toFixed(4)}</Statistic.Value>
+                </Statistic>
+              </Segment>
             </Accordion.Content>
         </Accordion>
         <br/>

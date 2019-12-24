@@ -126,7 +126,7 @@ class TargetConstraints extends Component {
       name,
       value,
     );
-    tsx_UpdateServerState( 'night_plan_NeedsRefresh', 'yes' );
+    this.props.night_plan_needs_updating();
   };
 
   componentDidMount() {
