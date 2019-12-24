@@ -102,7 +102,6 @@ class App extends TrackerReact(Component) {
       modalOpen: false,
       modalOpenTest: false,
       modalOpenBackup: false,
-      modalViewNightPlanner: false,
       planData: '',
       planDataLoading: true,
     };
@@ -133,17 +132,6 @@ modalOpenTest = () => this.setState({ modalOpenTest: true });
 modalCloseTest = () => this.setState({ modalOpenTest: false });
 modalOpenBackup = () => this.setState({ modalOpenBackup: true });
 modalCloseBackup = () => this.setState({ modalOpenBackup: false });
-
-  modalShowTargetReport = () => {
-    this.setState({planDataLoading: true});
-    this.loadPlanData();
-    if( this.planData != '') {
-      this.setState({ modalViewNightPlanner: true });
-    }
-  };
-  modalCloseNightPlanner = () => {
-    this.setState({ modalViewNightPlanner: false });
-  };
 
   propValue( prop ) {
     let val = '';
@@ -302,28 +290,7 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
   }
 
   // *******************************
-  //
-  renderMonitor() {
-    /* need to pass things down:
-        - the tsxInfo...
-        - the published active target
-        - the progress...
-     */
-//      <Monitor  tsxInfo={this.props.tsxInfo}/>
-    return  (
-      <Monitor
-        tsx_progress={this.props.tsx_progress}
-        tsx_total={this.props.tsx_total}
-        scheduler_report={this.props.scheduler_report}
-        targetSessionId={this.props.targetSessionId}
-        targetName={this.props.targetName}
-        tsxInfo={this.props.tsxInfo}
-      />
-    );
-  }
-
-
-  renderDevices() {
+    renderDevices() {
 
     var mount = TheSkyXInfos.findOne().mount();
     var camera = TheSkyXInfos.findOne().camera();
@@ -461,14 +428,14 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
         </div>
       )
     } else if (this.state.activeMenu == 'Plan' ) {
+
       return (
         <div>
-          <Button icon='refresh' onClick={this.loadPlanData.bind(this)} label='Refresh Plan'/>
+          <Button icon='refresh' loading={this.props.night_plan_NeedsRefresh=='yes'} labelPosition='left' onClick={this.loadPlanData.bind(this)} label='Refresh Plan'/>
           <NightPlanner
             enabledtargets={this.props.enabledTargetSessions}
             night_plan_updating = {this.props.night_plan_updating}
             planDataLoading = {this.state.planDataLoading}
-            planDataLoaded = {this.planDataLoaded}
             night_plan = {this.props.night_plan}
             tsxInfo= {this.props.tsxInfo}
           />
@@ -690,12 +657,14 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           planData: '',
           planDataLoading: true,
         });
+        tsx_SetServerState( 'planNeedsRefresh', 'yes' );
       }
       if( result != '') {
         this.setState({
           planData: result,
           planDataLoading: false,
         });
+        tsx_SetServerState( 'planNeedsRefresh', 'no' );
       }
     }
     else {
@@ -705,36 +674,9 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           planData: result,
           planDataLoading: false,
         });
+        tsx_SetServerState( 'planNeedsRefresh', 'no' );
       }.bind(this));
     }
-  }
-
-  renderTargetReportModal( night_plans ) {
-
-    // Night Plan for 2019-02-04
-
-    return (
-      <Modal
-      open={this.state.modalViewNightPlanner}
-      onClose={this.modalCloseNightPlanner}
-      basic
-      closeIcon>
-        <Modal.Header>Report</Modal.Header>
-        <Modal.Content>
-          <NightPlanner
-            night_plan_updating = {night_plans}
-            planDataLoading = {this.state.planDataLoading}
-            planDataLoaded = {this.planDataLoaded}
-            night_plan = {this.props.night_plan}
-            tsxInfo= {this.props.tsxInfo}
-          />
-        </Modal.Content>
-        <Modal.Description>
-        </Modal.Description>
-        <Modal.Actions>
-        </Modal.Actions>
-      </Modal>
-    )
   }
 
   appButtons( state, active ) {
@@ -751,7 +693,6 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
       <Button.Group compact size='mini' floated='right'>
         <Button icon='cloud download' onClick={this.modalOpenBackup}/>
         <Button icon='detective' onClick={this.modalOpenSessionsControls}/>
-        <Button icon='chart bar' onClick={this.modalShowTargetReport}/>
         <Button disabled={DISABLE} icon='plug' onClick={this.connectToTSX.bind(this)}/>
         <Button disabled={DISABLE} icon='car' onClick={this.park.bind(this)}/>
       </Button.Group>
@@ -962,7 +903,6 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           {this.renderSessionControls()}
           {this.renderTestModal()}
           {this.renderBackupModal()}
-          {this.renderTargetReportModal(this.props.night_plan_updating)}
         </Segment.Group>
         <Modal
           open={this.state.modalConnectionFailed}
@@ -1061,5 +1001,6 @@ export default withTracker(() => {
 
     night_plan: TheSkyXInfos.findOne({name: 'NightPlan'}),
     night_plan_updating: TheSkyXInfos.findOne({name: 'night_plan_updating'}),
+    night_plan_NeedsRefresh: TheSkyXInfos.findOne({name: 'night_plan_NeedsRefresh'}),
   };
 })(App);

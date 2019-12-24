@@ -21,9 +21,7 @@ import { withTracker } from 'meteor/react-meteor-data';
 import {
   Button,
   Checkbox,
-  Dropdown,
   Label,
-  Input,
   Header,
   Icon,
   Table,
@@ -43,6 +41,20 @@ import {
 import {
   TargetSessions,
 } from '../api/targetSessions.js'
+
+import {
+  Form,
+  Input,
+} from 'formsy-semantic-ui-react';
+const XRegExp = require('xregexp');
+const XRegExpPositiveReal = XRegExp('^[0-9]\\.?[0-9]+|[1-9][0-9]\\.?[0-9]+$');
+const XRegExpPosNum = XRegExp('^0$|(^([1-9]\\d*(\\.\\d+)?)$)|(^0?\\.\\d*[1-9]\\d*)$');
+const XRegExpNonZeroPosInt = XRegExp('^([1-9]\\d*)$');
+const XRegExpZeroOrPosInt = XRegExp('^(\\d|[1-9]\\d*)$');
+const XRegExpZeroToNine = XRegExp('^\\d$');
+const XRegExpZeroToTwenty = XRegExp('^([0-9]|[1-9][0-9]|20)$');
+const XRegExp24hr = XRegExp('^([0-9]:[0-5][0-9]|[1-2][0-9]:[0-5][0-9])$');
+const ERRORLABEL = <Label color="red" pointing/>
 
 function updateTargetPlan( fid, name, value ) {
   var obj = TargetSessions.findOne({_id:fid});
@@ -114,6 +126,7 @@ class TargetConstraints extends Component {
       name,
       value,
     );
+    tsx_UpdateServerState( 'night_plan_NeedsRefresh', 'yes' );
   };
 
   componentDidMount() {
@@ -159,54 +172,84 @@ class TargetConstraints extends Component {
           {this.props.targetPlan.targetFindName +': ' + this.props.targetPlan.description}
         </Table.Cell>
         <Table.Cell>
-          <Input
+        <Form>
+          <Form.Input
             fluid
             size='mini'
             name='startTime'
             placeholder='0:00'
             value={this.props.targetPlan.startTime}
             onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExp24hr, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be like 0:00 or 10:00"
+            errorLabel={ ERRORLABEL }
           />
+          </Form>
         </Table.Cell>
         <Table.Cell>
-          <Input
+        <Form>
+          <Form.Input
             fluid
             size='mini'
             name='stopTime'
             placeholder='0:00'
             value={this.props.targetPlan.stopTime}
             onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExp24hr, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be like 0:00 or 10:00"
+            errorLabel={ ERRORLABEL }
           />
+          </Form>
         </Table.Cell>
         <Table.Cell>
-          <Input
-            fluid
-            size='mini'
-            name='priority'
-            placeholder='10'
-            value={this.props.targetPlan.priority}
-            onChange={this.handleChange}
-          />
-        </Table.Cell>
-        <Table.Cell>
-          <Input
+        <Form>
+          <Form.Input
             fluid
             size='mini'
             name='minAlt'
             placeholder='45'
             value={this.props.targetPlan.minAlt}
             onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExpPositiveReal, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be real number -12.4, 45.0, 45"
+            errorLabel={ ERRORLABEL }
           />
+          </Form>
         </Table.Cell>
         <Table.Cell>
-          <Input
+        <Form>
+          <Form.Input
             fluid
             size='mini'
-            name='comment'
-            placeholder='...'
-            value='...'
+            name='priority'
+            placeholder='10'
+            value={this.props.targetPlan.priority}
             onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExpZeroToTwenty, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be between 0-20"
+            errorLabel={ ERRORLABEL }
           />
+          </Form>
+        </Table.Cell>
+        <Table.Cell>
+          <Form>
+            <Form.Input
+              fluid
+              size='mini'
+              name='comment'
+              placeholder='...'
+              value='...'
+              onChange={this.handleChange}
+            />
+          </Form>
         </Table.Cell>
       </Table.Row>
     )

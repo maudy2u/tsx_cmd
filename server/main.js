@@ -116,6 +116,7 @@ function initServerStates() {
   tsx_SetServerState('imagingSessionDither', 0);
   tsx_SetServerState('tool_active', false );
   tsx_SetServerState('night_plan_updating', false );
+  tsx_SetServerState('night_plan_NeedsRefresh', 'yes' );
 
   // check the setting of the start/stop time initialization
   var startT, stopT;

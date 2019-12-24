@@ -21,7 +21,19 @@ import React, { Component } from 'react'
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { Segment, Item, Label, Button, Modal, Header, Icon, Table, Checkbox, Progress } from 'semantic-ui-react'
+import {
+  Accordion,
+  Header,
+  Segment,
+  Item,
+  Label,
+  Button,
+  Modal,
+  Icon,
+  Table,
+  Checkbox,
+  Progress,
+} from 'semantic-ui-react'
 
 import { TargetReports } from '../api/targetReports.js';
 import { TargetSessions } from '../api/targetSessions.js';
@@ -54,6 +66,7 @@ class Target extends Component {
 
     description: '',
     priority: 10,
+    activeIndex: 0,
   }
 
   handleOpen = () => this.setState({ modalOpen: true })
@@ -75,6 +88,14 @@ class Target extends Component {
     }
     this.forceUpdate();
   };
+
+  handleClick = (e, titleProps) => {
+     const { index } = titleProps
+     const { activeIndex } = this.state
+     const newIndex = activeIndex === index ? -1 : index
+
+     this.setState({ activeIndex: newIndex })
+  }
 
   componentWillMount() {
     // do not modify the state directly
@@ -324,77 +345,66 @@ class Target extends Component {
       //
     }
 
-    return (
-    <Segment raised>
-      <Item>
-        <Item.Content>
-        <Checkbox
-          label='  '
-          name='enabledActive'
-          toggle
-          checked={ENABLEACTIVE}
-          onChange={this.handleToggleEnabled.bind(this)}
-          />
-        <Item.Header as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, TOOL_ACTIVE)}>
-          {this.props.target.targetFindName} <small>{this.props.target.description}</small>
+    const { activeIndex } = this.state
 
-          </Item.Header>
-          <Item.Description>
-          </Item.Description>
-          <Item.Meta>
-            <Segment>
-              <small>Constraints:</small><br/>
-              <Label>Images: <Label.Detail>{this.props.target.totalImagesTaken()}/{this.props.target.totalImagesPlanned()}</Label.Detail></Label>
-              <Label>Priority: <Label.Detail>{this.props.target.priority}</Label.Detail></Label>
-              <Label>Start: <Label.Detail>{this.props.target.startTime}</Label.Detail></Label>
-              <Label>Stop: <Label.Detail>{this.props.target.stopTime}</Label.Detail></Label>
-              <Label>Min. Alt.: <Label.Detail>{this.props.target.minAlt}</Label.Detail></Label>
-              <br/><small>Last position: {DTIME}</small><br/>
-              <Label>Alt.: <Label.Detail>{ALT}</Label.Detail></Label>
-              <Label>HA: <Label.Detail>{HA}</Label.Detail></Label>
-              <Label>Transit: <Label.Detail>{TRANSIT}</Label.Detail></Label>
-              <Label>RA: <Label.Detail>{RA}</Label.Detail></Label>
-              <Label>DEC: <Label.Detail>{DEC}</Label.Detail></Label>
-              <Label>Point: <Label.Detail>{POINT}</Label.Detail></Label><br/>
-              <small>{this.seriesDetails()}</small>
-            </Segment>
-          </Item.Meta>
-          <Item.Extra>
-            <Label.Group>
-              {/* <Label>Direction: <Label.Detail>{this.state.azimuth}</Label.Detail></Label> */}
-            </Label.Group>
-            <center>
-              {this.targetButtons(this.props.scheduler_running.value, TOOL_ACTIVE)}
-            </center>
-            {
-            // <Checkbox
-            //   label=' Calibration Target'
-            //   name='isCalibrationFrames'
-            //   toggle
-            //   checked={CALIBRATION}
-            //   onChange={this.handleToggleEnabled.bind(this)}
-            // />
-            }
-            <Modal
-              open={this.state.modalOpen}
-              onClose={this.handleClose}
-              basic
-              size='small'
-              closeIcon>
-              <Modal.Header>Editing Target {this.props.target.targetFindName}</Modal.Header>
-              <Modal.Content>
-                <Modal.Description>
-                  <TargetEditor key={this.props.target._id} target={this.props.target} />
-                </Modal.Description>
-              </Modal.Content>
-            </Modal>
-          </Item.Extra>
-        </Item.Content>
-      </Item>
-    </Segment>
+    return (
+      <Accordion styled>
+        <Accordion.Title
+          active={activeIndex === 1}
+          index={1}
+          onClick={this.handleClick}>
+          <Checkbox
+            label='  '
+            name='enabledActive'
+            toggle
+            checked={ENABLEACTIVE}
+            onChange={this.handleToggleEnabled.bind(this)}
+            />
+          <Header style={{color: 'black'}} as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, TOOL_ACTIVE)}>
+            {this.props.target.targetFindName} <small>{this.props.target.description}</small>
+          </Header>
+        </Accordion.Title>
+        <Accordion.Content  active={activeIndex === 1} >
+          <Segment>
+            <small>Constraints:</small><br/>
+            <Label>Images: <Label.Detail>{this.props.target.totalImagesTaken()}/{this.props.target.totalImagesPlanned()}</Label.Detail></Label>
+            <Label>Priority: <Label.Detail>{this.props.target.priority}</Label.Detail></Label>
+            <Label>Start: <Label.Detail>{this.props.target.startTime}</Label.Detail></Label>
+            <Label>Stop: <Label.Detail>{this.props.target.stopTime}</Label.Detail></Label>
+            <Label>Min. Alt.: <Label.Detail>{this.props.target.minAlt}</Label.Detail></Label>
+            <br/><small>Last position: {DTIME}</small><br/>
+            <Label>Alt.: <Label.Detail>{ALT}</Label.Detail></Label>
+            <Label>HA: <Label.Detail>{HA}</Label.Detail></Label>
+            <Label>Transit: <Label.Detail>{TRANSIT}</Label.Detail></Label>
+            <Label>RA: <Label.Detail>{RA}</Label.Detail></Label>
+            <Label>DEC: <Label.Detail>{DEC}</Label.Detail></Label>
+            <Label>Point: <Label.Detail>{POINT}</Label.Detail></Label><br/>
+            <small>{this.seriesDetails()}</small>
+          </Segment>
+          <center>
+            {this.targetButtons(this.props.scheduler_running.value, TOOL_ACTIVE)}
+          </center>
+          <Modal
+            open={this.state.modalOpen}
+            onClose={this.handleClose}
+            basic
+            size='small'
+            closeIcon>
+            <Modal.Header>Editing Target {this.props.target.targetFindName}</Modal.Header>
+            <Modal.Content>
+              <Modal.Description>
+                <TargetEditor key={this.props.target._id} target={this.props.target} />
+              </Modal.Description>
+            </Modal.Content>
+          </Modal>
+          </Accordion.Content>
+      </Accordion>
     )
   }
 }
+
+/*
+*/
 
 export default withTracker(() => {
     return {
