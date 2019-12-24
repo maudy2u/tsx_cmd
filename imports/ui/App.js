@@ -431,7 +431,7 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
 
       return (
         <div>
-          <Button icon='refresh' loading={this.props.night_plan_NeedsRefresh=='yes'} labelPosition='left' onClick={this.loadPlanData.bind(this)} label='Refresh Plan'/>
+          <Button icon='refresh' loading={this.state.planDataLoading} labelPosition='left' onClick={this.loadPlanData.bind(this)} label='Refresh Plan'/>
           <NightPlanner
             enabledtargets={this.props.enabledTargetSessions}
             night_plan_updating = {this.props.night_plan_updating}
@@ -627,6 +627,11 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
   }
 
   loadPlanData() {
+    this.setState({
+      planDataLoading: true,
+    });
+
+
     // these are all working methods
     // on the client
     var RUNNING = '';
