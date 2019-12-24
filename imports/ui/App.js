@@ -632,7 +632,7 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
     this.setState({
       night_plan_needs_updating: true,
     });
-    loadPlanData();
+    this.loadPlanData();
   }
 
   loadPlanData() {
