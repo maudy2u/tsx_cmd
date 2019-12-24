@@ -104,6 +104,7 @@ class App extends TrackerReact(Component) {
       modalOpenBackup: false,
       planData: '',
       planDataLoading: true,
+      night_plan_needs_updating: true,
     };
     this.planDataLoaded = this.planDataLoaded.bind(this);
   }
@@ -431,7 +432,7 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
 
       return (
         <div>
-          <Button icon='refresh' loading={this.state.planDataLoading} labelPosition='left' onClick={this.loadPlanData.bind(this)} label='Refresh Plan'/>
+          <Button icon='refresh' loading={this.state.night_plan_needs_updating} labelPosition='left' onClick={this.initialLoadPlanData.bind(this)} label='Refresh Plan'/>
           <NightPlanner
             enabledtargets={this.props.enabledTargetSessions}
             night_plan_updating = {this.props.night_plan_updating}
@@ -622,15 +623,19 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
   planDataLoaded() {
     //this.state.enabledActive
     this.setState({
-      planDataLoading: false
+      planDataLoading: false,
+      night_plan_needs_updating: false,
     })
   }
 
-  loadPlanData() {
+  initialLoadPlanData() {
     this.setState({
-      planDataLoading: true,
+      night_plan_needs_updating: true,
     });
+    loadPlanData();
+  }
 
+  loadPlanData() {
 
     // these are all working methods
     // on the client
@@ -661,15 +666,17 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
         this.setState({
           planData: '',
           planDataLoading: true,
+          night_plan_needs_updating: true,
         });
-        tsx_SetServerState( 'planNeedsRefresh', 'yes' );
+        tsx_UpdateServerState( 'night_plan_NeedsRefresh', 'yes' );
       }
       if( result != '') {
         this.setState({
           planData: result,
           planDataLoading: false,
+          night_plan_needs_updating: false,
         });
-        tsx_SetServerState( 'planNeedsRefresh', 'no' );
+        tsx_UpdateServerState( 'night_plan_NeedsRefresh', 'no' );
       }
     }
     else {
@@ -678,8 +685,9 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
         this.setState({
           planData: result,
           planDataLoading: false,
+          night_plan_needs_updating: false,
         });
-        tsx_SetServerState( 'planNeedsRefresh', 'no' );
+        tsx_UpdateServerState( 'night_plan_NeedsRefresh', 'no' );
       }.bind(this));
     }
   }

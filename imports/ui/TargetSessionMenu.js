@@ -16,9 +16,21 @@ tsx cmd - A web page to send commands to TheSkyX server
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import _ from 'lodash'
 import React, { Component } from 'react';
 import { withTracker } from 'meteor/react-meteor-data';
-import { Item, Dropdown, Menu, Confirm, Modal, Table, Segment, Button, Progress } from 'semantic-ui-react'
+import {
+  Item,
+  Dropdown,
+  Menu,
+  Confirm,
+  Modal,
+  Table,
+  Segment,
+  Button,
+  Progress,
+  Search,
+} from 'semantic-ui-react'
 
 import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
 import {
@@ -30,18 +42,74 @@ import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 import TargetEditor from './TargetEditor.js';
 import Target  from './Target.js';
 
+const XRegExp = require('xregexp');
+const XRegExpPositiveReal = XRegExp('^[0-9]\\.?[0-9]+|[1-9][0-9]\\.?[0-9]+$');
+const XRegExpPosNum = XRegExp('^0$|(^([1-9]\\d*(\\.\\d+)?)$)|(^0?\\.\\d*[1-9]\\d*)$');
+const XRegExpNonZeroPosInt = XRegExp('^([1-9]\\d*)$');
+const XRegExpZeroOrPosInt = XRegExp('^(\\d|[1-9]\\d*)$');
+const XRegExpZeroToNine = XRegExp('^\\d$');
+const XRegExpZeroToTwenty = XRegExp('^([0-9]|[1-9][0-9]|20)$');
+const XRegExp24hr = XRegExp('^([0-9]:[0-5][0-9]|[1-2][0-9]:[0-5][0-9])$');
+
 // ImageSession component - represents a single ImageSession
 // export default
+
+const initialState = { isLoading: false, results: [], value: '' }
+
 class TargetSessionMenu extends Component {
 
   state = {
+    initialState,
     open: false ,
     addModalOpen: false,
     newTarget: {
       _id:'',
     },
     targetList: '',
+    matchName: '',
   }
+
+  handleResultSelect = (e, { result }) => {
+    this.setState({ value: result.title })
+  }
+  handleSearchChange = (e, { value }) => {
+    this.setState({ isLoading: true, value })
+
+    setTimeout(() => {
+      if (this.state.value.length < 1) return this.setState(initialState)
+
+      const re = new RegExp(_.escapeRegExp(this.state.value), 'i')
+      const isMatch = (result) => re.test(result.title)
+
+      this.setState({
+        isLoading: false,
+        results: _.filter(this.source(), isMatch),
+      })
+    }, 300)
+  }
+
+  source() {
+      const source = []
+      var objs = TargetSessions.find({}).fetch();
+      if( typeof objs == "undefined") {
+        return source; // do not try to process
+      }
+      for( var i=0; i<objs.length; i++ ) {
+        source.push({
+          id: objs[i]._id,
+          title: objs[i].targetFindName,
+          description: objs[i].targetFindName + ' ' + objs[i].description,
+        })
+      }
+      return source;
+  }
+  // const searchData = data.map((obj)=>{
+  //   return {
+  //     name: obj.targetFindName,
+  //     description: obj.description,
+  //     id: obj._id,
+  //   }
+  // });
 
   handleAddModalOpen = () => this.setState({ addModalOpen: true })
   handleAddModalClose = () => this.setState({ addModalOpen: false })
@@ -58,45 +126,6 @@ class TargetSessionMenu extends Component {
     this.setState({
       targetList: nextProps.targets,
     });
-  }
-
-
-  //{this.testMeteorMethod.bind(this)}
-  connectTsxMeteorMethod() {
-
-    // on the client
-    Meteor.call("loadTestDataTargetSessions", function (error) {
-      // identify the error
-      if (error && error.error === "logged-out") {
-        // show a nice error message
-        Session.set("errorMessage", "Please log in to post a comment.");
-      }
-    }.bind(this));
-  }
-
-  loadTestDataMeteorMethod() {
-
-    // on the client
-    Meteor.call("loadTestDataTargetSessions", function (error) {
-      // identify the error
-      if (error && error.error === "logged-out") {
-        // show a nice error message
-        Session.set("errorMessage", "Please log in to post a comment.");
-      }
-    }.bind(this));
-  }
-
-  chkTestData() {
-    var target1 = this.state.targetList;
-    console.log('test');
-    // on the client
-    Meteor.call("loadTestDataAllTakeSeriesTemplates", function (error) {
-      // identify the error
-      if (error && error.error === "logged-out") {
-        // show a nice error message
-        Session.set("errorMessage", "Please log in to post a comment.");
-      }
-    }.bind(this));
   }
 
   playScheduler() {
@@ -125,16 +154,6 @@ class TargetSessionMenu extends Component {
 //        tsx_UpdateServerState(tsx_ServerStates.currentStage, 'Stopped');
 
       }.bind(this));
-  }
-
-  renderTargets( container ) {
-    // this.props.template.series.. this is a series ID
-    // does not work:       this.props.template.series.map({sort: {order:1}}, (definedSeries)=>{
-    return (
-      this.props.targets.map((target)=>{
-        return <Target key={target._id} target={target} />
-      })
-    )
   }
 
   refreshTargetReports() {
@@ -180,6 +199,7 @@ class TargetSessionMenu extends Component {
 
   render() {
     const { open } = this.state;
+    const { isLoading, value, results } = this.state;
     /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
     */
     var RUNNING = '';
@@ -191,18 +211,54 @@ class TargetSessionMenu extends Component {
       RUNNING = '';
       ACTIVE=false;
     }
-
+    // this.props.targets.map((target)=>{
+    //     var nam;
+    //     if( this.state.initialState.results.length > 0 ) {
+    //       nam = results
+    //     }
+    //     // this
+    //     if( typeof nam != 'undefined') {
+    //       var found = RegExp.exec(target.targetFindName, name);
+    //     }
+    // });
     return (
       <div>
         <h1>Targets</h1>
-        {this.targetButtons(
-          RUNNING
-          , ACTIVE
-        )}
+        <Table style={{background: 'black'}}>
+          <Table.Body>
+          <Table.Row>
+            <Table.Cell>
+              {this.targetButtons(
+                RUNNING
+                , ACTIVE
+              )}
+            </Table.Cell>
+            <Table.Cell>
+              <Search
+                loading={isLoading}
+                onResultSelect={this.handleResultSelect}
+                onSearchChange={_.debounce(this.handleSearchChange, 500, {
+                  leading: true,
+                })}
+                results={results}
+                value={value}
+                //{...this.props} // This causes a warning...
+              />
+            </Table.Cell>
+          </Table.Row>
+          </Table.Body>
+        </Table>
         <br />
         {this.props.targets.map((target)=>{
-            let report = this.props.target_reports.find(function(element) {
-              return element.target_id == target._id;});
+          let report = this.props.target_reports.find(function(element) {
+            return element.target_id == target._id;});
+
+          if( typeof this.state.value != 'undefined' && this.state.value != '' ){
+            if( target.targetFindName.indexOf(this.state.value) == -1 ) {
+              // searching and not a match so filter out
+              return
+            }
+          }
           return (
              <Target
               key={target._id}

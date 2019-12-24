@@ -361,7 +361,7 @@ class Target extends Component {
             onChange={this.handleToggleEnabled.bind(this)}
             />
           <Header style={{color: 'black'}} as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, TOOL_ACTIVE)}>
-            {this.props.target.targetFindName} <small>{this.props.target.description}</small>
+            {this.props.target.targetFindName} <Label><small>{this.props.target.description}</small></Label>
           </Header>
         </Accordion.Title>
         <Accordion.Content  active={activeIndex === 1} >
