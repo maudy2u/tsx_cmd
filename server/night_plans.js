@@ -149,17 +149,17 @@ export function tsx_AltTimesForTargets( targets ) {
   if( tsx_err != false ) {
     throw( 'TSX_ERROR|Is Tsx Running?');
   }
-  tsx_SetServerState( 'NightPlan', Out );
+  tsx_SetServerState( 'night_plan', Out );
   return Out;
 }
 
 Meteor.methods({
 
   planData() {
-    tsx_SetServerState( 'night_plan_updating', true );
+    tsx_SetServerState( 'night_plan_report', true );
     tsxDebug( ' --- Night Plan: Computing');
     let plan = TargetPlans();
-    tsx_SetServerState( 'night_plan_updating', false );
+    tsx_SetServerState( 'night_plan_report', true );
     tsxDebug( ' --- Night Plan: Loaded');
     return plan;
   },

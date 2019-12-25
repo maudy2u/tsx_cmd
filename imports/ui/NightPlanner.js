@@ -70,6 +70,7 @@ import {
 
 import {
   formatDate,
+  formatDateTime,
 } from '../api/time_utils.js'
 
 import TargetConstraints from './TargetConstraints.js'
@@ -82,6 +83,7 @@ class NightPlanner extends Component {
 
     this.state = {
         planData: [],
+        night_plan: '',
         night_plan_reset: true,
         plan_needs_updating: true,
     };
@@ -172,14 +174,12 @@ class NightPlanner extends Component {
           planData: '',
           night_plan_reset: true,
         });
-        saveDefaultStateValue( 'night_plan_reset', true );
       }
       if( result != '') {
         this.setState({
           planData: result,
           night_plan_reset: false,
         });
-        saveDefaultStateValue( 'night_plan_reset', false );
       }
     }
     else {
@@ -191,7 +191,6 @@ class NightPlanner extends Component {
             night_plan_reset: false,
             plan_needs_updating: false,
           });
-          saveDefaultStateValue( 'night_plan_reset', false );
         }
       }.bind(this));
     }
@@ -505,11 +504,15 @@ class NightPlanner extends Component {
     //    <Loader size='small'>Click button next to Refresh Plan</Loader>
     //</Dimmer>
 
+    var data = this.props.night_plan;
+    const plan_date = this.props.night_plan.timestamp;
+//          <Header>Night Plan - {formatDate(new Date())} </Header>
+
     return (
       <div>
         <Button icon='refresh' loading={this.state.plan_needs_updating} labelPosition='left' onClick={this.loadPlanData.bind(this)} label='Refresh Plan'/>
         <Segment secondary>
-          <Header>Night Plan - {formatDate(new Date())} </Header>
+          <Header>Night Plan - {formatDateTime(plan_date)} </Header>
           <center>
             <small><font color="black">Defaults: start time={STARTTIME}, end time={ENDTIME}; Teal=Twilight, Blue=Moon, Green=Imaging</font><br/>
             </small>

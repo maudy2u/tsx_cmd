@@ -134,7 +134,7 @@ export const tsx_ServerStates = {
   tool_flats_location: 'tool_flats_location',
   tool_flats_dec_az: 'tool_flats_dec_az',
 
-  night_plan_updating: 'night_plan_updating',
+  night_plan: 'night_plan',
   night_plan_reset: 'night_plan_reset',
 
   flatbox_enabled: 'flatbox_enabled',

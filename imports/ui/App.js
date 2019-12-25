@@ -929,9 +929,8 @@ export default withTracker(() => {
     // targetSessions: TargetSessions.find({ }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
     target_reports: TargetReports.find({}).fetch(),
 
-    night_plan: TheSkyXInfos.findOne({name: 'NightPlan'}),
     enabledTargetSessions: TargetSessions.find({ enabledActive: true }, { sort: { priority: 1 } }).fetch(),
-    night_plan_updating: TheSkyXInfos.findOne({name: 'night_plan_updating'}),
+    night_plan: TheSkyXInfos.findOne({name: 'night_plan'}),
     night_plan_reset: TheSkyXInfos.findOne({name: 'night_plan_reset'}),
   };
 })(App);
