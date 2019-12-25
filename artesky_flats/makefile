@@ -21,7 +21,7 @@ all: client server
 #another target for client
 server:
 	#$(cpp) -g -o artesky_srv artesky_srv.c
-	$(cpp)  -I./artesky-projects-devel/libartesky_SDK/1.0.0/include ./artesky_srv.c lib/libartesky_arm64.so -o artesky_srv
+	$(cpp)  -I./artesky-projects-devel/libartesky_SDK/1.0.0/include ./artesky_srv.c /lib/libartesky_arm64.so -o artesky_srv
 
 
 client:

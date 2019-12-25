@@ -1,0 +1,21 @@
+# SOME EXAMPLE INSTALL STEPS
+# sudo cp artesky_flat.service /etc/systemd/system/
+# sudo chmod 644 /etc/systemd/system/artesky_flat.service
+# sudo systemctl daemon-reload
+# sudo systemctl enable artesky_flat.service
+# sudo systemctl start artesky_flat.service
+# sudo systemctl status artesky_flat.service
+[Unit]
+Description=Artesky Flatbox server
+After=multi-user.target
+
+[Service]
+Type=idle
+# MUST SET YOUR USERNAME HERE.
+User=odroid
+ExecStart=/usr/local/bin/artesky_srv --ip 10.9.8.34
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

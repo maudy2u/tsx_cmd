@@ -232,6 +232,9 @@ import {
            else {
              ParkMount( isParked );
              isParked = true;
+             // no target found... so sleep and check again...
+             // allow a moment to enable a target.
+             sleepScheduler( isParked );
            }
 
            // Check if sun is up and no cal frames
@@ -247,7 +250,8 @@ import {
                var softPark = false;
                tsx_AbortGuider();
                tsx_MntPark(defaultFilter, softPark);
-               UpdateStatus( ' Scheduler stopped: not dark.');
+               var defaultMinSunAlt = tsx_GetServerStateValue('defaultMinSunAlt');
+               UpdateStatus( ' Scheduler stopped: sun rose above limit ' + defaultMinSunAlt);
                break;
              }
            }

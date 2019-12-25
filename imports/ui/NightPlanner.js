@@ -82,9 +82,8 @@ class NightPlanner extends Component {
 
     this.state = {
         planData: [],
-        planDataLoading: true,
+        night_plan_reset: true,
         plan_needs_updating: true,
-
     };
     // Methods to pass as properties
     this.loadPlanData = this.loadPlanData.bind(this);
@@ -101,11 +100,20 @@ class NightPlanner extends Component {
     saveDefaultStateValue( name, !val );
   };
 
+  componentWillMount() {
+    if( typeof this.props == 'undefined') return;
+    if( typeof this.props.night_plan_reset == 'undefined' ) return;
+    this.setState({
+        night_plan_reset: this.props.night_plan_reset,
+    })
+  }
+
+
   night_plan_needs_updating = () => {
     this.setState({
-      planDataLoading: false,
       plan_needs_updating: true,
     })
+    this.loadPlanData();
   }
 
 
@@ -131,6 +139,7 @@ class NightPlanner extends Component {
   // *******************************
   // Night planner
   loadPlanData() {
+
     // these are all working methods
     // on the client
     var RUNNING = '';
@@ -161,14 +170,16 @@ class NightPlanner extends Component {
         result = '';
         this.setState({
           planData: '',
-          planDataLoading: true,
+          night_plan_reset: true,
         });
+        saveDefaultStateValue( 'night_plan_reset', true );
       }
       if( result != '') {
         this.setState({
           planData: result,
-          planDataLoading: false,
+          night_plan_reset: false,
         });
+        saveDefaultStateValue( 'night_plan_reset', false );
       }
     }
     else {
@@ -177,10 +188,10 @@ class NightPlanner extends Component {
           // identify the error
           this.setState({
             planData: result,
-            planDataLoading: false,
+            night_plan_reset: false,
             plan_needs_updating: false,
           });
-          tsx_UpdateServerState( 'night_plan_NeedsRefresh', 'no' );
+          saveDefaultStateValue( 'night_plan_reset', false );
         }
       }.bind(this));
     }
@@ -281,6 +292,9 @@ class NightPlanner extends Component {
   }
 
   render() {
+    // if( this.props.night_plan_reset) {
+    //   this.loadPlanData();
+    // }
 
     // pop up the upload dialog
     // send the file to server
@@ -486,6 +500,11 @@ class NightPlanner extends Component {
       }
     }
 
+    // need to check this... believe need to leave as is...
+    //<Dimmer active={ACTIVE_DIMMER}>
+    //    <Loader size='small'>Click button next to Refresh Plan</Loader>
+    //</Dimmer>
+
     return (
       <div>
         <Button icon='refresh' loading={this.state.plan_needs_updating} labelPosition='left' onClick={this.loadPlanData.bind(this)} label='Refresh Plan'/>
@@ -495,9 +514,6 @@ class NightPlanner extends Component {
             <small><font color="black">Defaults: start time={STARTTIME}, end time={ENDTIME}; Teal=Twilight, Blue=Moon, Green=Imaging</font><br/>
             </small>
           </center>
-          <Dimmer active={this.state.planDataLoading}>
-              <Loader size='small'>Click button next to Refresh Plan</Loader>
-          </Dimmer>
           <Table celled compact basic unstackable>
             <Table.Header>
               <Table.Row>

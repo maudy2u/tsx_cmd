@@ -30,17 +30,6 @@ import {
 
 
 export function TargetPlans() {
-
-  // Get teh users planned start and stop hours
-  let STARTTIME = tsx_GetServerStateValue('defaultStartTime');
-  if( STARTTIME == '' || typeof STARTTIME == 'undefined') {
-    STARTTIME = '18:00'; // guess
-  }
-  let ENDTIME = tsx_GetServerStateValue('defaultStopTime');
-  if( ENDTIME == '' || typeof ENDTIME == 'undefined') {
-    ENDTIME = '6:00'; // guess
-  }
-
   // Get the users planned Sun Altitude limit times
   let SUNALT = tsx_GetServerStateValue('defaultMinSunAlt');
   if( SUNALT == '' || typeof SUNALT == 'undefined') {

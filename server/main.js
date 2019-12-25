@@ -118,6 +118,7 @@ function initServerStates() {
   tsx_SetServerState('tool_active', false );
   tsx_SetServerState('currentSessionReport', '' );
   tsx_SetServerState('night_plan_updating', false );
+  tsx_SetServerState('night_plan_reset', true );
 
   // check the setting of the start/stop time initialization
   var startT, stopT;

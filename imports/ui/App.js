@@ -430,6 +430,7 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           <NightPlanner
             night_plan = {this.props.night_plan}
             enabledtargets={this.props.enabledTargetSessions}
+            night_plan_reset={this.props.night_plan_reset}
             tsxInfo= {this.props.tsxInfo}
             tool_active = {this.props.tool_active}
             scheduler_running={this.props.scheduler_running}
@@ -931,5 +932,6 @@ export default withTracker(() => {
     night_plan: TheSkyXInfos.findOne({name: 'NightPlan'}),
     enabledTargetSessions: TargetSessions.find({ enabledActive: true }, { sort: { priority: 1 } }).fetch(),
     night_plan_updating: TheSkyXInfos.findOne({name: 'night_plan_updating'}),
+    night_plan_reset: TheSkyXInfos.findOne({name: 'night_plan_reset'}),
   };
 })(App);
