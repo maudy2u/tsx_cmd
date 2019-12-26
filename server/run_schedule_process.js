@@ -85,6 +85,19 @@ import {
    ParkMount,
  } from './mount.js'
 
+ import {
+   srvStopScheduler,
+ } from './main.js'
+
+ export function getSchedulerState() {
+   var state = tsx_GetServerStateValue('scheduler_running');
+   return state;
+ }
+
+ export function setSchedulerState( value ) {
+   tsx_SetServerState('scheduler_running', value);
+ }
+
  export function runSchedulerProcess() {
    // *******************************
    //   Imaging processs

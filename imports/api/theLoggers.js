@@ -35,6 +35,10 @@ import { LoggerConsole } from 'meteor/ostrio:loggerconsole';
 // https://atmospherejs.com/ostrio/loggermongo
 import { LoggerMongo } from 'meteor/ostrio:loggermongo';
 
+import {
+  sessionDate,
+} from './time_utils.js'
+
 const logSession = new Logger();
 const logCon = new Logger();
 const logDB = new Logger();
@@ -144,24 +148,6 @@ function formatDate( today ) {
   + ('0'  + SS).slice(-2);
 }
 
-function fileNameDate( today ) {
-  // desired format:
-  // 2018-01-01
-
-  var HH = today.getHours();
-  var MM = today.getMinutes();
-  var SS = today.getSeconds();
-  var mm = today.getMonth()+1; // month is zero based
-  var dd = today.getDate();
-  var yyyy = today.getFullYear();
-
-  // set to the date of the "night" session
-  ((HH < 8) ? dd=dd-1 : dd=dd);
-
-  return yyyy +'_'+ ('0'  + mm).slice(-2) +'_'+ ('0'  + dd).slice(-2);
-}
-
-
 /*
  * Separate settings and collection
  * for info, debug and other messages
@@ -230,7 +216,7 @@ export function logFileForClient() {
   }
   var time = new Date();
   var location = logFolder + '/logs/';
-  var fileName = fileNameDate(time) + "_tsx_cmd.log";
+  var fileName = sessionDate(time) + "_tsx_cmd.log";
 
   return location + fileName;
 }
@@ -239,7 +225,7 @@ export function logFileForClient() {
   collectionName: 'AppLogsSession',
   fileNameFormat(time) {
     // Create log so that the name match the times for the "night" session
-    return fileNameDate(time) + "_tsx_cmd.log";
+    return sessionDate(time) + "_tsx_cmd.log";
   },
   path: logFolder + '/logs/', // srcPath, //'~/tsx_cmd_logs/', // Use absolute storage path
 

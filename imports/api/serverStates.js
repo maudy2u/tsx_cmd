@@ -140,6 +140,8 @@ export const tsx_ServerStates = {
   flatbox_enabled: 'flatbox_enabled',
   flatbox_ip: 'flatbox_ip',
 
+  session_report: 'session_report',
+
 };
 
 // Should be using this version for all and not within the API

@@ -410,19 +410,17 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
 
     if (this.state.activeMenu == 'Monitor' ) {
       return (
-        <div>
-          <Monitor
-            tsx_progress={this.props.tsx_progress}
-            tsx_total={this.props.tsx_total}
-            scheduler_report={this.props.scheduler_report}
-            targetSessionId={this.props.targetSessionId}
-            targetName={this.props.targetName}
-            tsxInfo={this.props.tsxInfo}
-            scheduler_running={this.props.scheduler_running}
-            srvLog={this.props.srvLog}
-            tool_active = {this.props.tool_active}
-          />
-        </div>
+        <Monitor
+          enabledTargetSessions={this.props.enabledTargetSessions}
+          tsx_progress={this.props.tsx_progress}
+          tsx_total={this.props.tsx_total}
+          scheduler_report={this.props.scheduler_report}
+          targetName={this.props.targetName}
+          tsxInfo={this.props.tsxInfo}
+          scheduler_running={this.props.scheduler_running}
+          srvLog={this.props.srvLog}
+          tool_active = {this.props.tool_active}
+        />
       )
     } else if (this.state.activeMenu == 'Plan' ) {
 

@@ -58,6 +58,17 @@ import {
   tsx_has_error,
  } from './tsx_feeder.js'
 
+ import {
+   getFilterName,
+   getFrame,
+   getFrameName,
+   getFilterSlot,
+ } from './filter_wheel.js'
+
+ import {
+   addSessionImageReport,
+ } from '../imports/api/sessionReports.js'
+
 var tsxHeader =  '/* Java Script *//* Socket Start Packet */';
 var tsxFooter = '/* Socket End Packet */';
 var forceAbort = false;
@@ -79,41 +90,6 @@ export function isSchedulerStopped() {
   tsx_SetServerState('imagingSessionId', '');
 
   return true;
-}
-
-// **************************************************************
-export function getFilterSlot(filterName) {
-  // need to look up the filters in TSX
-  var slot = '';
-  try {
-    var filter = Filters.findOne({name: filterName});
-    tsxDebug(' Found Filter ' + filterName + ' at slot: ' + filter.slot);
-    slot = filter.slot;
-  }
-  catch( e ) {
-    // no slot found - assumed to be the err
-    slot = 0;
-  }
-  return slot;
-}
-// **************************************************************
-//  cdLight =1, cdBias, cdDark, cdFlat
-function getFrame(frame) {
-  // tsxDebug('************************');
-  tsxDebug(' *** getFrame: ' + frame );
-
-  var frames = [
-    {name: 'Light', id:1},
-    {name: 'Flat', id:4},
-    {name: 'Dark', id:3},
-    {name: 'Bias', id:2},
-  ];
-
-  var num = frames.find(function(element) {
-    return element.name == frame;
-  }).id;
-  tsxDebug('Found '+frame+' frame number: ' + num);
-  return num;
 }
 
 // **************************************************************
@@ -2274,6 +2250,14 @@ export function tsx_takeImage( filterNum, exposure, frame, tName ) {
           // the stoed position can be used for flats
           recordRotatorPosition( tName, Number(ang).toFixed(3) );
         }
+        addSessionImageReport(
+          tName,
+          getFrameName(frame),
+          getFilterName(filterNum),
+          exposure,
+          'focus_pos', // focus_pos
+          '1', // binning
+        );
       }
       finally{
         if( frame == '1 ' ) { // 1 = Light

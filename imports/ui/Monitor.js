@@ -62,7 +62,12 @@ import TargetSessionMenu from './TargetSessionMenu.js';
 // import Filter from './Filter.js';
 import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
-//import TheSkyXInfo from './TheSkyXInfo.js';
+import SessionReport from './SessionReport.js';
+
+import {
+  SessionReports,
+  getSessionTargetFilterExposureData,
+} from '../api/sessionReports.js';
 
 class Monitor extends Component {
 
@@ -596,10 +601,10 @@ class Monitor extends Component {
           {this.playButtons(RUNNING) }
         </Button.Group>
         <h1>{' ' + TARGETNAME}</h1>
-        <Accordion styled>
+        <Accordion size='mini' styled>
             <Accordion.Title
               active={activeIndex === 0}
-              content='Details'
+              content='Coordinates'
               index={0}
               onClick={this.handleClick}
               />
@@ -607,19 +612,19 @@ class Monitor extends Component {
               <Segment>
                 <Statistic size='mini'>
                   <Statistic.Label>Alt</Statistic.Label>
-                  <Statistic.Value>{Number(this.props.scheduler_report.value.ALT).toFixed(4)}</Statistic.Value>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.ALT).toFixed(3)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
                   <Statistic.Label>Az</Statistic.Label>
-                  <Statistic.Value>{Number(this.props.scheduler_report.value.AZ).toFixed(4)}</Statistic.Value>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.AZ).toFixed(3)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
                   <Statistic.Label>RA</Statistic.Label>
-                  <Statistic.Value>{Number(this.props.scheduler_report.value.RA).toFixed(4)}</Statistic.Value>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.RA).toFixed(3)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
                   <Statistic.Label>DEC</Statistic.Label>
-                  <Statistic.Value>{Number(this.props.scheduler_report.value.DEC).toFixed(4)}</Statistic.Value>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.DEC).toFixed(3)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
                   <Statistic.Label>Pointing</Statistic.Label>
@@ -629,23 +634,26 @@ class Monitor extends Component {
               <Segment>
                 <Statistic size='mini'>
                   <Statistic.Label>FOV</Statistic.Label>
-                  <Statistic.Value>{Number(this.props.scheduler_report.value.ANGLE).toFixed(4)}</Statistic.Value>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.ANGLE).toFixed(2)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
                   <Statistic.Label>HA</Statistic.Label>
-                  <Statistic.Value>{Number(this.props.scheduler_report.value.HA).toFixed(4)}</Statistic.Value>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.HA).toFixed(3)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
                   <Statistic.Label>Trans</Statistic.Label>
-                  <Statistic.Value>{Number(this.props.scheduler_report.value.TRANSIT).toFixed(4)}</Statistic.Value>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.TRANSIT).toFixed(3)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
                   <Statistic.Label>Foc. Pos.</Statistic.Label>
-                  <Statistic.Value>{Number(this.props.scheduler_report.value.focusPostion).toFixed(4)}</Statistic.Value>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.focusPostion).toFixed(3)}</Statistic.Value>
                 </Statistic>
               </Segment>
             </Accordion.Content>
         </Accordion>
+        <SessionReport
+          enabledTargetSessions={this.props.enabledTargetSessions}
+          />
         <br/>
         <Form unstackable>
           <Form.Group>

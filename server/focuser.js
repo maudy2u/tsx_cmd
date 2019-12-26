@@ -38,7 +38,7 @@ import {
 
 import {
   getFilterSlot,
-} from './run_imageSession.js'
+} from './filter_wheel.js'
 
 import {
   tsx_feeder,

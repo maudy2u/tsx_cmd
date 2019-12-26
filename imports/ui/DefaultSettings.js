@@ -505,7 +505,7 @@ class DefaultSettings extends Component {
       <div>
       <Accordion.Title
         active={activeIndex === eRotator}
-        content='Mount'
+        content='Rotator'
         index={eRotator}
         onClick={this.handleClick}
         />

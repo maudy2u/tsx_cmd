@@ -80,6 +80,8 @@ import {
 
 import {
   runSchedulerProcess,
+  getSchedulerState,
+  setSchedulerState,
 } from './run_schedule_process.js'
 
 /*
@@ -99,6 +101,15 @@ targetAZ: 'targetAZ',
 currentTargetSession: 'currentTargetSession', // use to report current imaging targets
 isCurrentlyImaging: 'isCurrentlyImaging',
 */
+
+
+ export function srvStopScheduler() {
+   CleanUpJobs();
+   UpdateImagingSesionID( '' );
+   tsx_SetServerState('targetName', 'No Active Target');
+   tsx_SetServerState('scheduler_report', '');
+   setSchedulerState('Stop' );
+ }
 
 function initServerStates() {
   tsx_SetServerState('activeMenu', 'Settings');
@@ -173,23 +184,6 @@ function CleanUpJobs() {
   return;
 }
 
-function getSchedulerState() {
-  var state = tsx_GetServerStateValue('scheduler_running');
-  return state;
-}
-
-function setSchedulerState( value ) {
-  tsx_SetServerState('scheduler_running', value);
-}
-
-export function srvStopScheduler() {
-  CleanUpJobs();
-  UpdateImagingSesionID( '' );
-  tsx_SetServerState('targetName', 'No Active Target');
-  tsx_SetServerState('scheduler_report', '');
-  setSchedulerState('Stop' );
-}
-
 Meteor.startup(() => {
   tsxLog(' ******************************', '');
   tsxLog(' ****** TSX_CMD STARTING', '');
@@ -251,26 +245,11 @@ Meteor.startup(() => {
 
 });
 
-// need to look up statemodel design... see patterns
-// Scheduler states
-// Calibration states
-// processCalibrationTargets
 
-export function srvStartCalibrations() {
-  if(getSchedulerState() == 'Stop' ) {
-    CleanUpJobs();
-    UpdateImagingSesionID( '' );
-    tsx_SetServerState('targetName', 'No Active Target');
-    tsx_SetServerState('scheduler_report', '');
-    setSchedulerState('Stop' );
-  }
-}
-export function srvStopCalibrations() {
-  CleanUpJobs();
-  UpdateImagingSesionID( '' );
-  setCalibrationState('Stop' );
-}
-
+// *******************************
+// *******************************
+// *******************************
+// *******************************
 Meteor.methods({
 
   processCalibrationTargets( ) {

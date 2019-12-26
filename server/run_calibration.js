@@ -28,12 +28,8 @@ import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug,
 } from '../imports/api/theLoggers.js';
 
 import {
-  backupFolder,
-} from '../imports/api/backups.js';
-
-import {
-  skySafariFilesFolder,
-} from '../imports/api/skySafariFiles.js';
+  getFilterSlot,
+} from './filter_wheel.js'
 
 import {
   tsx_ServerStates,
@@ -50,23 +46,8 @@ import {
 } from '../imports/api/serverStates.js';
 
 import {
-  tsx_Connect,
-  tsx_Disconnect,
-  tsx_MntPark,
-  tsx_AbortGuider,
-  getValidTargetSession,
-  prepareTargetForImaging,
-  processTargetTakeSeries,
+  tsx_takeImage,
   tsx_ServerIsOnline,
-  tsx_isDark,
-  isTimeBeforeCurrentTime,
-  hasStartTimePassed,
-  tsx_MntUnpark,
-  tsx_IsParked,
-  findCalibrationSession,
-  CalibrateAutoGuider,
-  tsx_RotateCamera,
-  UpdateImagingTargetReport,
   tsx_SlewTargetName,
   tsx_SlewCmdCoords,
   tsx_StopTracking,
@@ -88,12 +69,6 @@ import {
   addCalibrationFrame,
   updateCalibrationFrame,
  } from '../imports/api/calibrationFrames.js';
-
- import {
-   tsx_takeImage,
-   getFilterSlot,
- } from './run_imageSession.js'
-
 
 export function collect_calibration_images() {
   tsx_SetServerState( 'tool_active', true );
@@ -168,6 +143,5 @@ function takeCalibrationImages( cal ) {
   var exposure = cal.exposure;
   var binning; //future
   var tName = "calibration_image";
-  // export function tsx_takeImage( filterNum, exposure, frame, tName ) {
-
+  tsx_takeImage( filter, exposure, frame, tName );
 }
