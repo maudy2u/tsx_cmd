@@ -45,25 +45,37 @@ export const SessionReports = new Mongo.Collection('sessionReports');
     runningTotal: 0,
   })
 */
+
+// Used by the TargetReports.js
+// creates structure to query the ImagingSessionLogs
 export function getTargetReportTemplate( sessionDate, target ) {
   var takeSeries = TakeSeriesTemplates.findOne({_id:target.series._id});
   var report = [];
   for( var i=0; i<takeSeries.series.length; i++ ) {
     var s = Seriess.findOne({ _id:takeSeries.series[i].id});
-    report.push({
-      id: s._id,
-      sessionDate: sessionDate,
+    var idx = report.indexOf({
       target: target.targetFindName,
-      repeating: takeSeries.repeatSeries,
       subFrameType: s.frame,
       filter: s.filter,
       exposure: s.exposure,
       binning: s.binning,
-      order: s.order,
-      quantity: s.repeat,
-      sessionTotal: 0,
-      runningTotal: 0,
-    })
+    });
+    if( !(idx > -1) ) {
+      report.push({
+        id: s._id,
+        sessionDate: sessionDate,
+        target: target.targetFindName,
+        repeating: takeSeries.repeatSeries,
+        subFrameType: s.frame,
+        filter: s.filter,
+        exposure: s.exposure,
+        binning: s.binning,
+        order: s.order,
+        quantity: s.repeat,
+        sessionTotal: 0,
+        runningTotal: 0,
+      })
+    }
   }
   return report;
 }
@@ -144,28 +156,6 @@ export function getSessionData( date ) {
   var data = SessionReports.find({ sessionDate: session }).fetch();
   return data;
 }
-
-export function getSessionTargetFilterExposureTotal( reportRow ) {
-  var data = SessionReports.find({
-    sessionDate: reportRow.sessionDate,
-    target: reportRow.target,
-    filter: reportRow.filter,
-    exposure: reportRow.exposure,
-  }).fetch();
-  var num = data.length;
-  return num;
-}
-
-export function getTargetFilterExposureRunningTotal( reportRow ) {
-  var data = SessionReports.find({
-    target: reportRow.target,
-    filter: reportRow.filter,
-    exposure: reportRow.exposure,
-  }).fetch();
-  var num = data.length;
-  return num;
-}
-
 
 export function getSessionTargets( date ) {
   var data = getSessionDate ( date );
