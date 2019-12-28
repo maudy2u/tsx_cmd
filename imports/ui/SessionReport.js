@@ -54,8 +54,17 @@ import {
   updateFlatExposure,
 } from '../api/filters.js';
 
-import TargetReport from './TargetReport.js';
+import {
+  sessionDate,
+} from '../api/time_utils.js'
 
+import {
+  createImagingReportSessionDate,
+  createImagingReportSessionDateTemplate,
+  getSessionDates
+} from '../api/imagingSessionLogs.js'
+
+import TargetLog from './TargetLog.js';
 
 // Import the UI
 class SessionReport extends Component {
@@ -64,6 +73,7 @@ class SessionReport extends Component {
     super();
     this.state = {
       activeIndex: 0,
+      sessionDate: sessionDate(new Date()), // default to today's date
     };
   }
 
@@ -74,6 +84,10 @@ class SessionReport extends Component {
    const newIndex = activeIndex === index ? -1 : index
 
    this.setState({ activeIndex: newIndex })
+ }
+
+ handleChange = (e, { name, value }) => {
+   this.setState({ [name]: value });
  }
 
   // used for the modal exposure settings for flats
@@ -113,14 +127,21 @@ class SessionReport extends Component {
   }
 
   render() {
-/*
 
+    const { activeIndex } = this.state;
+    var sessionDates = getSessionDates();
 
- */
+    var dropDownSessionDates = [];
+    for( var sd=0; sd<sessionDates.length; sd ++ ) {
+      dropDownSessionDates.push(
+        { key: sessionDates[sd], text: sessionDates[sd], value: sessionDates[sd]}
+      );
+    }
+    var reportData = createImagingReportSessionDateTemplate( this.state.sessionDate );
 
-    const { activeIndex } = this.state
 
     return (
+      <div>
       <Accordion size='mini' styled>
           <Accordion.Title
             active={activeIndex === 0}
@@ -128,6 +149,19 @@ class SessionReport extends Component {
             index={0}
             onClick={this.handleClick}
             />
+            <Dropdown
+              button
+              search
+              wrapSelection
+              scrolling
+              label='Session Dates'
+              name='sessionDate'
+              options={dropDownSessionDates}
+              placeholder='Pick a date'
+              text={this.state.sessionDate}
+              onChange={this.handleChange}
+            />
+
           <Accordion.Content active={activeIndex === 0} >
             <Table celled compact basic unstackable>
               <Table.Header style={{background: 'black'}}>
@@ -139,17 +173,14 @@ class SessionReport extends Component {
                   <Table.Cell content='Total' />
                 </Table.Row>
               </Table.Header>
-                {this.props.enabledTargetSessions.map((obj)=>{
-                  return (
-                     <TargetReport
-                      key={obj._id}
-                      target={obj}
-                    />
-                  )
-                })}
+              <TargetLog
+                reportData={reportData}
+                sessionDate={this.state.sessionDate}
+              />
             </Table>
           </Accordion.Content>
       </Accordion>
+      </div>
     )
   }
 }

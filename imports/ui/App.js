@@ -66,7 +66,6 @@ import SessionControls from './SessionControls.js';
 import TestModal from './TestModal.js';
 import BackupModal from './BackupModal.js';
 import NightPlanner from './NightPlanner.js';
-import SessionLog from './SessionLog.js';
 
 import {
   tsx_ServerStates,
@@ -382,9 +381,6 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           <Menu.Item fitted name='Toolbox' active={activeMenu === 'Toolbox'} onClick={this.handleMenuItemClick}>
             <Icon name='briefcase' size='large' />
           </Menu.Item>
-          <Menu.Item fitted name='Session Log' active={activeMenu === 'Session Log'} onClick={this.handleMenuItemClick}>
-            <Icon name='line graph' size='large' />
-          </Menu.Item>
           <Menu.Item fitted name='Devices' active={activeMenu === 'Devices'} onClick={this.handleMenuItemClick}>
             <Icon name='power cord' size='large' />
           </Menu.Item>
@@ -473,15 +469,6 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           tool_flats_location = {this.props.tool_flats_location}
           tool_flats_dec_az = {this.props.tool_flats_dec_az}
         />
-      )
-    } else if (this.state.activeMenu == 'Session Log') {
-      return (
-        <SessionLog
-          scheduler_report={this.props.scheduler_report}
-          tsxInfo={this.props.tsxInfo}
-          scheduler_running={this.props.scheduler_running}
-          enabledTargetSessions={this.props.enabledTargetSessions}
-          />
       )
     } else if (this.state.activeMenu == 'Devices') {
       return this.renderDevices();

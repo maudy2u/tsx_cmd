@@ -188,6 +188,12 @@ export function getSessionDates() {
       dates.push( ld );
     }
   }
+  var today = sessionDate(new Date());
+  var idx = dates.indexOf( today );
+  if( idx == -1 ) {
+    dates.push( today );
+  }
+
   return  dates;
 }
 
