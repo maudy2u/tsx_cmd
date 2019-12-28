@@ -193,10 +193,32 @@ export function getSessionDates() {
 
  // Used by the TargetReports.js
  // creates structure to query the ImagingSessionLogs
- export function logImagingForSessionDate( sDate ) {
+ // get all items logged on date
+ // find the unique subsets
+ export function createImagingReportSessionDateTemplate( sDate ) {
+   if( sDate == '' ) {
+     return [];
+   }
    var takeSeries = ImagingSessionLogs.find({sessionDate: sDate}).fetch();
-
-   return takeSeries;
+   var keys = []; // target | filter | exposure
+   var reportData = [];
+   for( var i=0; i<takeSeries.length; i++ ) {
+     var e = takeSeries[i];
+     var k = e.target+'|'+e.filter+'|'+e.exposure;
+     if( keys.indexOf(k)<0) {
+       keys.push(k);
+       reportData.push({
+         key: k,
+         sessionDate: e.sessionDate,
+         target: e.target,
+         filter: e.filter,
+         exposure: e.exposure,
+         sessionTotal: 0,
+         runningTotal: 0,
+       })
+     }
+   }
+   return reportData;
  }
 
  export function getTargetReportTemplate( sDate, target ) {

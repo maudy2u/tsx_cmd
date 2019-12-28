@@ -50,93 +50,34 @@ import {
 } from '../api/filters.js';
 
 import {
-  sessionDate,
-} from '../api/time_utils.js'
-
-import {
-  logImagingForSessionDate,
-  calcSessionTargetFilterExposureLogTotal,
+  calcSessionTargetFilterExposureTotal,
+  calcTargetFilterExposureRunningTotal,
 } from '../api/imagingSessionLogs.js'
-
-//const sDate = sessionDate(new Date());
 
 class TargetLog extends Component {
 
-  constructor() {
-    super();
-    this.state = {
-      target: '',
-      sessionDate: '',
-      report: '',
-    };
-  }
+  state = {
+    reportData: [],
+  };
 
   // Initialize states
   componentDidMount() {
     // // do not modify the state directly
-    if( typeof this.props.enabledTargetSessions != 'undefined') {
-      this.setState({
-        target: this.props.enabledTargetSessions.target,
-      });
-    }
-    if( typeof this.props.sessionDate != 'undefined') {
-      this.setState({
-        sessionDate: this.props.sessionDate,
-      });
-    }
   }
-
-  handleChange = (e, { name, value }) => {
-    this.setState({ [name]: value });
-    updateCalibrationFrame(
-      this.props.calibration._id,
-      name,
-      value,
-    );
-  };
-
-  handleToggle = (e, { name }) => {
-    var val = eval( 'this.state.' + name);
-    this.setState({
-      [name]: !val
-    });
-    updateCalibrationFrame(
-      this.props.calibration._id,
-      name,
-      !val,
-    );
-  };
 
   render() {
     // get the ses
-    const reportData = logImagingForSessionDate( this.props.sessionDate );
-    var targetLog = [];
-    for( var i=0; i<reportData.length; i++ ) {
-      var data = reportData[i];
-      var idx = targetLog.indexOf({
-        target: data.target,
-        filter: data.filter,
-        exposure: data.exposure
-      });
-      if( idx > -1 ) {
-        var total = targetLog[idx].sessionTotal;
-        targetLog[idx].sessionTotal = total+1;
-      }
-      else {
-          targetLog.push( data );
-      }
-    }
 
     return (
       <Table.Body>
-      { targetLog.map((obj)=> {
+      { this.props.reportData.map((obj)=> {
           return (
-            <Table.Row style={{color: 'white'}} key={obj.id}>
+            <Table.Row style={{color: 'white'}} key={obj.key}>
               <Table.Cell width={2} content={obj.target } />
               <Table.Cell width={1} content={obj.filter } />
               <Table.Cell width={1} content={obj.exposure } />
-              <Table.Cell width={1} content={obj.runningTotal } />
-              <Table.Cell width={1} content={''}/>
+              <Table.Cell width={1} content={ calcSessionTargetFilterExposureTotal(obj) } />
+              <Table.Cell width={1} content={calcTargetFilterExposureRunningTotal(obj)}/>
             </Table.Row>
           )}
       )}

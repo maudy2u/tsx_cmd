@@ -56,6 +56,8 @@ import {
 } from '../api/filters.js';
 
 import {
+  createImagingReportSessionDate,
+  createImagingReportSessionDateTemplate,
   getSessionDates
 } from '../api/imagingSessionLogs.js'
 
@@ -70,6 +72,7 @@ class SessionLog extends Component {
     this.state = {
       activeIndex: 0,
       sessionDate: '',
+      reportData: [],
     };
   }
 
@@ -82,8 +85,9 @@ class SessionLog extends Component {
    this.setState({ activeIndex: newIndex })
  }
 
- handleChange = (e, { name, value }) =>
-  this.setState({ [name]: value });
+ handleChange = (e, { name, value }) => {
+   this.setState({ [name]: value });
+ }
 
   // used for the modal exposure settings for flats
   handleStateChange = (e, { name, value }) => {
@@ -139,6 +143,7 @@ class SessionLog extends Component {
         { key: sessionDates[sd], text: sessionDates[sd], value: sessionDates[sd]}
       );
     }
+    var reportData = createImagingReportSessionDateTemplate( this.state.sessionDate );
 
     return (
       <div>
@@ -174,15 +179,10 @@ class SessionLog extends Component {
                   <Table.Cell content='Total' />
                 </Table.Row>
               </Table.Header>
-                {this.props.enabledTargetSessions.map((obj)=>{
-                  return (
-                     <TargetLog
-                      key={obj._id}
-                      target={obj}
-                      sessionDate={this.state.sessionDate}
-                    />
-                  )
-                })}
+                <TargetLog
+                  reportData={reportData}
+                  sessionDate={this.state.sessionDate}
+                />
             </Table>
           </Accordion.Content>
       </Accordion>
