@@ -50,7 +50,7 @@ import {
 } from '../api/filters.js';
 
 import {
-  calcSessionTargetFilterExposureTotal,
+  calcTargetFilterExposureSessionTotal,
   calcTargetFilterExposureRunningTotal,
 } from '../api/imagingSessionLogs.js'
 
@@ -76,8 +76,8 @@ class TargetLog extends Component {
               <Table.Cell width={2} content={obj.target } />
               <Table.Cell width={1} content={obj.filter } />
               <Table.Cell width={1} content={obj.exposure } />
-              <Table.Cell width={1} content={ calcSessionTargetFilterExposureTotal(obj) } />
-              <Table.Cell width={1} content={calcTargetFilterExposureRunningTotal(obj)}/>
+              <Table.Cell width={1} content={ calcTargetFilterExposureSessionTotal(obj) } />
+              <Table.Cell width={1} content={ calcTargetFilterExposureRunningTotal(obj) }/>
             </Table.Row>
           )}
       )}

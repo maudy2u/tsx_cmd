@@ -53,6 +53,7 @@ import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 import {
   tsx_ServerStates,
   tsx_UpdateServerState,
+  saveDefaultStateValue,
   // tsx_GetServerState,
 } from  '../api/serverStates.js';
 
@@ -138,64 +139,36 @@ class DefaultSettings extends Component {
     this.setState({
       [name]: !val
     });
-    this.saveDefaultState( name );
+    saveDefaultStateValue( name, value );
   };
 
   handleChange = (e, { name, value }) => {
     this.setState({ [name]: value.trim() });
-    this.saveDefaultState( name );
-  };
-
-  setSaveState( name, value ) {
-    this.setState({ [name]: value });
-    this.saveDefaultState( name );
+    saveDefaultStateValue( name, value );
   };
 
   handleStartChange = ( value ) => {
     console.log( ' Found start: ' + value.formatted24);
     this.setState({defaultStartTime: value.formatted24 });
     console.log( ' Saved start: ' + this.state.defaultStartTime );
-    Meteor.call( 'updateServerState', 'defaultStartTime', value.formatted24 , function(error, result) {
-
-        if (error && error.error === "logged-out") {
-          // show a nice error message
-          Session.set("errorMessage", "Please fix.");
-        }
-    });//.bind(this));
-
+    saveDefaultStateValue( 'defaultStartTime', value.formatted24 );
   }
+
   handleStopChange = ( value ) => {
     this.setState({defaultStopTime: value.formatted24 });
-    Meteor.call( 'updateServerState', 'defaultStopTime', value.formatted24 , function(error, result) {
-
-        if (error && error.error === "logged-out") {
-          // show a nice error message
-          Session.set("errorMessage", "Please fix.");
-        }
-    });//.bind(this));
-
+    saveDefaultStateValue( 'defaultStopTime', value.formatted24 );
   }
 
-  handlePriorityChange = ( value ) => this.setState({defaultPriority: value.value });
-
+  handlePriorityChange = ( value ) => {
+    this.setState({defaultPriority: value.value });
+    saveDefaultStateValue( 'defaultPriority', value.value );
+  }
   handleMenuItemClick = (e, { name }) => this.setState({ activeItem: name });
   saveServerFailedOpen = () => this.setState({ saveServerFailed: true });
   saveServerFailedClose = () => this.setState({ saveServerFailed: false });
 
-  componentDidMount() {
+  componentWillMount() {
     this.updateDefaults(this.props);
-  }
-
-  // Generic Method to determine default to save.
-  saveDefaultState( param ) {
-    var value = eval("this.state."+param);
-    Meteor.call( 'updateServerState', param, value , function(error, result) {
-
-        if (error && error.error === "logged-out") {
-          // show a nice error message
-          Session.set("errorMessage", "Please fix.");
-        }
-    });//.bind(this));
   }
 
   updateDefaults(nextProps) {
@@ -203,150 +176,108 @@ class DefaultSettings extends Component {
         return;
       }
 
-      if( typeof nextProps.tsxInfo == 'undefined'  ) {
-        return;
+      if( typeof nextProps.tsxInfo != 'undefined'  ) {
+        this.setState({
+
+          defaultMinSunAlt: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultMinSunAlt';
+          }).value,
+          defaultFocusTempDiff: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultFocusTempDiff';
+          }).value,
+          defaultMeridianFlip: Boolean(nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultMeridianFlip';
+          }).value),
+          defaultStartTime: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultStartTime';
+          }).value,
+          defaultStopTime: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultStopTime';
+          }).value,
+          defaultPriority: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultPriority';
+          }).value,
+          currentStage: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'currentStage';
+          }).value,
+          defaultSoftPark: Boolean(nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultSoftPark';
+          }).value),
+          defaultMinAlt: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultMinAlt';
+          }).value,
+          defaultSleepTime: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultSleepTime';
+          }).value,
+          isTwilightEnabled: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'isTwilightEnabled';
+          }).value,
+          isFocus3Enabled: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'isFocus3Enabled';
+          }).value,
+          focus3Samples: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'focus3Samples';
+          }).value,
+          isFocus3Binned: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'isFocus3Binned';
+          }).value,
+          defaultGuideExposure: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultGuideExposure';
+          }).value,
+          defaultDithering: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultDithering';
+          }).value,
+          minDitherFactor: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'minDitherFactor';
+          }).value,
+          maxDitherFactor: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'maxDitherFactor';
+          }).value,
+          imagingPixelSize: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'imagingPixelSize';
+          }).value,
+          imagingFocalLength: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'imagingFocalLength';
+          }).value,
+          guiderPixelSize: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'guiderPixelSize';
+          }).value,
+          guidingPixelErrorTolerance: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'guidingPixelErrorTolerance';
+          }).value,
+          defaultFocusExposure: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultFocusExposure';
+          }).value,
+          defaultCLSEnabled: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultCLSEnabled';
+          }).value,
+          defaultFilter: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultFilter';
+          }).value,
+          fovPositionAngleTolerance: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'fovPositionAngleTolerance';
+          }).value,
+          defaultFOVExposure: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultFOVExposure';
+          }).value,
+          defaultCLSRetries: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultCLSRetries';
+          }).value,
+          defaultCLSRepeat: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultCLSRepeat';
+          }).value,
+          calibrationFrameSize: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'calibrationFrameSize';
+          }).value,
+
+          flatbox_enabled: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'flatbox_enabled';
+          }).value,
+          flatbox_ip: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'flatbox_ip';
+          }).value,
+        });
       }
-
-    this.setState({
-
-      defaultFocusTempDiff: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultFocusTempDiff';
-      }).value,
-      defaultMeridianFlip: Boolean(nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultMeridianFlip';
-      }).value),
-      defaultStartTime: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultStartTime';
-      }).value,
-      defaultStopTime: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultStopTime';
-      }).value,
-      defaultPriority: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultPriority';
-      }).value,
-      currentStage: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'currentStage';
-      }).value,
-      defaultSoftPark: Boolean(nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultSoftPark';
-      }).value),
-      defaultMinAlt: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultMinAlt';
-      }).value,
-      defaultSleepTime: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultSleepTime';
-      }).value,
-      isTwilightEnabled: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'isTwilightEnabled';
-      }).value,
-      isFocus3Enabled: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'isFocus3Enabled';
-      }).value,
-      focus3Samples: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'focus3Samples';
-      }).value,
-      isFocus3Binned: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'isFocus3Binned';
-      }).value,
-      defaultGuideExposure: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultGuideExposure';
-      }).value,
-      defaultDithering: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultDithering';
-      }).value,
-      defaultMinSunAlt: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultMinSunAlt';
-      }).value,
-      minDitherFactor: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'minDitherFactor';
-      }).value,
-      maxDitherFactor: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'maxDitherFactor';
-      }).value,
-      imagingPixelSize: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'imagingPixelSize';
-      }).value,
-      imagingFocalLength: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'imagingFocalLength';
-      }).value,
-      guiderPixelSize: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'guiderPixelSize';
-      }).value,
-      guidingPixelErrorTolerance: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'guidingPixelErrorTolerance';
-      }).value,
-      defaultFocusExposure: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultFocusExposure';
-      }).value,
-      defaultCLSEnabled: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultCLSEnabled';
-      }).value,
-      defaultFilter: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultFilter';
-      }).value,
-      fovPositionAngleTolerance: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'fovPositionAngleTolerance';
-      }).value,
-      defaultFOVExposure: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultFOVExposure';
-      }).value,
-      defaultCLSRetries: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultCLSRetries';
-      }).value,
-      defaultCLSRepeat: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'defaultCLSRepeat';
-      }).value,
-      calibrationFrameSize: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'calibrationFrameSize';
-      }).value,
-
-      flatbox_enabled: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'flatbox_enabled';
-      }).value,
-      flatbox_ip: nextProps.tsxInfo.find(function(element) {
-        return element.name == 'flatbox_ip';
-      }).value,
-    });
-
-  }
-
-  // Use this method to save any defaults gathered
-  saveDefaults(){
-
-    // this.saveDefaultState('ip');
-    // this.saveDefaultState('port');
-    this.saveDefaultState('defaultMinAlt');
-    this.saveDefaultState('defaultCoolTemp');
-    this.saveDefaultState('defaultFocusTempDiff');
-    this.saveDefaultState('defaultMeridianFlip');
-    this.saveDefaultState('defaultStartTime');
-    this.saveDefaultState('defaultStopTime');
-    this.saveDefaultState('defaultPriority');
-    this.saveDefaultState('defaultSoftPark');
-    this.saveDefaultState('defaultSleepTime');
-    this.saveDefaultState('isTwilightEnabled');
-    this.saveDefaultState('isFocus3Enabled');
-    this.saveDefaultState('focus3Samples');
-    this.saveDefaultState('isFocus3Binned');
-    this.saveDefaultState('defaultGuideExposure');
-    this.saveDefaultState('defaultDithering');
-    this.saveDefaultState('defaultMinSunAlt');
-    this.saveDefaultState('minDitherFactor');
-    this.saveDefaultState('maxDitherFactor');
-    this.saveDefaultState('imagingPixelSize');
-    this.saveDefaultState('imagingFocalLength');
-    this.saveDefaultState('guiderPixelSize');
-    this.saveDefaultState('guidingPixelErrorTolerance');
-    this.saveDefaultState('defaultFocusExposure');
-    this.saveDefaultState('defaultCLSEnabled');
-    this.saveDefaultState('defaultFilter');
-    this.saveDefaultState('fovPositionAngleTolerance');
-    this.saveDefaultState('defaultFOVExposure');
-    this.saveDefaultState('defaultCLSRetries');
-    this.saveDefaultState('defaultCLSRepeat');
-    this.saveDefaultState('calibrationFrameSize');
-    this.saveDefaultState('flatbox_enabled');
-    this.saveDefaultState('flatbox_ip');
   }
 
   // *******************************
@@ -807,9 +738,6 @@ class DefaultSettings extends Component {
 
     return (
       <div>
-        <Button icon='save' onClick={this.saveDefaults.bind(this)} />
-        {/* <Button icon='save' onClick={this.saveTSXServerConnection.bind(this)}> Save Connection </Button>
-        {this.renderTSXConnetion()} */}
         <Accordion styled>
           {this.renderConstraints()}
           {this.renderStartStopTimes()}

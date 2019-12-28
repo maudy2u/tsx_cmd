@@ -509,6 +509,7 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
       return (
         <DefaultSettings
           scheduler_running={this.props.scheduler_running}
+          tsxInfo = { this.props.tsxInfo }
         />
       )
     }

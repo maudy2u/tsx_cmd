@@ -327,45 +327,49 @@ class Toolbox extends Component {
 
     return (
       <div>
-      <Header>Calibrate Autoguider</Header>
-      <Button.Group icon>
-          <Button  disabled={DISABLE} onClick={this.calibrateGuider.bind(this)}>Calibrate</Button>
-       </Button.Group>
-       <Checkbox
-         label='Enable Calibrating '
-         name='isCalibrationEnabled'
-         toggle
-         placeholder= 'Enable Autoguiding Calibrating'
-         checked={Boolean(this.state.isCalibrationEnabled)}
-         onChange={this.handleToggleAndSave.bind(this)}
-       />
-       <Form>
-         <Dropdown
-            name='tool_calibrate_via'
-            placeholder='Slew via...'
-            selection options={slewOptions}
-            value={calType}
-            onChange={this.handleChange}
-          />
-          <Input
-            name='tool_calibrate_location'
-            placeholder='Target name, Ra, or Alt: '
-            value={calLocation}
-            onChange={this.handleChange}
-          />
-          <Input
-            name='tool_calibrate_dec_az'
-            placeholder='Dec, or azimuth: '
-            value={calDecAz}
-            onChange={this.handleChange}
-            validations={{
-              matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-            }}
-            validationError="Must be a positive number, e.g 0, 5.1, 1800, 3600"
-            errorLabel={ ERRORLABEL }
-          />
+        <Header>Calibrate Autoguider</Header>
+        <Form>
+          <Form.Group>
+            <Button.Group icon>
+              <Button  disabled={DISABLE} onClick={this.calibrateGuider.bind(this)}>Calibrate</Button>
+            </Button.Group>
+            <Checkbox
+             label='Enable Calibrating '
+             name='isCalibrationEnabled'
+             toggle
+             placeholder= 'Enable Autoguiding Calibrating'
+             checked={Boolean(this.state.isCalibrationEnabled)}
+             onChange={this.handleToggleAndSave.bind(this)}
+            />
+          </Form.Group>
+          <Form.Group>
+            <Dropdown
+             name='tool_calibrate_via'
+             placeholder='Slew via...'
+             selection options={slewOptions}
+             value={calType}
+             onChange={this.handleChange}
+            />
+            <Input
+             name='tool_calibrate_location'
+             placeholder='Target name, Ra, or Alt: '
+             value={calLocation}
+             onChange={this.handleChange}
+            />
+            <Input
+             name='tool_calibrate_dec_az'
+             placeholder='Dec, or azimuth: '
+             value={calDecAz}
+             onChange={this.handleChange}
+             validations={{
+               matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+             }}
+             validationError="Must be a positive number, e.g 0, 5.1, 1800, 3600"
+             errorLabel={ ERRORLABEL }
+            />
+          </Form.Group>
+          (Optionaly select a slew type and specify a location, e.g 5.95, 21.99)
         </Form>
-        <br/>(Optionaly select a slew type and specify a location, e.g 5.95, 21.99)
      </div>
     )
   };

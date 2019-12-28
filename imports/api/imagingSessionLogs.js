@@ -253,18 +253,7 @@ export function getSessionDates() {
    return report;
  }
 
-export function calcSessionTargetFilterExposureLogTotal( reportRow ) {
-  var data = ImagingSessionLogs.find({
-    target: reportRow.target,
-    filter: reportRow.filter,
-    exposure: reportRow.exposure,
-  }).fetch();
-  var num = data.length;
-  return num;
-}
-
-
- export function calcSessionTargetFilterExposureTotal( reportRow ) {
+ export function calcTargetFilterExposureSessionTotal( reportRow ) {
    var data = ImagingSessionLogs.find({
      sessionDate: reportRow.sessionDate,
      target: reportRow.target,
