@@ -33,7 +33,7 @@ var targetName = "$000";
 var twightlightAlt = $001;
 var altLimit	= $002;	// Really a constant for the altitude limit
 // data to return
-var report;
+var report = 'Success';
 // Verify target
 var tryTarget 	= {
 	ready: true,
@@ -43,14 +43,15 @@ var tryTarget 	= {
 CHART.Find("sun");
 OBJI.Property(59);
 var sunAlt = OBJI.ObjInfoPropOut;
+var report = 'Success';
 if (sunAlt > twightlightAlt ) {
-report  = false
-  + '|' +
+report  = report +'|isDark=' + false
+  + '|sunAltitude=' +
   sunAlt;
 
 } else {
-  report  = true
-    + '|' +
+  report  = report +'|isDark=' + true
+    + '|sunAltitude=' +
     sunAlt;
 };
 
@@ -101,24 +102,24 @@ try {
     var targetTransit = OBJI.ObjInfoPropOut; 		// Stuff DEC into variable
 
     report = report +
-      '|' +
+      '|isValid=' +
       true
-      + '|' +
+      + '|AZ=' +
       azimuth
-      + '|' +
+      + '|ALT=' +
       altitude
-      + '|' +
+      + '|RA=' +
       targetRA
-      + '|' +
+      + '|DEC=' +
       targetDEC
-      + '|' +
+      + '|HA=' +
       targetHA
-      + '|' +
+      + '|TRANSIT=' +
       targetTransit;
   }
   else {
     report = report +
-      '|' +
+      '|isValid=' +
       false;
 
     tryTarget 	= {
@@ -132,7 +133,7 @@ catch (repErr) {
 	//	If error, report it.
 	//
   report = report +
-    '|' +
+    '|isValid=' +
     false;
 
   tryTarget 	= {
@@ -145,24 +146,24 @@ var BTP = sky6RASCOMTele.DoCommandOutput;
 var pointing = '';
 if (BTP == 1)
 {
-  pointing = 'East';
+  pointing = 'pointing=East';
   // RunJavaScriptOutput.writeLine ("Mount has not flipped and is pointing east.");
 
 } else if (BTP == 0) {
 
-  pointing = 'West';
+  pointing = 'pointing=West';
   //RunJavaScriptOutput.writeLine ("Mount has flipped and is pointing west.");
 }
 else {
-  pointing = 'Unknown';
+  pointing = 'pointing=Unknown';
 }
-report = report +'|'+ tryTarget.ready + '|'+tryTarget.msg + '|'+pointing;
+report = report +'|ready='+ tryTarget.ready + '|readyMsg='+tryTarget.msg + '|'+pointing;
 
 // add focuser info
 if( SelectedHardware.focuserModel != '<No Focuser Selected>') {
   var temp = CCDSC.focTemperature.toFixed(1);
   var pos = CCDSC.focPosition;
-  report = report +'|'+ temp +'|'+ pos;
+  report = report +'|focusTemp='+ temp +'|focusPosition='+ pos;
 }
 
 report;

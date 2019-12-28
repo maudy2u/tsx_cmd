@@ -28,7 +28,15 @@ import {
 } from '../imports/api/theLoggers.js';
 
 import { TargetSessions } from '../imports/api/targetSessions.js';
-import { TargetReports } from '../imports/api/targetReports.js';
+import {
+  ImagingSessionLogs,
+  addImageReport,
+  updateImageReport,
+} from '../imports/api/imagingSessionLogs.js';
+import {
+  TargetReports,
+  updateTargetReport,
+} from '../imports/api/targetReports.js';
 import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
 import { Seriess } from '../imports/api/seriess.js';
 import { Filters } from '../imports/api/filters.js';
@@ -50,24 +58,20 @@ import {
   UpdateStatusErr,
   postProgressTotal,
   UpdateImagingSesionID,
- } from '../imports/api/serverStates.js'
+} from '../imports/api/serverStates.js'
 
 import {
   tsx_feeder,
   tsx_cmd,
   tsx_has_error,
- } from './tsx_feeder.js'
+} from './tsx_feeder.js'
 
- import {
-   getFilterName,
-   getFrame,
-   getFrameName,
-   getFilterSlot,
- } from './filter_wheel.js'
-
- import {
-   addSessionImageReport,
- } from '../imports/api/sessionReports.js'
+import {
+  getFilterName,
+  getFrame,
+  getFrameName,
+  getFilterSlot,
+} from './filter_wheel.js'
 
 var tsxHeader =  '/* Java Script *//* Socket Start Packet */';
 var tsxFooter = '/* Socket End Packet */';
@@ -836,22 +840,6 @@ function tsx_CLS_target( target, filter ) {
     throw( 'TSX_ERROR|Cloudy? Is Tsx Running?');
   }
   return clsSuccess;
-}
-
-function targetReportAngle( target, angle ) {
-  var rid = TargetReports.upsert( { target_id: target._id }, {
-    $set: {
-      ANGLE: angle,
-    }
-  });
-  var rpt = TargetReports.findOne( { target_id: target._id } );
-  var tgt = TargetSessions.update({_id: target._id} , {
-    $set: {
-      report_id: rid,
-      report: rpt,
-    }
-  });
-  tsx_SetServerState('scheduler_report', rpt );
 }
 
 // **************************************************************
@@ -1845,110 +1833,87 @@ function tsx_TargetReport( target ) {
       // true|West|42.2|5.593339690591149|22.023446766485247|3.4187695344846833|16.2723491463255240.0|0|
       // No error. Error = 0.
       tsxDebug( tsx_return );
-
       var result = tsx_return.split('|')[0].trim();
       if( result == 'TypeError: Object not found. Error = 250.') {
         UpdateStatusErr('!!! TargetReport failed. Target not found.');
-        tsxDebug( tsx_return );
+        tsxLog( tsx_return );
       }
       else {
-        var isDark = tsx_return.split('|')[0].trim();
-        var sunAlt = tsx_return.split('|')[1].trim();
-        var isValid = tsx_return.split('|')[2].trim();
-
-        // isValid will be false if not found or exception within script
-        if( isValid != 'true' ) {
-          UpdateStatusErr('!!! TargetReport failed. Not found ('+target.targetFindName+'): ' + isValid);
-        }
-        else {
-          var az, alt, ra, dec, ha,
-            transit, focTemp, focPostion,
-            ready, readyMsg, pointing;
-
-          // #TODO can add star detect in case of clouds...
-
-          // if( isValid ) {
-          az = tsx_return.split('|')[3].trim();
-          alt = tsx_return.split('|')[4].trim();
-          ra = tsx_return.split('|')[5].trim();
-          dec = tsx_return.split('|')[6].trim();
-          ha = tsx_return.split('|')[7].trim();
-          transit = tsx_return.split('|')[8].trim();
-          ready = tsx_return.split('|')[9].trim();
-          readyMsg = tsx_return.split('|')[10].trim();
-          pointing = tsx_return.split('|')[11].trim();
-          try { // try to get focuser info
-            focTemp = tsx_return.split('|')[12].trim();
-            focPostion = tsx_return.split('|')[13].trim();
+        var results = tsx_return.split('|');
+        if( results.length > 0) {
+          var result = results[0].trim();
+          if( result == 'Success') {
+            success = true;
           }
-          catch(e) {
-              // no need
-              focTemp='';
-              focPostion='';
+          for( var i=1; i<results.length;i++) {
+            var token=results[i].trim();
+            var param=token.split("=");
+            switch( param[0] ) {
+
+              case 'focusPosition':
+                updateTargetReport( target._id, 'focusPosition', param[1] );
+                break;
+              case 'focusTemp':
+                updateTargetReport( target._id, 'focusTemp', param[1] );
+                break;
+              case 'readyMsg':
+                updateTargetReport( target._id, 'readyMsg', param[1] );
+                break;
+              case 'ready':
+                updateTargetReport( target._id, 'ready', param[1] );
+                break;
+              case 'isDark':
+                updateTargetReport( target._id, 'isDark', param[1] );
+                break;
+              case 'sunAltitude':
+                updateTargetReport( target._id, 'sunAltitude', param[1] );
+                break;
+              case 'isValid':
+                updateTargetReport( target._id, 'isValid', param[1] );
+                break;
+              case 'AZ':
+                updateTargetReport( target._id, 'AZ', param[1] );
+                break;
+              case 'ALT':
+                updateTargetReport( target._id, 'ALT', param[1] );
+                break;
+              case 'RA':
+                updateTargetReport( target._id, 'RA', param[1] );
+                break;
+              case 'DEC':
+                updateTargetReport( target._id, 'DEC', param[1] );
+                break;
+              case 'HA':
+                updateTargetReport( target._id, 'HA', param[1] );
+                break;
+              case 'TRANSIT':
+                updateTargetReport( target._id, 'TRANSIT', param[1] );
+                break;
+              case 'isValid':
+                UpdateStatusErr('!!! TargetReport failed. Not found ('+target.targetFindName+'): ' + param[1]);
+                break;
+              case 'pointing':
+                updateTargetReport( target._id, 'pointing', param[1] );
+                break;
+              default:
+
+            }
           }
-          var update = new Date();
-          Out = {
-            scale: '',
-            isValid: isValid,
-            AZ: az,
-            direction: pointing,
-            ALT: alt,
-            RA:  ra,
-            DEC: dec,
-            HA: ha,
-            TRANSIT: transit,
-            isDark: isDark,
-            sunAltitude: sunAlt,
-            focusTemp: focTemp,
-            focusPostion: focPostion,
-            updatedAt: update,
-            ready: ready,
-            readyMsg: readyMsg,
-            pointing: pointing,
-          };
-
-          var rid = TargetReports.upsert( { target_id: target._id }, {
-
-            $set: {
-              isValid: isValid,
-              RA:  ra,
-              DEC: dec,
-              ALT: alt,
-              AZ: az,
-              HA: ha,
-              direction: pointing,
-              scale: '',
-              TRANSIT: transit,
-              isDark: isDark,
-              sunAltitude: sunAlt,
-              focusTemp: focTemp,
-              focusPostion: focPostion,
-              updatedAt: update,
-              ready: ready,
-              readyMsg: readyMsg,
-              pointing: pointing,
-            }
-          });
-          TargetSessions.update({_id: target._id} , {
-            $set: {
-              report_id: rid,
-              report: Out,
-            }
-          });
-          // }
-          // tsxDebug(Out);
-          target.report = Out;
-
-          tsx_SetServerState( tsx_ServerStates.targetRA, ra );
-          tsx_SetServerState( tsx_ServerStates.targetDEC, dec );
-          tsx_SetServerState( tsx_ServerStates.targetALT, alt );
-          tsx_SetServerState(tsx_ServerStates.targetAZ, az );
-          tsx_SetServerState( tsx_ServerStates.targetHA, ha );
-          tsx_SetServerState( tsx_ServerStates.targetTransit, transit );
-          tsx_SetServerState( 'mntMntPointing', pointing );
-
-          tsxDebug( target.targetFindName + ' ' + Out.ALT);
         }
+
+        var rpt = TargetReports.findOne({target_id: target._id });
+        target.report = rpt;
+
+        tsx_SetServerState( tsx_ServerStates.targetRA, rpt.RA );
+        tsx_SetServerState( tsx_ServerStates.targetDEC, rpt.DEC );
+        tsx_SetServerState( tsx_ServerStates.targetALT, rpt.ALT );
+        tsx_SetServerState(tsx_ServerStates.targetAZ, rpt.AZ );
+        tsx_SetServerState( tsx_ServerStates.targetHA, rpt.HA );
+        tsx_SetServerState( tsx_ServerStates.targetTransit, rpt.TRANSIT );
+        tsx_SetServerState( 'mntMntPointing', rpt.pointing );
+
+        tsxDebug( target.targetFindName + ' ' + rpt.ALT);
+        Out=rpt;
       }
     }
     tsx_is_waiting = false;
@@ -2033,7 +1998,6 @@ function tsx_MatchRotation( target ) {
 
           var linkAngle = tsx_return.split('|')[1].trim();
           var angle = linkAngle.split('=')[1].trim();
-          targetReportAngle( target, angle );
           UpdateStatus(' ' + target.targetFindName + ': Rotator FOV angle: ' + angle);
         }
         tsx_is_waiting = false;
@@ -2183,7 +2147,7 @@ function resetTargetImageProcess(target, series ) {
     }
   }
   if (!found) { // we are adding to the series
-    progress.push( {_id:seriesId, taken: 0} );
+    progress.push( {_id:series._id, taken: 0} );
   }
   TargetSessions.update({_id: target._id}, {
     $set: {
@@ -2218,7 +2182,7 @@ function takenImagesFor(target, seriesId) {
 // Use the filter and exposure to take an image
 // Currently it is assumed these are Light images
 // Could set frame type...
-export function tsx_takeImage( filterNum, exposure, frame, tName ) {
+export function tsx_takeImage( filterNum, exposure, frame, target ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_takeImage: ' + filterNum );
 
@@ -2230,40 +2194,112 @@ export function tsx_takeImage( filterNum, exposure, frame, tName ) {
   cmd = cmd.replace("$000", filterNum ); // set filter
   cmd = cmd.replace("$001", exposure ); // set exposure
   cmd = cmd.replace("$002", frame ); // set Light/Dark/Flat/Bias
-  cmd = cmd.replace("$003", tName ); // set target
+  cmd = cmd.replace("$003", target.targetFindName ); // set target
 
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-    var result = tsx_return.split('|')[0].trim();
-    tsxDebug(' Image: ' + result);
-    tsxDebug( tsx_return );
-    if( result === "Success") {
-      success = true;
-      // check for rotatorPositionAngle
-      try {
-        tsxDebug( 'found rotator position: ' + tsx_return );
-        var rotPos = tsx_return.split('|')[1].trim()
-        if( rotPos == 'rotatorPosition') {
-          // the position is stored
-          let ang = tsx_return.split('|')[2].trim();
-          tsxDebug( ' --- rotator position angle: ' + Number(ang).toFixed(3) );
-          // the stoed position can be used for flats
-          recordRotatorPosition( tName, Number(ang).toFixed(3) );
-        }
-        addSessionImageReport(
-          tName,
-          getFrameName(frame),
-          getFilterName(filterNum),
-          exposure,
-          'focus_pos', // focus_pos
-          '1', // binning
-        );
-      }
-      finally{
-        if( frame == '1 ' ) { // 1 = Light
+    // e.g.
+    // Success|RMS_ERROR=0.00|ROTATOR_POS_ANGLE=-350|ANGLE=349.468|FOCUS_POS=0.000
+    tsxDebug(' TakeImage return: ' + tsx_return );
+    if( tsx_has_error(tsx_return) == false ) {
+      var results = tsx_return.split('|');
+      if( results.length > 0) {
+        var result = results[0].trim();
+        if( result == 'Success' ) {
+          success = true;
+          var iid = addImageReport( target.targetFindName );
+          for( var i=1; i<results.length;i++) {
+            var token=results[i].trim();
+            // RunJavaScriptOutput.writeLine(token);
+            var param=token.split("=");
+            switch( param[0] ) {
+
+              case 'ALT':
+                updateImageReport( iid, 'ALT', param[1] );
+                updateTargetReport( target._id, 'ALT', param[1] );
+                break;
+
+              case 'AZ':
+                updateImageReport( iid, 'AZ', param[1] );
+                updateTargetReport( target._id, 'AZ', param[1] );
+                break;
+
+              case 'RA':
+                updateImageReport( iid, 'RA', param[1] );
+                updateTargetReport( target._id, 'RA', param[1] );
+                break;
+
+              case 'DEC':
+                updateImageReport( iid, 'DEC', param[1] );
+                updateTargetReport( target._id, 'DEC', param[1] );
+                break;
+
+              case 'pointing':
+                updateImageReport( iid, 'pointing', param[1] );
+                updateTargetReport( target._id, 'pointing', param[1] );
+                break;
+
+              case 'ANGLE':
+                updateImageReport( iid, 'ANGLE', param[1] );
+                updateTargetReport( target._id, 'pointing', param[1] );
+                break;
+
+              case 'HA':
+                updateImageReport( iid, 'HA', param[1] );
+                updateTargetReport( target._id, 'HA', param[1] );
+                break;
+
+              case 'TRANSIT':
+                updateImageReport( iid, 'TRANSIT', param[1] );
+                updateTargetReport( target._id, 'TRANSIT', param[1] );
+                break;
+
+              case 'FOCUS_POS':
+                updateImageReport( iid, 'FOCUS_POS', param[1] );
+                updateTargetReport( target._id, 'focusPosition', param[1] );
+                break;
+
+              case 'sunAltitude':
+                updateImageReport( iid, 'sunAltitude', param[1] );
+                updateTargetReport( target._id, 'sunAltitude', param[1] );
+                break;
+
+              case 'focusTemp':
+                updateImageReport( iid, 'focusTemp', param[1] );
+                updateTargetReport( target._id, 'focusTemp', param[1] );
+                break;
+
+              case 'ROTATOR_POS_ANGLE':
+                updateImageReport( iid, 'ROTATOR_POS_ANGLE', param[1] );
+                updateTargetReport( target._id, 'ROTATOR_POS_ANGLE', param[1] );
+                break;
+
+              case 'RMS_ERROR':
+                updateImageReport( iid, 'RMS_ERROR', param[1] );
+//                updateTargetReport( target._id, 'pointing', param[1] );
+                break;
+
+              case 'fileName':
+                updateImageReport( iid, 'fileName', param[1] );
+                break;
+
+              default:
+                //RunJavaScriptOutput.writeLine(param[0]+' not found.');
+            }
+          }
+
+          updateImageReport( iid, 'target', target.targetFindName );
+          updateImageReport( iid, 'subFrameTypes', getFrameName(frame) );
+          updateImageReport( iid, 'filter', getFilterName(filterNum) );
+          updateImageReport( iid, 'exposure', exposure );
+//          updateImageReport( iid, 'level', tName );
+          updateImageReport( iid, 'binning', 1 );
+
           // increment Dither count
-          var lastDither = Number(tsx_GetServerStateValue('imagingSessionDither'));
-          tsx_SetServerState('imagingSessionDither', lastDither+1);
+          if( frame == '1 ' ) { // 1 = Light
+            var lastDither = Number(tsx_GetServerStateValue('imagingSessionDither'));
+            tsx_SetServerState('imagingSessionDither', lastDither+1);
+          }
         }
       }
     }
@@ -2272,7 +2308,6 @@ export function tsx_takeImage( filterNum, exposure, frame, tName ) {
     }
     Meteor.sleep( 500 ); // needs a sleep before next image
     tsx_is_waiting = false;
-
   }));
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
@@ -2327,7 +2362,7 @@ function takeSeriesImage(target, series) {
   if( (remainingImages <= series.repeat) && (remainingImages > 0) ) {
     UpdateStatus( ' ' + target.targetFindName + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds, ' + num + '/' +series.repeat + ' TAKING' );
 
-    var res = tsx_takeImage( slot, series.exposure, frame, target.targetFindName.trim() );
+    var res = tsx_takeImage( slot, series.exposure, frame, target );
     if( res != false ) {
       UpdateStatus( ' ' + target.targetFindName + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds, ' + num + '/' +series.repeat + ' DONE' );
       // *******************************
@@ -2931,7 +2966,7 @@ Use this to set the last focus
     var slot = getFilterSlot( series.filter );
     //  cdLight =1, cdBias, cdDark, cdFlat
     var frame = getFrame(series.frame);
-    out = tsx_takeImage(slot,series.exposure, frame, targetSession.targetFindName);
+    out = tsx_takeImage(slot,series.exposure, frame, targetSession );
     tsxDebug('Taken image: ' +res);
 
     return;

@@ -17,8 +17,8 @@ tsx cmd - A web page to send commands to TheSkyX server
  */
 
 import { Mongo } from 'meteor/mongo';
-import { TakeSeriesTemplates } from './takeSeriesTemplates.js'
-import { Seriess } from './seriess.js'
+import { TargetSessions } from './targetSessions.js'
+//import { Seriess } from './seriess.js'
 // import SimpleSchema from 'simple-schema';
 
 // Used to store the sessions for a Target - the actual imaging
@@ -26,117 +26,165 @@ export const TargetReports = new Mongo.Collection('targetReports');
 
 /*
 TargetReports = {
+  ALT:
+  AZ:
+  RA:
+  DEC:
+  pointing:
+  ANGLE:
+  HA:
+  TRANSIT:
+  focusPostion: focPostion,
+  pointing: pointing,
+  ANGLE: clsSuccess.angle,
+
   scale: '',
   isValid: isValid,
-  AZ: az,
   direction: az,
-  ALT: alt,
-  RA:  ra,
-  DEC: dec,
-  HA: ha,
-  TRANSIT: transit,
   isDark: isDark,
   sunAltitude: sunAlt,
   focusTemp: focTemp,
-  focusPostion: focPostion,
   updatedAt: update,
   ready: ready,
   readyMsg: readyMsg,
-  pointing: pointing,
-  ANGLE: clsSuccess.angle,
 };
-
  */
 
+ export function addTargetReport( fid ) {
+   const id  = TargetReports.insert(
+     {
+       target_id: fid,
+       ALT: 0,
+       AZ: 0,
+       RA: 0,
+       DEC: 0,
+       pointing: '',
+       ANGLE: 0,
+       HA: 0,
+       TRANSIT: 0,
+       focusPosition: 0,
+       scale: 0,
+       isValid: '',
+       direction: '',
+       isDark: '',
+       sunAltitude: '',
+       focusTemp: '',
+       updatedAt: '',
+       ready: '',
+       readyMsg: '',
+       ROTATOR_POS_ANGLE: '',
+     },
+   );
+   return id;
+ }
+
+
+ export function updateTargetReport( tid, name, value ) {
+   var id;
+   var obj = TargetReports.findOne({target_id: tid});
+   if( typeof obj == 'undefined' ) {
+     var new_id = addTargetReport(tid);
+     obj = TargetReports.findOne({_id: new_id});
+   }
+   if( typeof obj != 'undefined') {
+     if( name == 'ALT') {
+       obj.ALT = value;
+     }
+     else if( name == 'AZ') {
+       obj.AZ = value;
+     }
+     else if( name == 'RA') {
+       obj.RA = value;
+     }
+     else if( name == 'DEC') {
+       obj.DEC = value;
+     }
+     else if( name == 'pointing') {
+       obj.pointing = value;
+     }
+     else if( name == 'ANGLE') {
+       obj.ANGLE = value;
+     }
+     else if( name == 'HA') {
+       obj.HA = value;
+     }
+     else if( name == 'TRANSIT') {
+       obj.TRANSIT = value;
+     }
+     else if( name == 'focusPosition') {
+       obj.focusPosition = value;
+     }
+     else if( name == 'scale') {
+       obj.scale = value;
+     }
+     else if( name == 'isValid') {
+       obj.isValid = value;
+     }
+
+     // is this one deprecated?
+     else if( name == 'direction') {
+       obj.direction = value;
+     }
+     else if( name == 'isDark') {
+       obj.isDark = value;
+     }
+     else if( name == 'sunAltitude') {
+       obj.sunAltitude = value;
+     }
+     else if( name == 'focusTemp') {
+       obj.focusTemp = value;
+     }
+     else if( name == 'updatedAt') {
+       obj.updatedAt = value;
+     }
+     else if( name == 'ready') {
+       obj.ready = value;
+     }
+     else if( name == 'readyMsg') {
+       obj.readyMsg = value;
+     }
+     else if( name == 'ROTATOR_POS_ANGLE') {
+       obj.ROTATOR_POS_ANGLE = value;
+     }
+
+     id = TargetReports.update({_id: obj._id}, {
+       $set: {
+         ALT: obj.ALT,
+         AZ: obj.AZ,
+         RA: obj.RA,
+         DEC: obj.DEC,
+         pointing: obj.pointing,
+         ANGLE: obj.ANGLE,
+         HA: obj.HA,
+         TRANSIT: obj.TRANSIT,
+         focusPosition: obj.focusPosition,
+         scale: obj.scale,
+         isValid: obj.isValid,
+         direction: obj.direction,
+         isDark: obj.isDark,
+         sunAltitude: obj.sunAltitude,
+         focusTemp: obj.focusTemp,
+         updatedAt: obj.updatedAt,
+         ready: obj.ready,
+         readyMsg: obj.readyMsg,
+         updatedAt: new Date(),
+         RMS_ERROR: obj.RMS_ERROR,
+         ROTATOR_POS_ANGLE: obj.ROTATOR_POS_ANGLE,
+       }
+     });
+     TargetSessions.update({_id: tid} , {
+       $set: {
+         report_id: obj._id,
+         report: obj,
+       }
+     });
+   }
+   return obj;
+ }
+
+
+
 TargetReports.helpers({
-  //
-  // totalImagesPlanned: function() {
-  //   var totalPlannedImages = 0;
-  //   var totalTakenImages = 0;
-  //   var target = this;
-  //
-  //   var seriesId = target.series._id;
-  //   var takeSeries = TakeSeriesTemplates.findOne({_id:seriesId});
-  //
-  //   if( typeof takeSeries == "undefined") {
-  //     return 100; // do not try to process
-  //   }
-  //
-  //   for (var i = 0; i < takeSeries.series.length; i++) {
-  //     var series = takeSeries.series[i];
-  //
-  //     if( typeof series == "undefined") {
-  //       return 100; // do not try to process
-  //     }
-  //
-  //     var item = Seriess.findOne({_id:series.id}); //.fetch();
-  //     if( typeof item == "undefined") {
-  //       return 100; // do not try to process
-  //     }
-  //
-  //     totalPlannedImages = totalPlannedImages + Number(item.repeat);
-  //   }
-  //   // console.log('Planned: ' + totalPlannedImages);
-  //   return totalPlannedImages;
-  // },
-  //
-  // totalImagesTaken: function() {
-  //   var totalTakenImages = 0;
-  //   var target = this;
-  //
-  //   var progress = target.progress;
-  //   if( typeof progress == 'undefined') {
-  //     return 0;
-  //   }
-  //   for (var j = 0; j < progress.length; j++) {
-  //     totalTakenImages = totalTakenImages + progress[j].taken;
-  //   }
-  //   // console.log('Taken: ' + totalTakenImages);
-  //   return totalTakenImages;
-  // },
-  //
-  // calcProgress: function() {
-  //   var taken = this.totalImagesTaken();
-  //   var planned = this.totalImagesPlanned();
-  //
-  //   return taken/planned;
-  //
-  // },
-  //
-  // takenImagesFor: function(seriesId) {
-  //   var taken = 0;
-  //   var progress = this.progress;
-  //   if( typeof progress == 'undefined') {
-  //     return taken;
-  //   }
-  //   for (var i = 0; i < progress.length; i++) {
-  //     if (progress[i]._id == seriesId ) {
-  //       taken = progress[i].taken;
-  //       break;
-  //     }
-  //   }
-  //   return taken;
-  // },
-  //
-  // incrementTakenFor: function(seriesId) {
-  //   var taken = 0;
-  //   var progress = this.progress;
-  //   if( typeof progress != 'undefined') {
-  //     // increment
-  //     for (var i = 0; i < progress.length; i++) {
-  //       if (progress[i]._id == seriesId ) {
-  //         progress[i].taken = progress[i].taken + 1;
-  //         taken = progress[i].taken;
-  //         TargetSessions.update({_id: this._id}, {
-  //           $set: {
-  //             progress: progress[i],
-  //           }
-  //         });
-  //       }
-  //     }
-  //   }
-  //
-  //   return taken;
-  // }
+
 
 });

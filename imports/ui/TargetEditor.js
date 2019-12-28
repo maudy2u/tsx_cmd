@@ -297,7 +297,7 @@ class TargetEditor extends Component {
       // console.log('result: ' + result);
       // if success then TheSkyX has made this point the target...
       // now get the coordinates
-      cmdSuccess = true;
+      //cmdSuccess = true;
       this.setState({ra: result.RA});
       this.setState({dec: result.DEC});
       this.setState({alt: result.ALT});

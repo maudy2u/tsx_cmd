@@ -64,11 +64,6 @@ import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
 import SessionReport from './SessionReport.js';
 
-import {
-  SessionReports,
-  getSessionTargetFilterExposureData,
-} from '../api/sessionReports.js';
-
 class Monitor extends Component {
 
     state = {

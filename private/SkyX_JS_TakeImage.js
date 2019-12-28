@@ -3,7 +3,7 @@
 // Stephen Townsend
 // 2018-04-19
 
-var Out = 'Success|';
+var Out = 'Success';
 var aFilter = $000;
 var aExpTime = $001;
 var aFrame = $002; //  cdLight =1, cdBias, cdDark, cdFlat
@@ -22,9 +22,9 @@ CCDSC.Subframe = false;			// Not a subframe
 
 var WAIT = ((CCDAG.AutoguiderExposureTime + CCDAG.Delay + 1) * 1000);
 
-function isGuidingGood( camImageScale, guiderImageScale, pixelTolerance ) {
-//	var wait = ((CCDAG.AutoguiderExposureTime + CCDAG.Delay + 1) * 1000);
+function guideError() {
 
+	var Quality = -1;
 	var isGuiding = false;
 	if( SelectedHardware.autoguiderCameraModel !== '<No Camera Selected>' ) {
 
@@ -33,55 +33,12 @@ function isGuidingGood( camImageScale, guiderImageScale, pixelTolerance ) {
 		}
 		if( isGuiding) {
 
-			// not needed...
-			//var wait = ((ccdsoftAutoguider.AutoguiderExposureTime + ccdsoftAutoguider.Delay + 1) * 1000);
-
 			var errorX = CCDAG.GuideErrorX;
 			var errorY = CCDAG.GuideErrorY;
-			var Quality =" ";
+			var rms = Math.sqrt( Math.pow(errorX,2)+Math.pow(errorY,2));
+			Quality = Number(rms).toFixed(2);
 
-			var imageScaleRatio = (camImageScale / guiderImageScale);
-			var imageScaleRatio = imageScaleRatio.toFixed(2);
-
-			if (imageScaleRatio < 0.2)
-			//
-			// I have doubts about measuring this level of accuracy with
-			// a centroid calculation at such an undersampled image scale.
-			//
-			{
-				imageScaleRatio = 0.2; // default for "GOOD"
-			}
-			var pixelLimit = imageScaleRatio;
-
-			// If user provides a pixelTolerance then use it instead of the
-			// calculated tolerance
-			if( pixelTolerance > 0 ) {
-				pixelLimit = pixelTolerance;
-			}
-
-			//
-			// Measure the error regardless of where the limit came from
-			//
-			if ( (Math.abs(errorX) < pixelLimit) && (Math.abs(errorY) < pixelLimit)  )	{
-				Quality = "Good|" + Number(errorX).toFixed(2) + ", " +  Number(errorY).toFixed(2) +'|'+pixelLimit;
-			}
-			else {
-				Quality = "Poor|" + Number(errorX).toFixed(2) + ", " +  Number(errorY).toFixed(2) +'|'+pixelLimit;
-			}
-			if ( CCDAG.ImageUseDigitizedSkySurvey == "1" )
-			//
-			// Test to see if we are using the simulator, if so, say everything is great.
-			//
-			{
-				Quality = "Good|Simulator ";
-			}
 		}
-		else {
-			Quality = "Good|Not Guiding ";
-		}
-	}
-	else {
-		Quality = "Good|No guider ";
 	}
 	return Quality;
 }
@@ -107,28 +64,40 @@ if ( SelectedHardware.filterWheelModel !== "<No Filter Wheel Selected>" )
 // now take image...
 CCDSC.TakeImage();
 
-//Enter the rotator angle
-if( CCDSC.rotatorIsConnected ) {
-	var rotatorPosition = CCDSC.rotatorPositionAngle();
-  TSXI.setFITSKeyword("ROTATOR_POS_ANGLE", rotatorPosition);
-	Out = Out+'rotatorPosition|'+rotatorPosition;
+Out = Out + '|fileName=' + CCDSC.LastImageFileName;
 
-	// ImageLink.scale = imageScale; // SEEMS THIS MAY BE IGNORED
-	// ImageLink.pathToFITS = CCDSC.LastImageFileName;
-	// ImageLink.execute();
-	// var imageLinkAng=ImageLinkResults.imagePositionAngle;//sky position
-	// Out = Out+'|positionAngle|'+Number(imageLinkAng).toFixed(3);
+// get the overall RMS error if guiding
+var rms = guideError();
+if( rms > -1 ) {
+	TSXI.setFITSKeyword("RMS_ERROR", rms);
+	Out = Out+'|RMS_ERROR='+rms;
 }
-//CCDSC.Asynchronous = true;		// We are going to wait for it
 
 // *******************************
 //Add some FITSKeywords for future reference
 //open TSX camera and get the last image
 var success = TSXI.AttachToActiveImager();
 
+//Enter the rotator angle
+if( CCDSC.rotatorIsConnected ) {
+	var rotatorPosition = CCDSC.rotatorPositionAngle();
+  TSXI.setFITSKeyword("ROTATOR_POS_ANGLE", rotatorPosition);
+	Out = Out+'|ROTATOR_POS_ANGLE='+Number(rotatorPosition).toFixed(3);
+}
+//CCDSC.Asynchronous = true;		// We are going to wait for it
+
+if( ImageLinkResults.imageFilePath ) {
+	TSXI.setFITSKeyword("ANGLE", ImageLinkResults.imagePositionAngle);
+	Out = Out+'|ANGLE='+Number(ImageLinkResults.imagePositionAngle).toFixed(3);
+}
+
 //Enter the focsuer position
 if( CCDSC.focIsConnected ) {
-  TSXI.setFITSKeyword("FOCUS_POS", CCDSC.focPosition);
+	var temp = CCDSC.focTemperature.toFixed(1);
+  var pos = CCDSC.focPosition;
+  TSXI.setFITSKeyword("FOCUS_POS", pos);
+	// add focuser info
+  Out = Out+'|focusTemp='+ Number(temp).toFixed(3) +'|FOCUS_POS='+ Number(pos).toFixed(3);
 }
 
 //Enter the custom object name
@@ -136,9 +105,70 @@ if( tName != '$003' ) {
 	//Correct the OBJECT Keyword if using coordinates instead of a target name
 	TSXI.setFITSKeyword("OBJECT", tName);
 }
+
 //Set save path and save
 //TSXI.Path = targetImageDataPath;
 TSXI.Save();
+
+CHART.Find("sun");
+OBJI.Property(59);
+var sunAlt = OBJI.ObjInfoPropOut;
+Out = Out+ '|sunAltitude=' + Number(sunAlt).toFixed(3);
+
+var BTP = sky6RASCOMTele.DoCommandOutput;
+var pointing = '';
+if (BTP == 1)
+{
+  pointing = 'pointing=East';
+  // RunJavaScriptOutput.writeLine ("Mount has not flipped and is pointing east.");
+
+} else if (BTP == 0) {
+
+  pointing = 'pointing=West';
+  //RunJavaScriptOutput.writeLine ("Mount has flipped and is pointing west.");
+}
+else {
+  pointing = 'pointing=Unknown';
+}
+report = report +'|'+pointing;
+
+CHART.Find(tName);
+var haveTarget = OBJI.Property(59); // altitude
+if( haveTarget != 'TypeError: Object not found. Error = 250.') {
+	// we have a target we can query
+	var altitude = OBJI.ObjInfoPropOut;
+	altitude = altitude.toFixed(3);
+
+	OBJI.Property(58); // azimuth
+	var azimuth = OBJI.ObjInfoPropOut;
+	azimuth = azimuth.toFixed(3);
+
+	OBJI.Property(54);  // RA				// Pull the RA value
+	var targetRA = OBJI.ObjInfoPropOut; 		// Stuff RA into variable
+
+	OBJI.Property(55); // DEC			// Pull the DEC value
+	var targetDEC = OBJI.ObjInfoPropOut; 		// Stuff DEC into variable
+
+	OBJI.Property(70); // HA			// Pull the Hour Angle value
+	var targetHA = OBJI.ObjInfoPropOut; 		// Stuff DEC into variable
+
+	OBJI.Property(68); // TransitTime			// Pull the transitTime value
+	var targetTransit = OBJI.ObjInfoPropOut; 		// Stuff DEC into variable
+
+	Out = Out +
+		+ '|AZ=' +
+		azimuth
+		+ '|ALT=' +
+		altitude
+		+ '|RA=' +
+		Number(targetRA).toFixed(3)
+		+ '|DEC=' +
+		Number(targetDEC).toFixed(3)
+		+ '|HA=' +
+		Number(targetHA).toFixed(3)
+		+ '|TRANSIT=' +
+		Number(targetTransit).toFixed(3);
+}
 
 Out;
 /* Socket End Packet */

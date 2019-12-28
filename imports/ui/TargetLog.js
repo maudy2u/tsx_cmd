@@ -54,34 +54,36 @@ import {
 } from '../api/time_utils.js'
 
 import {
-  getTargetReportTemplate,
-  calcTargetFilterExposureRunningTotal,
-  calcSessionTargetFilterExposureTotal,
+  logImagingForSessionDate,
+  calcSessionTargetFilterExposureLogTotal,
 } from '../api/imagingSessionLogs.js'
 
 //const sDate = sessionDate(new Date());
 
-class TargetReport extends Component {
+class TargetLog extends Component {
 
   constructor() {
     super();
     this.state = {
       target: '',
-      sessionDate: sessionDate(new Date()),
+      sessionDate: '',
       report: '',
     };
   }
 
   // Initialize states
-  componentWillMount() {
+  componentDidMount() {
     // // do not modify the state directly
-
-    if( typeof this.props.enabledTargetSessions == 'undefined') {
-      return;
+    if( typeof this.props.enabledTargetSessions != 'undefined') {
+      this.setState({
+        target: this.props.enabledTargetSessions.target,
+      });
     }
-    this.setState({
-      target: this.props.enabledTargetSessions.target,
-    });
+    if( typeof this.props.sessionDate != 'undefined') {
+      this.setState({
+        sessionDate: this.props.sessionDate,
+      });
+    }
   }
 
   handleChange = (e, { name, value }) => {
@@ -92,6 +94,7 @@ class TargetReport extends Component {
       value,
     );
   };
+
   handleToggle = (e, { name }) => {
     var val = eval( 'this.state.' + name);
     this.setState({
@@ -104,53 +107,36 @@ class TargetReport extends Component {
     );
   };
 
-  componentWillMount() {
-    this.updateDefaults(this.props);
-  }
-
-  updateDefaults(nextProps) {
-    if( typeof nextProps == 'undefined'  ) {
-      return;
-    }
-    if( typeof nextProps.tsxInfo != 'undefined'  ) {
-      this.setState({
-        flatbox_enabled: nextProps.tsxInfo.flatbox_enabled
-      });
-    }
-    if( typeof nextProps.enabledTargetSessions != 'undefined'  ) {
-      this.setState({
-        target: nextProps.enabledTargetSessions.target
-      });
-      // this.setState({
-      //   report: getTargetReportTemplate(this.state.sessionDate, nextProps.enabledTargetSessions.target),
-      // })
-
-    }
-  }
-
   render() {
-    const reportData = getTargetReportTemplate(this.state.sessionDate, this.props.target);
+    // get the ses
+    const reportData = logImagingForSessionDate( this.props.sessionDate );
+    var targetLog = [];
+    for( var i=0; i<reportData.length; i++ ) {
+      var data = reportData[i];
+      var idx = targetLog.indexOf({
+        target: data.target,
+        filter: data.filter,
+        exposure: data.exposure
+      });
+      if( idx > -1 ) {
+        var total = targetLog[idx].sessionTotal;
+        targetLog[idx].sessionTotal = total+1;
+      }
+      else {
+          targetLog.push( data );
+      }
+    }
 
     return (
       <Table.Body>
-      { reportData.map((obj)=> {
-        var session = calcSessionTargetFilterExposureTotal(obj);
-        var sData = '';
-        if( obj.repeating ) {
-          sData = session + '*';
-        }
-        else {
-          sData = session + '/' + obj.quantity;
-        }
-
-        if( session > 0)
+      { targetLog.map((obj)=> {
           return (
             <Table.Row style={{color: 'white'}} key={obj.id}>
-              <Table.Cell width={2} content={this.props.target.targetFindName} />
-              <Table.Cell width={1} content={obj.filter} />
-              <Table.Cell width={1} content={obj.exposure} />
-              <Table.Cell width={1} content={sData} />
-              <Table.Cell width={1} content={calcTargetFilterExposureRunningTotal(obj)}/>
+              <Table.Cell width={2} content={obj.target } />
+              <Table.Cell width={1} content={obj.filter } />
+              <Table.Cell width={1} content={obj.exposure } />
+              <Table.Cell width={1} content={obj.runningTotal } />
+              <Table.Cell width={1} content={''}/>
             </Table.Row>
           )}
       )}
@@ -162,4 +148,4 @@ class TargetReport extends Component {
 export default withTracker(() => {
     return {
   };
-})(TargetReport);
+})(TargetLog);

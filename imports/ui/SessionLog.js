@@ -38,6 +38,7 @@ import {
   Radio,
   Accordion,
   Divider,
+  Header,
 } from 'semantic-ui-react'
 
 import {
@@ -54,16 +55,21 @@ import {
   updateFlatExposure,
 } from '../api/filters.js';
 
-import TargetReport from './TargetReport.js';
+import {
+  getSessionDates
+} from '../api/imagingSessionLogs.js'
+
+import TargetLog from './TargetLog.js';
 
 
 // Import the UI
-class SessionReport extends Component {
+class SessionLog extends Component {
 
   constructor() {
     super();
     this.state = {
       activeIndex: 0,
+      sessionDate: '',
     };
   }
 
@@ -75,6 +81,9 @@ class SessionReport extends Component {
 
    this.setState({ activeIndex: newIndex })
  }
+
+ handleChange = (e, { name, value }) =>
+  this.setState({ [name]: value });
 
   // used for the modal exposure settings for flats
   handleStateChange = (e, { name, value }) => {
@@ -115,12 +124,38 @@ class SessionReport extends Component {
   render() {
 /*
 
+  1. Get the sessions available
+  2. populate the session dates in the drop down
+  3. Pick the date, pass to Log and print table
 
  */
 
-    const { activeIndex } = this.state
+    const { activeIndex } = this.state;
+    var sessionDates = getSessionDates();
+
+    var dropDownSessionDates = [];
+    for( var sd=0; sd<sessionDates.length; sd ++ ) {
+      dropDownSessionDates.push(
+        { key: sessionDates[sd], text: sessionDates[sd], value: sessionDates[sd]}
+      );
+    }
 
     return (
+      <div>
+      <Header>Session Log</Header>
+      <Dropdown
+        button
+        search
+        wrapSelection
+        scrolling
+        label='Session Dates'
+        name='sessionDate'
+        options={dropDownSessionDates}
+        placeholder='Pick a date'
+        text={this.state.sessionDate}
+        onChange={this.handleChange}
+      />
+      <br/>
       <Accordion size='mini' styled>
           <Accordion.Title
             active={activeIndex === 0}
@@ -141,19 +176,21 @@ class SessionReport extends Component {
               </Table.Header>
                 {this.props.enabledTargetSessions.map((obj)=>{
                   return (
-                     <TargetReport
+                     <TargetLog
                       key={obj._id}
                       target={obj}
+                      sessionDate={this.state.sessionDate}
                     />
                   )
                 })}
             </Table>
           </Accordion.Content>
       </Accordion>
+      </div>
     )
   }
 }
 export default withTracker(() => {
   return {
   };
-})(SessionReport);
+})(SessionLog);
