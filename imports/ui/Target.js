@@ -33,6 +33,7 @@ import {
   Table,
   Checkbox,
   Progress,
+  Statistic,
 } from 'semantic-ui-react'
 
 import { TargetReports } from '../api/targetReports.js';
@@ -262,7 +263,7 @@ class Target extends Component {
   targetButtons( state, active ) {
     if( state == 'Stop' && active == false ) {
       return(
-        <Button.Group basic size='mini'>
+        <Button.Group basic size='mini' floated='right'>
           <Button icon='refresh' onClick={this.getTargetReport.bind(this)}/>
           <Button icon='location arrow' onClick={this.clsTarget.bind(this)}/>
           <Button icon='repeat' onClick={this.eraseProgress.bind(this)}/>
@@ -363,26 +364,31 @@ class Target extends Component {
           <Header style={{color: 'black'}} as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, TOOL_ACTIVE)}>
             {this.props.target.targetFindName} <Label><small>{this.props.target.description}</small></Label>
           </Header>
+          {this.targetButtons(this.props.scheduler_running.value, TOOL_ACTIVE)}
         </Accordion.Title>
         <Accordion.Content  active={activeIndex === 1} >
           <Segment>
-            <small>Constraints:</small><br/>
-            <Label>Images: <Label.Detail>{this.props.target.totalImagesTaken()}/{this.props.target.totalImagesPlanned()}</Label.Detail></Label>
-            <Label>Priority: <Label.Detail>{this.props.target.priority}</Label.Detail></Label>
-            <Label>Start: <Label.Detail>{this.props.target.startTime}</Label.Detail></Label>
-            <Label>Stop: <Label.Detail>{this.props.target.stopTime}</Label.Detail></Label>
-            <Label>Min. Alt.: <Label.Detail>{this.props.target.minAlt}</Label.Detail></Label>
-            <br/><small>Last position: {DTIME}</small><br/>
-            <Label>Alt.: <Label.Detail>{ALT}</Label.Detail></Label>
-            <Label>HA: <Label.Detail>{HA}</Label.Detail></Label>
-            <Label>Transit: <Label.Detail>{TRANSIT}</Label.Detail></Label>
-            <Label>RA: <Label.Detail>{RA}</Label.Detail></Label>
-            <Label>DEC: <Label.Detail>{DEC}</Label.Detail></Label>
-            <Label>Point: <Label.Detail>{POINT}</Label.Detail></Label><br/>
-            <small>{this.seriesDetails()}</small>
+            <small>
+              <Statistic size='mini'>
+                <Statistic.Label>Priority</Statistic.Label>
+                <Statistic.Value>{this.props.target.priority}</Statistic.Value>
+              </Statistic>
+              <Statistic size='mini'>
+                <Statistic.Label>Start</Statistic.Label>
+                <Statistic.Value>{this.props.target.startTime}</Statistic.Value>
+              </Statistic>
+              <Statistic size='mini'>
+                <Statistic.Label>Stop</Statistic.Label>
+                <Statistic.Value>{this.props.target.stopTime}</Statistic.Value>
+              </Statistic>
+              <Statistic size='mini'>
+                <Statistic.Label>Min. Alt.</Statistic.Label>
+                <Statistic.Value>{this.props.target.minAlt}</Statistic.Value>
+              </Statistic>
+            </small>
+            <br/><small><Label>{this.seriesDetails()}</Label></small>
           </Segment>
           <center>
-            {this.targetButtons(this.props.scheduler_running.value, TOOL_ACTIVE)}
           </center>
           <Modal
             open={this.state.modalOpen}

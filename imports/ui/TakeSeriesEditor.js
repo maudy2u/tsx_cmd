@@ -29,7 +29,8 @@ import { Filters } from '../api/filters.js';
 // import { Form, Grid, Input, Table, Button, Dropdown, } from 'semantic-ui-react'
 import {
   // Tab,
-  Grid,
+  Table,
+
   Label,
   // Segment,
   Button,
@@ -221,27 +222,14 @@ class TakeSeriesEditor extends Component {
   }
 
   render() {
-
     /*
-    <Grid.Column>
-      <Dropdown
-        fluid
-        name='frame'
-        options={this.renderDropDownFrames()}
-        placeholder='Frame'
-        text={this.state.frame}
-        onChange={this.handleChange}
-      />
-    </Grid.Column>
-     */
-
+    */
     return (
-      <Grid.Row>
-        <Grid.Column width={1}>
+      <Table.Row verticalAlign={'middle'}>
+        <Table.Cell width={1}>
           <Button size='mini' icon='delete'  onClick={this.deleteEntry.bind(this)}/>
-          {/* <b><label>{this.state.order}</label></b> */}
-        </Grid.Column>
-        <Grid.Column>
+        </Table.Cell>
+        <Table.Cell width={1}  verticalAlign={'middle'}>
           <Form>
             <Form.Input
               fluid
@@ -256,8 +244,8 @@ class TakeSeriesEditor extends Component {
               errorLabel={ ERRORLABEL }
               />
           </Form>
-        </Grid.Column>
-        <Grid.Column>
+        </Table.Cell>
+        <Table.Cell width={2} verticalAlign={'middle'}>
           <Form>
           <Form.Dropdown
               button
@@ -271,8 +259,8 @@ class TakeSeriesEditor extends Component {
               onChange={this.handleChange}
             />
             </Form>
-          </Grid.Column>
-          <Grid.Column>
+        </Table.Cell>
+        <Table.Cell width={1}  verticalAlign={'middle'}>
           <Form>
           <Form.Input
             fluid
@@ -287,21 +275,14 @@ class TakeSeriesEditor extends Component {
             errorLabel={ ERRORLABEL }
           />
           </Form>
-        </Grid.Column>
-        {/* <Grid.Column>
-          <Input
-            fluid
-            placeholder='Binning'
-            name='binning'
-            value={this.state.binning}
-            onChange={this.handleChange}
-          />
-        </Grid.Column> */}
-        <Grid.Column>
-          <Button size='mini' icon='arrow up'  onClick={this.moveUpEntry.bind(this)}/>
-          <Button size='mini' icon='arrow down'  onClick={this.moveDownEntry.bind(this)}/>
-        </Grid.Column>
-      </Grid.Row>
+        </Table.Cell>
+        <Table.Cell width={2}>
+          <Button.Group>
+            <Button size='mini' icon='arrow up'  onClick={this.moveUpEntry.bind(this)}/>
+            <Button size='mini' icon='arrow down'  onClick={this.moveDownEntry.bind(this)}/>
+          </Button.Group>
+        </Table.Cell>
+      </Table.Row>
     )
   }
 

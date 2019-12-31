@@ -22,7 +22,11 @@ import ReactDOM from 'react-dom';
 
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
+import {
+  TakeSeriesTemplates,
+  updateTakeSeriesTemplate,
+} from '../api/takeSeriesTemplates.js';
+
 import { Seriess } from '../api/seriess.js';
 
 import {
@@ -38,6 +42,7 @@ import {
   // Input,
   Dropdown,
   Radio,
+  Table,
 } from 'semantic-ui-react'
 
 import {
@@ -62,60 +67,82 @@ class TakeSeriesTemplateEditor extends Component {
   state = {
     name: '',
     description: '',
-    seriesProcess: "",
+    processSeries: "",
     seriesContainer: [],
     repeatSeries: false,
     defaultDithering: 0,
     seriesOrderFix: '',
   };
 
-  nameChange = (e, { value }) => this.setState({ name: value });
-  descriptionChange = (e, { value }) => this.setState({ description: value });
-  handleDitherChange = (e, { value }) => this.setState({ defaultDithering: value });
-  seriesProcessChange = (e, { value }) => this.setState({ seriesProcess: value });
-  updateSeriesContainer = (e, { value }) => this.setState({ seriesContainer: value });
+  handleChange = (e, { name, value }) => {
+    this.setState({ [name]: value });
+    updateTakeSeriesTemplate(
+      this.props.template._id,
+      name,
+      value,
+    );
+  };
+  processSeriesChange = (e, { value }) => {
+    this.setState({ processSeries: value });
+    updateTakeSeriesTemplate(
+      this.props.template._id,
+      'processSeries',
+      value,
+    );
+  }
 
-  handleToggle = (e, { name, value }) => {
-    var val = eval( 'this.state.' + name);
-    this.setState({
-      [name]: !val
-    });
+  handleChecked = (e, { name, checked }) => {
+    this.setState({ [name]: checked });
+    updateTakeSeriesTemplate(
+      this.props.template._id,
+      name,
+      checked,
+    );
   };
 
   componentWillMount() {
     // do not modify the state directly
-    this.setState({name: this.props.template.name});
-    this.setState({description: this.props.template.description});
-    this.setState({seriesProcess: this.props.template.processSeries});
-    this.setState({seriesContainer: this.props.template.series});
-    this.setState({repeatSeries: this.props.template.repeatSeries});
 
-    // make sure dithering is set
-    if( this.props.template.defaultDithering == ''
-    || typeof this.props.template.defaultDithering == 'undefined' ) {
-      this.props.template.defaultDithering = 0;
+    if( typeof this.props.template != 'undefined') {
+      this.setState({
+        name: this.props.template.name,
+        description: this.props.template.description,
+        processSeries: this.props.template.processSeries,
+        defaultDithering: this.props.template.defaultDithering,
+        seriesContainer: this.props.template.series,
+      });
+      if( typeof this.props.template.repeatSeries == 'undefined'
+        || this.props.template.repeatSeries == '' ) {
+          this.setState({
+            repeatSeries: false,
+          });
+        }
     }
-    this.setState({defaultDithering: this.props.template.defaultDithering});
   }
 
-  componentWillReceiveProps(nextProps) {
-
-    // used to force a reload.... must be better way
-    this.setState({
-      seriesOrderFix: nextProps.seriess,
-    });
+  componentDidMount() {
+    this.updateDefaults(this.props);
   }
 
-  saveEntry() {
-    TakeSeriesTemplates.update(this.props.template._id, {
-      $set: {
-        name: this.state.name,
-        description: this.state.description,
-        processSeries: this.state.seriesProcess,
-        repeatSeries: this.state.repeatSeries,
-        defaultDithering: this.state.defaultDithering,
-       },
-    });
+  updateDefaults(nextProps) {
+    if( typeof nextProps == 'undefined'  ) {
+      return;
+    }
+    if( typeof nextProps.template != 'undefined'  ) {
+      this.setState({
+        name: nextProps.template.name,
+        description: nextProps.template.description,
+        processSeries: nextProps.template.processSeries,
+        defaultDithering: nextProps.template.defaultDithering,
+        seriesContainer: nextProps.template.series,
+      });
+      if( typeof nextProps.template.repeatSeries == 'undefined'
+        || nextProps.template.repeatSeries == '' ) {
+          this.setState({
+            repeatSeries: false,
+          });
+      }
+    }
   }
 
   addEntry() {
@@ -155,8 +182,13 @@ class TakeSeriesTemplateEditor extends Component {
           return aO.order- bO.order;
         }
       ).map((definedSeries)=>{
-       return  <TakeSeriesEditor key={definedSeries.id} template={this.props.template} series_id={definedSeries} />
-      })
+       return (
+        <TakeSeriesEditor
+          key={definedSeries.id}
+          template={this.props.template}
+          series_id={definedSeries}
+        />
+      )})
     )
   }
 
@@ -167,22 +199,24 @@ class TakeSeriesTemplateEditor extends Component {
     <Grid.Column>
     <b>Frame</b>
     </Grid.Column>
+
+    <Button  icon='save' onClick={this.saveEntry.bind(this)} />
+
     */
 
     return (
       <div>
-        <Button  icon='save' onClick={this.saveEntry.bind(this)} />
-        <Button  icon='add' onClick={this.addEntry.bind(this)} />
         <Form>
           <Form.Group widths='equal'>
+          <Button  icon='add' onClick={this.addEntry.bind(this)} />
           <Form.Field>
             <Input
-              name='name_title'
+              name='name'
               label='Name:'
               type='text'
               placeholder='Name for the series'
               value={this.state.name}
-              onChange={this.nameChange}
+              onChange={this.handleChange}
             />
           </Form.Field>
           <Form.Field>
@@ -192,59 +226,51 @@ class TakeSeriesTemplateEditor extends Component {
               type='text'
               placeholder='Describe the series'
               value={this.state.description}
-              onChange={this.descriptionChange}
+              onChange={this.handleChange}
             />
           </Form.Field>
         </Form.Group>
-        <h3 className="ui header">Images executes: </h3>
           <Form.Group inline>
-            <Form.Field control={Radio} label='Per series' value='per series' checked={this.state.seriesProcess === "per series"} onChange={this.seriesProcessChange} />
-            <Form.Field control={Radio} label='Across series' value='across series' checked={this.state.seriesProcess === "across series"} onChange={this.seriesProcessChange} />
+            <Form.Field control={Radio} label='Per series' value='per series' checked={this.state.processSeries === "per series"} onChange={this.processSeriesChange} />
+            <Form.Field control={Radio} label='Across series' value='across series' checked={this.state.processSeries === "across series"} onChange={this.processSeriesChange} />
             <Form.Checkbox
               label=' Repeat series until stopped '
               toggle
               name='repeatSeries'
               checked={this.state.repeatSeries}
-              onChange={this.handleToggle.bind(this)}
+              onChange={this.handleChecked.bind(this)}
             />
-            <br/>
-            <br/>
-            <Form.Input
-              name='dither'
-              label='Dither after: '
-              placeholder='Images before dither'
-              value={this.state.defaultDithering}
-              onChange={this.handleDitherChange}
-              validations={{
-                matchRegexp: XRegExpZeroOrPosInt, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 0, 5, 1800, 3600"
-              errorLabel={ ERRORLABEL }
-            />
+            <Form.Field>
+              <Form.Input
+                name='defaultDithering'
+                label='Images before dither: '
+                type='text'
+                placeholder='Zero disables'
+                value={this.state.defaultDithering}
+                onChange={this.handleChange}
+                validations={{
+                  matchRegexp: XRegExpZeroOrPosInt, // https://github.com/slevithan/xregexp#unicode
+                }}
+                validationError="Must be a positive number, e.g 0, 5, 1800, 3600"
+                errorLabel={ ERRORLABEL }
+              />
+            </Form.Field>
           </Form.Group>
         </Form>
-        <br/>
-        <Grid columns={6} centered divided='vertically'>
-          <Grid.Row centered>
-            <Grid.Column width={1}/>
-            <Grid.Column>
-            <b>Exposure</b>
-            </Grid.Column>
-            <Grid.Column>
-            <b>Filter</b>
-            </Grid.Column>
-            <Grid.Column>
-            <b>Repeat</b>
-            </Grid.Column>
-            {/* <Grid.Column>
-            <b>Bin</b>
-            </Grid.Column> */}
-            <Grid.Column>
-            <b>Order</b>
-            </Grid.Column>
-          </Grid.Row>
-          {this.renderTakeSeries(this.state.seriesOrderFix)}
-        </Grid>
+        <Table celled compact basic unstackable>
+          <Table.Header style={{background: 'black'}}>
+            <Table.Row>
+              <Table.Cell content='Remove' />
+              <Table.Cell content='Exposure' />
+              <Table.Cell content='Filter' />
+              <Table.Cell content='Repeat' />
+              <Table.Cell content='Order' />
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {this.renderTakeSeries(this.state.seriesOrderFix)}
+          </Table.Body>
+        </Table>
       </div>
     )
   }

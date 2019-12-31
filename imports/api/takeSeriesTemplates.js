@@ -22,6 +22,20 @@ import { Seriess } from './seriess.js';
 // Used to store the sessions for a Target - the actual imaging
 export const TakeSeriesTemplates = new Mongo.Collection('takeSeriesTemplates');
 
+/*
+  TakeSeriesTemplates = {
+    name: '',
+    description: '',
+    processSeries:  '',
+    repeatSeries: '',
+    defaultDithering: 0,
+    series: '',
+    isCalibrationFrames - deprecated
+
+  };
+*/
+// get defaults
+// e.g. var clsFilter = TheSkyXInfos.findOne({name: 'defaultFilter'}).value;
 export function addNewTakeSeriesTemplate() {
   const id = TakeSeriesTemplates.insert(
     {
@@ -30,6 +44,7 @@ export function addNewTakeSeriesTemplate() {
       processSeries: 'across series',
       repeatSeries: false,
       createdAt: new Date(),
+      defaultDithering: 0,
       series: [],
       isCalibrationFrames: false,
     }
@@ -38,6 +53,49 @@ export function addNewTakeSeriesTemplate() {
   return id;
 }
 
+export function updateTakeSeriesTemplate( fid, name, value ) {
+  var obj = TakeSeriesTemplates.findOne({_id:fid});
+  if( typeof obj != 'undefined') {
+    if( name == 'name') {
+      obj.name = value;
+    }
+    else if( name == 'description') {
+      obj.description = value;
+    }
+    else if( name == 'processSeries') {
+      obj.processSeries = value;
+    }
+    else if( name == 'repeatSeries') {
+      obj.repeatSeries = value;
+    }
+    else if( name == 'defaultDithering') {
+      obj.defaultDithering = value;
+    }
+    else if( name == 'createdAt') {
+      obj.createdAt = value;
+    }
+    else if( name == 'isCalibrationFrames') { // remove???
+      obj.isCalibrationFrames = value;
+    }
+    else if( name == 'order') { // remove??
+      obj.order = value;
+    }
+
+    TakeSeriesTemplates.update({_id: obj._id}, {
+      $set: {
+        name: obj.name,
+        description: obj.description,
+        processSeries: obj.processSeries,
+        repeatSeries: obj.repeatSeries,
+        createdAt: obj.createdAt,
+        isCalibrationFrames: obj.isCalibrationFrames,
+        defaultDithering: obj.defaultDithering,
+      }
+    });
+  }
+}
+
+
 export function seriesDescription( template ) {
 
     // CURRENTLY: 0:33x3s, 1:33x3s, 2:33x3s, 3:33x3s
@@ -45,9 +103,14 @@ export function seriesDescription( template ) {
     let seriesArray = template.series;
     let details = "";
     let repeating = '';
-    if( template.repeatSeries ) {
+    if( template.repeatSeries !='' && typeof template.repeatSeries != 'undefined'  ) {
       repeating = 'repeating, ';
     }
+
+    if( template.defaultDithering> 0 ) {
+
+    }
+
     for (let i = 0; i < seriesArray.length; i++) {
       let series = Seriess.findOne({_id:seriesArray[i].id});
       if( typeof series == 'undefined') {
@@ -57,7 +120,11 @@ export function seriesDescription( template ) {
       details += series.frame +':' + series.filter + '@' + series.exposure + 'sec x'  + series.repeat;
     }
 
+    var dithering = '';
+    if ( template.defaultDithering > 0 ) {
+      dithering = 'dithering ' + template.defaultDithering + ', '
+    }
 
 
-    return 'Series: ' + repeating + 'dithering ' + template.defaultDithering + ', ' + details;
+    return 'TAKE SERIES - ' + template.name +'='+ template.processSeries + ': ' + repeating + dithering + details;
   }

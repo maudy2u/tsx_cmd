@@ -18,7 +18,18 @@ tsx cmd - A web page to send commands to TheSkyX server
 
 import React, { Component } from 'react'
 import { withTracker } from 'meteor/react-meteor-data';
-import { Button, Modal, Segment, Item, Header, Icon, Table, } from 'semantic-ui-react'
+import {
+  Button,
+  Modal,
+  Segment,
+  Item,
+  Header,
+  Icon,
+  Table,
+  Accordion,
+  Label,
+
+} from 'semantic-ui-react'
 
 import {
   TakeSeriesTemplates,
@@ -35,6 +46,15 @@ class TakeSeries extends Component {
     editOpen: false,
     deleteFailed: false,
     targetsPreventingDelete: [],
+    activeIndex: 0,
+  }
+
+  handleClick = (e, titleProps) => {
+     const { index } = titleProps
+     const { activeIndex } = this.state
+     const newIndex = activeIndex === index ? -1 : index
+
+     this.setState({ activeIndex: newIndex })
   }
 
   editOpen = () => this.setState({ editOpen: true })
@@ -108,6 +128,17 @@ class TakeSeries extends Component {
     }
   }
 
+  renderEditor() {
+    return (
+      <Segment>
+        <TakeSeriesTemplateEditor
+          key={this.props.seriesTemplate._id}
+          template={this.props.seriesTemplate}
+        />
+      </Segment>
+    )
+  }
+
   render() {
     let DESCRIPTION = '';
     if( this.props.seriesTemplate.description != '') {
@@ -122,43 +153,33 @@ class TakeSeries extends Component {
       ENABLEACTIVE = this.state.enabledActive;
       TOOL_ACTIVE = false;
     }
+
+    const { activeIndex } = this.state
+
     return (
-      <Segment raised>
-        <Item>
-          <Item.Content>
-            <Item.Header as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, TOOL_ACTIVE)}>
-              {this.props.seriesTemplate.name}
-            </Item.Header>
-            <Button.Group basic size='mini' floated='right'>
-              {/* <Button icon='edit' onClick={this.editEntry.bind(this)}/> */}
-              {/* <Button icon='copy' onClick={this.copyEntry.bind(this)}/> */}
-              <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
-            </Button.Group>
-            <Item.Description>
-            {DESCRIPTION}
-            </Item.Description>
-            <Item.Meta>
-            </Item.Meta>
-            <Item.Extra>
-              {this.seriesDetails()}
-              {/* *******************************
-                Used to handle the Editing deleting of a series
-                */}
-              <Modal
-                open={this.state.editOpen}
-                onClose={this.editClose}
-                closeIcon>
-                <Modal.Header>Editing Imaging Series</Modal.Header>
-                <Modal.Content>
-                  <Modal.Description>
-                    <TakeSeriesTemplateEditor key={this.props.seriesTemplate._id} template={this.props.seriesTemplate}/>
-                  </Modal.Description>
-                </Modal.Content>
-              </Modal>
-            </Item.Extra>
-          </Item.Content>
-        </Item>
-      </Segment>
+      <Accordion styled fluid>
+        <Accordion.Title
+          active={activeIndex === 1}
+          index={1}
+          onClick={this.handleClick}>
+          <Header style={{color: 'black'}} as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, TOOL_ACTIVE)}>
+
+            {this.props.seriesTemplate.name}<Label><small> {DESCRIPTION}</small></Label>
+          </Header>
+          <Button icon='delete'  size='mini'  floated='right' onClick={this.deleteEntry.bind(this)}/>
+          </Accordion.Title>
+          <Accordion.Content  active={activeIndex === 1} >
+                {/*
+                  <Segment>
+                    { this.seriesDetails() }
+                  </Segment>
+                  <Button.Group basic size='mini' floated='right'>
+                  </Button.Group>
+                  size='mini'  <Button icon='edit' onClick={this.editEntry.bind(this)}/>
+                  <Button icon='copy' onClick={this.copyEntry.bind(this)}/>                */}
+            { this.renderEditor() }
+        </Accordion.Content>
+      </Accordion>
     )
   }
 
