@@ -98,15 +98,15 @@ class CalibrationFrame extends Component {
       value,
     );
   };
-  handleToggle = (e, { name }) => {
-    var val = eval( 'this.state.' + name);
+
+  handleToggle = (e, { name, checked }) => {
     this.setState({
-      [name]: !val
+      on_enabled: checked
     });
     updateCalibrationFrame(
       this.props.calibration._id,
       name,
-      !val,
+      checked,
     );
   };
 
