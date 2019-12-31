@@ -97,7 +97,7 @@ if( CCDSC.focIsConnected ) {
   var pos = CCDSC.focPosition;
   TSXI.setFITSKeyword("FOCUS_POS", pos);
 	// add focuser info
-  Out = Out+'|focusTemp='+ Number(temp).toFixed(3) +'|FOCUS_POS='+ Number(pos).toFixed(3);
+  Out = Out+'|focusTemp='+ Number(temp).toFixed(3) +'|FOCUS_POS='+ Number(pos).toFixed(0);
 }
 
 //Enter the custom object name

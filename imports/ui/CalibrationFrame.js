@@ -65,7 +65,7 @@ class CalibrationFrame extends Component {
     rotation: '',
     order: 0,
     binning: 1,
-    enabled: true,
+    on_enabled: true,
     flatbox_enabled: false,
   }
 
@@ -86,7 +86,7 @@ class CalibrationFrame extends Component {
       rotation: this.props.calibration.rotation,
       order: this.props.calibration.order,
       binning: this.props.calibration.binning,
-      enabled: this.props.calibration.enabled,
+      on_enabled: this.props.calibration.on_enabled,
     });
   }
 
@@ -153,7 +153,7 @@ class CalibrationFrame extends Component {
         binning: nextProps.calibration.binning
       });
       this.setState({
-        enabled: nextProps.calibration.enabled
+        on_enabled: nextProps.calibration.on_enabled
       });
     }
   }
@@ -186,9 +186,9 @@ class CalibrationFrame extends Component {
       <Table.Row>
       <Table.Cell   >
       <Checkbox
-        name='enabled'
+        name='on_enabled'
         label=''
-        checked={this.state.enabled }
+        checked={this.state.on_enabled }
         onChange={this.handleToggle}
         />
       </Table.Cell   >

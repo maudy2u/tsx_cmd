@@ -628,20 +628,24 @@ class Monitor extends Component {
               </Segment>
               <Segment>
                 <Statistic size='mini'>
+                  <Statistic.Label>HA</Statistic.Label>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.HA).toFixed(2)}</Statistic.Value>
+                </Statistic>
+                <Statistic size='mini'>
+                  <Statistic.Label>Trans</Statistic.Label>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.TRANSIT).toFixed(2)}</Statistic.Value>
+                </Statistic>
+                <Statistic size='mini'>
+                  <Statistic.Label>Foc. Pos.</Statistic.Label>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.focusPostion).toFixed(0)}</Statistic.Value>
+                </Statistic>
+                <Statistic size='mini'>
                   <Statistic.Label>FOV</Statistic.Label>
                   <Statistic.Value>{Number(this.props.scheduler_report.value.ANGLE).toFixed(2)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
-                  <Statistic.Label>HA</Statistic.Label>
-                  <Statistic.Value>{Number(this.props.scheduler_report.value.HA).toFixed(3)}</Statistic.Value>
-                </Statistic>
-                <Statistic size='mini'>
-                  <Statistic.Label>Trans</Statistic.Label>
-                  <Statistic.Value>{Number(this.props.scheduler_report.value.TRANSIT).toFixed(3)}</Statistic.Value>
-                </Statistic>
-                <Statistic size='mini'>
-                  <Statistic.Label>Foc. Pos.</Statistic.Label>
-                  <Statistic.Value>{Number(this.props.scheduler_report.value.focusPostion).toFixed(3)}</Statistic.Value>
+                  <Statistic.Label>RMS</Statistic.Label>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.RMS_ERROR).toFixed(2)}</Statistic.Value>
                 </Statistic>
               </Segment>
             </Accordion.Content>

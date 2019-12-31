@@ -51,7 +51,7 @@ export function addCalibrationFrame() {
       rotation: "",
       order: 0,
       binning: 1,
-      enabled: true,
+      on_enabled: true,
     },
   );
   return id;
@@ -84,8 +84,8 @@ export function updateCalibrationFrame( fid, name, value ) {
     else if( name == 'binning') {
       obj.binning = value;
     }
-    else if( name == 'enabled') {
-      obj.enabled = value;
+    else if( name == 'on_enabled') {
+      obj.on_enabled = value;
     }
     CalibrationFrames.update({_id: obj._id}, {
       $set: {
@@ -97,7 +97,7 @@ export function updateCalibrationFrame( fid, name, value ) {
         rotation: obj.rotation,
         order: obj.order,
         binning: obj.binning,
-        enabled: obj.enabled,
+        on_enabled: obj.on_enabled,
       }
     });
   }
