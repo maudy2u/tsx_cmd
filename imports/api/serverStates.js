@@ -140,6 +140,7 @@ export const tsx_ServerStates = {
   flatbox_enabled: 'flatbox_enabled',
   flatbox_ip: 'flatbox_ip',
   flatbox_device: 'flatbox_device',
+  flatbox_camera_delay: 'flatbox_camera_delay',
 
   session_report: 'session_report',
 

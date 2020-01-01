@@ -46,6 +46,7 @@ import {
   tsx_GetServerState,
   tsx_UpdateDevice,
   tsx_GetServerStateValue,
+  tsx_UpdateServerState,
   UpdateStatus,
   UpdateStatusErr,
   postProgressTotal,
@@ -78,31 +79,36 @@ import {
   isSchedulerStopped,
 } from './run_imageSession.js';
 
+//const arteksy_cmd = '/usr/local/bin/arteksy_cmd'
+//const arteksy_cmd = '/usr/bin/arteksy_cmd'
+//const arteksy_cmd = '/bin/artesky_cmd' 
+const arteksy_cmd = 'artesky_cmd'
+
 // grab npm version
 import shelljs from 'shelljs';
 // this is equivalent to the standard node require:
 const Shelljs = require('shelljs');
 
 function flatbox_srv() {
-  var addr = tsx_GetServerState( 'flatbox_ip');
-  if( addr == '' || typeof addCalibration == 'undefined') {
+  var addr = tsx_GetServerStateValue( 'flatbox_ip');
+  if( addr == '' || typeof addr == 'undefined') {
     addr = '127.0.0.1';
     tsx_UpdateServerState( 'flatbox_ip', addr);
   }
-  return 'artesky_cmd -h ' + addr;
+  return arteksy_cmd + ' -h ' + addr;
 }
 
 function flat_device() {
-  var addr = tsx_GetServerState( 'flatbox_device');
-  if( addr == '' || typeof addCalibration == 'undefined') {
+  var addr = tsx_GetServerStateValue( 'flatbox_device');
+  if( addr == '' || typeof addr == 'undefined') {
     addr = 'ttyARTESKYFLAT';
     tsx_UpdateServerState( 'flatbox_device', addr);
   }
 }
 
 function flat_enabled() {
-  var addr = tsx_GetServerState( 'flatbox_enabled');
-  if( addr == '' || typeof addCalibration == 'undefined') {
+  var addr = tsx_GetServerStateValue( 'flatbox_enabled');
+  if( addr == '' || typeof addr == 'undefined') {
     addr = false;
     tsx_UpdateServerState( 'flatbox_enabled', addr);
   }
@@ -110,8 +116,8 @@ function flat_enabled() {
 
 export function flatbox_connect() {
   tsxLog(' Flatbox: connected');
-  return;
-  var err = Shelljs.exec( flatbox_srv() + ' -c').code;
+  tsxDebug( flatbox_srv() + ' -c' );
+  var err = Shelljs.exec( flatbox_srv() + ' -c').stdout;
   tsxLog( err );
   if ( err == -1) {
     UpdateStatusErr('Error!! failed find Artesky server: ' + err);
@@ -122,7 +128,6 @@ export function flatbox_connect() {
 
 export function flatbox_on() {
   tsxLog(' Flatbox: on');
-  return;
   var err = Shelljs.exec( flatbox_srv() + ' -O').code;
   tsxLog( err );
   if ( err == -1) {
@@ -134,7 +139,6 @@ export function flatbox_on() {
 
 export function flatbox_level( lvl ) {
   tsxLog(' Flatbox: level ' + cal.level);
-  return;
   var err;
   if( lvl > 0 ) {
     err = Shelljs.exec( flatbox_srv() + ' -l' + lvl).code;
@@ -152,7 +156,6 @@ export function flatbox_level( lvl ) {
 
 export function flatbox_off() {
   tsxLog(' Flatbox: off');
-  return;
 
   var err = Shelljs.exec( flatbox_srv() + ' -o').code;
   tsxLog( err );
@@ -165,7 +168,6 @@ export function flatbox_off() {
 
 export function flatbox_disconnect() {
   tsxLog(' Flatbox: DISCONNECTED');
-  return;
 
   var err = Shelljs.exec( flatbox_srv() + ' -d').code;
   tsxLog( err );
@@ -178,7 +180,6 @@ export function flatbox_disconnect() {
 
 export function flatbox_status() {
   tsxLog(' Flatbox: status');
-  return;
 
   var err = Shelljs.exec( flatbox_srv() + ' -s').code;
   tsxLog( err );

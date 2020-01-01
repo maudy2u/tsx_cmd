@@ -8,17 +8,24 @@ var aFilter = $000;
 var aExpTime = $001;
 var aFrame = $002; //  cdLight =1, cdBias, cdDark, cdFlat
 var tName = '$003';
+var delay = $004;
+var binning = $005;
 
 var CCDSC = ccdsoftCamera;
 var CCDAG = ccdsoftAutoguider;
 var TSXI = ccdsoftCameraImage;
+var CHART = sky6StarChart;
+var OBJI = sky6ObjectInformation;
 
 CCDSC.Asynchronous = false;		// We are going to wait for it
 CCDSC.ExposureTime = aExpTime;		// Set the exposure time based on the second parameter from tsxfeeder
 CCDSC.AutoSaveOn = true;		// Keep the image
 CCDSC.ImageReduction = 0;		// Don't do autodark, change this if you do want some other calibration (1=AD, 2=full)
+var oldFrame = CCDSC.Frame;
 CCDSC.Frame = aFrame;			// It's a light frame
-CCDSC.Subframe = false;			// Not a subframe
+CCDSC.Subframe = false;	 		// Not a subframe
+var oldDelay = CCDSC.Delay;
+CCDSC.Delay = delay;
 
 var WAIT = ((CCDAG.AutoguiderExposureTime + CCDAG.Delay + 1) * 1000);
 
@@ -63,6 +70,8 @@ if ( SelectedHardware.filterWheelModel !== "<No Filter Wheel Selected>" )
 // *******************************
 // now take image...
 CCDSC.TakeImage();
+CCDSC.Delay = oldDelay;
+CCDSC.Frame = oldFrame;
 
 Out = Out + '|fileName=' + CCDSC.LastImageFileName;
 
@@ -130,44 +139,46 @@ if (BTP == 1)
 else {
   pointing = 'pointing=Unknown';
 }
-report = report +'|'+pointing;
+Out = Out +'|'+pointing;
 
-CHART.Find(tName);
-var haveTarget = OBJI.Property(59); // altitude
-if( haveTarget != 'TypeError: Object not found. Error = 250.') {
-	// we have a target we can query
-	var altitude = OBJI.ObjInfoPropOut;
-	altitude = altitude.toFixed(3);
+if( aFrame == 1 ) { // not for calibrations
+	CHART.Find(tName);
+	var haveTarget = OBJI.Property(59); // altitude
+	if( haveTarget != 'TypeError: Object not found. Error = 250.') {
+		// we have a target we can query
+		var altitude = OBJI.ObjInfoPropOut;
+		altitude = altitude.toFixed(3);
 
-	OBJI.Property(58); // azimuth
-	var azimuth = OBJI.ObjInfoPropOut;
-	azimuth = azimuth.toFixed(3);
+		OBJI.Property(58); // azimuth
+		var azimuth = OBJI.ObjInfoPropOut;
+		azimuth = azimuth.toFixed(3);
 
-	OBJI.Property(54);  // RA				// Pull the RA value
-	var targetRA = OBJI.ObjInfoPropOut; 		// Stuff RA into variable
+		OBJI.Property(54);  // RA				// Pull the RA value
+		var targetRA = OBJI.ObjInfoPropOut; 		// Stuff RA into variable
 
-	OBJI.Property(55); // DEC			// Pull the DEC value
-	var targetDEC = OBJI.ObjInfoPropOut; 		// Stuff DEC into variable
+		OBJI.Property(55); // DEC			// Pull the DEC value
+		var targetDEC = OBJI.ObjInfoPropOut; 		// Stuff DEC into variable
 
-	OBJI.Property(70); // HA			// Pull the Hour Angle value
-	var targetHA = OBJI.ObjInfoPropOut; 		// Stuff DEC into variable
+		OBJI.Property(70); // HA			// Pull the Hour Angle value
+		var targetHA = OBJI.ObjInfoPropOut; 		// Stuff DEC into variable
 
-	OBJI.Property(68); // TransitTime			// Pull the transitTime value
-	var targetTransit = OBJI.ObjInfoPropOut; 		// Stuff DEC into variable
+		OBJI.Property(68); // TransitTime			// Pull the transitTime value
+		var targetTransit = OBJI.ObjInfoPropOut; 		// Stuff DEC into variable
 
-	Out = Out +
-		+ '|AZ=' +
-		azimuth
-		+ '|ALT=' +
-		altitude
-		+ '|RA=' +
-		Number(targetRA).toFixed(3)
-		+ '|DEC=' +
-		Number(targetDEC).toFixed(3)
-		+ '|HA=' +
-		Number(targetHA).toFixed(3)
-		+ '|TRANSIT=' +
-		Number(targetTransit).toFixed(3);
+		Out = Out +
+			+ '|AZ=' +
+			azimuth
+			+ '|ALT=' +
+			altitude
+			+ '|RA=' +
+			Number(targetRA).toFixed(3)
+			+ '|DEC=' +
+			Number(targetDEC).toFixed(3)
+			+ '|HA=' +
+			Number(targetHA).toFixed(3)
+			+ '|TRANSIT=' +
+			Number(targetTransit).toFixed(3);
+	}
 }
 
 Out;

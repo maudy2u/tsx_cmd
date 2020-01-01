@@ -2182,7 +2182,7 @@ function takenImagesFor(target, seriesId) {
 // Use the filter and exposure to take an image
 // Currently it is assumed these are Light images
 // Could set frame type...
-export function tsx_takeImage( filterNum, exposure, frame, target ) {
+export function tsx_takeImage( filterNum, exposure, frame, target, delay, binning ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_takeImage: ' + filterNum );
 
@@ -2191,10 +2191,19 @@ export function tsx_takeImage( filterNum, exposure, frame, target ) {
   var cmd = tsx_cmd('SkyX_JS_TakeImage');
   postProgressTotal(exposure);
 
+  if( delay == '' || typeof delay == 'undefined' ) {
+    delay = 1;
+  }
+  if( binning == '' || typeof binning == 'undefined' ) {
+    binning = 1;
+  }
+
   cmd = cmd.replace("$000", filterNum ); // set filter
-  cmd = cmd.replace("$001", exposure ); // set exposure
-  cmd = cmd.replace("$002", frame ); // set Light/Dark/Flat/Bias
+  cmd = cmd.replace("$001", exposure );  // set exposure
+  cmd = cmd.replace("$002", frame );     // set Light/Dark/Flat/Bias
   cmd = cmd.replace("$003", target.targetFindName ); // set target
+  cmd = cmd.replace("$004", delay );   // set target
+  cmd = cmd.replace("$005", binning ); // set target
 
   var tsx_is_waiting = true;
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {

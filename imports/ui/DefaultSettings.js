@@ -124,6 +124,7 @@ class DefaultSettings extends Component {
       flatbox_device:'',
       flatbox_ip: '',
       flatbox_enabled: false,
+      flatbox_camera_delay: 1,
 
       ip: '',
       port: '',
@@ -310,6 +311,10 @@ class DefaultSettings extends Component {
           flatbox_device: nextProps.tsxInfo.find(function(element) {
             return element.name == 'flatbox_device';
           }).value,
+          flatbox_camera_delay: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'flatbox_camera_delay';
+          }).value,
+
         });
       }
   }
@@ -367,8 +372,16 @@ class DefaultSettings extends Component {
             value={this.state.flatbox_device}
             onChange={this.handleChange}
           />
+          <Form.Input
+            label='Calibration image delay '
+            name='flatbox_camera_delay'
+            placeholder='Seconds to wait e.g. 1.3'
+            value={this.state.flatbox_camera_delay}
+            onChange={this.handleChange}
+          />
         </Form.Group>
         <Form.Group>
+        <br/> 
         Button to refresh Devices
         Iterate each device and
         </Form.Group>

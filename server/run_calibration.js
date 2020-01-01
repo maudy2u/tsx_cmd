@@ -148,8 +148,9 @@ function takeCalibrationImages( cal ) {
   var frame = getFrameNumber(cal.subFrameTypes);
   var filter = getFilterSlot( cal.filter );
   var exposure = cal.exposure;
+  var delay = tsx_GetServerStateValue( 'flatbox_camera_delay' );
   var binning; //future
   var tName = "calibration_image";
-  tsxDebug( ' Calibration: ' +filter +', ' + exposure +', ' + frame +', ' + tName );
-  tsx_takeImage( filter, exposure, frame, tName );
+  tsxDebug( ' Calibration: filter=' +filter +', exposure=' + exposure +', frame=' + frame +', name=' + tName + ', delay=' + delay);
+  tsx_takeImage( filter, exposure, frame, tName, delay, binning );
 }
