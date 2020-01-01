@@ -292,9 +292,10 @@ class CalibrationsMenu extends Component {
     if( this.props.scheduler_running.value == 'Stop'  && this.props.tool_active.value == false ){
       DISABLED = false;
     }
+//        <Checkbox label='Artesky  .' name='flatbox_enabled' toggle checked={this.state.flatbox_enabled} onClick={this.handleToggleAndSave.bind(this)} />
+
     return (
       <Button.Group basic size='mini' floated='right'>
-        <Checkbox label='Artesky  .' name='flatbox_enabled' toggle checked={this.state.flatbox_enabled} onClick={this.handleToggleAndSave.bind(this)} />
         <Button disabled={true} icon='recycle' onClick={this.resetAngles.bind(this)}/>
         <Button disabled={DISABLED} icon='settings' onClick={this.showModalCalibrationSettings.bind(this)}/>
       </Button.Group>
@@ -402,7 +403,6 @@ class CalibrationsMenu extends Component {
                 , this.props.tool_active
               )}
               { this.renderCalibrationButtonBar() }
-              { this.renderCalibrationFlaxboxSettings() }
               { this.renderModalCalibrationSettings()}
               </Table.HeaderCell>
              </Table.Row>

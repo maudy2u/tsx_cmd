@@ -68,7 +68,7 @@ import {
 
 import {
   getFilterName,
-  getFrame,
+  getFrameNumber,
   getFrameName,
   getFilterSlot,
 } from './filter_wheel.js'

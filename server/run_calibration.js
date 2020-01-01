@@ -28,6 +28,9 @@ import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug,
 } from '../imports/api/theLoggers.js';
 
 import {
+  getFilterName,
+  getFrameNumber,
+  getFrameName,
   getFilterSlot,
 } from './filter_wheel.js'
 
@@ -81,7 +84,7 @@ export function collect_calibration_images() {
 
   // Confirm TheSkyX is Running
   let cf; // get the enabled calibration calibrations
-  cf = CalibrationFrames.find({ enabled: true }, { sort: { order: 1 } }).fetch();
+  cf = CalibrationFrames.find({ on_enabled: true }, { sort: { order: 1 } }).fetch();
   var fp_enabled = tsx_GetServerStateValue( 'flatbox_enabled');
   if( fp_enabled == '' ) {
     fp_enabled = false;
@@ -92,8 +95,10 @@ export function collect_calibration_images() {
     flatbox_connect();
   }
   // for loop for Quantity
+  tsxLog( ' Processing calibration frames: ' + cf.length );
   for( var i=0; i < cf.length; i ++ ) {
     if( isSchedulerStopped() != false ) {
+      tsxLog( ' EXIT: Scheduler is NOT stopped' );
       break;
     }
     cal = cf[i];
@@ -103,10 +108,10 @@ export function collect_calibration_images() {
     // check if level > 0; if so turn on light panel
     if( fp_enabled == true && cal.level > 0 ) {
       flatbox_on();
-      flatbox_level( fp.level );
+      flatbox_level( cal.level );
     }
     else if( fp_enabled == true && cal.level <= 0 ) {
-      flatbox_level( fp.level );
+      flatbox_level( cal.level );
       flatbox_off();
     }
     // take_image to actually take the picture
@@ -123,6 +128,7 @@ export function collect_calibration_images() {
       }
     }
     catch( err ) {
+      tsxDebug( err )
       var res = err.split('|')[0].trim();
       if( res == 'TSX_ERROR' ) {
         UpdateStatusErr( ' *** UNKNOWN ERROR - Calibrating failed.' );
@@ -137,11 +143,13 @@ export function collect_calibration_images() {
   tsx_SetServerState( 'tool_active', false );
 }
 
+//var aFrame = $002; //  cdLight =1, cdBias, cdDark, cdFlat
 function takeCalibrationImages( cal ) {
-  var frame = cal.subFrameTypes;
+  var frame = getFrameNumber(cal.subFrameTypes);
   var filter = getFilterSlot( cal.filter );
   var exposure = cal.exposure;
   var binning; //future
   var tName = "calibration_image";
+  tsxDebug( ' Calibration: ' +filter +', ' + exposure +', ' + frame +', ' + tName );
   tsx_takeImage( filter, exposure, frame, tName );
 }
