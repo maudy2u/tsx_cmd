@@ -169,7 +169,7 @@ export function flatbox_off() {
 export function flatbox_disconnect() {
   tsxLog(' Flatbox: DISCONNECTED');
 
-  var err = Shelljs.exec( flatbox_srv() + ' -d').code;
+  var err = Shelljs.exec( flatbox_srv() + ' -x').code;
   tsxLog( err );
   if ( err == -1) {
     UpdateStatusErr('Error!! failed to disconnect Artesky server: ' + err);
