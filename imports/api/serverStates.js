@@ -139,10 +139,21 @@ export const tsx_ServerStates = {
 
   flatbox_enabled: 'flatbox_enabled',
   flatbox_ip: 'flatbox_ip',
+  flatbox_device: 'flatbox_device',
 
   session_report: 'session_report',
 
 };
+
+export function getDefaultStateValue( param ) {
+  var val = TheSkyXInfos.find(function(element) {
+    return element.name == param;
+  }).value;
+  if( typeof val != 'undefined' ) {
+    return val;
+  }
+  return '';
+}
 
 // Should be using this version for all and not within the API
 export function saveDefaultStateValue( param, val ) {

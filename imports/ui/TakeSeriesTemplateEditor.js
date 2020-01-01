@@ -102,22 +102,7 @@ class TakeSeriesTemplateEditor extends Component {
 
   componentWillMount() {
     // do not modify the state directly
-
-    if( typeof this.props.template != 'undefined') {
-      this.setState({
-        name: this.props.template.name,
-        description: this.props.template.description,
-        processSeries: this.props.template.processSeries,
-        defaultDithering: this.props.template.defaultDithering,
-        seriesContainer: this.props.template.series,
-      });
-      if( typeof this.props.template.repeatSeries == 'undefined'
-        || this.props.template.repeatSeries == '' ) {
-          this.setState({
-            repeatSeries: false,
-          });
-        }
-    }
+    this.updateDefaults(this.props);
   }
 
   componentDidMount() {
@@ -201,7 +186,6 @@ class TakeSeriesTemplateEditor extends Component {
     </Grid.Column>
 
     <Button  icon='save' onClick={this.saveEntry.bind(this)} />
-
     */
 
     return (

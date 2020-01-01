@@ -83,11 +83,27 @@ import shelljs from 'shelljs';
 // this is equivalent to the standard node require:
 const Shelljs = require('shelljs');
 
-function ip() {
+function flat_ip() {
   var addr = tsx_GetServerState( 'flatbox_ip');
   if( addr == '' || typeof addCalibration == 'undefined') {
     addr = '127.0.0.1';
-    tsx_UpdateServerState( 'flatbox_ip', '127.0.0.1');
+    tsx_UpdateServerState( 'flatbox_ip', addr);
+  }
+}
+
+function flat_device() {
+  var addr = tsx_GetServerState( 'flatbox_device');
+  if( addr == '' || typeof addCalibration == 'undefined') {
+    addr = 'ttyARTESKYFLAT';
+    tsx_UpdateServerState( 'flatbox_device', addr);
+  }
+}
+
+function flat_enabled() {
+  var addr = tsx_GetServerState( 'flatbox_enabled');
+  if( addr == '' || typeof addCalibration == 'undefined') {
+    addr = false;
+    tsx_UpdateServerState( 'flatbox_enabled', addr);
   }
 }
 

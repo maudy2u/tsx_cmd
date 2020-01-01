@@ -29,6 +29,7 @@ import {
   Button,
   Progress,
   Accordion,
+  Checkbox,
 } from 'semantic-ui-react'
 
 import {
@@ -54,7 +55,6 @@ import {
   tsx_ServerStates,
   tsx_UpdateServerState,
   saveDefaultStateValue,
-  // tsx_GetServerState,
 } from  '../api/serverStates.js';
 
 import {
@@ -72,22 +72,23 @@ const XRegExpZeroToNine = XRegExp('^\\d$');
 
 const ERRORLABEL = <Label color="red" pointing/>
 
-const eDefaultConstrainsts = 0;
-const eStartStop = 1;
-const eClouds = 2;
-const eGuider = 3;
-const eFocuser =4;
-const eFilterWheel = 5;
-const eRotator = 6;
-const eCamera =7;
-const eMount = 8;
+const eSetup = 0;
+const eDefaultConstrainsts =1;
+const eStartStop = 2;
+const eClouds = 3;
+const eGuider = 4;
+const eFocuser =5;
+const eFilterWheel = 6;
+const eRotator = 7;
+const eCamera =8;
+const eMount = 9;
 
 // App component - represents the whole app
 class DefaultSettings extends Component {
 
-  // constructor() {
-  //   super();
-    state = {
+   constructor() {
+     super();
+     this.state = {
       defaultMinSunAlt: -15,
       defaultMinAlt: 30,
       defaultFocusTempDiff: 0.7,
@@ -120,8 +121,16 @@ class DefaultSettings extends Component {
       defaultCLSRepeat: 3600,
       calibrationFrameSize: 100,
 
+      flatbox_device:'',
+      flatbox_ip: '',
+      flatbox_enabled: false,
+
+      ip: '',
+      port: '',
+
       activeIndex: 0,
     };
+  }
 
   handleClick = (e, titleProps) => {
      const { index } = titleProps
@@ -140,6 +149,15 @@ class DefaultSettings extends Component {
       [name]: !val
     });
     saveDefaultStateValue( name, value );
+  };
+
+  handleToggleAndSave = (e, { name, value }) => {
+    var val = eval( 'this.state.' + name);
+
+    this.setState({
+      [name]: !val
+    });
+    saveDefaultStateValue( name, !val );
   };
 
   handleChange = (e, { name, value }) => {
@@ -167,7 +185,11 @@ class DefaultSettings extends Component {
   saveServerFailedOpen = () => this.setState({ saveServerFailed: true });
   saveServerFailedClose = () => this.setState({ saveServerFailed: false });
 
-  componentWillMount() {
+  // componentWillMount() {
+  //   this.updateDefaults(this.props);
+  // }
+
+  componentDidMount() {
     this.updateDefaults(this.props);
   }
 
@@ -177,7 +199,19 @@ class DefaultSettings extends Component {
       }
 
       if( typeof nextProps.tsxInfo != 'undefined'  ) {
+        // false === 'undefined' issues
         this.setState({
+          flatbox_enabled: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'flatbox_enabled';
+        }).value});
+
+        this.setState({
+          ip: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'ip';
+          }).value,
+          port: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'port';
+          }).value,
 
           defaultMinSunAlt: nextProps.tsxInfo.find(function(element) {
             return element.name == 'defaultMinSunAlt';
@@ -270,11 +304,11 @@ class DefaultSettings extends Component {
             return element.name == 'calibrationFrameSize';
           }).value,
 
-          flatbox_enabled: nextProps.tsxInfo.find(function(element) {
-            return element.name == 'flatbox_enabled';
-          }).value,
           flatbox_ip: nextProps.tsxInfo.find(function(element) {
             return element.name == 'flatbox_ip';
+          }).value,
+          flatbox_device: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'flatbox_device';
           }).value,
         });
       }
@@ -282,6 +316,68 @@ class DefaultSettings extends Component {
 
   // *******************************
   //
+  renderServers() {
+    const { activeIndex } = this.state
+
+    return (
+      <div>
+      <Accordion.Title
+        active={activeIndex === eSetup}
+        content='System Setup'
+        index={eSetup}
+        onClick={this.handleClick}
+        />
+      <Accordion.Content  active={activeIndex === eSetup} >
+      <Form>
+        <Form.Group>
+          <Form.Input
+            label='TheSkyX Server IP Address'
+            name='ip'
+            placeholder='Enter TheSkyX IP address'
+            value={this.state.ip}
+            onChange={this.handleChange}
+          />
+          <Form.Input
+            label='The SkyX Server Port'
+            name='port'
+            placeholder='Enter TheSkyX port'
+            value={this.state.port}
+            onChange={this.handleChange}
+          />
+        </Form.Group>
+        <Form.Group>
+          <Checkbox
+            label='Enable Artseky Flatbox'
+            name='flatbox_enabled'
+            toggle
+            checked={this.state.flatbox_enabled}
+            onClick={this.handleToggleAndSave.bind(this)}
+          />
+          <Form.Input
+            label='Artseky Flatbox Server IP'
+            name='flatbox_ip'
+            placeholder='Enter artesky_srv IP address, e.g. 127.0.0.1'
+            value={this.state.flatbox_ip}
+            onChange={this.handleChange}
+          />
+          <Form.Input
+            label='Artseky Flatbox Device Port'
+            name='flatbox_device'
+            placeholder='e.g. /dev/ttyARTESKYFLAT'
+            value={this.state.flatbox_device}
+            onChange={this.handleChange}
+          />
+        </Form.Group>
+        <Form.Group>
+        Button to refresh Devices
+        Iterate each device and
+        </Form.Group>
+      </Form>
+    </Accordion.Content>
+    </div>
+    )
+  }
+
   renderConstraints() {
     const { activeIndex } = this.state
 
@@ -739,6 +835,7 @@ class DefaultSettings extends Component {
     return (
       <div>
         <Accordion styled>
+          {this.renderServers()}
           {this.renderConstraints()}
           {this.renderStartStopTimes()}
           {this.renderClouds()}
