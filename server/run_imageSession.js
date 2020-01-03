@@ -850,6 +850,7 @@ function tsx_RunFocus3( target ) {
   var Out;
   var enabled = tsx_GetServerStateValue('isFocus3Enabled');
   var doCLS = tsx_GetServerStateValue( 'defaultCLSEnabled' );
+  var cloudy = tsx_GetServerStateValue( 'focusRequiresCLS' );
   tsxDebug(' ??? @Focus3 enabled found to be: ' + enabled );
   if( enabled == true  ) {
 
@@ -864,21 +865,35 @@ function tsx_RunFocus3( target ) {
       tsx_SetServerState('focus3Samples', 5 ); // arbitrary default
       focusSamples = 5;
     }
+    if( cloudy == '' || typeof cloudy == 'undefined' ) {
+      cloudy = false;
+      tsx_SetServerState( 'focusRequiresCLS', false );
+    }
 
     var focusFilter = getFilterSlot(target.focusFilter);
     var focusExp = target.focusExposure;
-    var focusTarget = target.focusTarget;
+    var focusObj = target.focusTarget;
 
     // do not bother CLS to star target... assume that the mount is prepared
-    if( focusTarget != '' ) {
-      if( doCLS == false ) {
-        // If CLS not enabled then Slew...
-        var res = tsx_SlewTargetName( focusTarget );
-      }
-      else {
-        var res = tsx_CLS_target( focusTarget );
-        updateTargetIsCloudy( target, res );
-      }
+    // if focus requires CLS for clouds...
+    // determine focus FOV: target or start
+    var focusTarget;
+    if( focusObj != '' ) {
+      focusTarget = focusTarget;
+    }
+    else {
+      focusTarget = target.targetFindName;
+    }
+
+    var recentreTarget = false;
+    if( doCLS != false && cloudy ) {
+      var res = tsx_CLS_target( focusTarget );
+      updateTargetIsCloudy( target, res );
+    }
+    else if( focusTarget != target.targetFindName ) {
+      // If CLS not enabled then Slew...
+      var res = tsx_SlewTargetName( focusTarget );
+      recentreTarget = true;
     }
 
     var cmd = tsx_cmd('SkyX_JS_Focus-3');
@@ -896,13 +911,8 @@ function tsx_RunFocus3( target ) {
       curFocusTemp = lastFocusTemp;
     }
 
-    if( focusTarget != '' ) {
-      //  NGC7023: @Focus3 started: 13737 for temp 13.2
-      UpdateStatus(' ' + target.targetFindName +': @Focus3 started (using ' + focusTarget + ') for current temp ' + lastFocusTemp + ', vs ' + curFocusTemp );
-    }
-    else {
-      UpdateStatus(' ' + target.targetFindName +': @Focus3 started: for current temp ' + lastFocusTemp  + ', vs ' + curFocusTemp );
-    }
+    UpdateStatus(' ' + target.targetFindName +': @Focus3 (using ' + focusTarget + ') for current temp ' + lastFocusTemp + ', vs ' + curFocusTemp );
+
     var position = '';
     var temp = '';
     var tsx_is_waiting = true;
@@ -935,7 +945,7 @@ function tsx_RunFocus3( target ) {
     while( tsx_is_waiting ) {
      Meteor.sleep( 1000 );
     }
-    if( focusTarget != '' ) {
+    if( recentreTarget ) {
       if( doCLS == false ) {
         // If CLS not enabled then Slew...
         var res = tsx_Slew( target );
@@ -2222,6 +2232,16 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
             // RunJavaScriptOutput.writeLine(token);
             var param=token.split("=");
             switch( param[0] ) {
+
+              case 'avgPix':
+                updateImageReport( iid, 'avgPix', param[1] );
+                updateTargetReport( target._id, 'avgPix', param[1] );
+                break;
+
+              case 'maxPix':
+                updateImageReport( iid, 'maxPix', param[1] );
+                updateTargetReport( target._id, 'maxPix', param[1] );
+                break;
 
               case 'ALT':
                 updateImageReport( iid, 'ALT', param[1] );

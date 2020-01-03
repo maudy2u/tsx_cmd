@@ -64,6 +64,7 @@ import {
   flatbox_off,
   flatbox_status,
   flatbox_level,
+  flatbox_setup,
 } from './artesky_flatbox.js'
 
 import {
@@ -72,6 +73,8 @@ import {
   addCalibrationFrame,
   updateCalibrationFrame,
  } from '../imports/api/calibrationFrames.js';
+
+const settlePanel = 3*1000; // seconds
 
 export function collect_calibration_images() {
   tsx_SetServerState( 'tool_active', true );
@@ -92,7 +95,10 @@ export function collect_calibration_images() {
     tsxLog( ' Flatbox: turned off by default')
   }
   if( fp_enabled ) {
+    flatbox_setup(); // connect device
+    Meteor.sleep(settlePanel);
     flatbox_connect();
+    Meteor.sleep(settlePanel);
   }
   // for loop for Quantity
   tsxLog( ' Processing calibration frames: ' + cf.length );
@@ -107,12 +113,18 @@ export function collect_calibration_images() {
 
     // check if level > 0; if so turn on light panel
     if( fp_enabled == true && cal.level > 0 ) {
+      Meteor.sleep(settlePanel);
       flatbox_on();
+      Meteor.sleep(settlePanel);
       flatbox_level( cal.level );
+      Meteor.sleep(settlePanel);
     }
     else if( fp_enabled == true && cal.level <= 0 ) {
+      Meteor.sleep(settlePanel);
       flatbox_level( cal.level );
+      Meteor.sleep(settlePanel);
       flatbox_off();
+      Meteor.sleep(settlePanel);
     }
     // take_image to actually take the picture
     try {
@@ -137,7 +149,10 @@ export function collect_calibration_images() {
     }
   }
   if( fp_enabled ) {
+    flatbox_off();
+    Meteor.sleep(settlePanel);
     flatbox_disconnect();
+    Meteor.sleep(settlePanel);
   }
 
   tsx_SetServerState( 'tool_active', false );

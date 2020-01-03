@@ -432,6 +432,17 @@ class CalibrationsMenu extends Component {
           })}
           </Table.Body>
        </Table>
+       <Segment>
+       Let us try to create a calibration level and exposure routine...
+        1. pick an exposure. check ZWO site
+        2. Check SB site for new camera parameter - to get/set gain
+        3. take image using an exposure, take five images, report all five,
+            report the avg., max. and 90% values
+            - CCDSI.averagePixelValue()
+            - CCDSC.MaximumPixel
+            - 90%...
+        4. Use a Sleep for level changes...
+       </Segment>
       </div>
     )
   }

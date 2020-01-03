@@ -101,6 +101,7 @@ export const tsx_ServerStates = {
   isGuideSettlingEnabled: 'isGuideSettlingEnabled',
   guidingPixelErrorTolerance: 'guidingPixelErrorTolerance',
   guiderPixelSize: 'guiderPixelSize',
+  guider_camera_delay: 'guider_camera_delay',
 
   fovAngle: 'fovAngle',
   fovPositionAngleTolerance: 'fovPositionAngleTolerance',
@@ -108,8 +109,10 @@ export const tsx_ServerStates = {
 
   lastTargetDirection: 'lastTargetDirection',
   lastCheckMinSunAlt: 'lastCheckMinSunAlt',
+
   lastFocusPos: 'lastFocusPos',
   lastFocusTemp: 'lastFocusTemp',
+  focusRequiresCLS: 'focusRequiresCLS',
 
   defaultCLSRepeat: 'defaultCLSRepeat',
   isCLSRepeatEnabled: 'isCLSRepeatEnabled',

@@ -105,6 +105,8 @@ class DefaultSettings extends Component {
       isFocus3Enabled: false,
       focus3Samples: 5,
       isFocus3Binned: false,
+      focusRequiresCLS: true,
+
       focus3samples: 5,
       defaultGuideExposure: 7,
       defaultFocusExposure: 1,
@@ -114,6 +116,8 @@ class DefaultSettings extends Component {
       imagingFocalLength: 2800,
       guiderPixelSize: 3.8,
       guidingPixelErrorTolerance: 0.9,
+      guider_camera_delay: 1.0,
+
       defaultCLSEnabled: true,
       fovPositionAngleTolerance: 0.5,
       defaultFOVExposure: 4,
@@ -200,11 +204,27 @@ class DefaultSettings extends Component {
       }
 
       if( typeof nextProps.tsxInfo != 'undefined'  ) {
+
         // false === 'undefined' issues
+        var val = nextProps.tsxInfo.find(function(element) {
+          return element.name == 'flatbox_enabled';
+        }).value;
+        if( val == '' || typeof val == 'undefined') {
+          val = false;
+        }
         this.setState({
-          flatbox_enabled: nextProps.tsxInfo.find(function(element) {
-            return element.name == 'flatbox_enabled';
-        }).value});
+          flatbox_enabled: val,
+        });
+
+        val = nextProps.tsxInfo.find(function(element) {
+          return element.name == 'focusRequiresCLS';
+        }).value;
+        if( val == '' || typeof val == 'undefined') {
+          val = false;
+        }
+        this.setState({
+          focusRequiresCLS: val,
+        });
 
         this.setState({
           ip: nextProps.tsxInfo.find(function(element) {
@@ -214,6 +234,10 @@ class DefaultSettings extends Component {
             return element.name == 'port';
           }).value,
 
+
+          guider_camera_delay: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'guider_camera_delay';
+          }).value,
           defaultMinSunAlt: nextProps.tsxInfo.find(function(element) {
             return element.name == 'defaultMinSunAlt';
           }).value,
@@ -253,6 +277,7 @@ class DefaultSettings extends Component {
           focus3Samples: nextProps.tsxInfo.find(function(element) {
             return element.name == 'focus3Samples';
           }).value,
+
           isFocus3Binned: nextProps.tsxInfo.find(function(element) {
             return element.name == 'isFocus3Binned';
           }).value,
@@ -322,7 +347,13 @@ class DefaultSettings extends Component {
   // *******************************
   //
   renderServers() {
-    const { activeIndex } = this.state
+    const { activeIndex } = this.state;
+    var mount = TheSkyXInfos.findOne().mount();
+    var camera = TheSkyXInfos.findOne().camera();
+    var guider = TheSkyXInfos.findOne().guider();
+    var rotator = TheSkyXInfos.findOne().rotator();
+    var efw = TheSkyXInfos.findOne().efw();
+    var focuser = TheSkyXInfos.findOne().focuser();
 
     return (
       <div>
@@ -352,40 +383,61 @@ class DefaultSettings extends Component {
         </Form.Group>
         <Form.Group>
           <Checkbox
+            style={{color: '#68c349'}}
             label='Enable Artseky Flatbox'
             name='flatbox_enabled'
             toggle
             checked={this.state.flatbox_enabled}
             onClick={this.handleToggleAndSave.bind(this)}
           />
-          <Form.Input
-            label='Artseky Flatbox Server IP'
-            name='flatbox_ip'
-            placeholder='Enter artesky_srv IP address, e.g. 127.0.0.1'
-            value={this.state.flatbox_ip}
-            onChange={this.handleChange}
-          />
-          <Form.Input
-            label='Artseky Flatbox Device Port'
-            name='flatbox_device'
-            placeholder='e.g. /dev/ttyARTESKYFLAT'
-            value={this.state.flatbox_device}
-            onChange={this.handleChange}
-          />
-          <Form.Input
-            label='Calibration image delay '
-            name='flatbox_camera_delay'
-            placeholder='Seconds to wait e.g. 1.3'
-            value={this.state.flatbox_camera_delay}
-            onChange={this.handleChange}
-          />
         </Form.Group>
         <Form.Group>
-        <br/> 
+        <Form.Input
+          label='Artseky Flatbox Server IP'
+          name='flatbox_ip'
+          placeholder='Enter artesky_srv IP address, e.g. 127.0.0.1'
+          value={this.state.flatbox_ip}
+          onChange={this.handleChange}
+        />
+        <Form.Input
+          label='Artseky Flatbox Device Port'
+          name='flatbox_device'
+          placeholder='e.g. /dev/ttyARTESKYFLAT'
+          value={this.state.flatbox_device}
+          onChange={this.handleChange}
+        />
+        <Form.Input
+          label='Calibration image delay '
+          name='flatbox_camera_delay'
+          placeholder='Seconds to wait e.g. 1.3'
+          value={this.state.flatbox_camera_delay}
+          onChange={this.handleChange}
+        />
+        <br/>
         Button to refresh Devices
         Iterate each device and
         </Form.Group>
       </Form>
+      <Segment.Group>
+        <Segment><Label>Mount<Label.Detail>
+          {mount.manufacturer + ' | ' + mount.model}
+        </Label.Detail></Label></Segment>
+        <Segment><Label>Camera<Label.Detail>
+          {camera.manufacturer + ' | ' + camera.model}
+        </Label.Detail></Label></Segment>
+        <Segment><Label>Autoguider<Label.Detail>
+          {guider.manufacturer + ' | ' + guider.model}
+        </Label.Detail></Label></Segment>
+        <Segment><Label>Filter Wheel<Label.Detail>
+          {efw.manufacturer + ' | ' + efw.model}
+        </Label.Detail></Label></Segment>
+        <Segment><Label>Focuser<Label.Detail>
+          {focuser.manufacturer + ' | ' + focuser.model}
+        </Label.Detail></Label></Segment>
+        <Segment><Label>Rotator<Label.Detail>
+          {rotator.manufacturer + ' | ' + rotator.model}
+        </Label.Detail></Label></Segment>
+      </Segment.Group>
     </Accordion.Content>
     </div>
     )
@@ -642,6 +694,13 @@ class DefaultSettings extends Component {
             validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
             errorLabel={ ERRORLABEL }
           />
+          <Form.Input
+            label='Guiding image delay '
+            name='guider_camera_delay'
+            placeholder='Seconds to wait e.g. 1.3'
+            value={this.state.guider_camera_delay}
+            onChange={this.handleChange}
+          />
           </Form>
       </Accordion.Content>
       </div>
@@ -759,7 +818,7 @@ class DefaultSettings extends Component {
         />
         <Form.Input
           label='@Focus3 samples '
-          name='focus2Samples'
+          name='focus3Samples'
           placeholder='Number of samples to take'
           value={this.state.focus3Samples}
           onChange={this.handleChange}
@@ -768,6 +827,14 @@ class DefaultSettings extends Component {
           }}
           validationError="Must be a positive number, e.g 1, 2, 3, 5..."
           errorLabel={ ERRORLABEL }
+        />
+        <Checkbox
+          style={{color: '#68c349'}}
+          label='CLS before focusing in case of clouds'
+          name='focusRequiresCLS'
+          toggle
+          checked={this.state.focusRequiresCLS}
+          onClick={this.handleToggleAndSave.bind(this)}
         />
         </Form>
       </Accordion.Content>
@@ -825,7 +892,14 @@ class DefaultSettings extends Component {
           validationError="Must be a positive number, e.g 0, 5, 1800, 3600"
           errorLabel={ ERRORLABEL }
         />
-
+        <Checkbox
+          style={{color: '#68c349'}}
+          label='CLS before focusing in case of clouds'
+          name='focusRequiresCLS'
+          toggle
+          checked={this.state.focusRequiresCLS}
+          onClick={this.handleToggleAndSave.bind(this)}
+        />
       </Form>
 
     </Accordion.Content>

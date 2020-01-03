@@ -181,5 +181,9 @@ if( aFrame == 1 ) { // not for calibrations
 	}
 }
 
+var avgPix = CCDSI.averagePixelValue();
+var maxPix = CCDSC.MaximumPixel;
+Out = Out + '|avgPix=' + avgPix + '|maxPix='+maxPix;
+
 Out;
 /* Socket End Packet */

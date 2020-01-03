@@ -62,6 +62,8 @@ ImagingSessionLogs = {
        enabled: '',
        sessionTotal: '',
        runningTotal: '',
+       maxPix: '',
+       avgPix: '',
      },
    );
    return id;
@@ -144,6 +146,13 @@ ImagingSessionLogs = {
      else if( name == 'enabled') {
        obj.enabled = value;
      }
+     else if( name == 'maxPix') {
+       obj.maxPix = value;
+     }
+     else if( name == 'avgPix') {
+       obj.avgPix = value;
+     }
+
      id = ImagingSessionLogs.update({_id: obj._id}, {
        $set: {
          ALT: obj.ALT,
@@ -172,6 +181,8 @@ ImagingSessionLogs = {
          focus_pos: obj.focus_pos,
          binning: obj.binning,
          enabled: obj.enabled,
+         maxPix: obj.maxPix,
+         avgPix: obj.avgPix,
        }
      });
    }

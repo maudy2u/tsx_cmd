@@ -81,7 +81,7 @@ import {
 
 //const arteksy_cmd = '/usr/local/bin/arteksy_cmd'
 //const arteksy_cmd = '/usr/bin/arteksy_cmd'
-//const arteksy_cmd = '/bin/artesky_cmd' 
+//const arteksy_cmd = '/bin/artesky_cmd'
 const arteksy_cmd = 'artesky_cmd'
 
 // grab npm version
@@ -104,6 +104,7 @@ function flat_device() {
     addr = 'ttyARTESKYFLAT';
     tsx_UpdateServerState( 'flatbox_device', addr);
   }
+  return ' -d ' + addr;
 }
 
 function flat_enabled() {
@@ -114,13 +115,25 @@ function flat_enabled() {
   }
 }
 
+export function flatbox_setup() {
+  tsxLog(' Flatbox: setup');
+  tsxDebug( flatbox_srv() + flat_device() );
+  var err = Shelljs.exec( flatbox_srv() + ' -c').code;
+//  tsxLog( err );
+  if ( err == -1) {
+    UpdateStatusErr('Error!! failed setup Artesky server: ' + err);
+    return false;
+  }
+  return true;
+}
+
 export function flatbox_connect() {
   tsxLog(' Flatbox: connected');
   tsxDebug( flatbox_srv() + ' -c' );
-  var err = Shelljs.exec( flatbox_srv() + ' -c').stdout;
-  tsxLog( err );
+  var err = Shelljs.exec( flatbox_srv() + ' -c').code;
+//  tsxLog( err );
   if ( err == -1) {
-    UpdateStatusErr('Error!! failed find Artesky server: ' + err);
+    UpdateStatusErr('Error!! failed to connect to Artesky server: ' + err);
     return false;
   }
   return true;
@@ -129,7 +142,7 @@ export function flatbox_connect() {
 export function flatbox_on() {
   tsxLog(' Flatbox: on');
   var err = Shelljs.exec( flatbox_srv() + ' -O').code;
-  tsxLog( err );
+//  tsxLog( err );
   if ( err == -1) {
     UpdateStatusErr('Error!! failed to turn on Artesky server: ' + err);
     return false;
@@ -146,7 +159,7 @@ export function flatbox_level( lvl ) {
   else {
     err = Shelljs.exec( flatbox_srv() + ' -o').code;
   }
-  tsxLog( err );
+//  tsxLog( err );
   if ( err == -1) {
     UpdateStatusErr('Error!! failed to set level Artesky server: ' + err);
     return false;
@@ -156,9 +169,8 @@ export function flatbox_level( lvl ) {
 
 export function flatbox_off() {
   tsxLog(' Flatbox: off');
-
   var err = Shelljs.exec( flatbox_srv() + ' -o').code;
-  tsxLog( err );
+//  tsxLog( err );
   if ( err == -1) {
     UpdateStatusErr('Error!! failed to turn OFF Artesky server: ' + err);
     return false;
@@ -170,7 +182,7 @@ export function flatbox_disconnect() {
   tsxLog(' Flatbox: DISCONNECTED');
 
   var err = Shelljs.exec( flatbox_srv() + ' -x').code;
-  tsxLog( err );
+//  tsxLog( err );
   if ( err == -1) {
     UpdateStatusErr('Error!! failed to disconnect Artesky server: ' + err);
     return false;
@@ -182,7 +194,7 @@ export function flatbox_status() {
   tsxLog(' Flatbox: status');
 
   var err = Shelljs.exec( flatbox_srv() + ' -s').code;
-  tsxLog( err );
+//  tsxLog( err );
   if ( err == -1) {
     UpdateStatusErr('Error!! failed to get Status Artesky server: ' + err);
     return false;
