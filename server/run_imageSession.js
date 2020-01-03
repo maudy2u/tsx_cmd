@@ -27,16 +27,21 @@ import {
   tsxDebug,
 } from '../imports/api/theLoggers.js';
 
-import { TargetSessions } from '../imports/api/targetSessions.js';
+import {
+  TargetSessions,
+} from '../imports/api/targetSessions.js';
+
 import {
   ImagingSessionLogs,
   addImageReport,
   updateImageReport,
 } from '../imports/api/imagingSessionLogs.js';
+
 import {
   TargetReports,
   updateTargetReport,
 } from '../imports/api/targetReports.js';
+
 import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
 import { Seriess } from '../imports/api/seriess.js';
 import { Filters } from '../imports/api/filters.js';
@@ -58,6 +63,8 @@ import {
   UpdateStatusErr,
   postProgressTotal,
   UpdateImagingSesionID,
+  tsx_UpdateDeviceManufacturer,
+  tsx_UpdateDeviceModel,
 } from '../imports/api/serverStates.js'
 
 import {
@@ -1183,121 +1190,136 @@ function tsx_DeviceInfo() {
   // cmd = cmd.replace('$001', Number(exposure) ); // set exposure
 
   var success;
+  var tsx_is_waiting = true;
+  var numFilters = -1;
+  var numBins = -1;
   tsx_feeder( String(cmd), Meteor.bindEnvironment((tsx_return) => {
-      tsxDebug(tsx_return);
-      var errIndex = tsx_return.split('|').length-1;
-      if( tsx_return.split('|')[errIndex].trim() != "No error. Error = 0.") {
-        UpdateStatus(' Devices Updated');
-	       tsxDebug( tsx_return );
-         return;
-      }
-      if( tsx_return.split('|')[0].trim() === "TypeError: The operation failed because there is no connection to the device. Error = 200.") {
-	      tsxDebug( tsx_return );
-        UpdateStatus('The operation failed because there is no connection to the device.');
-	      return;
-      }
-      try {
-        tsx_UpdateDevice(
-          'guider',
-          tsx_return.split('|')[1].trim(),
-          tsx_return.split('|')[3].trim(),
-        );
-      } catch (e) {
-        tsxDebug( ' No guider found.' );
-      }
+    // e.g.
+    // Success|RMS_ERROR=0.00|ROTATOR_POS_ANGLE=-350|ANGLE=349.468|FOCUS_POS=0.000
+    tsxDebug(' TakeImage return: ' + tsx_return );
+    if( tsx_has_error(tsx_return) == false ) {
+      var results = tsx_return.split('|');
+      if( results.length > 0) {
+        var result = results[0].trim();
+        if( result == 'Success' ) {
+          success = true;
+          for( var i=1; i<results.length;i++) {
+            var token=results[i].trim();
+            // 
+            var param=token.split("=");
+            switch( param[0] ) {
 
-      try {
-        tsx_UpdateDevice(
-          'camera',
-          tsx_return.split('|')[5].trim(),
-          tsx_return.split('|')[7].trim(),
-        );
-      } catch (e) {
-        tsxDebug( ' No camera found.' );
-      }
+              case 'aMan':
+                tsx_UpdateDeviceManufacturer( 'guider', param[1] );
+                break;
 
-      try {
-        tsx_UpdateDevice(
-          'efw',
-          tsx_return.split('|')[9].trim(),
-          tsx_return.split('|')[11].trim(),
-        );
-      } catch (e) {
-        tsxDebug( ' No EFW found.' );
-      }
+              case 'aMod':
+                tsx_UpdateDeviceModel( 'guider', param[1] );
+                break;
 
-      try {
-        tsx_UpdateDevice(
-          'focuser',
-          tsx_return.split('|')[13].trim(),
-          tsx_return.split('|')[15].trim(),
-        );
-      } catch (e) {
-        tsxDebug( ' No focuser found.' );
-      }
+              case 'cMan':
+                tsx_UpdateDeviceManufacturer( 'camera', param[1] );
+                break;
 
-      try {
-        tsx_UpdateDevice(
-          'mount',
-          tsx_return.split('|')[17].trim(),
-          tsx_return.split('|')[19].trim(),
-        );
-      } catch (e) {
-        tsxErr( ' No mount found.' );
-      }
+              case 'cMod':
+                tsx_UpdateDeviceModel( 'camera', param[1] );
+                break;
 
-      try {
-         tsx_UpdateDevice(
-           'rotator',
-           tsx_return.split('|')[21].trim(),
-           tsx_return.split('|')[23].trim(),
-         );
-       } catch (e) {
-         tsxDebug( ' No rotator found.' );
-       }
+              case 'efwMan':
+                tsx_UpdateDeviceManufacturer( 'efw', param[1] );
+                break;
 
+              case 'efwMod':
+                tsx_UpdateDeviceModel( 'efw', param[1] );
+                break;
 
-       var numBins = tsx_return.split('|')[25].trim();
-       tsx_SetServerState(
-         'numberOfBins',
-         numBins
-       );
-       var numFilters = tsx_return.split('|')[27].trim();
-       tsx_SetServerState(
-         'numberOfFilters',
-         numFilters
-       );
+              case 'focMan':
+                tsx_UpdateDeviceManufacturer( 'focuser', param[1] );
+                break;
 
-       // if too many filters... reduce to matching
-       // if not enough then upsert will clean up
-       var filters = Filters.find({}, { sort: { slot: 1 } }).fetch();
-       if( filters.length > numFilters ) {
-         // need to reduce the filters
-         for (var i = 0; i < filters.length; i++) {
-           if( filters[i].slot > numberFilters-1) {
-              Filters.remove(filters[i]._id);
-           }
-         }
-       }
+              case 'focMod':
+                tsx_UpdateDeviceModel( 'focuser', param[1] );
+                break;
 
-       var index = 28; // the next position after the numFilters
-       for (var i = 0; i < numFilters; i++) {
-         let name = tsx_return.split('|')[index+i].trim();
-         let filter = Filters.findOne({name: name });
-         let exp = 0;
-         if( typeof filter != 'undefined' ) {
-           exp = filter.flat_exposure;
-         }
-         Filters.upsert( {slot: i }, {
-           $set: {
-             name: name,
-             flat_exposure: exp,
+              case 'mntMan':
+                tsx_UpdateDeviceManufacturer( 'mount', param[1] );
+                break;
+
+              case 'mntMod':
+                tsx_UpdateDeviceModel( 'mount', param[1] );
+                break;
+
+              case 'rotMan':
+                tsx_UpdateDeviceManufacturer( 'rotator', param[1] );
+                break;
+
+              case 'rotMod':
+                tsx_UpdateDeviceModel( 'rotator', param[1] );
+                break;
+
+              case 'numBins':
+                numBins = param[1];
+                tsx_SetServerState( 'numberOfBins', numBins );
+                break;
+
+              case 'numFilters':
+                numFilters = param[1];
+                tsx_SetServerState( 'numberOfFilters', numFilters );
+                break;
+
+              default:
+                //RunJavaScriptOutput.writeLine(param[0]+' not found.');
             }
-         });
-       }
-       UpdateStatus( ' Devices Updated');
-     }
-  ));
+          }
+
+          if( numFilters > -1 ) {
+            // if too many filters... reduce to matching
+            // if not enough then upsert will clean up
+            var filters = Filters.find({}, { sort: { slot: 1 } }).fetch();
+            if( filters.length > numFilters ) {
+              // need to reduce the filters
+              for (var i = 0; i < filters.length; i++) {
+                if( filters[i].slot > numFilters-1) {
+                   Filters.remove(filters[i]._id);
+                }
+              }
+            }
+
+            for( var s=0; s<numFilters; s++ ) {
+              var slot = "slot_" +s;
+              for( var i=1; i<results.length;i++) {
+                var token=results[i].trim();
+                var param=token.split("=");
+                if( slot == param[0] ) {
+                  var name = param[1];
+                  let filter = Filters.findOne({name: name });
+                  Filters.upsert( {slot: s }, {
+                    $set: {
+                      name: name,
+                    }
+                  });
+                }
+              }
+            }
+          }
+          UpdateStatus( ' Devices Updated');
+        }
+      }
+      else {
+        tsxWarn(' Device update failed: ' + tsx_return);
+      }
+    }
+    Meteor.sleep( 500 ); // needs a sleep before next image
+    tsx_is_waiting = false;
+  }));
+  while( tsx_is_waiting ) {
+   Meteor.sleep( 1000 );
+   if( isSchedulerStopped() ) {
+     tsxDebug(' Device Update Stopped');
+     tsx_is_waiting = false;
+     success = false;
+   }
+  }
 }
 
 // **************************************************************

@@ -133,7 +133,7 @@ class DefaultSettings extends Component {
       ip: '',
       port: '',
 
-      activeIndex: 0,
+      activeIndex: 1,
     };
   }
 
@@ -344,53 +344,45 @@ class DefaultSettings extends Component {
       }
   }
 
-  // *******************************
-  //
-  renderServers() {
-    const { activeIndex } = this.state;
-    var mount = TheSkyXInfos.findOne().mount();
-    var camera = TheSkyXInfos.findOne().camera();
-    var guider = TheSkyXInfos.findOne().guider();
-    var rotator = TheSkyXInfos.findOne().rotator();
-    var efw = TheSkyXInfos.findOne().efw();
-    var focuser = TheSkyXInfos.findOne().focuser();
+  appButtons( state, active ) {
+    // detective
+    var DISABLE = true;
+    var NOT_DISABLE = false;
+    // then use as needed disabled={DISABLE} or disabled={NOT_DISABLE}
+    if( state == 'Stop'  && active == false ){
+      DISABLE = false;
+      NOT_DISABLE = true;
+    }
+//   icon='plug'     <Button disabled compact />
+//      <Button disabled={DISABLE}  onClick={this.connectToTSX.bind(this)}>
+//      Refresh</Button>
 
     return (
-      <div>
-      <Accordion.Title
-        active={activeIndex === eSetup}
-        content='System Setup'
-        index={eSetup}
-        onClick={this.handleClick}
-        />
-      <Accordion.Content  active={activeIndex === eSetup} >
-      <Form>
-        <Form.Group>
-          <Form.Input
-            label='TheSkyX Server IP Address'
-            name='ip'
-            placeholder='Enter TheSkyX IP address'
-            value={this.state.ip}
-            onChange={this.handleChange}
-          />
-          <Form.Input
-            label='The SkyX Server Port'
-            name='port'
-            placeholder='Enter TheSkyX port'
-            value={this.state.port}
-            onChange={this.handleChange}
-          />
-        </Form.Group>
-        <Form.Group>
-          <Checkbox
-            style={{color: '#68c349'}}
-            label='Enable Artseky Flatbox'
-            name='flatbox_enabled'
-            toggle
-            checked={this.state.flatbox_enabled}
-            onClick={this.handleToggleAndSave.bind(this)}
-          />
-        </Form.Group>
+      <Button onClick={this.connectToTSX.bind(this)}>
+      Refresh</Button>
+    )
+  }
+
+  connectToTSX() {
+
+    // these are all working methods
+    // on the client
+    Meteor.call("connectToTSX", function (error, result) {
+      // identify the error
+      if (error && error.reason === "Internal server error") {
+        // show a nice error message
+      }
+      else {
+      }
+    }.bind(this));
+  }
+
+  // *******************************
+  //
+  renderArtesky() {
+    if(this.state.flatbox_enabled)
+      return (
+        <Segment>
         <Form.Group>
         <Form.Input
           label='Artseky Flatbox Server IP'
@@ -413,12 +405,71 @@ class DefaultSettings extends Component {
           value={this.state.flatbox_camera_delay}
           onChange={this.handleChange}
         />
-        <br/>
-        Button to refresh Devices
-        Iterate each device and
         </Form.Group>
+        </Segment>
+      )
+  }
+
+  renderServers() {
+    const { activeIndex } = this.state;
+    var mount = TheSkyXInfos.findOne().mount();
+    var camera = TheSkyXInfos.findOne().camera();
+    var guider = TheSkyXInfos.findOne().guider();
+    var rotator = TheSkyXInfos.findOne().rotator();
+    var efw = TheSkyXInfos.findOne().efw();
+    var focuser = TheSkyXInfos.findOne().focuser();
+    var RUNNING = '';
+    var ACTIVE = false;
+    try {
+      RUNNING = this.props.scheduler_running.value;
+      ACTIVE = this.props.tool_active.value;
+    } catch (e) {
+      RUNNING = '';
+      ACTIVE=false;
+    }
+
+    return (
+      <div>
+      <Accordion.Title
+        active={activeIndex === eSetup}
+        content='System Setup'
+        index={eSetup}
+        onClick={this.handleClick}
+      />
+      <Accordion.Content  active={activeIndex === eSetup} >
+      <Checkbox
+        style={{color: '#68c349'}}
+        label='Enable Artseky Flatbox'
+        name='flatbox_enabled'
+        toggle
+        checked={this.state.flatbox_enabled}
+        onClick={this.handleToggleAndSave.bind(this)}
+      />
+      <Form>
+      <Segment>
+        <Form.Group>
+          <Form.Input
+            label='TheSkyX Server IP Address'
+            name='ip'
+            placeholder='Enter TheSkyX IP address'
+            value={this.state.ip}
+            onChange={this.handleChange}
+          />
+          <Form.Input
+            label='The SkyX Server Port'
+            name='port'
+            placeholder='Enter TheSkyX port'
+            value={this.state.port}
+            onChange={this.handleChange}
+          />
+        </Form.Group>
+        </Segment>
+      </Form>
+      <Form>
+        { this.renderArtesky() }
       </Form>
       <Segment.Group>
+        {this.appButtons(RUNNING, ACTIVE)}
         <Segment><Label>Mount<Label.Detail>
           {mount.manufacturer + ' | ' + mount.model}
         </Label.Detail></Label></Segment>

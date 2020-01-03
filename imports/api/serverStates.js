@@ -211,6 +211,24 @@ export function tsx_UpdateDevice( name, man, mod) {
   })
 };
 
+export function tsx_UpdateDeviceManufacturer( name, man) {
+  TheSkyXInfos.upsert( {name: name }, {
+    $set: {
+      manufacturer: man,
+      timestamp: new Date(),
+     }
+  })
+};
+
+export function tsx_UpdateDeviceModel( name, mod) {
+  TheSkyXInfos.upsert( {name: name }, {
+    $set: {
+      model: mod,
+      timestamp: new Date(),
+     }
+  })
+};
+
 export function tsx_UpdateServerState( name, value) {
   var tsx = tsx_GetServerState( name );
   if( typeof tsx == 'undefined' ) {

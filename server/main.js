@@ -226,13 +226,13 @@ Meteor.startup(() => {
   initServerStates();
 
   // Initialze the server on startup
-  tsx_UpdateDevice('mount', 'Not connected ', '' );
+/*  tsx_UpdateDevice('mount', 'Not connected ', '' );
   tsx_UpdateDevice('camera', 'Not connected ', '' );
   tsx_UpdateDevice('guider', 'Not connected ', '' );
   tsx_UpdateDevice('rotator', 'Not connected ', '' );
   tsx_UpdateDevice('efw', 'Not connected ', '' );
   tsx_UpdateDevice('focuser', 'Not connected ', '' );
-
+*/
   tsxLog( '            Logfile', logFileForClient() );
   tsxLog( '   DB Backup Folder', backupFolder );
   tsxLog( ' SkySafari Settings', skySafariFilesFolder );

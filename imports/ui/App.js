@@ -49,7 +49,7 @@ import {
 
 import { Filters } from '../api/filters.js';
 import { CalibrationFrames } from '../api/calibrationFrames.js';
-import { FlatSeries } from '../api/flatSeries.js';
+import { FlatSeries  } from '../api/flatSeries.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 import { AppLogsDB } from '../api/theLoggers.js'
 
@@ -381,10 +381,7 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           <Menu.Item fitted name='Toolbox' active={activeMenu === 'Toolbox'} onClick={this.handleMenuItemClick}>
             <Icon name='briefcase' size='large' />
           </Menu.Item>
-          <Menu.Item fitted name='Devices' active={activeMenu === 'Devices'} onClick={this.handleMenuItemClick}>
-            <Icon name='power cord' size='large' />
-          </Menu.Item>
-            <Menu.Item fitted name='Settings' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick}>
+          <Menu.Item fitted name='Settings' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick}>
             <Icon name='configure' size='large'/>
           </Menu.Item>
         </Menu>
@@ -497,6 +494,7 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
         <DefaultSettings
           scheduler_running={this.props.scheduler_running}
           tsxInfo = { this.props.tsxInfo }
+          tool_active = { this.props.tool_active }
         />
       )
     }
@@ -619,11 +617,12 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
       NOT_DISABLE = true;
     }
 //        <Button disabled compact />
+//        <Button disabled={DISABLE} icon='plug' onClick={this.connectToTSX.bind(this)}/>
+//        <Button icon='detective' onClick={this.modalOpenSessionsControls}/>
+
     return (
       <Button.Group compact size='mini' floated='right'>
         <Button icon='cloud download' onClick={this.modalOpenBackup}/>
-        <Button icon='detective' onClick={this.modalOpenSessionsControls}/>
-        <Button disabled={DISABLE} icon='plug' onClick={this.connectToTSX.bind(this)}/>
         <Button disabled={DISABLE} icon='car' onClick={this.park.bind(this)}/>
       </Button.Group>
     )
@@ -795,6 +794,9 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           <Segment.Group>
             <Segment size='mini' clearing>
                 {this.appButtons(RUNNING, ACTIVE)}
+                <Button.Group compact size='mini'>
+                  <Button icon='detective' onClick={this.modalOpenSessionsControls}/>
+                </Button.Group>
                 <Label onClick={this.modalEnterIpOpen.bind(this)}>TSX ip:
                   <Label.Detail>
                     {IP}
