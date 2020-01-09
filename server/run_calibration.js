@@ -96,9 +96,9 @@ export function collect_calibration_images() {
   }
   if( fp_enabled ) {
     flatbox_setup(); // connect device
-    Meteor.sleep(settlePanel);
+ //   Meteor.sleep(settlePanel);
     flatbox_connect();
-    Meteor.sleep(settlePanel);
+ //   Meteor.sleep(settlePanel);
   }
   // for loop for Quantity
   tsxLog( ' Processing calibration frames: ' + cf.length );
@@ -113,18 +113,18 @@ export function collect_calibration_images() {
 
     // check if level > 0; if so turn on light panel
     if( fp_enabled == true && cal.level > 0 ) {
-      Meteor.sleep(settlePanel);
+ //     Meteor.sleep(settlePanel);
       flatbox_on();
-      Meteor.sleep(settlePanel);
+ //     Meteor.sleep(settlePanel);
       flatbox_level( cal.level );
-      Meteor.sleep(settlePanel);
+ //     Meteor.sleep(settlePanel);
     }
     else if( fp_enabled == true && cal.level <= 0 ) {
-      Meteor.sleep(settlePanel);
+//     Meteor.sleep(settlePanel);
       flatbox_level( cal.level );
-      Meteor.sleep(settlePanel);
+ //     Meteor.sleep(settlePanel);
       flatbox_off();
-      Meteor.sleep(settlePanel);
+ //     Meteor.sleep(settlePanel);
     }
     // take_image to actually take the picture
     try {
@@ -150,9 +150,9 @@ export function collect_calibration_images() {
   }
   if( fp_enabled ) {
     flatbox_off();
-    Meteor.sleep(settlePanel);
+ //   Meteor.sleep(settlePanel);
     flatbox_disconnect();
-    Meteor.sleep(settlePanel);
+ //   Meteor.sleep(settlePanel);
   }
 
   tsx_SetServerState( 'tool_active', false );
