@@ -2215,6 +2215,7 @@ function takenImagesFor(target, seriesId) {
 // Use the filter and exposure to take an image
 // Currently it is assumed these are Light images
 // Could set frame type...
+// Frmae is the number...
 export function tsx_takeImage( filterNum, exposure, frame, target, delay, binning ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_takeImage: ' + filterNum );
