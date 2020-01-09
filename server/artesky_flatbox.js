@@ -138,17 +138,11 @@ export function flatbox_connect() {
 }
 
 export function flatbox_on() {
-<<<<<<< HEAD
   flatbox_connect();
   var cmd = flatbox_srv() + ' -O';
   tsxLog(' Flatbox -ON: ' + cmd );
   var err = Shelljs.exec( cmd ).code;
   err = Shelljs.exec( cmd ).code;
-=======
-  var cmd = flatbox_srv() + ' -O';
-  tsxLog(' Flatbox -ON: ' + cmd );
-  var err = Shelljs.exec( cmd.trim() ).code;
-  err = Shelljs.exec( cmd.trim() ).code;
   if ( err == -1) {
     UpdateStatusErr('Error!! failed to turn on Artesky server: ' + err);
     return false;

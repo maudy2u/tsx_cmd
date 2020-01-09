@@ -84,7 +84,7 @@ const frames = [
 //  cdLight =1, cdBias, cdDark, cdFlat
 export function getFrameNumber(frame) {
   // tsxDebug('************************');
-  tsxDebug(' *** getFrame: ' + frame );
+  tsxDebug(' *** getFrameNumber: ' + frame );
 
   var num = frames.find(function(element) {
     return element.name == frame;
