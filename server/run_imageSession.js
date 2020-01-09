@@ -894,6 +894,7 @@ function tsx_RunFocus3( target ) {
 
     var recentreTarget = false;
     if( doCLS != false && cloudy ) {
+      // If this method fails CLS it throws error
       var res = tsx_CLS_target( focusTarget );
       updateTargetIsCloudy( target, res );
     }
@@ -1205,7 +1206,7 @@ function tsx_DeviceInfo() {
           success = true;
           for( var i=1; i<results.length;i++) {
             var token=results[i].trim();
-            // 
+            //
             var param=token.split("=");
             switch( param[0] ) {
 
@@ -2214,6 +2215,7 @@ function takenImagesFor(target, seriesId) {
 // Use the filter and exposure to take an image
 // Currently it is assumed these are Light images
 // Could set frame type...
+// Frmae is the number...
 export function tsx_takeImage( filterNum, exposure, frame, target, delay, binning ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_takeImage: ' + filterNum );
@@ -2408,7 +2410,7 @@ function takeSeriesImage(target, series) {
   // *******************************
   // Take the image
   var slot = getFilterSlot( series.filter );
-  var frame = getFrame( series.frame );//  cdLight =1, cdBias, cdDark, cdFlat
+  var frame = getFrameNumber( series.frame );//  cdLight =1, cdBias, cdDark, cdFlat
   var num = taken+1;
   if( (remainingImages <= series.repeat) && (remainingImages > 0) ) {
     UpdateStatus( ' ' + target.targetFindName + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds, ' + num + '/' +series.repeat + ' TAKING' );
@@ -3016,7 +3018,7 @@ Use this to set the last focus
 
     var slot = getFilterSlot( series.filter );
     //  cdLight =1, cdBias, cdDark, cdFlat
-    var frame = getFrame(series.frame);
+    var frame = getFrameNumber(series.frame);
     out = tsx_takeImage(slot,series.exposure, frame, targetSession );
     tsxDebug('Taken image: ' +res);
 

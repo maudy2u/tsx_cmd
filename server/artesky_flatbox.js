@@ -138,13 +138,17 @@ export function flatbox_connect() {
 }
 
 export function flatbox_on() {
+<<<<<<< HEAD
   flatbox_connect();
   var cmd = flatbox_srv() + ' -O';
   tsxLog(' Flatbox -ON: ' + cmd );
-// Meteor.sleep(3*1000);
   var err = Shelljs.exec( cmd ).code;
- Meteor.sleep(1*1000);
   err = Shelljs.exec( cmd ).code;
+=======
+  var cmd = flatbox_srv() + ' -O';
+  tsxLog(' Flatbox -ON: ' + cmd );
+  var err = Shelljs.exec( cmd.trim() ).code;
+  err = Shelljs.exec( cmd.trim() ).code;
   if ( err == -1) {
     UpdateStatusErr('Error!! failed to turn on Artesky server: ' + err);
     return false;
@@ -185,7 +189,7 @@ export function flatbox_off() {
 
 export function flatbox_disconnect() {
   var cmd = flatbox_srv() + ' -x';
-  tsxLog(' ***RE-DISABLED Flatbox -DISCONNECTED: ' + cmd );
+  tsxLog(' Flatbox -DISCONNECTED: ' + cmd );
   err = Shelljs.exec( cmd ).code;
   if ( err == -1) {
     UpdateStatusErr('Error!! failed to disconnect Artesky server: ' + err);
