@@ -64,3 +64,6 @@ ostrio:logger
 # *******************************
 # job-collection needs to be the last in the package file
 vsivsi:job-collection
+ostrio:files@1.6.6
+juliancwirko:postcss
+less
