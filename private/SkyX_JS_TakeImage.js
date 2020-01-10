@@ -13,7 +13,7 @@ var binning = $005;
 
 var CCDSC = ccdsoftCamera;
 var CCDAG = ccdsoftAutoguider;
-var TSXI = ccdsoftCameraImage;
+var CCDSI = ccdsoftCameraImage;
 var CHART = sky6StarChart;
 var OBJI = sky6ObjectInformation;
 
@@ -78,25 +78,25 @@ Out = Out + '|fileName=' + CCDSC.LastImageFileName;
 // get the overall RMS error if guiding
 var rms = guideError();
 if( rms > -1 ) {
-	TSXI.setFITSKeyword("RMS_ERROR", rms);
+	CCDSI.setFITSKeyword("RMS_ERROR", rms);
 	Out = Out+'|RMS_ERROR='+rms;
 }
 
 // *******************************
 //Add some FITSKeywords for future reference
 //open TSX camera and get the last image
-var success = TSXI.AttachToActiveImager();
+var success = CCDSI.AttachToActiveImager();
 
 //Enter the rotator angle
 if( CCDSC.rotatorIsConnected ) {
 	var rotatorPosition = CCDSC.rotatorPositionAngle();
-  TSXI.setFITSKeyword("ROTATOR_POS_ANGLE", rotatorPosition);
+  CCDSI.setFITSKeyword("ROTATOR_POS_ANGLE", rotatorPosition);
 	Out = Out+'|ROTATOR_POS_ANGLE='+Number(rotatorPosition).toFixed(3);
 }
 //CCDSC.Asynchronous = true;		// We are going to wait for it
 
 if( ImageLinkResults.imageFilePath ) {
-	TSXI.setFITSKeyword("ANGLE", ImageLinkResults.imagePositionAngle);
+	CCDSI.setFITSKeyword("ANGLE", ImageLinkResults.imagePositionAngle);
 	Out = Out+'|ANGLE='+Number(ImageLinkResults.imagePositionAngle).toFixed(3);
 }
 
@@ -104,7 +104,7 @@ if( ImageLinkResults.imageFilePath ) {
 if( CCDSC.focIsConnected ) {
 	var temp = CCDSC.focTemperature.toFixed(1);
   var pos = CCDSC.focPosition;
-  TSXI.setFITSKeyword("FOCUS_POS", pos);
+  CCDSI.setFITSKeyword("FOCUS_POS", pos);
 	// add focuser info
   Out = Out+'|focusTemp='+ Number(temp).toFixed(3) +'|FOCUS_POS='+ Number(pos).toFixed(0);
 }
@@ -112,12 +112,12 @@ if( CCDSC.focIsConnected ) {
 //Enter the custom object name
 if( tName != '$003' ) {
 	//Correct the OBJECT Keyword if using coordinates instead of a target name
-	TSXI.setFITSKeyword("OBJECT", tName);
+	CCDSI.setFITSKeyword("OBJECT", tName);
 }
 
 //Set save path and save
-//TSXI.Path = targetImageDataPath;
-TSXI.Save();
+//CCDSI.Path = targetImageDataPath;
+CCDSI.Save();
 
 CHART.Find("sun");
 OBJI.Property(59);
