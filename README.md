@@ -1,7 +1,7 @@
 # tsx_cmd
 meteor-react javascript server for TheSkyX and astrophotography
 
-This is a hobbyist solution to imaging with TheSkyX using a web page and a nodejs server. The nodejs server is a meteor and mongoDB solution. The server is intended to be a clean install and removal, i.e. delete the directory and it is gone.
+This is a hobbyist solution to imaging with TheSkyX using a web page and a dedicated web server. The web server is a meteor, nodejs and mongoDB solution. The server is intended to be a clean install and removal, i.e. delete the directory and it is gone.
 
 ... A really fast setup, download and run script in an empty directory: `bin/tsx_cmd_install.sh`
 ... then run `tsx_cmd_start.sh`, and configure
@@ -9,34 +9,34 @@ This is a hobbyist solution to imaging with TheSkyX using a web page and a nodej
 ## Use case:
 
 ### Prerequisites:
-- All equipment is setup correctly: mount (Myt), imaging camera, rotator, autoguider, filter wheel, focuser.
+- All equipment is already setup correctly: mount (Myt), imaging camera, rotator, autoguider, filter wheel, focuser.
 - All imaging equipment is confirmed to work with TheSkyX, i.e. this app is not really needed
-- There is a PC (the PC), such as an ODroid XU4, Mac, RPI3, used to run TheSkyX
+- There is a PC (the PC), such as an ODroid XU4, ODroind N2, RPI4, Mac, RPI3, used to run TheSkyX
 - The PC is networked into your LAN via ethernet or Wifi
-- There is no need for security, such as user accounts
-- the PC has  can be used to install Tsx_Cmd server - nodejs, mongoDB
-- Access and use of the PC's command line, such as via ssh
+- There is no need for security, such as user accounts, this is assumed to be a closed system
+- the PC has can be used to install tsx_cmd - nodejs, mongoDB
+- Access and use of the PC's command line, such as via ssh or direct keyboard access
 
 ### Description
-- Use a web browser to access Tsx_Cmd running on the PC, such as Safari, Chrome via a Mac, iPad,
+- Use a web browser to access tsx_cmd running on the PC, such as Safari, Chrome via a Mac, iPad,
 iPhone or the PC
-- Desire to automate an nights imaging session and plan by defining targets, take series,
-Flat series, FOV rotation, and Calibration of the Autoguider
-- Capture targets based on start/stop times, priority, and minimum altitude
+- A desire to automate a night's imaging session and plan by defining targets, take series,
+Flat series, and Calibration of the Autoguider
+- Capture targets based on start/stop times, FOV rotation, priority, and minimum altitude
 - Automate meridian flips, autoguiding, and autoguider calibration, rotating FOV per target,
 doing 1 or more targets in a night
 - Automatically stopping sessions once sun reached altitude, such as -11.5 degrees
-- Failed CLS pause the session for some time, and then keep trying CLS periodically until stopped
 - Periodic CLS to check for clouds
+- Attempt to manage cloudy nights using a failed CLS to pause the session for some time,
+and then keep trying CLS periodically until stopped
 - Check the possible schedule of targets via the Night Planner
 - Toggle the enabling and disabling of targets to capture
 - Click single button to start the planned session
 
 ---
 ## Install TSX_cmd
-[Project - TSX Command](bear://x-callback-url/open-note?id=CD71E4DF-EF35-414B-8543-4038D2330CB3-1082-00000289114BA390)
 
-1. Create a directory for tsx_cmd, it can need ~500MB once installed
+1. Create a directory for tsx_cmd, it can need ~500MB once all installed
 	- or clone this whole repository: git clone https://github.com/maudy2u/tsx_cmd
 
 2. Decide to install precompile or development versions
@@ -94,9 +94,16 @@ Open a browser: http://localhost:3000/ (or replace with the ip of the PC/SBC run
 	4. Click Play button to start.
 ---
 ## History:
+### RC17
+- enhanced Nighi Planner
+- improved UI
+- redid Flats into Calibration files
+- Added some Artesky flatbox support
+- Misc fixes, such as works without guider, and focusing box size
+### RC8
 - Targets and take series improvements
 - Calibration of autoguider improvements
 - Beta version of cloud checking implemented.
-- Added Night planner
+- Night planner
 
 #tsx_cmd #./how-to
