@@ -40,7 +40,7 @@ if [ "${1}" == "init" ]; then
   if [ "$(uname)" == "Darwin" ]; then
     echo " *******************************"
     echo " tsx_cmd - Mac in" ${install_dir}
-    export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC8/tsx_cmd_Darwin_i386_build_355_v3.4.5_2018-12-27_RC8.tar'
+    export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC17/tsx_cmd_os.osx.x86_64_build_506_v3.5.12_2019-12-19_RC17.tar'
     export MONGO='https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-4.0.5.tgz'
     export NODEJS='https://nodejs.org/dist/v8.11.1/node-v8.11.1-darwin-x64.tar.gz'
     # https://nodejs.org/dist/v8.11.3/node-v8.11.3-darwin-x64.tar.xz
@@ -55,7 +55,7 @@ if [ "${1}" == "init" ]; then
       echo ""
       echo " *******************************"
       echo " tsx_cmd - aarch64/armv8 in" ${install_dir}
-      export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC9_aarch64/tsx_cmd_Linux_aarch64_build_374_v3.4.6_2019-02-17_RC9.tar'
+      export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC17/tsx_cmd_os.linux.aarch64_build_506_v3.5.12_2019-12-19_RC17.tar'
       export MONGO='http://downloads.mongodb.org/linux/mongodb-linux-arm64-ubuntu1604-3.6.8.tgz'
       export NODEJS='https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-arm64.tar.xz'
       export MONGO_PARAMS="-C ./mongodb  --strip-components=1"
@@ -76,7 +76,7 @@ if [ "${1}" == "init" ]; then
       echo ""
       echo " *******************************"
       echo " tsx_cmd - Linux X86_64 in" ${install_dir}
-      #export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC9_aarch64/tsx_cmd_Linux_aarch64_build_374_v3.4.6_2019-02-17_RC9.tar'
+      export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC17/tsx_cmd_os.linux.x86_64_build_506_v3.5.12_2019-12-19_RC17.tar'
       export MONGO='http://downloads.mongodb.org/linux/mongodb-linux-x86_64-ubuntu1804-4.0.5.tgz'
       export NODEJS='https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-x64.tar.xz'
       export MONGO_PARAMS="-C ./mongodb  --strip-components=1"
@@ -180,6 +180,7 @@ echo '  "enable_debug": "no",' >> ./settings.json
 echo '  "enable_info": "no",' >> ./settings.json
 echo '  "enable_warn": "yes",' >> ./settings.json
 echo '  "tsx_cmd_db": "tsx_cmd",' >> ./settings.json
+echo '  "meteor_db": "meteor",' >> ./settings.json
 echo '  "mongo_port": "27017",' >> ./settings.json
 echo '  "removed-to-enable: backup_location": "/home/odroid/app",' >> ./settings.json
 echo '  "removed-to-enable: log_file_location": "/media/odroid/PENSIVE2/tsx_cmd_logs"' >> ./settings.json
