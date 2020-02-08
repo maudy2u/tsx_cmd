@@ -130,8 +130,22 @@ function initServerStates() {
   tsx_SetServerState('currentSessionReport', '' );
   tsx_SetServerState('night_plan_reset', true );
 
+  // prepare hardware... ensures all works for install
+  var mount = TheSkyXInfos.findOne().mount();
+  var camera = TheSkyXInfos.findOne().camera();
+  var guider = TheSkyXInfos.findOne().guider();
+  var rotator = TheSkyXInfos.findOne().rotator();
+  var efw = TheSkyXInfos.findOne().efw();
+  var focuser = TheSkyXInfos.findOne().focuser();
+
   // check the setting of the start/stop time initialization
   var startT, stopT;
+  try {
+    minDefAlt = TheSkyXInfos.findOne({name: 'defaultMinAlt'}).value;
+  }
+  catch(e) {
+    tsx_SetServerState('defaultMinAlt', '45');
+  }
   try {
     startT = TheSkyXInfos.findOne({name: 'defaultStartTime'}).value;
   }

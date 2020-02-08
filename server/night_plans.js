@@ -31,6 +31,10 @@ import {
 
 export function TargetPlans() {
   // Get the users planned Sun Altitude limit times
+  let DEFMINALT = tsx_GetServerStateValue('defaultMinAlt');
+  if( DEFMINALT == '' || typeof DEFMINALT == 'undefined') {
+    DEFMINALT = 45;
+  }
   let SUNALT = tsx_GetServerStateValue('defaultMinSunAlt');
   if( SUNALT == '' || typeof SUNALT == 'undefined') {
     SUNALT = -12; // Use Nautical Twilight
@@ -49,6 +53,9 @@ export function TargetPlans() {
     let target = targets[i];
     if( tsx_data != '' ) {
       tsx_data += '##';
+    }
+    if( target.minAlt == '' || typeof target.minAlt == 'undefined') {
+      target.minAlt = DEFMINALT;
     }
     tsx_data += target.targetFindName +'|'+ target.minAlt;
   }

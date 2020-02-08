@@ -224,7 +224,7 @@ export function tsx_IsParked() {
 // **************************************************************
 export function tsx_MntUnpark() {
   tsxDebug('************************');
-  UpdateStatus(' Unparking mount' );
+  tsxDebug(' Unparking mount' );
   var cmd = tsx_cmd('SkyX_JS_UnparkMount');
 
   var Out = '';
@@ -233,7 +233,7 @@ export function tsx_MntUnpark() {
         var result = tsx_return.split('|')[0].trim();
         tsxDebug( ' *** result: ' + result );
         if( result == 'unparked' ) {
-          UpdateStatus(' Unparked mount' );
+          UpdateStatus(' MOUNT: unparked' );
         }
         else {
           UpdateStatusErr( ' !!! Unparking err: ' + result );
@@ -856,8 +856,13 @@ function tsx_RunFocus3( target ) {
 
   var Out;
   var enabled = tsx_GetServerStateValue('isFocus3Enabled');
-  var doCLS = tsx_GetServerStateValue( 'defaultCLSEnabled' );
+  var clsEnabled = tsx_GetServerStateValue( 'defaultCLSEnabled' );
   var cloudy = tsx_GetServerStateValue( 'focusRequiresCLS' );
+  var focusFilter = getFilterSlot(target.focusFilter);
+  var focusSamples = tsx_GetServerStateValue( 'focus3Samples' );
+  var focusExp = target.focusExposure;
+  var focusObj = target.focusTarget;
+
   tsxDebug(' ??? @Focus3 enabled found to be: ' + enabled );
   if( enabled == true  ) {
 
@@ -867,43 +872,48 @@ function tsx_RunFocus3( target ) {
       Out = ''; // get last temp
       return Out;
     }
-    var focusSamples = tsx_GetServerStateValue( 'focus3Samples' );
     if( focusSamples == '' || typeof focusSamples == 'undefined') {
-      tsx_SetServerState('focus3Samples', 5 ); // arbitrary default
-      focusSamples = 5;
+      var defSamples = 3;
+      tsx_SetServerState('focus3Samples', defSamples ); // arbitrary default
+      focusSamples = defSamples;
     }
     if( cloudy == '' || typeof cloudy == 'undefined' ) {
       cloudy = false;
       tsx_SetServerState( 'focusRequiresCLS', false );
     }
-
-    var focusFilter = getFilterSlot(target.focusFilter);
-    var focusExp = target.focusExposure;
-    var focusObj = target.focusTarget;
-
-    // do not bother CLS to star target... assume that the mount is prepared
-    // if focus requires CLS for clouds...
-    // determine focus FOV: target or start
-    var focusTarget;
-    if( focusObj != '' ) {
-      focusTarget = focusTarget;
+    if( clsEnabled == '' || typeof clsEnabled == 'undefined' ) {
+      clsEnabled = false;
+      tsx_SetServerState( 'defaultCLSEnabled', false );
     }
-    else {
+
+    // ----------------------------
+    // if detecting clouds or target name does not = focus target
+    // then move mount
+    var recentreTarget = false;
+    var focusTarget;
+    if(  focusObj == '' || typeof focusObj == 'undefined') {
+      // default to the target itself
       focusTarget = target.targetFindName;
     }
-
-    var recentreTarget = false;
-    if( doCLS != false && cloudy ) {
-      // If this method fails CLS it throws error
-      var res = tsx_CLS_target( focusTarget );
-      updateTargetIsCloudy( target, res );
+    else {
+      focusTarget = focusObj;
     }
-    else if( focusTarget != target.targetFindName ) {
-      // If CLS not enabled then Slew...
-      var res = tsx_SlewTargetName( focusTarget );
+
+    if( cloudy ||  focusTarget != target.targetFindName ) {
       recentreTarget = true;
+      if( clsEnabled ) {
+        // If this method fails CLS it throws error
+        var res = tsx_CLS_target( focusTarget );
+        updateTargetIsCloudy( target, res );
+      }
+      else {
+        // If CLS not enabled then Slew...
+        var res = tsx_SlewTargetName( focusTarget );
+      }
     }
 
+    // ----------------------------
+    // now just start the focus routine...
     var cmd = tsx_cmd('SkyX_JS_Focus-3');
     tsxDebug( ' ??? @Focusing-3 samples: ' + focusSamples );
     tsxDebug( ' ??? @Focusing-3 filter: ' + focusFilter );
@@ -915,7 +925,7 @@ function tsx_RunFocus3( target ) {
     var lastFocusTemp = tsx_GetServerStateValue( 'initialFocusTemperature' ); // get last temp
     let curFocusTemp = target.report.focusTemp; // read new temp
     tsxDebug( ' curFocusTemp temp: ' + curFocusTemp );
-    if( typeof curFocusTemp == 'undefined' ) {
+    if( typeof curFocusTemp == 'undefined' || curFocusTemp == '' ) {
       curFocusTemp = lastFocusTemp;
     }
 
@@ -954,7 +964,7 @@ function tsx_RunFocus3( target ) {
      Meteor.sleep( 1000 );
     }
     if( recentreTarget ) {
-      if( doCLS == false ) {
+      if( clsEnabled == false ) {
         // If CLS not enabled then Slew...
         var res = tsx_Slew( target );
       }
@@ -1835,9 +1845,36 @@ function tsx_dither( target ) {
 }
 
 // **************************************************************
+function update_monitor_coordinates( rpt, targetFindName ) {
+  tsx_SetServerState( tsx_ServerStates.targetRA, rpt.RA );
+  tsx_SetServerState( tsx_ServerStates.targetDEC, rpt.DEC );
+  tsx_SetServerState( tsx_ServerStates.targetALT, rpt.ALT );
+  tsx_SetServerState(tsx_ServerStates.targetAZ, rpt.AZ );
+  tsx_SetServerState( tsx_ServerStates.targetHA, rpt.HA );
+  tsx_SetServerState( tsx_ServerStates.targetTransit, rpt.TRANSIT );
+  tsx_SetServerState( 'mntMntPointing', rpt.pointing );
+  tsxDebug( targetFindName + ' ' + rpt.ALT);
+}
+
+// **************************************************************
 function tsx_TargetReport( target ) {
   // tsxDebug('************************');
   tsxDebug(' *** tsx_TargetReport: ' + target.targetFindName);
+
+  // only get the new data if dirty or not existant
+  var org_rpt = TargetReports.findOne({target_id: target._id });
+  var dirty = 'yes';
+  if( typeof org_rpt == 'undefined' || org_rpt == '' ) {
+    updateTargetReport( target._id, 'dirty', 'yes' );
+  }
+  else {
+    dirty = org_rpt.dirty;
+  }
+  if( dirty == ' no' ) {
+    update_monitor_coordinates( org_rpt, target.targetFindName );
+    return org_rpt;
+  }
+
 
   // var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale, target.expos);
   var cmd = tsx_cmd('SkyX_JS_TargetReport');
@@ -1934,18 +1971,11 @@ function tsx_TargetReport( target ) {
           }
         }
 
+        updateTargetReport( target._id, 'dirty', 'no' );
+
         var rpt = TargetReports.findOne({target_id: target._id });
         target.report = rpt;
-
-        tsx_SetServerState( tsx_ServerStates.targetRA, rpt.RA );
-        tsx_SetServerState( tsx_ServerStates.targetDEC, rpt.DEC );
-        tsx_SetServerState( tsx_ServerStates.targetALT, rpt.ALT );
-        tsx_SetServerState(tsx_ServerStates.targetAZ, rpt.AZ );
-        tsx_SetServerState( tsx_ServerStates.targetHA, rpt.HA );
-        tsx_SetServerState( tsx_ServerStates.targetTransit, rpt.TRANSIT );
-        tsx_SetServerState( 'mntMntPointing', rpt.pointing );
-
-        tsxDebug( target.targetFindName + ' ' + rpt.ALT);
+        update_monitor_coordinates( rpt, target.targetFindName );
         Out=rpt;
       }
     }
