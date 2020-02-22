@@ -10,6 +10,7 @@ import {
   tsxErr,
   tsxWarn,
   tsxDebug,
+  tsxTrace,
 } from '../imports/api/theLoggers.js';
 import {
   tsx_UpdateDevice,
@@ -79,7 +80,7 @@ export function TargetPlans() {
 
 
 export function tsx_AltTimesForTargets( targets ) {
-  // tsxDebug('************************');
+  // tsxTrace('************************');
   tsxInfo(' *** tsx_AltTimesForTargets: ' + targets.length );
   let Out = [];
   let tsx_is_waiting = true;
@@ -98,7 +99,7 @@ export function tsx_AltTimesForTargets( targets ) {
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       try {
         tsx_err = tsx_has_error( tsx_return );
-        tsxDebug( ' tsx_AltTimesForTargets: ' + tsx_return );
+        tsxTrace( ' tsx_AltTimesForTargets: ' + tsx_return );
         /*
         tsx_AltTimesForTargets: Sun|-12|06:49|18:00##Sun|-11.5|06:52|17:57##M81|30|18:22|12:14|No error. Error = 0.
         */
@@ -164,10 +165,10 @@ Meteor.methods({
 
   planData() {
     tsx_SetServerState( 'night_plan_report', true );
-    tsxDebug( ' --- Night Plan: Computing');
+    tsxTrace( ' --- Night Plan: Computing');
     let plan = TargetPlans();
     tsx_SetServerState( 'night_plan_report', true );
-    tsxDebug( ' --- Night Plan: Loaded');
+    tsxTrace( ' --- Night Plan: Loaded');
     return plan;
   },
 

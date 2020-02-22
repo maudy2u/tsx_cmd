@@ -24,6 +24,7 @@ import {
   tsxErr,
   tsxWarn,
   tsxDebug,
+  tsxTrace,
 } from '../imports/api/theLoggers.js';
 import {
   tsx_UpdateDevice,
@@ -108,9 +109,9 @@ Meteor.methods({
     UpdateStatus(' TOOLBOX: @Focus3 STARTED');
     try {
       var cmd = tsx_cmd('SkyX_JS_Focus-3');
-      tsxDebug( ' ??? @Focusing-3 filter: ' + focusFilter );
-      tsxDebug( ' ??? @Focusing-3 exposure: ' + focusExp );
-      tsxDebug( ' ??? @Focusing-3 samples: ' + focusSamples );
+      tsxTrace( ' ??? @Focusing-3 filter: ' + focusFilter );
+      tsxTrace( ' ??? @Focusing-3 exposure: ' + focusExp );
+      tsxTrace( ' ??? @Focusing-3 samples: ' + focusSamples );
       cmd = cmd.replace("$000", focusFilter ); // set filter
       cmd = cmd.replace("$001", focusExp ); // set Bin
       cmd = cmd.replace("$002", focusSamples ); // set Bin
@@ -119,7 +120,7 @@ Meteor.methods({
 
       tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         //[[B^[[B^[[BI20180708-01:53:13.485(-3)?   [SERVER]|2018-07-08|01:53:13|[DEBUG]| ??? @Focusing-3 returned: TypeError: Error code = 5 (5). No additional information is available.|No error. Error = 0
-        tsxDebug( ' ??? @Focusing-3 returned: ' + tsx_return );
+        tsxTrace( ' ??? @Focusing-3 returned: ' + tsx_return );
         var temp = tsx_return.split('|')[1].trim();
         var position = tsx_return.split('|')[0].trim();
         if( temp == 'TypeError: Error code = 5 (5). No additional information is available.') {

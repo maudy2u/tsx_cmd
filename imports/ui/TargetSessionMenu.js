@@ -79,7 +79,7 @@ class TargetSessionMenu extends Component {
       if (this.state.value.length < 1) return this.setState(initialState)
 
       const re = new RegExp(_.escapeRegExp(this.state.value), 'i')
-      const isMatch = (result) => re.test(result.title)
+      const isMatch = (result) => re.test(result.title + ' ' +result.description)
 
       this.setState({
         isLoading: false,
@@ -98,7 +98,7 @@ class TargetSessionMenu extends Component {
         source.push({
           id: objs[i]._id,
           title: objs[i].targetFindName,
-          description: objs[i].targetFindName + ' ' + objs[i].description,
+          description: objs[i].description,
         })
       }
       return source;
@@ -254,7 +254,10 @@ class TargetSessionMenu extends Component {
             return element.target_id == target._id;});
 
           if( typeof this.state.value != 'undefined' && this.state.value != '' ){
-            if( target.targetFindName.indexOf(this.state.value) == -1 ) {
+            if(
+              target.targetFindName.indexOf(this.state.value) == -1 &&
+              target.description.indexOf(this.state.value) == -1
+            ) {
               // searching and not a match so filter out
               return
             }

@@ -239,18 +239,6 @@ class TargetConstraints extends Component {
           />
           </Form>
         </Table.Cell>
-        <Table.Cell width={2}>
-          <Form>
-            <Form.Input
-              fluid
-              size='mini'
-              name='comment'
-              placeholder='...'
-              value='...'
-              onChange={this.handleChange}
-            />
-          </Form>
-        </Table.Cell>
       </Table.Row>
     )
   }

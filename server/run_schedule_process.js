@@ -29,6 +29,7 @@ import {
   tsxErr,
   tsxWarn,
   tsxDebug,
+  tsxTrace,
 } from '../imports/api/theLoggers.js';
 
 import {
@@ -140,7 +141,7 @@ import {
          // *******************************
          // the job is used to run the scheduler.
          while( isSchedulerStopped() == false ) {
-           tsxDebug(" === Starting imaging targets");
+           tsxTrace(" === Starting imaging targets");
 
            tsx_MntUnpark();
            isParked = false;
@@ -174,7 +175,7 @@ import {
            // remove dark/bias/flat from targets...
 
            if (typeof target != 'undefined' && isSchedulerStopped() == false ) {
-             tsxDebug ( ' ' + target.targetFindName + ' Preparing target...');
+             tsxTrace ( ' ' + target.targetFindName + ' Preparing target...');
 
              // Point, Focus, Guide
              var ready = false;
@@ -210,8 +211,8 @@ import {
              }
              if( ready ) {
                // target images per Take Series
-               tsxDebug ( ' ************************1*');
-               tsxDebug ( ' ' +target.targetFindName  + ': start imaging');
+               tsxTrace ( ' ************************1*');
+               tsxTrace ( ' ' +target.targetFindName  + ': start imaging');
                try {
                  processTargetTakeSeries( target );
                  if( isSchedulerStopped() == true ) {
@@ -232,7 +233,7 @@ import {
                    break;
                  }
                }
-               tsxDebug ( ' ************************2*');
+               tsxTrace ( ' ************************2*');
              }
              // No target found so sleep and try again...
              else {
@@ -255,9 +256,9 @@ import {
              ParkMount( isParked );
              isParked = true;
              var approachingDawn = isTimeBeforeCurrentTime('3:00');
-             tsxDebug( ' Is approachingDawn: ' + approachingDawn);
+             tsxTrace( ' Is approachingDawn: ' + approachingDawn);
              // var stillDaytime = isTimeBeforeCurrentTime('15:00');
-             // tsxDebug( ' Is stillDaytime: ' + stillDaytime);
+             // tsxTrace( ' Is stillDaytime: ' + stillDaytime);
              if( approachingDawn ) {
                var defaultFilter = tsx_GetServerStateValue('defaultFilter');
                var softPark = false;

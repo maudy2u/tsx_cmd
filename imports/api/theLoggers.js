@@ -48,8 +48,8 @@ var log_levels = [];
 if( Meteor.settings.enable_log != 'no') {
  log_levels.push('LOG');
 }
-if( Meteor.settings.enable_debug === 'yes') {
- log_levels.push('DEBUG');
+if( Meteor.settings.enable_trace === 'yes') {
+ log_levels.push('TRACE');
 }
 if( Meteor.settings.enable_info === 'yes') {
  log_levels.push('INFO');
@@ -88,6 +88,20 @@ export function tsxLog( msg, data ) {
   logDB.log( msg + ' ' + data );
 }
 
+export function tsxDebug( msg, data ) {
+  if( typeof data === 'undefined' || data == null ) {
+    data = '';
+  }
+  logCon.debug( msg, data );
+  logSession.debug( msg, data );
+  // var dt = new Date();
+  // if( data != '' ) {
+  //   data = '= ' + data;
+  // }
+//  logDB.log( '|'+ formatDate(dt) +'|' + msg + ' ' + data );
+  logDB.debug( msg + ' ' + data );
+}
+
 export function tsxWarn( msg, data ) {
   if( typeof data === 'undefined' || data == null ) {
     data = '';
@@ -111,14 +125,14 @@ export function tsxErr( msg, data ) {
   logDB.error( msg + ' ' + data );
 }
 
-export function tsxDebug( msg, data ) {
+export function tsxTrace( msg, data ) {
 
   if( typeof data === 'undefined' || data == null ) {
     data = '';
   }
-  logCon.debug( msg, data );
-  logSession.debug( msg, data );
-  logDB.debug( msg + ' ' + data );
+  logCon.trace( msg, data );
+  logSession.trace( msg, data );
+  logDB.trace( msg + ' ' + data );
 }
 
 export function tsxInfo( msg, data ) {
@@ -150,7 +164,7 @@ function formatDate( today ) {
 
 /*
  * Separate settings and collection
- * for info, debug and other messages
+ * for info, trace and other messages
  */
  (new LoggerMongo(logReport, {
    collection: AppLogsDB,
@@ -196,7 +210,7 @@ function formatDate( today ) {
 // var rootPathLog = pathLog.resolve('.');
 // var srcPath = rootPathLog.split(pathLog.sep + '.meteor')[0];
 // // var c = Meteor.absolutePath;
-// // tsxDebug('Root: ' + src);
+// // tsxTrace('Root: ' + src);
 // srcPath = srcPath +'/server/logs/';
 var logFolder = '';
 if( Meteor.settings.log_file_location === '' || typeof Meteor.settings.log_file_location === 'undefined' ) {

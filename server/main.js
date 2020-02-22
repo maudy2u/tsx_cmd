@@ -28,7 +28,7 @@ import { FlatSeries } from '../imports/api/flatSeries.js';
 import { TargetAngles } from '../imports/api/targetAngles.js';
 import { CalibrationFrames } from '../imports/api/calibrationFrames.js';
 
-import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug,
+import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug, tsxTrace,
   logFileForClient, AppLogsDB
 } from '../imports/api/theLoggers.js';
 
@@ -163,7 +163,7 @@ function initServerStates() {
     var state = tsx_ServerStates[m];
     try {
       var isDefined = TheSkyXInfos.findOne({name: state });
-      tsxDebug(state, isDefined.value);
+      tsxTrace(state, isDefined.value);
 
     } catch (e) {
       tsxWarn('Initialized: ', state);
@@ -185,15 +185,15 @@ function CleanUpJobs() {
 
   // Clean up the scheduler process collections...
   // Persistence across reboots is not needed at this time.
-  // tsxDebug('Number of Jobs found: ' + jobs.length);
+  // tsxTrace('Number of Jobs found: ' + jobs.length);
   // if( jobs.length > 0 ) {
-  //   tsxDebug( ' Cleaning up DB');
+  //   tsxTrace( ' Cleaning up DB');
   //   for (var i = 0; i < jobs.length; i++) {
   //     if( typeof jobs[i] != 'undefined') {
   //       scheduler.remove(jobs[i]._id);
   //     }
   //   }
-  //   tsxDebug(' Cleaned DB');
+  //   tsxTrace(' Cleaned DB');
   // }
   return;
 }
@@ -270,13 +270,13 @@ Meteor.methods({
     if(
       getSchedulerState() == 'Running'
     ) {
-      tsxDebug("Running found");
+      tsxTrace("Running found");
       tsxLog('Scheduler is alreadying running. Nothing to do.');
       return;
     }
     else if( getSchedulerState() == 'Stop' ) {
       tsx_SetServerState( 'tool_active', true );
-      tsxDebug(" Calibration File Processes");
+      tsxTrace(" Calibration File Processes");
       runSchedulerProcess();
       // Create a job:
       var job = new Job(scheduler, 'runScheduler', // type of job
@@ -306,19 +306,19 @@ Meteor.methods({
    // 4. start/end checks... ???
    // or KISS and one big sequenital function...
    startScheduler() {
-     tsxDebug(' ***********************2*');
+     tsxTrace(' ***********************2*');
      // tsxLog('Found scheduler state: ' + getSchedulerState() );
      if(
        getSchedulerState() == 'Running'
      ) {
-       tsxDebug("Running found");
+       tsxTrace("Running found");
        tsxLog('Scheduler is alreadying running. Nothing to do.');
        return;
      }
      else if(
         getSchedulerState() == 'Stop'
       ) {
-        tsxDebug("Stop found");
+        tsxTrace("Stop found");
         runSchedulerProcess();
 
         // Confirm whether the there is a script running...
@@ -327,7 +327,7 @@ Meteor.methods({
           return;
         }
 
-        tsxDebug( '@@ Start1' );
+        tsxTrace( '@@ Start1' );
         // Create a job:
         var job = new Job(scheduler, 'runScheduler', // type of job
           // Job data that you define, including anything the job
@@ -337,7 +337,7 @@ Meteor.methods({
             scheduleType: 'imaging',
           }
         );
-        tsxDebug( '@@ Start2' );
+        tsxTrace( '@@ Start2' );
 
         // Set some properties of the job and then submit it
         // the same submit the start time to the scheduler...
@@ -348,7 +348,7 @@ Meteor.methods({
         // .delay(0);// 60*60*1000)     // Wait an hour before first try
 
         var jid = job.save();               // Commit it to the server
-        tsxDebug( '@@ Start1' );
+        tsxTrace( '@@ Start1' );
 
         // tsxLog('Job id: ' + jid);
         return;
@@ -370,7 +370,7 @@ Meteor.methods({
    },
 
   calibrateGuider( slew, location, dec_az ) {
-    tsxDebug(' *** tsx_CalibrateAutoGuide' );
+    tsxTrace(' *** tsx_CalibrateAutoGuide' );
     var enabled = tsx_GetServerStateValue('isCalibrationEnabled');
     if( !enabled ) {
       UpdateStatus(' *** Calibration disabled - enable to continue');
@@ -417,9 +417,9 @@ Meteor.methods({
 
   slewPosition( slew, location, dec_az, stopTracking ) {
     tsx_SetServerState( 'tool_active', true );
-    tsxDebug( '  slew'+slew);
-    tsxDebug( '  location'+location);
-    tsxDebug( '  dec_az'+dec_az);
+    tsxTrace( '  slew'+slew);
+    tsxTrace( '  location'+location);
+    tsxTrace( '  dec_az'+dec_az);
     var res = '';
     try {
       if( slew != '' ) {
@@ -524,10 +524,10 @@ Meteor.methods({
        value
       ) {
 
-     tsxDebug(' ******************************* ');
-     tsxDebug(' updateSeriesIdWith: ' + id + ', ' + name + ", " + value);
+     tsxTrace(' ******************************* ');
+     tsxTrace(' updateSeriesIdWith: ' + id + ', ' + name + ", " + value);
      if( name == 'order ') {
-       tsxDebug('1');
+       tsxTrace('1');
        var res = Seriess.update( {_id: id }, {
          $set:{
            order: value,
@@ -535,7 +535,7 @@ Meteor.methods({
        });
      }
      else if (name == 'exposure' ) {
-       tsxDebug('2');
+       tsxTrace('2');
        var res = Seriess.update( {_id: id }, {
          $set:{
            exposure: value,
@@ -543,7 +543,7 @@ Meteor.methods({
        });
      }
      else if (name == 'frame') {
-       tsxDebug('3');
+       tsxTrace('3');
        var res = Seriess.update( {_id: id }, {
          $set:{
            frame: value,
@@ -551,7 +551,7 @@ Meteor.methods({
        });
      }
      else if (name=='filter') {
-       tsxDebug('4');
+       tsxTrace('4');
        var res = Seriess.update( {_id: id }, {
          $set:{
            filter: value,
@@ -559,7 +559,7 @@ Meteor.methods({
        });
      }
      else if (name=='repeat') {
-       tsxDebug('5');
+       tsxTrace('5');
        var res = Seriess.update( {_id: id }, {
          $set:{
            repeat: value,
@@ -567,7 +567,7 @@ Meteor.methods({
        });
      }
      else if (name=='binning') {
-       tsxDebug('6');
+       tsxTrace('6');
        var res = Seriess.update( {_id: id }, {
          $set:{
            binning: value,

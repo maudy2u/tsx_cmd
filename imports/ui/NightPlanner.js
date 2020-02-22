@@ -536,7 +536,6 @@ class NightPlanner extends Component {
               <Table.HeaderCell content='Stop'/>
               <Table.HeaderCell content='Alt.'/>
               <Table.HeaderCell content='Priority'/>
-              <Table.HeaderCell content='Comment'/>
             </Table.Row>
           </Table.Header>
           <Table.Body>
