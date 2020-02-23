@@ -970,6 +970,7 @@ function tsx_RunFocus3( target ) {
     tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       //[[B^[[B^[[BI20180708-01:53:13.485(-3)?   [SERVER]|2018-07-08|01:53:13|[DEBUG]| ??? @Focusing-3 returned: TypeError: Error code = 5 (5). No additional information is available.|No error. Error = 0
       tsxTrace( ' ??? @Focusing-3 returned: ' + tsx_return );
+      tsxDebug(tsx_return);
       temp = tsx_return.split('|')[1].trim();
       position = tsx_return.split('|')[0].trim();
       if( temp == 'TypeError: Error code = 5 (5). No additional information is available.') {
@@ -999,10 +1000,10 @@ function tsx_RunFocus3( target ) {
     if( recentreTarget ) {
       if( clsEnabled == false ) {
         // If CLS not enabled then Slew...
-        var res = tsx_Slew( target );
+        var res = tsx_SlewTargetName( target.targetFindName );
       }
       else {
-        var res = tsx_CLS_target( target );
+        var res = tsx_CLS_target( target.targetFindName );
         updateTargetIsCloudy( target, res );
       }
     }
