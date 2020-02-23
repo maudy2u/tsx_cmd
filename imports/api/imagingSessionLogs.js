@@ -190,7 +190,7 @@ ImagingSessionLogs = {
  }
 
 export function getSessionDates() {
-  var log = ImagingSessionLogs.find({  sort: { sessionDate: 1} }).fetch();
+  var log = ImagingSessionLogs.find({}, {  sort: { sessionDate: 1} }).fetch();
   var dates = [];
   for( var i=0; i<log.length; i ++ ) {
     var ld = log[i].sessionDate;
