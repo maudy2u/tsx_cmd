@@ -67,6 +67,7 @@ export const tsx_ServerStates = {
   imagingSessionId: 'imagingSessionId',
   imagingSession: 'imagingSession', // use to report current imaging targets
   imagingSessionDither: 'imagingSessionDither',
+  imagingBinning: 'imagingBinning',
 
   // Dithering related states
   defaultDithering: 'defaultDithering',
@@ -102,6 +103,7 @@ export const tsx_ServerStates = {
   guidingPixelErrorTolerance: 'guidingPixelErrorTolerance',
   guiderPixelSize: 'guiderPixelSize',
   guider_camera_delay: 'guider_camera_delay',
+  defaultGuiderBin: 'defaultGuiderBin',
 
   fovAngle: 'fovAngle',
   fovPositionAngleTolerance: 'fovPositionAngleTolerance',

@@ -34,6 +34,10 @@ import {
   tsx_UpdateServerState,
   tsx_GetServerState,
 } from  '../api/serverStates.js';
+import {
+  renderDropDownImagingBinnings,
+  getBin,
+} from '../api/binnings.js'
 
 // Import the API Model
 import {
@@ -64,7 +68,8 @@ class CalibrationFrame extends Component {
     quantity: 1,
     rotation: '',
     order: 0,
-    binning: 1,
+    binning: '',
+    ccdTemp: '',
     on_enabled: true,
     flatbox_enabled: false,
   }
@@ -86,6 +91,7 @@ class CalibrationFrame extends Component {
       rotation: this.props.calibration.rotation,
       order: this.props.calibration.order,
       binning: this.props.calibration.binning,
+      ccdTemp: this.props.calibration.ccdTemp,
       on_enabled: this.props.calibration.on_enabled,
     });
   }
@@ -153,6 +159,9 @@ class CalibrationFrame extends Component {
         binning: nextProps.calibration.binning
       });
       this.setState({
+        ccdTemp: nextProps.calibration.ccdTemp
+      });
+      this.setState({
         on_enabled: nextProps.calibration.on_enabled
       });
     }
@@ -181,6 +190,14 @@ class CalibrationFrame extends Component {
   }
 
   render() {
+
+    let IMAGE_BINNINGS = '';
+    try {
+      IMAGE_BINNINGS = renderDropDownImagingBinnings();
+    }
+    catch ( e ) {
+      IMAGE_BINNINGS = [];
+    }
 
     return (
       <Table.Row>
@@ -221,12 +238,33 @@ class CalibrationFrame extends Component {
             />
         </Table.Cell>
         <Table.Cell   >
+          <Dropdown
+            button
+            size='mini'
+            name='binning'
+            options={renderDropDownImagingBinnings()}
+            placeholder='Bin'
+            text={this.state.binning}
+            onChange={this.handleChange}
+          />
+        </Table.Cell>
+        <Table.Cell   >
           <Input
             fluid
             size='mini'
             name='exposure'
             placeholder='Exposure'
             value={this.state.exposure}
+            onChange={this.handleChange}
+          />
+        </Table.Cell>
+        <Table.Cell   >
+          <Input
+            fluid
+            size='mini'
+            name='ccdTemp'
+            placeholder='Temp'
+            value={this.state.ccdTemp}
             onChange={this.handleChange}
           />
         </Table.Cell>

@@ -50,7 +50,8 @@ export function addCalibrationFrame() {
       level: 0,
       rotation: "",
       order: 0,
-      binning: 1,
+      binning: '',
+      ccdTemp: '',
       on_enabled: true,
     },
   );
@@ -84,6 +85,9 @@ export function updateCalibrationFrame( fid, name, value ) {
     else if( name == 'binning') {
       obj.binning = value;
     }
+    else if( name == 'ccdTemp') {
+      obj.ccdTemp = value;
+    }
     else if( name == 'on_enabled') {
       obj.on_enabled = value;
     }
@@ -97,6 +101,7 @@ export function updateCalibrationFrame( fid, name, value ) {
         rotation: obj.rotation,
         order: obj.order,
         binning: obj.binning,
+        ccdTemp: obj.ccdTemp,
         on_enabled: obj.on_enabled,
       }
     });

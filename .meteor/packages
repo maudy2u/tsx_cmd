@@ -59,8 +59,11 @@ ostrio:logger
 #flemay:less-autoprefixer # add for aarch64
 #juliancwirko:postcss      # remove for aarch64
 #less                      # remove for aarch64
+ostrio:files@1.6.6
+juliancwirko:postcss
+less
 
-# meteortoys:allthings@7.0.1 # NOT FOR USE ON ARMV7/8
+#meteortoys:allthings@7.0.1 # NOT FOR USE ON ARMV7/8
 # *******************************
 # job-collection needs to be the last in the package file
 vsivsi:job-collection

@@ -47,6 +47,19 @@ if( efwm != '<No Filter Wheel Selected>') {
   Out = Out + filters;
 }
 
+if( SelectedHardware.autoguiderCameraModel != '<No Guider Selected>' ) {
+  var ccd = ccdsoftAutoguider;
+  ccd.Connect();
+  while (!ccd.State == 0) {
+    sky6Web.Sleep (1000);
+  }
+
+  var numBins = ccd.lNumberBins;
+  var bins = "|numGuiderBins=" + numBins;
+  Out = Out + bins;
+}
+
+
 Out = "Success|"+ Out;
 
 /* Socket End Packet */

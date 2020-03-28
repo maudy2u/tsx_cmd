@@ -128,7 +128,7 @@ export function collect_calibration_images() {
     }
     // take_image to actually take the picture
     try {
-      for( var sub=0; sub<cal.quantity; sub++) {
+      for( var sub=0; sub<=cal.quantity; sub++) {
         if( isSchedulerStopped() == false ) {
             takeCalibrationImages( cal );
             var inc = sub+1;
@@ -163,9 +163,10 @@ function takeCalibrationImages( cal ) {
   var frame = getFrameNumber(cal.subFrameTypes);
   var filter = getFilterSlot( cal.filter );
   var exposure = cal.exposure;
+  var tName = cal.subFrameTypes;
   var delay = tsx_GetServerStateValue( 'flatbox_camera_delay' );
-  var binning; //future
-  var tName = "calibration_image";
-  tsxDebug( ' Calibration: filter=' +filter +', exposure=' + exposure +', frame=' + frame +', name=' + tName + ', delay=' + delay);
-  tsx_takeImage( filter, exposure, frame, tName, delay, binning );
+  var binning =cal.binning;
+  var ccdTemp = cal.ccdTemp;
+  tsxDebug( ' Calibration: filter=' +filter +', exposure=' + exposure +', frame=' + frame +', name=' + tName + ', delay=' + delay+ ', binning=' + binning+ ', ccdTemp=' + ccdTemp);
+  tsx_takeImage( filter, exposure, frame, tName, delay, binning, ccdTemp );
 }

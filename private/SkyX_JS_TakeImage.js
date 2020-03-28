@@ -4,12 +4,12 @@
 // 2018-04-19
 
 var Out = 'Success';
-var aFilter = $000;
-var aExpTime = $001;
+var aFilter = '$000';
+var aExpTime = '$001';
 var aFrame = $002; //  cdLight =1, cdBias, cdDark, cdFlat
 var tName = '$003';
-var delay = $004;
-var binning = $005;
+var delay = '$004';
+var binning = '$005';
 
 var CCDSC = ccdsoftCamera;
 var CCDAG = ccdsoftAutoguider;
@@ -28,9 +28,9 @@ var oldDelay = CCDSC.Delay;
 CCDSC.Delay = delay;
 
 var WAIT = ((CCDAG.AutoguiderExposureTime + CCDAG.Delay + 1) * 1000);
+while (!CCDSC.State == 0) { sky6Web.Sleep (1000); }
 
 function guideError() {
-
 	var Quality = -1;
 	var isGuiding = false;
 	if( SelectedHardware.autoguiderCameraModel !== '<No Camera Selected>' ) {
@@ -39,24 +39,15 @@ function guideError() {
 			isGuiding = true;
 		}
 		if( isGuiding) {
-
 			var errorX = CCDAG.GuideErrorX;
 			var errorY = CCDAG.GuideErrorY;
 			var rms = Math.sqrt( Math.pow(errorX,2)+Math.pow(errorY,2));
 			Quality = Number(rms).toFixed(2);
-
 		}
 	}
 	return Quality;
 }
 
-while (!CCDSC.State == 0)
-//
-// Diagnostic routine to make sure the camera is *really* ready
-//
-{
-	sky6Web.Sleep (1000);
-}
 
 if ( SelectedHardware.filterWheelModel !== "<No Filter Wheel Selected>" )
 //
@@ -69,7 +60,20 @@ if ( SelectedHardware.filterWheelModel !== "<No Filter Wheel Selected>" )
 
 // *******************************
 // now take image...
+var obinX = CCDSC.BinX;
+var obinY = CCDSC.BinY;
+if( binning != '' && typeof binning != 'undefined') {
+	// Make sure bin is valid.
+	try {
+	  CCDSC.BinX = binning; // use bin
+	  CCDSC.BinY = binning; // use bin
+	}
+	catch( err ) {
+	}
+}
 CCDSC.TakeImage();
+CCDSC.BinX = obinX;
+CCDSC.BinY = obinY;
 CCDSC.Delay = oldDelay;
 CCDSC.Frame = oldFrame;
 

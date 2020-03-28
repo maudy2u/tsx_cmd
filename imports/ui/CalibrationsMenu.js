@@ -410,7 +410,9 @@ class CalibrationsMenu extends Component {
                <Table.HeaderCell  >On/Off</Table.HeaderCell>
                <Table.HeaderCell  >Frame</Table.HeaderCell>
                <Table.HeaderCell  >Filter</Table.HeaderCell>
-               <Table.HeaderCell  >Exp.(s)</Table.HeaderCell>
+               <Table.HeaderCell  >Bin</Table.HeaderCell>
+               <Table.HeaderCell  >Exp(s)</Table.HeaderCell>
+               <Table.HeaderCell  >Temp.</Table.HeaderCell>
                <Table.HeaderCell  >Repeat</Table.HeaderCell>
                { this.renderFlatbox_level() }
                <Table.HeaderCell  ></Table.HeaderCell>

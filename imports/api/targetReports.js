@@ -80,6 +80,9 @@ TargetReports = {
 
 
  export function updateTargetReport( tid, name, value ) {
+   if( typeof tid == 'undefined' ) {
+     return 0;
+   }
    var id;
    var obj = TargetReports.findOne({target_id: tid});
    if( typeof obj == 'undefined' ) {

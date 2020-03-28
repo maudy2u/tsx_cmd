@@ -19,11 +19,11 @@ install_dir=$(pwd)
 if [ "$(uname)" == "Darwin" ]; then
   echo Mac in ${install_dir}
   sudo pkill node
-  sudo pkill mongod
+  sudo service mongod stop
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   echo Linux in ${install_dir}
   sudo pkill node
-  sudo pkill mongod
+  sudo service mongod stop
 elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
     # Do something under 32 bits Windows NT platform
     Echo windows32 - not yet supported

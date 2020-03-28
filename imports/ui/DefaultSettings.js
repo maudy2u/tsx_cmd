@@ -60,6 +60,10 @@ import {
 import {
   renderDropDownFilters,
 } from '../api/filters.js'
+import {
+  renderDropDownImagingBinnings,
+  renderDropDownGuiderBinnings,
+} from '../api/binnings.js'
 
 import ReactSimpleRange from 'react-simple-range';
 import Timekeeper from 'react-timekeeper';
@@ -114,9 +118,11 @@ class DefaultSettings extends Component {
       maxDitherFactor: 7,
       imagingPixelSize: 3.8,
       imagingFocalLength: 2800,
+      imagingBinning: '1',
       guiderPixelSize: 3.8,
       guidingPixelErrorTolerance: 0.9,
       guider_camera_delay: 1.0,
+      defaultGuiderBin: '1',
 
       defaultCLSEnabled: true,
       fovPositionAngleTolerance: 0.5,
@@ -238,6 +244,12 @@ class DefaultSettings extends Component {
           guider_camera_delay: nextProps.tsxInfo.find(function(element) {
             return element.name == 'guider_camera_delay';
           }).value,
+          imagingBinning: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'imagingBinning';
+          }).value,
+          defaultGuiderBin: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultGuiderBin';
+          }).value,
           defaultMinSunAlt: nextProps.tsxInfo.find(function(element) {
             return element.name == 'defaultMinSunAlt';
           }).value,
@@ -357,9 +369,13 @@ class DefaultSettings extends Component {
 //      <Button disabled={DISABLE}  onClick={this.connectToTSX.bind(this)}>
 //      Refresh</Button>
 
-    return (
-      <Button onClick={this.connectToTSX.bind(this)}>
+    return (<center>
+      <Button
+        onClick={this.connectToTSX.bind(this)}
+        style={{ backgroundColor: 'green', color: 'black'  }}
+      >
       Refresh</Button>
+      </center>
     )
   }
 
@@ -427,6 +443,7 @@ class DefaultSettings extends Component {
       RUNNING = '';
       ACTIVE=false;
     }
+//    style={{color: '#68c349'}}
 
     return (
       <div>
@@ -438,12 +455,12 @@ class DefaultSettings extends Component {
       />
       <Accordion.Content  active={activeIndex === eSetup} >
       <Checkbox
-        style={{color: '#68c349'}}
         label='Enable Artseky Flatbox'
         name='flatbox_enabled'
         toggle
         checked={this.state.flatbox_enabled}
         onClick={this.handleToggleAndSave.bind(this)}
+        style={{ labelColor: 'black'  }}
       />
       <Form>
       <Segment>
@@ -687,6 +704,14 @@ class DefaultSettings extends Component {
   renderGuider() {
     const { activeIndex } = this.state
 
+    let GUIDER_BINNINGS = '';
+    try {
+      GUIDER_BINNINGS = renderDropDownGuiderBinnings();
+    }
+    catch ( e ) {
+      GUIDER_BINNINGS = [];
+    }
+
     return (
       <div>
       <Accordion.Title
@@ -697,18 +722,18 @@ class DefaultSettings extends Component {
         />
       <Accordion.Content  active={activeIndex === eGuider} >
         <Form>
-        <Form.Input
-          label='Guide Camera Pixel Size: '
-          name='guiderPixelSize'
-          placeholder='i.e. guider pixel scale'
-          value={this.state.guiderPixelSize}
-          onChange={this.handleChange}
-          validations={{
-            matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-          }}
-          validationError="Must be a positive number, e.g 1, .7, 1.1"
-          errorLabel={ ERRORLABEL }
-        />
+          <Form.Input
+            label='AutoGuider Exposure '
+            name='defaultGuideExposure'
+            placeholder='Enter number seconds'
+            value={this.state.defaultGuideExposure}
+            onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be a positive number, e.g 1, .7, 1.1"
+            errorLabel={ ERRORLABEL }
+          />
           <Form.Input
             label='Guiding Tolerance '
             name='guidingPixelErrorTolerance'
@@ -722,10 +747,26 @@ class DefaultSettings extends Component {
             errorLabel={ ERRORLABEL }
           />
           <Form.Input
-            label='AutoGuider Exposure '
-            name='defaultGuideExposure'
-            placeholder='Enter number seconds'
-            value={this.state.defaultGuideExposure}
+            label='Guiding image delay '
+            name='guider_camera_delay'
+            placeholder='Seconds to wait e.g. 1.3'
+            value={this.state.guider_camera_delay}
+            onChange={this.handleChange}
+          />
+          <Form.Field control={Dropdown}
+            fluid
+            label='Default Guider Binning'
+            name='defaultGuiderBin'
+            options={GUIDER_BINNINGS}
+            placeholder='Bin guider image'
+            text={this.state.defaultGuiderBin}
+            onChange={this.handleChange}
+          />
+          <Form.Input
+            label='Guide Camera Pixel Size: '
+            name='guiderPixelSize'
+            placeholder='i.e. guider pixel scale'
+            value={this.state.guiderPixelSize}
             onChange={this.handleChange}
             validations={{
               matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
@@ -745,14 +786,7 @@ class DefaultSettings extends Component {
             validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
             errorLabel={ ERRORLABEL }
           />
-          <Form.Input
-            label='Guiding image delay '
-            name='guider_camera_delay'
-            placeholder='Seconds to wait e.g. 1.3'
-            value={this.state.guider_camera_delay}
-            onChange={this.handleChange}
-          />
-          </Form>
+        </Form>
       </Accordion.Content>
       </div>
     )
@@ -801,6 +835,15 @@ class DefaultSettings extends Component {
   renderImager() {
     const { activeIndex } = this.state;
 
+    let IMAGE_BINNINGS = '';
+    try {
+      IMAGE_BINNINGS = renderDropDownImagingBinnings();
+    }
+    catch ( e ) {
+      IMAGE_BINNINGS = [];
+    }
+
+
     return (
       <div>
       <Accordion.Title
@@ -810,20 +853,29 @@ class DefaultSettings extends Component {
         onClick={this.handleClick}
         />
       <Accordion.Content  active={activeIndex === eCamera} >
-      <Form>
-      <Form.Input
-        label='Image Camera Pixel Size: '
-        name='imagingPixelSize'
-        placeholder='i.e. image scale for dithering, and angle match'
-        value={this.state.imagingPixelSize}
-        onChange={this.handleChange}
-        validations={{
-          matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-        }}
-        validationError="Must be a positive number, e.g 1, .7, 1.1"
-        errorLabel={ ERRORLABEL }
-      />
-      </Form>
+        <Form>
+          <Form.Input
+            label='Image Camera Pixel Size: '
+            name='imagingPixelSize'
+            placeholder='i.e. image scale for dithering, and angle match'
+            value={this.state.imagingPixelSize}
+            onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be a positive number, e.g 1, .7, 1.1"
+            errorLabel={ ERRORLABEL }
+          />
+          <Form.Field control={Dropdown}
+            fluid
+            label='Default Image Binning'
+            name='imagingBinning'
+            options={IMAGE_BINNINGS}
+            placeholder='Bin imaging camera'
+            text={this.state.imagingBinning}
+            onChange={this.handleChange}
+          />
+        </Form>
       </Accordion.Content>
       </div>
     )

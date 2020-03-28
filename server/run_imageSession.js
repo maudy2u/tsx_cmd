@@ -52,6 +52,10 @@ import {
   recordRotatorPosition,
 } from '../imports/api/targetAngles.js';
 
+import {
+  getBinningNumber,
+} from '../imports/api/binnings.js'
+
 //Tools
 import {
   tsx_UpdateDevice,
@@ -1242,6 +1246,8 @@ function tsx_DeviceInfo() {
   var tsx_is_waiting = true;
   var numFilters = -1;
   var numBins = -1;
+  var numGuiderBins = -1;
+
   tsxDebug( '[TSX] SkyX_JS_DeviceInfo' );
 
   tsx_feeder( String(cmd), Meteor.bindEnvironment((tsx_return) => {
@@ -1316,6 +1322,11 @@ function tsx_DeviceInfo() {
               case 'numFilters':
                 numFilters = param[1];
                 tsx_SetServerState( 'numberOfFilters', numFilters );
+                break;
+
+              case 'numGuiderBins':
+                numGuiderBins = param[1];
+                tsx_SetServerState( 'numGuiderBins', numGuiderBins );
                 break;
 
               default:
@@ -2290,16 +2301,89 @@ function takenImagesFor(target, seriesId) {
   return taken;
 }
 
+export function tsx_setCCDTemp( ccdTemp ) {
+  tsxTrace(' *** tsx_setCCDTemp: ' + ccdTemp );
+  var success = false;
+  var cmd = tsx_cmd('SkyX_JS_ImagingCoolerSetTemp');
+  if( typeof ccdTemp == 'undefined' ) {
+    ccdTemp = '';
+  }
+
+  if( ccdTemp == '' ) return false;
+  console.log( ' ccdTemp setting: ' + ccdTemp )
+  cmd = cmd.replace("$000", ccdTemp ); // set filter
+
+  UpdateStatus( ' Imaging temp set to: ' + ccdTemp );
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+    console.log(' tsx_setCCDTemp return: ' + tsx_return );
+
+    var results = tsx_return.split('|');
+    if( results[0] == 'Success') {
+      success = true;
+    }
+
+    Meteor.sleep( 500 ); // needs a sleep before next image
+    tsx_is_waiting = false;
+  }));
+  while( tsx_is_waiting ) {
+    Meteor.sleep( 1000 );
+    if( isSchedulerStopped() ) {
+      tsxTrace('Stop Waiting Image - scheduler Stopped');
+      tsx_is_waiting = false;
+      success = false;
+    }
+  }
+  return success;
+}
+
+export function tsx_isCCDTemp( ccdTemp ) {
+  tsxTrace(' *** tsx_isCCDTemp: ' + ccdTemp );
+  var success = false;
+  var cmd = tsx_cmd('SkyX_JS_ImagingCoolerTemp');
+  if( typeof ccdTemp == 'undefined' ) {
+    ccdTemp = '';
+  }
+  if( ccdTemp == '' ) return false;
+
+  cmd = cmd.replace("$000", ccdTemp ); // set filter
+
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+    console.log(' tsx_isCCDTemp return: ' + tsx_return );
+    var results = tsx_return.split('|');
+    if( results[0] == 'true') {
+      success = true;
+    }
+    Meteor.sleep( 500 ); // needs a sleep before next image
+    tsx_is_waiting = false;
+  }));
+  while( tsx_is_waiting ) {
+    Meteor.sleep( 1000 );
+    if( isSchedulerStopped() ) {
+      tsxTrace('Stop Waiting Image - scheduler Stopped');
+      tsx_is_waiting = false;
+      success = false;
+    }
+  }
+  return success;
+}
+
 // **************************************************************
 // Use the filter and exposure to take an image
 // Currently it is assumed these are Light images
 // Could set frame type...
 // Frmae is the number...
-export function tsx_takeImage( filterNum, exposure, frame, target, delay, binning ) {
+export function tsx_takeImage( filterNum, exposure, frame, target, delay, binning, ccdTemp ) {
   // tsxTrace('************************');
   tsxTrace(' *** tsx_takeImage: ' + filterNum );
 
   var success = false;
+  var tName = '';
+  if( typeof target.targetFindName == 'undefined' ) {
+    tName = target;
+  }
+  else {
+    tName = target.targetFindName;
+  }
 
   var cmd = tsx_cmd('SkyX_JS_TakeImage');
   postProgressTotal(exposure);
@@ -2307,19 +2391,45 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
   if( delay == '' || typeof delay == 'undefined' ) {
     delay = 1;
   }
-  if( binning == '' || typeof binning == 'undefined' ) {
-    binning = 1;
+  if( typeof binning == 'undefined' ) {
+    binning = '';
+  }
+  if( typeof ccdTemp == 'undefined' ) {
+    ccdTemp = '';
+  }
+  ccdTemp = ccdTemp.trim();
+
+  // *******************************
+  // if temp set then set and check
+  if( ccdTemp != '') {
+    tsx_setCCDTemp( ccdTemp );
+    var chks = 0;
+    var timeout = 2; //mins
+    while( chks < (timeout*1000*60) && !tsx_isCCDTemp( ccdTemp ) && !isSchedulerStopped() ) {
+      UpdateStatus( ' ' + chks+'... Waiting to reach temp: ' + ccdTemp );
+      Meteor.sleep( 5000 ); // needs a sleep before next image
+      chks++;
+    }
+    if( tsx_isCCDTemp( ccdTemp ) ) {
+      UpdateStatus( "Cooler temperature withing 0.3 of: " + ccdTemp );
+    }
+    else {
+      UpdateStatus( "Cooler temperature NOT within 0.3 of: " + ccdTemp );
+    }
+    if( isSchedulerStopped() ) {
+      return success;
+    }
   }
 
   cmd = cmd.replace("$000", filterNum ); // set filter
   cmd = cmd.replace("$001", exposure );  // set exposure
   cmd = cmd.replace("$002", frame );     // set Light/Dark/Flat/Bias
-  cmd = cmd.replace("$003", target.targetFindName ); // set target
+  cmd = cmd.replace("$003", tName ); // set target
   cmd = cmd.replace("$004", delay );   // set target
-  cmd = cmd.replace("$005", binning ); // set target
+  cmd = cmd.replace("$005", getBinningNumber(binning) ); // set target
 
   var tsx_is_waiting = true;
-  tsxDebug( '[TSX] SkyX_JS_TakeImage, '+filterNum+', '+exposure+', '+frame+', '+target.targetFindName +', '+delay+', '+binning );
+  console.log( '[TSX] SkyX_JS_TakeImage, '+filterNum+', '+exposure+', '+frame+', '+tName +', '+delay+', '+binning+', '+ccdTemp );
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     // e.g.
@@ -2331,7 +2441,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
         var result = results[0].trim();
         if( result == 'Success' ) {
           success = true;
-          var iid = addImageReport( target.targetFindName );
+          var iid = addImageReport( tName );
           for( var i=1; i<results.length;i++) {
             var token=results[i].trim();
             // RunJavaScriptOutput.writeLine(token);
@@ -2422,7 +2532,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
             }
           }
 
-          updateImageReport( iid, 'target', target.targetFindName );
+          updateImageReport( iid, 'target', tName );
           updateImageReport( iid, 'subFrameTypes', getFrameName(frame) );
           updateImageReport( iid, 'filter', getFilterName(filterNum) );
           updateImageReport( iid, 'exposure', exposure );
