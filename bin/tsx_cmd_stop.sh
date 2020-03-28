@@ -22,8 +22,8 @@ if [ "$(uname)" == "Darwin" ]; then
   sudo service mongod stop
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   echo Linux in ${install_dir}
-  sudo pkill node
-  sudo service mongod stop
+  sudo killall node
+#  sudo service mongod stop
 elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
     # Do something under 32 bits Windows NT platform
     Echo windows32 - not yet supported

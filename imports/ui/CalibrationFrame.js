@@ -191,14 +191,6 @@ class CalibrationFrame extends Component {
 
   render() {
 
-    let IMAGE_BINNINGS = '';
-    try {
-      IMAGE_BINNINGS = renderDropDownImagingBinnings();
-    }
-    catch ( e ) {
-      IMAGE_BINNINGS = [];
-    }
-
     return (
       <Table.Row>
       <Table.Cell   >

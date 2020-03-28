@@ -139,7 +139,7 @@ class TakeSeriesTemplateEditor extends Component {
       {
         order: order,
         exposure: 1,
-        binning: 1,
+        binning: '',
         frame: 'Light',
         filter: '',
         repeat: 1,
@@ -247,7 +247,8 @@ class TakeSeriesTemplateEditor extends Component {
               <Table.Cell content='Remove' />
               <Table.Cell content='Exposure' />
               <Table.Cell content='Filter' />
-              <Table.Cell content='Repeat' />
+              <Table.Cell content='Bin' />
+              <Table.Cell content='Quantity' />
               <Table.Cell content='Order' />
             </Table.Row>
           </Table.Header>

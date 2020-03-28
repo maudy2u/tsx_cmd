@@ -44,6 +44,16 @@ import {
   Dropdown,
   Radio,
 } from 'formsy-semantic-ui-react';
+
+import {
+  renderDropDownImagingBinnings,
+  getBin,
+} from '../api/binnings.js'
+
+import {
+  renderDropDownFilters,
+} from '../api/filters.js'
+
 const ERRORLABEL = <Label color="red" pointing/>
 const XRegExp = require('xregexp');
 const XRegExpPosNum = XRegExp('^0$|(^([1-9]\\d*(\\.\\d+)?)$)|(^0?\\.\\d*[1-9]\\d*)$');
@@ -69,7 +79,7 @@ class TakeSeriesEditor extends Component {
     frame: 'Light',
     filter: 'Filter',
     repeat: 0,
-    binning: 0,
+    binning: '',
     takeSeriesTemplate: '',
     dithering: 0,
   };
@@ -116,31 +126,6 @@ class TakeSeriesEditor extends Component {
     });
   }
 
-  // *******************************
-  // Get the filters from TheSkyX
-  renderDropDownFilters() {
-
-    var filterArray = [];
-    for (var i = 0; i < this.props.filters.length; i++) {
-      filterArray.push({
-        key: this.props.filters[i]._id,
-        text: this.props.filters[i].name,
-        value: this.props.filters[i].name });
-    }
-    return filterArray;
-    // return Filters.find().renderDropDownFilters();
-  }
-
-  // *******************************
-  // This is used to populate drop down frame lists
-  renderDropDownFrames() {
-
-    var frameArray = [];
-    for (var i = 0; i < frames.length; i++) {
-      frameArray.push({ key: frames[i], text: frames[i], value: frames[i] });
-    }
-    return frameArray;
-  }
 
   deleteEntry() {
 
@@ -253,9 +238,24 @@ class TakeSeriesEditor extends Component {
               wrapSelection
               scrolling
               name='filter'
-              options={this.renderDropDownFilters()}
+              options={renderDropDownFilters()}
               placeholder='Filter'
               text={this.state.filter}
+              onChange={this.handleChange}
+            />
+            </Form>
+        </Table.Cell>
+        <Table.Cell width={2} verticalAlign={'middle'}>
+          <Form>
+          <Form.Dropdown
+              button
+              search
+              wrapSelection
+              scrolling
+              name='binning'
+              options={renderDropDownImagingBinnings()}
+              placeholder=''
+              text={this.state.binning}
               onChange={this.handleChange}
             />
             </Form>

@@ -2310,12 +2310,12 @@ export function tsx_setCCDTemp( ccdTemp ) {
   }
 
   if( ccdTemp == '' ) return false;
-  console.log( ' ccdTemp setting: ' + ccdTemp )
+  tsxTrace( ' ccdTemp setting: ' + ccdTemp )
   cmd = cmd.replace("$000", ccdTemp ); // set filter
 
-  UpdateStatus( ' Imaging temp set to: ' + ccdTemp );
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-    console.log(' tsx_setCCDTemp return: ' + tsx_return );
+    tsxDebug(' tsx_setCCDTemp return: ' + tsx_return );
+    tsxTrace( ' Imaging temp set to: ' + ccdTemp );
 
     var results = tsx_return.split('|');
     if( results[0] == 'Success') {
@@ -2348,7 +2348,7 @@ export function tsx_isCCDTemp( ccdTemp ) {
   cmd = cmd.replace("$000", ccdTemp ); // set filter
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-    console.log(' tsx_isCCDTemp return: ' + tsx_return );
+    tsxDebug(' tsx_isCCDTemp return: ' + tsx_return );
     var results = tsx_return.split('|');
     if( results[0] == 'true') {
       success = true;
@@ -2411,10 +2411,10 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
       chks++;
     }
     if( tsx_isCCDTemp( ccdTemp ) ) {
-      UpdateStatus( "Cooler temperature withing 0.3 of: " + ccdTemp );
+      tsxTrace( "Cooler temperature within 0.3 of: " + ccdTemp );
     }
     else {
-      UpdateStatus( "Cooler temperature NOT within 0.3 of: " + ccdTemp );
+      tsxTrace( "Cooler temperature NOT within 0.3 of: " + ccdTemp );
     }
     if( isSchedulerStopped() ) {
       return success;
@@ -2429,7 +2429,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
   cmd = cmd.replace("$005", getBinningNumber(binning) ); // set target
 
   var tsx_is_waiting = true;
-  console.log( '[TSX] SkyX_JS_TakeImage, '+filterNum+', '+exposure+', '+frame+', '+tName +', '+delay+', '+binning+', '+ccdTemp );
+  tsxDebug( '[TSX] SkyX_JS_TakeImage, '+filterNum+', '+exposure+', '+frame+', '+tName +', '+delay+', '+binning+', '+ccdTemp );
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     // e.g.
@@ -2537,7 +2537,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
           updateImageReport( iid, 'filter', getFilterName(filterNum) );
           updateImageReport( iid, 'exposure', exposure );
 //          updateImageReport( iid, 'level', tName );
-          updateImageReport( iid, 'binning', 1 );
+          updateImageReport( iid, 'binning', binning );
 
           // increment Dither count
           if( frame == '1 ' ) { // 1 = Light
@@ -2608,7 +2608,7 @@ function takeSeriesImage(target, series) {
   if( (remainingImages <= series.repeat) && (remainingImages > 0) ) {
     UpdateStatus( ' ' + target.targetFindName + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds, ' + num + '/' +series.repeat + ' TAKING' );
 
-    var res = tsx_takeImage( slot, series.exposure, frame, target );
+    var res = tsx_takeImage( slot, series.exposure, frame, target ); //delay, binning, ccdTemp )
     if( res != false ) {
       UpdateStatus( ' ' + target.targetFindName + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds, ' + num + '/' +series.repeat + ' DONE' );
       // *******************************
@@ -3212,7 +3212,7 @@ Use this to set the last focus
     var slot = getFilterSlot( series.filter );
     //  cdLight =1, cdBias, cdDark, cdFlat
     var frame = getFrameNumber(series.frame);
-    out = tsx_takeImage(slot,series.exposure, frame, targetSession );
+    out = tsx_takeImage(slot,series.exposure, frame, targetSession ); // delay, binning, ccdTemp )
     tsxTrace('Taken image: ' +res);
 
     return;
