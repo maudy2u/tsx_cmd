@@ -17,7 +17,6 @@ tsx cmd - A web page to send commands to TheSkyX server
  */
 
 import { Meteor } from 'meteor/meteor';
-
 import { Filters } from '../imports/api/filters.js';
 import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
 

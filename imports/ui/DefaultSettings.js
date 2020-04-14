@@ -73,6 +73,7 @@ const XRegExpPosNum = XRegExp('^0$|(^([1-9]\\d*(\\.\\d+)?)$)|(^0?\\.\\d*[1-9]\\d
 const XRegExpNonZeroPosInt = XRegExp('^([1-9]\\d*)$');
 const XRegExpZeroOrPosInt = XRegExp('^(\\d|[1-9]\\d*)$');
 const XRegExpZeroToNine = XRegExp('^\\d$');
+const XRegExpNegToPosInt = XRegExp('^(\\+|-)?\\d+$');
 
 const ERRORLABEL = <Label color="red" pointing/>
 
@@ -86,6 +87,7 @@ const eFilterWheel = 6;
 const eRotator = 7;
 const eCamera =8;
 const eMount = 9;
+const eFlatbox = 10;
 
 // App component - represents the whole app
 class DefaultSettings extends Component {
@@ -118,6 +120,8 @@ class DefaultSettings extends Component {
       maxDitherFactor: 7,
       imagingPixelSize: 3.8,
       imagingFocalLength: 2800,
+      defaultUseImagingCooler_enabled: false,
+      defaultCoolTemp: '',
       imagingBinning: '1',
       guiderPixelSize: 3.8,
       guidingPixelErrorTolerance: 0.9,
@@ -244,6 +248,12 @@ class DefaultSettings extends Component {
           guider_camera_delay: nextProps.tsxInfo.find(function(element) {
             return element.name == 'guider_camera_delay';
           }).value,
+          defaultCoolTemp: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultCoolTemp';
+          }).value,
+          defaultUseImagingCooler_enabled: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultUseImagingCooler_enabled';
+          }).value,
           imagingBinning: nextProps.tsxInfo.find(function(element) {
             return element.name == 'imagingBinning';
           }).value,
@@ -368,14 +378,14 @@ class DefaultSettings extends Component {
 //   icon='plug'     <Button disabled compact />
 //      <Button disabled={DISABLE}  onClick={this.connectToTSX.bind(this)}>
 //      Refresh</Button>
+//      <center>
+//      </center>
 
-    return (<center>
+    return (
       <Button
         onClick={this.connectToTSX.bind(this)}
         style={{ backgroundColor: 'green', color: 'black'  }}
-      >
-      Refresh</Button>
-      </center>
+      >Refresh</Button>
     )
   }
 
@@ -391,39 +401,6 @@ class DefaultSettings extends Component {
       else {
       }
     }.bind(this));
-  }
-
-  // *******************************
-  //
-  renderArtesky() {
-    if(this.state.flatbox_enabled)
-      return (
-        <Segment>
-        <Form.Group>
-        <Form.Input
-          label='Artseky Flatbox Server IP'
-          name='flatbox_ip'
-          placeholder='Enter artesky_srv IP address, e.g. 127.0.0.1'
-          value={this.state.flatbox_ip}
-          onChange={this.handleChange}
-        />
-        <Form.Input
-          label='Artseky Flatbox Device Port'
-          name='flatbox_device'
-          placeholder='e.g. /dev/ttyARTESKYFLAT'
-          value={this.state.flatbox_device}
-          onChange={this.handleChange}
-        />
-        <Form.Input
-          label='Calibration image delay '
-          name='flatbox_camera_delay'
-          placeholder='Seconds to wait e.g. 1.3'
-          value={this.state.flatbox_camera_delay}
-          onChange={this.handleChange}
-        />
-        </Form.Group>
-        </Segment>
-      )
   }
 
   renderServers() {
@@ -454,36 +431,25 @@ class DefaultSettings extends Component {
         onClick={this.handleClick}
       />
       <Accordion.Content  active={activeIndex === eSetup} >
-      <Checkbox
-        label='Enable Artseky Flatbox'
-        name='flatbox_enabled'
-        toggle
-        checked={this.state.flatbox_enabled}
-        onClick={this.handleToggleAndSave.bind(this)}
-        style={{ labelColor: 'black'  }}
-      />
       <Form>
-      <Segment>
-        <Form.Group>
-          <Form.Input
-            label='TheSkyX Server IP Address'
-            name='ip'
-            placeholder='Enter TheSkyX IP address'
-            value={this.state.ip}
-            onChange={this.handleChange}
-          />
-          <Form.Input
-            label='The SkyX Server Port'
-            name='port'
-            placeholder='Enter TheSkyX port'
-            value={this.state.port}
-            onChange={this.handleChange}
-          />
-        </Form.Group>
+        <Segment>
+          <Form.Group>
+            <Form.Input
+              label='TheSkyX Server IP Address'
+              name='ip'
+              placeholder='Enter TheSkyX IP address'
+              value={this.state.ip}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='The SkyX Server Port'
+              name='port'
+              placeholder='Enter TheSkyX port'
+              value={this.state.port}
+              onChange={this.handleChange}
+            />
+          </Form.Group>
         </Segment>
-      </Form>
-      <Form>
-        { this.renderArtesky() }
       </Form>
       <Segment.Group>
         {this.appButtons(RUNNING, ACTIVE)}
@@ -511,6 +477,74 @@ class DefaultSettings extends Component {
     )
   }
 
+  renderFlatBox() {
+    const { activeIndex } = this.state;
+    // var RUNNING = '';
+    // var ACTIVE = false;
+    var DISABLED = true;
+    try {
+      // RUNNING = this.props.scheduler_running.value;
+      // ACTIVE = this.props.tool_active.value;
+      DISABLED= !this.state.flatbox_enabled;
+
+    } catch (e) {
+      // RUNNING = '';
+      // ACTIVE=false;
+      DISABLED = true;
+    }
+//    style={{color: '#68c349'}}
+
+    return (
+      <div>
+      <Accordion.Title
+        active={activeIndex === eFlatbox}
+        content='Flatbox Setup'
+        index={eFlatbox}
+        onClick={this.handleClick}
+      />
+      <Accordion.Content  active={activeIndex === eFlatbox} >
+      <Segment>
+      <Checkbox
+        label='Enable Artseky Flatbox'
+        name='flatbox_enabled'
+        toggle
+        checked={this.state.flatbox_enabled}
+        onClick={this.handleToggleAndSave.bind(this)}
+        style={{ labelColor: 'black'  }}
+      />
+      <Form>
+      <Form.Group>
+      <Form.Input
+        disabled={DISABLED}
+        label='Artseky Flatbox Server IP'
+        name='flatbox_ip'
+        placeholder='Enter artesky_srv IP address, e.g. 127.0.0.1'
+        value={this.state.flatbox_ip}
+        onChange={this.handleChange}
+      />
+      <Form.Input
+        disabled={DISABLED}
+        label='Artseky Flatbox Device Port'
+        name='flatbox_device'
+        placeholder='e.g. /dev/ttyARTESKYFLAT'
+        value={this.state.flatbox_device}
+        onChange={this.handleChange}
+      />
+      <Form.Input
+        disabled={DISABLED}
+        label='Calibration image delay '
+        name='flatbox_camera_delay'
+        placeholder='Seconds to wait e.g. 1.3'
+        value={this.state.flatbox_camera_delay}
+        onChange={this.handleChange}
+      />
+      </Form.Group>
+      </Form>
+      </Segment>
+    </Accordion.Content>
+    </div>
+    )
+  }
   renderConstraints() {
     const { activeIndex } = this.state
 
@@ -523,7 +557,7 @@ class DefaultSettings extends Component {
         onClick={this.handleClick}
         />
       <Accordion.Content  active={activeIndex === eDefaultConstrainsts} >
-      <div>
+      <Segment>
       <h4 style={{color: "#5FB343"}} className="ui header">Priority: {this.state.defaultPriority}</h4>
       <ReactSimpleRange
         label
@@ -559,7 +593,7 @@ class DefaultSettings extends Component {
         errorLabel={ ERRORLABEL }
       />
       </Form>
-      </div>
+      </Segment>
     </Accordion.Content>
     </div>
     )
@@ -615,6 +649,7 @@ class DefaultSettings extends Component {
         onClick={this.handleClick}
         />
       <Accordion.Content active={activeIndex === eMount} >
+      <Segment>
         <Form>
         <Form.Input
           label='Focal Length: '
@@ -653,6 +688,7 @@ class DefaultSettings extends Component {
           errorLabel={ ERRORLABEL }
         />
         </Form>
+        </Segment>
       </Accordion.Content>
       </div>
     )
@@ -670,6 +706,7 @@ class DefaultSettings extends Component {
         onClick={this.handleClick}
         />
       <Accordion.Content active={activeIndex === eRotator} >
+      <Segment>
         <Form>
           <Form.Input
             label='FOV Angle Tolerance '
@@ -696,6 +733,7 @@ class DefaultSettings extends Component {
             errorLabel={ ERRORLABEL }
           />
         </Form>
+        </Segment>
       </Accordion.Content>
       </div>
     )
@@ -721,6 +759,7 @@ class DefaultSettings extends Component {
         onClick={this.handleClick}
         />
       <Accordion.Content  active={activeIndex === eGuider} >
+      <Segment>
         <Form>
           <Form.Input
             label='AutoGuider Exposure '
@@ -787,6 +826,7 @@ class DefaultSettings extends Component {
             errorLabel={ ERRORLABEL }
           />
         </Form>
+        </Segment>
       </Accordion.Content>
       </div>
     )
@@ -816,6 +856,7 @@ class DefaultSettings extends Component {
         onClick={this.handleClick}
         />
       <Accordion.Content  active={activeIndex === eFilterWheel} >
+      <Segment>
         <Form>
         <Form.Field control={Dropdown}
           fluid
@@ -827,6 +868,7 @@ class DefaultSettings extends Component {
           onChange={this.handleChange}
         />
         </Form>
+        </Segment>
       </Accordion.Content>
       </div>
     )
@@ -836,11 +878,14 @@ class DefaultSettings extends Component {
     const { activeIndex } = this.state;
 
     let IMAGE_BINNINGS = '';
+    var NOT_DISABLE_TEMP  = false;
     try {
       IMAGE_BINNINGS = renderDropDownImagingBinnings();
+      NOT_DISABLE_TEMP= !this.state.defaultUseImagingCooler_enabled;
     }
     catch ( e ) {
       IMAGE_BINNINGS = [];
+      NOT_DISABLE_TEMP = true;
     }
 
 
@@ -853,6 +898,7 @@ class DefaultSettings extends Component {
         onClick={this.handleClick}
         />
       <Accordion.Content  active={activeIndex === eCamera} >
+      <Segment>
         <Form>
           <Form.Input
             label='Image Camera Pixel Size: '
@@ -876,6 +922,31 @@ class DefaultSettings extends Component {
             onChange={this.handleChange}
           />
         </Form>
+        <br/>
+        <Checkbox
+          label='Use imaging cooler'
+          name='defaultUseImagingCooler_enabled'
+          toggle
+          checked={this.state.defaultUseImagingCooler_enabled}
+          onClick={this.handleToggleAndSave.bind(this)}
+          style={{ labelColor: 'black'  }}
+        />
+        <Form>
+          <Form.Input
+            disabled={NOT_DISABLE_TEMP}
+            label='Image cooler temperature: '
+            name='defaultCoolTemp'
+            placeholder='i.e. image scale for dithering, and angle match'
+            value={this.state.defaultCoolTemp}
+            onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExpNegToPosInt, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be a real number, e.g -20, -1, 0, 3, 5, ..."
+            errorLabel={ ERRORLABEL }
+          />
+        </Form>
+        </Segment>
       </Accordion.Content>
       </div>
     )
@@ -893,8 +964,8 @@ class DefaultSettings extends Component {
         onClick={this.handleClick}
         />
       <Accordion.Content  active={activeIndex === eFocuser} >
+      <Segment>
         <Form>
-
           <Form.Input
             label='Starting Focusing Exposure '
             name='defaultFocusExposure'
@@ -940,6 +1011,7 @@ class DefaultSettings extends Component {
           onClick={this.handleToggleAndSave.bind(this)}
         />
         </Form>
+        </Segment>
       </Accordion.Content>
     </div>
     )
@@ -957,55 +1029,55 @@ class DefaultSettings extends Component {
         onClick={this.handleClick}
         />
       <Accordion.Content  active={activeIndex === eClouds} >
-      <Form>
-
-      <Form.Input
-        label='Minutes to sleep when no target '
-        name='defaultSleepTime'
-        placeholder='Minutes to sleep'
-        value={this.state.defaultSleepTime}
-        onChange={this.handleChange}
-        validations={{
-          matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-        }}
-        validationError="Must be a positive number, e.g 1, .7, 1.1"
-        errorLabel={ ERRORLABEL }
-      />
-        <Form.Input
-          label='CloseLoopSlew Retries  '
-          name='defaultCLSRetries'
-          placeholder='Number of CLS retries - think cloud checking'
-          value={this.state.defaultCLSRetries}
-          onChange={this.handleChange}
-          validations={{
-            matchRegexp: XRegExpZeroToNine, // https://github.com/slevithan/xregexp#unicode
-          }}
-          validationError="Must be between 0-9"
-          errorLabel={ ERRORLABEL }
-        />
-        <Form.Input
-          label='CloseLoopSlew Redo  '
-          name='defaultCLSRepeat'
-          placeholder='Number seconds before CLS redo - think cloud checking'
-          value={this.state.defaultCLSRepeat}
-          onChange={this.handleChange}
-          validations={{
-            matchRegexp: XRegExpZeroOrPosInt, // https://github.com/slevithan/xregexp#unicode
-          }}
-          validationError="Must be a positive number, e.g 0, 5, 1800, 3600"
-          errorLabel={ ERRORLABEL }
-        />
-        <Checkbox
-          style={{color: '#68c349'}}
-          label='CLS before focusing in case of clouds'
-          name='focusRequiresCLS'
-          toggle
-          checked={this.state.focusRequiresCLS}
-          onClick={this.handleToggleAndSave.bind(this)}
-        />
-      </Form>
-
-    </Accordion.Content>
+        <Segment>
+          <Form>
+            <Form.Input
+              label='Minutes to sleep when no target '
+              name='defaultSleepTime'
+              placeholder='Minutes to sleep'
+              value={this.state.defaultSleepTime}
+              onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, .7, 1.1"
+              errorLabel={ ERRORLABEL }
+            />
+            <Form.Input
+              label='CloseLoopSlew Retries  '
+              name='defaultCLSRetries'
+              placeholder='Number of CLS retries - think cloud checking'
+              value={this.state.defaultCLSRetries}
+              onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpZeroToNine, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be between 0-9"
+              errorLabel={ ERRORLABEL }
+            />
+            <Form.Input
+              label='CloseLoopSlew Redo  '
+              name='defaultCLSRepeat'
+              placeholder='Number seconds before CLS redo - think cloud checking'
+              value={this.state.defaultCLSRepeat}
+              onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpZeroOrPosInt, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 0, 5, 1800, 3600"
+              errorLabel={ ERRORLABEL }
+            />
+            <Checkbox
+              style={{color: '#68c349'}}
+              label='CLS before focusing in case of clouds'
+              name='focusRequiresCLS'
+              toggle
+              checked={this.state.focusRequiresCLS}
+              onClick={this.handleToggleAndSave.bind(this)}
+            />
+          </Form>
+      </Segment>
+      </Accordion.Content>
     </div>
     )
   }
@@ -1024,17 +1096,18 @@ class DefaultSettings extends Component {
 
     return (
       <div>
-        <Accordion styled>
+        <Accordion fluid styled >
           {this.renderServers()}
           {this.renderConstraints()}
           {this.renderStartStopTimes()}
           {this.renderClouds()}
           {this.renderGuider()}
+          {this.renderImager()}
           {this.renderFocuser()}
           {this.renderFilterWheel()}
           {this.renderRotator()}
-          {this.renderImager()}
           {this.renderMount()}
+          {this.renderFlatBox()}
 
       </Accordion>
     </div>

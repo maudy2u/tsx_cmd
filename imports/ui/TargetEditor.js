@@ -16,6 +16,7 @@ tsx cmd - A web page to send commands to TheSkyX server
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Meteor } from 'meteor/meteor';
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom';
 // import {mount} from 'react-mounter';
@@ -24,6 +25,7 @@ import { withTracker } from 'meteor/react-meteor-data';
 import { Filters } from '../api/filters.js';
 import { TargetSessions } from '../api/targetSessions.js';
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
+import { SkySafariFiles } from '../api/skySafariFiles.js';
 import TakeSeriesTemplateEditor from './TakeSeriesTemplateEditor.js';
 
 import {
@@ -32,6 +34,7 @@ import {
   Segment,
   Button,
   Progress,
+  Statistic,
 } from 'semantic-ui-react'
 
 import {
@@ -48,81 +51,288 @@ const XRegExpNonZeroPosInt = XRegExp('^([1-9]\\d*)$');
 const XRegExpZeroOrPosInt = XRegExp('^(\\d|[1-9]\\d*)$');
 const XRegExpZeroToNine = XRegExp('^\\d$');
 
+import {
+  renderDropDownFilters,
+} from '../api/filters.js'
 
 import ReactSimpleRange from 'react-simple-range';
 // import { DateTime } from 'react-datetime-bootstrap';
 import Timekeeper from 'react-timekeeper';
 
+import IndividualFile from './FileIndividualFile.js';
+const debug = require('debug')('demo:file');
+import PropTypes from 'prop-types';
+
+import {
+  updateTargetStateValue,
+  updateTargetSeriesStateValue,
+} from  '../api/serverStates.js';
+
 class TargetEditor extends Component {
 
-  state = {
-    name: '',               // name of the target
-    targetImage: '',        // image file name of the target - future
-    targetFindName: '',     // Name to look up in TheSkyX
-    description: '',        // SOmething to say
-    enabledActive: false,   // whether the target is active or not
-    series: {},     // The take series to use
-    progress: [],
-    report_id: '',
-    ra: "",                 // Target RA
-    dec: "",                // Target DEC
-    alt: "",                // Target ALT
-    angle: "",
-    scale: '',
-    rotator_position: '',
-    coolingTemp: -19,
-    coolingTime: 5,
-    clsFilter: '',
-    focusFilter: '',
-    foccusSamples: '',
-    focusBin: '',
-    focusTarget: '',
-    focusExposure: 1,
-    guideExposure: '',
-    guideDelay: '',
-    startTime: '20:00',
-    stopTime: '6:00',
-    priority: 10,           // Priority: 1 is highest
-    tempChg: 0.7,
-    currentAlt:0,
-    minAlt: 29,
-    report: '',
+  constructor(props) {
+    super(props);
 
-    seriesTemplate: {},
-    value: false,
-    openModal: false,
-    templates: [],
-    checked: false,
-    template_id: '',
-    filterDropDown:[],
-    seriesDropDown:[],
-    testDate: '',
+    this.state = {
+      name: '',               // name of the target
+      targetImage: '',        // image file name of the target - future
+      targetFindName: '',     // Name to look up in TheSkyX
+      description: '',        // SOmething to say
+      friendlyName: '',
+      enabledActive: false,   // whether the target is active or not
+      series: {},     // The take series to use
+      progress: [],
+      report_id: '',
+      ra: "",                 // Target RA
+      dec: "",                // Target DEC
+      alt: "",                // Target ALT
+      angle: "",
+      scale: '',
+      rotator_position: '',
+      coolingTemp: -19,
+      coolingTime: 5,
+      clsFilter: '',
+      focusFilter: '',
+      foccusSamples: '',
+      focusBin: '',
+      focusTarget: '',
+      focusExposure: 1,
+      guideExposure: '',
+      guideDelay: '',
+      startTime: '20:00',
+      stopTime: '6:00',
+      priority: 10,           // Priority: 1 is highest
+      tempChg: 0.7,
+      currentAlt:0,
+      minAlt: 29,
+      report: '',
 
-    rotator_angle_westside: false,
-    rotator_180_flip: false,
-  };
+      seriesTemplate: {},
+      value: false,
+      openModal: false,
+      templates: [],
+      checked: false,
+      template_id: '',
+      filterDropDown:[],
+      seriesDropDown:[],
+      testDate: '',
+
+      rotator_angle_westside: false,
+      rotator_180_flip: false,
+
+      uploading: [],
+      progress: 0,
+      inProgress: false
+    };
+
+    this.uploadIt = this.uploadIt.bind(this);
+  }
+
+  propTypes: {
+    fileName: PropTypes.string.isRequired,
+    fileSize: PropTypes.number.isRequired,
+    fileUrl: PropTypes.string,
+    fileId: PropTypes.string.isRequired
+  }
+
+  uploadIt(e) {
+    e.preventDefault();
+
+    let self = this;
+
+    if (e.currentTarget.files && e.currentTarget.files[0]) {
+     // We upload only one file, in case
+     // there was multiple files selected
+     var file = e.currentTarget.files[0];
+
+     if (file) {
+       let uploadInstance = SkySafariFiles.insert({
+         file: file,
+         meta: {
+           locator: self.props.fileLocator,
+           // userId: Meteor.userId() // Optional, used to check on server for file tampering
+         },
+         streams: 'dynamic',
+         chunkSize: 'dynamic',
+         allowWebWorkers: true // If you see issues with uploads, change this to false
+       }, false)
+
+       self.setState({
+         uploading: uploadInstance, // Keep track of this instance to use below
+         inProgress: true // Show the progress bar now
+       });
+
+       // These are the event functions, don't need most of them, it shows where we are in the process
+       uploadInstance.on('start', function () {
+         console.log('Starting');
+       })
+
+       uploadInstance.on('end', function (error, fileObj) {
+         console.log('On end File Object: ', fileObj);
+       })
+
+       uploadInstance.on('uploaded', function (error, fileObj) {
+         console.log('uploaded: ', fileObj);
+
+         // Remove the filename from the upload box
+         self.refs['fileinput'].value = '';
+
+         // Reset our state for the next file
+         self.setState({
+           uploading: [],
+           progress: 0,
+           inProgress: false
+         });
+       })
+
+       uploadInstance.on('error', function (error, fileObj) {
+         console.log('Error during upload: ' + error)
+       });
+
+       uploadInstance.on('progress', function (progress, fileObj) {
+         console.log('Upload Percentage: ' + progress)
+         // Update our progress bar
+         self.setState({
+           progress: progress
+         });
+       });
+
+       uploadInstance.start(); // Must manually start the upload
+     }
+    }
+  }
+
+  showUploads() {
+   console.log('**********************************', this.state.uploading);
+
+   if (this.state.uploading.length > 0) {
+     return <div>
+       {this.state.uploading.file.name}
+
+       <div className="progress progress-bar-default">
+         <div style={{width: this.state.progress + '%'}} aria-valuemax="100"
+            aria-valuemin="0"
+            aria-valuenow={this.state.progress || 0} role="progressbar"
+            className="progress-bar">
+           <span className="sr-only">{this.state.progress}% Complete (success)</span>
+           <span>{this.state.progress}%</span>
+         </div>
+       </div>
+     </div>
+   }
+  }
+
+  displayFiles() {
+    //console.log("Rendering FileUpload",this.props.docsReadyYet);
+    if (this.props.files && this.props.docsReadyYet) {
+
+      let fileCursors = this.props.files;
+
+      // Run through each file that the user has stored
+      // (make sure the subscription only sends files owned by this user)
+      let display = fileCursors.map((aFile, key) => {
+
+        let link = SkySafariFiles.findOne({_id: aFile._id}).link('version');  // 'version' is needed in the case the file is renamed.
+
+        // get the TSXIP, and replace the "host with this value"
+        let tsxip = TheSkyXInfos.findOne({name: 'ip'});
+        if( typeof tsxip != 'undefined' || tsxip != '') {
+          var url = new URL(link);
+          url.hostname = tsxip.value;
+          link = url.href //'http://example.com:8080/one/two'
+        }
+
+        // Send out components that show details of each file
+        return <div key={'file' + key}>
+          <IndividualFile
+            fileName={aFile.name}
+            fileUrl={link}
+            fileId={aFile._id}
+            fileSize={aFile.size}
+          />
+        </div>
+      })
+      return display;
+    }
+    else {
+      return <div>Loading file list</div>;
+    }
+  }
 
   handleOpen = () => this.setState({ modalOpen: true });
   handleClose = () => this.setState({ modalOpen: false });
-  handleChange = (e, { name, value }) => this.setState({ [name]: value });
+  handleChange = (e, { name, value }) => {
+    this.setState({ [name]: value.trim() });
+    console.log( this.props.target._id + ', ' + name + ', ' + value )
+    updateTargetStateValue( this.props.target._id, name, value );
+  };
+  //handleChange = (e, { name, value }) => this.setState({ [name]: value });
 
   handleToggle = (e, { name, value }) => {
     var val = eval( 'this.state.' + name);
     this.setState({
       [name]: !val
     });
-    this.saveDefaultStateValue( name, !val );
+    updateTargetStateValue( this.props.target._id, name, value );
   };
 
-  handleStartChange = ( value ) => this.setState({startTime: value.formatted24 });
-  handleStopChange = ( value ) => this.setState({stopTime: value.formatted24 });
-  handlePriorityChange = ( value ) => this.setState({priority: value.value });
-  handleCoolingTempChange = ( value ) => this.setState({coolingTemp: value.value });
-  handleCoolingTimeChange = ( value ) => this.setState({coolingTime: value.value });
+  handleStartChange = (value) => {
+    this.setState({startTime: value.formatted24 })
+    // what is needed for the "dropdown values"
+    // series needs an "ID", and so include text value
+
+    updateTargetStateValue( this.props.target._id, 'startTime', value.formatted24 );
+  };
+  handleSeriesChange = (value) => {
+    this.setState({startTime: value.formatted24 })
+    // what is needed for the "dropdown values"
+    // series needs an "ID", and so include text value
+    var series = this.state.seriesTemplate; // name in the field
+    // filter needs an index and text value...
+    var seriesId; // get the matching key value
+    for (var i = 0; i < this.state.seriesDropDown.length; i++) {
+      if( series == this.state.seriesDropDown[i].value ) {
+        seriesId = this.state.seriesDropDown[i].key;
+      }
+    }
+
+    updateTargetSeriesStateValue( this.props.target._id, seriesId, this.state.seriesTemplate );
+  };
+  handleStopChange = (value) => {
+    this.setState({stopTime: value.formatted24 })
+    // what is needed for the "dropdown values"
+    // series needs an "ID", and so include text value
+
+    updateTargetStateValue( this.props.target._id, 'stopTime', value.formatted24 );
+  };
+  handlePriorityChange = (value) => {
+    this.setState({priority: value.value })
+    // what is needed for the "dropdown values"
+    // series needs an "ID", and so include text value
+
+    updateTargetStateValue( this.props.target._id, 'priority', value.value );
+  };
+  handleCoolingTempChange = (value) => {
+    this.setState({coolingTemp: value.value })
+    // what is needed for the "dropdown values"
+    // series needs an "ID", and so include text value
+
+    updateTargetStateValue( this.props.target._id, 'coolingTemp', value.value );
+  };
   // handleFocusTempChange = ( value ) => this.setState({tempChg: value.value });
-  handleMinAltChange = ( value ) => this.setState({minAlt: value.value });
+  handleMinAltChange = (value) => {
+    this.setState({minAlt: value.value })
+    // what is needed for the "dropdown values"
+    // series needs an "ID", and so include text value
+
+    updateTargetStateValue( this.props.target._id, 'minAlt', value.value );
+  };
   onChangeChecked() {
-    this.setState({enabledActive: !this.state.enabledActive});
+    this.setState({enabledActive: value.value })
+    // what is needed for the "dropdown values"
+    // series needs an "ID", and so include text value
+
+    updateTargetStateValue( this.props.target._id, 'enabledActive', !this.state.enabledActive );
   }
 
   componentWillMount() {
@@ -155,6 +365,7 @@ class TargetEditor extends Component {
       targetFindName: this.props.target.targetFindName,
       targetImage: this.props.target.targetImage,
       description: this.props.target.description,
+      friendlyName: this.props.target.friendlyName,
       enabledActive: this.props.target.enabledActive,
       series: {
         _id: this.props.target.series._id,
@@ -193,75 +404,6 @@ class TargetEditor extends Component {
       report: '',
 
     });
-  }
-
-  saveEntry() {
-
-    var d = new Date();
-    var n = d.getHours();
-    var n = d.getMinutes();
-
-    // what is needed for the "dropdown values"
-    // series needs an "ID", and so include text value
-    var series = this.state.seriesTemplate; // name in the field
-
-    // filter needs an index and text value...
-    var seriesId; // get the matching key value
-    for (var i = 0; i < this.state.seriesDropDown.length; i++) {
-      if( series == this.state.seriesDropDown[i].value ) {
-        seriesId = this.state.seriesDropDown[i].key;
-      }
-    }
-
-    TargetSessions.update(this.props.target._id, {
-      $set: {
-        name: this.state.name,
-        targetFindName: this.state.targetFindName,
-        targetImage: this.state.targetImage,
-        description: this.state.description,
-        enabledActive: this.state.enabledActive,
-        series: {
-          _id: seriesId,
-          value: this.state.seriesTemplate,
-        },
-        //progress: [], // not part of editor
-        // report_d: this.state.report_id,
-        ra: this.state.ra,
-        dec: this.state.dec,
-        angle: this.state.angle,
-        rotator_position: this.state.rotator_position,
-        scale: this.state.scale,
-        coolingTemp: this.state.coolingTemp,
-        clsFilter: this.state.clsFilter,
-        focusFilter: this.state.focusFilter,
-        foccusSamples: this.state.foccusSamples,
-        focusBin: this.state.focusBin,
-        focusTarget: this.state.focusTarget,
-        focusExposure: this.state.focusExposure,
-        guideExposure: this.state.guideExposure,
-        guideDelay: this.state.guideDelay,
-        startTime: this.state.startTime,
-        stopTime: this.state.stopTime,
-        priority: this.state.priority,
-        tempChg: this.state.tempChg,
-        currentAlt: this.state.currentAlt,
-        minAlt: this.state.minAlt,
-        report: '',
-
-       },
-    });
-  }
-
-  getDropDownFilters() {
-
-    var filterArray = [];
-    for (var i = 0; i < this.props.filters.length; i++) {
-      filterArray.push({
-        key: this.props.filters[i]._id,
-        text: this.props.filters[i].name,
-        value: this.props.filters[i].name });
-    }
-    return filterArray;
   }
 
   // Get all the current values from the TaeSeriesTemplate collections
@@ -304,6 +446,20 @@ class TargetEditor extends Component {
     }.bind(this));
   }
 
+  getTSXRaDec() {
+    this.setState({ra: ''});
+    this.setState({dec: ''});
+    this.setState({alt: ''});
+
+    // console.log('targetFind: ' + this.props.target.targetFindName );
+    Meteor.call(
+      'getTSXFrameCentre',
+      function ( error, result ) {
+
+      this.setState({targetFindName: result});
+    }.bind(this));
+  }
+
   // *******************************
   render() {
     // *******************************
@@ -318,9 +474,15 @@ class TargetEditor extends Component {
 
     // *******************************
     // DROP DOWN CONSTANTS
-    var takeSeries = this.getTakeSeriesTemplates();
-    var filters = this.getDropDownFilters();
+    let FILTERS = '';
+    try {
+      FILTERS = renderDropDownFilters();
+    }
+    catch ( e ) {
+      FILTERS = [];
+    }
     var TARGETPRIORITY = this.state.priority;
+    var takeSeries = this.getTakeSeriesTemplates();
 
     // *******************************
     // var for ra and DATEPICKER
@@ -329,7 +491,7 @@ class TargetEditor extends Component {
     var targetDec = `${this.state.dec}`;
     var targetAngle = `${this.state.angle}`;
     var targetDesc = `${this.state.description}`;
-
+    var friendlyName = `${this.state.friendlyName}`
     var focFilter= `${this.state.focusFilter}`;
     var focTemp= `${this.state.tempChg}`;
     var focExp = `${this.state.focusExposure}`
@@ -359,6 +521,12 @@ class TargetEditor extends Component {
                     placeholder='TheSkyX Find: e.g.: M31 or, 11h 33m 48s, 55d 57m 18s'
                     value={this.state.targetFindName}
                     onChange={this.handleChange}/>
+                <Form.Input
+                    label='Friendly Name'
+                    name='friendlyName'
+                    placeholder='Used for filename if needed, e.g. Not Sky Chart Centre'
+                    value={this.state.friendlyName}
+                    onChange={this.handleChange}/>
               </Form.Group>
               <small>     e.g. M31 or, 11h 33m 48s, 55d 57m 18s</small>
               <Form.Group>
@@ -371,17 +539,33 @@ class TargetEditor extends Component {
                   value={this.state.description}
                   onChange={this.handleChange}/>
               </Form.Group>
-              <Form.Group>
+                <Button onClick={this.getTSXRaDec.bind(this)}>Get</Button>
                 <Button onClick={this.getTargetRaDec.bind(this)}>Find</Button>
-                <Label>RA <Label.Detail>{Number(this.state.ra).toFixed(4)}</Label.Detail></Label>
-                <Label>DEC <Label.Detail>{Number(this.state.dec).toFixed(4)}</Label.Detail></Label>
-                <Label>Atl <Label.Detail>{Number(this.state.alt).toFixed(4)}</Label.Detail></Label>
+                <br/>
+                <Statistic size='mini'>
+                  <Statistic.Label>RA</Statistic.Label>
+                  <Statistic.Value>{Number(this.state.ra).toFixed(4)}</Statistic.Value>
+                </Statistic>
+                <Statistic size='mini'>
+                  <Statistic.Label>DEC</Statistic.Label>
+                  <Statistic.Value>{Number(this.state.dec).toFixed(4)}</Statistic.Value>
+                </Statistic>
+                <Statistic size='mini'>
+                  <Statistic.Label>Alt</Statistic.Label>
+                  <Statistic.Value>{Number(this.state.alt).toFixed(4)}</Statistic.Value>
+                </Statistic>
                 {/*
+                  <Form.Group>
+                  </Form.Group>
+
                 <Label>Az <Label.Detail>{this.state.targetAZ}</Label.Detail></Label>
                 <Label>Angle <Label.Detail>{Number(this.state.targetAngle).toFixed(4)}</Label.Detail></Label>
                 <Label>HA <Label.Detail>{Number(this.state.targetHA).toFixed(4)}</Label.Detail></Label>
                 <Label>Transit <Label.Detail>{Number(this.state.targetTransit).toFixed(4)}</Label.Detail></Label> */}
-              </Form.Group>
+              <p>Upload SkySafari Settings:</p>
+              <input type="file" id="fileinput" disabled={this.state.inProgress} ref="fileinput"
+                onChange={this.uploadIt}/>
+              {this.showUploads()}
               <Form.Group>
                 <Form.Field control={Dropdown}
                   button
@@ -425,7 +609,7 @@ class TargetEditor extends Component {
                     onChange={this.handleChange}/>
               */}
               <Form.Input
-                  label='East Pointing FOV ImageLink Angle (optional)'
+                  label='OPTIONAL: Position Angle, north through east (per ImageLink)'
                   name='angle'
                   placeholder='Position angle per ImageLink (e.g. 0 for PEC capture)'
                   value={this.state.angle}
@@ -545,7 +729,7 @@ class TargetEditor extends Component {
             scrolling
             label='ClosedLoopSlew Filter'
             name='clsFilter'
-            options={filters}
+            options={FILTERS}
             placeholder='Filter for Close Loop Slew'
             text={this.state.clsFilter}
             onChange={this.handleChange}
@@ -561,7 +745,7 @@ class TargetEditor extends Component {
                   search
                   label='Focus Filter'
                   name='focusFilter'
-                  options={filters}
+                  options={FILTERS}
                   placeholder='Filter for focusing'
                   text={focFilter}
                   onChange={this.handleChange}
@@ -641,9 +825,10 @@ class TargetEditor extends Component {
 // *******************************
 // THIS IS THE ACTUAL RENDERING...
 // *******************************
+//        <Button  icon='save' onClick={this.saveEntry.bind(this)} />
+
     return (
       <Segment secondary>
-        <Button  icon='save' onClick={this.saveEntry.bind(this)} />
         <Form>
           <Tab menu={{ pointing: true }} renderActiveOnly={true} panes={panes} />
         </Form>

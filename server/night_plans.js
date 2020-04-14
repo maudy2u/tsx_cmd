@@ -1,3 +1,4 @@
+import { Meteor } from 'meteor/meteor';
 import { TargetSessions } from '../imports/api/targetSessions.js';
 import { TargetReports } from '../imports/api/targetReports.js';
 //import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';

@@ -385,14 +385,60 @@ class Toolbox extends Component {
       DISABLE = false;
       NOT_DISABLE = true;
     }
+/*
+          selection options={slewOptions}
+          value={calType}
+        value={calLocation}
+         <Button.Group icon>
+        </Button.Group>
 
+<Dropdown
+ name='tool_focus_choice'
+ placeholder='Slew to...'
+ onChange={this.handleChange}
+/>
+
+<Dropdown
+ name='tool_script_target'
+ placeholder='Run script..'
+ onChange={this.handleChange}
+/>
+
+<Input
+/>
+</Segment>
+<Segment>
+<Input
+/>
+*/
     return (
-      <div>
-      <Header>@Focus3</Header>
-      <Button.Group icon>
-          <Button  disabled={DISABLE} onClick={this.runFocuser.bind(this)}>@Focus3</Button>
-       </Button.Group>
-     </div>
+      <Segment.Group horizontal>
+      <Segment>
+        <Button  disabled={DISABLE} onClick={this.runFocuser.bind(this)}>@Focus3</Button>
+        <Form>
+          <Dropdown
+           name='tool_script_target'
+           placeholder='Run script..'
+           onChange={this.handleChange}
+          />
+          <Form.Input
+            name='tool_focustarget'
+            placeholder='Target name, Ra/Dec'
+            onChange={this.handleChange}
+          />
+        </Form>
+      </Segment>
+      <Segment>
+        <Button  disabled={DISABLE} onClick={this.runFocuser.bind(this)}>Run Script</Button>
+        <Form>
+          <Form.Input
+            name='tool_focus_script'
+            placeholder='Filename of Script'
+            onChange={this.handleChange}
+          />
+        </Form>
+      </Segment>
+      </Segment.Group>
     )
   };
 
@@ -425,6 +471,7 @@ class Toolbox extends Component {
          )}
         </Segment>
         <Segment raised>
+        <Header>@Focus3</Header>
         {this.focusTool(
           this.props.scheduler_running.value
           , this.props.tool_active.value

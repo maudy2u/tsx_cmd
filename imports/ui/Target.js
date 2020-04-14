@@ -42,7 +42,9 @@ import {
   TakeSeriesTemplates,
   seriesDescription,
 } from '../api/takeSeriesTemplates.js';
-
+import {
+  updateTargetStateValue,
+} from  '../api/serverStates.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 
 import TargetEditor from './TargetEditor.js';
@@ -74,20 +76,11 @@ class Target extends Component {
   handleClose = () => this.setState({ modalOpen: false })
 
   handleToggleEnabled = (e, { name, checked }) => {
+    var val = eval( 'this.state.' + name);
     this.setState({
-      [name]: checked
+      [name]: !val
     });
-    if( name == 'enabledActive') {
-      TargetSessions.update({_id:this.props.target._id}, {
-        $set:{ enabledActive: checked }
-      });
-    }
-    if( name == 'isCalibrationFrames') {
-      TargetSessions.update({_id:this.props.target._id}, {
-        $set:{ isCalibrationFrames: checked }
-      });
-    }
-    this.forceUpdate();
+    updateTargetStateValue( this.props.target._id, name, !val );
   };
 
   handleClick = (e, titleProps) => {

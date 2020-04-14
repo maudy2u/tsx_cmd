@@ -1253,7 +1253,7 @@ function tsx_DeviceInfo() {
   tsx_feeder( String(cmd), Meteor.bindEnvironment((tsx_return) => {
     // e.g.
     // Success|RMS_ERROR=0.00|ROTATOR_POS_ANGLE=-350|ANGLE=349.468|FOCUS_POS=0.000
-    tsxDebug(' TakeImage return: ' + tsx_return );
+    tsxDebug(' SkyX_JS_DeviceInfo return: ' + tsx_return );
     if( tsx_has_error(tsx_return) == false ) {
       var results = tsx_return.split('|');
       if( results.length > 0) {
@@ -1603,6 +1603,36 @@ function isFocusingNeeded(target) {
     }
   }
   return false;
+}
+
+export function tsx_GetChartCentre() {
+  tsxTrace(' *** tsx_GetChartCentre: ' );
+  var cmd = tsx_cmd('SkyX_JS_GetChartCentre');
+
+  var Out = '';
+  var tsx_is_waiting = true;
+  tsxDebug( '[TSX] SkyX_JS_GetChartCentre');
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+    if( tsx_has_error(tsx_return) == false ) {
+      tsxDebug( tsx_return );
+      var results = tsx_return.split('|');
+      for( var i=0; i<results.length;i++) {
+        var token=results[i].trim();
+        var param=token.split("=");
+        switch( param[0] ) {
+          case 'sexi2000':
+            Out=param[1];
+            break;
+          default:
+        }
+      }
+    }
+    tsx_is_waiting = false;
+  }));
+  while( tsx_is_waiting ) {
+    Meteor.sleep( 1000 );
+  }
+  return Out;
 }
 
 // **************************************************************
@@ -2378,11 +2408,15 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
 
   var success = false;
   var tName = '';
+  var friendly = '';
+  if( typeof target.friendlyName != 'undefined' && target.friendlyName != '' ) {
+    friendly = target.friendlyName;
+  }
   if( typeof target.targetFindName == 'undefined' ) {
-    tName = target;
+    tName = target; // used for calibration..
   }
   else {
-    tName = target.targetFindName;
+    tName = target.targetFindName; // used for imaging
   }
 
   var cmd = tsx_cmd('SkyX_JS_TakeImage');
@@ -2427,6 +2461,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
   cmd = cmd.replace("$003", tName ); // set target
   cmd = cmd.replace("$004", delay );   // set target
   cmd = cmd.replace("$005", getBinningNumber(binning) ); // set target
+  cmd = cmd.replace("$006", friendly );   // set target
 
   var tsx_is_waiting = true;
   tsxDebug( '[TSX] SkyX_JS_TakeImage, '+filterNum+', '+exposure+', '+frame+', '+tName +', '+delay+', '+binning+', '+ccdTemp );
@@ -3194,6 +3229,30 @@ Use this to set the last focus
 
   },
 
+  //
+  // **************************************************************
+  // Used to pass RA/DEC to target editors
+  getTSXFrameCentre() {
+    tsx_SetServerState( 'tool_active', true );
+
+    tsxTrace('************************');
+    tsxTrace(' *** getTSXFrameCentre');
+    var res = '';
+    try {
+      res = tsx_GetChartCentre();
+    }
+    catch( e )  {
+      if( e == 'TsxError' ) {
+        UpdateStatus('!!! TheSkyX connection is no longer there!');
+      }
+    }
+    finally {
+      tsx_SetServerState( 'tool_active', false );
+    }
+    return res;
+
+  },
+
   // **************************************************************
   // 7. Start session run:
   //    - take image
@@ -3212,7 +3271,7 @@ Use this to set the last focus
     var slot = getFilterSlot( series.filter );
     //  cdLight =1, cdBias, cdDark, cdFlat
     var frame = getFrameNumber(series.frame);
-    out = tsx_takeImage(slot,series.exposure, frame, targetSession ); // delay, binning, ccdTemp )
+    out = tsx_takeImage(slot, series.exposure, frame, targetSession ); // delay, binning, ccdTemp )
     tsxTrace('Taken image: ' +res);
 
     return;

@@ -34,7 +34,7 @@ class IndividualFile extends Component {
   }
 
   restoreFile() {
-    let conf = confirm('Are you sure you want to restore this database file?') || false;
+    let conf = confirm('Are you sure you want to restore this file?') || false;
     if (conf == true) {
       Meteor.call('RestoreFile', this.props.fileId, function (err, res) {
         if (err)

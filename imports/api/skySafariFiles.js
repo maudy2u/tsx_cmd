@@ -18,8 +18,9 @@ tsx cmd - A web page to send commands to TheSkyX server
 
 // Needs: meteor npm install --save simpl-schema
 
-
 import { Mongo } from 'meteor/mongo';
+import { Meteor } from 'meteor/meteor';
+import { Accounts } from 'meteor/accounts-base';
 import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug, logFileForClient, AppLogsDB } from './theLoggers.js';
 import { FilesCollection } from 'meteor/ostrio:files';
 // Used to store the filters currently available/active on TSX
@@ -41,7 +42,7 @@ export const SkySafariFiles = new FilesCollection({
   collectionName: 'skySafariFiles',
   allowClientCode: true, // Required to let you remove uploaded file
   onBeforeUpload(file) {
-    // Allow upload files under 10MB, and only in png/jpg/jpeg formats
+    // Allow upload files under 10MB, and only in skyset formats
     if (file.size <= 1048576 && /skyset/i.test(file.ext)) {
       return true;
     } else {
@@ -52,14 +53,85 @@ export const SkySafariFiles = new FilesCollection({
 export default SkySafariFiles; // To be imported in other files
 // *******************************
 
-// SimpleSchema.setDefaultMessages({
-//   initialLanguage: 'en',
-//   messages: {
-//     en: {
-//       uploadError: '{{value}}', //File-upload
-//     },
-//   }
-// });
+
+export function skysafariFraming( skysetFile ) {
+
+  // load files
+  // ScopeFieldRotation=1.060000000000000e+02
+  // DisplayCenterLon=2.024722758067027e+02
+  // DisplayCenterLat=4.719440077746570e+01
+  var results = [
+      "ScopeFieldRotation=1.060000000000000e+02",
+      "DisplayCenterLon=2.024722758067027e+02",
+      "DisplayCenterLat=4.719440077746570e+01",
+    ];
+
+  var src = Assets.getText(skysetFile);
+  tsxInfo(' *** skysafari: ' + skysetFile );
+
+
+  var OUT = {};
+
+  // iterate and split for
+  for( var i=0; i<results.length;i++) {
+    var token=results[i].trim();
+    // RunJavaScriptOutput.writeLine(token);
+    var param=token.split("=");
+    switch( param[0] ) {
+
+      case 'ScopeFieldRotation':
+        OUT.pa=convertORIENT2PA(param[1]);
+        break;
+
+      case 'DisplayCenterLon':
+        OUT.ra=convertLon2RA(param[1]);
+        break;
+
+      case 'DisplayCenterLat':
+        OUT.dec=convertLat2Dec(param[1]);
+        break;
+
+      default:
+        //RunJavaScriptOutput.writeLine(param[0]+' not found.');
+    }
+  }
+  tsxTrace( OUT.ra + ', ' + OUT.dec + ', ' + OUT.pa );
+  return OUT;
+}
+
+export function convertLon2RA( lon ) {
+  //var lon  = 1.072530029359138e+02
+  var dd = Math.floor(lon/15)
+  var mmdec = (lon/15-dd)*60
+  var mm = Math.floor(mmdec)
+  var ssdec = (mmdec-mm)*60
+  var ss = ssdec.toFixed(2)
+  return dd + 'h ' + mm + 'm ' + ss + 's';
+}
+export function convertLat2Dec( lat ) {
+  //var lat =
+  var dd = Math.floor(lat)
+  var mmdec = (lat-dd)*60
+  var mm = Math.floor(mmdec)
+  var ssdec = (mmdec-mm)*60
+  var ss = ssdec.toFixed(2)
+
+  return dd + 'd ' + mm + 'm ' + ss + 's';
+}
+
+export function convertORIENT2PA( orient ) {
+  //RunJavaScriptOutput.writeLine(orient+'  found.');
+	if( orient < 360 && orient>=180 ) {
+    	return (360 - orient).toFixed(2);
+  }
+  else if( orient > 0 && orient < 180 ) {
+		return (180 - orient).toFixed(2);
+	}
+	else {
+ 	  return -1; //failed orient value
+	}
+}
+
 
 if (Meteor.isClient) {
   Meteor.subscribe('files.skySafari.all');

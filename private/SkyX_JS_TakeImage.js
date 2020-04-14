@@ -10,6 +10,7 @@ var aFrame = $002; //  cdLight =1, cdBias, cdDark, cdFlat
 var tName = '$003';
 var delay = '$004';
 var binning = '$005';
+var friendly = '$006';
 
 var CCDSC = ccdsoftCamera;
 var CCDAG = ccdsoftAutoguider;
@@ -50,9 +51,6 @@ function guideError() {
 
 
 if ( SelectedHardware.filterWheelModel !== "<No Filter Wheel Selected>" )
-//
-// This test looks to see if there is a filter wheel. If so, change filters as instructed.
-//
 {
 	CCDSC.filterWheelConnect();		// Probably redundant.
 	CCDSC.FilterIndexZeroBased = aFilter;	// Pick a filter (up to eight), set by first parameter from tsxfeeder.
@@ -71,7 +69,20 @@ if( binning != '' && typeof binning != 'undefined') {
 	catch( err ) {
 	}
 }
+
+// Use Friendly name if it is defined
+var oldASFormula = ccdsoftCamera.PropStr("m_csCustomFileNameLight")
+var newASFormula = '';
+if( friendly != '$006' && friendly != '' && friendly != 'undefined' ) {
+	newASFormula = oldASFormula.replace(/:t/g, friendly);
+	ccdsoftCamera.setPropStr("m_csCustomFileNameLight", newASFormula);
+}
+
 CCDSC.TakeImage();
+if( newASFormula != '' && newASFormula != 'undefined' ) {
+	ccdsoftCamera.setPropStr("m_csCustomFileNameLight", oldASFormula);
+}
+
 CCDSC.BinX = obinX;
 CCDSC.BinY = obinY;
 CCDSC.Delay = oldDelay;
@@ -117,6 +128,10 @@ if( CCDSC.focIsConnected ) {
 if( tName != '$003' ) {
 	//Correct the OBJECT Keyword if using coordinates instead of a target name
 	CCDSI.setFITSKeyword("OBJECT", tName);
+}
+if( friendly != '$006' ) {
+	//Correct the OBJECT Keyword if using coordinates instead of a target name
+	CCDSI.setFITSKeyword("OBJECT", friendly);
 }
 
 //Set save path and save

@@ -27,6 +27,7 @@ import {
   tsxDebug,
 } from './theLoggers.js';
 
+// SERVER STATE VARIABLE FOUND BY NAME
 export const tsx_ServerStates = {
   tsx_version: 'tsx_version',
   tsx_date: 'tsx_date',
@@ -68,6 +69,8 @@ export const tsx_ServerStates = {
   imagingSession: 'imagingSession', // use to report current imaging targets
   imagingSessionDither: 'imagingSessionDither',
   imagingBinning: 'imagingBinning',
+  defaultUseImagingCooler_enabled: 'defaultUseImagingCooler_enabled',
+  defaultCoolTemp: 'defaultCoolTemp',
 
   // Dithering related states
   defaultDithering: 'defaultDithering',
@@ -78,7 +81,6 @@ export const tsx_ServerStates = {
 
   defaultFilter: 'defaultFilter',
   defaultMinAlt: 'defaultMinAlt',
-  defaultCoolTemp: 'defaultCoolTemp',
   defaultFocusTempDiff: 'defaultFocusTempDiff',
   defaultFocusExposure: 'defaultFocusExposure',
 
@@ -165,6 +167,29 @@ export function getDefaultStateValue( param ) {
 export function saveDefaultStateValue( param, val ) {
 
   Meteor.call( 'updateServerState', param, val , function(error, result) {
+
+      if (error && error.error === "logged-out") {
+        // show a nice error message
+        Session.set("errorMessage", "Please fix.");
+      }
+  });//.bind(this));
+}
+
+// Should be using this version for all and not within the API
+export function updateTargetStateValue( id, param, val ) {
+
+  Meteor.call( 'updateTargetState', id, param, val , function(error, result) {
+
+      if (error && error.error === "logged-out") {
+        // show a nice error message
+        Session.set("errorMessage", "Please fix.");
+      }
+  });//.bind(this));
+}
+
+export function updateTargetSeriesStateValue( id, series, param, val ) {
+
+  Meteor.call( 'updateTargetSeriesState', id, series, param, val , function(error, result) {
 
       if (error && error.error === "logged-out") {
         // show a nice error message

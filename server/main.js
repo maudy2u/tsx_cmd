@@ -518,6 +518,30 @@ Meteor.methods({
      tsxInfo(' [Saved] ' +name+':'+value);
    },
 
+   updateTargetState( id, name, value ) {
+
+    TargetSessions.update( id, {
+       $set: {
+         [name]: value,
+       },
+    });
+
+     console.log(' [Saved] '+ name + '='+ value);
+   },
+
+   updateTargetSeriesState( id, sid, svalue ) {
+     TargetSessions.update( id, {
+       $set: {
+         series: {
+             _id: sid,
+             value: svalue,
+         }
+       },
+    });
+
+     tsxInfo(' [Saved] target:' +value);
+   },
+
    updateSeriesIdWith(
        id,
        name,

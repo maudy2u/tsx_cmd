@@ -38,6 +38,7 @@ export function addNewTargetSession() {
       targetFindName: '!New Target',
       targetImage: '',
       description: '',
+      friendlyName: '',
       enabledActive: false,
       isCalibrationFrames: false,
       series: {
