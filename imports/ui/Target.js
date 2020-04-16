@@ -340,6 +340,12 @@ class Target extends Component {
     }
 
     const { activeIndex } = this.state
+    var TARGET_NAME = '';
+    if( this.props.target.friendlyName != '' && typeof this.props.target.friendlyName !='undefined' ) {
+      TARGET_NAME = this.props.target.friendlyName;
+    } else {
+      TARGET_NAME = this.props.target.targetFindName;
+    }
 
     return (
       <Accordion styled fluid>
@@ -355,7 +361,7 @@ class Target extends Component {
             onChange={this.handleToggleEnabled.bind(this)}
             />
           <Header style={{color: 'black'}} as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, TOOL_ACTIVE)}>
-            {this.props.target.targetFindName} <Label><small>{this.props.target.description}</small></Label>
+            {TARGET_NAME} <Label><small>{this.props.target.description}</small></Label>
           </Header>
           {this.targetButtons(this.props.scheduler_running.value, TOOL_ACTIVE)}
         </Accordion.Title>
@@ -389,7 +395,7 @@ class Target extends Component {
             basic
             size='small'
             closeIcon>
-            <Modal.Header>Editing Target {this.props.target.targetFindName}</Modal.Header>
+            <Modal.Header>Editing Target {TARGET_NAME}</Modal.Header>
             <Modal.Content>
               <Modal.Description>
                 <TargetEditor key={this.props.target._id} target={this.props.target} />

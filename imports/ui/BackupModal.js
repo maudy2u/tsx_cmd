@@ -120,6 +120,7 @@ class BackupModal extends Component {
 
        uploadInstance.on('end', function (error, fileObj) {
          console.log('On end File Object: ', fileObj);
+         alert('File "' + fileObj.name + '" successfully uploaded');
        })
 
        uploadInstance.on('uploaded', function (error, fileObj) {
@@ -159,7 +160,6 @@ class BackupModal extends Component {
    if (this.state.uploading.length > 0) {
      return <div>
        {this.state.uploading.file.name}
-
        <div className="progress progress-bar-default">
          <div style={{width: this.state.progress + '%'}} aria-valuemax="100"
             aria-valuemin="0"

@@ -45,12 +45,17 @@ build_tsx_cmd () {
   folder=${base_dir}"tsx_cmd_"$1"_"${details}
   mkdir -p ${folder}
   echo " Building" ${folder}
-  ~/meteor/meteor build --architecture $1 --directory ${folder}
+  ${compiler} build --architecture $1 --directory ${folder}
   cd ${base_dir}
   tar -czf ${folder}.tar -C ${folder} .
   rm -rf ${folder}
   cd ${install_dir}
 }
+if [ "$(uname -p)" == "aarch64" ]; then
+  export compiler='~/meteor/meteor'
+else
+  export compiler='meteor'
+fi
 
 echo ""
 echo " *******************************"
@@ -62,7 +67,7 @@ if [ "$(uname -p)" == "aarch64" ]; then
   folder=${base_dir}"tsx_cmd_"${build_type}"_"${details}
   mkdir -p ${folder}
   echo " Building" ${folder}
-  ~/meteor/meteor build --directory ${folder}
+  ${compiler} build --directory ${folder}
   cd ${base_dir}
   tar -czf ${folder}.tar -C ${folder} .
   rm -rf ${folder}

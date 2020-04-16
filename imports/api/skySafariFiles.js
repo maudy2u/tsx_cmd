@@ -18,39 +18,35 @@ tsx cmd - A web page to send commands to TheSkyX server
 
 // Needs: meteor npm install --save simpl-schema
 
-import { Mongo } from 'meteor/mongo';
-import { Meteor } from 'meteor/meteor';
-import { Accounts } from 'meteor/accounts-base';
-import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug, logFileForClient, AppLogsDB } from './theLoggers.js';
 import { FilesCollection } from 'meteor/ostrio:files';
+import { tsxTrace, tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug, logFileForClient, AppLogsDB } from './theLoggers.js';
 // Used to store the filters currently available/active on TSX
 import { Random } from 'meteor/random';
-// import SimpleSchema from 'simpl-schema';
 
 // Used to store the sessions for a Target - the actual imaging
 // check here for extras: https://github.com/VeliovGroup/Meteor-Files/wiki/Constructor
-var folder = '';
+var sfolder = '';
 if( Meteor.settings.skySafari_files === '' || typeof Meteor.settings.skySafari_files === 'undefined' ) {
-  folder = Meteor.absolutePath + '/skySafari_files/';
+  sfolder = Meteor.absolutePath + '/skySafari_files/';
 }
 else {
-  folder = Meteor.settings.skySafari_files;
+  sfolder = Meteor.settings.skySafari_files;
 }
-export const skySafariFilesFolder = folder;
+export const skySafariFilesFolder = sfolder;
 export const SkySafariFiles = new FilesCollection({
   storagePath: skySafariFilesFolder,
   collectionName: 'skySafariFiles',
-  allowClientCode: true, // Required to let you remove uploaded file
-  onBeforeUpload(file) {
-    // Allow upload files under 10MB, and only in skyset formats
-    if (file.size <= 1048576 && /skyset/i.test(file.ext)) {
-      return true;
-    } else {
-      return 'Please upload SkySafari settings file, with size equal or less than 1MB';
-    }
-  }
+  // allowClientCode: true, // Required to let you remove uploaded file
+  // onBeforeUpload(file) {
+  //   // Allow upload files under 10MB, and only in skyset formats
+  //   if (file.size <= 1048576 && /skyset/i.test(file.ext)) {
+  //     return true;
+  //   } else {
+  //     return 'Please upload SkySafari settings file, with size equal or less than 1MB';
+  //   }
+  // }
 });
-export default SkySafariFiles; // To be imported in other files
+//export default SkySafariFiles; // To be imported in other files
 // *******************************
 
 
@@ -60,19 +56,23 @@ export function skysafariFraming( skysetFile ) {
   // ScopeFieldRotation=1.060000000000000e+02
   // DisplayCenterLon=2.024722758067027e+02
   // DisplayCenterLat=4.719440077746570e+01
-  var results = [
-      "ScopeFieldRotation=1.060000000000000e+02",
-      "DisplayCenterLon=2.024722758067027e+02",
-      "DisplayCenterLat=4.719440077746570e+01",
-    ];
+  // var results = [
+  //     "ScopeFieldRotation=1.060000000000000e+02",
+  //     "DisplayCenterLon=2.024722758067027e+02",
+  //     "DisplayCenterLat=4.719440077746570e+01",
+  //   ];
+    var fs = require('fs');
+    try {
+        var src = fs.readFileSync(skysetFile, 'utf8');
+    } catch(e) {
+        console.log('Error:', e.stack);
+    }
 
-  var src = Assets.getText(skysetFile);
   tsxInfo(' *** skysafari: ' + skysetFile );
-
-
   var OUT = {};
 
   // iterate and split for
+  var results = src.split('\n');
   for( var i=0; i<results.length;i++) {
     var token=results[i].trim();
     // RunJavaScriptOutput.writeLine(token);
@@ -132,44 +132,32 @@ export function convertORIENT2PA( orient ) {
 	}
 }
 
-
-if (Meteor.isClient) {
-  Meteor.subscribe('files.skySafari.all');
-}
-
 if (Meteor.isServer) {
-  // Meteor.publish('files.skySafari.all', () => {
-  //   return SkySafariFiles.collection.find({});
-  // });
+  import shelljs from 'shelljs';
+  // this is equivalent to the standard node require:
+  const Shelljs = require('shelljs');
+
+  try {
+    tsxInfo('   skyset',  skySafariFilesFolder );
+    let err = Shelljs.test( '-e', skySafariFilesFolder ); // -e tests for valid path, -d tests for directory
+    if( err != true ) {
+      tsxErr( ' skysafari folder file not found, creating: ' + skySafariFilesFolder );
+      let err = Shelljs.mkdir( '-p', skySafariFilesFolder).code;
+      tsxErr( err );
+      if ( err !== 0) {
+        tsxErr('Error: failed to create skysafari location: ' + err);
+        return;
+      }
+    }
+    else {
+      let err = Shelljs.test( '-d', skySafariFilesFolder ); // -e tests for valid path, -d tests for directory
+      if( err != true ) {
+        tsxErr( ' skysafari path is not a valid directory: ' + skySafariFilesFolder );
+      }
+    }
+  }
+  catch( e ) {
+    // If on mac do nothing...
+    tsxErr( ' skysafari mkdir exception: ' + e );
+  }
 }
-
-/*
-  _id
-  targetName
-  target_id
-  datetime
-  rotatorPosition
- */
-
-
-// *******************************
-// Get the filters from TheSkyX
-//SkySafariFiles.helpers({
-
-  // renderDropDownFilters: function() {
-  //   var filters = Filters.find().fetch();
-  //   var filterArray = [];
-  //   for (var i = 0; i < filters.length; i++) {
-  //     filterArray.push({
-  //       key: filters[i]._id,
-  //       text: filters[i].name,
-  //       value: filters[i].name });
-  //   }
-  //   return filterArray;
-  // },
-  // getFilterIndexFor: function(filterName) {
-  //   var filter = Filters.find({name: filterName}).fetch();
-  //   return filter.slot;
-  // },
-
-//});

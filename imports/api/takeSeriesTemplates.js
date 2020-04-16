@@ -53,6 +53,19 @@ export function addNewTakeSeriesTemplate() {
   return id;
 }
 
+export function getTakeSeriesTemplates(takeSeriesTemplates) {
+  var options = [];
+  var count =0;
+  takeSeriesTemplates.forEach((series) => {
+    //      { key: 0, text: 'Static LUM', value: 0 },
+    // options.push({key:series._id, text:series.name, value: { _id:series._id, text:series.name, value:series.name }});
+    options.push({key:series._id, text:series.name, value: series.name });
+    count++;
+    // console.log(`Found series._id: ${series._id}, name: ${series.name}`);
+  });
+  return options;
+}
+
 export function updateTakeSeriesTemplate( fid, name, value ) {
   var obj = TakeSeriesTemplates.findOne({_id:fid});
   if( typeof obj != 'undefined') {

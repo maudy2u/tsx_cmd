@@ -78,6 +78,7 @@ export function addNewTargetSession() {
       enableMeridianFlip: TheSkyXInfos.findOne({name: 'defaultMeridianFlip'}).value,
       // startTime: '',
       // stopTime: '',
+      skysafariFile_id: '',
 
     }
   );
@@ -136,6 +137,16 @@ createdAt: new Date(),
  */
 
 TargetSessions.helpers({
+
+  takeSeries: function() {
+    var taken = this.totalImagesTaken();
+    var planned = this.totalImagesPlanned();
+
+    var series = this.series;
+
+    return taken/planned;
+
+  },
 
   totalImagesPlanned: function() {
     var totalPlannedImages = 0;

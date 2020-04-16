@@ -25,6 +25,9 @@ import {
   convertLat2Dec,
   convertORIENT2PA,
 } from '../imports/api/skySafariFiles.js';
+import {
+  TargetSessions,
+} from '../imports/api/targetSessions.js';
 
 import {
   tsxInfo,
@@ -80,44 +83,42 @@ else {
 Meteor.startup(function () {
 
   // *******************************
-  // check for files to load
+  // check for files to cleanup
   // *******************************
   // SkySafariFiles.remove({});
   try {
     var files = Shelljs.ls( skySafariFilesFolder );
     if ( files.code !== 0) {
-      tsxDebug('There are no setting.skeysets: ' + files.code );
+      tsxDebug('There are no setting.skysets: ' + files.code );
       return;
     }
-    // get all files in the SkySafariFiles and confirm exists
+    // if file in datbase no longer exists remove from database
     tsxTrace( ' Integrity check of file store');
     let fileCursors = SkySafariFiles.find({}, {sort: {name: 1}}).fetch();
     let display = fileCursors.map((aFile, key) => {
       let err = Shelljs.test( '-e', aFile.path );
       if( err != true ) {
-        tsxDebug( ' Dropping file not found: ' + aFile.path );
+        tsxDebug( ' Dropping entry not found: ' + aFile.path );
         SkySafariFiles.remove({ _id: aFile._id });
       }
     })
-    // confirm all files in the folder and in the SkySafariFiles
+    // Any files in the folder not in database needs to be removedin the SkySafariFiles
     tsxTrace( ' Resync file store');
     fileCursors = SkySafariFiles.find({}, {sort: {name: 1}}).fetch();
     for( var s = 0; s < files.length; s ++ ) {
       var found = false;
+      console.log( files[s] );
       let display = fileCursors.map((aFile, key) => {
         let pFile = SkySafariFiles.findOne({_id: aFile._id}).name;  //The "view/download" link
-        if( pFile == files[s] || pFile == 'undefined' ) {
+        if( (pFile._id + '.' + pFile.extension) == files[s] || pFile == 'undefined' ) {
           found = true;
           return;
         }
       })
       // if not found then add it in
       if( found == false ) {
-        tsxDebug( ' resync ' + backupFolder +'' + files[s] );
-        SkySafariFiles.addFile( backupFolder +'' + files[s], {
-          name: files[s],
-          meta: {}
-        });
+        tsxDebug( ' removed ' + skySafariFilesFolder +'' + files[s] );
+        let err = Shelljs.rm( skySafariFilesFolder+'/'+files[s] ).code;
       }
     }
   }
@@ -147,13 +148,43 @@ function fileNameDate( today ) {
 
 // server Ref: https://github.com/VeliovGroup/Meteor-Files/wiki#api
 // client ref: https://github.com/VeliovGroup/Meteor-Files/blob/master/docs/react-example.md
+Meteor.publish('files.skysafari.all', function () {
+  return SkySafariFiles.find().cursor;
+});
+
 
 
 Meteor.methods({
 
+  // **************************************************************
+  AssignSkySafariToTarget( tid, sid ) {
+    var skyfile = SkySafariFiles.findOne({_id: sid });
+    var skyset = skysafariFraming(skyfile.path);
+    var t = TargetSessions.findOne({_id: tid });
+    console.log(
+        ' ###'
+      + ' path=' + skyfile.path
+      + ', friendly=' + skyset.name
+      + ', tid=' + tid
+      + ', sid=' + sid
+      + ', tName=' + t.targetFindName
+    );
+    TargetSessions.upsert( {_id: tid }, {
+      $set:{
+        targetFindName: skyset.ra + ', ' + skyset.dec,
+        friendlyName: skyfile.name,
+        setSkysetFile_id: sid,
+        angle: skyset.pa,
+      }
+    });
+
+    console.log( ' *** ' + skyfile.name + ', '+skyset.ra + ', ' + skyset.dec + ', ' + skyset.pa );
+    return skyset;
+  },
+
   RemoveSkySafariFile( fid ) {
     SkySafariFiles.remove({_id: fid});
-    UpdateStatus( ' Backup removed file. ');
+    UpdateStatus( ' SkySafari removed file. ');
   },
 
   RenameSkySafariFile( fid, fName ) {
@@ -201,105 +232,83 @@ Meteor.methods({
       // If on mac do nothing...
       UpdateStatus( ' Restore exception: ' + e );
     }
-
-    try {
-      // *******************************
-      // Is there a different development port for mongod?
-      // mongorestore --drop -d tsx_cmd "${install_dir}/import/export/tsx_cmd"
-
-      let dump = 'mongorestore --drop --port=' + mongo_port + ' -d '+ tsx_cmd_db + ' ' + restoreLocation;
-      tsxLog( ' Executing: ', dump );
-      if (Shelljs.exec( dump ).code !== 0) {
-        UpdateStatus('Error: Failed to run mongorestore to restore DB backup');
-        // Shelljs.exit(1); // do not exit. kills server
-        return;
-      }
-
-      UpdateStatus( ' Database restored: ' + aFile.name);
-    }
-    catch( e ) {
-      UpdateStatus( ' Restore FAILED: ' + e );
-    }
-    finally {
-      tsx_SetServerState( 'tool_active', false );
-    }
   },
-
-  GetBackupOfSkySafari() {
-    tsx_SetServerState( 'tool_active', true );
-
-    // run the shell Script
-    // Run external tool synchronously
-    // mongodump --uri=mongodb://127.0.0.1:3001/meteor -o ./export --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB
-
-    let backupLocation =  backupFolder + 'tsx_cmd_db_export';
-
-    try {
-      UpdateStatus( ' Backup starting');
-      tsxLog( ' Using: ', backupLocation );
-      let err = Shelljs.mkdir( '-p', backupLocation).code;
-//      err = shell.mkdir( '-p', '/tmp/tsx_cmd_db_export').code;
-      tsxLog( err );
-      if ( err !== 0) {
-        UpdateStatus('Error: failed to create backup location: ' + err);
-        return;
-      }
-    }
-    catch( e ) {
-      // If on mac do nothing...
-      UpdateStatus( ' Backup mkdir exception: ' + e );
-    }
-    try {
-
-      // *******************************
-      // Is there a different development port for mongod?
-      let dump = 'mongodump --port ' + mongo_port + ' --db='+ tsx_cmd_db +' -o ' + backupLocation + ' --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB --forceTableScan'
-      tsxLog( ' Executing: ', dump );
-      if (Shelljs.exec( dump ).code !== 0) {
-        UpdateStatus('Error: Failed to run mongodump to create DB backup');
-        // Shelljs.exit(1); // do not exit. kills server
-        return;
-      }
-
-      // *******************************
-      // Is there a different development port for mongod?
-      // tsxLog( ' Executing: ', 'mongodump -d tsx_cmd -o ' + backupLocation + ' --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB' );
-      // if (Shelljs.exec('mongodump -d tsx_cmd -o ' + backupLocation + ' --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB').code !== 0) {
-      //   UpdateStatus('Error: Failed to run mongodump to create DB backup');
-      //   // Shelljs.exit(1); // do not exit. kills server
-      //   return;
-      // }
-
-      let tod = fileNameDate( new Date() );
-      let fName = 'db_export_'+tod+'.tar'
-
-      tsxLog( ' Executing: ', 'tar -C '+ backupLocation +' -cf '+ backupFolder + fName + ' ./' );
-      // tar -C /Users/stephen/Documents/code/tsx_cmd/backup/tsx_cmd_db_export/ -cf /Users/stephen/Documents/code/tsx_cmd/backup/export_db.tar .
-      if (Shelljs.exec('tar -C '+ backupLocation + ' -cf '+backupFolder+ fName + ' ./' ).code !== 0) {
-        UpdateStatus('Error: failed to tar the backup for uploading.');
-        // Shelljs.exit(1); // do not exit. kills server
-        return;
-      }
-
-      tsxLog( ' Storing backup: ', backupFolder + fName )
-      SkySafariFiles.addFile( backupFolder + fName, {
-        name: fName,
-        meta: {}
-      });
-      if (Shelljs.exec('rm -rf '+ backupLocation ).code !== 0) {
-        UpdateStatus('Error: failed removing backup location.');
-        // Shelljs.exit(1); // do not exit. kills server
-        return;
-      }
-
-      UpdateStatus( ' Backup ready.');
-    }
-    catch( e ) {
-      UpdateStatus( ' Backup FAILED: ' + e );
-    }
-    finally {
-      tsx_SetServerState( 'tool_active', false );
-    }
-  },
-
+//
+//   GetBackupOfSkySafari() {
+//     tsx_SetServerState( 'tool_active', true );
+//
+//     // run the shell Script
+//     // Run external tool synchronously
+//     // mongodump --uri=mongodb://127.0.0.1:3001/meteor -o ./export --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB
+//
+//     let backupLocation =  skySafariFilesFolder + 'tsx_cmd_db_export';
+//
+//     try {
+//       UpdateStatus( ' Backup starting');
+//       tsxLog( ' Using: ', backupLocation );
+//       let err = Shelljs.mkdir( '-p', backupLocation).code;
+// //      err = shell.mkdir( '-p', '/tmp/tsx_cmd_db_export').code;
+//       tsxLog( err );
+//       if ( err !== 0) {
+//         UpdateStatus('Error: failed to create backup location: ' + err);
+//         return;
+//       }
+//     }
+//     catch( e ) {
+//       // If on mac do nothing...
+//       UpdateStatus( ' Backup mkdir exception: ' + e );
+//     }
+//     try {
+//
+//       // *******************************
+//       // Is there a different development port for mongod?
+//       let dump = 'mongodump --port ' + mongo_port + ' --db='+ tsx_cmd_db +' -o ' + backupLocation + ' --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB --forceTableScan'
+//       tsxLog( ' Executing: ', dump );
+//       if (Shelljs.exec( dump ).code !== 0) {
+//         UpdateStatus('Error: Failed to run mongodump to create DB backup');
+//         // Shelljs.exit(1); // do not exit. kills server
+//         return;
+//       }
+//
+//       // *******************************
+//       // Is there a different development port for mongod?
+//       // tsxLog( ' Executing: ', 'mongodump -d tsx_cmd -o ' + backupLocation + ' --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB' );
+//       // if (Shelljs.exec('mongodump -d tsx_cmd -o ' + backupLocation + ' --excludeCollectionsWithPrefix=MeteorToys --excludeCollectionsWithPrefix=appLogsDB').code !== 0) {
+//       //   UpdateStatus('Error: Failed to run mongodump to create DB backup');
+//       //   // Shelljs.exit(1); // do not exit. kills server
+//       //   return;
+//       // }
+//
+//       let tod = fileNameDate( new Date() );
+//       let fName = 'db_export_'+tod+'.tar'
+//
+//       tsxLog( ' Executing: ', 'tar -C '+ backupLocation +' -cf '+ skySafariFilesFolder + fName + ' ./' );
+//       // tar -C /Users/stephen/Documents/code/tsx_cmd/backup/tsx_cmd_db_export/ -cf /Users/stephen/Documents/code/tsx_cmd/backup/export_db.tar .
+//       if (Shelljs.exec('tar -C '+ backupLocation + ' -cf '+skySafariFilesFolder+ fName + ' ./' ).code !== 0) {
+//         UpdateStatus('Error: failed to tar the backup for uploading.');
+//         // Shelljs.exit(1); // do not exit. kills server
+//         return;
+//       }
+//
+//       tsxLog( ' Storing backup: ', skySafariFilesFolder + fName )
+//       SkySafariFiles.addFile( skySafariFilesFolder + fName, {
+//         name: fName,
+//         meta: {}
+//       });
+//       if (Shelljs.exec('rm -rf '+ backupLocation ).code !== 0) {
+//         UpdateStatus('Error: failed removing backup location.');
+//         // Shelljs.exit(1); // do not exit. kills server
+//         return;
+//       }
+//
+//       UpdateStatus( ' Backup ready.');
+//     }
+//     catch( e ) {
+//       UpdateStatus( ' Backup FAILED: ' + e );
+//     }
+//     finally {
+//       tsx_SetServerState( 'tool_active', false );
+//     }
+//   },
+//
 });

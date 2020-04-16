@@ -62,11 +62,11 @@ class TargetSessionMenu extends Component {
     initialState,
     open: false ,
     addModalOpen: false,
-    newTarget: {
-      _id:'',
-    },
-    targetList: '',
-    matchName: '',
+    // newTarget: {
+    //   _id:'',
+    // },
+    // targetList: '',
+//    matchName: '',
   }
 
   handleResultSelect = (e, { result }) => {
@@ -103,13 +103,6 @@ class TargetSessionMenu extends Component {
       }
       return source;
   }
-  // const searchData = data.map((obj)=>{
-  //   return {
-  //     name: obj.targetFindName,
-  //     description: obj.description,
-  //     id: obj._id,
-  //   }
-  // });
 
   handleAddModalOpen = () => this.setState({ addModalOpen: true })
   handleAddModalClose = () => this.setState({ addModalOpen: false })
@@ -122,10 +115,10 @@ class TargetSessionMenu extends Component {
 
   componentWillReceiveProps(nextProps) {
 
-    // used to force a reload.... must be better way
-    this.setState({
-      targetList: nextProps.targets,
-    });
+    // // used to force a reload.... must be better way
+    // this.setState({
+    //   targetList: nextProps.targets,
+    // });
   }
 
   playScheduler() {
@@ -173,15 +166,10 @@ class TargetSessionMenu extends Component {
       DISABLE = false;
       NOT_DISABLE = true;
     }
-/*
-<Button.Group basic size='mini' floated='right'>
-  <Button disabled={DISABLE} icon='recycle' />
-  <Button disabled={DISABLE} icon='settings' />
-</Button.Group>
- */
+
     return (
       <Button.Group>
-          <Button disabled={DISABLE} icon='plus' onClick={this.addNewTargets.bind(this)} />
+          <Button disabled={DISABLE} icon='plus' onClick={addNewTargetSession.bind(this)} />
           <Button disabled compact   />
           <Button disabled={DISABLE} onClick={this.refreshTargetReports.bind(this)} >Refresh</Button>
           <Button disabled compact  />
@@ -191,11 +179,11 @@ class TargetSessionMenu extends Component {
      )
   }
 
-  addNewTargets() {
-    // get the id for the new object
-    var out = addNewTargetSession();
-    // now popup the modal...
-  };
+  // addNewTargets() {
+  //   // get the id for the new object
+  //   var out = addNewTargetSession();
+  //   // now popup the modal...
+  // };
 
   render() {
     const { open } = this.state;

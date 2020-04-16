@@ -24,8 +24,13 @@ import { withTracker } from 'meteor/react-meteor-data';
 
 import { Filters } from '../api/filters.js';
 import { TargetSessions } from '../api/targetSessions.js';
-import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js';
+import {
+  TakeSeriesTemplates,
+  getTakeSeriesTemplates,
+} from '../api/takeSeriesTemplates.js';
 import { SkySafariFiles } from '../api/skySafariFiles.js';
+import { TheSkyXInfos } from '../api/theSkyXInfos.js';
+
 import TakeSeriesTemplateEditor from './TakeSeriesTemplateEditor.js';
 
 import {
@@ -74,55 +79,58 @@ class TargetEditor extends Component {
     super(props);
 
     this.state = {
-      name: '',               // name of the target
-      targetImage: '',        // image file name of the target - future
-      targetFindName: '',     // Name to look up in TheSkyX
-      description: '',        // SOmething to say
-      friendlyName: '',
-      enabledActive: false,   // whether the target is active or not
-      series: {},     // The take series to use
-      progress: [],
-      report_id: '',
-      ra: "",                 // Target RA
-      dec: "",                // Target DEC
-      alt: "",                // Target ALT
-      angle: "",
-      scale: '',
-      rotator_position: '',
-      coolingTemp: -19,
-      coolingTime: 5,
-      clsFilter: '',
-      focusFilter: '',
-      foccusSamples: '',
-      focusBin: '',
-      focusTarget: '',
-      focusExposure: 1,
-      guideExposure: '',
-      guideDelay: '',
-      startTime: '20:00',
-      stopTime: '6:00',
-      priority: 10,           // Priority: 1 is highest
-      tempChg: 0.7,
-      currentAlt:0,
-      minAlt: 29,
-      report: '',
-
       seriesTemplate: {},
       value: false,
       openModal: false,
       templates: [],
       checked: false,
-      template_id: '',
       filterDropDown:[],
       seriesDropDown:[],
-      testDate: '',
-
-      rotator_angle_westside: false,
-      rotator_180_flip: false,
-
       uploading: [],
       progress: 0,
-      inProgress: false
+      inProgress: false,
+      seriesDropDown: getTakeSeriesTemplates(this.props.seriesTemplates),
+
+      //   setSkysetFile_id: '',
+      seriesTemplate: this.props.target.series.value,
+
+      name: this.props.target.name,
+      targetFindName: this.props.target.targetFindName,
+      targetImage: this.props.target.targetImage,
+      description: this.props.target.description,
+      friendlyName: this.props.target.friendlyName,
+      enabledActive: this.props.target.enabledActive,
+      series: {
+        _id: this.props.target.series._id,
+        value: this.props.target.series.text,
+      },
+      progress: [
+  //            {_id: seriesId, taken:0},
+      ],
+
+      report_d: this.props.target.report_id,
+      ra: this.props.target.ra,
+      dec: this.props.target.dec,
+      angle: this.props.target.angle,
+      rotator_position: this.props.target.rotator_position,
+      scale: this.props.target.scale,
+      coolingTemp: Number(this.props.target.coolingTemp),
+      clsFilter: this.props.target.clsFilter,
+      focusFilter: this.props.target.focusFilter,
+      foccusSamples: this.props.target.foccusSamples,
+      focusBin: this.props.target.focusBin,
+      focusTarget: this.props.target.focusTarget,
+      focusExposure: this.props.target.focusExposure,
+      guideExposure: Number(this.props.target.guideExposure),
+      guideDelay: Number(this.props.target.guideDelay),
+      startTime: this.props.target.startTime,
+      stopTime: this.props.target.stopTime,
+      priority: Number(this.props.target.priority),
+      tempChg: this.props.target.tempChg,
+      currentAlt: Number(this.props.target.currentAlt),
+      minAlt: Number(this.props.target.minAlt),
+      report: '',
+      setSkysetFile_id: this.props.target.setSkysetFile_id,
     };
 
     this.uploadIt = this.uploadIt.bind(this);
@@ -142,7 +150,7 @@ class TargetEditor extends Component {
 
     if (e.currentTarget.files && e.currentTarget.files[0]) {
      // We upload only one file, in case
-     // there was multiple files selected
+     // there was multiple sFiles selected
      var file = e.currentTarget.files[0];
 
      if (file) {
@@ -166,23 +174,26 @@ class TargetEditor extends Component {
        uploadInstance.on('start', function () {
          console.log('Starting');
        })
-
        uploadInstance.on('end', function (error, fileObj) {
          console.log('On end File Object: ', fileObj);
-       })
+         alert('File "' + fileObj.name + '" successfully uploaded');
+         self.forceUpdate();
+       });
 
        uploadInstance.on('uploaded', function (error, fileObj) {
          console.log('uploaded: ', fileObj);
 
          // Remove the filename from the upload box
-         self.refs['fileinput'].value = '';
+         // this line cause an exception... why...
+         //self.refs['sFileinput'].value = '';
 
          // Reset our state for the next file
          self.setState({
            uploading: [],
            progress: 0,
-           inProgress: false
+           inProgress: false,
          });
+         self.getSkySafariSkySet( self.props.target._id, fileObj._id )
        })
 
        uploadInstance.on('error', function (error, fileObj) {
@@ -206,9 +217,9 @@ class TargetEditor extends Component {
    console.log('**********************************', this.state.uploading);
 
    if (this.state.uploading.length > 0) {
-     return <div>
+     return
+     <div>
        {this.state.uploading.file.name}
-
        <div className="progress progress-bar-default">
          <div style={{width: this.state.progress + '%'}} aria-valuemax="100"
             aria-valuemin="0"
@@ -222,14 +233,14 @@ class TargetEditor extends Component {
    }
   }
 
+  //console.log("Rendering FileUpload",this.props.sDocsReadyYet);
   displayFiles() {
-    //console.log("Rendering FileUpload",this.props.docsReadyYet);
-    if (this.props.files && this.props.docsReadyYet) {
+    if (this.props.sFiles && this.props.sDocsReadyYet) {
 
-      let fileCursors = this.props.files;
+      let fileCursors = this.props.sFiles;
 
       // Run through each file that the user has stored
-      // (make sure the subscription only sends files owned by this user)
+      // (make sure the subscription only sends sFiles owned by this user)
       let display = fileCursors.map((aFile, key) => {
 
         let link = SkySafariFiles.findOne({_id: aFile._id}).link('version');  // 'version' is needed in the case the file is renamed.
@@ -327,6 +338,7 @@ class TargetEditor extends Component {
 
     updateTargetStateValue( this.props.target._id, 'minAlt', value.value );
   };
+
   onChangeChecked() {
     this.setState({enabledActive: value.value })
     // what is needed for the "dropdown values"
@@ -335,91 +347,49 @@ class TargetEditor extends Component {
     updateTargetStateValue( this.props.target._id, 'enabledActive', !this.state.enabledActive );
   }
 
-  componentWillMount() {
-    // NEED TO UPDATE THE NAME GIVEN TO THE SERIES...
-    // var series = this.props.target.series;
-    // if( series != 'undefined') {
-    //   var update = TakeSeriesTemplates.findOne({_id: series._id});
-    //
-    //   var item = update.series;
-    //   for (var i = 0; i < item.length; i++) {
-    //     var a = item[i];
-    //     var image = Seriess.findOne({_id:item[i].id}); //.fetch();
-    //     totalPlannedImages += image.repeat;
-    //   }
-    //
-    //   series.text = update.name;
-    //   this.props.target.series = series;
-    // }
+  componentDidUpdate(prevProps) {
+    // Typical usage (don't forget to compare props):
+    if (this.props.target !== prevProps.target) {
+      this.setState({
+        name: this.props.target.name,
+        targetFindName: this.props.target.targetFindName,
+        targetImage: this.props.target.targetImage,
+        description: this.props.target.description,
+        friendlyName: this.props.target.friendlyName,
+        enabledActive: this.props.target.enabledActive,
+        series: {
+          _id: this.props.target.series._id,
+          value: this.props.target.series.text,
+        },
+        progress: [
+    //            {_id: seriesId, taken:0},
+        ],
 
-    // // do not modify the state directly
-    this.setState({
-
-      seriesTemplate: this.props.target.series.value,
-      seriesDropDown: this.getTakeSeriesTemplates(),
-      value: false,
-      openModal: false,
-
-
-      name: this.props.target.name,
-      targetFindName: this.props.target.targetFindName,
-      targetImage: this.props.target.targetImage,
-      description: this.props.target.description,
-      friendlyName: this.props.target.friendlyName,
-      enabledActive: this.props.target.enabledActive,
-      series: {
-        _id: this.props.target.series._id,
-        value: this.props.target.series.text,
-      },
-      progress: [
-//            {_id: seriesId, taken:0},
-      ],
-
-      // series: {
-      //   _id: orgTarget.series._id,
-      //   value: orgTarget.series.text,
-      // },
-
-      report_d: this.props.target.report_id,
-      ra: this.props.target.ra,
-      dec: this.props.target.dec,
-      angle: this.props.target.angle,
-      rotator_position: this.props.target.rotator_position,
-      scale: this.props.target.scale,
-      coolingTemp: Number(this.props.target.coolingTemp),
-      clsFilter: this.props.target.clsFilter,
-      focusFilter: this.props.target.focusFilter,
-      foccusSamples: this.props.target.foccusSamples,
-      focusBin: this.props.target.focusBin,
-      focusTarget: this.props.target.focusTarget,
-      focusExposure: this.props.target.focusExposure,
-      guideExposure: Number(this.props.target.guideExposure),
-      guideDelay: Number(this.props.target.guideDelay),
-      startTime: this.props.target.startTime,
-      stopTime: this.props.target.stopTime,
-      priority: Number(this.props.target.priority),
-      tempChg: this.props.target.tempChg,
-      currentAlt: Number(this.props.target.currentAlt),
-      minAlt: Number(this.props.target.minAlt),
-      report: '',
-
-    });
-  }
-
-  // Get all the current values from the TaeSeriesTemplate collections
-  getTakeSeriesTemplates() {
-    var options = [];
-    const topPosts = TakeSeriesTemplates.find({}, { sort: { name: -1 } });
-
-    var count =0;
-    this.props.takeSeriesTemplates1.forEach((series) => {
-      //      { key: 0, text: 'Static LUM', value: 0 },
-      // options.push({key:series._id, text:series.name, value: { _id:series._id, text:series.name, value:series.name }});
-      options.push({key:series._id, text:series.name, value: series.name });
-      count++;
-      // console.log(`Found series._id: ${series._id}, name: ${series.name}`);
-    });
-    return options;
+        report_d: this.props.target.report_id,
+        ra: this.props.target.ra,
+        dec: this.props.target.dec,
+        angle: this.props.target.angle,
+        rotator_position: this.props.target.rotator_position,
+        scale: this.props.target.scale,
+        coolingTemp: Number(this.props.target.coolingTemp),
+        clsFilter: this.props.target.clsFilter,
+        focusFilter: this.props.target.focusFilter,
+        foccusSamples: this.props.target.foccusSamples,
+        focusBin: this.props.target.focusBin,
+        focusTarget: this.props.target.focusTarget,
+        focusExposure: this.props.target.focusExposure,
+        guideExposure: Number(this.props.target.guideExposure),
+        guideDelay: Number(this.props.target.guideDelay),
+        startTime: this.props.target.startTime,
+        stopTime: this.props.target.stopTime,
+        priority: Number(this.props.target.priority),
+        tempChg: this.props.target.tempChg,
+        currentAlt: Number(this.props.target.currentAlt),
+        minAlt: Number(this.props.target.minAlt),
+        report: '',
+        setSkysetFile_id: this.props.target.setSkysetFile_id,
+      })
+    }
   }
 
   getTargetRaDec() {
@@ -460,6 +430,15 @@ class TargetEditor extends Component {
     }.bind(this));
   }
 
+  getSkySafariSkySet( tid, sid ) {
+    console.log('getSkySafariSkySet: ' + tid +', '+ sid );
+    Meteor.call( 'AssignSkySafariToTarget', tid, sid, function ( error, skyset ) {
+
+      console.log( ' *** skyset: ' +skyset.ra + ', ' + skyset.dec + ', ' + skyset.pa );
+
+    }.bind(this));
+  }
+
   // *******************************
   render() {
     // *******************************
@@ -482,7 +461,7 @@ class TargetEditor extends Component {
       FILTERS = [];
     }
     var TARGETPRIORITY = this.state.priority;
-    var takeSeries = this.getTakeSeriesTemplates();
+    var takeSeries = getTakeSeriesTemplates(this.props.seriesTemplates);
 
     // *******************************
     // var for ra and DATEPICKER
@@ -492,6 +471,7 @@ class TargetEditor extends Component {
     var targetAngle = `${this.state.angle}`;
     var targetDesc = `${this.state.description}`;
     var friendlyName = `${this.state.friendlyName}`
+    var targetFindName = `${this.state.targetFindName}`
     var focFilter= `${this.state.focusFilter}`;
     var focTemp= `${this.state.tempChg}`;
     var focExp = `${this.state.focusExposure}`
@@ -531,17 +511,20 @@ class TargetEditor extends Component {
               <small>     e.g. M31 or, 11h 33m 48s, 55d 57m 18s</small>
               <Form.Group>
               </Form.Group>
-              <Form.Group>
+              <Form.Group inline>
                 <Form.Field control={Input}
                   label='Description'
                   name='description'
                   placeholder='Describe the session'
                   value={this.state.description}
                   onChange={this.handleChange}/>
-              </Form.Group>
+                  <div>
                 <Button onClick={this.getTSXRaDec.bind(this)}>Get</Button>
                 <Button onClick={this.getTargetRaDec.bind(this)}>Find</Button>
-                <br/>
+                  </div>
+              </Form.Group>
+              <Form.Group >
+                {/*<br/>*/}
                 <Statistic size='mini'>
                   <Statistic.Label>RA</Statistic.Label>
                   <Statistic.Value>{Number(this.state.ra).toFixed(4)}</Statistic.Value>
@@ -554,6 +537,7 @@ class TargetEditor extends Component {
                   <Statistic.Label>Alt</Statistic.Label>
                   <Statistic.Value>{Number(this.state.alt).toFixed(4)}</Statistic.Value>
                 </Statistic>
+              </Form.Group>
                 {/*
                   <Form.Group>
                   </Form.Group>
@@ -563,9 +547,11 @@ class TargetEditor extends Component {
                 <Label>HA <Label.Detail>{Number(this.state.targetHA).toFixed(4)}</Label.Detail></Label>
                 <Label>Transit <Label.Detail>{Number(this.state.targetTransit).toFixed(4)}</Label.Detail></Label> */}
               <p>Upload SkySafari Settings:</p>
-              <input type="file" id="fileinput" disabled={this.state.inProgress} ref="fileinput"
+              <input type="file" id="sFileinput" disabled={this.state.inProgress} ref="sFileinput"
                 onChange={this.uploadIt}/>
-              {this.showUploads()}
+              {
+                this.showUploads()
+              }
               <Form.Group>
                 <Form.Field control={Dropdown}
                   button
@@ -770,23 +756,6 @@ class TargetEditor extends Component {
                   onChange={this.handleChange}
                 />
               </Form.Group>
-              <Segment>
-              {/*
-                <h4 className="ui header">Focus Temperature Delta: {this.state.tempChg}</h4>
-                <Form.Input
-                  label='Delta in temp to focus'
-                  name='tempChg'
-                  placeholder='e.g. 0.7'
-                  value={this.state.tempChg}
-                  onChange={this.handleChange}
-                  validations={{
-                    matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-                  }}
-                  validationError="Must be a positive number, e.g 1, .7, 1.1"
-                  errorLabel={ ERRORLABEL }
-                />
-                */}
-              </Segment>
       </Tab.Pane> },
 //
 // THis is the imaging constraints... currently only the temp setting
@@ -822,25 +791,32 @@ class TargetEditor extends Component {
       //   </Segment>
       // </Tab.Pane> },
     ]
+
 // *******************************
 // THIS IS THE ACTUAL RENDERING...
 // *******************************
-//        <Button  icon='save' onClick={this.saveEntry.bind(this)} />
-
     return (
       <Segment secondary>
         <Form>
           <Tab menu={{ pointing: true }} renderActiveOnly={true} panes={panes} />
         </Form>
+        {
+          this.displayFiles()
+        }
     </Segment>
     )
   }
 }
 
 export default withTracker(() => {
-    return {
+  const sFilesHandle = Meteor.subscribe('files.skysafari.all');
+  const sDocsReadyYet = sFilesHandle.ready();
+  const sFiles = SkySafariFiles.find({}, {sort: {name: 1}}).fetch();
+  return {
+      sDocsReadyYet,
+      sFiles,
       filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
-      targets1: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
-      takeSeriesTemplates1: TakeSeriesTemplates.find({ isCalibrationFrames: false }, { sort: { name: 1 } }).fetch(),
+//      targets1: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
+      seriesTemplates: TakeSeriesTemplates.find({ isCalibrationFrames: false }, { sort: { name: 1 } }).fetch(),
   };
 })(TargetEditor);
