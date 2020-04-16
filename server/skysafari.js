@@ -89,7 +89,7 @@ Meteor.startup(function () {
   try {
     var files = Shelljs.ls( skySafariFilesFolder );
     if ( files.code !== 0) {
-      tsxDebug('There are no setting.skysets: ' + files.code );
+      tsxTrace('There are no setting.skysets: ' + files.code );
       return;
     }
     // if file in datbase no longer exists remove from database
@@ -107,10 +107,10 @@ Meteor.startup(function () {
     fileCursors = SkySafariFiles.find({}, {sort: {name: 1}}).fetch();
     for( var s = 0; s < files.length; s ++ ) {
       var found = false;
-      console.log( files[s] );
       let display = fileCursors.map((aFile, key) => {
-        let pFile = SkySafariFiles.findOne({_id: aFile._id}).name;  //The "view/download" link
-        if( (pFile._id + '.' + pFile.extension) == files[s] || pFile == 'undefined' ) {
+        tsxTrace( ' Match? ' + aFile._id + '.' + aFile.extension +'\n' + files[s] );
+
+        if( (aFile._id + '.' + aFile.extension) == files[s] || aFile == 'undefined' ) {
           found = true;
           return;
         }

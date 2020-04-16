@@ -132,6 +132,29 @@ export function convertORIENT2PA( orient ) {
 	}
 }
 
+export function getSkySafariSkySetName( sid ) {
+  var name = '';
+  if( sid !=''&& typeof sid != 'undefined') {
+    var sFile = SkySafariFiles.findOne({_id: sid});
+    if( sFile != '' && typeof sFile != 'undefined') {
+      name = sFile.name;
+    }
+  }
+  return name;
+}
+
+export function getSkySetsDropDown() {
+  var items = SkySafariFiles.find().fetch();
+  var dropDownArray = [];
+  for (var i = 0; i < items.length; i++) {
+    dropDownArray.push({
+      key: items[i]._id,
+      text: items[i].name,
+      value: items[i]._id });
+  }
+  return dropDownArray;
+};
+
 if (Meteor.isServer) {
   import shelljs from 'shelljs';
   // this is equivalent to the standard node require:

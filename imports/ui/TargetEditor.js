@@ -28,7 +28,11 @@ import {
   TakeSeriesTemplates,
   getTakeSeriesTemplates,
 } from '../api/takeSeriesTemplates.js';
-import { SkySafariFiles } from '../api/skySafariFiles.js';
+import {
+  SkySafariFiles,
+  getSkySetsDropDown,
+  getSkySafariSkySetName,
+} from '../api/skySafariFiles.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 
 import TakeSeriesTemplateEditor from './TakeSeriesTemplateEditor.js';
@@ -85,7 +89,6 @@ class TargetEditor extends Component {
       templates: [],
       checked: false,
       filterDropDown:[],
-      seriesDropDown:[],
       uploading: [],
       progress: 0,
       inProgress: false,
@@ -107,7 +110,7 @@ class TargetEditor extends Component {
       progress: [
   //            {_id: seriesId, taken:0},
       ],
-
+      series_id:this.props.target.series_id,
       report_d: this.props.target.report_id,
       ra: this.props.target.ra,
       dec: this.props.target.dec,
@@ -177,7 +180,7 @@ class TargetEditor extends Component {
        uploadInstance.on('end', function (error, fileObj) {
          console.log('On end File Object: ', fileObj);
          alert('File "' + fileObj.name + '" successfully uploaded');
-         self.forceUpdate();
+         // self.forceUpdate();
        });
 
        uploadInstance.on('uploaded', function (error, fileObj) {
@@ -231,6 +234,12 @@ class TargetEditor extends Component {
        </div>
      </div>
    }
+   else{
+     return
+     <div>
+      {getSkySafariSkySetName(this.props.target.skysafariFile_id)}
+     </div>
+   }
   }
 
   //console.log("Rendering FileUpload",this.props.sDocsReadyYet);
@@ -277,6 +286,11 @@ class TargetEditor extends Component {
     console.log( this.props.target._id + ', ' + name + ', ' + value )
     updateTargetStateValue( this.props.target._id, name, value );
   };
+
+  handleSkySetChange = (e, { name, value }) => {
+    this.setState({ [name]: value.trim() });
+  };
+
   //handleChange = (e, { name, value }) => this.setState({ [name]: value });
 
   handleToggle = (e, { name, value }) => {
@@ -294,6 +308,7 @@ class TargetEditor extends Component {
 
     updateTargetStateValue( this.props.target._id, 'startTime', value.formatted24 );
   };
+
   handleSeriesChange = (value) => {
     this.setState({startTime: value.formatted24 })
     // what is needed for the "dropdown values"
@@ -309,6 +324,7 @@ class TargetEditor extends Component {
 
     updateTargetSeriesStateValue( this.props.target._id, seriesId, this.state.seriesTemplate );
   };
+
   handleStopChange = (value) => {
     this.setState({stopTime: value.formatted24 })
     // what is needed for the "dropdown values"
@@ -361,6 +377,7 @@ class TargetEditor extends Component {
           _id: this.props.target.series._id,
           value: this.props.target.series.text,
         },
+        series_id:this.props.target.series_id,
         progress: [
     //            {_id: seriesId, taken:0},
         ],
@@ -390,6 +407,14 @@ class TargetEditor extends Component {
         setSkysetFile_id: this.props.target.setSkysetFile_id,
       })
     }
+  }
+
+  reloadSkyset() {
+    this.getSkySafariSkySet( this.props.target._id, this.state.setSkysetFile_id );
+  }
+  removeSkySet() {
+    this.setState({ setSkysetFile_id: '' });
+    updateTargetStateValue( this.props.target._id, 'setSkysetFile_id', '' );
   }
 
   getTargetRaDec() {
@@ -439,6 +464,24 @@ class TargetEditor extends Component {
     }.bind(this));
   }
 
+  skysetButtons() {
+/*
+<Button icon='reload' onClick={this.getTargetReport.bind(this)}/>
+<Button icon='download' onClick={this.clsTarget.bind(this)}/>
+<Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
+<input type="file" id="sFileinput" disabled={this.state.inProgress} ref="sFileinput"
+  onChange={this.uploadIt}/>
+*/
+    return(
+      <Button.Group basic size='mini' floated='right'>
+        <Button icon='repeat' onClick={this.reloadSkyset.bind(this)}/>
+        <Button icon='download' />
+        <Button icon='delete' onClick={this.removeSkySet.bind(this)}/>
+      </Button.Group>
+    )
+  }
+
+
   // *******************************
   render() {
     // *******************************
@@ -460,12 +503,13 @@ class TargetEditor extends Component {
     catch ( e ) {
       FILTERS = [];
     }
-    var TARGETPRIORITY = this.state.priority;
+    var TARGETPRIORITY = `${this.state.priority}`;
     var takeSeries = getTakeSeriesTemplates(this.props.seriesTemplates);
-
+    var SKYSETS = getSkySetsDropDown();
+    var SKYSET_NAME = getSkySafariSkySetName(this.state.skysafariFile_id);
     // *******************************
     // var for ra and DATEPICKER
-    var MINIMUMALT = this.state.minAlt;
+    var MINIMUMALT = `${this.state.minAlt}`;
     var targetRa = `${this.state.ra}`;
     var targetDec = `${this.state.dec}`;
     var targetAngle = `${this.state.angle}`;
@@ -545,13 +589,35 @@ class TargetEditor extends Component {
                 <Label>Az <Label.Detail>{this.state.targetAZ}</Label.Detail></Label>
                 <Label>Angle <Label.Detail>{Number(this.state.targetAngle).toFixed(4)}</Label.Detail></Label>
                 <Label>HA <Label.Detail>{Number(this.state.targetHA).toFixed(4)}</Label.Detail></Label>
-                <Label>Transit <Label.Detail>{Number(this.state.targetTransit).toFixed(4)}</Label.Detail></Label> */}
-              <p>Upload SkySafari Settings:</p>
-              <input type="file" id="sFileinput" disabled={this.state.inProgress} ref="sFileinput"
-                onChange={this.uploadIt}/>
-              {
-                this.showUploads()
-              }
+                <Label>Transit <Label.Detail>{Number(this.state.targetTransit).toFixed(4)}</Label.Detail></Label>
+
+                search
+                wrapSelection
+                scrolling
+
+
+                */}
+              <Form.Group>
+                <Form.Dropdown
+                  selectOnNavigation={false}
+                  button
+                  search
+                  wrapSelection
+                  scrolling
+                  label='SkySafari SkySets'
+                  name='setSkysetFile_id'
+                  options={SKYSETS}
+                  placeholder='No SkySafari Files'
+                  text={getSkySafariSkySetName(this.state.setSkysetFile_id)}
+                  onChange={this.handleSkySetChange}
+                  />
+                {this.skysetButtons()}
+              </Form.Group>
+              <Form.Group>
+                <input type="file" id="sFileinput" disabled={this.state.inProgress} ref="sFileinput"
+                  onChange={this.uploadIt}/>
+                {this.showUploads()}
+              </Form.Group>
               <Form.Group>
                 <Form.Field control={Dropdown}
                   button
@@ -584,16 +650,6 @@ class TargetEditor extends Component {
           </Segment>
           <Segment>
             <Form.Group>
-              {/*<Form.Input
-                    label='Rotator Position (optional)'
-                    name='rotator_position'
-                    placeholder='Position for rotator (i.e. used with flats)'
-                    value={this.state.rotator_position}
-                    validations="isNumeric"
-                    validationErrors={{ isNumeric: 'Must be a number' }}
-                    errorLabel={ ERRORLABEL }
-                    onChange={this.handleChange}/>
-              */}
               <Form.Input
                   label='OPTIONAL: Position Angle, north through east (per ImageLink)'
                   name='angle'
