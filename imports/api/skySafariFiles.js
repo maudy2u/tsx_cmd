@@ -150,7 +150,7 @@ export function getSkySetsDropDown() {
     dropDownArray.push({
       key: items[i]._id,
       text: items[i].name,
-      value: items[i]._id });
+      value: items[i].name });
   }
   return dropDownArray;
 };

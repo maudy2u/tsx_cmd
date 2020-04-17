@@ -102,6 +102,7 @@ class TargetEditor extends Component {
       targetImage: this.props.target.targetImage,
       description: this.props.target.description,
       friendlyName: this.props.target.friendlyName,
+      setSkysetFile_id: this.props.target.setSkysetFile_id,
       enabledActive: this.props.target.enabledActive,
       series: {
         _id: this.props.target.series._id,
@@ -133,7 +134,6 @@ class TargetEditor extends Component {
       currentAlt: Number(this.props.target.currentAlt),
       minAlt: Number(this.props.target.minAlt),
       report: '',
-      setSkysetFile_id: this.props.target.setSkysetFile_id,
     };
 
     this.uploadIt = this.uploadIt.bind(this);
@@ -287,7 +287,7 @@ class TargetEditor extends Component {
     updateTargetStateValue( this.props.target._id, name, value );
   };
 
-  handleSkySetChange = (e, { name, value }) => {
+  handleSkySetChange = (e, { name, value, key }) => {
     this.setState({ [name]: value.trim() });
   };
 
@@ -372,6 +372,7 @@ class TargetEditor extends Component {
         targetImage: this.props.target.targetImage,
         description: this.props.target.description,
         friendlyName: this.props.target.friendlyName,
+        setSkysetFile_id: this.props.target.setSkysetFile_id,
         enabledActive: this.props.target.enabledActive,
         series: {
           _id: this.props.target.series._id,
@@ -404,7 +405,6 @@ class TargetEditor extends Component {
         currentAlt: Number(this.props.target.currentAlt),
         minAlt: Number(this.props.target.minAlt),
         report: '',
-        setSkysetFile_id: this.props.target.setSkysetFile_id,
       })
     }
   }
@@ -415,6 +415,22 @@ class TargetEditor extends Component {
   removeSkySet() {
     this.setState({ setSkysetFile_id: '' });
     updateTargetStateValue( this.props.target._id, 'setSkysetFile_id', '' );
+  }
+
+  downloadSkySet() {
+    let link = SkySafariFiles.findOne({_id: this.state.skysafariFile_id}); //.link('version');  // 'version' is needed in the case the file is renamed.
+    link = link.path('version');
+    // get the TSXIP, and replace the "host with this value"
+    let tsxip = TheSkyXInfos.findOne({name: 'ip'});
+    if( typeof tsxip != 'undefined' || tsxip != '') {
+      var url = new URL(link);
+      url.hostname = tsxip.value;
+      link = url.href //'http://example.com:8080/one/two'
+    }
+    return (
+      <a href={link} className="btn btn-outline btn-primary btn-sm"
+         target="_blank">Download</a>
+    )
   }
 
   getTargetRaDec() {
@@ -475,7 +491,7 @@ class TargetEditor extends Component {
     return(
       <Button.Group basic size='mini' floated='right'>
         <Button icon='repeat' onClick={this.reloadSkyset.bind(this)}/>
-        <Button icon='download' />
+        <Button icon='download' onClick={this.downloadSkySet.bind(this)}/>
         <Button icon='delete' onClick={this.removeSkySet.bind(this)}/>
       </Button.Group>
     )
@@ -505,8 +521,6 @@ class TargetEditor extends Component {
     }
     var TARGETPRIORITY = `${this.state.priority}`;
     var takeSeries = getTakeSeriesTemplates(this.props.seriesTemplates);
-    var SKYSETS = getSkySetsDropDown();
-    var SKYSET_NAME = getSkySafariSkySetName(this.state.skysafariFile_id);
     // *******************************
     // var for ra and DATEPICKER
     var MINIMUMALT = `${this.state.minAlt}`;
@@ -514,12 +528,18 @@ class TargetEditor extends Component {
     var targetDec = `${this.state.dec}`;
     var targetAngle = `${this.state.angle}`;
     var targetDesc = `${this.state.description}`;
-    var friendlyName = `${this.state.friendlyName}`
-    var targetFindName = `${this.state.targetFindName}`
+    var friendlyName = `${this.state.friendlyName}`;
+    var setSkysetFile_id = `${this.props.target.setSkysetFile_id}`;
+    var targetFindName = `${this.state.targetFindName}`;
     var focFilter= `${this.state.focusFilter}`;
     var focTemp= `${this.state.tempChg}`;
-    var focExp = `${this.state.focusExposure}`
+    var focExp = `${this.state.focusExposure}`;
 
+
+    var SKYSETS = getSkySetsDropDown();
+    var SKYSET_NAME = getSkySafariSkySetName(setSkysetFile_id);
+    console.log( ' SKYSET_NAME='+SKYSET_NAME);
+    console.log( ' setSkysetFile_id='+setSkysetFile_id);
     // let styles = {
     //    heading: {
     //      fontColor: '#5FB343'
@@ -719,7 +739,7 @@ class TargetEditor extends Component {
             step={1}
             min={1}
             max={19}
-            value={TARGETPRIORITY}
+            value={Number(TARGETPRIORITY)}
             sliderSize={12}
             thumbSize={18}
             onChange={this.handlePriorityChange}
@@ -732,7 +752,7 @@ class TargetEditor extends Component {
             step={.5}
             min={0}
             max={90}
-            value={MINIMUMALT}
+            value={Number(MINIMUMALT)}
             sliderSize={12}
             thumbSize={18}
             onChange={this.handleMinAltChange}
@@ -857,7 +877,7 @@ class TargetEditor extends Component {
           <Tab menu={{ pointing: true }} renderActiveOnly={true} panes={panes} />
         </Form>
         {
-          this.displayFiles()
+          /*this.displayFiles()*/
         }
     </Segment>
     )
