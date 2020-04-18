@@ -862,9 +862,11 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
             </Button>
           </Modal.Actions>
         </Modal>
+        <center>
         <Label>tsx_cmd - Imaging with TheSkyX</Label>
         <Label>version <Label.Detail>{VERSION}</Label.Detail></Label>
         <Label>date <Label.Detail>{DATE}</Label.Detail></Label>
+        </center>
       </div>
     );
   }

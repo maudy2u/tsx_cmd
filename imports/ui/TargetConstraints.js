@@ -165,11 +165,20 @@ class TargetConstraints extends Component {
   }
 
   render() {
+    var TARGET_DESC = '';
+    if( this.props.targetPlan.friendlyName !='' && typeof this.props.targetPlan.friendlyName != 'undefined' ) {
+      TARGET_DESC = this.props.targetPlan.friendlyName
+      +': ' +  this.props.targetPlan.description
+      + ' ('+this.props.targetPlan.targetFindName+ ')';
+    }
+    else {
+      TARGET_DESC = this.props.targetPlan.targetFindName +': ' + this.props.targetPlan.description;
+    }
 
     return (
       <Table.Row>
         <Table.Cell width={3}>
-          {this.props.targetPlan.targetFindName +': ' + this.props.targetPlan.description}
+          {TARGET_DESC}
         </Table.Cell>
         <Table.Cell width={1}>
         <Form>
