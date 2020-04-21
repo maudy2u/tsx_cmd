@@ -254,6 +254,7 @@ class DefaultSettings extends Component {
           defaultUseImagingCooler_enabled: nextProps.tsxInfo.find(function(element) {
             return element.name == 'defaultUseImagingCooler_enabled';
           }).value,
+
           imagingBinning: nextProps.tsxInfo.find(function(element) {
             return element.name == 'imagingBinning';
           }).value,
@@ -363,6 +364,8 @@ class DefaultSettings extends Component {
           }).value,
 
         });
+        console.log(' test: '+this.state.defaultUseImagingCooler_enabled)
+
       }
   }
 
@@ -877,11 +880,10 @@ class DefaultSettings extends Component {
   renderImager() {
     const { activeIndex } = this.state;
 
-    let IMAGE_BINNINGS = '';
+    var IMAGE_BINNINGS = renderDropDownImagingBinnings();
     var NOT_DISABLE_TEMP  = false;
-    IMAGE_BINNINGS = renderDropDownImagingBinnings();
     try {
-      NOT_DISABLE_TEMP= new Number(this.state.defaultUseImagingCooler_enabled).boolean;
+      NOT_DISABLE_TEMP= !this.state.defaultUseImagingCooler_enabled;
     }
     catch ( e ) {
       IMAGE_BINNINGS = [];
@@ -927,7 +929,7 @@ class DefaultSettings extends Component {
           label='Use imaging cooler'
           name='defaultUseImagingCooler_enabled'
           toggle
-          checked={new Number(this.state.defaultUseImagingCooler_enabled).boolean}
+          checked={this.state.defaultUseImagingCooler_enabled}
           onClick={this.handleToggleAndSave.bind(this)}
           style={{ labelColor: 'black'  }}
         />
