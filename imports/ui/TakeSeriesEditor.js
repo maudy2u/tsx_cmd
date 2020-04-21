@@ -210,11 +210,11 @@ class TakeSeriesEditor extends Component {
     /*
     */
     return (
-      <Table.Row verticalAlign={'middle'}>
-        <Table.Cell width={1}>
+      <Table.Row verticalAlign='bottom'>
+        <Table.Cell width={1} verticalAlign='bottom'>
           <Button size='mini' icon='delete'  onClick={this.deleteEntry.bind(this)}/>
         </Table.Cell>
-        <Table.Cell width={1}  verticalAlign={'middle'}>
+        <Table.Cell width={1}  verticalAlign='bottom'>
           <Form>
             <Form.Input
               fluid
@@ -230,9 +230,10 @@ class TakeSeriesEditor extends Component {
               />
           </Form>
         </Table.Cell>
-        <Table.Cell width={2} verticalAlign={'middle'}>
+        <Table.Cell width={2} verticalAlign='middle'>
           <Form>
           <Form.Dropdown
+            fluid
               button
               search
               wrapSelection
@@ -245,9 +246,10 @@ class TakeSeriesEditor extends Component {
             />
             </Form>
         </Table.Cell>
-        <Table.Cell width={2} verticalAlign={'middle'}>
+        <Table.Cell width={2} verticalAlign='middle'>
           <Form>
           <Form.Dropdown
+              fluid
               button
               search
               wrapSelection
@@ -260,7 +262,7 @@ class TakeSeriesEditor extends Component {
             />
             </Form>
         </Table.Cell>
-        <Table.Cell width={1}  verticalAlign={'middle'}>
+        <Table.Cell width={1}  verticalAlign='middle'>
           <Form>
           <Form.Input
             fluid
@@ -276,7 +278,7 @@ class TakeSeriesEditor extends Component {
           />
           </Form>
         </Table.Cell>
-        <Table.Cell width={2}>
+        <Table.Cell width={2} verticalAlign='bottom'>
           <Button.Group>
             <Button size='mini' icon='arrow up'  onClick={this.moveUpEntry.bind(this)}/>
             <Button size='mini' icon='arrow down'  onClick={this.moveDownEntry.bind(this)}/>

@@ -41,6 +41,7 @@ if (Meteor.isServer) {
   //   }
   //   return param.value;
   // });
+
 }
 
 // used to help Helpers return the device, or init
@@ -96,38 +97,40 @@ function initParamWith(paramName, paramValue) {
 TheSkyXInfos.helpers({
 
   ip: function() {
-    return initParam('ip').value;
+    return TheSkyXInfos.findOne({name: 'ip'}).value;
   },
 
   port: function() {
-    return initParam('port').value;
+    return TheSkyXInfos.findOne({name: 'port'}).value;
   },
 
   defaultMinAltitude: function() {
-    return initParamWith('defautMinAlt', 30).value;
+    return TheSkyXInfos.findOne({name: 'defautMinAlt'}).value;
+//    return initParamWith('defautMinAlt', 30).value;
   },
 
   defaultFocusTempDiff: function() {
-    return initParamWith('defaultFocusTemp', 0.7).value;
+    return TheSkyXInfos.findOne({name: 'defaultFocusTemp'}).value;
+//    return initParamWith('defaultFocusTemp', 0.7).value;
   },
 
   mount: function() {
-    return initDevice('mount');
+    return TheSkyXInfos.findOne({name: 'mount'});
   },
   camera: function() {
-    return initDevice('camera');
+    return TheSkyXInfos.findOne({name: 'camera'});
   },
   efw: function() {
-    return initDevice('efw');
+    return TheSkyXInfos.findOne({name: 'efw'});
   },
   guider: function() {
-    return initDevice('guider');
+    return TheSkyXInfos.findOne({name: 'guider'});
   },
   rotator: function() {
-    return initDevice('rotator');
+    return TheSkyXInfos.findOne({name: 'rotator'});
   },
   focuser: function() {
-    return initDevice('focuser');
+    return TheSkyXInfos.findOne({name: 'focuser'});
   },
 
 });

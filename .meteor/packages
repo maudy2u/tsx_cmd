@@ -30,9 +30,9 @@ blaze-html-templates    # Compile .html files into Meteor Blaze views
 reactive-var            # Reactive variable for tracker
 jquery                  # Helpful client-side library
 tracker                 # Meteor's client-side reactive programming library
-
 ## INSERT A NEW IDEA...
 ultimatejs:tracker-react
+accounts-base           # called for by ostrio:files
 
 
 standard-minifier-js    # JS minifier run for production mode
@@ -52,18 +52,19 @@ ostrio:loggermongo
 akasha:shelljs
 session
 ostrio:logger
-#ostrio:files@1.6.6        # this version works with ARMV7
-#ostrio:files@=1.6.0       # this version works with aarch64
-#flemay:less-autoprefixer # add for aarch64, can work for armhf
-#standard-minifier-css    # add for aarch64, can work for armhf
-#flemay:less-autoprefixer # add for aarch64
-#juliancwirko:postcss      # remove for aarch64
-#less                      # remove for aarch64
-ostrio:files@1.6.6
-juliancwirko:postcss
-less
 
-#meteortoys:allthings@7.0.1 # NOT FOR USE ON ARMV7/8
+## ARM64
+#ostrio:files@=1.6.0       	# this version works with aarch64
+#flemay:less-autoprefixer 	# add for aarch64, can work for armhf
+#standard-minifier-css    	# add for aarch64, can work for armhf
+
+## ARMv7/MacOS/Windows/Linux
+ostrio:files@1.6.6			# remove if arch64
+juliancwirko:postcss      	# remove for aarch64
+less                      	# remove for aarch64
+
+
+meteortoys:allthings@7.0.1 # NOT FOR USE ON ARMV7/8
 # *******************************
 # job-collection needs to be the last in the package file
 vsivsi:job-collection

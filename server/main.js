@@ -233,7 +233,6 @@ Meteor.startup(() => {
   }
 
   // removing so can start up easier without error.
-  // var dbMinAlt = TheSkyXInfos.findOne().defaultMinAltitude();
   tsxLog('         TheSkyX IP',  dbIp );
   tsxLog('       TheSkyX port', dbPort );
 

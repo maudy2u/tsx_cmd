@@ -48,6 +48,11 @@ export function TargetPlans() {
   // tsx_method: object, altitude
 
   // Get the targets to report
+  // All add dirty flag for checking times...
+  //    start/end - is a date timeout
+  //    Alt is a change...
+  // so need the time target last checked
+
   let targets = TargetSessions.find({ isCalibrationFrames: false, enabledActive: true }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch();
   let tsx_data = MOONRISE + '##' + SUNRISE;
   // get all targets and their limiting altitudes

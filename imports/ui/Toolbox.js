@@ -222,23 +222,23 @@ class Toolbox extends Component {
 
     return (
       <div>
-        <Button.Group icon>
-             <Button disabled={DISABLE} onClick={this.rotateCameraFOV.bind(this)}>Set FOV</Button>
-       </Button.Group>
        <Form>
-       <Form.Input
-         name='tool_rotator_fov'
-         placeholder='eg. 19826, or 0.5'
-         value={ROTATOR_NUM}
-         onChange={this.handleChange}
-         validations={{
-           matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-         }}
-         validationError="Must be a positive number, e.g 0, 5.1, 1800, 3600"
-         errorLabel={ ERRORLABEL }
-        />
+        <Form.Group>
+           <Button disabled={DISABLE} onClick={this.rotateCameraFOV.bind(this)}>Set PA</Button>
+           <Form.Input
+             name='tool_rotator_fov'
+             placeholder='eg. 19826, or 0.5'
+             value={ROTATOR_NUM}
+             onChange={this.handleChange}
+             validations={{
+               matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+             }}
+             validationError="Must be a positive number, e.g 0, 5.1, 1800, 3600"
+             errorLabel={ ERRORLABEL }
+            />
+          </Form.Group>
         </Form>
-       <br/>Enter the FOV angle for ImageLink, e.g. 0 for PEC
+       <br/>Enter the <b>Position Angle</b> for ImageLink, e.g. 0 for PEC
       </div>
     )
   };
@@ -269,21 +269,21 @@ class Toolbox extends Component {
 
     return (
       <div>
-        <Button.Group icon>
-             <Button disabled={DISABLE} onClick={this.rotateCamera.bind(this)}>Set Position</Button>
-       </Button.Group>
        <Form>
-         <Form.Input
-           name= 'tool_rotator_num'
-           placeholder='eg. 19826, or 0.5'
-           value={ROTATOR_NUM}
-           onChange={this.handleChange}
-           validations={{
-             matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-           }}
-           validationError="Must be a positive number, e.g 0, 5.1, 1800, 3600"
-           errorLabel={ ERRORLABEL }
-          />
+        <Form.Group>
+          <Button disabled={DISABLE} onClick={this.rotateCamera.bind(this)}>Set Position</Button>
+           <Form.Input
+             name= 'tool_rotator_num'
+             placeholder='eg. 19826, or 0.5'
+             value={ROTATOR_NUM}
+             onChange={this.handleChange}
+             validations={{
+               matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+             }}
+             validationError="Must be a positive number, e.g 0, 5.1, 1800, 3600"
+             errorLabel={ ERRORLABEL }
+            />
+          </Form.Group>
         </Form>
        <br/>Enter the rotator position, e.g. 49.02
       </div>
@@ -416,26 +416,30 @@ class Toolbox extends Component {
       <Segment>
         <Button  disabled={DISABLE} onClick={this.runFocuser.bind(this)}>@Focus3</Button>
         <Form>
-          <Dropdown
-           name='tool_script_target'
-           placeholder='Run script..'
-           onChange={this.handleChange}
-          />
-          <Form.Input
-            name='tool_focustarget'
-            placeholder='Target name, Ra/Dec'
-            onChange={this.handleChange}
-          />
+          <Form.Group inline>
+            <Form.Dropdown
+             name='tool_script_target'
+             placeholder='Run script..'
+             onChange={this.handleChange}
+            />
+            <Form.Input
+              name='tool_focustarget'
+              placeholder='Target name, Ra/Dec'
+              onChange={this.handleChange}
+            />
+          </Form.Group>
         </Form>
       </Segment>
       <Segment>
-        <Button  disabled={DISABLE} onClick={this.runFocuser.bind(this)}>Run Script</Button>
         <Form>
-          <Form.Input
-            name='tool_focus_script'
-            placeholder='Filename of Script'
-            onChange={this.handleChange}
-          />
+          <Form.Group>
+            <Button  disabled={DISABLE} onClick={this.runFocuser.bind(this)}>Run Script</Button>
+            <Form.Input
+              name='tool_focus_script'
+              placeholder='Filename of Script'
+              onChange={this.handleChange}
+            />
+          </Form.Group>
         </Form>
       </Segment>
       </Segment.Group>
@@ -478,7 +482,7 @@ class Toolbox extends Component {
         )}
         </Segment>
         <Segment raised>
-        <Header>Rotator FOV/Position</Header>
+        <Header>Rotator Position Angle</Header>
         <Segment.Group horizontal>
         <Segment>
           {this.rotateFOV(
@@ -488,7 +492,7 @@ class Toolbox extends Component {
             , this.props.tool_active.value
           )}
           </Segment>
-          <Segment>
+{/*          <Segment>
             {this.rotateTool(
               this.props.scheduler_running.value
               , this.state.tool_rotator_type
@@ -496,7 +500,7 @@ class Toolbox extends Component {
               , this.props.tool_active.value
             )}
             </Segment>
-        </Segment.Group>
+*/}        </Segment.Group>
         </Segment>
         <Segment>
         Future ideas <br/>
