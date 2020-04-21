@@ -97,40 +97,78 @@ function initParamWith(paramName, paramValue) {
 TheSkyXInfos.helpers({
 
   ip: function() {
-    return TheSkyXInfos.findOne({name: 'ip'}).value;
+    var val =  TheSkyXInfos.findOne({name: 'ip'}).value;
+    if( typeof val == 'undefined') {
+      val = '';
+    }
+    return val;
   },
 
   port: function() {
-    return TheSkyXInfos.findOne({name: 'port'}).value;
+    var val =  TheSkyXInfos.findOne({name: 'port'}).value;
+    if( typeof val == 'undefined') {
+      val = '';
+    }
+    return val;
   },
 
   defaultMinAltitude: function() {
-    return TheSkyXInfos.findOne({name: 'defautMinAlt'}).value;
-//    return initParamWith('defautMinAlt', 30).value;
+    var val =  TheSkyXInfos.findOne({name: 'defautMinAlt'}).value;
+    if( typeof val == 'undefined') {
+      val = '';
+    }
+    return val;
   },
 
   defaultFocusTempDiff: function() {
-    return TheSkyXInfos.findOne({name: 'defaultFocusTemp'}).value;
-//    return initParamWith('defaultFocusTemp', 0.7).value;
+    var val =  TheSkyXInfos.findOne({name: 'defaultFocusTemp'}).value;
+    if( typeof val == 'undefined') {
+      val = '';
+    }
+    return val;
   },
 
   mount: function() {
-    return TheSkyXInfos.findOne({name: 'mount'});
+    var val =  TheSkyXInfos.findOne({name: 'mount'});
+    if( typeof val == 'undefined') {
+      val = '';
+    }
+    return val;
   },
   camera: function() {
-    return TheSkyXInfos.findOne({name: 'camera'});
+    var val =  TheSkyXInfos.findOne({name: 'camera'});
+    if( typeof val == 'undefined') {
+      val = '';
+    }
+    return val;
   },
   efw: function() {
-    return TheSkyXInfos.findOne({name: 'efw'});
+    var val =  TheSkyXInfos.findOne({name: 'efw'});
+    if( typeof val == 'undefined') {
+      val = '';
+    }
+    return val;
   },
   guider: function() {
-    return TheSkyXInfos.findOne({name: 'guider'});
+    var val =  TheSkyXInfos.findOne({name: 'guider'});
+    if( typeof val == 'undefined') {
+      val = '';
+    }
+    return val;
   },
   rotator: function() {
-    return TheSkyXInfos.findOne({name: 'rotator'});
+    var val =  TheSkyXInfos.findOne({name: 'rotator'});
+    if( typeof val == 'undefined') {
+      val = '';
+    }
+    return val;
   },
   focuser: function() {
-    return TheSkyXInfos.findOne({name: 'focuser'});
+    var val =  TheSkyXInfos.findOne({name: 'focuser'});
+    if( typeof val == 'undefined') {
+      val = '';
+    }
+    return val;
   },
 
 });
