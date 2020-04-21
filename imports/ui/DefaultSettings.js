@@ -927,7 +927,7 @@ class DefaultSettings extends Component {
           label='Use imaging cooler'
           name='defaultUseImagingCooler_enabled'
           toggle
-          checked={this.state.defaultUseImagingCooler_enabled}
+          checked={new Number(this.state.defaultUseImagingCooler_enabled).boolean}
           onClick={this.handleToggleAndSave.bind(this)}
           style={{ labelColor: 'black'  }}
         />
