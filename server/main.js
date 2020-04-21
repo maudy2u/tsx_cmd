@@ -141,6 +141,12 @@ function initServerStates() {
   // check the setting of the start/stop time initialization
   var startT, stopT;
   try {
+    TheSkyXInfos.findOne({name: 'defaultUseImagingCooler_enabled'}).value;
+  }
+  catch(e) {
+    tsx_SetServerState('defaultUseImagingCooler_enabled', false);
+  }
+  try {
     minDefAlt = TheSkyXInfos.findOne({name: 'defaultMinAlt'}).value;
   }
   catch(e) {
