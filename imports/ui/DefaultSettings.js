@@ -879,9 +879,9 @@ class DefaultSettings extends Component {
 
     let IMAGE_BINNINGS = '';
     var NOT_DISABLE_TEMP  = false;
+    IMAGE_BINNINGS = renderDropDownImagingBinnings();
     try {
-      IMAGE_BINNINGS = renderDropDownImagingBinnings();
-      NOT_DISABLE_TEMP= !this.state.defaultUseImagingCooler_enabled;
+      NOT_DISABLE_TEMP= new Number(this.state.defaultUseImagingCooler_enabled).boolean;
     }
     catch ( e ) {
       IMAGE_BINNINGS = [];
