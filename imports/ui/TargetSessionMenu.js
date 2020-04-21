@@ -176,7 +176,6 @@ class TargetSessionMenu extends Component {
       DISABLE = false;
       NOT_DISABLE = true;
     }
-
     return (
       <Button.Group>
           <Button disabled={DISABLE} icon='plus' onClick={addNewTargetSession.bind(this)} />
@@ -202,6 +201,8 @@ class TargetSessionMenu extends Component {
     */
     var RUNNING = '';
     var ACTIVE = false;
+    var DISABLE = true;
+    var NOT_DISABLE = false;
     try {
       RUNNING = this.props.scheduler_running.value;
       ACTIVE = this.props.tool_active.value;
@@ -209,6 +210,11 @@ class TargetSessionMenu extends Component {
       RUNNING = '';
       ACTIVE=false;
     }
+    if( RUNNING == 'Stop'  && ACTIVE == false ){
+      DISABLE = false;
+      NOT_DISABLE = true;
+    }
+
     // this.props.targets.map((target)=>{
     //     var nam;
     //     if( this.state.initialState.results.length > 0 ) {
@@ -219,18 +225,24 @@ class TargetSessionMenu extends Component {
     //       var found = RegExp.exec(target.targetFindName, name);
     //     }
     // });
+
+/*
+<Table.Cell>
+  {this.targetButtons(
+    RUNNING
+    , ACTIVE
+  )}
+</Table.Cell>
+ */
+
+
     return (
       <div>
         <h1>Targets</h1>
+        <Button disabled={DISABLE} icon='plus' onClick={addNewTargetSession.bind(this)} />
         <Table style={{background: 'black'}}>
           <Table.Body>
           <Table.Row>
-            <Table.Cell>
-              {this.targetButtons(
-                RUNNING
-                , ACTIVE
-              )}
-            </Table.Cell>
             <Table.Cell>
               <Search
                 loading={isLoading}

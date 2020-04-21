@@ -364,8 +364,6 @@ class DefaultSettings extends Component {
           }).value,
 
         });
-        console.log(' test: '+this.state.defaultUseImagingCooler_enabled)
-
       }
   }
 
