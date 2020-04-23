@@ -42,11 +42,11 @@ and then keep trying CLS periodically until stopped
 2. Decide to install precompile or development versions
 	- **RECOMMENDED:** Fast starting: ([Release 1.8 Initial release to GitHub · maudy2u/tsx_cmd · GitHub](https://github.com/maudy2u/tsx_cmd/releases/tag/RC8)) - fast start
 	- Development ONLY… clone this repository:
-		- git clone https://github.com/maudy2u/tsx_cmd
-		- cd tsx_cmd
-		- INITIAL SETUP ONLY: bin/dev_install_meteor.sh
-		- bin/dev_setup_tsx_cmd.sh
-		- bin/dev_start.sh
+		- `git clone https://github.com/maudy2u/tsx_cmd`
+		- `cd tsx_cmd`
+		- INITIAL SETUP ONLY: `bin/dev_install_meteor.sh`
+		- `bin/dev_setup_tsx_cmd.sh`
+		- `bin/dev_start.sh`
 
 3. Fast start, just download this script:
 

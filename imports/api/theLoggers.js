@@ -48,6 +48,9 @@ var log_levels = [];
 if( Meteor.settings.enable_log != 'no') {
  log_levels.push('LOG');
 }
+if( Meteor.settings.enable_debug === 'yes') {
+ log_levels.push('DEBUG');
+}
 if( Meteor.settings.enable_trace === 'yes') {
  log_levels.push('TRACE');
 }

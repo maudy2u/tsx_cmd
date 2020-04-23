@@ -42,8 +42,8 @@ export function TargetPlans() {
     SUNALT = -12; // Use Nautical Twilight
   }
 
-  let MOONRISE = 'Moon|0';
-  let SUNRISE = 'Sun|'+SUNALT;
+  let MOONRISE = 'Moon|0'; //'Moon|0|Moon'
+  let SUNRISE = 'Sun|'+SUNALT; //'Sun|'+SUNALT+'|Sun'
   // Object/Target times:
   // tsx_method: object, altitude
 
@@ -64,6 +64,9 @@ export function TargetPlans() {
     if( target.minAlt == '' || typeof target.minAlt == 'undefined') {
       target.minAlt = DEFMINALT;
     }
+    // CAN NEED TO ADD THE _ID HERE, e.g.
+    //    tsx_data += target.targetFindName +'|'+ target.minAlt+'|'+ target._id;
+    // THis will allow finding the right target upon returning
     tsx_data += target.targetFindName +'|'+ target.minAlt;
   }
 
@@ -120,6 +123,11 @@ export function tsx_AltTimesForTargets( targets ) {
           let alt = rpt.split('|')[1].trim();
           let sTime = rpt.split('|')[2].trim();
           let eTime = rpt.split('|')[3].trim();
+//          let ref_id = rpt.split('|')[4].trim(); // passthru id
+
+
+          // THIS IS THE PROBLEM IF THE FINDNAME IS USED MORE THAN ONCE
+          // THIS CAN MEAN THE NEED FOR A REFERENCE ID, SUCH AS THE TARGET._id
           if( obj != 'Sun' && obj != 'Moon') {
             let target = TargetSessions.findOne({ targetFindName: obj });
             if( typeof target == 'undefined' ) {

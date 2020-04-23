@@ -350,6 +350,7 @@ class NightPlanner extends Component {
       endHr = 0;
     }
 
+    //CREATE THE HOUR GRID FOR THE TABLE
     let plannerIndex = [];
     if( startHr-bufHr < 24 && startHr-bufHr > endHr+bufHr ) {
         for( var i=startHr-bufHr; i < 24; i++ ) {
