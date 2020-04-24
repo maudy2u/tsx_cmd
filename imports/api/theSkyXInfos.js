@@ -142,8 +142,29 @@ TheSkyXInfos.helpers({
     }
     return val;
   },
+  cameraBins: function() {
+    var val =  TheSkyXInfos.findOne({name: 'numberOfBins'});
+    if( typeof val == 'undefined') {
+      val = '';
+    }
+    return val;
+  },
+  guiderBins: function() {
+    var val =  TheSkyXInfos.findOne({name: 'numGuiderBins'});
+    if( typeof val == 'undefined') {
+      val = '';
+    }
+    return val;
+  },
   efw: function() {
     var val =  TheSkyXInfos.findOne({name: 'efw'});
+    if( typeof val == 'undefined') {
+      val = '';
+    }
+    return val;
+  },
+  numFilters: function() {
+    var val =  TheSkyXInfos.findOne({name: 'numberOfFilters'});
     if( typeof val == 'undefined') {
       val = '';
     }

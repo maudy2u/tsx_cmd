@@ -412,6 +412,11 @@ class DefaultSettings extends Component {
     var rotator = TheSkyXInfos.findOne().rotator();
     var efw = TheSkyXInfos.findOne().efw();
     var focuser = TheSkyXInfos.findOne().focuser();
+    var CAMERA_BINS= TheSkyXInfos.findOne().cameraBins().value;
+
+    var GUIDER_BINS = TheSkyXInfos.findOne().guiderBins().value;
+    var NUM_FILTERS = TheSkyXInfos.findOne().numFilters().value;
+
     var RUNNING = '';
     var ACTIVE = false;
     try {
@@ -459,13 +464,25 @@ class DefaultSettings extends Component {
         </Label.Detail></Label></Segment>
         <Segment><Label>Camera<Label.Detail>
           {camera.manufacturer + ' | ' + camera.model}
-        </Label.Detail></Label></Segment>
+          </Label.Detail></Label>
+          <Label>Camera Bins<Label.Detail>
+          {CAMERA_BINS}
+          </Label.Detail></Label>
+        </Segment>
         <Segment><Label>Autoguider<Label.Detail>
           {guider.manufacturer + ' | ' + guider.model}
-        </Label.Detail></Label></Segment>
+          </Label.Detail></Label>
+          <Label>Autoguider Bins<Label.Detail>
+          {GUIDER_BINS}
+          </Label.Detail></Label>
+        </Segment>
         <Segment><Label>Filter Wheel<Label.Detail>
           {efw.manufacturer + ' | ' + efw.model}
-        </Label.Detail></Label></Segment>
+          </Label.Detail></Label>
+          <Label>Number of Filters<Label.Detail>
+          {NUM_FILTERS}
+          </Label.Detail></Label>
+        </Segment>
         <Segment><Label>Focuser<Label.Detail>
           {focuser.manufacturer + ' | ' + focuser.model}
         </Label.Detail></Label></Segment>
