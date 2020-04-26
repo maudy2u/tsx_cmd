@@ -25,12 +25,14 @@ import {
   Header,
   Icon,
   Table,
+  Dropdown,
 } from 'semantic-ui-react'
 
 import {
   tsx_ServerStates,
   tsx_UpdateServerState,
   tsx_GetServerState,
+  updateTargetSeriesStateValue,
 } from  '../api/serverStates.js';
 
 // Import the API Model
@@ -41,6 +43,10 @@ import {
 import {
   TargetSessions,
 } from '../api/targetSessions.js'
+import {
+  takeSeriesDropDown,
+  getTakeSeriesName,
+} from '../api/takeSeriesTemplates.js';
 
 import {
   Form,
@@ -57,6 +63,7 @@ const XRegExp24hr = XRegExp('^([0-9]:[0-5][0-9]|[1-2][0-9]:[0-5][0-9])$');
 const ERRORLABEL = <Label color="red" pointing/>
 
 function updateTargetPlan( fid, name, value ) {
+  var dirty = false;
   var obj = TargetSessions.findOne({_id:fid});
   if( typeof obj != 'undefined') {
     if( name == 'startTime') {
@@ -73,6 +80,7 @@ function updateTargetPlan( fid, name, value ) {
     }
     else if( name == 'minAlt') {
       obj.minAlt = value;
+      dirty = true;
     }
     else if( name == 'Comment') {
       tsxLog( ' targetPlan: comment not implemented yet')
@@ -87,6 +95,9 @@ function updateTargetPlan( fid, name, value ) {
         minAlt: obj.minAlt,
       }
     });
+  }
+  if( dirty ) {
+    this.props.night_plan_needs_updating();
   }
 }
 
@@ -126,7 +137,11 @@ class TargetConstraints extends Component {
       name,
       value,
     );
-    this.props.night_plan_needs_updating();
+  };
+
+  handleSeriesChange = (e, { name, value }) => {
+    var seriesId =value;  // get the matching key value
+    updateTargetSeriesStateValue( this.props.targetPlan._id, seriesId );
   };
 
   componentDidMount() {
@@ -174,11 +189,56 @@ class TargetConstraints extends Component {
     else {
       TARGET_DESC = this.props.targetPlan.targetFindName +': ' + this.props.targetPlan.description;
     }
+    var TAKESERIES = takeSeriesDropDown(this.props.seriesTemplates);
+    var TAKESERIESNAME = getTakeSeriesName(this.props.targetPlan.series);
+    var DISABLE = true;
+    var NOT_DISABLE = false;
+
+    // then use as needed disabled={DISABLE} or disabled={NOT_DISABLE}
+    if( this.props.scheduler_running.value == 'Stop'  && this.props.tool_active.value == false ){
+      DISABLE = false;
+      NOT_DISABLE = true;
+    }
+
 
     return (
       <Table.Row>
         <Table.Cell width={3}>
           {TARGET_DESC}
+        </Table.Cell>
+        <Table.Cell width={1}>
+          <Form.Field control={Dropdown}
+            disabled={DISABLE}
+            button
+            search
+            wrapSelection
+            scrolling
+            name='seriesTemplate'
+            options={TAKESERIES}
+            placeholder='Series to use for Imaging'
+            text={TAKESERIESNAME}
+            onChange={this.handleSeriesChange}
+            />
+        </Table.Cell>
+        <Table.Cell width={1}>
+          {new Number(this.props.targetPlan.report.maxAlt).toFixed(2)}
+        </Table.Cell>
+        <Table.Cell width={1}>
+        <Form>
+          <Form.Input
+            fluid
+            size='mini'
+            name='minAlt'
+            placeholder='45'
+            value={this.props.targetPlan.minAlt}
+            onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExpPositiveReal, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be real number -12.4, 45.0, 45"
+            errorLabel={ ERRORLABEL }
+          />
+          </Form>
         </Table.Cell>
         <Table.Cell width={1}>
         <Form>
@@ -210,23 +270,6 @@ class TargetConstraints extends Component {
               matchRegexp: XRegExp24hr, // https://github.com/slevithan/xregexp#unicode
             }}
             validationError="Must be like 0:00 or 10:00"
-            errorLabel={ ERRORLABEL }
-          />
-          </Form>
-        </Table.Cell>
-        <Table.Cell width={1}>
-        <Form>
-          <Form.Input
-            fluid
-            size='mini'
-            name='minAlt'
-            placeholder='45'
-            value={this.props.targetPlan.minAlt}
-            onChange={this.handleChange}
-            validations={{
-              matchRegexp: XRegExpPositiveReal, // https://github.com/slevithan/xregexp#unicode
-            }}
-            validationError="Must be real number -12.4, 45.0, 45"
             errorLabel={ ERRORLABEL }
           />
           </Form>

@@ -338,7 +338,7 @@ class Monitor extends Component {
     // #TODO report no valid target
 
 
-    return target;
+    return target._id;
   }
 
   testTryTarget() {

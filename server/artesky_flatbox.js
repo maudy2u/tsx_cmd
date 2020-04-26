@@ -28,7 +28,7 @@ import { FlatSeries } from '../imports/api/flatSeries.js';
 import { TargetAngles } from '../imports/api/targetAngles.js';
 import { CalibrationFrames } from '../imports/api/calibrationFrames.js';
 
-import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug,   tsxTrace,
+import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug,
 
   logFileForClient, AppLogsDB
 } from '../imports/api/theLoggers.js';

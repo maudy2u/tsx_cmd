@@ -14,7 +14,7 @@ var targets = request.split('##');
 for( var i=0; i<targets.length; i++ ) {
 	var object = targets[i].split('|')[0].trim();
 	var alt = targets[i].split('|')[1].trim();
-	//var passthru = targets[i].split('|')[2].trim();
+	var passthru = targets[i].split('|')[2].trim();
 	try {
 		SCHART.Find(object);
 	}
@@ -169,8 +169,8 @@ for( var i=0; i<targets.length; i++ ) {
 		if( Out != '' ) {
 			Out += '##';
 		}
-		Out += object +'|'+ alt +'|'+ prettyRiseTime +'|'+prettySetTime;
-//		Out += object +'|'+ alt +'|'+ prettyRiseTime +'|'+prettySetTime+'|'+passthru;
+		//Out += object +'|'+ alt +'|'+ prettyRiseTime +'|'+prettySetTime;
+		Out += object +'|'+ alt +'|'+ prettyRiseTime +'|'+prettySetTime+'|'+passthru;
 	}
 }
 TSX.writeLine(" ************** ");

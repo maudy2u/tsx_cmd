@@ -52,14 +52,42 @@ export function addNewTakeSeriesTemplate() {
 
   return id;
 }
+export function takeSeriesDropDown() {
+  var items = TakeSeriesTemplates.find().fetch();
+  var dropDownArray = [];
+  for (var i = 0; i < items.length; i++) {
+    dropDownArray.push({
+      key: items[i]._id,
+      text: items[i].name,
+      value: items[i]._id });
+  }
+  return dropDownArray;
+}
 
+export function getTakeSeriesName( tSeries ) {
+
+  var name = '';
+  if( tSeries._id !=''&& typeof tSeries._id != 'undefined') {
+    var obj = TakeSeriesTemplates.findOne({_id: tSeries._id});
+    if( obj != '' && typeof obj != 'undefined') {
+      name = obj.name;
+    }
+  }
+  return name;
+}
+
+// DEPRECATED *******************************
+// attempt to replace with takeSeriesDropDown
 export function getTakeSeriesTemplates(takeSeriesTemplates) {
   var options = [];
   var count =0;
   takeSeriesTemplates.forEach((series) => {
     //      { key: 0, text: 'Static LUM', value: 0 },
     // options.push({key:series._id, text:series.name, value: { _id:series._id, text:series.name, value:series.name }});
-    options.push({key:series._id, text:series.name, value: series.name });
+    options.push({
+      key:series._id,
+      text:series.name,
+      value: series.name });
     count++;
     // console.log(`Found series._id: ${series._id}, name: ${series.name}`);
   });

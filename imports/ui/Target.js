@@ -125,7 +125,7 @@ class Target extends Component {
 
     try {
 
-      Meteor.call( 'getUpdateTargetReport', this.props.target , function(error, result) {
+      Meteor.call( 'getUpdateTargetReport', this.props.target._id , function(error, result) {
 
         if( typeof result != 'undefined') {
           this.updateMonitor(result);
@@ -199,7 +199,7 @@ class Target extends Component {
   }
 
   startImaging() {
-    Meteor.call( 'startImaging', this.props.target, function(error, result) {
+    Meteor.call( 'startImaging', this.props.target._id, function(error, result) {
       console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
@@ -212,7 +212,7 @@ class Target extends Component {
     TheSkyXInfos.update( {_id: session._id }, {
         $set: { value: this.props.target._id }
     });
-    Meteor.call( 'centreTarget', this.props.target, function(error, result) {
+    Meteor.call( 'centreTarget', this.props.target._id, function(error, result) {
       console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
@@ -227,7 +227,7 @@ class Target extends Component {
     TheSkyXInfos.update( {_id: session._id }, {
         $set: { value: this.props.target._id }
     });
-    Meteor.call( 'startImaging', this.props.target, function(error, result) {
+    Meteor.call( 'startImaging', this.props.target._id, function(error, result) {
       console.log('Error: ' + error);
       console.log('result: ' + result);
     }.bind(this));
@@ -299,11 +299,12 @@ class Target extends Component {
     let RA = '';
     let DEC = '';
     let POINT = '';
+    let MAXALT = '';
     try {
       ENABLEACTIVE = this.props.target.enabledActive;
       CALIBRATION = this.props.target.isCalibrationFrames;
       TOOL_ACTIVE = this.props.tool_active.value;
-
+      MAXALT = Number(this.props.report.maxAlt).toFixed(3);
       ALT = Number(this.props.report.ALT).toFixed(3);
       HA = Number(this.props.report.HA).toFixed(3);
       TRANSIT = Number(this.props.report.TRANSIT).toFixed(3);
@@ -321,6 +322,7 @@ class Target extends Component {
       RA = '';
       DEC = '';
       POINT = '';
+      MAXALT = '';
     }
 
     let DTIME = '';
@@ -383,6 +385,10 @@ class Target extends Component {
               <Statistic size='mini'>
                 <Statistic.Label>Min. Alt.</Statistic.Label>
                 <Statistic.Value>{this.props.target.minAlt}</Statistic.Value>
+              </Statistic>
+              <Statistic size='mini'>
+                <Statistic.Label>Max. Alt.</Statistic.Label>
+                <Statistic.Value>{MAXALT}</Statistic.Value>
               </Statistic>
             </small>
             <br/><small><Label>{this.seriesDetails()}</Label></small>

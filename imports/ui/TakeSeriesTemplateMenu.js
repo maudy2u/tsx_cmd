@@ -98,7 +98,7 @@ class TakeSeriesTemplateMenu extends Component {
 
     return (
       <div>
-      <h1>Take Series Templates</h1>
+      <h1>TakeSeries Templates</h1>
       {this.takeSeriesButtons(
         RUNNING
         , ACTIVE

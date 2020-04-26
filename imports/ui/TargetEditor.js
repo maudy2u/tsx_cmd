@@ -27,6 +27,8 @@ import { TargetSessions } from '../api/targetSessions.js';
 import {
   TakeSeriesTemplates,
   getTakeSeriesTemplates,
+  getTakeSeriesName,
+  takeSeriesDropDown,
 } from '../api/takeSeriesTemplates.js';
 import {
   SkySafariFiles,
@@ -44,6 +46,7 @@ import {
   Button,
   Progress,
   Statistic,
+  Confirm,
 } from 'semantic-ui-react'
 
 import {
@@ -83,8 +86,8 @@ class TargetEditor extends Component {
     super(props);
 
     this.state = {
-      seriesTemplate: {},
       value: false,
+      openGetCoords: false,
       openModal: false,
       templates: [],
       checked: false,
@@ -93,9 +96,6 @@ class TargetEditor extends Component {
       progress: 0,
       inProgress: false,
       seriesDropDown: getTakeSeriesTemplates(this.props.seriesTemplates),
-
-      //   setSkysetFile_id: '',
-      seriesTemplate: this.props.target.series.value,
 
       name: this.props.target.name,
       targetFindName: this.props.target.targetFindName,
@@ -279,11 +279,21 @@ class TargetEditor extends Component {
     }
   }
 
+
+  showGetCoords = () => this.setState({ openGetCoords: true });
+  handleCancelGetCoords = () => {
+    this.setState({ openGetCoords: false });
+  };
+  handleConfirmGetCoords = () => {
+    this.getTSXRaDec();
+    this.setState({ openGetCoords: false });
+  };
+
   handleOpen = () => this.setState({ modalOpen: true });
   handleClose = () => this.setState({ modalOpen: false });
   handleChange = (e, { name, value }) => {
     this.setState({ [name]: value.trim() });
-    console.log( this.props.target._id + ', ' + name + ', ' + value )
+//    console.log( this.props.target._id + ', ' + name + ', ' + value )
     updateTargetStateValue( this.props.target._id, name, value );
   };
 
@@ -301,28 +311,17 @@ class TargetEditor extends Component {
     updateTargetStateValue( this.props.target._id, name, value );
   };
 
+  handleSeriesChange = (e, { name, value }) => {
+    var seriesId =value;  // get the matching key value
+    updateTargetSeriesStateValue( this.props.target._id, seriesId );
+  };
+
   handleStartChange = (value) => {
     this.setState({startTime: value.formatted24 })
     // what is needed for the "dropdown values"
     // series needs an "ID", and so include text value
 
     updateTargetStateValue( this.props.target._id, 'startTime', value.formatted24 );
-  };
-
-  handleSeriesChange = (value) => {
-    this.setState({startTime: value.formatted24 })
-    // what is needed for the "dropdown values"
-    // series needs an "ID", and so include text value
-    var series = this.state.seriesTemplate; // name in the field
-    // filter needs an index and text value...
-    var seriesId; // get the matching key value
-    for (var i = 0; i < this.state.seriesDropDown.length; i++) {
-      if( series == this.state.seriesDropDown[i].value ) {
-        seriesId = this.state.seriesDropDown[i].key;
-      }
-    }
-
-    updateTargetSeriesStateValue( this.props.target._id, seriesId, this.state.seriesTemplate );
   };
 
   handleStopChange = (value) => {
@@ -441,7 +440,7 @@ class TargetEditor extends Component {
     // console.log('targetFind: ' + this.props.target.targetFindName );
     Meteor.call(
       'targetFind',
-      this.props.target ,
+      this.props.target._id ,
       function ( error, result ) {
 
 //    Meteor.call("targetFind", this.state.targetFindName , function(error, result) {
@@ -465,9 +464,8 @@ class TargetEditor extends Component {
     // console.log('targetFind: ' + this.props.target.targetFindName );
     Meteor.call(
       'getTSXFrameCentre',
+      this.props.target._id ,
       function ( error, result ) {
-
-      this.setState({targetFindName: result});
     }.bind(this));
   }
 
@@ -520,7 +518,9 @@ class TargetEditor extends Component {
       FILTERS = [];
     }
     var TARGETPRIORITY = `${this.state.priority}`;
-    var takeSeries = getTakeSeriesTemplates(this.props.seriesTemplates);
+//    var TAKESERIES = getTakeSeriesTemplates(this.props.seriesTemplates);
+    var TAKESERIES = takeSeriesDropDown();
+    var TAKESERIESNAME = getTakeSeriesName(this.state.series);
     // *******************************
     // var for ra and DATEPICKER
     var MINIMUMALT = `${this.state.minAlt}`;
@@ -583,19 +583,28 @@ class TargetEditor extends Component {
                   value={this.state.description}
                   onChange={this.handleChange}/>
                   <div>
-                <Button onClick={this.getTSXRaDec.bind(this)}>Get</Button>
-                <Button onClick={this.getTargetRaDec.bind(this)}>Find</Button>
+                <Button onClick={this.getTargetRaDec.bind(this)}>Find Target</Button>
+                <Button onClick={this.showGetCoords}>Get Chart Centre</Button>
+                <Confirm
+                  open={this.state.openGetCoords}
+                  header='Get TheSkyX Chart Centre'
+                  content='If you wish to replace TARGET NAME, with the current TheSkyX Chart Centre, click "Yes - Replace".'
+                  cancelButton='Cancel'
+                  confirmButton="Yes - Replace"
+                  onCancel={this.handleCancelGetCoords}
+                  onConfirm={this.handleConfirmGetCoords}
+                />
                   </div>
               </Form.Group>
               <Form.Group >
                 {/*<br/>*/}
                 <Statistic size='mini'>
                   <Statistic.Label>RA</Statistic.Label>
-                  <Statistic.Value>{Number(this.state.ra).toFixed(4)}</Statistic.Value>
+                  <Statistic.Value>{Number(this.props.target.ra).toFixed(4)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
                   <Statistic.Label>DEC</Statistic.Label>
-                  <Statistic.Value>{Number(this.state.dec).toFixed(4)}</Statistic.Value>
+                  <Statistic.Value>{Number(this.props.target.dec).toFixed(4)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
                   <Statistic.Label>Alt</Statistic.Label>
@@ -646,10 +655,10 @@ class TargetEditor extends Component {
                   scrolling
                   label='Series'
                   name='seriesTemplate'
-                  options={takeSeries}
+                  options={TAKESERIES}
                   placeholder='Series to use for Imaging'
-                  text={this.state.seriesTemplate}
-                  onChange={this.handleChange}/>
+                  text={TAKESERIESNAME}
+                  onChange={this.handleSeriesChange}/>
               </Form.Group>
               {/* <Form.Group> */}
               {/* <Form.Group widths='equal'>

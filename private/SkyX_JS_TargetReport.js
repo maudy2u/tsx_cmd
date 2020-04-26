@@ -26,6 +26,7 @@ try { // try to get focuser info
 var OBJI = sky6ObjectInformation;
 var CHART = sky6StarChart;
 var CCDSC = ccdsoftCamera;
+var TSX = RunJavaScriptOutput;
 // name use to find
 var targetName = "$000";
 //"astronomical twilight" (-18 degrees)
@@ -60,8 +61,9 @@ try {
   // Try to find the target and catch the error if it fails.
   //
   CHART.Find(targetName);
-  var haveTarget = OBJI.Property(59); // altitude
+	var haveTarget = OBJI.Property(59); // altitude
   if( haveTarget != 'TypeError: Object not found. Error = 250.') {
+
     // we have a target we can query
     var altitude = OBJI.ObjInfoPropOut;
     altitude = altitude.toFixed(1);
@@ -95,6 +97,17 @@ try {
     OBJI.Property(55); // DEC			// Pull the DEC value
     var targetDEC = OBJI.ObjInfoPropOut; 		// Stuff DEC into variable
 
+		// Figure out the latitude for future calculations.
+		CHART.DocumentProperty(0);
+		var lat = CHART.DocPropOut;
+		// Figure out the object's maximum & minimum altitudes for sanity checking.
+		var maxAlt = (90 - lat + targetDEC);
+		if (maxAlt > 90)
+		// This can happen, so we have to make it fit the convention.
+		{
+			maxAlt = 180 - maxAlt;
+		}
+
     OBJI.Property(70); // HA			// Pull the Hour Angle value
     var targetHA = OBJI.ObjInfoPropOut; 		// Stuff DEC into variable
 
@@ -108,6 +121,8 @@ try {
       azimuth
       + '|ALT=' +
       altitude
+			+ '|maxAlt=' +
+      maxAlt
       + '|RA=' +
       targetRA
       + '|DEC=' +
@@ -135,7 +150,7 @@ catch (repErr) {
   report = report +
     '|isValid=' +
     false;
-
+	TSX.writeLine( repErr );
   tryTarget 	= {
     ready: false,
     msg: 'Not found',

@@ -42,6 +42,8 @@ export function addNewTargetSession() {
       enabledActive: false,
       isCalibrationFrames: false,
       series: {
+//        _id: '',
+//        value: '',
       },
       progress: [
   //            {_id: seriesId, taken:0},
@@ -80,6 +82,55 @@ export function addNewTargetSession() {
       // stopTime: '',
       skysafariFile_id: '',
 
+    }
+  );
+  return id;
+}
+
+export function updateTargetSession( org ) {
+
+  TargetSessions.update( {_id: org._id}, {
+    $set:
+      {
+      name: org.name,
+      targetFindName: org.targetFindName,
+      targetImage: org.targetImage,
+      description: org.description,
+      friendlyName: org.friendlyName,
+      enabledActive: org.enabledActive,
+      isCalibrationFrames: org.isCalibrationFrames,
+      series: org.series,
+      progress: org.progress,
+      report_d: org.report_d,
+      ra: org.ra,
+      dec: org.dec,
+      angle: org.angle,
+      rotator_position: org.rotator_position,
+      scale: org.scale,
+      coolingTemp: org.coolingTemp,
+      clsFilter: org.clsFilter,
+      focusFilter: org.focusFilter,
+      foccusSamples: org.foccusSamples,
+      focusBin: org.focusBin,
+      focusTarget: org.focusTarget,
+      focusExposure: org.focusExposure,
+      guideExposure: org.guideExposure,
+      guideDelay: org.guideDelay,
+      startTime: org.startT,
+      stopTime: org.stopT,
+      priority: org.priority,
+      tempChg: org.tempChg,
+      currentAlt: org.currentAlt, // set to zero for now.
+      minAlt: org.minAlt,
+      completed: org.completed,
+      createdAt: org.createdAt,
+      enableMeridianFlip: org.enableMeridianFlip,
+      startTime: org.startTime,
+      stopTime: org.stopTime,
+      skysafariFile_id: org.skysafariFile_id,
+      updatedAt: new Date(),
+      report: org.report,
+      }
     }
   );
   return id;
@@ -137,6 +188,17 @@ createdAt: new Date(),
  */
 
 TargetSessions.helpers({
+
+  getFriendlyName: function() {
+    var friendly = '';
+    if( typeof this.friendlyName != 'undefined' && this.friendlyName != '' ) {
+      friendly = this.friendlyName;
+    }
+    else {
+      friendly = this.targetFindName;
+    }
+    return friendly;
+  },
 
   takeSeries: function() {
     var taken = this.totalImagesTaken();

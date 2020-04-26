@@ -98,9 +98,19 @@ TargetReports = {
      }
      else if( name == 'RA') {
        obj.RA = value;
+       TargetSessions.update({_id: tid} , {
+         $set: {
+           ra: obj.RA,
+         }
+       });
      }
      else if( name == 'DEC') {
        obj.DEC = value;
+       TargetSessions.update({_id: tid} , {
+         $set: {
+           dec: obj.DEC,
+         }
+       });
      }
      else if( name == 'pointing') {
        obj.pointing = value;
@@ -116,6 +126,9 @@ TargetReports = {
      }
      else if( name == 'focusPosition') {
        obj.focusPosition = value;
+     }
+     else if( name == 'maxAlt') {
+       obj.maxAlt = value;
      }
      else if( name == 'scale') {
        obj.scale = value;
@@ -171,6 +184,7 @@ TargetReports = {
          ready: obj.ready,
          readyMsg: obj.readyMsg,
          updatedAt: new Date(),
+         maxAlt: obj.maxAlt,
          RMS_ERROR: obj.RMS_ERROR,
          ROTATOR_POS_ANGLE: obj.ROTATOR_POS_ANGLE,
        }

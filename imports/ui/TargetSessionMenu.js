@@ -159,8 +159,8 @@ class TargetSessionMenu extends Component {
       }.bind(this));
   }
 
-  refreshTargetReports() {
-    Meteor.call("refreshTargetReports", function (error, result) {
+  refreshEnabledTargetReports() {
+    Meteor.call("refreshEnabledTargetReports", function (error, result) {
       }.bind(this));
   }
 
@@ -176,14 +176,17 @@ class TargetSessionMenu extends Component {
       DISABLE = false;
       NOT_DISABLE = true;
     }
+    /*
+    <Button disabled compact  />
+    <Button disabled={DISABLE} icon='play'  onClick={this.playScheduler.bind(this)}/>
+    <Button disabled={NOT_DISABLE} icon='stop' onClick={this.stopScheduler.bind(this)} />
+    
+     */
     return (
       <Button.Group>
           <Button disabled={DISABLE} icon='plus' onClick={addNewTargetSession.bind(this)} />
           <Button disabled compact   />
-          <Button disabled={DISABLE} onClick={this.refreshTargetReports.bind(this)} >Refresh</Button>
-          <Button disabled compact  />
-          <Button disabled={DISABLE} icon='play'  onClick={this.playScheduler.bind(this)}/>
-          <Button disabled={NOT_DISABLE} icon='stop' onClick={this.stopScheduler.bind(this)} />
+          <Button disabled={DISABLE} onClick={this.refreshEnabledTargetReports.bind(this)} >Refresh</Button>
        </Button.Group>
      )
   }
@@ -232,6 +235,7 @@ class TargetSessionMenu extends Component {
     RUNNING
     , ACTIVE
   )}
+  <Button disabled={DISABLE} icon='plus' onClick={addNewTargetSession.bind(this)} />
 </Table.Cell>
  */
 
@@ -239,7 +243,10 @@ class TargetSessionMenu extends Component {
     return (
       <div>
         <h1>Targets</h1>
-        <Button disabled={DISABLE} icon='plus' onClick={addNewTargetSession.bind(this)} />
+        {this.targetButtons(
+          RUNNING
+          , ACTIVE
+        )}
         <Table style={{background: 'black'}}>
           <Table.Body>
           <Table.Row>
