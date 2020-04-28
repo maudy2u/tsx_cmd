@@ -26,6 +26,7 @@ import {
   postStatus,
   postProgressTotal,
   postProgressIncrement,
+  tsx_ServerStates,
  } from '../imports/api/serverStates.js'
 
  import {
@@ -41,7 +42,6 @@ import {
    tsx_Disconnect,
    tsx_MntPark,
    tsx_AbortGuider,
-   getValidTargetSession,
    prepareTargetForImaging,
    processTargetTakeSeries,
    tsx_ServerIsOnline,
@@ -63,8 +63,8 @@ import {
  export function ParkMount( isParked ) {
    if( !isParked ) {
      UpdateStatus(' Parking mount...');
-     var defaultFilter = tsx_GetServerStateValue('defaultFilter');
-     var softPark = Boolean(tsx_GetServerStateValue('defaultSoftPark'));
+     var defaultFilter = tsx_GetServerStateValue( tsx_ServerStates.defaultFilter );
+     var softPark = Boolean(tsx_GetServerStateValue( tsx_ServerStates.defaultSoftPark ));
      tsx_AbortGuider();
      tsx_MntPark(defaultFilter, softPark);
    }

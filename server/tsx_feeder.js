@@ -27,6 +27,7 @@ import {
   postStatus,
   postProgressTotal,
   postProgressIncrement,
+  tsx_ServerStates,
  } from '../imports/api/serverStates.js'
 
  import {
@@ -133,7 +134,7 @@ export function tsx_feeder( cmd, callback ) {
   // https://www.w3schools.com/js/js_timing.asp
   var waiting = 0; // create arbitarty timeout
   var imageChk = false;
-  var processId = tsx_GetServerStateValue( 'runScheduler' );
+  var processId = tsx_GetServerStateValue( tsx_ServerStates.runScheduler );
   if( typeof processId != 'undefined' && processId != '') {
     imageChk = true;
     // Meteor._debug('Image checking: ' + processId );
@@ -151,7 +152,7 @@ export function tsx_feeder( cmd, callback ) {
     // postStatus( 'tsx_waiting (sec): ' + waiting /sec  );
     // Meteor._debug('tsx_waiting (sec): ' + waiting /sec );
     if( imageChk ) {
-      processId = tsx_GetServerStateValue( 'runScheduler' );
+      processId = tsx_GetServerStateValue( tsx_ServerStates.runScheduler );
     }
   }
   postProgressTotal(0);

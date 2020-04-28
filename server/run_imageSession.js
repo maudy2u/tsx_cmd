@@ -92,18 +92,18 @@ var forceAbort = false;
 // *******************************
 export function isSchedulerStopped() {
   tsxInfo(' *** isSchedulerStopped ' );
-  var sched = tsx_GetServerStateValue('scheduler_running');
-  var runScheduler =   tsx_SetServerState('runScheduler', '');
+  var sched = tsx_GetServerStateValue( tsx_ServerStates.scheduler_running );
+  var runScheduler =   tsx_SetServerState( tsx_ServerStates.runScheduler, '');
   if(
     (sched != 'Stop' && runScheduler != '')
   ) {
     tsxInfo('scheduler_running: ' + sched);
     return false; // exit
   }
-  tsx_SetServerState('targetName', 'No Active Target');
-  tsx_SetServerState('scheduler_report', '');
+  tsx_SetServerState( tsx_ServerStates.targetName, 'No Active Target');
+  tsx_SetServerState( tsx_ServerStates.scheduler_report, '');
   // THis line is needed in the tsx_feeder
-  tsx_SetServerState('imagingSessionId', '');
+  tsx_SetServerState( tsx_ServerStates.imagingSessionId, '');
 
   return true;
 }
@@ -341,7 +341,7 @@ export function CalibrateAutoGuider() {
     return;
   }
   // tsxInfo('************************');
-  var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
+  var enabled = tsx_GetServerStateValue( tsx_ServerStates.isAutoguidingEnabled );
   if( !enabled ) {
     tsxInfo(' *** @Autoguiding disabled');
     return;
@@ -367,7 +367,7 @@ export function CalibrateAutoGuider() {
 function SetUpAutoGuiding( target, doCalibration ) {
   // tsxInfo('************************');
   tsxInfo(' *** SetUpAutoGuiding: ' + target.getFriendlyName() );
-  var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
+  var enabled = tsx_GetServerStateValue( tsx_ServerStates.isAutoguidingEnabled );
   if( !enabled ) {
     tsxInfo(' *** @Autoguiding disabled: ' + target.getFriendlyName());
     return;
@@ -412,20 +412,20 @@ function SetUpAutoGuiding( target, doCalibration ) {
 // **************************************************************
 function tsx_TakeAutoGuideImage( ) {
   // tsxInfo('************************');
-  var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
+  var enabled = tsx_GetServerStateValue( tsx_ServerStates.isAutoguidingEnabled );
   if( !enabled ) {
     tsxInfo(' *** @Autoguiding disabled ');
     return;
   }
 
   var cmd = tsx_cmd('SkyX_JS_TakeGuideImage');
-  var exp = tsx_GetServerStateValue('defaultGuideExposure');
+  var exp = tsx_GetServerStateValue( tsx_ServerStates.defaultGuideExposure );
 
   cmd = cmd.replace('$000', exp );
   cmd = cmd.replace('$001', exp );
 
   var tsx_is_waiting = true;
-  tsxDebug( '[TSX] SkyX_JS_ParkMount,'+exp+', '+exp );
+  tsxDebug( '[TSX] SkyX_JS_TakeGuideImage,'+exp+', '+exp );
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         tsxInfo( " Autoguider image taken" );
@@ -441,7 +441,7 @@ function tsx_TakeAutoGuideImage( ) {
 function tsx_FindGuideStar() {
   // tsxInfo('************************');
   tsxInfo(' *** tsx_FindGuideStar' );
-  var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
+  var enabled = tsx_GetServerStateValue( tsx_ServerStates.isAutoguidingEnabled );
   var out = '';
   if( !enabled ) {
     tsxInfo(' *** @Autoguiding disabled: ' + target.getFriendlyName());
@@ -486,17 +486,17 @@ function tsx_FindGuideStar() {
 function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
   // tsxInfo('************************');
   tsxInfo(' *** tsx_CalibrateAutoGuide' );
-  var enabled = tsx_GetServerStateValue('isCalibrationEnabled');
+  var enabled = tsx_GetServerStateValue( tsx_ServerStates.isCalibrationEnabled );
   if( !enabled ) {
     tsxInfo(' *** Autoguider calibration disabled');
     return false;
   }
-  enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
+  enabled = tsx_GetServerStateValue( tsx_ServerStates.isAutoguidingEnabled );
   if( !enabled ) {
     tsxInfo(' *** Autoguider disabled ');
     return false;
   }
-  var fSize = tsx_GetServerStateValue('calibrationFrameSize');
+  var fSize = tsx_GetServerStateValue( tsx_ServerStates.calibrationFrameSize );
   if( typeof fSize == 'undefined' || fSize === '' ) {
     fSize = 300;
     UpdateStatusErr(' *** Autoguider calibration frame needs setting ');
@@ -535,7 +535,7 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
 // **************************************************************
 function tsx_StartAutoGuide(guideStarX, guideStarY) {
   tsxInfo(' *** tsx_StartAutoGuide' );
-  var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
+  var enabled = tsx_GetServerStateValue( tsx_ServerStates.isAutoguidingEnabled );
   if( !enabled ) {
     tsxInfo(' *** Autoguider disabled ');
     return;
@@ -548,10 +548,10 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
   cmd = cmd.replace('$000', guideStarX );
   cmd = cmd.replace('$001', guideStarY );
 
-  var camScale = tsx_GetServerStateValue( 'imagingPixelSize');
-  var guiderScale = tsx_GetServerStateValue( 'guiderPixelSize');
-  var guidingPixelErrorTolerance = tsx_GetServerStateValue( 'guidingPixelErrorTolerance');
-  var isGuideSettlingEnabled = tsx_GetServerStateValue( 'isGuideSettlingEnabled');
+  var camScale = tsx_GetServerStateValue( tsx_ServerStates.imagingPixelSize);
+  var guiderScale = tsx_GetServerStateValue( tsx_ServerStates.guiderPixelSize);
+  var guidingPixelErrorTolerance = tsx_GetServerStateValue( tsx_ServerStates.guidingPixelErrorTolerance);
+  var isGuideSettlingEnabled = tsx_GetServerStateValue( tsx_ServerStates.isGuideSettlingEnabled);
   tsxDebug( ' Settle autoguider: ' + isGuideSettlingEnabled ) ;
   tsxDebug( ' camScale: ' + camScale ) ;
   tsxDebug( ' guiderScale: ' + guiderScale ) ;
@@ -575,7 +575,7 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
   else {
     isGuideSettlingEnabled = 0;
   }
-  var fSize = tsx_GetServerStateValue('calibrationFrameSize');
+  var fSize = tsx_GetServerStateValue( tsx_ServerStates.calibrationFrameSize );
   if( typeof fSize == 'undefined' || fSize === '' ) {
     fSize = 300;
     UpdateStatus(' *** Autoguider calibration frame needs setting ');
@@ -601,13 +601,13 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
 function tsx_SettleAutoGuide( target ) {
   // tsxInfo('************************');
   tsxInfo(' *** tsx_SettleAutoGuide' );
-  var enabled = tsx_GetServerStateValue('isAutoguidingEnabled');
+  var enabled = tsx_GetServerStateValue( tsx_ServerStates.isAutoguidingEnabled );
   if( !enabled ) {
     tsxInfo(' *** Autoguider disabled ');
     return;
   }
 
-  var isGuideSettlingEnabled = tsx_GetServerStateValue( 'isGuideSettlingEnabled');
+  var isGuideSettlingEnabled = tsx_GetServerStateValue( tsx_ServerStates.isGuideSettlingEnabled);
   if( typeof isGuideSettlingEnabled === 'undefined' || isGuideSettlingEnabled === '') {
     isGuideSettlingEnabled = false;
   }
@@ -617,9 +617,9 @@ function tsx_SettleAutoGuide( target ) {
     return;
   }
 
-  var camScale = tsx_GetServerStateValue( 'imagingPixelSize');
-  var guiderScale = tsx_GetServerStateValue( 'guiderPixelSize');
-  var guidingPixelErrorTolerance = tsx_GetServerStateValue( 'guidingPixelErrorTolerance');
+  var camScale = tsx_GetServerStateValue( tsx_ServerStates.imagingPixelSize );
+  var guiderScale = tsx_GetServerStateValue( tsx_ServerStates.guiderPixelSize );
+  var guidingPixelErrorTolerance = tsx_GetServerStateValue( tsx_ServerStates.guidingPixelErrorTolerance );
   tsxDebug( ' Settle autoguider enabled: ' + isGuideSettlingEnabled ) ;
   tsxDebug( ' camScale: ' + camScale ) ;
   tsxDebug( ' guiderScale: ' + guiderScale ) ;
@@ -796,7 +796,7 @@ function tsx_CLS( target ) {
   // tsxInfo('************************');
   tsxInfo(' *** tsx_CLS: ' + target.getFriendlyName() );
   var Out = false;
-  var doCLS = tsx_GetServerStateValue( 'defaultCLSEnabled' );
+  var doCLS = tsx_GetServerStateValue( tsx_ServerStates.defaultCLSEnabled );
   if( doCLS == false ) {
     tsxInfo(' *** tsx_CLS: disabled, slewing' );
     // If CLS not enabled then Slew...
@@ -815,13 +815,13 @@ function tsx_CLS( target ) {
 }
 
 function resetCLSTimeCheck () {
-  var defaultCLSRepeat = tsx_GetServerState('defaultCLSRepeat');
+  var defaultCLSRepeat = tsx_GetServerState( tsx_ServerStates.defaultCLSRepeat);
   if( typeof defaultCLSRepeat === 'undefined' ) {
     tsxInfo( ' Check if to CLS again - needs a value.');
-    tsx_SetServerState('defaultCLSRepeat', 0); // default is off
-    defaultCLSRepeat = tsx_GetServerState('defaultCLSRepeat');
+    tsx_SetServerState( tsx_ServerStates.defaultCLSRepeat, 0); // default is off
+    defaultCLSRepeat = tsx_GetServerState( tsx_ServerStates.defaultCLSRepeat );
   }
-  tsx_SetServerState('defaultCLSRepeat', defaultCLSRepeat.value);
+  tsx_SetServerState( tsx_ServerStates.defaultCLSRepeat, defaultCLSRepeat.value);
 }
 
 function tsx_CLS_target( target, filter ) {
@@ -829,7 +829,7 @@ function tsx_CLS_target( target, filter ) {
   tsxInfo(' *** tsx_CLS_target: ' + target );
   var clsSuccess =false;
   var tsx_is_waiting = true;
-  var retries = tsx_GetServerStateValue( 'defaultCLSRetries' );
+  var retries = tsx_GetServerStateValue( tsx_ServerStates.defaultCLSRetries );
   if( typeof retries === 'undefined' || retries === '' ) {
     retries =0;
     tsxWarn(' ' + target.getFriendlyName() + ': CLS retries not set. Set to zero');
@@ -869,7 +869,7 @@ function tsx_CLS_target( target, filter ) {
           // all good do nothing
           // reset dithering....
           resetCLSTimeCheck();
-          tsx_SetServerState('imagingSessionDither', 0);
+          tsx_SetServerState( tsx_ServerStates.imagingSessionDither, 0);
         }
       }
       tsx_is_waiting = false;
@@ -890,16 +890,16 @@ function tsx_RunFocus3( target ) {
   tsxInfo(' *** tsx_RunFocus3: ' + target.getFriendlyName() );
 
   var Out;
-  var enabled = tsx_GetServerStateValue('isFocus3Enabled');
-  var clsEnabled = tsx_GetServerStateValue( 'defaultCLSEnabled' );
-  var cloudy = tsx_GetServerStateValue( 'focusRequiresCLS' );
-  var focusFilter = getFilterSlot(target.focusFilter);
-  var focusSamples = tsx_GetServerStateValue( 'focus3Samples' );
-  var focusExp = target.focusExposure;
-  var focusObj = target.focusTarget;
+  var enabled = tsx_GetServerStateValue( tsx_ServerStates.isFocus3Enabled );
 
   tsxDebug(' ??? @Focus3 enabled found to be: ' + enabled );
   if( enabled == true  ) {
+    var clsEnabled = tsx_GetServerStateValue( tsx_ServerStates.defaultCLSEnabled );
+    var cloudy = tsx_GetServerStateValue( tsx_ServerStates.focusRequiresCLS );
+    var focusFilter = getFilterSlot(target.focusFilter);
+    var focusSamples = tsx_GetServerStateValue( tsx_ServerStates.focus3Samples );
+    var focusExp = target.focusExposure;
+    var focusObj = target.focusTarget;
 
     var runFocus3 = isFocusingNeeded( target );
     if( runFocus3 == false ) {
@@ -907,9 +907,14 @@ function tsx_RunFocus3( target ) {
       Out = ''; // get last temp
       return Out;
     }
+    if( focusExp == '' || typeof focusExp == 'undefined') {
+      var defExp = 1;
+      tsx_SetServerState( tsx_ServerStates.defaultFocusExposure, defExp ); // arbitrary default
+      focusExp = defExp;
+    }
     if( focusSamples == '' || typeof focusSamples == 'undefined') {
       var defSamples = 3;
-      tsx_SetServerState('focus3Samples', defSamples ); // arbitrary default
+      tsx_SetServerState( tsx_ServerStates.focus3Samples, defSamples ); // arbitrary default
       focusSamples = defSamples;
     }
     if( cloudy == '' || typeof cloudy == 'undefined' ) {
@@ -957,7 +962,7 @@ function tsx_RunFocus3( target ) {
     cmd = cmd.replace("$001", focusExp ); // set Bin
     cmd = cmd.replace("$002", focusSamples ); // set samples
 
-    var lastFocusTemp = tsx_GetServerStateValue( 'initialFocusTemperature' ); // get last temp
+    var lastFocusTemp = tsx_GetServerStateValue( tsx_ServerStates.initialFocusTemperature ); // get last temp
     let curFocusTemp = target.report.focusTemp; // read new temp
     tsxInfo( ' curFocusTemp temp: ' + curFocusTemp );
     if( typeof curFocusTemp == 'undefined' || curFocusTemp == '' ) {
@@ -970,7 +975,6 @@ function tsx_RunFocus3( target ) {
     var temp = '';
     var tsx_is_waiting = true;
     tsxDebug( '[TSX] SkyX_JS_Focus-3,'+focusFilter+', '+focusExp+', '+focusSamples );
-
     tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       //[[B^[[B^[[BI20180708-01:53:13.485(-3)?   [SERVER]|2018-07-08|01:53:13|[DEBUG]| ??? @Focusing-3 returned: TypeError: Error code = 5 (5). No additional information is available.|No error. Error = 0
       tsxInfo( ' ??? @Focusing-3 returned: ' + tsx_return );
@@ -978,12 +982,12 @@ function tsx_RunFocus3( target ) {
       temp = tsx_return.split('|')[1].trim();
       position = tsx_return.split('|')[0].trim();
       if( temp == 'TypeError: Error code = 5 (5). No additional information is available.') {
-          temp = tsx_GetServerStateValue( 'initialFocusTemperature' );
+          temp = tsx_GetServerStateValue( tsx_ServerStates.initialFocusTemperature );
           UpdateStatusErr( ' !!! Error find focus.' );
       }
       //TypeError: @Focus diverged.  Error = 7001
       else if (temp =='TypeError: @Focus diverged.  Error = 7001.') {
-        temp = tsx_GetServerStateValue( 'initialFocusTemperature' );
+        temp = tsx_GetServerStateValue( tsx_ServerStates.initialFocusTemperature );
         UpdateStatusErr( ' !!! Error find focus.' );
       }
       else if( typeof temp == 'undefined' || temp === 'No error. Error = 0.') {
@@ -1136,7 +1140,7 @@ function SetUpForImagingRun(target, doRotator, doCalibration ) {
   }
   else {
     // Used to update the monitor, as it is this target to continue
-    tsx_SetServerState('scheduler_report', target.report );
+    tsx_SetServerState( tsx_ServerStates.scheduler_report, target.report );
   }
 
   // *******************************
@@ -1221,7 +1225,7 @@ export function getValidTargetSession() {
   //  b) Image
   //  c) Ra/Dec/Atl/Az/Transit/HA
   if( typeof target == 'undefined') {
-    tsxInfo(' Failed to find a valid target session.');
+    tsxDebug(' Failed to find a valid target session.');
   }
   else {
     tsxDebug(' Valid target: ' + target.getFriendlyName());
@@ -1416,7 +1420,7 @@ function tsx_isDarkEnough(target) {
 
   var targetFindName = target.targetFindName;
   UpdateImagingTargetReport( target );
-	var chkTwilight = tsx_GetServerStateValue('isTwilightEnabled');
+	var chkTwilight = tsx_GetServerStateValue( tsx_ServerStates.isTwilightEnabled );
   tsxDebug(' Twilight check enabled: ' + chkTwilight);
 	if( chkTwilight ) {
     // tsxInfo(target.report);
@@ -1440,8 +1444,8 @@ function tsx_isDarkEnough(target) {
 export function tsx_isDark() {
   // tsxInfo('************************');
   tsxInfo(' *** tsx_isDark' );
-	var chkTwilight = tsx_GetServerStateValue('isTwilightEnabled');
-  var defaultMinSunAlt = tsx_GetServerStateValue('defaultMinSunAlt');
+	var chkTwilight = tsx_GetServerStateValue( tsx_ServerStates.isTwilightEnabled );
+  var defaultMinSunAlt = tsx_GetServerStateValue( tsx_ServerStates.defaultMinSunAlt );
   tsxInfo(' Twilight check enabled: ' + chkTwilight);
   var isDark = '';
   var tsx_is_waiting = true;
@@ -1536,9 +1540,9 @@ function isMeridianFlipNeed( target ) {
   tsxInfo(' *** isMeridianFlipNeed: ' + target.getFriendlyName() );
 
   // do we need to flip
-  var lastDir = tsx_GetServerStateValue('lastTargetDirection');
+  var lastDir = tsx_GetServerStateValue( tsx_ServerStates.lastTargetDirection );
   var curDir = target.report.AZ;
-  tsx_SetServerState('lastTargetDirection', curDir);
+  tsx_SetServerState( tsx_ServerStates.lastTargetDirection, curDir);
   tsxDebug( ' --- check meridian (' + lastDir + '), cf. previous (' + curDir +')');
   if( curDir == 'West' && lastDir == 'East') {
     // we need to flip
@@ -1562,7 +1566,7 @@ function isFocusingNeeded(target) {
   // tsxInfo('************************');
   tsxInfo(' *** isFocusingNeeded: ' + target.getFriendlyName());
 
-  let lastFocusTemp = tsx_GetServerStateValue( 'initialFocusTemperature' ); // get last temp
+  let lastFocusTemp = tsx_GetServerStateValue( tsx_ServerStates.initialFocusTemperature ); // get last temp
 
   if( lastFocusTemp == 'Simulator' ) {
     tsxInfo(' !!! Simulator will not do focus calculations');
@@ -1589,7 +1593,7 @@ function isFocusingNeeded(target) {
     }
     let focusDiff = Math.abs(curFocusTemp - lastFocusTemp).toFixed(2);
 //    let targetDiff = target.tempChg; // diff for this target
-    let tempDiff = tsx_GetServerStateValue( 'defaultFocusTempDiff' ); // get last temp
+    let tempDiff = tsx_GetServerStateValue( tsx_ServerStates.defaultFocusTempDiff ); // get last temp
     if( typeof tempDiff == 'undefined' ) {
       tsxWarn(' !!! Focus temp diff is not set in defaults');
       return false;
@@ -1674,18 +1678,6 @@ export function UpdateImagingTargetReport( target ) {
 
   // how old is report... if less than 1 minute get report
   var tRprt = target.report;
-  if( typeof tRprt == 'undefined'
-    || typeof tRprt.updatedAt == 'undefined'
-    || tRprt == ''
-    || tRprt == false ) {
-      tsxInfo(' Creating TargetReport: ' + target.getFriendlyName());
-      tRprt = tsx_TargetReport( target );
-      if( typeof tRprt == 'undefined' ) {
-        return {
-          ready: false,
-        };
-      }
-  }
 
   // var cTime = new Date();
   // tsxInfo('Current time: ' + cTime );
@@ -1725,10 +1717,10 @@ function isTargetConditionInValid(target) {
   tsxInfo( ' --- check stop conditions');
 
   // Were checks just run
-  let timeToCheck = tsx_GetServerStateValue('isTargetConditionInValidExpired');
+  let timeToCheck = tsx_GetServerStateValue( tsx_ServerStates.isTargetConditionInValidExpired );
   if( typeof timeToCheck == 'undefined') {
     timeToCheck = new Date();
-    tsx_SetServerState('isTargetConditionInValidExpired', timeToCheck );
+    tsx_SetServerState( tsx_ServerStates.isTargetConditionInValidExpired, timeToCheck );
   }
 
   // Only check ever minute
@@ -1744,7 +1736,7 @@ function isTargetConditionInValid(target) {
   }
   else {
     timeToCheck = new Date();
-    tsx_SetServerState('isTargetConditionInValidExpired', timeToCheck );
+    tsx_SetServerState( tsx_ServerStates.isTargetConditionInValidExpired, timeToCheck );
   }
 
   if( isSchedulerStopped() ) {
@@ -1762,7 +1754,7 @@ function isTargetConditionInValid(target) {
   }
   else {
     // Used to update the monitor, as it is this target to continue
-    tsx_SetServerState('scheduler_report', target.report );
+    tsx_SetServerState( tsx_ServerStates.scheduler_report, target.report );
   }
 
   // *******************************
@@ -1791,14 +1783,14 @@ function isTargetConditionInValid(target) {
 
   // *******************************
   // check if time to redo CLS
-  var isCLSRepeatEnabled = tsx_GetServerStateValue('isCLSRepeatEnabled');
+  var isCLSRepeatEnabled = tsx_GetServerStateValue( tsx_ServerStates.isCLSRepeatEnabled );
   if( isCLSRepeatEnabled === true ) {
     // now retry
-    var defaultCLSRepeat = tsx_GetServerState('defaultCLSRepeat');
+    var defaultCLSRepeat = tsx_GetServerState( tsx_ServerStates.defaultCLSRepeat );
     if( typeof defaultCLSRepeat === 'undefined' ) {
       tsxInfo( ' Check if to CLS again - needs a value.');
-      tsx_SetServerState('defaultCLSRepeat', 0); // default is off
-      defaultCLSRepeat = tsx_GetServerState('defaultCLSRepeat');
+      tsx_SetServerState( tsx_ServerStates.defaultCLSRepeat, 0); // default is off
+      defaultCLSRepeat = tsx_GetServerState( tsx_ServerStates.defaultCLSRepeat );
     }
 
     // only SetUpForImagingRun if greater than zero
@@ -1876,7 +1868,7 @@ function isDitheringNeeded (target ) {
   if( ditherAt <= 0 ) {
     return false;
   }
-  var lastDither = Number(tsx_GetServerStateValue('imagingSessionDither'));
+  var lastDither = Number(tsx_GetServerStateValue( tsx_ServerStates.imagingSessionDither ));
   var dCount = lastDither;; // +1;
   var doDither = (Math.round(dCount) >= Math.round(ditherAt));
   tsxInfo( ' --- check dithering needed: ' + doDither );
@@ -1888,7 +1880,7 @@ function tsx_dither( target ) {
   // tsxInfo('************************');
   var Out = false;
   var ditherTarget = targetDither( target );
-  var lastDither = Number(tsx_GetServerStateValue('imagingSessionDither'));
+  var lastDither = Number(tsx_GetServerStateValue( tsx_ServerStates.imagingSessionDither ));
   var doDither = isDitheringNeeded( target );
   if( ditherTarget > 0 ) {
     if( doDither ) { // adding a plus one so the zero works and if one is passed it will rung once.
@@ -1898,11 +1890,11 @@ function tsx_dither( target ) {
 
       var cmd = tsx_cmd('SkyX_JS_NewDither');
 
-      var pixelSize = tsx_GetServerStateValue('imagingPixelSize');
+      var pixelSize = tsx_GetServerStateValue( tsx_ServerStates.imagingPixelSize );
       tsxDebug(' *** pixelSize: ' + pixelSize);
-      var minDitherFactor = tsx_GetServerStateValue('minDitherFactor');
+      var minDitherFactor = tsx_GetServerStateValue( tsx_ServerStates.minDitherFactor );
       tsxDebug(' *** minDitherFactor: ' + minDitherFactor);
-      var maxDitherFactor = tsx_GetServerStateValue('maxDitherFactor');
+      var maxDitherFactor = tsx_GetServerStateValue( tsx_ServerStates.maxDitherFactor );
       tsxDebug(' *** maxDitherFactor: ' + maxDitherFactor);
 
       cmd = cmd.replace("$000", pixelSize ); // var pixelSize = $000; // 3.8;
@@ -1921,7 +1913,7 @@ function tsx_dither( target ) {
           // tsxLog('Dither success');
           UpdateStatus(' [DITHERED]' + target.getFriendlyName() +'');
           // dither succeeded so reset count
-          tsx_SetServerState('imagingSessionDither', 0);
+          tsx_SetServerState( tsx_ServerStates.imagingSessionDither, 0);
         }
         Out = true;
         tsx_is_waiting = false;
@@ -1935,7 +1927,7 @@ function tsx_dither( target ) {
     }
     else {
       // moved this line to happen right after taking a light Image
-      // tsx_SetServerState('imagingSessionDither', lastDither+1);
+      // tsx_SetServerState( tsx_ServerStates.imagingSessionDither, lastDither+1);
       tsxInfo(' ' + target.getFriendlyName() +': not dithering');
     }
   }
@@ -1965,14 +1957,14 @@ function tsx_TargetReport( target ) {
 
   // only get the new data if dirty or not existant
   var org_rpt = TargetReports.findOne({target_id: target._id });
-  var dirty = 'yes';
+  var dirty = true;
   if( typeof org_rpt == 'undefined' || org_rpt == '' ) {
-    updateTargetReport( target._id, 'dirty', 'yes' );
+    updateTargetReport( target._id, 'dirty', true );
   }
   else {
     dirty = org_rpt.dirty;
   }
-  if( dirty == ' no' ) {
+  if( dirty == false ) {
     update_monitor_coordinates( org_rpt, target.targetFindName );
     UpdateStatus( ' --- Reloaded ' + target.getFriendlyName() );
     return org_rpt;
@@ -1983,7 +1975,7 @@ function tsx_TargetReport( target ) {
   var cmd = tsx_cmd('SkyX_JS_TargetReport');
   cmd = cmd.replace('$000', target.targetFindName );
 
-  var sunAlt = tsx_GetServerStateValue( 'defaultMinSunAlt');
+  var sunAlt = tsx_GetServerStateValue( tsx_ServerStates.defaultMinSunAlt );
   if( typeof sunAlt === 'undefined'  || sunAlt == '') {
     // hard coded to ~ nautical twilight
     // #TODO put the sun altitude into Settings
@@ -2078,9 +2070,10 @@ function tsx_TargetReport( target ) {
             }
           }
         }
-        updateTargetReport( target._id, 'dirty', 'no' );
+        updateTargetReport( target._id, 'dirty', false );
         var rpt = TargetReports.findOne({target_id: target._id });
         update_monitor_coordinates( rpt, target.targetFindName );
+        target.report = rpt; // set the current target's report... does it pass back?
         Out=rpt;
         UpdateStatus( ' --- Refreshed ' + target.getFriendlyName()  );
       }
@@ -2100,7 +2093,7 @@ function tsx_MatchRotation( target ) {
   try {
     tsxInfo(' *** tsx_MatchRotation: ' + target.getFriendlyName());
 
-    var isEnabled = tsx_GetServerStateValue( 'isFOVAngleEnabled');
+    var isEnabled = tsx_GetServerStateValue( tsx_ServerStates.isFOVAngleEnabled );
     if( typeof isEnabled === 'undefined') {
       tsx_SetServerState( 'isFOVAngleEnabled', false );
       isEnabled = false; // assume within one degree default
@@ -2118,28 +2111,28 @@ function tsx_MatchRotation( target ) {
     }
 
     if( isEnabled && foundFOV ) {
-      var pixelSize = tsx_GetServerStateValue( 'imagingPixelSize');
+      var pixelSize = tsx_GetServerStateValue( tsx_ServerStates.imagingPixelSize );
       if( typeof pixelSize === 'undefined') {
         var str =  ' *** Rotating failed: fix by setting default image pixel size';
         UpdateStatusErr( str );
         tsxError( str );
         return rotateSucess;
       }
-      var focalLength = tsx_GetServerStateValue( 'imagingFocalLength');
+      var focalLength = tsx_GetServerStateValue( tsx_ServerStates.imagingFocalLength );
       if( typeof focalLength === 'undefined') {
         var str =  ' *** Rotating failed: fix by setting default focal length';
         UpdateStatusErr( str );
         tsxError( str );
         return rotateSucess;
       }
-      var fovExposure = tsx_GetServerStateValue( 'defaultFOVExposure');
+      var fovExposure = tsx_GetServerStateValue( tsx_ServerStates.defaultFOVExposure );
       if( typeof fovExposure === 'undefined') {
         tsx_SetServerState( 'fovExposure', 4 );
         var str = ' *** Rotating FIXED: set to a default 4 sec, check on default page';
         UpdateStatusErr( str );
         tsxWarn( str );
       }
-      var ACCURACY = tsx_GetServerStateValue( 'fovPositionAngleTolerance');
+      var ACCURACY = tsx_GetServerStateValue( tsx_ServerStates.fovPositionAngleTolerance );
       if( typeof ACCURACY === 'undefined') {
         ACCURACY = 1; // assume within one degree default
       }
@@ -2194,9 +2187,9 @@ export function tsx_RotateCamera( position, cls ) {
   tsxInfo(' *** tsx_RotateCamera: ' + position);
 
   let rotateSucess = false;
-  let fovExposure = tsx_GetServerStateValue( 'defaultFOVExposure');
-  let pixelSize = tsx_GetServerStateValue( 'imagingPixelSize');
-  let focalLength = tsx_GetServerStateValue( 'imagingFocalLength');
+  let fovExposure = tsx_GetServerStateValue( tsx_ServerStates.defaultFOVExposure );
+  let pixelSize = tsx_GetServerStateValue( tsx_ServerStates.imagingPixelSize );
+  let focalLength = tsx_GetServerStateValue( tsx_ServerStates.imagingFocalLength );
   if(
     typeof position === 'undefined' || position === ''
   ) {
@@ -2223,7 +2216,7 @@ export function tsx_RotateCamera( position, cls ) {
     UpdateStatusErr( str );
     tsxWarn( str );
   }
-  let ACCURACY = tsx_GetServerStateValue( 'fovPositionAngleTolerance');
+  let ACCURACY = tsx_GetServerStateValue( tsx_ServerStates.fovPositionAngleTolerance );
   if( typeof ACCURACY === 'undefined') {
     ACCURACY = 1; // assume within one degree default
     tsxWarn( " *** Using default accuracy of 1 degree" );
@@ -2487,7 +2480,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     // e.g.
-    // Success|RMS_ERROR=0.00|ROTATOR_POS_ANGLE=-350|ANGLE=349.468|FOCUS_POS=0.000
+    // macOS = Success|fileName=/Users/stephen/Library/Application Support/Software Bisque/TheSkyX Professional Edition/Camera AutoSave/Imager/April 26 2020/_R_1x1_2.000secs_0.00C_00000059.fit|ROTATOR_POS_ANGLE=0.000|focusTemp=0.000|FOCUS_POS=0|sunAltitude=-17.924|pointing=WestNaN53.787|ALT=60.059|RA=14.066|DEC=54.254|HA=-2.905|TRANSIT=1.049|avgPix=4045.1396484375|maxPix=15973
     tsxDebug(' TakeImage return: ' + tsx_return );
     if( tsx_has_error(tsx_return) == false ) {
       var results = tsx_return.split('|');
@@ -2595,8 +2588,8 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
 
           // increment Dither count
           if( frame == '1 ' ) { // 1 = Light
-            var lastDither = Number(tsx_GetServerStateValue('imagingSessionDither'));
-            tsx_SetServerState('imagingSessionDither', lastDither+1);
+            var lastDither = Number(tsx_GetServerStateValue( tsx_ServerStates.imagingSessionDither ));
+            tsx_SetServerState( tsx_ServerStates.imagingSessionDither, lastDither+1);
           }
         }
       }
@@ -2679,7 +2672,7 @@ function takeSeriesImage(target, series) {
   else {
     UpdateStatus( target.getFriendlyName() + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds: ' + num + '/' +series.repeat + ' COMPLETED' );
   }
-  var jid = tsx_GetServerState('runScheduler');
+  var jid = tsx_GetServerState( tsx_ServerStates.runScheduler );
   if( jid == '' ) {
     // the process was stopped...
     tsxInfo('Throwing in imaging...');
@@ -2867,7 +2860,7 @@ export function processTargetTakeSeries( target ) {
   }
 
   tsx_AbortGuider();
-  var filter = tsx_GetServerStateValue('defaultFilter');
+  var filter = tsx_GetServerStateValue( tsx_ServerStates.defaultFilter );
   UpdateStatus( ' === ' + target.getFriendlyName() + ": Target stopped");
   tsxLog( ' =============================== ');
   return;
@@ -2886,17 +2879,17 @@ export function prepareTargetForImaging( target, doRotator, doCalibration ) {
   else {
     UpdateImagingSesionID( target._id );
     UpdateStatus( ' '+ target.getFriendlyName() + ": SELECTED");
-    tsx_SetServerState('targetName', target.targetFindName);
+    tsx_SetServerState( tsx_ServerStates.targetName, target.targetFindName);
 
     var targetCoords = UpdateImagingTargetReport( target );
     var curDir = targetCoords.direction;
-    tsx_SetServerState('lastTargetDirection', curDir);
+    tsx_SetServerState( tsx_ServerStates.lastTargetDirection, curDir);
     UpdateStatus( ' '+ target.getFriendlyName() + ": pointing " + curDir);
 
     var ready = SetUpForImagingRun( target, doRotator, doCalibration );
     if( ready ) {
 //      var rpt = TargetReports.findOne({ target_id: target._id })
-      tsx_SetServerState('scheduler_report', target.report );
+      tsx_SetServerState( tsx_ServerStates.scheduler_report, target.report );
     }
     // So if the setup is "false"... then no target.... who is going to redirect...
     // the target selection needs to know this...
@@ -3014,6 +3007,9 @@ function isTargetComplete( target ) {
 // *************************** ***********************************
 // Assuming a time in seconds is provided and a Date Object
 export function hasTimePassed( duration, timestamp ) {
+  if( timestamp == '' || duration == '' ) {
+    return true;
+  }
   var now = new Date();
   var diff = parseInt(now - timestamp)/1000; // Difference in seconds
   if( diff >= duration) {
@@ -3106,6 +3102,7 @@ export function canTargetSessionStart( target ) {
   tsxInfo(' *** canTargetSessionStart: ' + target.getFriendlyName() );
 
   var result =  UpdateImagingTargetReport( target );
+  // The problem is the new report is not used if it is updated!!!
   if( !result.ready ) {
     tsxInfo( ' !!! Target not found: ' + target.getFriendlyName() );
     return false;
@@ -3194,7 +3191,7 @@ Meteor.methods({
 
   // **************************************************************
   connectToTSX() {
-    tsx_SetServerState( 'tool_active', true );
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
 
     tsxInfo(' ******************************* ');
     UpdateStatus(' Refreshing Devices...');
@@ -3213,7 +3210,7 @@ Meteor.methods({
       }
     }
     finally {
-      tsx_SetServerState( 'tool_active', false );
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
     }
    },
 
@@ -3228,7 +3225,7 @@ Use this to set the last focus
   // **************************************************************
   // Used to pass RA/DEC to target editors
   targetFind(tid) {
-    tsx_SetServerState( 'tool_active', true );
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
     var target = TargetSessions.findOne({_id: tid});
     tsxInfo('************************');
     // tsxInfo(' *** targetFind: ' + target.targetFindName);
@@ -3243,7 +3240,7 @@ Use this to set the last focus
       }
     }
     finally {
-      tsx_SetServerState( 'tool_active', false );
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
     }
     return res;
 
@@ -3253,7 +3250,7 @@ Use this to set the last focus
   // **************************************************************
   // Used to pass RA/DEC to target editors
   getTSXFrameCentre( tid ) {
-    tsx_SetServerState( 'tool_active', true );
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
 
     tsxInfo('************************');
     tsxInfo(' *** getTSXFrameCentre');
@@ -3267,7 +3264,7 @@ Use this to set the last focus
       }
     }
     finally {
-      tsx_SetServerState( 'tool_active', false );
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
     }
     return res;
 
@@ -3420,7 +3417,7 @@ Use this to set the last focus
   centreTarget( tid ) {
     var target = TargetSessions.findOne({_id: tid});
 
-    tsx_SetServerState( 'tool_active', true );
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
     UpdateStatus( ' TOOLBOX: centring (CLS) ' + target.getFriendlyName() );
     var result =  '';
     try {
@@ -3437,11 +3434,11 @@ Use this to set the last focus
     catch( e )  {
       if( e == 'TsxError' ) {
         UpdateStatus('!!! TheSkyX connection is no longer there!');
-        tsx_SetServerState( 'tool_active', false );
+        tsx_SetServerState( tsx_ServerStates.tool_active, false );
       }
     }
     finally {
-      tsx_SetServerState( 'tool_active', false );
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
     }
     return result;
   },
@@ -3450,7 +3447,7 @@ Use this to set the last focus
   getTargetReport( tid ) {
     var target = TargetSessions.findOne({_id: tid});
 
-    tsx_SetServerState( 'tool_active', true );
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
     UpdateStatus( ' Getting report : ' + target.getFriendlyName() );
     try {
       var result = tsx_TargetReport( target );
@@ -3462,13 +3459,13 @@ Use this to set the last focus
       }
     }
     finally {
-      tsx_SetServerState( 'tool_active', false );
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
     }
     return;
   },
 
   getTargetReports( targetArray ) {
-    tsx_SetServerState( 'tool_active', true );
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
     try {
       for (let i = 0; i < targetArray.length; i++) {
         let target = TargetSessions.findOne({_id: targetArray[i]._id });
@@ -3484,13 +3481,13 @@ Use this to set the last focus
       }
     }
     finally {
-      tsx_SetServerState( 'tool_active', false );
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
     }
     return;
   },
 
   refreshEnabledTargetReports() {
-    tsx_SetServerState( 'tool_active', true );
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
     UpdateStatus( ' Refreshing targets' );
     try {
       let targets = TargetSessions.find({ isCalibrationFrames: false, enabledActive: true }).fetch();
@@ -3509,13 +3506,13 @@ Use this to set the last focus
       }
     }
     finally {
-      tsx_SetServerState( 'tool_active', false );
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
     }
   },
 
   park( ) {
-    tsx_SetServerState( 'tool_active', true );
-    let filter = tsx_GetServerStateValue('defaultFilter');
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
+    let filter = tsx_GetServerStateValue( tsx_ServerStates.defaultFilter );
     let result = '';
     try {
       result = tsx_MntPark(filter, false ); // use default filter
@@ -3526,7 +3523,7 @@ Use this to set the last focus
       }
     }
     finally {
-      tsx_SetServerState( 'tool_active', false );
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
     }
     return result;
   }

@@ -59,16 +59,6 @@ class Target extends Component {
   state = {
     modalOpen: false,
     enabledActive: false,
-    isCalibrationFrames: false,
-    ra: '0',
-    dec: '0',
-    altitude: '0',
-    azimuth: '0',
-    currentAlt: '',
-    HA: '',
-
-    description: '',
-    priority: 10,
     activeIndex: 0,
   }
 
@@ -89,17 +79,6 @@ class Target extends Component {
      const newIndex = activeIndex === index ? -1 : index
 
      this.setState({ activeIndex: newIndex })
-  }
-
-  componentWillMount() {
-    // do not modify the state directly
-  }
-
-  componentDidMount() {
-
-  }
-
-  componentWillReceiveProps(nextProps) {
   }
 
   eraseProgress() {
@@ -128,74 +107,12 @@ class Target extends Component {
       Meteor.call( 'getUpdateTargetReport', this.props.target._id , function(error, result) {
 
         if( typeof result != 'undefined') {
-          this.updateMonitor(result);
         }
 
       }.bind(this));
     } catch (e) {
 
     }
-  }
-
-  updateMonitor(report) {
-
-    if( typeof report != 'undefined' && report != '') {
-      this.setState({
-        currentAlt: report.ALT,
-      });
-    }
-  }
-
-  copyEntry() {
-    // console.log('In the DefineTemplate editEntry');
-
-    orgTarget = this.props.target;
-
-    // get the id for the new object
-    const id = TargetSessions.insert(
-      {
-        name: orgTarget.name + ' Duplicated',
-        targetFindName: orgTarget.targetFindName,
-        targetImage: orgTarget.targetImage,
-        description: 'DUPLICATED: ' + orgTarget.description,
-        enabledActive: false,
-        isCalibrationFrames: orgTarget.isCalibrationFrames,
-        series: {
-          _id: orgTarget.series._id,
-          value: orgTarget.series.text,
-        },
-        progress: [
-//            {_id: seriesId, taken:0},
-        ],
-        report_d: orgTarget.report_id,
-        ra: orgTarget.ra,
-        dec: orgTarget.dec,
-        angle: orgTarget.angle,
-        scale: orgTarget.scale,
-        coolingTemp: orgTarget.coolingTemp,
-        clsFliter: orgTarget.clsFliter,
-        focusFliter: orgTarget.focusFliter,
-        foccusSamples: orgTarget.foccusSamples,
-        focusBin: orgTarget.focusBin,
-        focusTarget: orgTarget.focusTarget,
-        focusExposure: Number(this.props.target.focusExposure),
-        guideExposure: orgTarget.guideExposure,
-        guideDelay: orgTarget.guideDelay,
-        startTime: orgTarget.startTime,
-        stopTime: orgTarget.stopTime,
-        priority: orgTarget.priority,
-        tempChg: orgTarget.tempChg,
-        currentAlt: orgTarget.currentAlt,
-        minAlt: orgTarget.minAlt,
-        report: '',
-
-        completed: orgTarget.completed,
-        createdAt: orgTarget.createdAt,
-      }
-    )
-    // do not copy series progress
-    this.forceUpdate();
-
   }
 
   startImaging() {
@@ -261,7 +178,7 @@ class Target extends Component {
           <Button icon='location arrow' onClick={this.clsTarget.bind(this)}/>
           <Button icon='repeat' onClick={this.eraseProgress.bind(this)}/>
           {/* <Button icon='edit' onClick={this.editEntry.bind(this)}/> */}
-          {/* <Button icon='copy' onClick={this.copyEntry.bind(this)}/> */}
+          {/* <Button icon='copy' onClick={copyTarget.bind(this)}/> */}
           <Button icon='delete' onClick={this.deleteEntry.bind(this)}/>
         </Button.Group>
       )
@@ -277,7 +194,7 @@ class Target extends Component {
   seriesDetails() {
     var tSeries = TakeSeriesTemplates.findOne({_id: this.props.target.series._id});
     if( typeof tSeries != 'undefined') {
-      return seriesDescription(tSeries);
+      return seriesDescription(this.props.target.series._id);
     }
   }
 
@@ -290,64 +207,14 @@ class Target extends Component {
       )
     }
 
-    let ENABLEACTIVE ='';
-    let CALIBRATION = '';
-    let TOOL_ACTIVE = false;
-    let ALT = '';
-    let HA = '';
-    let TRANSIT = '';
-    let RA = '';
-    let DEC = '';
-    let POINT = '';
-    let MAXALT = '';
-    try {
-      ENABLEACTIVE = this.props.target.enabledActive;
-      CALIBRATION = this.props.target.isCalibrationFrames;
-      TOOL_ACTIVE = this.props.tool_active.value;
-      MAXALT = Number(this.props.report.maxAlt).toFixed(3);
-      ALT = Number(this.props.report.ALT).toFixed(3);
-      HA = Number(this.props.report.HA).toFixed(3);
-      TRANSIT = Number(this.props.report.TRANSIT).toFixed(3);
-      RA = Number(this.props.report.RA).toFixed(3);
-      DEC = Number(this.props.report.DEC).toFixed(3);
-      POINT = this.props.report.direction;
-    } catch (e) {
-      ENABLEACTIVE = this.state.enabledActive;
-      CALIBRATION = this.state.isCalibrationFrames;
-      TOOL_ACTIVE = false;
+    var ENABLEACTIVE = this.props.target.enabledActive;
+    var TOOL_ACTIVE = this.props.tool_active.value;
 
-      ALT = '';
-      HA = '';
-      TRANSIT = '';
-      RA = '';
-      DEC = '';
-      POINT = '';
-      MAXALT = '';
-    }
-
-    let DTIME = '';
-    try {
-      let year = this.props.report.updatedAt.getFullYear();
-      let mon = Number(this.props.report.updatedAt.getMonth())+1; // needed to pull out so not a string
-      let MM = ('0'  + mon ).slice(-2); // 0-11, so plus 1
-      let day = ('0'  + this.props.report.updatedAt.getDate()).slice(-2);
-      let hours = ('0'  + this.props.report.updatedAt.getHours()).slice(-2);
-      let minutes = ('0'  + this.props.report.updatedAt.getMinutes()).slice(-2);
-      DTIME = hours + ':' + minutes + ', ' + year +'-'+MM+'-'+day;
-    }
-    catch( e ) {
-    }
-    finally {
-      //
-    }
+    var MAXALT = Number(this.props.target.report.maxAlt).toFixed(2);
+    var SERIES_DESCRIPTION = seriesDescription(this.props.target.series._id);
+    var TARGET_NAME = this.props.target.getFriendlyName();
 
     const { activeIndex } = this.state
-    var TARGET_NAME = '';
-    if( this.props.target.friendlyName != '' && typeof this.props.target.friendlyName !='undefined' ) {
-      TARGET_NAME = this.props.target.friendlyName;
-    } else {
-      TARGET_NAME = this.props.target.targetFindName;
-    }
 
     return (
       <Accordion styled fluid>
@@ -391,7 +258,7 @@ class Target extends Component {
                 <Statistic.Value>{MAXALT}</Statistic.Value>
               </Statistic>
             </small>
-            <br/><small><Label>{this.seriesDetails()}</Label></small>
+            <br/><small><Label>{SERIES_DESCRIPTION}</Label></small>
           </Segment>
           <center>
           </center>

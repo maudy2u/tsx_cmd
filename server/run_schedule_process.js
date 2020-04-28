@@ -90,12 +90,12 @@ import {
  } from './main.js'
 
  export function getSchedulerState() {
-   var state = tsx_GetServerStateValue('scheduler_running');
+   var state = tsx_GetServerStateValue( tsx_ServerStates.scheduler_running );
    return state;
  }
 
  export function setSchedulerState( value ) {
-   tsx_SetServerState('scheduler_running', value);
+   tsx_SetServerState(tsx_ServerStates.scheduler_running, value);
  }
 
  export function runSchedulerProcess() {
@@ -115,7 +115,7 @@ import {
        tsxLog( '  ###############################  ');
        // This will only be called if a 'runScheduler' job is obtained
        setSchedulerState( 'Running' );
-       tsx_SetServerState('runScheduler', job);
+       tsx_SetServerState(tsx_ServerStates.runScheduler, job);
 
        UpdateStatus(' SCHEDULER STARTED');
        var schedule = job.data;
@@ -236,6 +236,7 @@ import {
              }
              // No target found so sleep and try again...
              else {
+               tsxDebug( ' NO TARGETS READY SO PARKING MOUNT');
                ParkMount( isParked );
                isParked = true;
                sleepScheduler( isParked );
@@ -243,6 +244,7 @@ import {
            }
            // Scheduler stopped so park
            else {
+             tsxDebug( ' target is undefined or schedule is stopped');
              ParkMount( isParked );
              isParked = true;
              // no target found... so sleep and check again...
@@ -252,6 +254,7 @@ import {
 
            // Check if sun is up and no cal frames
            if( (!isDarkEnough()) && isSchedulerStopped() == false ) {
+             tsxDebug( ' not dark enough or schedule is stopped');
              ParkMount( isParked );
              isParked = true;
              var approachingDawn = isTimeBeforeCurrentTime('3:00');
@@ -259,11 +262,11 @@ import {
              // var stillDaytime = isTimeBeforeCurrentTime('15:00');
              // tsxInfo( ' Is stillDaytime: ' + stillDaytime);
              if( approachingDawn ) {
-               var defaultFilter = tsx_GetServerStateValue('defaultFilter');
+               var defaultFilter = tsx_GetServerStateValue( tsx_ServerStates.defaultFilter );
                var softPark = false;
                tsx_AbortGuider();
                tsx_MntPark(defaultFilter, softPark);
-               var defaultMinSunAlt = tsx_GetServerStateValue('defaultMinSunAlt');
+               var defaultMinSunAlt = tsx_GetServerStateValue( tsx_ServerStates.defaultMinSunAlt );
                UpdateStatus( ' Scheduler stopped: sun rose above limit ' + defaultMinSunAlt);
                break;
              }
@@ -282,7 +285,8 @@ import {
 }
 
 function sleepScheduler( isParked ) {
-  var sleepTime = tsx_GetServerStateValue('defaultSleepTime');
+  var sleepTime = tsx_GetServerStateValue( tsx_ServerStates.defaultSleepTime );
+  tsxDebug( ' SLEEPING.')
   if( isParked == false ) {
     ParkMount( isParked );
   }

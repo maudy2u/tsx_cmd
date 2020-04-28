@@ -18,8 +18,6 @@ tsx cmd - A web page to send commands to TheSkyX server
 
 import { Mongo } from 'meteor/mongo';
 import { TargetSessions } from './targetSessions.js'
-//import { Seriess } from './seriess.js'
-// import SimpleSchema from 'simple-schema';
 
 // Used to store the sessions for a Target - the actual imaging
 export const TargetReports = new Mongo.Collection('targetReports');
@@ -50,10 +48,16 @@ TargetReports = {
 };
  */
 
- export function addTargetReport( fid ) {
-   const id  = TargetReports.insert(
+export function removeTargetReport( tid ) {
+  TargetReports.remove({ target_id: tid });
+}
+
+ export function initTargetReport( tid ) {
+
+   // Setup one to one
+   var rid  = TargetReports.insert(
      {
-       target_id: fid,
+       target_id: tid,
        ALT: 0,
        AZ: 0,
        RA: 0,
@@ -73,9 +77,11 @@ TargetReports = {
        ready: '',
        readyMsg: '',
        ROTATOR_POS_ANGLE: '',
-     },
+       maxAlt: '',
+       dirty: true,
+     }
    );
-   return id;
+   return rid;
  }
 
 
@@ -86,7 +92,7 @@ TargetReports = {
    var id;
    var obj = TargetReports.findOne({target_id: tid});
    if( typeof obj == 'undefined' ) {
-     var new_id = addTargetReport(tid);
+     var new_id = initTargetReport(tid);
      obj = TargetReports.findOne({_id: new_id});
    }
    if( typeof obj != 'undefined') {
@@ -156,6 +162,9 @@ TargetReports = {
      else if( name == 'ready') {
        obj.ready = value;
      }
+     else if( name == 'dirty') {
+       obj.dirty = value;
+     }
      else if( name == 'readyMsg') {
        obj.readyMsg = value;
      }
@@ -187,11 +196,11 @@ TargetReports = {
          maxAlt: obj.maxAlt,
          RMS_ERROR: obj.RMS_ERROR,
          ROTATOR_POS_ANGLE: obj.ROTATOR_POS_ANGLE,
+         dirty: obj.dirty,
        }
      });
      TargetSessions.update({_id: tid} , {
        $set: {
-         report_id: obj._id,
          report: obj,
        }
      });

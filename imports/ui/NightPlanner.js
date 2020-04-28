@@ -202,7 +202,6 @@ class NightPlanner extends Component {
   renderTargetRow( DATA, colHours ) {
 
     let Out = [];
-    console.log ( DATA.length);
     for( let i=0; i<DATA.length; i ++ ) {
       let obj = DATA[i];
       if( typeof obj == 'undefined' ) {
@@ -214,7 +213,6 @@ class NightPlanner extends Component {
       }
       // *******************************
       // realy target to work with
-      console.log(' searching for: ' + obj.passthru )
       let target = TargetSessions.findOne({_id:obj.passthru});
       if( typeof target != 'undefined' && target != '') {
         let nam = target.friendlyName;
@@ -269,19 +267,6 @@ class NightPlanner extends Component {
           colour = 'green';
         }
         var note = '';
-        console.log(
-          'ref='+ref
-          +', name='+oName
-          +', start='+sTime
-          +', end='+eTime
-          +', rise='+rise
-          +', down='+down
-          +' hr='+hr
-          +' dHr='+dHr
-          +' rHr='+rHr
-          +' startHr='+startHr
-          +' endHr='+endHr
-        )
 
         if( j == 0 ) {
           note = oName;

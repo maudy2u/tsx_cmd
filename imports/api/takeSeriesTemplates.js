@@ -137,8 +137,11 @@ export function updateTakeSeriesTemplate( fid, name, value ) {
 }
 
 
-export function seriesDescription( template ) {
-
+export function seriesDescription( sid ) {
+    var template = TakeSeriesTemplates.findOne({_id: sid });
+    if( typeof template == 'undefined' || template == '' ) {
+      return 'PLEASE ASSIGN A TAKE SERIES';
+    }
     // CURRENTLY: 0:33x3s, 1:33x3s, 2:33x3s, 3:33x3s
     // WANT: LIGHT:LUM@33X3S
     let seriesArray = template.series;

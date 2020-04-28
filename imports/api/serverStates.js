@@ -71,8 +71,8 @@ export const tsx_ServerStates = {
   imagingBinning: 'imagingBinning',
   defaultUseImagingCooler_enabled: 'defaultUseImagingCooler_enabled',
   defaultCoolTemp: 'defaultCoolTemp',
-  defaultMinAltitude: 'defaultMinAltitude',
-  defautMinAlt: 'defautMinAlt',
+  defaultMinAltitude: 'defaultMinAltitude', // used for scheduling
+  //defautMinAlt: 'defautMinAlt', deprecated
   defaultFocusTemp: 'defaultFocusTemp',
 
   // Dithering related states

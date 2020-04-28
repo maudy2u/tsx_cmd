@@ -90,38 +90,6 @@ class TakeSeries extends Component {
     this.editOpen();
   }
 
-  copyEntry() {
-    console.log('In the DefineTemplate copyEntry');
-
-    orgSeries = this.props.seriesTemplate;
-
-    // get the id for the new object
-    const id = TakeSeriesTemplates.insert(
-      {
-        name: orgSeries.name + ' Duplicated',
-        description: orgSeries.description,
-        processSeries: orgSeries.processSeries,
-        defaultDithering: orgSeries.defaultDithering,
-        repeatSeries: orgSeries.repeatSeries,
-        createdAt: new Date(),
-        series: [],
-      }
-    )
-
-    var series = orgSeries.series;
-    for (var i = 0; i < series.length; i++) {
-      seriesMap = series[i];
-      TakeSeriesTemplates.update({_id: id}, {
-        $push: { 'series': seriesMap },
-      });
-    }
-  }
-
-  seriesDetails() {
-
-    return seriesDescription( this.props.seriesTemplate );
-  }
-
   canHeaderClick( state, active ) {
     if( state == 'Stop' && active == false ) {
       return this.editEntry.bind(this);

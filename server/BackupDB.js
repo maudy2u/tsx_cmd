@@ -224,12 +224,12 @@ Meteor.methods({
       UpdateStatus( ' Restore FAILED: ' + e );
     }
     finally {
-      tsx_SetServerState( 'tool_active', false );
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
     }
   },
 
   GetBackupOfDatabase() {
-    tsx_SetServerState( 'tool_active', true );
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
 
     // run the shell Script
     // Run external tool synchronously
@@ -301,7 +301,7 @@ Meteor.methods({
       UpdateStatus( ' Backup FAILED: ' + e );
     }
     finally {
-      tsx_SetServerState( 'tool_active', false );
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
     }
   },
 

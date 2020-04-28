@@ -32,11 +32,11 @@ import {
 
 export function TargetPlans() {
   // Get the users planned Sun Altitude limit times
-  let DEFMINALT = tsx_GetServerStateValue('defaultMinAlt');
+  let DEFMINALT = tsx_GetServerStateValue( tsx_ServerStates.defaultMinAlt );
   if( DEFMINALT == '' || typeof DEFMINALT == 'undefined') {
     DEFMINALT = 45;
   }
-  let SUNALT = tsx_GetServerStateValue('defaultMinSunAlt');
+  let SUNALT = tsx_GetServerStateValue( tsx_ServerStates.defaultMinSunAlt );
   if( SUNALT == '' || typeof SUNALT == 'undefined') {
     SUNALT = -12; // Use Nautical Twilight
   }
@@ -95,11 +95,11 @@ export function tsx_AltTimesForTargets( targets ) {
   let Out = [];
   let tsx_is_waiting = true;
 
-  let STARTTIME = tsx_GetServerStateValue('defaultStartTime');
+  let STARTTIME = tsx_GetServerStateValue( tsx_ServerStates.defaultStartTime );
   if( STARTTIME == '' || typeof STARTTIME == 'undefined') {
     STARTTIME = '18:00'; // Nautical Twilight
   }
-  let ENDTIME = tsx_GetServerStateValue('defaultStopTime');
+  let ENDTIME = tsx_GetServerStateValue( tsx_ServerStates.defaultStopTime );
   if( ENDTIME == '' || typeof ENDTIME == 'undefined') {
     ENDTIME = '6:00'; // Nautical Twilight
   }
@@ -175,17 +175,17 @@ export function tsx_AltTimesForTargets( targets ) {
   if( tsx_err != false ) {
     throw( 'TSX_ERROR|Is Tsx Running?');
   }
-  tsx_SetServerState( 'night_plan', Out );
+  tsx_SetServerState( tsx_ServerStates.night_plan, Out );
   return Out;
 }
 
 Meteor.methods({
 
   planData() {
-    tsx_SetServerState( 'night_plan_report', true );
+    tsx_SetServerState( tsx_ServerStates.night_plan_report, true );
     tsxInfo( ' --- Night Plan: Computing');
     let plan = TargetPlans();
-    tsx_SetServerState( 'night_plan_report', true );
+    tsx_SetServerState( tsx_ServerStates.night_plan_report, true );
     tsxInfo( ' --- Night Plan: Loaded');
     return plan;
   },

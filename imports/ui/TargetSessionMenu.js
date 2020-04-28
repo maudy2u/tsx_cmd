@@ -37,6 +37,7 @@ import {
   TargetSessions,
   addNewTargetSession,
  } from '../api/targetSessions.js';
+import { TargetReports } from '../api/targetReports.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 
 import TargetEditor from './TargetEditor.js';
@@ -180,7 +181,7 @@ class TargetSessionMenu extends Component {
     <Button disabled compact  />
     <Button disabled={DISABLE} icon='play'  onClick={this.playScheduler.bind(this)}/>
     <Button disabled={NOT_DISABLE} icon='stop' onClick={this.stopScheduler.bind(this)} />
-    
+
      */
     return (
       <Button.Group>
@@ -267,7 +268,7 @@ class TargetSessionMenu extends Component {
         </Table>
         <br />
         {this.props.targets.map((target)=>{
-          let report = this.props.target_reports.find(function(element) {
+          let report = TargetReports.find(function(element) {
             return element.target_id == target._id;});
 
           if( typeof this.state.value != 'undefined' && this.state.value != '' ){

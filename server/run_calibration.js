@@ -77,7 +77,7 @@ import {
 const settlePanel = 3*1000; // seconds
 
 export function collect_calibration_images() {
-  tsx_SetServerState( 'tool_active', true );
+  tsx_SetServerState( tsx_ServerStates.tool_active, true );
 
   // Confirm TheSkyX is running
   // if( tsx_Connect() != true ) {
@@ -88,10 +88,10 @@ export function collect_calibration_images() {
   // Confirm TheSkyX is Running
   let cf; // get the enabled calibration calibrations
   cf = CalibrationFrames.find({ on_enabled: true }, { sort: { order: 1 } }).fetch();
-  var fp_enabled = tsx_GetServerStateValue( 'flatbox_enabled');
+  var fp_enabled = tsx_GetServerStateValue( tsx_ServerStates.flatbox_enabled);
   if( fp_enabled == '' ) {
     fp_enabled = false;
-    tsx_SetServerState('flatbox_enabled', false);
+    tsx_SetServerState( tsx_ServerStates.flatbox_enabled, false);
     tsxLog( ' Flatbox: turned off by default')
   }
   if( fp_enabled ) {
@@ -155,7 +155,7 @@ export function collect_calibration_images() {
  //   Meteor.sleep(settlePanel);
   }
 
-  tsx_SetServerState( 'tool_active', false );
+  tsx_SetServerState( tsx_ServerStates.tool_active, false );
 }
 
 //var aFrame = $002; //  cdLight =1, cdBias, cdDark, cdFlat
@@ -164,7 +164,7 @@ function takeCalibrationImages( cal ) {
   var filter = getFilterSlot( cal.filter );
   var exposure = cal.exposure;
   var tName = cal.subFrameTypes;
-  var delay = tsx_GetServerStateValue( 'flatbox_camera_delay' );
+  var delay = tsx_GetServerStateValue( tsx_ServerStates.flatbox_camera_delay );
   var binning =cal.binning;
   var ccdTemp = cal.ccdTemp;
   tsxDebug( ' Calibration: filter=' +filter +', exposure=' + exposure +', frame=' + frame +', name=' + tName + ', delay=' + delay+ ', binning=' + binning+ ', ccdTemp=' + ccdTemp);

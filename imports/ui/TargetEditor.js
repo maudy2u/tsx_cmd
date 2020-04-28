@@ -23,6 +23,7 @@ import ReactDOM from 'react-dom';
 import { withTracker } from 'meteor/react-meteor-data';
 
 import { Filters } from '../api/filters.js';
+import { TargetReports } from '../api/targetReports.js';
 import { TargetSessions } from '../api/targetSessions.js';
 import {
   TakeSeriesTemplates,
@@ -104,6 +105,7 @@ class TargetEditor extends Component {
       friendlyName: this.props.target.friendlyName,
       setSkysetFile_id: this.props.target.setSkysetFile_id,
       enabledActive: this.props.target.enabledActive,
+
       series: {
         _id: this.props.target.series._id,
         value: this.props.target.series.text,
@@ -112,7 +114,6 @@ class TargetEditor extends Component {
   //            {_id: seriesId, taken:0},
       ],
       series_id:this.props.target.series_id,
-      report_d: this.props.target.report_id,
       ra: this.props.target.ra,
       dec: this.props.target.dec,
       angle: this.props.target.angle,
@@ -133,7 +134,7 @@ class TargetEditor extends Component {
       tempChg: this.props.target.tempChg,
       currentAlt: Number(this.props.target.currentAlt),
       minAlt: Number(this.props.target.minAlt),
-      report: '',
+      report: this.props.target.report,
     };
 
     this.uploadIt = this.uploadIt.bind(this);
@@ -175,16 +176,13 @@ class TargetEditor extends Component {
 
        // These are the event functions, don't need most of them, it shows where we are in the process
        uploadInstance.on('start', function () {
-         console.log('Starting');
        })
        uploadInstance.on('end', function (error, fileObj) {
-         console.log('On end File Object: ', fileObj);
          alert('File "' + fileObj.name + '" successfully uploaded');
          // self.forceUpdate();
        });
 
        uploadInstance.on('uploaded', function (error, fileObj) {
-         console.log('uploaded: ', fileObj);
 
          // Remove the filename from the upload box
          // this line cause an exception... why...
@@ -204,7 +202,6 @@ class TargetEditor extends Component {
        });
 
        uploadInstance.on('progress', function (progress, fileObj) {
-         console.log('Upload Percentage: ' + progress)
          // Update our progress bar
          self.setState({
            progress: progress
@@ -217,8 +214,6 @@ class TargetEditor extends Component {
   }
 
   showUploads() {
-   console.log('**********************************', this.state.uploading);
-
    if (this.state.uploading.length > 0) {
      return
      <div>
@@ -242,7 +237,6 @@ class TargetEditor extends Component {
    }
   }
 
-  //console.log("Rendering FileUpload",this.props.sDocsReadyYet);
   displayFiles() {
     if (this.props.sFiles && this.props.sDocsReadyYet) {
 
@@ -293,7 +287,6 @@ class TargetEditor extends Component {
   handleClose = () => this.setState({ modalOpen: false });
   handleChange = (e, { name, value }) => {
     this.setState({ [name]: value.trim() });
-//    console.log( this.props.target._id + ', ' + name + ', ' + value )
     updateTargetStateValue( this.props.target._id, name, value );
   };
 
@@ -382,7 +375,6 @@ class TargetEditor extends Component {
     //            {_id: seriesId, taken:0},
         ],
 
-        report_d: this.props.target.report_id,
         ra: this.props.target.ra,
         dec: this.props.target.dec,
         angle: this.props.target.angle,
@@ -403,7 +395,7 @@ class TargetEditor extends Component {
         tempChg: this.props.target.tempChg,
         currentAlt: Number(this.props.target.currentAlt),
         minAlt: Number(this.props.target.minAlt),
-        report: '',
+        report: this.props.target.report,
       })
     }
   }
@@ -437,19 +429,11 @@ class TargetEditor extends Component {
     this.setState({dec: ''});
     this.setState({alt: ''});
 
-    // console.log('targetFind: ' + this.props.target.targetFindName );
     Meteor.call(
       'targetFind',
       this.props.target._id ,
       function ( error, result ) {
 
-//    Meteor.call("targetFind", this.state.targetFindName , function(error, result) {
-      // identify the error
-      // console.log('Error: ' + error);
-      // console.log('result: ' + result);
-      // if success then TheSkyX has made this point the target...
-      // now get the coordinates
-      //cmdSuccess = true;
       this.setState({ra: result.RA});
       this.setState({dec: result.DEC});
       this.setState({alt: result.ALT});
@@ -461,7 +445,6 @@ class TargetEditor extends Component {
     this.setState({dec: ''});
     this.setState({alt: ''});
 
-    // console.log('targetFind: ' + this.props.target.targetFindName );
     Meteor.call(
       'getTSXFrameCentre',
       this.props.target._id ,
@@ -470,9 +453,7 @@ class TargetEditor extends Component {
   }
 
   getSkySafariSkySet( tid, sid ) {
-    console.log('getSkySafariSkySet: ' + tid +', '+ sid );
     Meteor.call( 'AssignSkySafariToTarget', tid, sid, function ( error, skyset ) {
-
       console.log( ' *** skyset: ' +skyset.ra + ', ' + skyset.dec + ', ' + skyset.pa );
 
     }.bind(this));
@@ -538,15 +519,6 @@ class TargetEditor extends Component {
 
     var SKYSETS = getSkySetsDropDown();
     var SKYSET_NAME = getSkySafariSkySetName(setSkysetFile_id);
-    console.log( ' SKYSET_NAME='+SKYSET_NAME);
-    console.log( ' setSkysetFile_id='+setSkysetFile_id);
-    // let styles = {
-    //    heading: {
-    //      fontColor: '#5FB343'
-    //    }
-    // }
-    // *******************************
-    // this is not the render return... scroll down...
     const panes = [
       // *******************************
       // name for the Target session

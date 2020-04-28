@@ -61,7 +61,6 @@ import {
   tsx_Disconnect,
   tsx_MntPark,
   tsx_AbortGuider,
-  getValidTargetSession,
   prepareTargetForImaging,
   processTargetTakeSeries,
   tsx_ServerIsOnline,
@@ -91,7 +90,7 @@ import shelljs from 'shelljs';
 const Shelljs = require('shelljs');
 
 function flatbox_srv() {
-  var addr = tsx_GetServerStateValue( 'flatbox_ip');
+  var addr = tsx_GetServerStateValue( tsx_ServerStates.flatbox_ip);
   if( addr == '' || typeof addr == 'undefined') {
     addr = '127.0.0.1';
     tsx_UpdateServerState( 'flatbox_ip', addr);
@@ -100,7 +99,7 @@ function flatbox_srv() {
 }
 
 function flat_device() {
-  var addr = tsx_GetServerStateValue( 'flatbox_device');
+  var addr = tsx_GetServerStateValue( tsx_ServerStates.flatbox_device);
   if( addr == '' || typeof addr == 'undefined') {
     addr = 'ttyARTESKYFLAT';
     tsx_UpdateServerState( 'flatbox_device', addr);
@@ -109,7 +108,7 @@ function flat_device() {
 }
 
 function flat_enabled() {
-  var addr = tsx_GetServerStateValue( 'flatbox_enabled');
+  var addr = tsx_GetServerStateValue( tsx_ServerStates.flatbox_enabled);
   if( addr == '' || typeof addr == 'undefined') {
     addr = false;
     tsx_UpdateServerState( 'flatbox_enabled', addr);

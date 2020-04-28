@@ -59,7 +59,6 @@ import {
   tsx_Disconnect,
   tsx_MntPark,
   tsx_AbortGuider,
-  getValidTargetSession,
   prepareTargetForImaging,
   processTargetTakeSeries,
   tsx_ServerIsOnline,
@@ -106,29 +105,29 @@ isCurrentlyImaging: 'isCurrentlyImaging',
  export function srvStopScheduler() {
    CleanUpJobs();
    UpdateImagingSesionID( '' );
-   tsx_SetServerState('targetName', 'No Active Target');
-   tsx_SetServerState('scheduler_report', '');
+   tsx_SetServerState(tsx_ServerStates.targetName, 'No Active Target');
+   tsx_SetServerState(tsx_ServerStates.scheduler_report, '');
    setSchedulerState('Stop' );
  }
 
 function initServerStates() {
-  tsx_SetServerState('activeMenu', 'Settings');
-  tsx_SetServerState('mntMntDir', '');
-  tsx_SetServerState('mntMntAlt', '');
-  tsx_SetServerState('targetRA', '');
-  tsx_SetServerState('targetDEC', '');
-  tsx_SetServerState('targetALT', '');
-  tsx_SetServerState('targetAZ', '');
-  tsx_SetServerState('targetHA', '');
-  tsx_SetServerState('targetTransit', '');
-  tsx_SetServerState('lastTargetDirection', '');
-  tsx_SetServerState('lastCheckMinSunAlt', '');
-  // tsx_SetServerState('lastFocusPos', '');
-  // tsx_SetServerState('lastFocusTemp', '');
-  tsx_SetServerState('imagingSessionDither', 0);
-  tsx_SetServerState('tool_active', false );
-  tsx_SetServerState('currentSessionReport', '' );
-  tsx_SetServerState('night_plan_reset', true );
+  tsx_SetServerState(tsx_ServerStates.activeMenu, 'Settings');
+  tsx_SetServerState(tsx_ServerStates.mntMntDir, '');
+  tsx_SetServerState(tsx_ServerStates.mntMntAlt, '');
+  tsx_SetServerState(tsx_ServerStates.targetRA, '');
+  tsx_SetServerState(tsx_ServerStates.targetDEC, '');
+  tsx_SetServerState(tsx_ServerStates.targetALT, '');
+  tsx_SetServerState(tsx_ServerStates.targetAZ, '');
+  tsx_SetServerState(tsx_ServerStates.targetHA, '');
+  tsx_SetServerState(tsx_ServerStates.targetTransit, '');
+  tsx_SetServerState(tsx_ServerStates.lastTargetDirection, '');
+  tsx_SetServerState(tsx_ServerStates.lastCheckMinSunAlt, '');
+  // tsx_SetServerState( tsx_ServerStates.lastFocusPos', '');
+  // tsx_SetServerState( tsx_ServerStates.lastFocusTemp', '');
+  tsx_SetServerState(tsx_ServerStates.imagingSessionDither, 0);
+  tsx_SetServerState(tsx_ServerStates.tool_active, false );
+  tsx_SetServerState(tsx_ServerStates.currentSessionReport, '' );
+  tsx_SetServerState(tsx_ServerStates.night_plan_reset, true );
 
   // prepare hardware... ensures all works for install
   var mount = TheSkyXInfos.findOne().mount();
@@ -141,28 +140,34 @@ function initServerStates() {
   // check the setting of the start/stop time initialization
   var startT, stopT;
   try {
-    TheSkyXInfos.findOne({name: 'defaultUseImagingCooler_enabled'}).value;
+    TheSkyXInfos.findOne({name: tsx_ServerStates.defaultUseImagingCooler_enabled}).value;
   }
   catch(e) {
-    tsx_SetServerState('defaultUseImagingCooler_enabled', false);
+    tsx_SetServerState(tsx_ServerStates.defaultUseImagingCooler_enabled, false);
   }
   try {
-    minDefAlt = TheSkyXInfos.findOne({name: 'defaultMinAlt'}).value;
+    minDefAlt = TheSkyXInfos.findOne({name: tsx_ServerStates.defaultMinAlt}).value;
   }
   catch(e) {
-    tsx_SetServerState('defaultMinAlt', '45');
+    tsx_SetServerState(tsx_ServerStates.defaultMinAltitude, '45');
   }
   try {
-    startT = TheSkyXInfos.findOne({name: 'defaultStartTime'}).value;
+    startT = TheSkyXInfos.findOne({name: tsx_ServerStates.defaultStartTime}).value;
   }
   catch(e) {
-    tsx_SetServerState('defaultStartTime', '21:00');
+    tsx_SetServerState(tsx_ServerStates.defaultStartTime, '21:00');
   }
   try {
-    stopT = TheSkyXInfos.findOne({name: 'defaultStopTime'}).value;
+    stopT = TheSkyXInfos.findOne({name: tsx_ServerStates.defaultStopTime}).value;
   }
   catch(e) {
-    tsx_SetServerState('defaultStopTime', '5:00');
+    tsx_SetServerState(tsx_ServerStates.defaultStopTime, '5:00');
+  }
+  try {
+    TheSkyXInfos.findOne({name: tsx_ServerStates.defaultFocusExposure}).value;
+  }
+  catch(e) {
+    tsx_SetServerState(tsx_ServerStates.defaultFocusExposure, '1');
   }
 
   for (var m in tsx_ServerStates){
@@ -188,7 +193,7 @@ function CleanUpJobs() {
   //  var jobs = scheduler.find().fetch();
   //  var jid = tsx_GetServerStateValue('runScheduler');
   //  scheduler.remove( jid );
-  tsx_SetServerState('runScheduler', '');
+  tsx_SetServerState(tsx_ServerStates.runScheduler, '');
 
   // Clean up the scheduler process collections...
   // Persistence across reboots is not needed at this time.
@@ -214,11 +219,11 @@ Meteor.startup(() => {
   var version_dat = {};
   version_dat = JSON.parse(Assets.getText('version.json'));
   if( version_dat.version != '') {
-    tsx_SetServerState('tsx_version', version_dat.version);
+    tsx_SetServerState(tsx_ServerStates.tsx_version, version_dat.version);
     tsxLog('            Version', version_dat.version);
   }
   if( version_dat.date != '') {
-    tsx_SetServerState('tsx_date', version_dat.date);
+    tsx_SetServerState(tsx_ServerStates.tsx_date, version_dat.date);
     tsxLog('               Date', version_dat.date);
   }
 
@@ -228,14 +233,14 @@ Meteor.startup(() => {
     dbIp = TheSkyXInfos.findOne().ip() ;
   } catch( err ) {
     // do nothing
-    tsx_SetServerState('ip', 'localhost');
+    tsx_SetServerState(tsx_ServerStates.ip, 'localhost');
     dbIp = 'localhost';
   }
   try {
     dbPort = TheSkyXInfos.findOne().port();
   } catch( err ) {
     // do nothing
-    tsx_SetServerState('port', '3040');
+    tsx_SetServerState(tsx_ServerStates.port, '3040');
     dbPort = '3040';
   }
 
@@ -281,11 +286,11 @@ Meteor.methods({
       return;
     }
     else if( getSchedulerState() == 'Stop' ) {
-      tsx_SetServerState( 'tool_active', true );
+      tsx_SetServerState( tsx_ServerStates.tool_active, true );
       tsxInfo(" Calibration File Processes");
       runSchedulerProcess();
       // Create a job:
-      var job = new Job(scheduler, 'runScheduler', // type of job
+      var job = new Job(scheduler, tsx_ServerStates.runScheduler, // type of job
         // Job data that you define, including anything the job
         // needs to complete. May contain links to files, etc...
         {
@@ -335,7 +340,7 @@ Meteor.methods({
 
         tsxInfo( '@@ Start1' );
         // Create a job:
-        var job = new Job(scheduler, 'runScheduler', // type of job
+        var job = new Job(scheduler, tsx_ServerStates.runScheduler, // type of job
           // Job data that you define, including anything the job
           // needs to complete. May contain links to files, etc...
           {
@@ -377,14 +382,14 @@ Meteor.methods({
 
   calibrateGuider( slew, location, dec_az ) {
     tsxInfo(' *** tsx_CalibrateAutoGuide' );
-    var enabled = tsx_GetServerStateValue('isCalibrationEnabled');
+    var enabled = tsx_GetServerStateValue( tsx_ServerStates.isCalibrationEnabled );
     if( !enabled ) {
       UpdateStatus(' *** Calibration disabled - enable to continue');
       return false;
     }
 
     UpdateStatus(' TOOLBOX: Autoguider Calibration STARTED');
-    tsx_SetServerState( 'tool_active', true );
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
     try {
       let res = true;
       if( slew != '' ) {
@@ -417,12 +422,12 @@ Meteor.methods({
     }
     finally {
       UpdateStatus(' TOOLBOX: Autoguider Calibration FINISHED');
-      tsx_SetServerState( 'tool_active', false );
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
     }
   },
 
   slewPosition( slew, location, dec_az, stopTracking ) {
-    tsx_SetServerState( 'tool_active', true );
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
     tsxInfo( '  slew'+slew);
     tsxInfo( '  location'+location);
     tsxInfo( '  dec_az'+dec_az);
@@ -451,11 +456,11 @@ Meteor.methods({
       }
     }
     finally {
-      tsx_SetServerState( 'tool_active', false );
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
       if( stopTracking ) {
         UpdateStatus('Stopping tracking');
 
-        tsx_SetServerState( 'tool_active', true );
+        tsx_SetServerState( tsx_ServerStates.tool_active, true );
         let res = '';
         try {
           res = tsx_StopTracking();
@@ -469,7 +474,7 @@ Meteor.methods({
           }
         }
         finally {
-          tsx_SetServerState( 'tool_active', false );
+          tsx_SetServerState( tsx_ServerStates.tool_active, false );
         }
         return res;
       }
@@ -478,15 +483,15 @@ Meteor.methods({
   },
 
   rotateCamera( cls ) {
-    tsx_SetServerState( 'tool_active', true );
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
     try {
       let num = '';
       tsxLog(' Rotating Camera');
       if( cls == 1 ) {
-        num  = tsx_GetServerStateValue('tool_rotator_num');
+        num  = tsx_GetServerStateValue( tsx_ServerStates.tool_rotator_num );
       }
       else {
-        num  = tsx_GetServerStateValue('tool_rotator_fov');
+        num  = tsx_GetServerStateValue( tsx_ServerStates.tool_rotator_fov );
       }
       var res = tsx_RotateCamera( num, cls ); // tool needs to use CLS use 0
     }
@@ -496,7 +501,7 @@ Meteor.methods({
       }
     }
     finally {
-      tsx_SetServerState( 'tool_active', false );
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
     }
   },
 

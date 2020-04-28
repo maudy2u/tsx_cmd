@@ -80,6 +80,7 @@ function updateTargetPlan( fid, name, value ) {
     }
     else if( name == 'minAlt') {
       obj.minAlt = value;
+      obj.report.dirty = true;
       dirty = true;
     }
     else if( name == 'Comment') {
@@ -93,6 +94,9 @@ function updateTargetPlan( fid, name, value ) {
         stopTime: obj.stopTime,
         priority: obj.priority,
         minAlt: obj.minAlt,
+        report: {
+          dirty: obj.report.dirty,
+        }
       }
     });
   }
@@ -215,17 +219,18 @@ class TargetConstraints extends Component {
             scrolling
             name='seriesTemplate'
             options={TAKESERIES}
-            placeholder='Series to use for Imaging'
+            placeholder='ERROR'
             text={TAKESERIESNAME}
             onChange={this.handleSeriesChange}
             />
         </Table.Cell>
         <Table.Cell width={1}>
-          {new Number(this.props.targetPlan.report.maxAlt).toFixed(2)}
+          {Number(this.props.targetPlan.report.maxAlt).toFixed(2)}
         </Table.Cell>
         <Table.Cell width={1}>
         <Form>
           <Form.Input
+            disabled={DISABLE}
             fluid
             size='mini'
             name='minAlt'

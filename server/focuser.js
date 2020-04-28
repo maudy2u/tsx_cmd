@@ -95,13 +95,13 @@ function fileNameDate( today ) {
 Meteor.methods({
 
   focusCamera() {
-    tsx_SetServerState( 'tool_active', true );
-    var focusFilterName = tsx_GetServerStateValue( 'defaultFilter' );
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
+    var focusFilterName = tsx_GetServerStateValue( tsx_ServerStates.defaultFilter );
     var focusFilter = getFilterSlot( focusFilterName );
-    var focusExp = tsx_GetServerStateValue( 'defaultFocusExposure' ); // assuming 1, need to get from state
-    var focusSamples = tsx_GetServerStateValue( 'focus3Samples' );
+    var focusExp = tsx_GetServerStateValue( tsx_ServerStates.defaultFocusExposure ); // assuming 1, need to get from state
+    var focusSamples = tsx_GetServerStateValue( tsx_ServerStates.focus3Samples );
     if( focusSamples == '' || typeof focusSamples == 'undefined') {
-      tsx_SetServerState('focus3Samples', 5 ); // arbitrary default
+      tsx_SetServerState(tsx_ServerStates.focus3Samples, 5 ); // arbitrary default
       focusSamples = 5;
     }
 
@@ -123,12 +123,12 @@ Meteor.methods({
         var temp = tsx_return.split('|')[1].trim();
         var position = tsx_return.split('|')[0].trim();
         if( temp == 'TypeError: Error code = 5 (5). No additional information is available.') {
-            temp = tsx_GetServerStateValue( 'initialFocusTemperature' );
+            temp = tsx_GetServerStateValue( tsx_ServerStates.initialFocusTemperature );
             UpdateStatus( ' !!! Error find focus.' );
         }
         //TypeError: @Focus diverged.  Error = 7001
         else if (temp =='TypeError: @Focus diverged.  Error = 7001.') {
-          temp = tsx_GetServerStateValue( 'initialFocusTemperature' );
+          temp = tsx_GetServerStateValue( tsx_ServerStates.initialFocusTemperature );
           UpdateStatus( ' !!! Error find focus.' );
         }
         else if( typeof temp == 'undefined' || temp === 'No error. Error = 0.') {
@@ -141,7 +141,7 @@ Meteor.methods({
         UpdateStatus(' --- Focuser postion (' + position + ') and temp ('+temp+') using filter: ' + focusFilterName);
 
         if( temp != '') {
-          tsx_SetServerState( 'initialFocusTemperature', temp);
+          tsx_SetServerState( tsx_ServerStates.initialFocusTemperature, temp);
         }
         tsx_is_waiting = false;
       }));
@@ -154,7 +154,7 @@ Meteor.methods({
     }
     finally {
       UpdateStatus(' TOOLBOX: @Focus3 FINISHED');
-      tsx_SetServerState( 'tool_active', false );
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
     }
   },
 

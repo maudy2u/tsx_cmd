@@ -3,7 +3,6 @@
 // Stephen Townsend
 // 2018-04-19
 
-var Out = 'Success';
 var aFilter = '$000';
 var aExpTime = '$001';
 var aFrame = $002; //  cdLight =1, cdBias, cdDark, cdFlat
@@ -12,11 +11,13 @@ var delay = '$004';
 var binning = '$005';
 var friendly = '$006';
 
+var TSX = RunJavaScriptOutput;
 var CCDSC = ccdsoftCamera;
 var CCDAG = ccdsoftAutoguider;
 var CCDSI = ccdsoftCameraImage;
 var CHART = sky6StarChart;
 var OBJI = sky6ObjectInformation;
+var Out = 'Success';
 
 CCDSC.Asynchronous = false;		// We are going to wait for it
 CCDSC.ExposureTime = aExpTime;		// Set the exposure time based on the second parameter from tsxfeeder
@@ -88,7 +89,7 @@ CCDSC.BinY = obinY;
 CCDSC.Delay = oldDelay;
 CCDSC.Frame = oldFrame;
 
-Out = Out + '|fileName=' + CCDSC.LastImageFileName;
+Out = Out.trim() + '|fileName=' + CCDSC.LastImageFileName.trim();
 
 // get the overall RMS error if guiding
 var rms = guideError();
@@ -203,6 +204,6 @@ if( aFrame == 1 ) { // not for calibrations
 var avgPix = CCDSI.averagePixelValue();
 var maxPix = CCDSC.MaximumPixel;
 Out = Out + '|avgPix=' + avgPix + '|maxPix='+maxPix;
-
+//TSX.writeLine( 'SAMPLE: ' + Out )
 Out;
 /* Socket End Packet */
