@@ -112,14 +112,6 @@ TheSkyXInfos.helpers({
     return val;
   },
 
-  defaultMinAltitude: function() {
-    var val =  TheSkyXInfos.findOne({name: 'defautMinAlt'}).value;
-    if( typeof val == 'undefined') {
-      val = '';
-    }
-    return val;
-  },
-
   defaultFocusTempDiff: function() {
     var val =  TheSkyXInfos.findOne({name: 'defaultFocusTemp'}).value;
     if( typeof val == 'undefined') {

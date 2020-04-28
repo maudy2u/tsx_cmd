@@ -52,14 +52,42 @@ export function addNewTakeSeriesTemplate() {
 
   return id;
 }
+export function takeSeriesDropDown() {
+  var items = TakeSeriesTemplates.find().fetch();
+  var dropDownArray = [];
+  for (var i = 0; i < items.length; i++) {
+    dropDownArray.push({
+      key: items[i]._id,
+      text: items[i].name,
+      value: items[i]._id });
+  }
+  return dropDownArray;
+}
 
+export function getTakeSeriesName( tSeries ) {
+
+  var name = '';
+  if( tSeries._id !=''&& typeof tSeries._id != 'undefined') {
+    var obj = TakeSeriesTemplates.findOne({_id: tSeries._id});
+    if( obj != '' && typeof obj != 'undefined') {
+      name = obj.name;
+    }
+  }
+  return name;
+}
+
+// DEPRECATED *******************************
+// attempt to replace with takeSeriesDropDown
 export function getTakeSeriesTemplates(takeSeriesTemplates) {
   var options = [];
   var count =0;
   takeSeriesTemplates.forEach((series) => {
     //      { key: 0, text: 'Static LUM', value: 0 },
     // options.push({key:series._id, text:series.name, value: { _id:series._id, text:series.name, value:series.name }});
-    options.push({key:series._id, text:series.name, value: series.name });
+    options.push({
+      key:series._id,
+      text:series.name,
+      value: series.name });
     count++;
     // console.log(`Found series._id: ${series._id}, name: ${series.name}`);
   });
@@ -109,8 +137,11 @@ export function updateTakeSeriesTemplate( fid, name, value ) {
 }
 
 
-export function seriesDescription( template ) {
-
+export function seriesDescription( sid ) {
+    var template = TakeSeriesTemplates.findOne({_id: sid });
+    if( typeof template == 'undefined' || template == '' ) {
+      return 'PLEASE ASSIGN A TAKE SERIES';
+    }
     // CURRENTLY: 0:33x3s, 1:33x3s, 2:33x3s, 3:33x3s
     // WANT: LIGHT:LUM@33X3S
     let seriesArray = template.series;

@@ -128,16 +128,6 @@ export function tsxErr( msg, data ) {
   logDB.error( msg + ' ' + data );
 }
 
-export function tsxTrace( msg, data ) {
-
-  if( typeof data === 'undefined' || data == null ) {
-    data = '';
-  }
-  logCon.trace( msg, data );
-  logSession.trace( msg, data );
-  logDB.trace( msg + ' ' + data );
-}
-
 export function tsxInfo( msg, data ) {
   if( typeof data === 'undefined' || data == null ) {
     data = '';
@@ -213,7 +203,6 @@ function formatDate( today ) {
 // var rootPathLog = pathLog.resolve('.');
 // var srcPath = rootPathLog.split(pathLog.sep + '.meteor')[0];
 // // var c = Meteor.absolutePath;
-// // tsxTrace('Root: ' + src);
 // srcPath = srcPath +'/server/logs/';
 var logFolder = '';
 if( Meteor.settings.log_file_location === '' || typeof Meteor.settings.log_file_location === 'undefined' ) {

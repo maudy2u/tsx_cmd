@@ -23,10 +23,13 @@ import ReactDOM from 'react-dom';
 import { withTracker } from 'meteor/react-meteor-data';
 
 import { Filters } from '../api/filters.js';
+import { TargetReports } from '../api/targetReports.js';
 import { TargetSessions } from '../api/targetSessions.js';
 import {
   TakeSeriesTemplates,
   getTakeSeriesTemplates,
+  getTakeSeriesName,
+  takeSeriesDropDown,
 } from '../api/takeSeriesTemplates.js';
 import {
   SkySafariFiles,
@@ -44,6 +47,7 @@ import {
   Button,
   Progress,
   Statistic,
+  Confirm,
 } from 'semantic-ui-react'
 
 import {
@@ -83,8 +87,8 @@ class TargetEditor extends Component {
     super(props);
 
     this.state = {
-      seriesTemplate: {},
       value: false,
+      openGetCoords: false,
       openModal: false,
       templates: [],
       checked: false,
@@ -94,9 +98,6 @@ class TargetEditor extends Component {
       inProgress: false,
       seriesDropDown: getTakeSeriesTemplates(this.props.seriesTemplates),
 
-      //   setSkysetFile_id: '',
-      seriesTemplate: this.props.target.series.value,
-
       name: this.props.target.name,
       targetFindName: this.props.target.targetFindName,
       targetImage: this.props.target.targetImage,
@@ -104,6 +105,7 @@ class TargetEditor extends Component {
       friendlyName: this.props.target.friendlyName,
       setSkysetFile_id: this.props.target.setSkysetFile_id,
       enabledActive: this.props.target.enabledActive,
+
       series: {
         _id: this.props.target.series._id,
         value: this.props.target.series.text,
@@ -112,7 +114,6 @@ class TargetEditor extends Component {
   //            {_id: seriesId, taken:0},
       ],
       series_id:this.props.target.series_id,
-      report_d: this.props.target.report_id,
       ra: this.props.target.ra,
       dec: this.props.target.dec,
       angle: this.props.target.angle,
@@ -133,7 +134,7 @@ class TargetEditor extends Component {
       tempChg: this.props.target.tempChg,
       currentAlt: Number(this.props.target.currentAlt),
       minAlt: Number(this.props.target.minAlt),
-      report: '',
+      report: this.props.target.report,
     };
 
     this.uploadIt = this.uploadIt.bind(this);
@@ -175,16 +176,13 @@ class TargetEditor extends Component {
 
        // These are the event functions, don't need most of them, it shows where we are in the process
        uploadInstance.on('start', function () {
-         console.log('Starting');
        })
        uploadInstance.on('end', function (error, fileObj) {
-         console.log('On end File Object: ', fileObj);
          alert('File "' + fileObj.name + '" successfully uploaded');
          // self.forceUpdate();
        });
 
        uploadInstance.on('uploaded', function (error, fileObj) {
-         console.log('uploaded: ', fileObj);
 
          // Remove the filename from the upload box
          // this line cause an exception... why...
@@ -204,7 +202,6 @@ class TargetEditor extends Component {
        });
 
        uploadInstance.on('progress', function (progress, fileObj) {
-         console.log('Upload Percentage: ' + progress)
          // Update our progress bar
          self.setState({
            progress: progress
@@ -217,8 +214,6 @@ class TargetEditor extends Component {
   }
 
   showUploads() {
-   console.log('**********************************', this.state.uploading);
-
    if (this.state.uploading.length > 0) {
      return
      <div>
@@ -242,7 +237,6 @@ class TargetEditor extends Component {
    }
   }
 
-  //console.log("Rendering FileUpload",this.props.sDocsReadyYet);
   displayFiles() {
     if (this.props.sFiles && this.props.sDocsReadyYet) {
 
@@ -279,11 +273,20 @@ class TargetEditor extends Component {
     }
   }
 
+
+  showGetCoords = () => this.setState({ openGetCoords: true });
+  handleCancelGetCoords = () => {
+    this.setState({ openGetCoords: false });
+  };
+  handleConfirmGetCoords = () => {
+    this.getTSXRaDec();
+    this.setState({ openGetCoords: false });
+  };
+
   handleOpen = () => this.setState({ modalOpen: true });
   handleClose = () => this.setState({ modalOpen: false });
   handleChange = (e, { name, value }) => {
     this.setState({ [name]: value.trim() });
-    console.log( this.props.target._id + ', ' + name + ', ' + value )
     updateTargetStateValue( this.props.target._id, name, value );
   };
 
@@ -301,28 +304,17 @@ class TargetEditor extends Component {
     updateTargetStateValue( this.props.target._id, name, value );
   };
 
+  handleSeriesChange = (e, { name, value }) => {
+    var seriesId =value;  // get the matching key value
+    updateTargetSeriesStateValue( this.props.target._id, seriesId );
+  };
+
   handleStartChange = (value) => {
     this.setState({startTime: value.formatted24 })
     // what is needed for the "dropdown values"
     // series needs an "ID", and so include text value
 
     updateTargetStateValue( this.props.target._id, 'startTime', value.formatted24 );
-  };
-
-  handleSeriesChange = (value) => {
-    this.setState({startTime: value.formatted24 })
-    // what is needed for the "dropdown values"
-    // series needs an "ID", and so include text value
-    var series = this.state.seriesTemplate; // name in the field
-    // filter needs an index and text value...
-    var seriesId; // get the matching key value
-    for (var i = 0; i < this.state.seriesDropDown.length; i++) {
-      if( series == this.state.seriesDropDown[i].value ) {
-        seriesId = this.state.seriesDropDown[i].key;
-      }
-    }
-
-    updateTargetSeriesStateValue( this.props.target._id, seriesId, this.state.seriesTemplate );
   };
 
   handleStopChange = (value) => {
@@ -383,7 +375,6 @@ class TargetEditor extends Component {
     //            {_id: seriesId, taken:0},
         ],
 
-        report_d: this.props.target.report_id,
         ra: this.props.target.ra,
         dec: this.props.target.dec,
         angle: this.props.target.angle,
@@ -404,7 +395,7 @@ class TargetEditor extends Component {
         tempChg: this.props.target.tempChg,
         currentAlt: Number(this.props.target.currentAlt),
         minAlt: Number(this.props.target.minAlt),
-        report: '',
+        report: this.props.target.report,
       })
     }
   }
@@ -438,19 +429,11 @@ class TargetEditor extends Component {
     this.setState({dec: ''});
     this.setState({alt: ''});
 
-    // console.log('targetFind: ' + this.props.target.targetFindName );
     Meteor.call(
       'targetFind',
-      this.props.target ,
+      this.props.target._id ,
       function ( error, result ) {
 
-//    Meteor.call("targetFind", this.state.targetFindName , function(error, result) {
-      // identify the error
-      // console.log('Error: ' + error);
-      // console.log('result: ' + result);
-      // if success then TheSkyX has made this point the target...
-      // now get the coordinates
-      //cmdSuccess = true;
       this.setState({ra: result.RA});
       this.setState({dec: result.DEC});
       this.setState({alt: result.ALT});
@@ -462,19 +445,15 @@ class TargetEditor extends Component {
     this.setState({dec: ''});
     this.setState({alt: ''});
 
-    // console.log('targetFind: ' + this.props.target.targetFindName );
     Meteor.call(
       'getTSXFrameCentre',
+      this.props.target._id ,
       function ( error, result ) {
-
-      this.setState({targetFindName: result});
     }.bind(this));
   }
 
   getSkySafariSkySet( tid, sid ) {
-    console.log('getSkySafariSkySet: ' + tid +', '+ sid );
     Meteor.call( 'AssignSkySafariToTarget', tid, sid, function ( error, skyset ) {
-
       console.log( ' *** skyset: ' +skyset.ra + ', ' + skyset.dec + ', ' + skyset.pa );
 
     }.bind(this));
@@ -520,7 +499,9 @@ class TargetEditor extends Component {
       FILTERS = [];
     }
     var TARGETPRIORITY = `${this.state.priority}`;
-    var takeSeries = getTakeSeriesTemplates(this.props.seriesTemplates);
+//    var TAKESERIES = getTakeSeriesTemplates(this.props.seriesTemplates);
+    var TAKESERIES = takeSeriesDropDown();
+    var TAKESERIESNAME = getTakeSeriesName(this.state.series);
     // *******************************
     // var for ra and DATEPICKER
     var MINIMUMALT = `${this.state.minAlt}`;
@@ -538,15 +519,6 @@ class TargetEditor extends Component {
 
     var SKYSETS = getSkySetsDropDown();
     var SKYSET_NAME = getSkySafariSkySetName(setSkysetFile_id);
-    console.log( ' SKYSET_NAME='+SKYSET_NAME);
-    console.log( ' setSkysetFile_id='+setSkysetFile_id);
-    // let styles = {
-    //    heading: {
-    //      fontColor: '#5FB343'
-    //    }
-    // }
-    // *******************************
-    // this is not the render return... scroll down...
     const panes = [
       // *******************************
       // name for the Target session
@@ -583,19 +555,28 @@ class TargetEditor extends Component {
                   value={this.state.description}
                   onChange={this.handleChange}/>
                   <div>
-                <Button onClick={this.getTSXRaDec.bind(this)}>Get</Button>
-                <Button onClick={this.getTargetRaDec.bind(this)}>Find</Button>
+                <Button onClick={this.getTargetRaDec.bind(this)}>Find Target</Button>
+                <Button onClick={this.showGetCoords}>Get Chart Centre</Button>
+                <Confirm
+                  open={this.state.openGetCoords}
+                  header='Get TheSkyX Chart Centre'
+                  content='If you wish to replace TARGET NAME, with the current TheSkyX Chart Centre, click "Yes - Replace".'
+                  cancelButton='Cancel'
+                  confirmButton="Yes - Replace"
+                  onCancel={this.handleCancelGetCoords}
+                  onConfirm={this.handleConfirmGetCoords}
+                />
                   </div>
               </Form.Group>
               <Form.Group >
                 {/*<br/>*/}
                 <Statistic size='mini'>
                   <Statistic.Label>RA</Statistic.Label>
-                  <Statistic.Value>{Number(this.state.ra).toFixed(4)}</Statistic.Value>
+                  <Statistic.Value>{Number(this.props.target.ra).toFixed(4)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
                   <Statistic.Label>DEC</Statistic.Label>
-                  <Statistic.Value>{Number(this.state.dec).toFixed(4)}</Statistic.Value>
+                  <Statistic.Value>{Number(this.props.target.dec).toFixed(4)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
                   <Statistic.Label>Alt</Statistic.Label>
@@ -646,10 +627,10 @@ class TargetEditor extends Component {
                   scrolling
                   label='Series'
                   name='seriesTemplate'
-                  options={takeSeries}
+                  options={TAKESERIES}
                   placeholder='Series to use for Imaging'
-                  text={this.state.seriesTemplate}
-                  onChange={this.handleChange}/>
+                  text={TAKESERIESNAME}
+                  onChange={this.handleSeriesChange}/>
               </Form.Group>
               {/* <Form.Group> */}
               {/* <Form.Group widths='equal'>

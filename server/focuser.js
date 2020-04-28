@@ -24,7 +24,6 @@ import {
   tsxErr,
   tsxWarn,
   tsxDebug,
-  tsxTrace,
 } from '../imports/api/theLoggers.js';
 import {
   tsx_UpdateDevice,
@@ -96,22 +95,22 @@ function fileNameDate( today ) {
 Meteor.methods({
 
   focusCamera() {
-    tsx_SetServerState( 'tool_active', true );
-    var focusFilterName = tsx_GetServerStateValue( 'defaultFilter' );
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
+    var focusFilterName = tsx_GetServerStateValue( tsx_ServerStates.defaultFilter );
     var focusFilter = getFilterSlot( focusFilterName );
-    var focusExp = tsx_GetServerStateValue( 'defaultFocusExposure' ); // assuming 1, need to get from state
-    var focusSamples = tsx_GetServerStateValue( 'focus3Samples' );
+    var focusExp = tsx_GetServerStateValue( tsx_ServerStates.defaultFocusExposure ); // assuming 1, need to get from state
+    var focusSamples = tsx_GetServerStateValue( tsx_ServerStates.focus3Samples );
     if( focusSamples == '' || typeof focusSamples == 'undefined') {
-      tsx_SetServerState('focus3Samples', 5 ); // arbitrary default
+      tsx_SetServerState(tsx_ServerStates.focus3Samples, 5 ); // arbitrary default
       focusSamples = 5;
     }
 
     UpdateStatus(' TOOLBOX: @Focus3 STARTED');
     try {
       var cmd = tsx_cmd('SkyX_JS_Focus-3');
-      tsxTrace( ' ??? @Focusing-3 filter: ' + focusFilter );
-      tsxTrace( ' ??? @Focusing-3 exposure: ' + focusExp );
-      tsxTrace( ' ??? @Focusing-3 samples: ' + focusSamples );
+      tsxInfo( ' ??? @Focusing-3 filter: ' + focusFilter );
+      tsxInfo( ' ??? @Focusing-3 exposure: ' + focusExp );
+      tsxInfo( ' ??? @Focusing-3 samples: ' + focusSamples );
       cmd = cmd.replace("$000", focusFilter ); // set filter
       cmd = cmd.replace("$001", focusExp ); // set Bin
       cmd = cmd.replace("$002", focusSamples ); // set Bin
@@ -120,16 +119,16 @@ Meteor.methods({
 
       tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         //[[B^[[B^[[BI20180708-01:53:13.485(-3)?   [SERVER]|2018-07-08|01:53:13|[DEBUG]| ??? @Focusing-3 returned: TypeError: Error code = 5 (5). No additional information is available.|No error. Error = 0
-        tsxTrace( ' ??? @Focusing-3 returned: ' + tsx_return );
+        tsxInfo( ' ??? @Focusing-3 returned: ' + tsx_return );
         var temp = tsx_return.split('|')[1].trim();
         var position = tsx_return.split('|')[0].trim();
         if( temp == 'TypeError: Error code = 5 (5). No additional information is available.') {
-            temp = tsx_GetServerStateValue( 'initialFocusTemperature' );
+            temp = tsx_GetServerStateValue( tsx_ServerStates.initialFocusTemperature );
             UpdateStatus( ' !!! Error find focus.' );
         }
         //TypeError: @Focus diverged.  Error = 7001
         else if (temp =='TypeError: @Focus diverged.  Error = 7001.') {
-          temp = tsx_GetServerStateValue( 'initialFocusTemperature' );
+          temp = tsx_GetServerStateValue( tsx_ServerStates.initialFocusTemperature );
           UpdateStatus( ' !!! Error find focus.' );
         }
         else if( typeof temp == 'undefined' || temp === 'No error. Error = 0.') {
@@ -142,7 +141,7 @@ Meteor.methods({
         UpdateStatus(' --- Focuser postion (' + position + ') and temp ('+temp+') using filter: ' + focusFilterName);
 
         if( temp != '') {
-          tsx_SetServerState( 'initialFocusTemperature', temp);
+          tsx_SetServerState( tsx_ServerStates.initialFocusTemperature, temp);
         }
         tsx_is_waiting = false;
       }));
@@ -155,7 +154,7 @@ Meteor.methods({
     }
     finally {
       UpdateStatus(' TOOLBOX: @Focus3 FINISHED');
-      tsx_SetServerState( 'tool_active', false );
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
     }
   },
 

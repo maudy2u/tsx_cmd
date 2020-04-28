@@ -43,6 +43,7 @@ import {
 import {
   TakeSeriesTemplates,
   addNewTakeSeriesTemplate,
+  takeSeriesDropDown,
 } from '../api/takeSeriesTemplates.js';
 import {
   TargetSessions,
@@ -210,50 +211,58 @@ class NightPlanner extends Component {
       if( oName == 'Sun' || oName == 'Moon') {
         continue;
       }
+      // *******************************
+      // realy target to work with
+      let target = TargetSessions.findOne({_id:obj.passthru});
+      if( typeof target != 'undefined' && target != '') {
+        let nam = target.friendlyName;
+        if( nam != '' && typeof nam != 'undefined') {
+          oName = nam;
+        }
+      }
+      else {
+        continue;
+      }
       let alt = obj.alt;
       let sTime = obj.start;
       let eTime = obj.end;
       let rise = obj.alt_start;
       let down = obj.alt_end;
+      let ref =obj.passthru;
+
       let COL = [];
       // only do the planner number of cols
       let hrLimit = colHours[colHours.length-1];
+      let startHr=0,endHr=0,rHr=0,dHr=0;
+      try {
+        startHr = this.adjHour( Number(sTime.split(':')[0].trim()), hrLimit );
+        endHr = this.adjHour( Number(eTime.split(':')[0].trim()), hrLimit );
+        rHr = this.adjHour( Number(rise.split(':')[0].trim()), hrLimit );
+        dHr = this.adjHour( Number(down.split(':')[0].trim()), hrLimit );
+        if( dHr < rHr ) {
+          dHr = dHr + 24;
+        }
+        if( endHr < startHr ) {
+          endHr = endHr + 24;
+        }
+        // console.log(
+        //    'HR: ' + hr + ', OBJ: ' + oName + ',ALT: ' + alt + ',S: ' + startHr + ',E: ' + endHr + ',R: ' + rHr + ',D: ' + dHr
+        // )
+      }
+      catch( e ) {
+        startHr = 0;
+        endHr = 0;
+        rHr = 0;
+        dHr = 0;
+      }
+
       for( let j=0; j< colHours.length; j++ ) {
-
-        let hr = this.adjHour( colHours[j], hrLimit );
-
-        let startHr=0,endHr=0,rHr=0,dHr=0;
         let colour = 'black';
-        try {
-          startHr = this.adjHour( Number(sTime.split(':')[0].trim()), hrLimit );
-          endHr = this.adjHour( Number(eTime.split(':')[0].trim()), hrLimit );
-          rHr = this.adjHour( Number(rise.split(':')[0].trim()), hrLimit );
-          dHr = this.adjHour( Number(down.split(':')[0].trim()), hrLimit );
-          if( dHr < rHr ) {
-            dHr = dHr + 24;
-          }
-          if( endHr < startHr ) {
-            endHr = endHr + 24;
-          }
-          // console.log(
-          //    'HR: ' + hr + ', OBJ: ' + oName + ',ALT: ' + alt + ',S: ' + startHr + ',E: ' + endHr + ',R: ' + rHr + ',D: ' + dHr
-          // )
-        }
-        catch( e ) {
-          startHr = 0;
-          endHr = 0;
-          rHr = 0;
-          dHr = 0;
-        }
+        let hr = this.adjHour( colHours[j], hrLimit );
         if(
-          (hr >= startHr
-          && hr >= rHr
-          )
+          ( hr >= startHr && hr >= rHr )
           &&
-          (
-          hr <= endHr
-          && hr <= dHr
-          )
+          ( hr <= endHr && hr <= dHr )
         ) {
           colour = 'green';
         }
@@ -261,18 +270,21 @@ class NightPlanner extends Component {
 
         if( j == 0 ) {
           note = oName;
+          if( hr >= rHr ) {
+            note = '['+rise+'] '+note;
+          }
+        }
+        else if( hr == rHr ) {
+          note = rise;
+        }
+        else if( hr == startHr ) {
+          note = sTime;
         }
         else if( hr == dHr ) {
           note = down;
         }
         else if( hr == endHr ) {
           note = eTime;
-        }
-        else if( hr == startHr ) {
-          note = sTime;
-        }
-        else if( hr == rHr ) {
-          note = rise;
         }
 
         COL.push(
@@ -282,13 +294,17 @@ class NightPlanner extends Component {
         );
       }
       Out.push(
-        <Table.Row key={oName+i}>
+        <Table.Row key={ref}>
           {COL}
         </Table.Row>
       )
     }
     return Out;
   }
+
+  // shouldComponentUpdate(nextProps, nextState)  {
+  //
+  // }
 
   render() {
     // if( this.props.night_plan_reset) {
@@ -303,6 +319,15 @@ class NightPlanner extends Component {
     // repeat for each enabled target
     // rows for start and end times....
     let PLAN = [];
+    var DISABLE = true;
+    var NOT_DISABLE = false;
+
+    // then use as needed disabled={DISABLE} or disabled={NOT_DISABLE}
+    if( this.props.scheduler_running.value == 'Stop'  && this.props.tool_active.value == false ){
+      DISABLE = false;
+      NOT_DISABLE = true;
+    }
+
     try {
       PLAN = this.props.night_plan.value;
     }
@@ -364,8 +389,7 @@ class NightPlanner extends Component {
     }
 
     // *******************************
-    // GET MOON data
-    // Get any moon data.
+    // GET SUN and MOON data
     let MOONRISE= '0:0';
     let MOONRISE_HR= 0;
     let MOONSET = '0:0';
@@ -419,10 +443,10 @@ class NightPlanner extends Component {
 
     // *******************************
     // createt the GRID
-
     let colHours = [];
     let planner = [];
 
+    // *******************************
     // setup first half
     if( startHr-bufHr < 24 && startHr-bufHr > endHr+bufHr ) {
         for( var k=startHr-bufHr; k < 24; k++ ) {
@@ -463,6 +487,7 @@ class NightPlanner extends Component {
           );
         }
     }
+    // *******************************
     // setup last half
     if( endHr+bufHr == 0 || endHr+bufHr < startHr-bufHr ) {
       for( let j=0; j < endHr+bufHr; j++ ) {
@@ -500,18 +525,12 @@ class NightPlanner extends Component {
       }
     }
 
-    // need to check this... believe need to leave as is...
-    //<Dimmer active={ACTIVE_DIMMER}>
-    //    <Loader size='small'>Click button next to Refresh Plan</Loader>
-    //</Dimmer>
-
     var data = this.props.night_plan;
     const plan_date = this.props.night_plan.timestamp;
-//          <Header>Night Plan - {formatDate(new Date())} </Header>
 
     return (
       <div>
-        <Button icon='refresh' loading={this.state.plan_needs_updating} labelPosition='left' onClick={this.loadPlanData.bind(this)} label='Refresh Plan'/>
+        <Button icon='refresh' loading={!this.state.plan_needs_updating} labelPosition='left' onClick={this.loadPlanData.bind(this)} label='Refresh Plan'/>
         <Segment secondary>
           <Header>Night Plan - {formatDateTime(plan_date)} </Header>
           <center>
@@ -533,9 +552,11 @@ class NightPlanner extends Component {
           <Table.Header>
             <Table.Row>
               <Table.HeaderCell content={'Target'+' Description'}/>
+              <Table.HeaderCell content={'TakeSeries'}/>
+              <Table.HeaderCell content='Max Alt.'/>
+              <Table.HeaderCell content='Min Alt.'/>
               <Table.HeaderCell content='Start'/>
               <Table.HeaderCell content='Stop'/>
-              <Table.HeaderCell content='Alt.'/>
               <Table.HeaderCell content='Priority'/>
             </Table.Row>
           </Table.Header>
@@ -546,6 +567,8 @@ class NightPlanner extends Component {
                 key={obj._id}
                 targetPlan={obj}
                 night_plan_needs_updating={this.night_plan_needs_updating}
+                scheduler_running={this.props.scheduler_running}
+                tool_active = {this.props.tool_active}
               />
             )
           })}

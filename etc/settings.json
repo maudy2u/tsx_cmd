@@ -1,7 +1,6 @@
 {
   "enable_log": "yes",
   "enable_debug": "yes",
-  "enable_trace": "no",
   "enable_info": "no",
   "enable_warn": "yes",
   "tsx_cmd_db": "tsx_cmd",

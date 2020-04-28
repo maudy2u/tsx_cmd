@@ -71,8 +71,8 @@ export const tsx_ServerStates = {
   imagingBinning: 'imagingBinning',
   defaultUseImagingCooler_enabled: 'defaultUseImagingCooler_enabled',
   defaultCoolTemp: 'defaultCoolTemp',
-  defaultMinAltitude: 'defaultMinAltitude',
-  defautMinAlt: 'defautMinAlt',
+  defaultMinAltitude: 'defaultMinAltitude', // used for scheduling
+  //defautMinAlt: 'defautMinAlt', deprecated
   defaultFocusTemp: 'defaultFocusTemp',
 
   // Dithering related states
@@ -190,9 +190,9 @@ export function updateTargetStateValue( id, param, val ) {
   });//.bind(this));
 }
 
-export function updateTargetSeriesStateValue( id, series, param, val ) {
+export function updateTargetSeriesStateValue( id, sid ) {
 
-  Meteor.call( 'updateTargetSeriesState', id, series, param, val , function(error, result) {
+  Meteor.call( 'updateTargetSeriesState', id, sid, function(error, result) {
 
       if (error && error.error === "logged-out") {
         // show a nice error message

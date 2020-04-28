@@ -28,8 +28,6 @@ import {
   tsxErr,
   tsxWarn,
   tsxDebug,
-  tsxTrace,
-
 } from '../imports/api/theLoggers.js';
 import {
   tsx_UpdateDevice,
@@ -86,7 +84,7 @@ Meteor.startup(function () {
       return;
     }
     // get all files in the Backups and confirm exists
-    tsxTrace( ' Integrity check of file store');
+    tsxInfo( ' Integrity check of file store');
     let fileCursors = Backups.find({}, {sort: {name: 1}}).fetch();
     let display = fileCursors.map((aFile, key) => {
       let err = Shelljs.test( '-e', aFile.path );
@@ -96,7 +94,7 @@ Meteor.startup(function () {
       }
     })
     // confirm all files in the folder and in the Backups
-    tsxTrace( ' Resync file store');
+    tsxInfo( ' Resync file store');
     fileCursors = Backups.find({}, {sort: {name: 1}}).fetch();
     for( var s = 0; s < files.length; s ++ ) {
       var found = false;
@@ -226,12 +224,12 @@ Meteor.methods({
       UpdateStatus( ' Restore FAILED: ' + e );
     }
     finally {
-      tsx_SetServerState( 'tool_active', false );
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
     }
   },
 
   GetBackupOfDatabase() {
-    tsx_SetServerState( 'tool_active', true );
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
 
     // run the shell Script
     // Run external tool synchronously
@@ -303,7 +301,7 @@ Meteor.methods({
       UpdateStatus( ' Backup FAILED: ' + e );
     }
     finally {
-      tsx_SetServerState( 'tool_active', false );
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
     }
   },
 

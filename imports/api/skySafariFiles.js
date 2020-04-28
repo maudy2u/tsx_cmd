@@ -19,7 +19,7 @@ tsx cmd - A web page to send commands to TheSkyX server
 // Needs: meteor npm install --save simpl-schema
 
 import { FilesCollection } from 'meteor/ostrio:files';
-import { tsxTrace, tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug, logFileForClient, AppLogsDB } from './theLoggers.js';
+import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug, logFileForClient, AppLogsDB } from './theLoggers.js';
 // Used to store the filters currently available/active on TSX
 import { Random } from 'meteor/random';
 
@@ -95,7 +95,7 @@ export function skysafariFraming( skysetFile ) {
         //RunJavaScriptOutput.writeLine(param[0]+' not found.');
     }
   }
-  tsxTrace( OUT.ra + ', ' + OUT.dec + ', ' + OUT.pa );
+  tsxInfo( OUT.ra + ', ' + OUT.dec + ', ' + OUT.pa );
   return OUT;
 }
 

@@ -18,6 +18,11 @@ tsx cmd - A web page to send commands to TheSkyX server
 
 import { Mongo } from 'meteor/mongo';
 import { TakeSeriesTemplates } from './takeSeriesTemplates.js'
+import {
+  initTargetReport,
+  resetTargetReport,
+  TargetReports,
+} from './targetReports.js'
 import { Seriess } from './seriess.js'
 import { TheSkyXInfos } from './theSkyXInfos.js'
 // import SimpleSchema from 'simple-schema';
@@ -31,8 +36,10 @@ export function addNewTargetSession() {
   var clsFilter = TheSkyXInfos.findOne({name: 'defaultFilter'}).value;
   var startT = TheSkyXInfos.findOne({name: 'defaultStartTime'}).value;
   var stopT = TheSkyXInfos.findOne({name: 'defaultStopTime'}).value;
+  var FOCSEXP = TheSkyXInfos.findOne({name: 'defaultFocusExposure'}).value;
+  var FOCSFILTER = TheSkyXInfos.findOne({name: 'defaultFilter'}).value;
 
-  const id  = TargetSessions.insert(
+  const tid  = TargetSessions.insert(
     {
       name: '!New Target',
       targetFindName: '!New Target',
@@ -42,11 +49,12 @@ export function addNewTargetSession() {
       enabledActive: false,
       isCalibrationFrames: false,
       series: {
+//        _id: '',
+//        value: '',
       },
       progress: [
   //            {_id: seriesId, taken:0},
       ],
-      report_d: '',
       ra: '',
       dec: '',
       angle: '',
@@ -60,11 +68,11 @@ export function addNewTargetSession() {
   */
       // coolingTemp: TheSkyXInfos.findOne({name: 'defaultCoolTemp'}),
       clsFilter: TheSkyXInfos.findOne({name: 'defaultFilter'}).value,
-      focusFilter: TheSkyXInfos.findOne({name: 'defaultFilter'}).value,
+      focusFilter: FOCSFILTER,
       foccusSamples: '',
       focusBin: '',
       focusTarget: '',
-      focusExposure: TheSkyXInfos.findOne({name: 'defaultFocusExposure'}).value,
+      focusExposure: FOCSEXP,
       guideExposure: '',
       guideDelay: '',
       startTime: startT,
@@ -75,15 +83,111 @@ export function addNewTargetSession() {
       minAlt: TheSkyXInfos.findOne({name: 'defaultMinAlt'}).value,
       completed: false,
       createdAt: new Date(),
+      updatedAt: new Date(),
       enableMeridianFlip: TheSkyXInfos.findOne({name: 'defaultMeridianFlip'}).value,
-      // startTime: '',
-      // stopTime: '',
-      skysafariFile_id: '',
 
+      skysafariFile_id: '',
+      report: '',
+    }
+  );
+  initTargetReport( tid );
+  return tid;
+}
+
+export function updateTargetSession( org ) {
+
+  TargetSessions.update( {_id: org._id}, {
+    $set:
+      {
+      name: org.name,
+      targetFindName: org.targetFindName,
+      targetImage: org.targetImage,
+      description: org.description,
+      friendlyName: org.friendlyName,
+      enabledActive: org.enabledActive,
+      isCalibrationFrames: org.isCalibrationFrames,
+      series: org.series,
+
+      progress: org.progress,
+      ra: org.ra,
+      dec: org.dec,
+      angle: org.angle,
+      rotator_position: org.rotator_position,
+      scale: org.scale,
+      coolingTemp: org.coolingTemp,
+      clsFilter: org.clsFilter,
+      focusFilter: org.focusFilter,
+      foccusSamples: org.foccusSamples,
+      focusBin: org.focusBin,
+      focusTarget: org.focusTarget,
+      focusExposure: org.focusExposure,
+      guideExposure: org.guideExposure,
+      guideDelay: org.guideDelay,
+      startTime: org.startTime,
+      stopTime: org.stopTime,
+      priority: org.priority,
+      tempChg: org.tempChg,
+      currentAlt: org.currentAlt, // set to zero for now.
+      minAlt: org.minAlt,
+      completed: org.completed,
+      createdAt: org.createdAt,
+      updatedAt: new Date(),
+
+      enableMeridianFlip: org.enableMeridianFlip,
+      skysafariFile_id: org.skysafariFile_id,
+      report: org.report,
+      }
     }
   );
   return id;
 }
+
+export function copyTarget( org ) {
+  // get the id for the new object
+  const tid = TargetSessions.insert(
+    {
+      name: org.name,
+      targetFindName: org.targetFindName,
+      targetImage: org.targetImage,
+      description: 'DUPLICATED: ' + org.description,
+      enabledActive: org.enabledActive,
+      isCalibrationFrames: org.isCalibrationFrames,
+      series: org.series,
+
+      progress: org.progress,
+      ra: org.ra,
+      dec: org.dec,
+      angle: org.angle,
+      rotator_position: org.rotator_position,
+      scale: org.scale,
+      coolingTemp: org.coolingTemp,
+      clsFliter: org.clsFliter,
+      focusFliter: org.focusFliter,
+      foccusSamples: org.foccusSamples,
+      focusBin: org.focusBin,
+      focusTarget: org.focusTarget,
+      focusExposure: Number(this.props.target.focusExposure),
+      guideExposure: org.guideExposure,
+      guideDelay: org.guideDelay,
+      startTime: org.startTime,
+      stopTime: org.stopTime,
+      priority: org.priority,
+      tempChg: org.tempChg,
+      currentAlt: org.currentAlt,
+      minAlt: org.minAlt,
+      completed: org.completed,
+      createdAt: org.createdAt,
+      updatedAt: new Date(),
+
+      enableMeridianFlip: org.enableMeridianFlip,
+      skysafariFile_id: org.skysafariFile_id,
+      report: org.report,
+    }
+  )
+
+  return tid;
+}
+
 // This code only runs on the server
 // Meteor.publish('tsx.ip', function tsxIpPublication() {
 //   var ip = TheSkyXInfos.findOne().ip().text;
@@ -136,7 +240,34 @@ createdAt: new Date(),
 
  */
 
+if (Meteor.isServer) {
+  // need to ensure there is a report
+  TargetReports.remove({});
+  var targets = TargetSessions.find({}).fetch();
+  for( var i=0; i<targets.length; i++ ) {
+    var rid = initTargetReport(targets[i]._id);
+    var obj = TargetReports.findOne({_id: rid});
+    TargetSessions.update({_id: targets[i]._id} , {
+      $set: {
+        report: obj,
+      }
+    });
+  }
+}
+
+
 TargetSessions.helpers({
+
+  getFriendlyName: function() {
+    var friendly = '';
+    if( typeof this.friendlyName != 'undefined' && this.friendlyName != '' ) {
+      friendly = this.friendlyName;
+    }
+    else {
+      friendly = this.targetFindName;
+    }
+    return friendly;
+  },
 
   takeSeries: function() {
     var taken = this.totalImagesTaken();

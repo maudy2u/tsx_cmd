@@ -32,6 +32,6 @@ dec2000 = dec2000.replace(/'/g, 'm');
 dec2000 = dec2000.replace(/"/g, 's');
 
 // e.g. sexigesimal=20h 16m 56.1s,+40d 00m 26.6s|RA=20.293916666666668|DEC=40.06505555555555|ra200=20h 16m 56.1s|dec2000=+40d 00m 26.6s
-rpt = 'sexi2000='+ra2000+','+dec2000+'|RA='+chartRa +'|DEC='+chartDec+'|ra200='+ra2000+'|dec2000='+dec2000
+rpt = 'sexi2000='+ra2000+','+dec2000+'|RA='+chartRa +'|DEC='+chartDec+'|ra2000='+ra2000+'|dec2000='+dec2000
 
 /* Socket End Packet */

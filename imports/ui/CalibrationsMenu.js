@@ -244,7 +244,7 @@ class CalibrationsMenu extends Component {
     return (
       <Button.Group icon>
          <Button disabled={DISABLE} icon='plus' onClick={this.addCalibration.bind(this)} />
-         <Button disabled  compact />
+         <Button disabled compact />
          <Button disabled={DISABLE} icon='play' onClick={this.playButton.bind(this)} />
          <Button disabled={NOT_DISABLE} icon='stop' onClick={this.stopButton.bind(this)} />
       </Button.Group>

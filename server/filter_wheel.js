@@ -20,7 +20,7 @@ import { Meteor } from 'meteor/meteor';
 import { Filters } from '../imports/api/filters.js';
 import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
 
-import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug,   tsxTrace,
+import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug,
 
   logFileForClient, AppLogsDB
 } from '../imports/api/theLoggers.js';
@@ -83,8 +83,8 @@ const frames = [
 // **************************************************************
 //  cdLight =1, cdBias, cdDark, cdFlat
 export function getFrameNumber(frame) {
-  // tsxTrace('************************');
-  tsxTrace(' *** getFrameNumber: ' + frame );
+  // tsxInfo('************************');
+  tsxInfo(' *** getFrameNumber: ' + frame );
 
   var num = frames.find(function(element) {
     return element.name == frame;

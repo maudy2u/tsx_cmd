@@ -11,7 +11,6 @@ import {
   tsxErr,
   tsxWarn,
   tsxDebug,
-  tsxTrace,
 } from '../imports/api/theLoggers.js';
 import {
   tsx_UpdateDevice,
@@ -33,17 +32,19 @@ import {
 
 export function TargetPlans() {
   // Get the users planned Sun Altitude limit times
-  let DEFMINALT = tsx_GetServerStateValue('defaultMinAlt');
+  let DEFMINALT = tsx_GetServerStateValue( tsx_ServerStates.defaultMinAlt );
   if( DEFMINALT == '' || typeof DEFMINALT == 'undefined') {
     DEFMINALT = 45;
   }
-  let SUNALT = tsx_GetServerStateValue('defaultMinSunAlt');
+  let SUNALT = tsx_GetServerStateValue( tsx_ServerStates.defaultMinSunAlt );
   if( SUNALT == '' || typeof SUNALT == 'undefined') {
     SUNALT = -12; // Use Nautical Twilight
   }
 
-  let MOONRISE = 'Moon|0'; //'Moon|0|Moon'
-  let SUNRISE = 'Sun|'+SUNALT; //'Sun|'+SUNALT+'|Sun'
+  //let MOONRISE = 'Moon|0';
+  let MOONRISE = 'Moon|0|Moon';
+  //let SUNRISE = 'Sun|'+SUNALT;
+  let SUNRISE = 'Sun|' + SUNALT + '|Sun';
   // Object/Target times:
   // tsx_method: object, altitude
 
@@ -65,9 +66,9 @@ export function TargetPlans() {
       target.minAlt = DEFMINALT;
     }
     // CAN NEED TO ADD THE _ID HERE, e.g.
-    //    tsx_data += target.targetFindName +'|'+ target.minAlt+'|'+ target._id;
+    tsx_data += target.targetFindName +'|'+ target.minAlt+'|'+ target._id;
     // THis will allow finding the right target upon returning
-    tsx_data += target.targetFindName +'|'+ target.minAlt;
+    // tsx_data += target.targetFindName +'|'+ target.minAlt;
   }
 
   /*
@@ -89,31 +90,32 @@ export function TargetPlans() {
 
 
 export function tsx_AltTimesForTargets( targets ) {
-  // tsxTrace('************************');
+  // tsxInfo('************************');
   tsxInfo(' *** tsx_AltTimesForTargets: ' + targets.length );
   let Out = [];
   let tsx_is_waiting = true;
 
-  let STARTTIME = tsx_GetServerStateValue('defaultStartTime');
+  let STARTTIME = tsx_GetServerStateValue( tsx_ServerStates.defaultStartTime );
   if( STARTTIME == '' || typeof STARTTIME == 'undefined') {
     STARTTIME = '18:00'; // Nautical Twilight
   }
-  let ENDTIME = tsx_GetServerStateValue('defaultStopTime');
+  let ENDTIME = tsx_GetServerStateValue( tsx_ServerStates.defaultStopTime );
   if( ENDTIME == '' || typeof ENDTIME == 'undefined') {
     ENDTIME = '6:00'; // Nautical Twilight
   }
   let cmd = tsx_cmd('SkyX_JS_AltTimesTargetReports');
   cmd = cmd.replace("$000", targets );
   let tsx_err = false;
+  tsxDebug( '[SkyX_JS_AltTimesTargetReports] send: '+targets );
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       try {
         tsx_err = tsx_has_error( tsx_return );
-        tsxTrace( ' tsx_AltTimesForTargets: ' + tsx_return );
+        tsxInfo( ' tsx_AltTimesForTargets: ' + tsx_return );
         /*
         tsx_AltTimesForTargets: Sun|-12|06:49|18:00##Sun|-11.5|06:52|17:57##M81|30|18:22|12:14|No error. Error = 0.
         */
         let result = tsx_return.split('##');
-        tsxDebug( 'result: ' + result );
+        tsxDebug( '[SkyX_JS_AltTimesTargetReports] recv: '+tsx_return );
         /*
         result: Sun|-12|06:49|18:00##Sun|-11.5|06:52|17:57##M81|30|18:22|12:14
         */
@@ -123,15 +125,15 @@ export function tsx_AltTimesForTargets( targets ) {
           let alt = rpt.split('|')[1].trim();
           let sTime = rpt.split('|')[2].trim();
           let eTime = rpt.split('|')[3].trim();
-//          let ref_id = rpt.split('|')[4].trim(); // passthru id
+          let ref_id = rpt.split('|')[4].trim(); // passthru id
 
 
           // THIS IS THE PROBLEM IF THE FINDNAME IS USED MORE THAN ONCE
           // THIS CAN MEAN THE NEED FOR A REFERENCE ID, SUCH AS THE TARGET._id
           if( obj != 'Sun' && obj != 'Moon') {
-            let target = TargetSessions.findOne({ targetFindName: obj });
+            let target = TargetSessions.findOne({ _id: ref_id });
             if( typeof target == 'undefined' ) {
-              tsxLog( ' cannot find: ' + obj);
+              tsxError( ' cannot find: ' + obj);
               continue;
             }
             Out.push({
@@ -141,6 +143,7 @@ export function tsx_AltTimesForTargets( targets ) {
               end: target.stopTime,
               alt_start: sTime,
               alt_end: eTime,
+              passthru:ref_id,
             });
           }
           else {
@@ -151,6 +154,7 @@ export function tsx_AltTimesForTargets( targets ) {
               end: ENDTIME,
               alt_start: sTime,
               alt_end: eTime,
+              passthru:ref_id,
             });
           }
         }
@@ -171,18 +175,18 @@ export function tsx_AltTimesForTargets( targets ) {
   if( tsx_err != false ) {
     throw( 'TSX_ERROR|Is Tsx Running?');
   }
-  tsx_SetServerState( 'night_plan', Out );
+  tsx_SetServerState( tsx_ServerStates.night_plan, Out );
   return Out;
 }
 
 Meteor.methods({
 
   planData() {
-    tsx_SetServerState( 'night_plan_report', true );
-    tsxTrace( ' --- Night Plan: Computing');
+    tsx_SetServerState( tsx_ServerStates.night_plan_report, true );
+    tsxInfo( ' --- Night Plan: Computing');
     let plan = TargetPlans();
-    tsx_SetServerState( 'night_plan_report', true );
-    tsxTrace( ' --- Night Plan: Loaded');
+    tsx_SetServerState( tsx_ServerStates.night_plan_report, true );
+    tsxInfo( ' --- Night Plan: Loaded');
     return plan;
   },
 
