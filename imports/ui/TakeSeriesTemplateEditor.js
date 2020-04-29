@@ -23,6 +23,10 @@ import ReactDOM from 'react-dom';
 import { withTracker } from 'meteor/react-meteor-data';
 
 import {
+  updateTakeSeriesStateValue,
+} from  '../api/serverStates.js';
+
+import {
   TakeSeriesTemplates,
   updateTakeSeriesTemplate,
 } from '../api/takeSeriesTemplates.js';
@@ -47,7 +51,7 @@ import {
 
 import {
   Form,
-//   Checkbox,
+  // Checkbox,
   Input,
 //   Dropdown,
 //   Radio,
@@ -63,25 +67,31 @@ const XRegExpZeroToNine = XRegExp('^\\d$');
 import TakeSeriesEditor from './TakeSeriesEditor.js';
 
 class TakeSeriesTemplateEditor extends Component {
-
-  state = {
-    name: '',
-    description: '',
-    processSeries: "",
-    seriesContainer: [],
-    repeatSeries: false,
-    defaultDithering: 0,
-    seriesOrderFix: '',
+  constructor(props) {
+    super(props);
+    this.state = {
+      name: this.props.template.name,
+      description: this.props.template.description,
+      processSeries: this.props.template.processSeries,
+      repeatSeries: this.props.template.repeatSeries,
+      defaultDithering: this.props.template.defaultDithering,
+      seriesOrderFix: '',
+    }
   };
 
-  handleChange = (e, { name, value }) => {
-    this.setState({ [name]: value });
-    updateTakeSeriesTemplate(
-      this.props.template._id,
-      name,
-      value,
-    );
-  };
+  componentDidUpdate(prevProps) {
+    // Typical usage (don't forget to compare props):
+    if (this.props.target !== prevProps.target) {
+      this.setState({
+        name: this.props.template.name,
+        description: this.props.template.description,
+        processSeries: this.props.template.processSeries,
+        repeatSeries: this.props.template.repeatSeries,
+        defaultDithering: this.props.template.defaultDithering,
+      });
+    }
+  }
+
   processSeriesChange = (e, { value }) => {
     this.setState({ processSeries: value });
     updateTakeSeriesTemplate(
@@ -91,44 +101,16 @@ class TakeSeriesTemplateEditor extends Component {
     );
   }
 
-  handleChecked = (e, { name, checked }) => {
-    this.setState({ [name]: checked });
-    updateTakeSeriesTemplate(
-      this.props.template._id,
-      name,
-      checked,
-    );
+  handleChange = (e, { name, value }) => {
+    updateTakeSeriesTemplate( this.props.template._id, name, value );
   };
-
-  componentWillMount() {
-    // do not modify the state directly
-    this.updateDefaults(this.props);
-  }
-
-  componentDidMount() {
-    this.updateDefaults(this.props);
-  }
-
-  updateDefaults(nextProps) {
-    if( typeof nextProps == 'undefined'  ) {
-      return;
-    }
-    if( typeof nextProps.template != 'undefined'  ) {
-      this.setState({
-        name: nextProps.template.name,
-        description: nextProps.template.description,
-        processSeries: nextProps.template.processSeries,
-        defaultDithering: nextProps.template.defaultDithering,
-        seriesContainer: nextProps.template.series,
-      });
-      if( typeof nextProps.template.repeatSeries == 'undefined'
-        || nextProps.template.repeatSeries == '' ) {
-          this.setState({
-            repeatSeries: false,
-          });
-      }
-    }
-  }
+  handleToggle = (e, { name, checked }) => {
+//    var val = eval( 'this.state.' + name);
+    this.setState({
+      [name]: checked
+    });
+    updateTakeSeriesStateValue( this.props.template._id, name, checked );
+  };
 
   addEntry() {
     // get the current map
@@ -179,17 +161,15 @@ class TakeSeriesTemplateEditor extends Component {
 
   render() {
 
-    var a = this.props.template.series;
-    /*
-    <Grid.Column>
-    <b>Frame</b>
-    </Grid.Column>
-
-    <Button  icon='save' onClick={this.saveEntry.bind(this)} />
-    */
-
     return (
       <div>
+      <Checkbox
+        label=' Repeat series until stopped '
+        toggle
+        name='repeatSeries'
+        checked={this.state.repeatSeries}
+        onChange={this.handleToggle.bind(this)}
+        />
         <Form>
           <Form.Group widths='equal'>
           <Button  icon='add' onClick={this.addEntry.bind(this)} />
@@ -199,7 +179,7 @@ class TakeSeriesTemplateEditor extends Component {
               label='Name:'
               type='text'
               placeholder='Name for the series'
-              value={this.state.name}
+              value={this.props.template.name}
               onChange={this.handleChange}
             />
           </Form.Field>
@@ -209,36 +189,27 @@ class TakeSeriesTemplateEditor extends Component {
               label='Description:'
               type='text'
               placeholder='Describe the series'
-              value={this.state.description}
+              value={this.props.template.description}
               onChange={this.handleChange}
             />
           </Form.Field>
         </Form.Group>
           <Form.Group inline>
-            <Form.Field control={Radio} label='Per series' value='per series' checked={this.state.processSeries === "per series"} onChange={this.processSeriesChange} />
-            <Form.Field control={Radio} label='Across series' value='across series' checked={this.state.processSeries === "across series"} onChange={this.processSeriesChange} />
-            <Form.Checkbox
-              label=' Repeat series until stopped '
-              toggle
-              name='repeatSeries'
-              checked={this.state.repeatSeries}
-              onChange={this.handleChecked.bind(this)}
-            />
-            <Form.Field>
-              <Form.Input
-                name='defaultDithering'
-                label='Images before dither: '
-                type='text'
-                placeholder='Zero disables'
-                value={this.state.defaultDithering}
-                onChange={this.handleChange}
-                validations={{
-                  matchRegexp: XRegExpZeroOrPosInt, // https://github.com/slevithan/xregexp#unicode
-                }}
-                validationError="Must be a positive number, e.g 0, 5, 1800, 3600"
-                errorLabel={ ERRORLABEL }
+            <Form.Field control={Radio} label='Per series' value='per series' checked={this.props.template.processSeries === "per series"} onChange={this.processSeriesChange} />
+            <Form.Field control={Radio} label='Across series' value='across series' checked={this.props.template.processSeries === "across series"} onChange={this.processSeriesChange} />
+            <Form.Input
+              name='defaultDithering'
+              label='Images before dither: '
+              type='text'
+              placeholder='Zero disables'
+              value={this.props.template.defaultDithering}
+              onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpZeroOrPosInt, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 0, 5, 1800, 3600"
+              errorLabel={ ERRORLABEL }
               />
-            </Form.Field>
           </Form.Group>
         </Form>
         <Table celled compact basic unstackable>

@@ -42,9 +42,11 @@ import {
   TakeSeriesTemplates,
   seriesDescription,
 } from '../api/takeSeriesTemplates.js';
+
 import {
   updateTargetStateValue,
 } from  '../api/serverStates.js';
+
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 
 import TargetEditor from './TargetEditor.js';

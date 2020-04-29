@@ -1681,11 +1681,11 @@ export function UpdateImagingTargetReport( target ) {
 
   // var cTime = new Date();
   // tsxInfo('Current time: ' + cTime );
-  tsxInfo( '!!! updatedAt: ' + tRprt.updatedAt );
+  tsxInfo( ' !!! updatedAt: ' + tRprt.updatedAt );
   // var msecDiff = cTime - tRprt.updatedAt;
   // tsxInfo('Report time diff: ' + msecDiff);
   // var mm = Math.floor(msecDiff / 1000 / 60);
-  if( hasTimePassed( 60, tRprt.updatedAt ) ) { // one minte passed so update report.
+  if( typeof tRprt.updatedAt == 'undefined' || hasTimePassed( 60, tRprt.updatedAt ) ) { // one minte passed so update report.
     tRprt = tsx_TargetReport( target );
   }
   else {
@@ -3016,7 +3016,7 @@ function isTargetComplete( target ) {
 // *************************** ***********************************
 // Assuming a time in seconds is provided and a Date Object
 export function hasTimePassed( duration, timestamp ) {
-  if( timestamp == '' || duration == '' ) {
+  if( Object.prototype.toString.call(timestamp) === '[object Date]' || duration == '' ) {
     return true;
   }
   var now = new Date();

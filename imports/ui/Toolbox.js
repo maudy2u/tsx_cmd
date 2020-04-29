@@ -115,15 +115,6 @@ class Toolbox extends Component {
 
       enableImagingCooler: false,
       isCLSRepeatEnabled: false,
-//      isCalibrationEnabled: false,
-
-//      tool_calibrate_via: '',
-//      tool_calibrate_location: '',
-//      tool_calibrate_dec_az: '',
-//      tool_rotator_fov: '',
-//      tool_rotator_num: '',
-//      tool_rotator_type: '',
-
     }
   };
 

@@ -43,7 +43,7 @@ export const tsx_ServerStates = {
   tsx_total: 'tsx_total', // use for monitor progress total planned value
   tsx_message: 'tsx_message', // used for the monitor progress label
   runScheduler: 'runScheduler',
-  
+
   initialFocusTemperature: 'initialFocusTemperature',
   mntRA: 'mntRA',
   mntDEC: 'mntDEC',
@@ -183,6 +183,17 @@ export function saveDefaultStateValue( param, val ) {
 export function updateTargetStateValue( id, param, val ) {
 
   Meteor.call( 'updateTargetState', id, param, val , function(error, result) {
+
+      if (error && error.error === "logged-out") {
+        // show a nice error message
+        Session.set("errorMessage", "Please fix.");
+      }
+  });//.bind(this));
+}
+
+export function updateTakeSeriesStateValue( id, param, val ) {
+
+  Meteor.call( 'updateTakeSeriesState', id, param, val , function(error, result) {
 
       if (error && error.error === "logged-out") {
         // show a nice error message
