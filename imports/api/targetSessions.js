@@ -139,7 +139,7 @@ export function updateTargetSession( org ) {
       }
     }
   );
-  return id;
+  return;
 }
 
 export function copyTarget( org ) {
@@ -243,16 +243,16 @@ createdAt: new Date(),
 if (Meteor.isServer) {
   // need to ensure there is a report
   TargetReports.remove({});
-  var targets = TargetSessions.find({}).fetch();
-  for( var i=0; i<targets.length; i++ ) {
-    var rid = initTargetReport(targets[i]._id);
-    var obj = TargetReports.findOne({_id: rid});
-    TargetSessions.update({_id: targets[i]._id} , {
-      $set: {
-        report: obj,
-      }
-    });
-  }
+  // var targets = TargetSessions.find({}).fetch();
+  // for( var i=0; i<targets.length; i++ ) {
+  //   var rid = initTargetReport(targets[i]._id);
+  //   var obj = TargetReports.findOne({_id: rid});
+  //   TargetSessions.update({_id: targets[i]._id} , {
+  //     $set: {
+  //       report: obj,
+  //     }
+  //   });
+  // }
 }
 
 

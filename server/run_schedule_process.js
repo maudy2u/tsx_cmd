@@ -236,7 +236,7 @@ import {
              }
              // No target found so sleep and try again...
              else {
-               tsxDebug( ' NO TARGETS READY SO PARKING MOUNT');
+               UpdateStatus( ' NO TARGETS READY. Will SLEEP and try in a bit.');
                ParkMount( isParked );
                isParked = true;
                sleepScheduler( isParked );
@@ -244,7 +244,7 @@ import {
            }
            // Scheduler stopped so park
            else {
-             tsxDebug( ' target is undefined or schedule is stopped');
+             UpdateStatus( ' NO VALID TARGETS. Will sleep and try in a bit.');
              ParkMount( isParked );
              isParked = true;
              // no target found... so sleep and check again...
@@ -254,7 +254,7 @@ import {
 
            // Check if sun is up and no cal frames
            if( (!isDarkEnough()) && isSchedulerStopped() == false ) {
-             tsxDebug( ' not dark enough or schedule is stopped');
+             tsxLog( ' NOT DARK ENOUGH, or schedule is stopped');
              ParkMount( isParked );
              isParked = true;
              var approachingDawn = isTimeBeforeCurrentTime('3:00');

@@ -299,7 +299,7 @@ export function tsx_MntPark(defaultFilter, softPark) {
           UpdateStatus( ' ' + result );
         }
         else {
-          UpdateStatusErr( ' !!! Parking err: ' + result );
+          UpdateStatusErr( ' !!! Parking err: ' + tsx_return );
         }
 
         Out = result;
@@ -1611,10 +1611,10 @@ function isFocusingNeeded(target) {
 
 export function tsx_SetTarget2ChartCentre( tid ) {
   tsxInfo(' *** tsx_SetTarget2ChartCentre: ' );
-  var cmd = tsx_cmd('SkyX_JS_GetChartCentre');
 
   var Out = '';
   var tsx_is_waiting = true;
+  var cmd = tsx_cmd('SkyX_JS_GetChartCentre');
   tsxDebug( '[TSX] SkyX_JS_GetChartCentre');
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
@@ -1966,7 +1966,7 @@ function tsx_TargetReport( target ) {
   }
   if( dirty == false ) {
     update_monitor_coordinates( org_rpt, target.targetFindName );
-    UpdateStatus( ' --- Reloaded ' + target.getFriendlyName() );
+    tsxInfo( ' --- Reloaded ' + target.getFriendlyName() );
     return org_rpt;
   }
 
@@ -2073,9 +2073,15 @@ function tsx_TargetReport( target ) {
         updateTargetReport( target._id, 'dirty', false );
         var rpt = TargetReports.findOne({target_id: target._id });
         update_monitor_coordinates( rpt, target.targetFindName );
-        target.report = rpt; // set the current target's report... does it pass back?
+// *******************************
+// THIS LINE IS OF UPTMOST IMPORTANCE... IT IS A REFERENCE AND UPDATES
+// THE REPORT ON THE TARGET FOR ADDITIONALLY SUPPORT.
+// *******************************
+        target.report = rpt; // set the current target's report... it passes back
+// *******************************
+// *******************************
         Out=rpt;
-        UpdateStatus( ' --- Refreshed ' + target.getFriendlyName()  );
+        tsxInfo( ' --- Refreshed ' + target.getFriendlyName()  );
       }
     }
     tsx_is_waiting = false;
@@ -2111,22 +2117,25 @@ function tsx_MatchRotation( target ) {
     }
 
     if( isEnabled && foundFOV ) {
+
       var pixelSize = tsx_GetServerStateValue( tsx_ServerStates.imagingPixelSize );
-      if( typeof pixelSize === 'undefined') {
+      if( typeof pixelSize === 'undefined' || pixelSize === '') {
         var str =  ' *** Rotating failed: fix by setting default image pixel size';
         UpdateStatusErr( str );
         tsxError( str );
         return rotateSucess;
       }
+
       var focalLength = tsx_GetServerStateValue( tsx_ServerStates.imagingFocalLength );
-      if( typeof focalLength === 'undefined') {
+      if( typeof focalLength === 'undefined' || focalLength === '') {
         var str =  ' *** Rotating failed: fix by setting default focal length';
         UpdateStatusErr( str );
         tsxError( str );
         return rotateSucess;
       }
+
       var fovExposure = tsx_GetServerStateValue( tsx_ServerStates.defaultFOVExposure );
-      if( typeof fovExposure === 'undefined') {
+      if( typeof fovExposure === 'undefined'  || fovExposure === '') {
         tsx_SetServerState( 'fovExposure', 4 );
         var str = ' *** Rotating FIXED: set to a default 4 sec, check on default page';
         UpdateStatusErr( str );
@@ -3256,7 +3265,7 @@ Use this to set the last focus
     tsxInfo(' *** getTSXFrameCentre');
     var res = '';
     try {
-      res = tsx_SetTarget2ChartCentre( id );
+      res = tsx_SetTarget2ChartCentre( tid );
     }
     catch( e )  {
       if( e == 'TsxError' ) {

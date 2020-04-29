@@ -42,7 +42,8 @@ export const tsx_ServerStates = {
   tsx_progress: 'tsx_progress', // used for monitor progress minute increment
   tsx_total: 'tsx_total', // use for monitor progress total planned value
   tsx_message: 'tsx_message', // used for the monitor progress label
-
+  runScheduler: 'runScheduler',
+  
   initialFocusTemperature: 'initialFocusTemperature',
   mntRA: 'mntRA',
   mntDEC: 'mntDEC',

@@ -275,12 +275,12 @@ class TargetEditor extends Component {
 
 
   showGetCoords = () => this.setState({ openGetCoords: true });
+
   handleCancelGetCoords = () => {
     this.setState({ openGetCoords: false });
   };
   handleConfirmGetCoords = () => {
     this.getTSXRaDec();
-    this.setState({ openGetCoords: false });
   };
 
   handleOpen = () => this.setState({ modalOpen: true });
@@ -449,6 +449,8 @@ class TargetEditor extends Component {
       'getTSXFrameCentre',
       this.props.target._id ,
       function ( error, result ) {
+        this.setState({ openGetCoords: false });
+
     }.bind(this));
   }
 
