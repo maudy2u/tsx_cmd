@@ -410,14 +410,6 @@ class Monitor extends Component {
     }.bind(this));
   }
 
-  testMatchRotation() {
-
-    Meteor.call( 'testMatchRotation', this.getCurrentTarget(),  function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
   renderTarget( tid ) {
     var target;
     var str;
@@ -496,40 +488,6 @@ class Monitor extends Component {
 
   handleTsx_actionsChange = (e, { name, value }) => {
     this.setState({ [name]: value })
-  };
-
-  dropDownAction() {
-
-    var value = this.state.tsx_action;
-
-    if( value == 'Pick' ) {
-      this.testPicking();
-    }
-    else if ( value == 'Test End' ) {
-      this.testEndConditions();
-    }
-    else if ( value == '@Focus3' ) {
-      this.testFocus3();
-    }
-    else if ( value == 'Dither' ) {
-      this.testDither();
-    }
-    else if ( value == 'Guide' ) {
-      this.testGuide();
-    }
-    else if ( value == 'Solve' ) {
-      this.testSolve();
-    }
-    else if ( value == 'Test Angle' ) {
-      this.testMatchRotation();
-    }
-    else if ( value == 'Start Series' ) {
-      this.startImaging();
-    }
-    else if ( value == 'AbortGuide' ) {
-      this.testAbortGuiding();
-    }
-
   };
 
   playButtons( state ) {

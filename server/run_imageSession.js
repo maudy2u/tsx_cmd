@@ -1793,7 +1793,6 @@ function isTargetConditionInValid(target) {
       defaultCLSRepeat = tsx_GetServerState( tsx_ServerStates.defaultCLSRepeat );
     }
 
-    // only SetUpForImagingRun if greater than zero
     var pTime = howMuchTimeHasPassed(defaultCLSRepeat.value, defaultCLSRepeat.timestamp);
     tsxDebug( ' --- checking CLS: ' + pTime+ ' of ' + defaultCLSRepeat.value + ' sec');
 
@@ -1805,7 +1804,7 @@ function isTargetConditionInValid(target) {
         UpdateStatus( ' ' + target.getFriendlyName() + ': time to recentre ' + pTime+ ' of ' + defaultCLSRepeat.value + ' sec');
         // This will cause a calibration to happen...
         // do not need to calibrate wth a meridian flip
-        //  SetUpForImagingRun( target, false, false );
+
         var cls = tsx_CLS(target); 						//# Call the Closed-Loop-Slew function to go to the target
         updateTargetIsCloudy( target, cls );
         if( !cls ) {
@@ -2895,6 +2894,7 @@ export function prepareTargetForImaging( target, doRotator, doCalibration ) {
     tsx_SetServerState( tsx_ServerStates.lastTargetDirection, curDir);
     UpdateStatus( ' '+ target.getFriendlyName() + ": pointing " + curDir);
 
+    // check here for the rotator...
     var ready = SetUpForImagingRun( target, doRotator, doCalibration );
     if( ready ) {
 //      var rpt = TargetReports.findOne({ target_id: target._id })
@@ -3410,16 +3410,6 @@ Use this to set the last focus
     tsxInfo(' *** testSolve' );
 
     return SetUpAutoGuiding( target, true );
-
-  },
-
-  testMatchRotation( tid ) {
-    var target = TargetSessions.findOne({_id: tid});
-
-    tsxInfo('************************');
-    tsxInfo(' *** testMatchRotation' );
-
-    return tsx_MatchRotation( target );
 
   },
 

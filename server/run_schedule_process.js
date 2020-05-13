@@ -173,7 +173,7 @@ import {
            // anything else? enable/disable... Flat/Dark/Bias
            // remove dark/bias/flat from targets...
 
-           if (typeof target != 'undefined' && isSchedulerStopped() == false ) {
+           if (typeof target !== 'undefined' && isSchedulerStopped() == false ) {
              tsxInfo ( ' ' + target.targetFindName + ' Preparing target...');
 
              // Point, Focus, Guide
@@ -182,6 +182,7 @@ import {
              try {
                // First true = do the rotator
                // Second true = do the calibration
+               // Check the prepareTargetForImaging and see where the rotate is
                ready = prepareTargetForImaging( target, true, true );
                if( isSchedulerStopped() == true ) {
                  break;

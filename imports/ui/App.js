@@ -384,6 +384,9 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           <Menu.Item fitted name='Settings' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick}>
             <Icon name='configure' size='large'/>
           </Menu.Item>
+          <Menu.Item fitted name='Weather' active={activeMenu === 'Weather'} onClick={this.handleMenuItemClick}>
+            <Icon name='cloud' size='large'/>
+          </Menu.Item>
         </Menu>
         {this.renderMenuSegments( MENU )}
       </div>
@@ -488,6 +491,21 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           tsxInfo = { this.props.tsxInfo }
           tool_active = { this.props.tool_active }
         />
+      )
+    } else if (this.state.activeMenu == 'Weather') {
+      return (
+        <center>
+          <a href="https://www.meteoblue.com/en/weather/forecast/seeing/moncton_canada_6076211?utm_source=weather_widget&utm_medium=linkus&utm_content=seeing&utm_campaign=Weather%2BWidget" target="_blank">meteoblue
+          </a>
+          <br/>
+          <iframe
+            src="https://www.meteoblue.com/en/weather/widget/seeing/moncton_canada_6076211?geoloc=fixed&noground=0"
+            frameBorder="0"
+            scrolling="NO"
+            allowTransparency="true"
+            sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"
+            style={{width: '520px', height: '727px'}}/>
+        </center>
       )
     } else {
       return (
