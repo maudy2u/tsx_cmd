@@ -53,13 +53,13 @@ build_tsx_cmd () {
   mkdir -p ${folder}
   echo " Building" ${folder}
   ${meteor_build} build --architecture $1 --directory ${folder}
-  package_tar
+  package_tar( ${folder} )
 }
 
 package_tar() {
   cd ${base_dir}
-  tar -czf ${folder}.tar -C ${folder} .
-  rm -rf ${folder}
+  tar -czf $1.tar -C $1 .
+  rm -rf $1
   cd ${install_dir}
 }
 
@@ -74,7 +74,7 @@ if [ "$(uname -p)" == "aarch64" ]; then
   mkdir -p ${folder}
   echo " Building" ${folder}
   ${meteor_build} build --directory ${folder}
-  package_tar
+  package_tar( ${folder} )
 fi
 
 #build_tsx_cmd "os.linux.aarch64"
