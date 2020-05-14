@@ -225,13 +225,13 @@ class Target extends Component {
           index={1}
           onClick={this.handleClick.bind(this)}
            >
-          <Checkbox
-            label='  '
-            name='enabledActive'
-            toggle
-            checked={ENABLEACTIVE}
-            onChange={this.handleToggleEnabled.bind(this)}
-            />
+           <Checkbox
+             label='  '
+             name='enabledActive'
+             toggle
+             checked={ENABLEACTIVE}
+             onClick={this.handleToggleEnabled.bind(this)}
+             />
           <Header style={{color: 'black'}} as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, TOOL_ACTIVE).bind(this)}>
             {TARGET_NAME}
           </Header>
