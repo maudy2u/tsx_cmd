@@ -42,42 +42,46 @@ done
 export details=build_$(git rev-list --all --count)_v${version}_${date}_${1}
 
 if [ "$(uname -p)" == "aarch64" ]; then
-  export compiler='~/meteor/meteor'
+  export meteor_build=~/meteor/meteor
 else
-  export compiler='meteor'
+  export meteor_build=meteor
 fi
 
 build_tsx_cmd () {
+  build_type=$1
   folder=${base_dir}"tsx_cmd_"$1"_"${details}
   mkdir -p ${folder}
   echo " Building" ${folder}
-  ${compiler} build --architecture $1 --directory ${folder}
+  ${meteor_build} build --architecture $1 --directory ${folder}
+  package_tar
+}
+
+package_tar() {
   cd ${base_dir}
   tar -czf ${folder}.tar -C ${folder} .
   rm -rf ${folder}
   cd ${install_dir}
 }
 
-echo ""
-echo " *******************************"
-echo " "${app}
-echo " *******************************"
-echo ""
+#echo ""
+#echo " *******************************"
+#echo " "${app}
+#echo " *******************************"
+#echo ""
 if [ "$(uname -p)" == "aarch64" ]; then
   build_type="os.linux.aarch64"
   folder=${base_dir}"tsx_cmd_"${build_type}"_"${details}
   mkdir -p ${folder}
   echo " Building" ${folder}
-  ${compiler} build --directory ${folder}
-  cd ${base_dir}
-  tar -czf ${folder}.tar -C ${folder} .
-  rm -rf ${folder}
-  cd ${install_dir}
+  ${meteor_build} build --directory ${folder}
+  package_tar
 fi
 
+#build_tsx_cmd "os.linux.aarch64"
 #build_tsx_cmd "os.osx.x86_64"
 #build_tsx_cmd "os.linux.x86_64"
 #build_tsx_cmd "os.windows.x86_32"
+
 echo ""
 echo " *******************************"
 echo "  Finished: "${app}

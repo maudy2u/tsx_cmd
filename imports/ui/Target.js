@@ -223,7 +223,8 @@ class Target extends Component {
         <Accordion.Title
           active={activeIndex === 1}
           index={1}
-          onClick={this.handleClick}>
+          onClick={this.handleClick.bind(this)}
+           >
           <Checkbox
             label='  '
             name='enabledActive'
@@ -231,9 +232,10 @@ class Target extends Component {
             checked={ENABLEACTIVE}
             onChange={this.handleToggleEnabled.bind(this)}
             />
-          <Header style={{color: 'black'}} as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, TOOL_ACTIVE)}>
-            {TARGET_NAME} <Label><small>{this.props.target.description}</small></Label>
+          <Header style={{color: 'black'}} as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, TOOL_ACTIVE).bind(this)}>
+            {TARGET_NAME}
           </Header>
+          <Label><small>{this.props.target.description}</small></Label>
           {this.targetButtons(this.props.scheduler_running.value, TOOL_ACTIVE)}
         </Accordion.Title>
         <Accordion.Content  active={activeIndex === 1} >
