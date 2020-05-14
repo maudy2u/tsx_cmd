@@ -1685,7 +1685,7 @@ export function UpdateImagingTargetReport( target ) {
   // var msecDiff = cTime - tRprt.updatedAt;
   // tsxInfo('Report time diff: ' + msecDiff);
   // var mm = Math.floor(msecDiff / 1000 / 60);
-  if( typeof tRprt.updatedAt == 'undefined' || hasTimePassed( 60, tRprt.updatedAt ) ) { // one minte passed so update report.
+  if( typeof tRprt.updatedAt === 'undefined' || hasTimePassed( 60, tRprt.updatedAt ) ) { // one minte passed so update report.
     tRprt = tsx_TargetReport( target );
   }
   else {
@@ -3016,7 +3016,7 @@ function isTargetComplete( target ) {
 // *************************** ***********************************
 // Assuming a time in seconds is provided and a Date Object
 export function hasTimePassed( duration, timestamp ) {
-  if( Object.prototype.toString.call(timestamp) === '[object Date]' || duration == '' ) {
+  if( Object.prototype.toString.call(timestamp) !== '[object Date]' || duration == '' ) {
     return true;
   }
   var now = new Date();
@@ -3079,6 +3079,7 @@ export function isTimeBeforeCurrentTime( ts ) {
   tsxInfo(' *** isTimeBeforeCurrentTime: ' + ts );
 
   if( typeof ts == 'undefined') {
+    tsxDebug( ' isTimeBeforeCurrentTime FAILED - ts is undefined')
     return true; // as undefined....
   }
 
