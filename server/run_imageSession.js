@@ -963,7 +963,8 @@ function tsx_RunFocus3( target ) {
     cmd = cmd.replace("$002", focusSamples ); // set samples
 
     var lastFocusTemp = tsx_GetServerStateValue( tsx_ServerStates.initialFocusTemperature ); // get last temp
-    let curFocusTemp = target.report.focusTemp; // read new temp
+    let curFocusTemp = TargetSessions.findOne({_id:target._id}).report.focusTemp;
+//    let curFocusTemp = target.report.focusTemp; // read new temp
     tsxInfo( ' curFocusTemp temp: ' + curFocusTemp );
     if( typeof curFocusTemp == 'undefined' || curFocusTemp == '' ) {
       curFocusTemp = lastFocusTemp;
@@ -1586,7 +1587,8 @@ function isFocusingNeeded(target) {
   }
   // check temp difference
   else {
-    let curFocusTemp = target.report.focusTemp; // read new temp
+    let curFocusTemp = TargetSessions.findOne({_id:target._id}).report.focusTemp;
+//    let curFocusTemp = target.report.focusTemp; // read new temp
     tsxDebug( ' curFocusTemp temp: ' + curFocusTemp );
     if( typeof curFocusTemp == 'undefined' ) {
       curFocusTemp = lastFocusTemp;
