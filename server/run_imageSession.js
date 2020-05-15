@@ -3026,9 +3026,9 @@ function isTargetComplete( target ) {
 // *************************** ***********************************
 // Assuming a time in seconds is provided and a Date Object
 export function hasTimePassed( duration, timestamp ) {
-  if( Object.prototype.toString.call(timestamp) !== '[object Date]' || duration == '' ) {
-    return true;
-  }
+  // if( typeof timestamp === 'undefined' || duration === '' ) {
+  //   return true;
+  // }
   var now = new Date();
   var diff = parseInt(now - timestamp)/1000; // Difference in seconds
   if( diff >= duration) {
