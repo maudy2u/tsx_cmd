@@ -1583,6 +1583,7 @@ function isFocusingNeeded(target) {
   // assume needed within 6 hours: 60sec *60 min * 6 hr
   let didTimePass = hasTimePassed( 21600, time_t );
   if( didTimePass ) {
+    console.log( 'Focus data old - assumed new date')
     return true;
   }
   // check temp difference
@@ -2498,7 +2499,10 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
         var result = results[0].trim();
         if( result == 'Success' ) {
           success = true;
-          var iid = addImageReport( tName );
+          if( friendly == '' ) {
+            friedly = tName;
+          }
+          var iid = addImageReport( friendly );
           for( var i=1; i<results.length;i++) {
             var token=results[i].trim();
             // RunJavaScriptOutput.writeLine(token);
