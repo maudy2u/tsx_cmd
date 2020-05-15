@@ -902,10 +902,14 @@ function tsx_RunFocus3( target ) {
     var focusObj = target.focusTarget;
 
     var runFocus3 = isFocusingNeeded( target );
+    tsxDebug( ' [@FOCUS3] focusing NOT needed returned: \'' + runFocus3+'\'')
     if( runFocus3 == false ) {
       tsxDebug(' ??? ' + target.getFriendlyName() +': @Focus3 not needed');
       Out = ''; // get last temp
       return Out;
+    }
+    else {
+      tsxDebug( ' [@FOCUS3] focusing IS needed returned: \'' + runFocus3+'\'')
     }
     if( focusExp == '' || typeof focusExp == 'undefined') {
       var defExp = 1;
