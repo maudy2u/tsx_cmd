@@ -98,7 +98,7 @@ class TargetSessionMenu extends Component {
       for( var i=0; i<objs.length; i++ ) {
         var title = '';
         var desc = '';
-        if( objs[i].friendlyName !='' && typeof objs[i].friendlyName != 'undefined' ) {
+        if( typeof objs[i].friendlyName !== 'undefined' && objs[i].friendlyName !=='' ) {
           title = objs[i].friendlyName;
           desc = objs[i].description + ' ('+objs[i].targetFindName+ ')';
         }
@@ -273,9 +273,9 @@ class TargetSessionMenu extends Component {
 
           if( typeof this.state.value != 'undefined' && this.state.value != '' ){
             if(
-              target.targetFindName.indexOf(this.state.value) == -1 &&
-              target.description.indexOf(this.state.value) == -1 &&
-              target.friendlyName.indexOf(this.state.value) == -1
+              target.targetFindName.indexOf(this.state.value) == -1
+              && target.description.indexOf(this.state.value) == -1
+              //&& target.friendlyName.indexOf(this.state.value) == -1
             ) {
               // searching and not a match so filter out
               return

@@ -4,7 +4,7 @@
 //  Stephen Townsend
 //  2018-11-29
 // *******************************
-var TARGET_PA = 0; // $000;
+var TARGET_PA =  73; // $000;
 var ACCURACY = 0.01; // $003; // DIFF target angle VS. ImageLink angle
 var JUSTROTATE = 0; //$004;
 var PIXELSIZE = 3.8; //$001; // 23.07 ... for simulator with 1.7 imagescale and 2800 FL
@@ -125,7 +125,7 @@ function currentPA() {
  // Rotate to within accuracy
  function rotate( targetAng, imageScale, accuracy ) {
 	 var i = 0;
-	 var err = accuracy+1*1;
+	 var err = accuracy*1+1;
 	 var cur_pa = 0;
 	 var rotPA = 0;
 	 var new_rotPA = 0;
@@ -133,7 +133,7 @@ function currentPA() {
    var res = "FAILED";
 	 TSX.writeLine ("[ROTATOR] accuracy requested: " + accuracy.toFixed(2) + ", init: " + err  );
 
-	 while( i< MAXTRIES && err > accuracy ) {
+	 while( i< MAXTRIES && (err*1) > (accuracy*1) ) {
 		 // Make sure the target is witin 0-360
 		 cur_pa = currentPA(); //ImageLinkResults.imagePositionAngle;//sky position
 
@@ -166,9 +166,12 @@ function currentPA() {
 		 CCDSC.TakeImage();
 		 resultPA = currentPA()*1;
 
-		// ERROR MUST CONSIDER THE 180 DEGREE ROTATION RULE
+		 err = Math.abs( adjustPA(targetAng) - resultPA );
 
-		 err = Math.abs( adjustPA(targetAng) - adjustPA( resultPA) );
+		// MUST CONSIDER THE 180 DEGREE ROTATION RULE
+		 if( Math.abs(err-180) < err) {
+			err = err-180;
+		 }
 		 TSX.writeLine ("[ROTATOR] wanted: " + targetAng.toFixed(2) + ", was: " + cur_pa.toFixed(2) +", and now: " + resultPA.toFixed(2) );
 		 TSX.writeLine ("[ROTATOR] accuracy requested: " + accuracy.toFixed(2) + ", obtained: " + err.toFixed(2)  );
 		 i++;

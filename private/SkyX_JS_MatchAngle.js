@@ -4,7 +4,7 @@
 //  Stephen Townsend
 //  2018-11-29
 // *******************************
-var TARGETANG= $000;
+var TARGET_PA= $000;
 var PIXELSIZE =$001; // 23.07 ... for simulator with 1.7 imagescale and 2800 FL
 var FOCALLENGTH = $002; // use 2800 on SIM
 var ACCURACY = $003; // DIFF target angle VS. ImageLink angle
@@ -18,31 +18,8 @@ var AILSEXPOSURE = AILS.exposureTimeAILS;
 var AILSSCALE = AILS.imageScale;
 var AILSFILTER = AILS.filterNameAILS;
 
-// *******************************
-// Calc position to rotate too...
-if( TARGETANG < 0 ) {
-	TARGETANG = 360+TARGETANG;
-}
-else if( TARGETANG > 360 ) {
-	TARGETANG = TARGETANG %360;
-}
-function getPointing() {
-	var BTP = sky6RASCOMTele.DoCommandOutput;
-	var pointing = '';
-	if (BTP == 1)
-	{
-	  pointing = 'EAST';
-	} else if (BTP == 0) {
-
-	  pointing = 'WEST';
-	}
-	else {
-	  pointing = 'Unknown';
-	}
-	return pointing;
-}
-function calcNewPostion( imageLinkAng, rotPos, targetAng)  {
-  var diff = imageLinkAng - targetAng; // difference between the actual and target
+function calcNewPostion( imageLinkPA, rotPA, targetAng)  {
+  var diff = imageLinkPA - targetAng; // difference between the actual and target
   var newPos = 0; // new possition for the rotator
   var angle = diff; //Math.abs(diff);
   var offset = 0;
@@ -58,7 +35,7 @@ function calcNewPostion( imageLinkAng, rotPos, targetAng)  {
     sign = -1;
   }
   offset = offset*sign;
-  newPos = rotPos+angle;
+  newPos = rotPA+angle;
   return newPos;
 }
 
@@ -112,14 +89,14 @@ function rotate( targetAng, imageScale ) {
     ImageLink.scale = imageScale; // SEEMS THIS MAY BE IGNORED
     ImageLink.pathToFITS = CCDSC.LastImageFileName;
     ImageLink.execute();
-    var imageLinkAng=ImageLinkResults.imagePositionAngle;//sky position
-    var rotPos = CCDSC.rotatorPositionAngle();//ROT position
-    var newPos = calcNewPostion( imageLinkAng, rotPos, targetAng);
-    var resMsg = "imageLinkAng="+ Number(imageLinkAng).toFixed(3) + "|targetAngle=" + Number(targetAng).toFixed(3) + "|rotPos=" + rotPos + "|newPos=" + newPos;
+    var imageLinkPA=ImageLinkResults.imagePositionAngle;//sky position
+    var rotPA = CCDSC.rotatorPositionAngle();//ROT position
+    var newPos = calcNewPostion( imageLinkPA, rotPA, targetAng);
+    var resMsg = "imageLinkAng="+ Number(imageLinkPA).toFixed(3) + "|targetAngle=" + Number(targetAng).toFixed(3) + "|rotPos=" + rotPA + "|newPos=" + newPos;
     OUT = "Success|" + resMsg;
     RunJavaScriptOutput.writeLine (resMsg);
     // VERIFY ANGLE and if not rotate
-    if( Math.abs(targetAng-imageLinkAng)>ACCURACY) {
+    if( Math.abs(targetAng-imageLinkPA)>ACCURACY) {
       CCDSC.rotatorGotoPositionAngle(newPos);
       while( CCDSC.rotatorIsRotating() ) {
       }
@@ -132,11 +109,30 @@ function rotate( targetAng, imageScale ) {
 }
 
 // *******************************
+// Calc position to rotate too...
+if( TARGET_PA < 0 ) {
+	TARGET_PA = 360+TARGET_PA;
+}
+else if( TARGET_PA > 360 ) {
+	TARGET_PA = TARGET_PA %360;
+}
+
+if( getPointing() == "WEST" ) {
+		if( TARGET_PA < 180 ) {
+			TARGET_PA += 180;
+		}
+		else {
+			TARGET_PA -= 180;
+		}
+}
+
+
+// *******************************
 CCDSC.Connect();
 if( JUSTROTATE == 1 ) {
-	CCDSC.rotatorGotoPositionAngle(TARGETANG);
-	var rotPos = CCDSC.rotatorPositionAngle(); // the real position
-	var resMsg = "imageLinkAng=NA|targetAngle=NA|rotPos=" + rotPos + "|targetPos=" + TARGETANG;
+	CCDSC.rotatorGotoPositionAngle(TARGET_PA);
+	var rotPA = CCDSC.rotatorPositionAngle(); // the real position
+	var resMsg = "imageLinkPA=NA|targetAngle=NA|rotPos=" + rotPA + "|targetPos=" + TARGET_PA;
 	OUT = "Success|" + resMsg;
 }
 else {
@@ -166,16 +162,8 @@ else {
 	CCDSC.Asynchronous = false;
 	CCDSC.Frame = 1;// light frame
 
-	if( getPointing() == "WEST" ) {
-			if( TARGETANG < 180 ) {
-				TARGETANG += 180;
-			}
-			else {
-				TARGETANG -= 180;
-			}
-	}
-  // SIMULATOR 1.7 and CCW=false
-	rotate( TARGETANG, AILSSCALE );
+	// SIMULATOR 1.7 and CCW=false
+	rotate( TARGET_PA, AILSSCALE );
 	CCDSC.BinX = obinX;
 	CCDSC.BinY = obinY;
 	CCDSC.Subframe = oFrame;
