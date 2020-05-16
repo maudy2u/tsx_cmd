@@ -4,7 +4,7 @@
 //  Stephen Townsend
 //  2018-11-29
 // *******************************
-var TARGET_PA = 20; // $000;
+var TARGET_PA = 0; // $000;
 var ACCURACY = 0.01; // $003; // DIFF target angle VS. ImageLink angle
 var JUSTROTATE = 0; //$004;
 var PIXELSIZE = 3.8; //$001; // 23.07 ... for simulator with 1.7 imagescale and 2800 FL
@@ -140,11 +140,11 @@ function currentPA() {
  	   TSX.writeLine ("\n[ROTATOR] ==== CURRENT PA ===== " + (i*1+1) );
 		 TSX.writeLine ("[ROTATOR] Orignal PA: " + cur_pa.toFixed(2) );
 		 cur_pa = adjustPA( cur_pa );
-		 TSX.writeLine ("[ROTATOR] Adjusted Target PA: " + cur_pa );
+		 TSX.writeLine ("[ROTATOR] Adjusted Target PA: " + cur_pa.toFixed(2) );
 		 var diff = diff_PA( targetAng*1, cur_pa*1);
 		 var exp_PA = cur_pa*1+diff*1;
       exp_PA = adjustPA( exp_PA )*1;
-		 TSX.writeLine ("[ROTATOR] imageLink offset: " + diff + ", e.g. " + cur_pa.toFixed(2) + "+" + diff.toFixed(2) + "=" + exp_PA.toFixed(2) );
+		 TSX.writeLine ("[ROTATOR] imageLink offset: " + diff.toFixed(2) + ", e.g. " + cur_pa.toFixed(2) + "+" + diff.toFixed(2) + "=" + exp_PA.toFixed(2) );
 
 		 TSX.writeLine ("\n[ROTATOR] ==== ROTATOR PA ===== ");
 		 rotPA = CCDSC.rotatorPositionAngle()*1;
@@ -155,7 +155,7 @@ function currentPA() {
 //		 new_rotPA = rotPA*1 + diff*1;
       new_rotPA = adjustPA( new_rotPA )*1;
 
-		 TSX.writeLine ("[ROTATOR] Adjusted new Rot PA: " + new_rotPA );
+		 TSX.writeLine ("[ROTATOR] Adjusted new Rot PA: " + new_rotPA.toFixed(2) );
 
 		 // SUCCESS AS LONG AS THIS I A SUBSTRACTED DIFFERENCE, WHY!!!!
 		 TSX.writeLine ("[ROTATOR] RotatorPa offset: " + diff.toFixed(2) );
@@ -170,7 +170,7 @@ function currentPA() {
 
 		 err = Math.abs( adjustPA(targetAng) - adjustPA( resultPA) );
 		 TSX.writeLine ("[ROTATOR] wanted: " + targetAng.toFixed(2) + ", was: " + cur_pa.toFixed(2) +", and now: " + resultPA.toFixed(2) );
-		 TSX.writeLine ("[ROTATOR] accuracy requested: " + accuracy.toFixed(2) + ", obtained: " + err  );
+		 TSX.writeLine ("[ROTATOR] accuracy requested: " + accuracy.toFixed(2) + ", obtained: " + err.toFixed(2)  );
 		 i++;
 		 if( err < accuracy ) {
 			res = 'Success';
