@@ -271,14 +271,29 @@ class TargetSessionMenu extends Component {
           let report = TargetReports.find(function(element) {
             return element.target_id == target._id;});
 
-          if( typeof this.state.value != 'undefined' && this.state.value != '' ){
-            if(
-              target.targetFindName.indexOf(this.state.value) == -1
-              && target.description.indexOf(this.state.value) == -1
-              //&& target.friendlyName.indexOf(this.state.value) == -1
-            ) {
-              // searching and not a match so filter out
-              return
+          if( typeof this.state.value !== 'undefined' && this.state.value !== '' ){
+
+            // Not sure if really need to protect from 'undefined'
+            // friendly name... but it defintely was causing issue
+            if( typeof target.friendlyName !== 'undefined'  ) {
+              if(
+                target.targetFindName.indexOf(this.state.value) == -1
+                && target.description.indexOf(this.state.value) == -1
+                && target.friendlyName.indexOf(this.state.value) == -1
+              ) {
+                // searching and not a match so filter out
+                return
+              }
+            }
+            else {
+              if(
+                target.targetFindName.indexOf(this.state.value) == -1
+                && target.description.indexOf(this.state.value) == -1
+//                && target.friendlyName.indexOf(this.state.value) == -1
+              ) {
+                // searching and not a match so filter out
+                return
+              }
             }
           }
           return (
