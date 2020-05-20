@@ -1684,11 +1684,8 @@ export function UpdateImagingTargetReport( target ) {
   tsxInfo(' *** UpdateImagingTargetReport: ' + target.getFriendlyName() );
 
   // how old is report... if less than 1 minute get report
-  var tRprt = target.report;
+  var tRprt = TargetReports.findOne({target_id: target._id });
 
-  // var cTime = new Date();
-  // tsxInfo('Current time: ' + cTime );
-  tsxDebug( ' !!! updatedAt: ' + tRprt.updatedAt );
   // var msecDiff = cTime - tRprt.updatedAt;
   // tsxInfo('Report time diff: ' + msecDiff);
   // var mm = Math.floor(msecDiff / 1000 / 60);
@@ -1965,16 +1962,9 @@ function tsx_TargetReport( target ) {
   tsxInfo(' *** tsx_TargetReport: ' + target.getFriendlyName());
 
   // only get the new data if dirty or not existant
-  var org_rpt = TargetReports.findOne({target_id: target._id });
-  var dirty = true;
+  // var org_rpt = TargetReports.findOne({target_id: target._id });
+  // var dirty = true;
   updateTargetReport( target._id, 'dirty', true );
-
-  if( dirty == false ) {
-    update_monitor_coordinates( org_rpt, target.targetFindName );
-    tsxInfo( ' --- Reloaded ' + target.getFriendlyName() );
-    return org_rpt;
-  }
-
 
   // var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale, target.expos);
   var cmd = tsx_cmd('SkyX_JS_TargetReport');
