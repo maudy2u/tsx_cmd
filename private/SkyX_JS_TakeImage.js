@@ -61,7 +61,7 @@ if ( SelectedHardware.filterWheelModel !== "<No Filter Wheel Selected>" )
 // now take image...
 var obinX = CCDSC.BinX;
 var obinY = CCDSC.BinY;
-if( binning != '' && typeof binning != 'undefined') {
+if( typeof binning !== 'undefined' && binning !== '') {
 	// Make sure bin is valid.
 	try {
 	  CCDSC.BinX = binning; // use bin
@@ -74,13 +74,13 @@ if( binning != '' && typeof binning != 'undefined') {
 // Use Friendly name if it is defined
 var oldASFormula = ccdsoftCamera.PropStr("m_csCustomFileNameLight")
 var newASFormula = '';
-if( friendly != '$006' && friendly != '' && friendly != 'undefined' ) {
+if( typeof friendly !== 'undefined' && friendly !== '$006' && friendly !== '' ) {
 	newASFormula = oldASFormula.replace(/:t/g, friendly);
 	ccdsoftCamera.setPropStr("m_csCustomFileNameLight", newASFormula);
 }
 
 CCDSC.TakeImage();
-if( newASFormula != '' && newASFormula != 'undefined' ) {
+if( typeof newASFormula !== 'undefined' && newASFormula !== '' ) {
 	ccdsoftCamera.setPropStr("m_csCustomFileNameLight", oldASFormula);
 }
 

@@ -553,7 +553,7 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
   var guidingPixelErrorTolerance = tsx_GetServerStateValue( tsx_ServerStates.guidingPixelErrorTolerance);
   var isGuideSettlingEnabled = tsx_GetServerStateValue( tsx_ServerStates.isGuideSettlingEnabled);
   tsxDebug( ' Settle autoguider: ' + isGuideSettlingEnabled ) ;
-  tsxDebug( ' camScale: ' + camScale ) ;
+  tsxDebug( ' imageScale: ' + camScale ) ;
   tsxDebug( ' guiderScale: ' + guiderScale ) ;
   tsxDebug( ' guidingPixelErrorTolerance: ' + guidingPixelErrorTolerance ) ;
   if( typeof camScale === 'undefined' || camScale === '') {
@@ -621,7 +621,7 @@ function tsx_SettleAutoGuide( target ) {
   var guiderScale = tsx_GetServerStateValue( tsx_ServerStates.guiderPixelSize );
   var guidingPixelErrorTolerance = tsx_GetServerStateValue( tsx_ServerStates.guidingPixelErrorTolerance );
   tsxDebug( ' Settle autoguider enabled: ' + isGuideSettlingEnabled ) ;
-  tsxDebug( ' camScale: ' + camScale ) ;
+  tsxDebug( ' imageScale: ' + camScale ) ;
   tsxDebug( ' guiderScale: ' + guiderScale ) ;
   tsxDebug( ' guidingPixelErrorTolerance: ' + guidingPixelErrorTolerance ) ;
   if( typeof camScale === 'undefined' || camScale === '') {
@@ -1718,11 +1718,9 @@ export function UpdateImagingTargetReport( target ) {
 function isTargetConditionInValid(target) {
   tsxInfo('************************');
   tsxInfo(' *** isTargetConditionInValid: ' + target.getFriendlyName() );
-  tsxInfo(' ' + target.getFriendlyName() + ': target evaluation');
+  tsxInfo(' [SCHEDULER] Evaluating: ' + target.getFriendlyName() );
 
   // *******************************
-  tsxInfo( ' --- check stop conditions');
-
   // Were checks just run
   let timeToCheck = tsx_GetServerStateValue( tsx_ServerStates.isTargetConditionInValidExpired );
   if( typeof timeToCheck == 'undefined') {
@@ -1733,6 +1731,7 @@ function isTargetConditionInValid(target) {
   // Only check ever minute
   let didTimePass = hasTimePassed( 60, timeToCheck ); // expire after one minute
   if( !didTimePass ) {
+    tsxInfo( ' [SCHEDULER] No need try next frame');
     if( isSchedulerStopped() ) {
       forceAbort = true;
       return true;
@@ -1742,6 +1741,7 @@ function isTargetConditionInValid(target) {
     }
   }
   else {
+    tsxInfo( ' [SCHEDULER] checking stop conditions');
     timeToCheck = new Date();
     tsx_SetServerState( tsx_ServerStates.isTargetConditionInValidExpired, timeToCheck );
   }
@@ -1755,7 +1755,7 @@ function isTargetConditionInValid(target) {
   // *******************************
   // reassess the target state
   if( !(canTargetSessionStart( target )) ) {
-    tsxDebug(' ' + target.getFriendlyName() + ' cannot continue!!');
+    UpdateStatus(' [SCHEDULER] STOPPING: ' + target.getFriendlyName());
     forceAbort = true;
     return true;
   }
@@ -1768,7 +1768,7 @@ function isTargetConditionInValid(target) {
   // confirm should use same target... and not higher priority
   var priorityTarget = getHigherPriorityTarget( target ); // no return
   if( priorityTarget.targetFindName != target.targetFindName ) {
-    tsxDebug(' ' + target.getFriendlyName() + ' has been replaced by ' + priorityTarget.getFriendlyName() );
+    UpdateStatus(' [SCHEDULER] HIGHER PRORITY FOUND: ' + priorityTarget.getFriendlyName() + ', stopping: ' + target.getFriendlyName() );
     forceAbort = true;
     return true;
   }
@@ -1782,7 +1782,7 @@ function isTargetConditionInValid(target) {
     // okay we have a lot to do...
     // prepare target of imaging again...
     // no need to focus or dither as done in prerun
-    UpdateStatus( ' ' + target.getFriendlyName() + ': MERIDIAN FLIP NEEDED...');
+    UpdateStatus( ' [SCHEDULER] MERIDIAN FLIP NEEDED: ' + target.getFriendlyName() + '...');
     let res = prepareTargetForImaging( target, false, false ) ;
 
     return false; // all good continue
@@ -1804,18 +1804,18 @@ function isTargetConditionInValid(target) {
     tsxDebug( ' --- checking CLS: ' + pTime+ ' of ' + defaultCLSRepeat.value + ' sec');
 
     if( defaultCLSRepeat.value > 0  ) {
-      tsxDebug( ' Check if time to CLS again: ' + defaultCLSRepeat.value );
-      tsxDebug( ' Check time: ' + defaultCLSRepeat.timestamp );
+      tsxDebug( ' [RECENTRING] Check if time to CLS again: ' + defaultCLSRepeat.value );
+      tsxDebug( ' [RECENTRING] Check time: ' + defaultCLSRepeat.timestamp );
       var doCLS = hasTimePassed( defaultCLSRepeat.value, defaultCLSRepeat.timestamp )
       if( doCLS === true ) {
-        UpdateStatus( ' ' + target.getFriendlyName() + ': time to recentre ' + pTime+ ' of ' + defaultCLSRepeat.value + ' sec');
+        UpdateStatus( ' [RECENTRING] ' + target.getFriendlyName() + ': time to recentre ' + pTime+ ' of ' + defaultCLSRepeat.value + ' sec');
         // This will cause a calibration to happen...
         // do not need to calibrate wth a meridian flip
 
         var cls = tsx_CLS(target); 						//# Call the Closed-Loop-Slew function to go to the target
         updateTargetIsCloudy( target, cls );
         if( !cls ) {
-          UpdateStatusErr( ' Target centred FAILED: ' + cls.angle);
+          UpdateStatusErr( ' [RECENTRING] FAILED: ' + cls.angle);
           throw( 'TSX_ERROR|Cloudy? Is Tsx Running?');
         }
         // UpdateStatus( " Setup guider: " + target.getFriendlyName() );
@@ -1824,11 +1824,11 @@ function isTargetConditionInValid(target) {
         return false;
       }
       else {
-        tsxDebug( ' ' + target.getFriendlyName() + ': NOT recentring');
+        tsxDebug( ' [RECENTRING] ' + target.getFriendlyName() + ': NOT YET time to recentre');
       }
     }
     else {
-      tsxDebug( ' ' + target.getFriendlyName() + ': NOT recentring');
+      tsxDebug( ' [RECENTRING] DISABLED' + target.getFriendlyName() + ': DISABLED CLS recentring ');
     }
   }
 
@@ -2449,13 +2449,13 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
   var cmd = tsx_cmd('SkyX_JS_TakeImage');
   postProgressTotal(exposure);
 
-  if( delay == '' || typeof delay == 'undefined' ) {
+  if( typeof delay == 'undefined' || delay == '' ) {
     delay = 1;
   }
-  if( typeof binning == 'undefined' ) {
+  if( typeof binning === 'undefined' ) {
     binning = '';
   }
-  if( typeof ccdTemp == 'undefined' ) {
+  if( typeof ccdTemp === 'undefined' ) {
     ccdTemp = '';
   }
   ccdTemp = ccdTemp.trim();
