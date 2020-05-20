@@ -1688,11 +1688,12 @@ export function UpdateImagingTargetReport( target ) {
 
   // var cTime = new Date();
   // tsxInfo('Current time: ' + cTime );
-  tsxInfo( ' !!! updatedAt: ' + tRprt.updatedAt );
+  tsxDebug( ' !!! updatedAt: ' + tRprt.updatedAt );
   // var msecDiff = cTime - tRprt.updatedAt;
   // tsxInfo('Report time diff: ' + msecDiff);
   // var mm = Math.floor(msecDiff / 1000 / 60);
   if( typeof tRprt.updatedAt === 'undefined' || hasTimePassed( 60, tRprt.updatedAt ) ) { // one minte passed so update report.
+    tsxDebug(' Ran TargetReport for new report: ' + target.getFriendlyName());
     tRprt = tsx_TargetReport( target );
   }
   else {
@@ -1731,12 +1732,13 @@ function isTargetConditionInValid(target) {
   // Only check ever minute
   let didTimePass = hasTimePassed( 60, timeToCheck ); // expire after one minute
   if( !didTimePass ) {
-    tsxInfo( ' [SCHEDULER] No need try next frame');
     if( isSchedulerStopped() ) {
       forceAbort = true;
+      tsxInfo( ' [SCHEDULER] No need try next frame - scheduler aborted');
       return true;
     }
     else {
+      tsxInfo( ' [SCHEDULER] less than 60 seconds, goto next frame');
       return false;
     }
   }
@@ -1761,6 +1763,7 @@ function isTargetConditionInValid(target) {
   }
   else {
     // Used to update the monitor, as it is this target to continue
+    UpdateStatus(' [SCHEDULER] Continuing: ' + target.getFriendlyName());
     tsx_SetServerState( tsx_ServerStates.scheduler_report, target.report );
   }
 
@@ -1964,12 +1967,8 @@ function tsx_TargetReport( target ) {
   // only get the new data if dirty or not existant
   var org_rpt = TargetReports.findOne({target_id: target._id });
   var dirty = true;
-  if( typeof org_rpt == 'undefined' || org_rpt == '' ) {
-    updateTargetReport( target._id, 'dirty', true );
-  }
-  else {
-    dirty = org_rpt.dirty;
-  }
+  updateTargetReport( target._id, 'dirty', true );
+
   if( dirty == false ) {
     update_monitor_coordinates( org_rpt, target.targetFindName );
     tsxInfo( ' --- Reloaded ' + target.getFriendlyName() );
