@@ -902,9 +902,8 @@ function tsx_RunFocus3( target ) {
     var focusObj = target.focusTarget;
 
     var runFocus3 = isFocusingNeeded( target );
-    tsxDebug( ' [@FOCUS3] focusing NOT needed returned: \'' + runFocus3+'\'')
     if( runFocus3 == false ) {
-      tsxDebug(' ??? ' + target.getFriendlyName() +': @Focus3 not needed');
+      tsxDebug( ' [@FOCUS3] focusing NOT needed returned: \'' + runFocus3+'\'')
       Out = ''; // get last temp
       return Out;
     }
