@@ -323,7 +323,7 @@ class NightPlanner extends Component {
     var NOT_DISABLE = false;
 
     // then use as needed disabled={DISABLE} or disabled={NOT_DISABLE}
-    if( this.props.scheduler_running.value == 'Stop'  && this.props.tool_active.value == false ){
+    if( this.props.scheduler_running.value === 'Stop' && this.props.tool_active.value === false ){
       DISABLE = false;
       NOT_DISABLE = true;
     }
@@ -529,7 +529,7 @@ class NightPlanner extends Component {
 
     return (
       <div>
-        <Button icon='refresh' loading={this.state.plan_is_updating} labelPosition='left' onClick={this.loadPlanData.bind(this)} label='Refresh Plan'/>
+        <Button disabled={DISABLE} icon='refresh' loading={this.state.plan_is_updating} labelPosition='left' onClick={this.loadPlanData.bind(this)} label='Refresh Plan'/>
         <Segment secondary>
           <Header>Night Plan - {formatDateTime(plan_date)} </Header>
           <center>

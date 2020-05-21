@@ -595,7 +595,7 @@ class Monitor extends Component {
                 </Statistic>
                 <Statistic size='mini'>
                   <Statistic.Label>Foc. Pos.</Statistic.Label>
-                  <Statistic.Value>{Number(this.props.scheduler_report.value.focusPostion).toFixed(0)}</Statistic.Value>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.focusPosition).toFixed(0)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
                   <Statistic.Label>FOV</Statistic.Label>
