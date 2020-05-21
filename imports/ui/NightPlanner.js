@@ -86,7 +86,7 @@ class NightPlanner extends Component {
         planData: [],
         night_plan: '',
         night_plan_reset: true,
-        plan_needs_updating: true,
+        plan_is_updating: false,
     };
     // Methods to pass as properties
     this.loadPlanData = this.loadPlanData.bind(this);
@@ -111,11 +111,8 @@ class NightPlanner extends Component {
     })
   }
 
-
-  night_plan_needs_updating = () => {
-    this.setState({
-      plan_needs_updating: true,
-    })
+  // Pass through function.
+  night_plan_is_updating = () => {
     this.loadPlanData();
   }
 
@@ -184,13 +181,16 @@ class NightPlanner extends Component {
       }
     }
     else {
+      this.setState({
+        plan_is_updating: true,
+      })
       Meteor.call("planData", function (error, result) {
         if( typeof error == 'undefined' ) {
           // identify the error
           this.setState({
             planData: result,
             night_plan_reset: false,
-            plan_needs_updating: false,
+            plan_is_updating: false,
           });
         }
       }.bind(this));
@@ -516,7 +516,6 @@ class NightPlanner extends Component {
           note = SUNRISE;
         }
 
-
         planner.push(
           <Table.HeaderCell textAlign={'center'} key={j} style={{ backgroundColor: colour, color: 'white' }}>
             <small>{note}</small>
@@ -530,7 +529,7 @@ class NightPlanner extends Component {
 
     return (
       <div>
-        <Button icon='refresh' loading={!this.state.plan_needs_updating} labelPosition='left' onClick={this.loadPlanData.bind(this)} label='Refresh Plan'/>
+        <Button icon='refresh' loading={this.state.plan_is_updating} labelPosition='left' onClick={this.loadPlanData.bind(this)} label='Refresh Plan'/>
         <Segment secondary>
           <Header>Night Plan - {formatDateTime(plan_date)} </Header>
           <center>
@@ -566,9 +565,11 @@ class NightPlanner extends Component {
               <TargetConstraints
                 key={obj._id}
                 targetPlan={obj}
-                night_plan_needs_updating={this.night_plan_needs_updating}
+                night_plan_is_updating={this.night_plan_is_updating}
                 scheduler_running={this.props.scheduler_running}
                 tool_active = {this.props.tool_active}
+                dirty = {obj.report.dirty}
+                plan_is_updating={this.state.plan_is_updating}
               />
             )
           })}

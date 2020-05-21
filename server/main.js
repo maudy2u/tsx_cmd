@@ -329,7 +329,7 @@ Meteor.methods({
      else if(
         getSchedulerState() == 'Stop'
       ) {
-        tsxInfo("Stop found");
+        tsxDebug("Stop found");
         runSchedulerProcess();
 
         // Confirm whether the there is a script running...
@@ -338,7 +338,7 @@ Meteor.methods({
           return;
         }
 
-        tsxInfo( '@@ Start1' );
+        tsxDebug( '@@ Start1' );
         // Create a job:
         var job = new Job(scheduler, tsx_ServerStates.runScheduler, // type of job
           // Job data that you define, including anything the job
@@ -348,7 +348,7 @@ Meteor.methods({
             scheduleType: 'imaging',
           }
         );
-        tsxInfo( '@@ Start2' );
+        tsxDebug( '@@ Start2' );
 
         // Set some properties of the job and then submit it
         // the same submit the start time to the scheduler...
@@ -359,7 +359,7 @@ Meteor.methods({
         // .delay(0);// 60*60*1000)     // Wait an hour before first try
 
         var jid = job.save();               // Commit it to the server
-        tsxInfo( '@@ Start1' );
+        tsxDebug( '@@ Start3' );
 
         // tsxLog('Job id: ' + jid);
         return;

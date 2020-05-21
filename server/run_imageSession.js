@@ -56,6 +56,10 @@ import {
   getBinningNumber,
 } from '../imports/api/binnings.js'
 
+import {
+  getSchedulerState,
+} from './run_schedule_process.js'
+
 //Tools
 import {
   tsx_UpdateDevice,
@@ -92,12 +96,12 @@ var forceAbort = false;
 // *******************************
 export function isSchedulerStopped() {
   tsxInfo(' *** isSchedulerStopped ' );
-  var sched = tsx_GetServerStateValue( tsx_ServerStates.scheduler_running );
+  var sched = getSchedulerState();
   var runScheduler =   tsx_SetServerState( tsx_ServerStates.runScheduler, '');
   if(
     (sched != 'Stop' && runScheduler != '')
   ) {
-    tsxInfo('scheduler_running: ' + sched);
+    tsxDebug('scheduler_running: ' + sched);
     return false; // exit
   }
   tsx_SetServerState( tsx_ServerStates.targetName, 'No Active Target');
@@ -1685,10 +1689,16 @@ export function UpdateImagingTargetReport( target ) {
   // how old is report... if less than 1 minute get report
   var tRprt = TargetReports.findOne({target_id: target._id });
 
+  // // no report so get one...
+  // if( typeof tRprt === 'undefined' ) {
+  //   tsxDebug(' Ran TargetReport for new report: ' + target.getFriendlyName());
+  //   tRprt = tsx_TargetReport( target );
+  // }
+
   // var msecDiff = cTime - tRprt.updatedAt;
   // tsxInfo('Report time diff: ' + msecDiff);
   // var mm = Math.floor(msecDiff / 1000 / 60);
-  if( typeof tRprt.updatedAt === 'undefined' || hasTimePassed( 60, tRprt.updatedAt ) ) { // one minte passed so update report.
+  if( typeof tRprt === 'undefined' || typeof tRprt.updatedAt === 'undefined' || hasTimePassed( 60, tRprt.updatedAt ) ) { // one minte passed so update report.
     tsxDebug(' Ran TargetReport for new report: ' + target.getFriendlyName());
     tRprt = tsx_TargetReport( target );
   }

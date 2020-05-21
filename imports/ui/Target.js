@@ -188,7 +188,7 @@ class Target extends Component {
   }
 
   canHeaderClick( state, active ) {
-    if( state == 'Stop' && active == false ) {
+    if( state === 'Stop' && active === false ) {
       return this.editEntry.bind(this);
     }
   }
@@ -203,7 +203,7 @@ class Target extends Component {
   render() {
     // Use the image for a stretched image in the Future
     //       <Item.Image size='tiny' src='' />
-    if( typeof this.props.target == 'undefined' ) {
+    if( typeof this.props.target === 'undefined' ) {
       return (
         <div/>
       )
@@ -211,6 +211,7 @@ class Target extends Component {
 
     var ENABLEACTIVE = this.props.target.enabledActive;
     var TOOL_ACTIVE = this.props.tool_active.value;
+    var SCHEDULER_RUNNING = this.props.scheduler_running.value;
 
     var MAXALT = Number(this.props.target.report.maxAlt).toFixed(2);
     var SERIES_DESCRIPTION = seriesDescription(this.props.target.series._id);
@@ -232,11 +233,11 @@ class Target extends Component {
              checked={ENABLEACTIVE}
              onClick={this.handleToggleEnabled.bind(this)}
              />
-          <Header style={{color: 'black'}} as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, TOOL_ACTIVE).bind(this)}>
+          <Header style={{color: 'black'}} as='a' onClick={this.canHeaderClick(SCHEDULER_RUNNING, TOOL_ACTIVE)}>
             {TARGET_NAME}
           </Header>
           <Label><small>{this.props.target.description}</small></Label>
-          {this.targetButtons(this.props.scheduler_running.value, TOOL_ACTIVE)}
+          {this.targetButtons(SCHEDULER_RUNNING, TOOL_ACTIVE)}
         </Accordion.Title>
         <Accordion.Content  active={activeIndex === 1} >
           <Segment>

@@ -100,9 +100,6 @@ function updateTargetPlan( fid, name, value ) {
       }
     });
   }
-  if( dirty ) {
-    this.props.night_plan_needs_updating();
-  }
 }
 
 class TargetConstraints extends Component {
@@ -183,7 +180,7 @@ class TargetConstraints extends Component {
     }
   }
 
-  render() {
+  getTargetDetails() {
     var TARGET_DESC = '';
     if( this.props.targetPlan.friendlyName !='' && typeof this.props.targetPlan.friendlyName != 'undefined' ) {
       TARGET_DESC = this.props.targetPlan.friendlyName
@@ -193,22 +190,39 @@ class TargetConstraints extends Component {
     else {
       TARGET_DESC = this.props.targetPlan.targetFindName +': ' + this.props.targetPlan.description;
     }
+
+    if( typeof this.props.targetPlan.report !== 'undefined' && this.props.targetPlan.report.dirty === true) {
+      return (
+        <Label ribbon>{TARGET_DESC}</Label>
+      )
+    }
+    else {
+      return(
+        <div>{TARGET_DESC}</div>
+      )
+    }
+
+  }
+
+  render() {
     var TAKESERIES = takeSeriesDropDown(this.props.seriesTemplates);
     var TAKESERIESNAME = getTakeSeriesName(this.props.targetPlan.series);
     var DISABLE = true;
-    var NOT_DISABLE = false;
+    var IS_UPDATING = this.props.plan_is_updating;
 
     // then use as needed disabled={DISABLE} or disabled={NOT_DISABLE}
-    if( this.props.scheduler_running.value == 'Stop'  && this.props.tool_active.value == false ){
+    if( (this.props.scheduler_running.value == 'Stop'  && this.props.tool_active.value == false)
+    ){
       DISABLE = false;
-      NOT_DISABLE = true;
     }
-
+    if( IS_UPDATING ) {
+      DISABLE = true;
+    }
 
     return (
       <Table.Row>
         <Table.Cell width={3}>
-          {TARGET_DESC}
+          {this.getTargetDetails()}
         </Table.Cell>
         <Table.Cell width={1}>
           <Form.Field control={Dropdown}
@@ -248,6 +262,7 @@ class TargetConstraints extends Component {
         <Table.Cell width={1}>
         <Form>
           <Form.Input
+            disabled={IS_UPDATING}
             fluid
             size='mini'
             name='startTime'
@@ -265,6 +280,7 @@ class TargetConstraints extends Component {
         <Table.Cell width={1}>
         <Form>
           <Form.Input
+            disabled={IS_UPDATING}
             fluid
             size='mini'
             name='stopTime'
@@ -282,6 +298,7 @@ class TargetConstraints extends Component {
         <Table.Cell width={1}>
         <Form>
           <Form.Input
+            disabled={IS_UPDATING}
             fluid
             size='mini'
             name='priority'

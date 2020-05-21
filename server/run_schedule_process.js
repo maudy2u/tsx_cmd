@@ -113,8 +113,13 @@ import {
    var workers = scheduler.processJobs( 'runScheduler',
      function (job, cb) {
        tsxLog( '  ###############################  ');
+       //  ###############################  ');
        // This will only be called if a 'runScheduler' job is obtained
+
+       // THE ONLY SPOT FOR THIS setMethod
        setSchedulerState( 'Running' );
+       //  ###############################  ');
+
        tsx_SetServerState(tsx_ServerStates.runScheduler, job);
 
        UpdateStatus(' SCHEDULER STARTED');
