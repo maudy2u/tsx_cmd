@@ -863,7 +863,11 @@ function tsx_CLS_target( target, filter ) {
         clsSuccess = true;
         tsxInfo(' ' + target + ': centred' );
         var angle = tsx_return.split('|')[1].trim();
+
         tsxInfo(' ' + target + ': Position Angle: ' + angle );
+        var rpt = updateTargetReport( target._id, 'ANGLE', angle );
+        target.report = rpt;
+
         var rotPos;
         try {
           rotPos = tsx_return.split('|')[2].trim();
@@ -1148,6 +1152,7 @@ function SetUpForImagingRun(target, doRotator, doCalibration ) {
   }
   else {
     // Used to update the monitor, as it is this target to continue
+    target.report = tryTarget;
     tsx_SetServerState( tsx_ServerStates.scheduler_report, target.report );
   }
 
