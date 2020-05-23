@@ -123,15 +123,6 @@ class TargetSessionMenu extends Component {
   show = () => this.setState({ open: true })
   close = () => this.setState({ open: false })
 
-
-  componentWillReceiveProps(nextProps) {
-
-    // // used to force a reload.... must be better way
-    // this.setState({
-    //   targetList: nextProps.targets,
-    // });
-  }
-
   playScheduler() {
     Meteor.call("startScheduler", function (error, result) {
       // this.forceUpdate();
@@ -218,28 +209,6 @@ class TargetSessionMenu extends Component {
       DISABLE = false;
       NOT_DISABLE = true;
     }
-
-    // this.props.targets.map((target)=>{
-    //     var nam;
-    //     if( this.state.initialState.results.length > 0 ) {
-    //       nam = results
-    //     }
-    //     // this
-    //     if( typeof nam != 'undefined') {
-    //       var found = RegExp.exec(target.targetFindName, name);
-    //     }
-    // });
-
-/*
-<Table.Cell>
-  {this.targetButtons(
-    RUNNING
-    , ACTIVE
-  )}
-  <Button disabled={DISABLE} icon='plus' onClick={addNewTargetSession.bind(this)} />
-</Table.Cell>
- */
-
 
     return (
       <div>

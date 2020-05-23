@@ -33,10 +33,6 @@ import { TargetSessions } from '../api/targetSessions.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
 
 class ImagingSession extends Component {
-
-}
-export default withTracker(() => {
-
   state = {
     modelOpen: false,
     name: '',
@@ -95,7 +91,7 @@ export default withTracker(() => {
     this.setState({enabledActive: !this.state.enabledActive});
   }
 
-  componentWillMount() {
+  componentDidMount(prevProps) {
     // do not modify the state directly
     this.setState({
       enabledActive: this.props.target.enabledActive,
@@ -131,6 +127,10 @@ export default withTracker(() => {
       </Modal>
     )
   }
+}
+
+export default withTracker(() => {
+
 
   return {
     tsxInfo: TheSkyXInfos.find({}).fetch(),

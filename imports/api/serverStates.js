@@ -159,9 +159,9 @@ export const tsx_ServerStates = {
 
 export function getDefaultStateValue( param ) {
   var val = TheSkyXInfos.find(function(element) {
-    return element.name == param;
+    return element.name === param;
   }).value;
-  if( typeof val != 'undefined' ) {
+  if( typeof val !== 'undefined' ) {
     return val;
   }
   return '';
@@ -273,7 +273,7 @@ export function tsx_UpdateDeviceModel( name, mod) {
 
 export function tsx_UpdateServerState( name, value) {
   var tsx = tsx_GetServerState( name );
-  if( typeof tsx == 'undefined' ) {
+  if( typeof tsx === 'undefined' ) {
     // state not found so create...
     TheSkyXInfos.insert( {name: name }, {
       $set: {
@@ -299,8 +299,8 @@ export function tsx_GetServerState( name ) {
 
 export function tsx_GetServerStateValue( name ) {
   var val = TheSkyXInfos.findOne( {name: name });
-  if( typeof val != 'undefined' ) {
-    if( typeof val.value != 'undefined' ) {
+  if( typeof val !== 'undefined' ) {
+    if( typeof val.value !== 'undefined' ) {
       return val.value;
     }
   }

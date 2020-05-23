@@ -120,8 +120,11 @@ class CalibrationsMenu extends Component {
     saveDefaultStateValue( name, !val );
   };
 
-  componentDidMount() {
-    this.updateDefaults(this.props);
+  componentDidUpdate(prevProps) {
+    // Typical usage (don't forget to compare props):
+    if (this.props.target !== prevProps.target) {
+      this.updateDefaults(this.props);
+    }
   }
 
   updateDefaults(nextProps) {

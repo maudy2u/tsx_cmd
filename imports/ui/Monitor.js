@@ -131,8 +131,11 @@ class Monitor extends Component {
   noFoundSessionOpen = () => this.setState({ noFoundSession: true })
   noFoundSessionClose = () => this.setState({ noFoundSession: false })
 
-  componentDidMount() {
-    this.updateDefaults(this.props);
+  componentDidUpdate(prevProps) {
+    // Typical usage (don't forget to compare props):
+    if (this.props.target !== prevProps.target) {
+      this.updateDefaults(this.props);
+    }
   }
 
   updateDefaults(nextProps) {
@@ -512,17 +515,28 @@ class Monitor extends Component {
   render() {
 
     var tsx_actions = this.getTsxActions();
-    var TARGETNAME ='';
+    var TARGETNAME = this.props.targetName.value;
+    if( TARGETNAME !== 'No Active Target') {
+      var sid = tsx_GetServerState(tsx_ServerStates.imagingSessionId);
+      try {
+        var target = TargetSessions.findOne({_id: sid.value });
+        if( typeof target.friendlyName !== 'undefined' && target.friendlyName !== '' ) {
+          TARGETNAME = target.friendlyName;
+        }
+      }
+      catch(err) {
+        console.log( ' No valid Target - yet: ' + err);
+      }
+    }
+
     var PROGRESS = '';
     var TOTAL = '';
     var RUNNING = '';
     try {
-      TARGETNAME = this.props.targetName.value;
       PROGRESS = this.props.tsx_progress.value;
       TOTAL = this.props.tsx_total.value;
       RUNNING = this.props.scheduler_running.value;
     } catch (e) {
-      TARGETNAME = 'Initializing';
       PROGRESS = 0;
       TOTAL = 0;
     }
@@ -553,7 +567,7 @@ class Monitor extends Component {
         <Button.Group icon>
           {this.playButtons(RUNNING) }
         </Button.Group>
-        <h1>{' ' + TARGETNAME}</h1>
+        <h1>&nbsp;&nbsp;{' ' + TARGETNAME}</h1>
         <Accordion size='mini' styled>
             <Accordion.Title
               active={activeIndex === 0}

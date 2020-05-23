@@ -30,6 +30,7 @@ import {
   Progress,
   Accordion,
   Checkbox,
+  Icon,
 } from 'semantic-ui-react'
 
 import {
@@ -60,6 +61,7 @@ import {
 import {
   renderDropDownFilters,
 } from '../api/filters.js'
+
 import {
   renderDropDownImagingBinnings,
   renderDropDownGuiderBinnings,
@@ -143,7 +145,7 @@ class DefaultSettings extends Component {
       ip: '',
       port: '',
 
-      activeIndex: 1,
+      activeIndex: -1,
     };
   }
 
@@ -200,12 +202,16 @@ class DefaultSettings extends Component {
   saveServerFailedOpen = () => this.setState({ saveServerFailed: true });
   saveServerFailedClose = () => this.setState({ saveServerFailed: false });
 
-  // componentWillMount() {
-  //   this.updateDefaults(this.props);
-  // }
-
   componentDidMount() {
+    // Typical usage (don't forget to compare props):
     this.updateDefaults(this.props);
+  }
+
+  componentDidUpdate(prevProps) {
+    // Typical usage (don't forget to compare props):
+    if (this.props.target !== prevProps.target) {
+      this.updateDefaults(this.props);
+    }
   }
 
   updateDefaults(nextProps) {
@@ -219,6 +225,7 @@ class DefaultSettings extends Component {
         var val = nextProps.tsxInfo.find(function(element) {
           return element.name == 'flatbox_enabled';
         }).value;
+
         if( val == '' || typeof val == 'undefined') {
           val = false;
         }
@@ -229,9 +236,11 @@ class DefaultSettings extends Component {
         val = nextProps.tsxInfo.find(function(element) {
           return element.name == 'focusRequiresCLS';
         }).value;
-        if( val == '' || typeof val == 'undefined') {
+
+        if( typeof val === 'undefined' || val === '' ) {
           val = false;
         }
+
         this.setState({
           focusRequiresCLS: val,
         });
@@ -240,10 +249,10 @@ class DefaultSettings extends Component {
           ip: nextProps.tsxInfo.find(function(element) {
             return element.name == 'ip';
           }).value,
+
           port: nextProps.tsxInfo.find(function(element) {
             return element.name == 'port';
           }).value,
-
 
           guider_camera_delay: nextProps.tsxInfo.find(function(element) {
             return element.name == 'guider_camera_delay';
@@ -376,12 +385,6 @@ class DefaultSettings extends Component {
       DISABLE = false;
       NOT_DISABLE = true;
     }
-//   icon='plug'     <Button disabled compact />
-//      <Button disabled={DISABLE}  onClick={this.connectToTSX.bind(this)}>
-//      Refresh</Button>
-//      <center>
-//      </center>
-
     return (
       <Button
         onClick={this.connectToTSX.bind(this)}
@@ -432,10 +435,12 @@ class DefaultSettings extends Component {
       <div>
       <Accordion.Title
         active={activeIndex === eSetup}
-        content='System Setup'
         index={eSetup}
         onClick={this.handleClick}
-      />
+      >
+      <Icon name='star' size='large' />
+      TheSkyX Connection
+      </Accordion.Title>
       <Accordion.Content  active={activeIndex === eSetup} >
       <Form>
         <Segment>
@@ -516,10 +521,13 @@ class DefaultSettings extends Component {
       <div>
       <Accordion.Title
         active={activeIndex === eFlatbox}
-        content='Flatbox Setup'
         index={eFlatbox}
         onClick={this.handleClick}
-      />
+        icon='question'
+      >
+      <Icon name='chart area' size='large' />
+      Artesky Flatbox
+      </Accordion.Title>
       <Accordion.Content  active={activeIndex === eFlatbox} >
       <Segment>
       <Checkbox
@@ -570,10 +578,12 @@ class DefaultSettings extends Component {
       <div>
       <Accordion.Title
         active={activeIndex === eDefaultConstrainsts}
-        content='Default Constraints'
         index={eDefaultConstrainsts}
         onClick={this.handleClick}
-        />
+      >
+      <Icon name='settings' size='large' />
+      Default Constraints
+      </Accordion.Title>
       <Accordion.Content  active={activeIndex === eDefaultConstrainsts} >
       <Segment>
       <h4 style={{color: "#5FB343"}} className="ui header">Priority: {this.state.defaultPriority}</h4>
@@ -626,10 +636,12 @@ class DefaultSettings extends Component {
       <div>
       <Accordion.Title
         active={activeIndex === eStartStop}
-        content='Default Start/Stop Times'
         index={eStartStop}
         onClick={this.handleClick}
-        />
+      >
+      <Icon name='time' size='large' />
+      Default Start/Stop Times
+      </Accordion.Title>
       <Accordion.Content  active={activeIndex === eStartStop} >
       <div>
         <Segment raised>
@@ -662,10 +674,12 @@ class DefaultSettings extends Component {
       <div>
       <Accordion.Title
         active={activeIndex === eMount}
-        content='Mount'
         index={eMount}
         onClick={this.handleClick}
-        />
+      >
+      <Icon name='moon' size='large' />
+      Mount
+      </Accordion.Title>
       <Accordion.Content active={activeIndex === eMount} >
       <Segment>
         <Form>
@@ -719,10 +733,12 @@ class DefaultSettings extends Component {
       <div>
       <Accordion.Title
         active={activeIndex === eRotator}
-        content='Rotator'
         index={eRotator}
         onClick={this.handleClick}
-        />
+      >
+      <Icon name='crop' size='large' />
+      Rotator
+      </Accordion.Title>
       <Accordion.Content active={activeIndex === eRotator} >
       <Segment>
         <Form>
@@ -772,10 +788,12 @@ class DefaultSettings extends Component {
       <div>
       <Accordion.Title
         active={activeIndex === eGuider}
-        content='Guider'
         index={eGuider}
         onClick={this.handleClick}
-        />
+      >
+      <Icon name='chart line' size='large' />
+      Guider
+      </Accordion.Title>
       <Accordion.Content  active={activeIndex === eGuider} >
       <Segment>
         <Form>
@@ -869,10 +887,12 @@ class DefaultSettings extends Component {
       <div>
       <Accordion.Title
         active={activeIndex === eFilterWheel}
-        content='Filter Wheel'
         index={eFilterWheel}
         onClick={this.handleClick}
-        />
+      >
+      <Icon name='filter' size='large' />
+      Filter Wheel
+      </Accordion.Title>
       <Accordion.Content  active={activeIndex === eFilterWheel} >
       <Segment>
         <Form>
@@ -910,10 +930,12 @@ class DefaultSettings extends Component {
       <div>
       <Accordion.Title
         active={activeIndex === eCamera}
-        content='Imaging Camera'
         index={eCamera}
         onClick={this.handleClick}
-        />
+      >
+      <Icon name='camera' size='large' />
+      Imaging Camera
+      </Accordion.Title>
       <Accordion.Content  active={activeIndex === eCamera} >
       <Segment>
         <Form>
@@ -976,10 +998,12 @@ class DefaultSettings extends Component {
       <div>
       <Accordion.Title
         active={activeIndex === eFocuser}
-        content='Focuser'
         index={eFocuser}
         onClick={this.handleClick}
-        />
+      >
+      <Icon name='adjust' size='large' />
+      Focuser
+      </Accordion.Title>
       <Accordion.Content  active={activeIndex === eFocuser} >
       <Segment>
         <Form>
@@ -1041,10 +1065,12 @@ class DefaultSettings extends Component {
       <div>
       <Accordion.Title
         active={activeIndex === eClouds}
-        content='Clouds'
         index={eClouds}
         onClick={this.handleClick}
-        />
+      >
+      <Icon name='cloud' size='large' />
+      Clouds
+      </Accordion.Title>
       <Accordion.Content  active={activeIndex === eClouds} >
         <Segment>
           <Form>

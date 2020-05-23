@@ -74,28 +74,6 @@ class CalibrationFrame extends Component {
     flatbox_enabled: false,
   }
 
-  // Initialize states
-  componentWillMount() {
-    // // do not modify the state directly
-
-    if( typeof this.props.calibration == 'undefined') {
-      return;
-    }
-    this.setState({
-      id: this.props.calibration._id,
-      subFrameTypes: this.props.calibration.subFrameTypes,
-      filter: this.props.calibration.filter,
-      exposure: this.props.calibration.exposure,
-      level: this.props.calibration.level,
-      quantity: this.props.calibration.quantity,
-      rotation: this.props.calibration.rotation,
-      order: this.props.calibration.order,
-      binning: this.props.calibration.binning,
-      ccdTemp: this.props.calibration.ccdTemp,
-      on_enabled: this.props.calibration.on_enabled,
-    });
-  }
-
   handleChange = (e, { name, value }) => {
     this.setState({ [name]: value });
     updateCalibrationFrame(
@@ -116,9 +94,21 @@ class CalibrationFrame extends Component {
     );
   };
 
-
+  // Initialize states
   componentDidMount() {
-    this.updateDefaults(this.props);
+    // // do not modify the state directly
+
+    if( typeof this.props.target === 'undefined') {
+      return;
+    }
+    updateDefaults(this.props);
+  }
+
+  componentDidUpdate(prevProps) {
+    // Typical usage (don't forget to compare props):
+    if (this.props.target !== prevProps.target) {
+      this.updateDefaults(this.props);
+    }
   }
 
   updateDefaults(nextProps) {

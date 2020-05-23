@@ -47,7 +47,7 @@ if (Meteor.isServer) {
 // used to help Helpers return the device, or init
 function initDevice(devName) {
   var dev = TheSkyXInfos.findOne({name: devName});
-  if( typeof dev == 'undefined') {
+  if( typeof dev === 'undefined') {
     var did = TheSkyXInfos.upsert({name: devName}, {
       $set: {
         model: '',
@@ -62,7 +62,7 @@ function initDevice(devName) {
 
 function initParam(paramName) {
   var param = TheSkyXInfos.findOne({name: paramName});
-  if( typeof param == 'undefined') {
+  if( typeof param === 'undefined') {
     var did = TheSkyXInfos.upsert({name: paramName}, {
       $set: {
         value: '',
@@ -79,7 +79,7 @@ function initParam(paramName) {
 
 function initParamWith(paramName, paramValue) {
   var param = TheSkyXInfos.findOne({name: paramName});
-  if( typeof param == 'undefined') {
+  if( typeof param === 'undefined') {
     var did = TheSkyXInfos.upsert({name: paramName}, {
       $set: {
         value: paramValue,
@@ -98,7 +98,7 @@ TheSkyXInfos.helpers({
 
   ip: function() {
     var val =  TheSkyXInfos.findOne({name: 'ip'}).value;
-    if( typeof val == 'undefined') {
+    if( typeof val === 'undefined') {
       val = '';
     }
     return val;
@@ -106,7 +106,7 @@ TheSkyXInfos.helpers({
 
   port: function() {
     var val =  TheSkyXInfos.findOne({name: 'port'}).value;
-    if( typeof val == 'undefined') {
+    if( typeof val === 'undefined') {
       val = '';
     }
     return val;
@@ -114,7 +114,7 @@ TheSkyXInfos.helpers({
 
   defaultFocusTempDiff: function() {
     var val =  TheSkyXInfos.findOne({name: 'defaultFocusTemp'}).value;
-    if( typeof val == 'undefined') {
+    if( typeof val === 'undefined') {
       val = '';
     }
     return val;
@@ -122,63 +122,63 @@ TheSkyXInfos.helpers({
 
   mount: function() {
     var val =  TheSkyXInfos.findOne({name: 'mount'});
-    if( typeof val == 'undefined') {
+    if( typeof val === 'undefined') {
       val = '';
     }
     return val;
   },
   camera: function() {
     var val =  TheSkyXInfos.findOne({name: 'camera'});
-    if( typeof val == 'undefined') {
+    if( typeof val === 'undefined') {
       val = '';
     }
     return val;
   },
   cameraBins: function() {
     var val =  TheSkyXInfos.findOne({name: 'numberOfBins'});
-    if( typeof val == 'undefined') {
+    if( typeof val === 'undefined') {
       val = '';
     }
     return val;
   },
   guiderBins: function() {
     var val =  TheSkyXInfos.findOne({name: 'numGuiderBins'});
-    if( typeof val == 'undefined') {
+    if( typeof val === 'undefined') {
       val = '';
     }
     return val;
   },
   efw: function() {
     var val =  TheSkyXInfos.findOne({name: 'efw'});
-    if( typeof val == 'undefined') {
+    if( typeof val === 'undefined') {
       val = '';
     }
     return val;
   },
   numFilters: function() {
     var val =  TheSkyXInfos.findOne({name: 'numberOfFilters'});
-    if( typeof val == 'undefined') {
+    if( typeof val === 'undefined') {
       val = '';
     }
     return val;
   },
   guider: function() {
     var val =  TheSkyXInfos.findOne({name: 'guider'});
-    if( typeof val == 'undefined') {
+    if( typeof val === 'undefined') {
       val = '';
     }
     return val;
   },
   rotator: function() {
     var val =  TheSkyXInfos.findOne({name: 'rotator'});
-    if( typeof val == 'undefined') {
+    if( typeof val === 'undefined') {
       val = '';
     }
     return val;
   },
   focuser: function() {
     var val =  TheSkyXInfos.findOne({name: 'focuser'});
-    if( typeof val == 'undefined') {
+    if( typeof val === 'undefined') {
       val = '';
     }
     return val;

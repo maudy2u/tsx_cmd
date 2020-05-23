@@ -107,7 +107,7 @@ class TakeSeriesEditor extends Component {
   };
 
   // Initialize states
-  componentWillMount() {
+  componentDidMount(prevProps) {
     var definedSeries = Seriess.findOne({_id:this.props.series_id.id});
     // // do not modify the state directly
     if( typeof definedSeries == 'undefined') {

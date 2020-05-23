@@ -103,7 +103,7 @@ class NightPlanner extends Component {
     saveDefaultStateValue( name, !val );
   };
 
-  componentWillMount() {
+  componentDidMount(prevProps) {
     if( typeof this.props == 'undefined') return;
     if( typeof this.props.night_plan_reset == 'undefined' ) return;
     this.setState({

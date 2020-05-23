@@ -525,17 +525,19 @@ Meteor.methods({
    },
 
    updateServerState( name, value ) {
-     var id = TheSkyXInfos.upsert( {name: name }, {
-       $set: { value: value }
-     })
+     if( typeof name !== 'undefined' && name !== '' ) {
+       tsx_SetServerState( name, value );
+     }
      tsxInfo(' [Saved] ' +name+':'+value);
    },
 
    updateTargetState( id, name, value ) {
 
+     var dts = new Date();
     TargetSessions.update( id, {
        $set: {
          [name]: value,
+         timestamp: dts,
        },
     });
 
@@ -544,13 +546,15 @@ Meteor.methods({
 
    updateTargetSeriesState( id, sid ) {
      var ser = TakeSeriesTemplates.findOne({_id: sid});
+     var dts = new Date();
 
      TargetSessions.update( id, {
        $set: {
          series: {
              _id: sid,
              name: ser.name,
-         }
+         },
+         timestamp: dts,
        },
     });
 

@@ -59,12 +59,13 @@ import Monitor from './Monitor.js';
 import Toolbox from './Toolbox.js';
 import CalibrationsMenu from './CalibrationsMenu.js';
 import TargetSessionMenu from './TargetSessionMenu.js';
+import AppInfo from './AppInfo.js'
+import AppStates from './AppStates.js'
+
 // import Filter from './Filter.js';
 import Series from './Series.js';
 import TakeSeriesTemplateMenu from './TakeSeriesTemplateMenu.js';
-import SessionControls from './SessionControls.js';
 import TestModal from './TestModal.js';
-import BackupModal from './BackupModal.js';
 import NightPlanner from './NightPlanner.js';
 
 import {
@@ -89,19 +90,15 @@ class App extends TrackerReact(Component) {
     this.state = {
       activeMenu: 'Targets',
       saveServerFailed: false,
-      modalEnterIp: false,
-      modalEnterPort: false,
-      modalConnectionFailed: false,
-      showMonitor: false, // this needs to be a server session variable
 
       ip: 'localhost',
       port: '3040',
-
       currentStage: ' Loading....',
-      modalOpenWindowSessionControls: false,
+      progress: 0,
+      progress_total: 0,
+
       modalOpen: false,
       modalOpenTest: false,
-      modalOpenBackup: false,
     };
   }
 
@@ -112,23 +109,9 @@ class App extends TrackerReact(Component) {
   saveServerFailedClose = () => this.setState({ saveServerFailed: false });
 
   // Set TSX Server
-  ipChange = (e, { value }) => this.setState({ ip: value.trim() });
-  portChange = (e, { value }) => this.setState({ port: value.trim() });
-  modalEnterIpOpen = () => this.setState({ modalEnterIp: true });
-  modalEnterIpClose = () => this.setState({ modalEnterIp: false });
-  modalEnterPortOpen = () => this.setState({ modalEnterPort: true });
-  modalEnterPortClose = () => this.setState({ modalEnterPort: false });
-  modalConnectionFailedOpen = () => this.setState({ modalConnectionFailed: true });
-  modalConnectionFailedClose = () => this.setState({ modalConnectionFailed: false });
 
-  modalOpenSessionsControls = () => this.setState({ modalOpenWindowSessionControls: true });
-  modalCloseSessionsControls = () => this.setState({ modalOpenWindowSessionControls: false });
-
-
-modalOpenTest = () => this.setState({ modalOpenTest: true });
-modalCloseTest = () => this.setState({ modalOpenTest: false });
-modalOpenBackup = () => this.setState({ modalOpenBackup: true });
-modalCloseBackup = () => this.setState({ modalOpenBackup: false });
+  modalOpenTest = () => this.setState({ modalOpenTest: true });
+  modalCloseTest = () => this.setState({ modalOpenTest: false });
 
   propValue( prop ) {
     let val = '';
@@ -141,59 +124,52 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
     return val;
   }
 
-  saveTSXServerIp() {
-    this.modalEnterIpClose();
-    if( this.state.ip == ""  ) {
-      this.saveServerFailedOpen();
-    }
-    else {
-      this.saveDefaultState('ip');
-    };
+  // WARNING!!  adding this did not work
+  // shouldComponentUpdate(prevProps) {
+  //   // Typical usage (don't forget to compare props):
+  //   if (this.props.target !== prevProps.target) {
+  //     return true;
+  //   }
+  //   return false;
+  // }
 
-  };
-
-  saveTSXServerPort() {
-    this.modalEnterPortClose();
-    if( this.state.port == ""  ) {
-      this.saveServerFailedOpen();
-    }
-    else {
-      this.saveDefaultState('port');
-    };
-
-  };
-
-  saveTSXServerConnection() {
-
-    if( this.state.port == "" || this.state.ip == ""  ) {
-      this.saveServerFailedOpen();
-    }
-    else {
-      this.saveDefaultState('ip');
-      this.saveDefaultState('port');
-    };
-  };
-
-  // *******************************
-  //
   componentDidMount() {
-    if( typeof this.props.tsxIP == 'undefined' || typeof this.props.tsxPort == 'undefined' ) {
-      return;
-    }
-
+    // Typical usage (don't forget to compare props):
     this.updateDefaults(this.props);
   }
 
+  componentDidUpdate(prevProps) {
+    // Typical usage (don't forget to compare props):
+    if (this.props.target !== prevProps.target) {
+      this.updateDefaults(this.props);
+    }
+  }
+
   updateDefaults(nextProps) {
-    if( typeof nextProps.tsxIP.value != 'undefined') {
+    if( typeof nextProps.tsxIP !== 'undefined' && typeof nextProps.tsxIP.value !== 'undefined') {
       this.setState({
         ip: nextProps.tsxIP.value,
       });
     }
 
-    if( typeof nextProps.tsxPort.value != 'undefined') {
+    if( typeof nextProps.tsxPort !== 'undefined' && typeof nextProps.tsxPort.value !== 'undefined') {
       this.setState({
         port: nextProps.tsxPort.value,
+      });
+    }
+    if( typeof nextProps.currentStage !== 'undefined' && typeof nextProps.currentStage.value !== 'undefined') {
+      this.setState({
+        currentStage: nextProps.currentStage.value,
+      });
+    }
+    if( typeof nextProps.tsx_progress !== 'undefined' && typeof nextProps.tsx_progress.value !== 'undefined') {
+      this.setState({
+        progress: nextProps.tsx_progress.value,
+      });
+    }
+    if( typeof nextProps.tsx_total !== 'undefined' && typeof nextProps.tsx_total.value !== 'undefined') {
+      this.setState({
+        progress_total: nextProps.tsx_total.value,
       });
     }
   }
@@ -217,145 +193,6 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
   saveDefaultState( param ) {
     var value = eval("this.state."+param);
     tsx_UpdateServerState(param, value);
-  }
-
-  // Use this method to save any defaults gathered
-  saveDefaults(){
-    this.saveDefaultState('ip');
-    this.saveDefaultState('port');
-  }
-
-  // // *******************************
-  // //
-  // addNewFilter(event) {
-  //   // Find the text field via the React ref
-  //   const text = ReactDOM.findDOMNode(this.refs.textInput).value.trim();
-  //
-  //   Filters.insert({
-  //     name: text,
-  //     createdAt: new Date(), // current time
-  //     offset: 0,
-  //   });
-  //   // Clear form
-  //   ReactDOM.findDOMNode(this.refs.textInput).value = '';
-  // }
-
-  // *******************************
-  //
-  renderTSXConnetion() {
-
-    return (
-      <Segment>
-        <Form>
-          <Form.Group widths='equal' onSubmit={this.saveTSXServerConnection.bind(this)}>
-            <Form.Input
-              label='IP Address'
-              name='ip'
-              placeholder="Enter TSX address"
-              value={this.state.ip}
-              onChange={this.ipChange}/>
-            <Form.Input
-              label='Port'
-              name='port'
-              placeholder="Enter TSX port"
-              value={this.state.port}
-              onChange={this.portChange}/>
-          </Form.Group>
-        </Form>
-
-           {/* *******************************
-             Used to handle the FAILED deleting of a series
-             */}
-           <Modal
-             open={this.state.saveServerFailed}
-             onClose={this.saveServerFailedClose.bind(this)}
-             basic
-             size='small'
-             closeIcon>
-             <Modal.Header>Save Failed</Modal.Header>
-             <Modal.Content>
-               <h3>Both IP and Port need to have a value.</h3>
-             </Modal.Content>
-             <Modal.Actions>
-               <Button color='red' onClick={this.saveServerFailedClose.bind(this)} inverted>
-                 <Icon name='stop' /> Got it
-               </Button>
-             </Modal.Actions>
-           </Modal>
-      </Segment>
-    );
-  }
-
-  // *******************************
-    renderDevices() {
-
-    var mount = TheSkyXInfos.findOne().mount();
-    var camera = TheSkyXInfos.findOne().camera();
-    var guider = TheSkyXInfos.findOne().guider();
-    var rotator = TheSkyXInfos.findOne().rotator();
-    var efw = TheSkyXInfos.findOne().efw();
-    var focuser = TheSkyXInfos.findOne().focuser();
-
-    return (
-        <Segment.Group>
-          <Segment><Label>Mount<Label.Detail>
-            {mount.manufacturer + ' | ' + mount.model}
-          </Label.Detail></Label></Segment>
-          <Segment><Label>Camera<Label.Detail>
-            {camera.manufacturer + ' | ' + camera.model}
-          </Label.Detail></Label></Segment>
-          <Segment><Label>Autoguider<Label.Detail>
-            {guider.manufacturer + ' | ' + guider.model}
-          </Label.Detail></Label></Segment>
-          <Segment><Label>Filter Wheel<Label.Detail>
-            {efw.manufacturer + ' | ' + efw.model}
-          </Label.Detail></Label></Segment>
-          <Segment><Label>Focuser<Label.Detail>
-            {focuser.manufacturer + ' | ' + focuser.model}
-          </Label.Detail></Label></Segment>
-          <Segment><Label>Rotator<Label.Detail>
-            {rotator.manufacturer + ' | ' + rotator.model}
-          </Label.Detail></Label></Segment>
-        </Segment.Group>
-    );
-
-  }
-
-  // *******************************
-  //
-  renderLogout() {
-
-  }
-
-  connectToTSX() {
-
-    // these are all working methods
-    // on the client
-    Meteor.call("connectToTSX", function (error, result) {
-      // identify the error
-      if (error && error.reason === "Internal server error") {
-        // show a nice error message
-        this.setState({modalConnectionFailed: true});
-      }
-      else {
-        this.setState({activeMenu: 'Devices'});
-        this.saveDefaultState('activeMenu');
-      }
-    }.bind(this));
-  }
-
-  park() {
-
-    // these are all working methods
-    // on the client
-    Meteor.call("park", function (error, result) {
-      // identify the error
-      if (error && error.reason === "Internal server error") {
-        // show a nice error message
-        this.setState({modalConnectionFailed: true});
-      }
-    }.bind(this));
-
   }
 
   renderMenu( MENU, RUNNING ) {
@@ -435,7 +272,6 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           />
       )
     } else if (this.state.activeMenu == 'Targets' ) {
-//      <Button disabled={DISABLE} size='mini' onClick={this.addNewTargets.bind(this)}>Add Target</Button>
       return (
         <div>
           <TargetSessionMenu
@@ -470,18 +306,12 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
           tool_flats_dec_az = {this.props.tool_flats_dec_az}
         />
       )
-    } else if (this.state.activeMenu == 'Devices') {
-      return this.renderDevices();
-
     } else if (this.state.activeMenu == 'Settings') {
       return (
         <DefaultSettings
           scheduler_running={this.props.scheduler_running}
         />
       )
-
-    } else if (this.state.activeMenu == 'logout') {
-      return this.renderLogout();
 
     } else if (this.state.activeMenu == 'Toolbox') {
       return (
@@ -520,158 +350,6 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
 
   }
 
-  renderIPEditor() {
-
-    return (
-      <Modal
-        open={this.state.modalEnterIp}
-        onClose={this.modalEnterIpClose.bind(this)}
-        basic
-        size='small'
-        closeIcon>
-        <Modal.Header>Enter the IP to use to connect to the TSX Server.</Modal.Header>
-        <Modal.Content>
-          <Form>
-          <Segment>
-              <Form.Input
-                label='IP:'
-                name='ip'
-                value={this.state.ip}
-                onChange={this.ipChange}/>
-          </Segment>
-          </Form>
-        </Modal.Content>
-        <Modal.Description>
-        </Modal.Description>
-        <Modal.Actions>
-          <Button onClick={this.modalEnterIpClose.bind(this)} inverted>
-            <Icon name='cancel' />Cancel
-          </Button>
-          <Button onClick={this.saveTSXServerIp.bind(this)} inverted>
-            <Icon name='save' />Save
-          </Button>
-        </Modal.Actions>
-      </Modal>
-    )
-  }
-
-  renderPortEditor() {
-
-    return (
-      <Modal
-        open={this.state.modalEnterPort}
-        onClose={this.modalEnterPortClose.bind(this)}
-        basic
-        size='small'
-        closeIcon>
-        <Modal.Header>Enter the TCP Port to use to connect to the TSX Server.</Modal.Header>
-        <Modal.Content>
-        </Modal.Content>
-          <Form>
-          <Segment>
-            <Form.Group>
-              <Form.Input
-                label='Port: '
-                name='port'
-                placeholder='Minutes to sleep'
-                value={this.state.port}
-                onChange={this.portChange}
-              />
-            </Form.Group>
-          </Segment>
-          </Form>
-        <Modal.Description>
-        </Modal.Description>
-        <Modal.Actions>
-          <Button onClick={this.modalEnterPortClose.bind(this)} inverted>
-            <Icon name='cancel' />Cancel
-          </Button>
-          <Button onClick={this.saveTSXServerPort.bind(this)} inverted>
-            <Icon name='save' />Save
-          </Button>
-        </Modal.Actions>
-      </Modal>
-    )
-  }
-
-  tsxConnectionFailed() {
-    return (
-      <Modal
-        open={this.state.modalConnectionFailed}
-        onClose={this.modalConnectionFailedClose.bind(this)}
-        basic
-        size='small'
-        closeIcon>
-        <Modal.Header>TSX Connection Failed</Modal.Header>
-        <Modal.Content>
-          <h3>Check that TheSkyX server is available, and the IP and Port to use to connect to the TSX Server.</h3>
-        </Modal.Content>
-        <Modal.Description>
-          <Input
-            label='IP:'
-            value={this.state.ip}
-          />
-          <Input
-            label='Port:'
-            value={this.state.port}
-          />
-        </Modal.Description>
-        <Modal.Actions>
-          <Button onClick={this.modalConnectionFailedClose.bind(this)} inverted>
-            <Icon name='stop' />Stop
-          </Button>
-        </Modal.Actions>
-      </Modal>
-    )
-  };
-
-  appButtons( state, active ) {
-    // detective
-    var DISABLE = true;
-    var NOT_DISABLE = false;
-    // then use as needed disabled={DISABLE} or disabled={NOT_DISABLE}
-    if( state == 'Stop'  && active == false ){
-      DISABLE = false;
-      NOT_DISABLE = true;
-    }
-//        <Button disabled compact />
-//        <Button disabled={DISABLE} icon='plug' onClick={this.connectToTSX.bind(this)}/>
-//        <Button icon='detective' onClick={this.modalOpenSessionsControls}/>
-
-    return (
-      <Button.Group compact size='mini' floated='right'>
-        <Button icon='cloud download' onClick={this.modalOpenBackup}/>
-        <Button disabled={DISABLE} icon='car' onClick={this.park.bind(this)}/>
-      </Button.Group>
-    )
-  }
-
-  renderSessionControls( ) {
-    /*
-    modalWindowTitle='ControlPanel'
-    let test = this.props.defaultMeridianFlip;
-     */
-    return(
-      <Modal
-        open={this.state.modalOpenWindowSessionControls}
-        onClose={this.modalCloseSessionsControls}
-        basic
-        size='small'
-        closeIcon>
-        <Modal.Header>Session Controls</Modal.Header>
-        <Modal.Content>
-          <SessionControls
-            tsxInfo = { this.props.tsxInfo }
-          />
-        </Modal.Content>
-        <Modal.Description>
-        </Modal.Description>
-        <Modal.Actions>
-        </Modal.Actions>
-      </Modal>
-    )
-  }
-
   renderTestModal() {
     return(
       <Modal
@@ -700,33 +378,6 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
     )
   }
 
-  renderBackupModal() {
-    return(
-      <Modal
-        open={this.state.modalOpenBackup}
-        onClose={this.modalCloseBackup}
-        basic
-        size='small'
-        closeIcon>
-        <Modal.Header>Backup tsx_cmd DB</Modal.Header>
-        <Modal.Content>
-          <BackupModal
-            tsxInfo = { this.props.tsxInfo }
-            target_reports={this.props.target_reports}
-            tool_active = {this.props.tool_active}
-            scheduler_running={this.props.scheduler_running}
-            scheduler_report={this.props.scheduler_report}
-            tsxInfo = {this.props.tsxInfo}
-            currentStage= {this.props.currentStage}
-          />
-        </Modal.Content>
-        <Modal.Description>
-        </Modal.Description>
-        <Modal.Actions>
-        </Modal.Actions>
-      </Modal>
-    )
-  }
 
 /* This is a sample template to add in a modal
   renderTestModal() {
@@ -757,148 +408,97 @@ modalCloseBackup = () => this.setState({ modalOpenBackup: false });
   }
 */
   render() {
-    /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
-    */
-    var IP = '';
-    var PORT ='';
-    var STATUS ='';
-    var MENU = '';
-    var VERSION = '';
-    var DATE = '';
-    var RUNNING = '';
-    var ACTIVE = false;
-    let PROGRESS = 0;
-    let TOTAL = 60;
-    try {
-      IP = this.props.tsxIP.value;
-      PORT = this.props.tsxPort.value;
-      STATUS = this.props.currentStage.value;
-      MENU = this.props.activeMenu.value;
-      VERSION = this.props.tsx_version.value;
-      DATE = this.props.tsx_date.value;
-      RUNNING = this.props.scheduler_running.value;
-      ACTIVE = this.props.tool_active.value;
-      PROGRESS = this.props.tsx_progress.value;
-      TOTAL = this.props.tsx_total.value;
-    } catch (e) {
-      IP = 'Initializing';
-      PORT = 'Initializing';
-      STATUS = 'Initializing';
-      MENU = 'Targets';
-      VERSION = '...';
-      DATE = '...';
-      RUNNING = '';
-      ACTIVE=false;
-      PROGRESS = 0;
-      TOTAL = 60;
-    }
-    var LOG = [];
-    var num = 0;
-    if( TOTAL == 0 ) {
-      TOTAL = 60;
-    }
-    try {
-      num = this.props.srvLog.length;
-    }
-    finally {
-      for (var i = num-1; i > -1; i--) { // this puts most resent line on top
-          var log = this.props.srvLog[i];
-          LOG = LOG + '[' + log.level +']' + log.message + '\n';
+    if ( this.props.tsxInfo ) {
+      /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
+      */
+      var MENU = 'Targets';
+      var RUNNING = '';
+      var ACTIVE = false;
+      var PROGRESS = 0;
+      var PROGRESS_TOTAL = 60;
+      var STAGE = 'Setting up';
+
+     try {
+        MENU = this.props.activeMenu.value;
+        RUNNING = this.props.scheduler_running.value;
+        ACTIVE = this.props.tool_active.value;
+        PROGRESS =  this.props.tsx_progress.value;
+        PROGRESS_TOTAL = this.props.tsx_total.value;
+        STAGE = this.props.currentStage.value;
+
+      } catch (e) {
+        MENU = 'Targets';
+        RUNNING = '';
+        ACTIVE = false;
+        PROGRESS = 0;
+        PROGRESS_TOTAL = 60;
+        STAGE = 'Setting up';
       }
+      var LOG = [];
+      var num = 0;
+      try {
+        num = this.props.srvLog.length;
+      }
+      finally {
+        for (var i = num-1; i > -1; i--) { // this puts most resent line on top
+            var log = this.props.srvLog[i];
+            LOG = LOG + '[' + log.level +']' + log.message + '\n';
+        }
+      }
+
+      return (
+        <div className="container">
+            <Segment.Group>
+              <Segment>
+                <AppStates
+                  scheduler_running={ this.props.scheduler_running }
+                  tool_active = { this.props.tool_active }
+                  tsxInfo= {this.props.tsxInfo }
+                  progress= { this.props.tsx_progress }
+                  progress_total = { this.props.tsx_total }
+                  currentStage = { this.props.currentStage }
+                  target_reports={this.props.target_reports}
+                  scheduler_report={this.props.scheduler_report}
+                />
+              </Segment>
+              <Segment>
+                { this.renderMenu( MENU, RUNNING ) }
+              </Segment>
+            {/* *******************************
+
+            THIS IS FOR A FAILED CONNECTION TO TSX
+
+            *******************************             */}
+            {this.renderTestModal()}
+          </Segment.Group>
+          <AppInfo
+            ip = {this.props.tsxIP}
+            port = {this.props.tsxPort}
+            version = {this.props.tsx_version}
+            date = {this.props.tsx_date}
+            />
+        </div>
+      );
     }
-
-    return (
-      <div className="container">
-          <Segment.Group>
-            <Segment size='mini' clearing>
-                {this.appButtons(RUNNING, ACTIVE)}
-                <Button.Group compact size='mini'>
-                  <Button icon='detective' onClick={this.modalOpenSessionsControls}/>
-                </Button.Group>
-                <Label onClick={this.modalEnterIpOpen.bind(this)}>TSX ip:
-                  <Label.Detail>
-                    {IP}
-                  </Label.Detail>
-                </Label>
-                <Label onClick={this.modalEnterPortOpen.bind(this)}>
-                  TSX port:
-                  <Label.Detail>
-                    {PORT}
-                  </Label.Detail>
-                </Label>
-                <br/>
-                {this.renderIPEditor()}
-                {this.renderPortEditor()}
-            </Segment>
-            <Segment>
-              <Progress
-                size='medium'
-                value={PROGRESS}
-                total={TOTAL}
-                autoSuccess
-                progress='ratio'>
-                <Label>
-                  {STATUS}
-                </Label>
-              </Progress>
-            </Segment>
-            <Segment>
-              { this.renderMenu( MENU, RUNNING ) }
-            </Segment>
-          {/* *******************************
-
-          THIS IS FOR A FAILED CONNECTION TO TSX
-
-          *******************************             */}
-          {this.renderSessionControls()}
-          {this.renderTestModal()}
-          {this.renderBackupModal()}
-        </Segment.Group>
-        <Modal
-          open={this.state.modalConnectionFailed}
-          onClose={this.modalConnectionFailedClose.bind(this)}
-          basic
-          size='small'
-          closeIcon>
-          <Modal.Header>TSX Connection Failed</Modal.Header>
-          <Modal.Content>
-            <h3>Check that TheSkyX server is available, and the IP and Port to use to connect to the TSX Server.</h3>
-          </Modal.Content>
-          <Modal.Description>
-            <Input
-              label='IP:'
-              value={this.state.ip}
-            />
-            <Input
-              label='Port:'
-              value={this.state.port}
-            />
-          </Modal.Description>
-          <Modal.Actions>
-            <Button onClick={this.modalConnectionFailedClose.bind(this)} inverted>
-              <Icon name='stop' />Stop
-            </Button>
-          </Modal.Actions>
-        </Modal>
-        <center>
-        <Label>tsx_cmd - Imaging with TheSkyX</Label>
-        <Label>version <Label.Detail>{VERSION}</Label.Detail></Label>
-        <Label>date <Label.Detail>{DATE}</Label.Detail></Label>
-        </center>
-      </div>
-    );
+    else {
+      return(
+        <Label>Loading...</Label>
+      )
+    }
   }
 }
 // *******************************
 // THIS IS THE DEFAULT EXPORT AND IS WHERE THE LOADING OF THE COMPONENT STARTS
 export default withTracker(() => {
-  // Meteor.subscribe('targetSessions');
-  // Meteor.subscribe('tsxIP');
-  // Meteor.subscribe('scheduler_running');
-  // Meteor.subscribe('scheduler_report');
-  // Meteor.subscribe('currentStage');
-  // Meteor.subscribe('tsxInfo');
+  const infoHandle = Meteor.subscribe('tsxInfo.all');
+  var infoReadyYet = infoHandle.ready();
+  var tsxInfo = TheSkyXInfos.find({}).fetch();
+
   return {
+    infoReadyYet,
+    tsxInfo,
+    scheduler_running: TheSkyXInfos.findOne({name: 'scheduler_running'}),
+
     tool_calibrate_via: TheSkyXInfos.findOne({name: 'tool_calibrate_via'}),
     tool_calibrate_location: TheSkyXInfos.findOne({name: 'tool_calibrate_location'}),
     tool_rotator_num: TheSkyXInfos.findOne({name: 'tool_rotator_num'}),
@@ -926,7 +526,6 @@ export default withTracker(() => {
 
     // App stuf
     currentStage: TheSkyXInfos.findOne({name: 'currentStage'}),
-    tsxInfo: TheSkyXInfos.find({}).fetch(),
     tsx_version: TheSkyXInfos.findOne({name: 'tsx_version'}),
     tsx_date: TheSkyXInfos.findOne({name: 'tsx_date'}),
     tsxIP: TheSkyXInfos.findOne({name: 'ip'}),
@@ -939,7 +538,6 @@ export default withTracker(() => {
     tsx_progress: TheSkyXInfos.findOne({name: 'tsx_progress'}),
     tsx_total:  TheSkyXInfos.findOne({name: 'tsx_total'}),
     tsx_message: TheSkyXInfos.findOne({name: 'tsx_message'}),
-    scheduler_running: TheSkyXInfos.findOne({name: 'scheduler_running'}),
     scheduler_report: TheSkyXInfos.findOne({name: 'scheduler_report'}),
     filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
 //    calibrations: CalibrationFrames.find({}, { sort: { order: 1 } }).fetch(),

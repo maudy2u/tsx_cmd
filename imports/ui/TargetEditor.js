@@ -662,17 +662,6 @@ class TargetEditor extends Component {
                   validationErrors={{ isNumeric: 'Must be a number' }}
                   errorLabel={ ERRORLABEL }
                   onChange={this.handleChange}/>
-              <Checkbox
-                label=' On angle is WestSide, off EastSide'
-                name='rotator_angle_westside'
-                disabled
-                toggle
-                checked={this.state.rotator_angle_westside}
-                onChange={this.handleToggle}
-                validations="isNumeric"
-                validationErrors={{ isNumeric: 'Must be a number' }}
-                errorLabel={ ERRORLABEL }
-              />
             </Form.Group>
           </Segment>
         </Segment.Group>

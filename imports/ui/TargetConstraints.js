@@ -114,23 +114,6 @@ class TargetConstraints extends Component {
     Comment: '',
   }
 
-  // Initialize states
-  componentWillMount() {
-    // // do not modify the state directly
-
-    if( typeof this.props.targetPlan == 'undefined') {
-      return;
-    }
-    this.setState({
-      name: this.props.targetPlan.targetFindName,
-      description: this.props.targetPlan.description,
-      startTime: this.props.targetPlan.startTime,
-      stopTime: this.props.targetPlan.stopTime,
-      priority: this.props.targetPlan.priority,
-      minAlt: this.props.targetPlan.minAlt,
-    });
-  }
-
   handleChange = (e, { name, value }) => {
     this.setState({ [name]: value });
     updateTargetPlan(
@@ -145,20 +128,33 @@ class TargetConstraints extends Component {
     updateTargetSeriesStateValue( this.props.targetPlan._id, seriesId );
   };
 
+  // Initialize states
   componentDidMount() {
+    // // do not modify the state directly
+
+    if( typeof this.props.targetPlan === 'undefined') {
+      return;
+    }
     this.updateDefaults(this.props);
   }
 
+  componentDidUpdate(prevProps) {
+    // Typical usage (don't forget to compare props):
+    if (this.props.target !== prevProps.target) {
+      this.updateDefaults(this.props);
+    }
+  }
+
   updateDefaults(nextProps) {
-    if( typeof nextProps == 'undefined'  ) {
+    if( typeof nextProps === 'undefined'  ) {
       return;
     }
-    if( typeof nextProps.tsxInfo != 'undefined'  ) {
-      // this.setState({
-      //   flatbox_enabled: nextProps.tsxInfo.flatbox_enabled
-      // });
-    }
-    if( typeof nextProps.targetPlan != 'undefined'  ) {
+    // if( typeof nextProps.tsxInfo !== 'undefined'  ) {
+    //   // this.setState({
+    //   //   flatbox_enabled: nextProps.tsxInfo.flatbox_enabled
+    //   // });
+    // }
+    if( typeof nextProps.targetPlan !=='undefined'  ) {
       this.setState({
         name: nextProps.targetPlan.targetFindName
       });

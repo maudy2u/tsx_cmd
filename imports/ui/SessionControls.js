@@ -115,6 +115,7 @@ class SessionControls extends Component {
     return (
       <Segment.Group size='mini'>
         <Segment>{/* use this icon fro the Model settings configure */}
+        <Form>
           <Form.Checkbox
             label='Enable Twilight Check '
             name='isTwilightEnabled'
@@ -203,6 +204,8 @@ class SessionControls extends Component {
             checked={this.state.isCLSRepeatEnabled}
             onChange={this.handleToggleAndSave.bind(this)}
           />
+          </Form>
+
         </Segment>
       </Segment.Group>
     );

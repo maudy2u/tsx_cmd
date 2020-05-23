@@ -16,7 +16,11 @@ tsx cmd - A web page to send commands to TheSkyX server
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Component } from 'react'
+import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
+import { Session } from 'meteor/session'
+
+// import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 import {
   Button,
@@ -39,6 +43,7 @@ import {
 import {
   TheSkyXInfos
 } from '../api/theSkyXInfos.js';
+
 import { TakeSeriesTemplates } from '../api/takeSeriesTemplates.js'
 import { Seriess } from '../api/seriess.js'
 import { TargetSessions } from '../api/targetSessions.js'
@@ -54,18 +59,55 @@ import {
   calcTargetFilterExposureRunningTotal,
 } from '../api/imagingSessionLogs.js'
 
-class TargetLog extends Component {
+const XRegExp = require('xregexp');
+const XRegExpPosNum = XRegExp('^0$|(^([1-9]\\d*(\\.\\d+)?)$)|(^0?\\.\\d*[1-9]\\d*)$');
+const XRegExpNonZeroPosInt = XRegExp('^([1-9]\\d*)$');
+const XRegExpZeroOrPosInt = XRegExp('^(\\d|[1-9]\\d*)$');
+const XRegExpZeroToNine = XRegExp('^\\d$');
+const XRegExpNegToPosInt = XRegExp('^(\\+|-)?\\d+$');
 
-  state = {
-    reportData: [],
-  };
+const ERRORLABEL = <Label color="red" pointing/>
+
+class TemplateClass extends Component {
+
+  constructor() {
+    super();
+    this.state = {
+     ip: 'localhost',
+     port: 3040,
+   };
+ }
 
   // Initialize states
+  componentDidMount() {
+    // Typical usage (don't forget to compare props):
+    this.updateDefaults(this.props);
+  }
+
   componentDidUpdate(prevProps) {
     // Typical usage (don't forget to compare props):
     if (this.props.target !== prevProps.target) {
-//      this.updateDefaults(this.props);
+      this.updateDefaults(this.props);
     }
+  }
+
+  updateDefaults(nextProps) {
+      if( typeof nextProps == 'undefined'  ) {
+        return;
+      }
+
+      if( typeof nextProps.tsxInfo !== 'undefined'  ) {
+
+        this.setState({
+          ip: nextProps.tsxInfo.find(function(element) {
+            return element.name === 'ip';
+          }).value,
+
+          port: nextProps.tsxInfo.find(function(element) {
+            return element.name === 'port';
+          }).value,
+        });
+      }
   }
 
   render() {
@@ -91,5 +133,6 @@ class TargetLog extends Component {
 
 export default withTracker(() => {
     return {
+      tsxInfo: TheSkyXInfos.find({}).fetch(),
   };
-})(TargetLog);
+})(TemplateClass);

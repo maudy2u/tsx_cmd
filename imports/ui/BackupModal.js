@@ -274,7 +274,7 @@ class BackupModal extends Component {
           <Label>Status: <Label.Detail>{STATUS}</Label.Detail></Label>
           <Segment>
             <h1>Instructions</h1>
-            {this.databaseButtons( this.props.scheduler_running, this.props.tool_active ) }
+            {this.databaseButtons( this.props.scheduler_running.value, this.props.tool_active.value ) }
             <br/>
             Do a backup of the database and then download the file to save it...
             <br/>1. send meteor command to backup
