@@ -408,7 +408,10 @@ class App extends TrackerReact(Component) {
   }
 */
   render() {
-    if ( this.props.tsxInfo ) {
+    if (
+      this.props.tsxInfo
+      && this.props.targetName
+     ) {
       /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
       */
       var MENU = 'Targets';
@@ -493,10 +496,12 @@ export default withTracker(() => {
   const infoHandle = Meteor.subscribe('tsxInfo.all');
   var infoReadyYet = infoHandle.ready();
   var tsxInfo = TheSkyXInfos.find({}).fetch();
+  var targetName = TheSkyXInfos.findOne({name: 'targetName'});
 
   return {
     infoReadyYet,
     tsxInfo,
+    targetName,
     scheduler_running: TheSkyXInfos.findOne({name: 'scheduler_running'}),
 
     tool_calibrate_via: TheSkyXInfos.findOne({name: 'tool_calibrate_via'}),
@@ -534,7 +539,6 @@ export default withTracker(() => {
     activeMenu: TheSkyXInfos.findOne({name: 'activeMenu'}),
 
     flatSettings: TheSkyXInfos.findOne({name: 'flatSettings'}),
-    targetName: TheSkyXInfos.findOne({name: 'targetName'}),
     tsx_progress: TheSkyXInfos.findOne({name: 'tsx_progress'}),
     tsx_total:  TheSkyXInfos.findOne({name: 'tsx_total'}),
     tsx_message: TheSkyXInfos.findOne({name: 'tsx_message'}),

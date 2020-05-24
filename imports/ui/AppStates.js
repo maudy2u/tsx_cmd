@@ -230,8 +230,8 @@ total={TOTAL}
         size='small'
         autoSuccess
         progress='ratio'
-        value={0}
-        total={1}
+        value={PROGRESS}
+        total={TOTAL}
         >
         <Label>
           {STATUS}

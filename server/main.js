@@ -112,6 +112,10 @@ isCurrentlyImaging: 'isCurrentlyImaging',
 
 function initServerStates() {
   tsx_SetServerState(tsx_ServerStates.activeMenu, 'Settings');
+//  tsx_SetServerState(tsx_ServerStates.tsx_total, 1);
+//  tsx_SetServerState(tsx_ServerStates.tsx_progress, 0);
+//  tsx_SetServerState(tsx_ServerStates.targetName, '');
+
   tsx_SetServerState(tsx_ServerStates.mntMntDir, '');
   tsx_SetServerState(tsx_ServerStates.mntMntAlt, '');
   tsx_SetServerState(tsx_ServerStates.targetRA, '');

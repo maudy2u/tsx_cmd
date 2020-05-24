@@ -3,7 +3,6 @@
 // import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
 // import { Seriess } from '../imports/api/seriess.js';
 // import { Filters } from '../imports/api/filters.js';
-// import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
 // import {
 //   tsxInfo,
 //   tsxLog,
@@ -21,6 +20,12 @@
 //   UpdateStatusWarn,
 //   UpdateStatusErr,
 // } from '../imports/api/serverStates.js'
+import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
+
+Meteor.publish('tsxInfo.all', function () {
+  return TheSkyXInfos.find().cursor;
+});
+
 //
 // /*
 // Meteor.publish("targetSessions", function pub_targetSessions() {
@@ -29,10 +34,6 @@
 //
 // Meteor.publish("tsxIP", function pub_tsxIP() {
 //   return TheSkyXInfos.find({name: 'ip'});
-// });
-//
-// Meteor.publish("scheduler_running", function pub_scheduler_running() {
-//   return TheSkyXInfos.find({name: 'scheduler_running'});
 // });
 //
 // Meteor.publish("tsxInfo", function pub_tsxInfo() {
