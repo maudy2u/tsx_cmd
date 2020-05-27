@@ -82,7 +82,7 @@ import {
 //const arteksy_cmd = '/usr/local/bin/arteksy_cmd'
 //const arteksy_cmd = '/usr/bin/arteksy_cmd'
 //const arteksy_cmd = '/bin/artesky_cmd'
-const arteksy_cmd = 'artesky_cmd'
+const arteksy_cmd = ''; // comment out attmempting sockets 'artesky_cmd'
 
 // grab npm version
 import shelljs from 'shelljs';
@@ -95,21 +95,22 @@ function flatbox_srv() {
     addr = '127.0.0.1';
     tsx_UpdateServerState( 'flatbox_ip', addr);
   }
-  return arteksy_cmd + ' -h ' + addr;
+  return ''; //arteksy_cmd + ' --host ' + addr;
 }
 
 function flat_device() {
   var addr = tsx_GetServerStateValue( tsx_ServerStates.flatbox_device);
   if( addr == '' || typeof addr == 'undefined') {
-    addr = 'ttyARTESKYFLAT';
+    addr = '/dev/ttyACM0';
     tsx_UpdateServerState( 'flatbox_device', addr);
   }
-  return ' -d ' + addr;
+//  return ' --device ' + addr;
+  return '';
 }
 
 function flat_enabled() {
   var addr = tsx_GetServerStateValue( tsx_ServerStates.flatbox_enabled);
-  if( addr == '' || typeof addr == 'undefined') {
+  if( typeof addr == 'undefined' || addr == '' ) {
     addr = false;
     tsx_UpdateServerState( 'flatbox_enabled', addr);
   }
@@ -117,88 +118,267 @@ function flat_enabled() {
 
 export function flatbox_setup() {
   var cmd = flatbox_srv() + flat_device();
-  tsxLog(' Flatbox -setup: ' + cmd );
-  var err = Shelljs.exec( cmd ).code;
-  if ( err == -1) {
-    UpdateStatusErr('Error!! failed setup Artesky server: ' + err);
-    return false;
+  tsxLog(' [ARTESKY] Flatbox --setup: ' + cmd );
+
+  var Out =false;
+
+  artesky_cmd(cmd, Meteor.bindEnvironment((err) => {
+    var results = tsx_return.split(':');
+    if( results.length > 0) {
+      var err = results[0].trim();
+      if (err !== 'Processed') {
+        UpdateStatusErr(' [ARTESKY] CONNECTION FAILED!! Artesky server error: ' + err);
+      }
+      else {
+        UpdateStatus(' [ARTESKY] Flatbox Connected: ' + err );
+        Out = true;
+      }
+    }
+    stop_artesky_is_waiting();
+  }));
+
+  while( artesky_is_waiting() ) {
+    Meteor.sleep( 1000 );
   }
-  return true;
+  return Out;
 }
 
 export function flatbox_connect() {
-  var cmd = flatbox_srv() + ' -c';
-  tsxLog(' Flatbox -setup: ' + cmd );
-  var err = Shelljs.exec( cmd ).code;
-  if ( err == -1) {
-    UpdateStatusErr('Error!! failed to connect to Artesky server: ' + err);
-    return false;
+  var cmd = flatbox_srv() + ' --connect ' + flat_device();
+  tsxLog(' [ARTESKY] Flatbox --connect: ' + cmd );
+
+  var Out =false;
+  artesky_cmd(cmd, Meteor.bindEnvironment((artesky_return) => {
+    var results = artesky_return.split(':');
+    if( results.length > 0) {
+      var err = results[0].trim();
+      if (err !== 'Processed') {
+        UpdateStatusErr(' [ARTESKY] CONNECTION FAILED!! Artesky server error: ' + err);
+      }
+      else {
+        UpdateStatus(' [ARTESKY] Flatbox Connected: ' + err );
+        Out = true;
+      }
+    }
+    stop_artesky_is_waiting();
+  }));
+
+  while( artesky_is_waiting() ) {
+    Meteor.sleep( 1000 );
   }
-  return true;
+  return Out;
 }
 
 export function flatbox_on() {
   flatbox_connect();
-  var cmd = flatbox_srv() + ' -O';
-  tsxLog(' Flatbox -ON: ' + cmd );
-  var err = Shelljs.exec( cmd ).code;
-  err = Shelljs.exec( cmd ).code;
-  if ( err == -1) {
-    UpdateStatusErr('Error!! failed to turn on Artesky server: ' + err);
-    return false;
+  var cmd = flatbox_srv() + ' --on';
+  tsxLog(' [ARTESKY] Flatbox ON: ' + cmd );
+  var Out =false;
+  artesky_cmd(cmd, Meteor.bindEnvironment((artesky_return) => {
+    var results = artesky_return.split(':');
+    if( results.length > 0) {
+      var err = results[0].trim();
+      if (err !== 'Processed') {
+        UpdateStatusErr(' [ARTESKY] TURNING ON FAILED!! Artesky server error: ' + err);
+      }
+      else {
+        UpdateStatus(' [ARTESKY] Flatbox ON: ' + err  );
+        Out =true;
+      }
+    }
+    stop_artesky_is_waiting();
+  }));
+  while( artesky_is_waiting() ) {
+    Meteor.sleep( 1000 );
   }
-  return true;
+  return Out;
 }
 
 export function flatbox_level( lvl ) {
   var err;
-  if( lvl > 0 ) {
-    var cmd = flatbox_srv() + ' -l ' + lvl;
-    tsxLog(' Flatbox -ON: ' + cmd );
-    err = Shelljs.exec( cmd ).code;
+  var cmd = '';
+  if( lvl > 0 && lvl < 255 ) {
+    cmd = flatbox_srv() + ' --level ' + lvl;
+    tsxLog(' [ARTESKY] Flatbox Level: ' + cmd );
   }
   else {
-    var cmd = flatbox_srv() + ' -l 0';
-    tsxLog(' Flatbox -ON: ' + cmd );
-    err = Shelljs.exec( cmd ).code;
-    flatbox_off();
+    cmd = flatbox_srv() + ' --level 0';
+    tsxLog(' [ARTESKY] Flatbox Level: ' + cmd );
   }
-  if ( err == -1) {
-    UpdateStatusErr('Error!! failed to set level Artesky server: ' + err);
-    return false;
+  var Out =false;
+  artesky_cmd(cmd, Meteor.bindEnvironment((artesky_return) => {
+    var results = artesky_return.split(':');
+    if( results.length > 0) {
+      var err = results[0].trim();
+      if (err !== 'Processed') {
+        UpdateStatusErr(' [ARTESKY] Flatbox LEVEL FAILED!! Artesky server error: ' + err);
+      }
+      else {
+        UpdateStatus(' [ARTESKY] Flatbox LEVEL SET: ' + err  );
+        Out =true;
+      }
+    }
+    stop_artesky_is_waiting();
+  }));
+  while( artesky_is_waiting() ) {
+    Meteor.sleep( 1000 );
   }
-  return true;
+  return Out;
 }
 
 export function flatbox_off() {
-  var cmd = flatbox_srv() + ' -x';
-  tsxLog(' ***DISABLE Flatbox -OFF using Disconnect: ' + cmd );
-  err = Shelljs.exec( cmd ).code;
-  if ( err == -1) {
-    UpdateStatusErr('Error!! failed to turn OFF Artesky server: ' + err);
-    return false;
+  var cmd = flatbox_srv() + ' --off';
+  tsxLog(' [ARTESKY] Flatbox OFF: ' + cmd );
+  var Out = false;
+  artesky_cmd(cmd, Meteor.bindEnvironment((artesky_return) => {
+    var results = artesky_return.split(':');
+    if( results.length > 0) {
+      var err = results[0].trim();
+      if (err !== 'Processed') {
+        UpdateStatusErr(' [ARTESKY] Flatbox OFF FAILED!! Artesky server error: ' + err);
+      }
+      else {
+        UpdateStatus(' [ARTESKY] Flatbox OFF: ' + err );
+        Out = true;
+      }
+    }
+    stop_artesky_is_waiting();
+  }));
+  while( artesky_is_waiting() ) {
+    Meteor.sleep( 1000 );
   }
-  return true;
+  return Out;
 }
 
 export function flatbox_disconnect() {
-  var cmd = flatbox_srv() + ' -x';
-  tsxLog(' Flatbox -DISCONNECTED: ' + cmd );
-  err = Shelljs.exec( cmd ).code;
-  if ( err == -1) {
-    UpdateStatusErr('Error!! failed to disconnect Artesky server: ' + err);
-    return false;
+  var cmd = flatbox_srv() + ' --disconnect';
+  tsxLog(' [ARTESKY] Flatbox -DISCONNECTED: ' + cmd );
+  var Out =false;
+  artesky_cmd(cmd, Meteor.bindEnvironment((artesky_return) => {
+    var results = artesky_return.split(':');
+    if( results.length > 0) {
+      var err = results[0].trim();
+      if (err !== 'Processed') {
+        UpdateStatusErr(' [ARTESKY] Flatbox DISCONNECT FAILED!! Artesky server error: ' + err);
+      }
+      else {
+        UpdateStatus(' [ARTESKY] Flatbox Disconnected: ' + err );
+        Out =true;
+      }
+    }
+    stop_artesky_is_waiting();
+  }));
+  while( artesky_is_waiting() ) {
+    Meteor.sleep( 1000 );
   }
-  return true;
+  return Out;
 }
 
 export function flatbox_status() {
-  var cmd = flatbox_srv() + ' -s';
-  tsxLog(' Flatbox -STATUS: ' + cmd );
-  err = Shelljs.exec( cmd ).code;
-  if ( err == -1) {
-    UpdateStatusErr('Error!! failed to get Status Artesky server: ' + err);
-    return false;
+  var cmd = flatbox_srv() + ' --status';
+  tsxLog(' [ARTESKY] Flatbox -STATUS: ' + cmd );
+  var Out =false;
+  artesky_cmd(cmd, Meteor.bindEnvironment((artesky_return) => {
+    var results = artesky_return.split(':');
+    if( results.length > 0) {
+      var err = results[0].trim();
+      if (err !== 'Processed') {
+        UpdateStatusErr(' [ARTESKY] Flatbox STATUS FAILED!! Artesky server error: ' + err);
+      }
+      else {
+        // tsxLog('Dither success');
+        UpdateStatus(' [ARTESKY] Flatbox STATUS: ' + err );
+        Out =true;
+      }
+    }
+    stop_artesky_is_waiting();
+  }));
+  while( artesky_is_waiting() ) {
+    Meteor.sleep( 1000 );
   }
-  return true;
+  return Out;
 }
+
+var artesky_waiting = false;
+
+export function artesky_is_waiting() {
+  return artesky_waiting;
+}
+export function stop_artesky_is_waiting() {
+  artesky_waiting = false;
+}
+
+function start_artesky_is_waiting() {
+  artesky_waiting = true;
+}
+
+function artesky_GetPortAndIP() {
+  var ip = tsx_GetServerStateValue( tsx_ServerStates.flatbox_ip);
+  var port = 5570; // 5570
+  return { ip, port };
+}
+
+// *******************************
+// test of generic write method...
+export function artesky_cmd( cmd, callback ) {
+  // Meteor._debug(" ********** tsx_feeder ************ ");
+  // Meteor._debug('Started tsx_feeder.');
+  var Out = '';
+  cmd = String(cmd);
+  Meteor.sleep(1*1000);  // arbitary sleep for 3sec.
+
+  const { ip, port } = artesky_GetPortAndIP();
+  var net = require('net');
+  var tsx = new net.Socket({writeable: true}); //writeable true does not appear to help
+  tsx.setEncoding(); // used to set the string type of return
+
+  tsx.on('close', function() {
+       Meteor._debug('artesky_close');
+  });
+
+  tsx.on('write', function() {
+       Meteor._debug('Writing to TheSkyX.');
+  });
+
+
+  tsx.on('error', function(err) {
+    console.error(" ******************************* ");
+    console.error( 'Connection error: ' + err );
+    console.error(" ******************************* ");
+
+    callback('TsxError|' + err + '|' + cmd );
+    stop_artesky_is_waiting();
+  });
+
+  tsx.on('data', (chunk) => {
+//    Meteor._debug(` [ARTESKEY] Received ${chunk.length} bytes of data.`);
+//    Meteor._debug(' [ARTESKEY] DEBUG - Received: ***'  + chunk + '***');
+    Out = chunk;
+    // tsx.close;
+    callback(Out);
+//    stop_artesky_is_waiting();
+  });
+
+  start_artesky_is_waiting();
+
+  tsx.connect(port, ip, function() {
+    //Meteor._debug(' [ARTESKEY] DEBUG - Sending arteskyCmd: ' + ip + ', ' +  port);
+  });
+
+  tsx.write(cmd, (err) => {
+     Meteor._debug(' [ARTESKEY] DEBUG - Sending arteskyCmd: ' + cmd);
+  });
+
+  // need a TSX WAIT FOR SCRIPT DONE...
+  // https://www.w3schools.com/js/js_timing.asp
+  var waiting = 0; // create arbitarty timeout
+  var imageChk = false;
+  var processId = tsx_GetServerStateValue( tsx_ServerStates.runScheduler );
+  while( artesky_waiting && processId > '' ) { //}&& forceExit > 2*60*sec ) {
+    var sec = 1000;
+    Meteor.sleep( sec );
+    waiting = waiting + sec;
+    var incr = waiting /sec;
+  }
+  tsx.end(); // will announce tsx_close
+};

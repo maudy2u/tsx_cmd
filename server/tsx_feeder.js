@@ -95,7 +95,7 @@ export function tsx_feeder( cmd, callback ) {
   tsx.setEncoding(); // used to set the string type of return
 
   tsx.on('close', function() {
-       Meteor._debug('tsx_close');
+       //Meteor._debug('tsx_close');
   });
 
   tsx.on('write', function() {

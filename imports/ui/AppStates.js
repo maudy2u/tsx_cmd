@@ -22,7 +22,26 @@ import { Session } from 'meteor/session'
 
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
-import { Header, TextArea, Dimmer, Loader, Grid, Form, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Radio } from 'semantic-ui-react'
+import {
+  Header,
+  //TextArea,
+  //Dimmer,
+  //Loader,
+  //Grid,
+  //Form,
+  //Input,
+  Icon,
+  //Dropdown,
+  Label,
+  //Table,
+  //Menu,
+  //Segment,
+  Button,
+  Progress,
+  Modal,
+  //Radio,
+  Confirm,
+} from 'semantic-ui-react'
 
 import SessionControls from './SessionControls.js';
 import BackupModal from './BackupModal.js';
@@ -60,12 +79,20 @@ class AppStates extends Component {
      version: 'tbd',
      date: 'unknown',
 
+     confirmPark: false,
      modalOpenWindowSessionControls: false,
      modalOpenBackup: false,
      modalConnectionFailed: false,
    };
  }
 
+ showConfirmPark = () => this.setState({ confirmPark: true });
+ handleCancelPark = () => {
+   this.setState({ confirmPark: false });
+ };
+ handleYesPark = () => {
+   this.park();
+ };
  modalOpenSessionsControls = () => this.setState({ modalOpenWindowSessionControls: true });
  modalCloseSessionsControls = () => this.setState({ modalOpenWindowSessionControls: false });
  modalOpenBackup = () => this.setState({ modalOpenBackup: true });
@@ -102,10 +129,16 @@ class AppStates extends Component {
 
   park() {
     Meteor.call("park", function (error, result) {
+
+      this.setState({ confirmPark: false });
+
       // identify the error
-      if (error && error.reason === "Internal server error") {
+      if (error ) {
         // show a nice error message
-        this.setState({modalConnectionFailed: true});
+        alert('FAILED to park mount: ' + error.reason);
+      }
+      else {
+        alert('Mount parked');
       }
     }.bind(this));
   }
@@ -123,7 +156,16 @@ class AppStates extends Component {
     return (
       <Button.Group compact size='mini' floated='right'>
         <Button icon='cloud download' onClick={this.modalOpenBackup}/>
-        <Button disabled={DISABLE} icon='car' onClick={this.park.bind(this)}/>
+        <Button disabled={DISABLE} icon='car' onClick={this.showConfirmPark}/>
+        <Confirm
+          open={this.state.confirmPark}
+          header='Park Mount?'
+          content='If you wish to PARK MOUNT, click Yes.'
+          cancelButton='Cancel'
+          confirmButton="Yes - Park"
+          onCancel={this.handleCancelPark}
+          onConfirm={this.handleYesPark}
+        />
       </Button.Group>
     )
   }

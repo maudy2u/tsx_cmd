@@ -373,14 +373,6 @@ class Monitor extends Component {
     }.bind(this));
   }
 
-  testDither() {
-
-    Meteor.call( 'testDither', this.getCurrentTarget(),  function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
   testGuide() {
 
     Meteor.call( 'testGuide', this.getCurrentTarget(),  function(error, result) {
@@ -612,7 +604,7 @@ class Monitor extends Component {
                   <Statistic.Value>{Number(this.props.scheduler_report.value.focusPosition).toFixed(0)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
-                  <Statistic.Label>FOV</Statistic.Label>
+                  <Statistic.Label>PA</Statistic.Label>
                   <Statistic.Value>{Number(this.props.scheduler_report.value.ANGLE).toFixed(2)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>

@@ -296,6 +296,7 @@ class App extends TrackerReact(Component) {
       return (
         <CalibrationsMenu
           scheduler_report={this.props.scheduler_report}
+          flatbox_enabled={this.props.flatbox_enabled}
           tsxInfo={this.props.tsxInfo}
           scheduler_running={this.props.scheduler_running}
           calibrations={this.props.calibrations}
@@ -497,11 +498,13 @@ export default withTracker(() => {
   var infoReadyYet = infoHandle.ready();
   var tsxInfo = TheSkyXInfos.find({}).fetch();
   var targetName = TheSkyXInfos.findOne({name: 'targetName'});
+  var flatbox_enabled = TheSkyXInfos.findOne({name: 'flatbox_enabled'});
 
   return {
     infoReadyYet,
     tsxInfo,
     targetName,
+    flatbox_enabled,
     scheduler_running: TheSkyXInfos.findOne({name: 'scheduler_running'}),
 
     tool_calibrate_via: TheSkyXInfos.findOne({name: 'tool_calibrate_via'}),

@@ -7,12 +7,12 @@
 //	Ken Sturrock
 //	Jaunary 13, 2018
 //  Stephen Townsend
-//  2018-04-21
+//  2018-04-21, 2020-05-24
 //
 var lumFilter = $000;
 var softPark = $001;
 var errMsgs = "";	//Initialize variable to store any shutdown error messages.
-var cr 			= "\n";
+var CR 			= "|";
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //			CAMERA SHUTDOWN SECTION
@@ -23,8 +23,6 @@ var cr 			= "\n";
 // and reduction/calibration.
 //
 // Whatever makes your life better the next time you turn it on.
-//
-
 ccdsoftCamera.ExposureTime = 10;		// Set the exposure to 10 seconds
 ccdsoftCamera.AutoSaveOn = true;		// Keep the image
 ccdsoftCamera.Frame = 1;			// It's a light frame
@@ -33,30 +31,21 @@ ccdsoftCamera.Subframe = false;			// Not a subframe
 ccdsoftCamera.FilterIndexZeroBased = lumFilter;	// Set the filter to Luminance
 // If soft park do not disconnect camera to keep it cooling?
 if (!softPark ) {
-	try
-	{
+	try {
 		ccdsoftAutoguider.Disconnect();
 	}
-	catch (repErr)
-	//
-	//	If error, report it.
-	//
-	{
-		errMsgs += "Guider: " + refErr + cr;
+	catch (repErr) 	{
+		errMsgs += "Guider|" + refErr + CR;
 	}
 
-	try
-	{
+	try {
 		ccdsoftCamera.Disconnect();
 	}
-	catch (repErr)
-	//
-	//	If error, report it.
-	//
-	{
-		errMsgs += "Camera: " + refErr + cr;
+	catch (repErr) {
+		errMsgs += "Camera|" + refErr + CR;
 	}
 }
+
 if( SelectedHardware.mountModel !== "Telescope Mount Simulator" ) {
 	if (!softPark ) {
 		try {
@@ -65,12 +54,12 @@ if( SelectedHardware.mountModel !== "Telescope Mount Simulator" ) {
  			 	while( !sky6RASCOMTele.IsParked() ) {
 					sky6Web.Sleep(1000);
  			 	}
-		 }
-			 errMsgs = 'Parked';
+		 	}
+			errMsgs = 'Parked';
 		}
 		catch(e) {
 			sky6RASCOMTele.SetTracking(0, 1, 0 ,0);
-			errMsgs = 'Soft Parked - catch';
+			errMsgs = 'Parking - Failed - Soft Parked';
 		}
 	}
 	else {
@@ -79,12 +68,15 @@ if( SelectedHardware.mountModel !== "Telescope Mount Simulator" ) {
 				sky6RASCOMTele.Unpark();
 			}
 			catch(e) {
-				// ignore... assume simulator
+				errMsgs = 'Soft Parking - Failed - stopped tracking';
 			}
 		}
 		sky6RASCOMTele.SetTracking(0, 1, 0 ,0);
 		errMsgs = 'Soft Parked';
 	}
+}
+else {
+	errMsgs = 'Parked';
 }
 sky6Web.Sleep(3000); // needed if command is too fast
 errMsgs

@@ -77,6 +77,8 @@ import {
 const settlePanel = 3*1000; // seconds
 
 export function collect_calibration_images() {
+  UpdateStatus(" [CALIBRATION] Started collecting calibration frames");
+
   tsx_SetServerState( tsx_ServerStates.tool_active, true );
 
   // Confirm TheSkyX is running
@@ -95,21 +97,21 @@ export function collect_calibration_images() {
     tsxLog( ' Flatbox: turned off by default')
   }
   if( fp_enabled ) {
-    flatbox_setup(); // connect device
+//    flatbox_setup(); // connect device
  //   Meteor.sleep(settlePanel);
     flatbox_connect();
  //   Meteor.sleep(settlePanel);
   }
   // for loop for Quantity
-  tsxLog( ' Processing calibration frames: ' + cf.length );
+  tsxLog( ' [CALIBRATION] calibration frame(s): ' + cf.length );
   for( var i=0; i < cf.length; i ++ ) {
     if( isSchedulerStopped() != false ) {
-      tsxLog( ' EXIT: Scheduler is NOT stopped' );
+      tsxLog( ' [CALIBRATION] EXIT: Manually stopped' );
       break;
     }
     cal = cf[i];
     // what is the FOV position??
-    tsxLog( ' DEPRECATED>> Rotator disabled: ' + cal.rotation );
+    tsxLog( ' [CALIBRATION] DEPRECATED>> Rotator disabled: ' + cal.rotation );
 
     // check if level > 0; if so turn on light panel
     if( fp_enabled == true && cal.level > 0 ) {
@@ -123,19 +125,28 @@ export function collect_calibration_images() {
 //     Meteor.sleep(settlePanel);
       flatbox_level( cal.level );
  //     Meteor.sleep(settlePanel);
-      flatbox_off();
+//      flatbox_off();
  //     Meteor.sleep(settlePanel);
     }
     // take_image to actually take the picture
     try {
       for( var sub=0; sub<=cal.quantity; sub++) {
         if( isSchedulerStopped() == false ) {
-            takeCalibrationImages( cal );
+            var iid = takeCalibrationImages( cal );
+
+            // if test levels process the
+            if( typeof iid !== 'undefined' || iid !== '' ) {
+              var image = ImagingSessionLogs.findOne({_id: iid });
+              if( typeof image !== 'undefined' || image !== '' ) {
+               tsxLog( ' [CALIBRATION] frame MaximumPixel: ' + image.maxPix );
+             }
+            }
+
             var inc = sub+1;
-            UpdateStatus( ' Calibration: ' + cal.subFrameTypes + ' ' +  cal.filter + ' ' + cal.exposure + ' sec: '  +inc+'/' + cal.quantity    );
+            UpdateStatus( ' [CALIBRATION] frame: ' + cal.subFrameTypes + ' ' +  cal.filter + ' ' + cal.exposure + ' sec: '  +inc+'/' + cal.quantity    );
         }
         else {
-          UpdateStatus( " --- Calibrations Manually stopped.");
+          UpdateStatus( " [CALIBRATION] Manually stopped.");
         }
       }
     }
@@ -143,7 +154,7 @@ export function collect_calibration_images() {
       tsxDebug( err )
       var res = err.split('|')[0].trim();
       if( res == 'TSX_ERROR' ) {
-        UpdateStatusErr( ' *** UNKNOWN ERROR - Calibrating failed.' );
+        UpdateStatusErr( ' [CALIBRATION] *** UNKNOWN ERROR - Calibrating failed.' );
         // do not move mount/park as calibrating....
       }
     }
@@ -156,6 +167,7 @@ export function collect_calibration_images() {
   }
 
   tsx_SetServerState( tsx_ServerStates.tool_active, false );
+  UpdateStatus(" [CALIBRATION] Finished calibration frames");
 }
 
 //var aFrame = $002; //  cdLight =1, cdBias, cdDark, cdFlat
@@ -168,5 +180,26 @@ function takeCalibrationImages( cal ) {
   var binning =cal.binning;
   var ccdTemp = cal.ccdTemp;
   tsxDebug( ' Calibration: filter=' +filter +', exposure=' + exposure +', frame=' + frame +', name=' + tName + ', delay=' + delay+ ', binning=' + binning+ ', ccdTemp=' + ccdTemp);
-  tsx_takeImage( filter, exposure, frame, tName, delay, binning, ccdTemp );
+  return tsx_takeImage( filter, exposure, frame, tName, delay, binning, ccdTemp );
 }
+
+Meteor.methods({
+
+  testArteskyConnection() {
+    var err = flatbox_connect();
+    console.log( ' [ARTESKY] connect: ' + err )
+    err = flatbox_status();
+    console.log( ' [ARTESKY] status: ' + err )
+    return err;
+  },
+
+  artesky_off() {
+    var err = flatbox_connect();
+    console.log( ' [ARTESKY] connect: ' + err )
+    err = flatbox_off();
+    console.log( ' [ARTESKY] on: ' + err )
+    err = flatbox_disconnect();
+    console.log( ' [ARTESKY] on: ' + err )
+  }
+
+});

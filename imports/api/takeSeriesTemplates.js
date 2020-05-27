@@ -151,10 +151,6 @@ export function seriesDescription( sid ) {
       repeating = 'repeating, ';
     }
 
-    if( template.defaultDithering> 0 ) {
-
-    }
-
     for (let i = 0; i < seriesArray.length; i++) {
       let series = Seriess.findOne({_id:seriesArray[i].id});
       if( typeof series == 'undefined') {
@@ -168,7 +164,6 @@ export function seriesDescription( sid ) {
     if ( template.defaultDithering > 0 ) {
       dithering = 'dithering ' + template.defaultDithering + ', '
     }
-
 
     return 'TAKE SERIES - ' + template.name +'='+ template.processSeries + ': ' + repeating + dithering + details;
   }

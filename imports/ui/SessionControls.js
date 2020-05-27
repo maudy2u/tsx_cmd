@@ -88,6 +88,9 @@ class SessionControls extends Component {
         isGuideSettlingEnabled: this.props.tsxInfo.find(function(element) {
         return element.name == 'isGuideSettlingEnabled';}).value,
 
+        isDitheringEnabled: this.props.tsxInfo.find(function(element) {
+        return element.name == 'isDitheringEnabled';}).value,
+
         isCLSRepeatEnabled: this.props.tsxInfo.find(function(element) {
         return element.name == 'isCLSRepeatEnabled';}).value,
         isTwilightEnabled: this.props.tsxInfo.find(function(element) {
@@ -114,7 +117,7 @@ class SessionControls extends Component {
 
     return (
       <Segment.Group size='mini'>
-        <Segment>{/* use this icon fro the Model settings configure */}
+        <Segment secondary>{/* use this icon fro the Model settings configure */}
         <Form>
           <Form.Checkbox
             label='Enable Twilight Check '
@@ -195,6 +198,14 @@ class SessionControls extends Component {
             onChange={this.handleToggleAndSave.bind(this)}
           />
           <br />
+          <Form.Checkbox
+            label='Enable Dithering '
+            name='isDitheringEnabled'
+            toggle
+            placeholder= 'Enable using the dither settings'
+            checked={this.state.isDitheringEnabled}
+            onChange={this.handleToggleAndSave.bind(this)}
+          />
           <br />
           <Form.Checkbox
             label='Enable Cloud Check (periodic CLS) '

@@ -82,6 +82,7 @@ export const tsx_ServerStates = {
   imagingFocalLength: 'imagingFocalLength',
   minDitherFactor: 'minDitherFactor',
   maxDitherFactor: 'maxDitherFactor',
+  isDitheringEnabled: 'isDitheringEnabled',
 
   defaultFilter: 'defaultFilter',
   defaultMinAlt: 'defaultMinAlt',

@@ -40,7 +40,7 @@ import {
 } from './time_utils.js'
 
 const logSession = new Logger();
-const logCon = new Logger();
+const logCon = new Logger(); // for console
 const logDB = new Logger();
 const logReport = new Logger();
 

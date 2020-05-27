@@ -89,7 +89,7 @@ CCDSC.BinY = obinY;
 CCDSC.Delay = oldDelay;
 CCDSC.Frame = oldFrame;
 
-Out = Out.trim() + '|fileName=' + CCDSC.LastImageFileName.trim();
+Out = Out.trim() + '|fileName=' + CCDSC.LastImageFileName.trim() +'|maxPix='+ CCDSC.MaximumPixel;
 
 // get the overall RMS error if guiding
 var rms = guideError();

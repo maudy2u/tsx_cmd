@@ -299,7 +299,7 @@ export function tsx_MntPark(defaultFilter, softPark) {
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         var result = tsx_return.split('|')[0].trim();
         tsxInfo( ' park result: ' + result );
-        if( result == 'Parked' || result == 'Soft Parked' ) {
+        if( result === 'Parked' || result === 'Soft Parked' ) {
           UpdateStatus( ' ' + result );
         }
         else {
@@ -1728,8 +1728,8 @@ export function UpdateImagingTargetReport( target ) {
 
 // need to return true if to stop
 function isTargetConditionInValid(target) {
-  tsxInfo('************************');
-  tsxInfo(' *** isTargetConditionInValid: ' + target.getFriendlyName() );
+  tsxInfo(' [SCHEDULER] ************************');
+  tsxInfo(' [SCHEDULER] isTargetConditionInValid: ' + target.getFriendlyName() );
   tsxInfo(' [SCHEDULER] Evaluating: ' + target.getFriendlyName() );
 
   // *******************************
@@ -1809,27 +1809,27 @@ function isTargetConditionInValid(target) {
     // now retry
     var defaultCLSRepeat = tsx_GetServerState( tsx_ServerStates.defaultCLSRepeat );
     if( typeof defaultCLSRepeat === 'undefined' ) {
-      tsxInfo( ' Check if to CLS again - needs a value.');
+      tsxInfo( ' [SCHEDULER] Check if to CLS again - needs a value.');
       tsx_SetServerState( tsx_ServerStates.defaultCLSRepeat, 0); // default is off
       defaultCLSRepeat = tsx_GetServerState( tsx_ServerStates.defaultCLSRepeat );
     }
 
     var pTime = howMuchTimeHasPassed(defaultCLSRepeat.value, defaultCLSRepeat.timestamp);
-    tsxDebug( ' --- checking CLS: ' + pTime+ ' of ' + defaultCLSRepeat.value + ' sec');
+    tsxDebug( ' [SCHEDULER] checking CLS: ' + pTime+ ' of ' + defaultCLSRepeat.value + ' sec');
 
     if( defaultCLSRepeat.value > 0  ) {
-      tsxDebug( ' [RECENTRING] Check if time to CLS again: ' + defaultCLSRepeat.value );
-      tsxDebug( ' [RECENTRING] Check time: ' + defaultCLSRepeat.timestamp );
+      tsxDebug( ' [SCHEDULER] Check if time to CLS again: ' + defaultCLSRepeat.value );
+      tsxDebug( ' [SCHEDULER] Check time: ' + defaultCLSRepeat.timestamp );
       var doCLS = hasTimePassed( defaultCLSRepeat.value, defaultCLSRepeat.timestamp )
       if( doCLS === true ) {
-        UpdateStatus( ' [RECENTRING] ' + target.getFriendlyName() + ': time to recentre ' + pTime+ ' of ' + defaultCLSRepeat.value + ' sec');
+        UpdateStatus( ' [SCHEDULER] ' + target.getFriendlyName() + ': time to recentre ' + pTime+ ' of ' + defaultCLSRepeat.value + ' sec');
         // This will cause a calibration to happen...
         // do not need to calibrate wth a meridian flip
 
         var cls = tsx_CLS(target); 						//# Call the Closed-Loop-Slew function to go to the target
         updateTargetIsCloudy( target, cls );
         if( !cls ) {
-          UpdateStatusErr( ' [RECENTRING] FAILED: ' + cls.angle);
+          UpdateStatusErr( ' [SCHEDULER] FAILED: ' + cls.angle);
           throw( 'TSX_ERROR|Cloudy? Is Tsx Running?');
         }
         // UpdateStatus( " Setup guider: " + target.getFriendlyName() );
@@ -1838,11 +1838,11 @@ function isTargetConditionInValid(target) {
         return false;
       }
       else {
-        tsxDebug( ' [RECENTRING] ' + target.getFriendlyName() + ': NOT YET time to recentre');
+        tsxDebug( ' [SCHEDULER] ' + target.getFriendlyName() + ': NOT YET time to recentre');
       }
     }
     else {
-      tsxDebug( ' [RECENTRING] DISABLED' + target.getFriendlyName() + ': DISABLED CLS recentring ');
+      tsxDebug( ' [SCHEDULER] DISABLED' + target.getFriendlyName() + ': DISABLED CLS recentring ');
     }
   }
 
@@ -1857,7 +1857,7 @@ function isTargetConditionInValid(target) {
     tsx_AbortGuider();
     InitialFocus( target );
     // no need to return false... can keep going.
-    tsxInfo( ' --- refocus, and redo autoguider');
+    tsxInfo( ' [SCHEDULER] refocus, and redo autoguider');
     let didDither = false;
     let doDither = isDitheringNeeded( target );
     if( doDither == true  ) {
@@ -1877,12 +1877,17 @@ function isTargetConditionInValid(target) {
       didDither = tsx_dither( target ); //  runs SetUpAutoGuiding
     }
   }
-  tsxInfo( ' isTargetConditionInValid returns false to continue.');
+  tsxInfo( ' [SCHEDULER] isTargetConditionInValid returns false to continue.');
   return false;
 }
 
 function isDitheringNeeded (target ) {
-  tsxInfo(' *** isDitheringNeeded: ' + target.getFriendlyName());
+  tsxInfo(' [DITHER] *** isDitheringNeeded: ' + target.getFriendlyName());
+
+  var isDitheringEnabled = Boolean(tsx_GetServerStateValue( tsx_ServerStates.isDitheringEnabled ));
+  if( typeof isDitheringEnabled === 'undefined' || isDitheringEnabled === '' ) {
+    tsx_SetServerState( tsx_ServerStates.isDitheringEnabled, false );
+  }
 
   var ditherAt = targetDither( target );
   if( ditherAt <= 0 ) {
@@ -1890,8 +1895,8 @@ function isDitheringNeeded (target ) {
   }
   var lastDither = Number(tsx_GetServerStateValue( tsx_ServerStates.imagingSessionDither ));
   var dCount = lastDither;; // +1;
-  var doDither = (Math.round(dCount) >= Math.round(ditherAt));
-  tsxInfo( ' --- check dithering needed: ' + doDither );
+  var doDither = (Math.round(dCount) >= Math.round(ditherAt)) && isDitheringEnabled;
+  tsxInfo( ' [DITHER] is dithering needed: ' + doDither );
   return doDither;
 }
 
@@ -1911,11 +1916,11 @@ function tsx_dither( target ) {
       var cmd = tsx_cmd('SkyX_JS_NewDither');
 
       var pixelSize = tsx_GetServerStateValue( tsx_ServerStates.imagingPixelSize );
-      tsxDebug(' *** pixelSize: ' + pixelSize);
+      tsxDebug(' [DITHER] *** pixelSize: ' + pixelSize);
       var minDitherFactor = tsx_GetServerStateValue( tsx_ServerStates.minDitherFactor );
-      tsxDebug(' *** minDitherFactor: ' + minDitherFactor);
+      tsxDebug(' [DITHER] *** minDitherFactor: ' + minDitherFactor);
       var maxDitherFactor = tsx_GetServerStateValue( tsx_ServerStates.maxDitherFactor );
-      tsxDebug(' *** maxDitherFactor: ' + maxDitherFactor);
+      tsxDebug(' [DITHER] *** maxDitherFactor: ' + maxDitherFactor);
 
       cmd = cmd.replace("$000", pixelSize ); // var pixelSize = $000; // 3.8;
       cmd = cmd.replace("$001", minDitherFactor ); // var minDitherFactor = $001; // 3
@@ -1925,13 +1930,13 @@ function tsx_dither( target ) {
 
       tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         var result = tsx_return.split('|')[0].trim();
-        tsxDebug('Any error?: ' + result);
+        tsxDebug(' [DITHER] Any error?: ' + result);
         if( result != 'Success') {
-          UpdateStatusWarn('!!! SkyX_JS_NewDither Failed. Error: ' + result);
+          UpdateStatusWarn(' [DITHER] !!! SkyX_JS_NewDither Failed. Error: ' + result);
         }
         else {
           // tsxLog('Dither success');
-          UpdateStatus(' [DITHERED]' + target.getFriendlyName() +'');
+          UpdateStatus(' [DITHER]' + target.getFriendlyName() +'');
           // dither succeeded so reset count
           tsx_SetServerState( tsx_ServerStates.imagingSessionDither, 0);
         }
@@ -1942,17 +1947,17 @@ function tsx_dither( target ) {
         Meteor.sleep( 1000 );
       }
       // now redo Autoguiding...
-      tsxInfo( ' Dither commands AutoGuide Redo');
+      tsxInfo( ' [DITHER] Dither commands AutoGuide Redo');
       SetUpAutoGuiding( target, false );
     }
     else {
       // moved this line to happen right after taking a light Image
       // tsx_SetServerState( tsx_ServerStates.imagingSessionDither, lastDither+1);
-      tsxInfo(' ' + target.getFriendlyName() +': not dithering');
+      tsxInfo(' [DITHER] ' + target.getFriendlyName() +': not dithering');
     }
   }
   else{
-    tsxLog(' --- check dithering disabled');
+    tsxLog(' [DITHER] dithering disabled');
   }
   return Out;
 
@@ -2436,7 +2441,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
   // tsxInfo('************************');
   tsxInfo(' *** tsx_takeImage: ' + filterNum );
 
-  var success = false;
+  var res_iid = '';
   var tName = '';
   var friendly =  '';
 
@@ -2481,7 +2486,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
       tsxInfo( "Cooler temperature NOT within 0.3 of: " + ccdTemp );
     }
     if( isSchedulerStopped() ) {
-      return success;
+      return res_iid;
     }
   }
 
@@ -2505,11 +2510,10 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
       if( results.length > 0) {
         var result = results[0].trim();
         if( result == 'Success' ) {
-          success = true;
-          if( friendly == '' ) {
+          if( friendly === '' ) {
             friedly = tName;
           }
-          var iid = addImageReport( friendly );
+          res_iid = addImageReport( friendly );
           for( var i=1; i<results.length;i++) {
             var token=results[i].trim();
             // RunJavaScriptOutput.writeLine(token);
@@ -2595,6 +2599,10 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
                 updateImageReport( iid, 'fileName', param[1] );
                 break;
 
+                case 'maxPix':
+                  updateImageReport( iid, 'fileName', param[1] );
+                  break;
+
               default:
                 //RunJavaScriptOutput.writeLine(param[0]+' not found.');
             }
@@ -2626,10 +2634,10 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
    if( isSchedulerStopped() ) {
      tsxInfo('Stop Waiting Image - scheduler Stopped');
      tsx_is_waiting = false;
-     success = false;
+     res_iid = '';
    }
   }
-  return success;
+  return res_iid;
 };
 
 // **************************************************************
@@ -2677,7 +2685,7 @@ function takeSeriesImage(target, series) {
     UpdateStatus( ' ' + target.getFriendlyName() + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds, ' + num + '/' +series.repeat + ' TAKING' );
 
     var res = tsx_takeImage( slot, series.exposure, frame, target ); //delay, binning, ccdTemp )
-    if( res != false ) {
+    if( res !== '' ) {
       UpdateStatus( ' ' + target.getFriendlyName() + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds, ' + num + '/' +series.repeat + ' DONE' );
       // *******************************
       // Update progress
@@ -2708,7 +2716,7 @@ function targetDither( target ) {
   try {
     template = TakeSeriesTemplates.findOne( {_id:target.series._id});
     let ditherTarget = template.defaultDithering;
-    if( ditherTarget == '' || typeof ditherTarget == 'undefined') {
+    if( typeof ditherTarget === 'undefined' || ditherTarget == '') {
       ditherAt = 0;
     }
     else {
@@ -2716,7 +2724,7 @@ function targetDither( target ) {
     }
   }
   catch( e ) {
-    UpdateStatus(' !!! Failed - series dither: ' + target.getFriendlyName() + '>> ' + e);
+    UpdateStatus(' [DITHER] Failed! No dither defined, see: ' + target.getFriendlyName() + '>> ' + e);
   }
   return Number( ditherAt );
 }
@@ -2764,7 +2772,7 @@ export function processTargetTakeSeries( target ) {
     }
   }
 
-  UpdateStatus(' === Dithering: ' + targetDither( target ));
+  UpdateStatus(' [DITHER] ' + targetDither( target ));
   if( template.repeatSeries == true ) {
     UpdateStatus(' === Repeating: ' + template.repeatSeries );
   }
@@ -3375,16 +3383,6 @@ Use this to set the last focus
     }
 
     return  UpdateImagingTargetReport( target );
-
-  },
-
-  testDither( tid ) {
-    var target = TargetSessions.findOne({_id: tid});
-
-    tsxInfo('************************');
-    tsxInfo(' *** testDither' );
-
-    return tsx_dither( target );
 
   },
 

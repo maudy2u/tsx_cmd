@@ -88,7 +88,7 @@ const eFocuser =5;
 const eFilterWheel = 6;
 const eRotator = 7;
 const eCamera =8;
-const eMount = 9;
+const eDither = 9;
 const eFlatbox = 10;
 
 // App component - represents the whole app
@@ -407,6 +407,22 @@ class DefaultSettings extends Component {
     }.bind(this));
   }
 
+  testArteskyConnection() {
+    // these are all working methods
+    // on the client
+    Meteor.call("testArteskyConnection", function (error, result) {
+      // identify the error
+      if (result === false || (error && error.reason === "Internal server error")) {
+        // show a nice error message
+        alert('Artesky connection failed');
+
+      }
+      else {
+        alert('Artesky connection SUCCESSFUL');
+      }
+    }.bind(this));
+  }
+
   renderServers() {
     const { activeIndex } = this.state;
     var mount = TheSkyXInfos.findOne().mount();
@@ -458,6 +474,18 @@ class DefaultSettings extends Component {
               placeholder='Enter TheSkyX port'
               value={this.state.port}
               onChange={this.handleChange}
+            />
+            <Form.Input
+              label='Focal Length: '
+              name='imagingFocalLength'
+              placeholder='i.e. focal length in mm of OTA'
+              value={this.state.imagingFocalLength}
+              onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
+              errorLabel={ ERRORLABEL }
             />
           </Form.Group>
         </Segment>
@@ -538,6 +566,12 @@ class DefaultSettings extends Component {
         onClick={this.handleToggleAndSave.bind(this)}
         style={{ labelColor: 'black'  }}
       />
+      &nbsp;
+      <Button
+        disabled={DISABLED}
+        onClick={this.testArteskyConnection.bind(this)}
+        style={{ backgroundColor: 'green', color: 'black'  }}
+      >TEST CONNECTION</Button>
       <Form>
       <Form.Group>
       <Form.Input
@@ -549,10 +583,10 @@ class DefaultSettings extends Component {
         onChange={this.handleChange}
       />
       <Form.Input
-        disabled={DISABLED}
+        disabled={true}
         label='Artseky Flatbox Device Port'
         name='flatbox_device'
-        placeholder='e.g. /dev/ttyARTESKYFLAT'
+        placeholder='Assumes /dev/ttyACM0'
         value={this.state.flatbox_device}
         onChange={this.handleChange}
       />
@@ -667,58 +701,57 @@ class DefaultSettings extends Component {
     )
   }
 
-  renderMount() {
+  renderDithering() {
     const { activeIndex } = this.state
+    var DISABLE = !this.state.isDitheringEnabled;
 
     return (
       <div>
       <Accordion.Title
-        active={activeIndex === eMount}
-        index={eMount}
+        active={activeIndex === eDither}
+        index={eDither}
         onClick={this.handleClick}
       >
       <Icon name='moon' size='large' />
-      Mount
+      Dithering
       </Accordion.Title>
-      <Accordion.Content active={activeIndex === eMount} >
+      <Accordion.Content active={activeIndex === eDither} >
       <Segment>
         <Form>
-        <Form.Input
-          label='Focal Length: '
-          name='imagingFocalLength'
-          placeholder='i.e. focal length in mm of OTA'
-          value={this.state.imagingFocalLength}
-          onChange={this.handleChange}
-          validations={{
-            matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
-          }}
-          validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
-          errorLabel={ ERRORLABEL }
-        />
-        <Form.Input
-          label='Dithering Minimum Pixel Move '
-          name='minDitherFactor'
-          placeholder='Minimum number of pixels'
-          value={this.state.minDitherFactor}
-          onChange={this.handleChange}
-          validations={{
-            matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
-          }}
-          validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
-          errorLabel={ ERRORLABEL }
-        />
-        <Form.Input
-          label='Dithering Maximum Pixel Move '
-          name='maxDitherFactor'
-          placeholder='Maximum number of pixels'
-          value={this.state.maxDitherFactor}
-          onChange={this.handleChange}
-          validations={{
-            matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
-          }}
-          validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
-          errorLabel={ ERRORLABEL }
-        />
+          <Checkbox
+            label=' Enable Dithering'
+            name='isDitheringEnabled'
+            toggle
+            checked={this.state.isDitheringEnabled}
+            onClick={this.handleToggleAndSave.bind(this)}
+            style={{ labelColor: 'black'  }}
+          />
+          <Form.Input
+            disabled={DISABLE}
+            label='Dithering Minimum Pixel Move '
+            name='minDitherFactor'
+            placeholder='Minimum number of pixels'
+            value={this.state.minDitherFactor}
+            onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
+            errorLabel={ ERRORLABEL }
+          />
+          <Form.Input
+            disabled={DISABLE}
+            label='Dithering Maximum Pixel Move '
+            name='maxDitherFactor'
+            placeholder='Maximum number of pixels'
+            value={this.state.maxDitherFactor}
+            onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
+            errorLabel={ ERRORLABEL }
+          />
         </Form>
         </Segment>
       </Accordion.Content>
@@ -1149,7 +1182,7 @@ class DefaultSettings extends Component {
           {this.renderFocuser()}
           {this.renderFilterWheel()}
           {this.renderRotator()}
-          {this.renderMount()}
+          {this.renderDithering()}
           {this.renderFlatBox()}
 
       </Accordion>

@@ -137,9 +137,7 @@ import {
          isSchedulerStopped() == false )
        {
          // *******************************
-         UpdateStatus(" === Starting calibration targets");
            collect_calibration_images();
-         UpdateStatus(" === Finished calibration targets");
        }
        else {
          // *******************************

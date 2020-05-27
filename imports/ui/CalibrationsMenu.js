@@ -78,8 +78,6 @@ class CalibrationsMenu extends Component {
       tool_flats_location: '',
       tool_flats_dec_az: '',
 
-      flatbox_enabled: false,
-      flatbox_ip: '127.0.0.1',
       activeIndex: 1,
     };
   }
@@ -146,15 +144,6 @@ class CalibrationsMenu extends Component {
       this.setState({
         tool_flats_location: nextProps.tsxInfo.find(function(element) {
           return element.name == 'tool_flats_location';
-      }).value});
-
-      this.setState({
-        flatbox_enabled: nextProps.tsxInfo.find(function(element) {
-          return element.name == 'flatbox_enabled';
-      }).value});
-      this.setState({
-        flatbox_ip: nextProps.tsxInfo.find(function(element) {
-          return element.name == 'flatbox_ip';
       }).value});
     }
 
@@ -260,6 +249,20 @@ class CalibrationsMenu extends Component {
 
   stopButton() {
     // this.tsxStopSession();
+    Meteor.call("artesky_off", function (error, result) {
+        // identify the error
+        tsx_UpdateServerState(tsx_ServerStates.imagingSessionId, '' );
+        tsx_UpdateServerState(tsx_ServerStates.targetImageName, '');
+        tsx_UpdateServerState(tsx_ServerStates.targetDEC, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetRA, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetALT, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetAZ, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetHA, '_');
+        tsx_UpdateServerState(tsx_ServerStates.targetTransit, '_');
+//        tsx_UpdateServerState(tsx_ServerStates.currentStage, 'Stopped');
+
+      }.bind(this));
+
     Meteor.call("stopScheduler", function (error, result) {
         // identify the error
         tsx_UpdateServerState(tsx_ServerStates.imagingSessionId, '' );
@@ -293,8 +296,6 @@ class CalibrationsMenu extends Component {
     if( this.props.scheduler_running.value == 'Stop'  && this.props.tool_active.value == false ){
       DISABLED = false;
     }
-//        <Checkbox label='Artesky  .' name='flatbox_enabled' toggle checked={this.state.flatbox_enabled} onClick={this.handleToggleAndSave.bind(this)} />
-
     return (
       <Button.Group basic size='mini' floated='right'>
          <Button disabled={DISABLED} onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
@@ -336,61 +337,14 @@ class CalibrationsMenu extends Component {
   }
 
   renderFlatbox_level() {
-  if( this.state.flatbox_enabled == true ) {
+  if( this.props.flatbox_enabled.value === true ) {
       return (
         <Table.HeaderCell  >Level</Table.HeaderCell>
       )
     }
   }
 
-  renderCalibrationFlaxboxSettings() {
-    const { activeIndex } = this.state;
-    const eFlatbox = 0;
 
-    // if flatbox enabled
-    // if rotator enabled?
-    // enable rotation?
-    /*
-    validations={{
-      matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-    }}
-    validationError="Must be a positive number, e.g 1, .7, 1.1"
-    errorLabel={ ERRORLABEL }
-
-    content='Artesky Flatbox Setup'
-
-
-    */
-
-    if( this.state.flatbox_enabled == true ) {
-        return (
-          <div>
-          <Divider/>
-          <Accordion styled>
-          <Accordion.Title
-            active={activeIndex === eFlatbox}
-            index={eFlatbox}
-            onClick={this.handleClick}
-            content='Artesky Flatbox Setup'
-            />
-          <Accordion.Content  active={activeIndex === eFlatbox} >
-          <Form>
-
-          <Form.Input
-            label='Connect IP '
-            name='flatbox_ip'
-            placeholder='127.0.0.1'
-            value={this.state.flatbox_ip}
-            onChange={this.handleStateChange}
-          />
-          </Form>
-
-        </Accordion.Content>
-        </Accordion>
-        </div>
-      )
-    }
-  }
   render() {
 
     return (
@@ -428,7 +382,7 @@ class CalibrationsMenu extends Component {
                 key={obj._id}
                 calibrations={this.props.calibrations}
                 calibration={obj}
-                flatbox_enabled={this.state.flatbox_enabled}
+                flatbox_enabled={this.props.flatbox_enabled}
                 tsxInfo={this.props.tsxInfo}
                 scheduler_running={this.props.scheduler_running}
                 tool_active={this.props.tool_active}

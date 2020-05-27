@@ -71,7 +71,6 @@ class CalibrationFrame extends Component {
     binning: '',
     ccdTemp: '',
     on_enabled: true,
-    flatbox_enabled: false,
   }
 
   handleChange = (e, { name, value }) => {
@@ -114,11 +113,6 @@ class CalibrationFrame extends Component {
   updateDefaults(nextProps) {
     if( typeof nextProps == 'undefined'  ) {
       return;
-    }
-    if( typeof nextProps.tsxInfo != 'undefined'  ) {
-      this.setState({
-        flatbox_enabled: nextProps.tsxInfo.flatbox_enabled
-      });
     }
     if( typeof nextProps.calibration != 'undefined'  ) {
       this.setState({
@@ -163,7 +157,7 @@ class CalibrationFrame extends Component {
   }
 
   renderFlatbox_level() {
-    if( this.props.flatbox_enabled == true ) {
+    if( this.props.flatbox_enabled.value === true ) {
       return (
         <Table.Cell   >
           <Input
@@ -171,7 +165,7 @@ class CalibrationFrame extends Component {
             size='mini'
             name='level'
             placeholder='Level'
-            value={this.state.level}
+            value={this.props.calibration.level}
             onChange={this.handleChange}
           />
         </Table.Cell>
@@ -187,7 +181,7 @@ class CalibrationFrame extends Component {
       <Checkbox
         name='on_enabled'
         label=''
-        checked={this.state.on_enabled }
+        checked={this.props.calibration.on_enabled }
         onChange={this.handleToggle}
         />
       </Table.Cell   >
@@ -201,7 +195,7 @@ class CalibrationFrame extends Component {
             name='subFrameTypes'
             options={calibrationTypes()}
             placeholder='subFrameTypes'
-            text={this.state.subFrameTypes}
+            text={this.props.calibration.subFrameTypes}
             onChange={this.handleChange}
           />
         </Table.Cell>
@@ -215,7 +209,7 @@ class CalibrationFrame extends Component {
               name='filter'
               options={renderDropDownFilters()}
               placeholder='Filter'
-              text={this.state.filter}
+              text={this.props.calibration.filter}
               onChange={this.handleChange}
             />
         </Table.Cell>
@@ -226,7 +220,7 @@ class CalibrationFrame extends Component {
             name='binning'
             options={renderDropDownImagingBinnings()}
             placeholder='Bin'
-            text={this.state.binning}
+            text={this.props.calibration.binning}
             onChange={this.handleChange}
           />
         </Table.Cell>
@@ -236,7 +230,7 @@ class CalibrationFrame extends Component {
             size='mini'
             name='exposure'
             placeholder='Exposure'
-            value={this.state.exposure}
+            value={this.props.calibration.exposure}
             onChange={this.handleChange}
           />
         </Table.Cell>
@@ -246,7 +240,7 @@ class CalibrationFrame extends Component {
             size='mini'
             name='ccdTemp'
             placeholder='Temp'
-            value={this.state.ccdTemp}
+            value={this.props.calibration.ccdTemp}
             onChange={this.handleChange}
           />
         </Table.Cell>
@@ -256,7 +250,7 @@ class CalibrationFrame extends Component {
             size='mini'
             name='quantity'
             placeholder='Quantity'
-            value={this.state.quantity}
+            value={this.props.calibration.quantity}
             onChange={this.handleChange}
           />
         </Table.Cell>
