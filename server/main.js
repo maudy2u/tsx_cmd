@@ -334,7 +334,6 @@ Meteor.methods({
         getSchedulerState() == 'Stop'
       ) {
         tsxDebug("Stop found");
-        runSchedulerProcess();
 
         // Confirm whether the there is a script running...
         if( !tsx_ServerIsOnline() ) {
@@ -342,7 +341,9 @@ Meteor.methods({
           return;
         }
 
-        tsxDebug( '@@ Start1' );
+        runSchedulerProcess();
+
+        tsxDebug( ' @@ creating job' );
         // Create a job:
         var job = new Job(scheduler, tsx_ServerStates.runScheduler, // type of job
           // Job data that you define, including anything the job
@@ -352,7 +353,7 @@ Meteor.methods({
             scheduleType: 'imaging',
           }
         );
-        tsxDebug( '@@ Start2' );
+        tsxDebug( ' @@ Job created' );
 
         // Set some properties of the job and then submit it
         // the same submit the start time to the scheduler...
@@ -363,7 +364,7 @@ Meteor.methods({
         // .delay(0);// 60*60*1000)     // Wait an hour before first try
 
         var jid = job.save();               // Commit it to the server
-        tsxDebug( '@@ Start3' );
+        tsxDebug( ' @@ Job submitted' );
 
         // tsxLog('Job id: ' + jid);
         return;

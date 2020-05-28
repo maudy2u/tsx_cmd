@@ -135,11 +135,11 @@ export function collect_calibration_images() {
       var numMaxPixs = 0;
       var MAXIMUM_OCCURANCE = 2;
       const MAX_VALUE = 65536; // TheSkyX's 16 bit maximumm value
-      for( var sub=0; sub<=cal.quantity; sub++) {
+      for( var sub=0; sub<cal.quantity; sub++) {
         if( isSchedulerStopped() == false ) {
+            UpdateStatus( ' [CALIBRATION] frame: ' + cal.subFrameTypes + ' ' +  cal.filter + ' ' + cal.exposure + ' sec: '  +inc+'/' + cal.quantity    );
             var iid = takeCalibrationImages( cal );
             var inc = sub+1;
-            UpdateStatus( ' [CALIBRATION] frame: ' + cal.subFrameTypes + ' ' +  cal.filter + ' ' + cal.exposure + ' sec: '  +inc+'/' + cal.quantity    );
 
             // *******************************
             // MONITOR for MAX PIXEL and if max value decrease by one

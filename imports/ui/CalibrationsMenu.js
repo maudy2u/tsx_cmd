@@ -152,7 +152,7 @@ class CalibrationsMenu extends Component {
   playButton() {
     // obtain calibration targetSession
     Meteor.call( 'processCalibrationTargets', function(error, result) {
-      console.log('result: ' + result);
+
     }.bind(this));
   }
 
@@ -370,7 +370,7 @@ class CalibrationsMenu extends Component {
                <Table.HeaderCell  >Bin</Table.HeaderCell>
                <Table.HeaderCell  >Exp(s)</Table.HeaderCell>
                <Table.HeaderCell  >Temp.</Table.HeaderCell>
-               <Table.HeaderCell  >Repeat</Table.HeaderCell>
+               <Table.HeaderCell  >Quantity</Table.HeaderCell>
                { this.renderFlatbox_level() }
                <Table.HeaderCell  ></Table.HeaderCell>
              </Table.Row>
