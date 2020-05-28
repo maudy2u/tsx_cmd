@@ -248,7 +248,6 @@ class App extends TrackerReact(Component) {
     if (this.state.activeMenu == 'Monitor' ) {
       return (
         <Monitor
-          enabledTargetSessions={this.props.enabledTargetSessions}
           tsx_progress={this.props.tsx_progress}
           tsx_total={this.props.tsx_total}
           scheduler_report={this.props.scheduler_report}

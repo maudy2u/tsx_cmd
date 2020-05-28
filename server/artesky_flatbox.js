@@ -72,7 +72,6 @@ import {
   findCalibrationSession,
   CalibrateAutoGuider,
   tsx_RotateCamera,
-  UpdateImagingTargetReport,
   tsx_SlewTargetName,
   tsx_SlewCmdCoords,
   tsx_StopTracking,
@@ -118,7 +117,7 @@ function flat_enabled() {
 
 export function flatbox_setup() {
   var cmd = flatbox_srv() + flat_device();
-  tsxLog(' [ARTESKY] Flatbox --setup: ' + cmd );
+  tsxLog(' [ARTESKY] Flatbox sending: ' + cmd );
 
   var Out =false;
 
@@ -145,7 +144,7 @@ export function flatbox_setup() {
 
 export function flatbox_connect() {
   var cmd = flatbox_srv() + ' --connect ' + flat_device();
-  tsxLog(' [ARTESKY] Flatbox --connect: ' + cmd );
+  tsxLog(' [ARTESKY] Flatbox sending: ' + cmd );
 
   var Out =false;
   artesky_cmd(cmd, Meteor.bindEnvironment((artesky_return) => {
@@ -172,7 +171,7 @@ export function flatbox_connect() {
 export function flatbox_on() {
   flatbox_connect();
   var cmd = flatbox_srv() + ' --on';
-  tsxLog(' [ARTESKY] Flatbox ON: ' + cmd );
+  tsxLog(' [ARTESKY] Flatbox sending: ' + cmd );
   var Out =false;
   artesky_cmd(cmd, Meteor.bindEnvironment((artesky_return) => {
     var results = artesky_return.split(':');
@@ -198,13 +197,13 @@ export function flatbox_level( lvl ) {
   var err;
   var cmd = '';
   if( lvl > 0 && lvl < 255 ) {
-    cmd = flatbox_srv() + ' --level ' + lvl;
-    tsxLog(' [ARTESKY] Flatbox Level: ' + cmd );
   }
   else {
-    cmd = flatbox_srv() + ' --level 0';
-    tsxLog(' [ARTESKY] Flatbox Level: ' + cmd );
+    UpdateStatus(' [ARTESKY] Flatbox OUT OF RANGE. LEVEL SET: ' + err  );
+    lvl = 0;
   }
+  cmd = flatbox_srv() + ' --level ' + lvl;
+  tsxLog(' [ARTESKY] Flatbox sending: --level ' + cmd );
   var Out =false;
   artesky_cmd(cmd, Meteor.bindEnvironment((artesky_return) => {
     var results = artesky_return.split(':');
@@ -214,7 +213,7 @@ export function flatbox_level( lvl ) {
         UpdateStatusErr(' [ARTESKY] Flatbox LEVEL FAILED!! Artesky server error: ' + err);
       }
       else {
-        UpdateStatus(' [ARTESKY] Flatbox LEVEL SET: ' + err  );
+        UpdateStatus(' [ARTESKY] Flatbox LEVEL SET: ' + lvl  );
         Out =true;
       }
     }
@@ -228,7 +227,7 @@ export function flatbox_level( lvl ) {
 
 export function flatbox_off() {
   var cmd = flatbox_srv() + ' --off';
-  tsxLog(' [ARTESKY] Flatbox OFF: ' + cmd );
+  tsxLog(' [ARTESKY] Flatbox sending: ' + cmd );
   var Out = false;
   artesky_cmd(cmd, Meteor.bindEnvironment((artesky_return) => {
     var results = artesky_return.split(':');
@@ -252,7 +251,7 @@ export function flatbox_off() {
 
 export function flatbox_disconnect() {
   var cmd = flatbox_srv() + ' --disconnect';
-  tsxLog(' [ARTESKY] Flatbox -DISCONNECTED: ' + cmd );
+  tsxLog(' [ARTESKY] Flatbox sending: ' + cmd );
   var Out =false;
   artesky_cmd(cmd, Meteor.bindEnvironment((artesky_return) => {
     var results = artesky_return.split(':');
@@ -276,7 +275,7 @@ export function flatbox_disconnect() {
 
 export function flatbox_status() {
   var cmd = flatbox_srv() + ' --status';
-  tsxLog(' [ARTESKY] Flatbox -STATUS: ' + cmd );
+  tsxLog(' [ARTESKY] Flatbox sending: ' + cmd );
   var Out =false;
   artesky_cmd(cmd, Meteor.bindEnvironment((artesky_return) => {
     var results = artesky_return.split(':');

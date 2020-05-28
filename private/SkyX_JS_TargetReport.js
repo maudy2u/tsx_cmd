@@ -97,9 +97,13 @@ try {
     OBJI.Property(55); // DEC			// Pull the DEC value
     var targetDEC = OBJI.ObjInfoPropOut; 		// Stuff DEC into variable
 
+		CHART.DocumentProperty(1);
+		var lon = CHART.DocPropOut;
+
 		// Figure out the latitude for future calculations.
 		CHART.DocumentProperty(0);
 		var lat = CHART.DocPropOut;
+
 		// Figure out the object's maximum & minimum altitudes for sanity checking.
 		var maxAlt = (90 - lat + targetDEC);
 		if (maxAlt > 90)
@@ -117,7 +121,11 @@ try {
     report = report +
       '|isValid=' +
       true
-      + '|AZ=' +
+			+ '|LAT=' +
+      lat
+			+ '|LON=' +
+      lon
+			+ '|AZ=' +
       azimuth
       + '|ALT=' +
       altitude

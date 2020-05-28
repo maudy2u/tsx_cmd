@@ -45,6 +45,7 @@ export const tsx_ServerStates = {
   runScheduler: 'runScheduler',
 
   initialFocusTemperature: 'initialFocusTemperature',
+  defaultImageAutoSavePattern: 'defaultImageAutoSavePattern',
   mntRA: 'mntRA',
   mntDEC: 'mntDEC',
   mntMHS: 'mntMHS',

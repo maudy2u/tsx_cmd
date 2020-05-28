@@ -63,7 +63,6 @@ const XRegExp24hr = XRegExp('^([0-9]:[0-5][0-9]|[1-2][0-9]:[0-5][0-9])$');
 const ERRORLABEL = <Label color="red" pointing/>
 
 function updateTargetPlan( fid, name, value ) {
-  var dirty = false;
   var obj = TargetSessions.findOne({_id:fid});
   if( typeof obj != 'undefined') {
     if( name == 'startTime') {
@@ -81,7 +80,6 @@ function updateTargetPlan( fid, name, value ) {
     else if( name == 'minAlt') {
       obj.minAlt = value;
       obj.report.dirty = true;
-      dirty = true;
     }
     else if( name == 'Comment') {
       tsxLog( ' targetPlan: comment not implemented yet')
@@ -100,19 +98,10 @@ function updateTargetPlan( fid, name, value ) {
       }
     });
   }
+  return obj;
 }
 
 class TargetConstraints extends Component {
-
-  state = {
-    name: '',
-    description: '',
-    startTime: '',
-    stopTime: '',
-    priority: 0,
-    minAlt: 45,
-    Comment: '',
-  }
 
   handleChange = (e, { name, value }) => {
     this.setState({ [name]: value });
@@ -148,31 +137,6 @@ class TargetConstraints extends Component {
   updateDefaults(nextProps) {
     if( typeof nextProps === 'undefined'  ) {
       return;
-    }
-    // if( typeof nextProps.tsxInfo !== 'undefined'  ) {
-    //   // this.setState({
-    //   //   flatbox_enabled: nextProps.tsxInfo.flatbox_enabled
-    //   // });
-    // }
-    if( typeof nextProps.targetPlan !=='undefined'  ) {
-      this.setState({
-        name: nextProps.targetPlan.targetFindName
-      });
-      this.setState({
-        description: nextProps.targetPlan.description
-      });
-      this.setState({
-        startTime: nextProps.targetPlan.startTime
-      });
-      this.setState({
-        stopTime: nextProps.targetPlan.stopTime
-      });
-      this.setState({
-        priority: nextProps.targetPlan.priority
-      });
-      this.setState({
-        minAlt: nextProps.targetPlan.minAlt
-      });
     }
   }
 

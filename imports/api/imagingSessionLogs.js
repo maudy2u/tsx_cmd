@@ -69,6 +69,18 @@ ImagingSessionLogs = {
    return id;
  }
 
+ export function imageReportMaxPixel( iid ) {
+   // if test levels process the
+   if( typeof iid !== 'undefined' || iid !== '' ) {
+     var image = ImagingSessionLogs.findOne({_id: iid });
+     if( typeof image !== 'undefined' || image !== '' ) {
+       return image.maxPix;
+    }
+   }
+   return -1;
+
+ }
+
 
  export function updateImageReport( iid, name, value ) {
    var id;

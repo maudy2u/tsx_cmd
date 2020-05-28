@@ -70,7 +70,6 @@ import {
   findCalibrationSession,
   CalibrateAutoGuider,
   tsx_RotateCamera,
-  UpdateImagingTargetReport,
   tsx_SlewTargetName,
   tsx_SlewCmdCoords,
   tsx_StopTracking,

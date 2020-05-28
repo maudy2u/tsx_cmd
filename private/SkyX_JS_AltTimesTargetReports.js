@@ -170,7 +170,7 @@ for( var i=0; i<targets.length; i++ ) {
 			Out += '##';
 		}
 		//Out += object +'|'+ alt +'|'+ prettyRiseTime +'|'+prettySetTime;
-		Out += object +'|'+ alt +'|'+ prettyRiseTime +'|'+prettySetTime+'|'+passthru;
+		Out += object +'|'+ alt +'|'+ prettyRiseTime +'|'+prettySetTime+'|'+passthru+'|'+maxAlt.toFixed(2);
 	}
 }
 TSX.writeLine(" ************** ");

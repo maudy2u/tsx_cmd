@@ -2031,6 +2031,12 @@ function tsx_TargetReport( target ) {
             var param=token.split("=");
             switch( param[0] ) {
 
+              case 'LAT':
+                updateTargetReport( target._id, 'LAT', param[1] );
+                break;
+              case 'LON':
+                updateTargetReport( target._id, 'LON', param[1] );
+                break;
               case 'focusPosition':
                 updateTargetReport( target._id, 'focusPosition', param[1] );
                 break;
@@ -2521,99 +2527,95 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
             switch( param[0] ) {
 
               case 'avgPix':
-                updateImageReport( iid, 'avgPix', param[1] );
+                updateImageReport( res_iid, 'avgPix', param[1] );
                 updateTargetReport( target._id, 'avgPix', param[1] );
                 break;
 
               case 'maxPix':
-                updateImageReport( iid, 'maxPix', param[1] );
+                updateImageReport( res_iid, 'maxPix', param[1] );
                 updateTargetReport( target._id, 'maxPix', param[1] );
                 break;
 
               case 'ALT':
-                updateImageReport( iid, 'ALT', param[1] );
+                updateImageReport( res_iid, 'ALT', param[1] );
                 updateTargetReport( target._id, 'ALT', param[1] );
                 break;
 
               case 'AZ':
-                updateImageReport( iid, 'AZ', param[1] );
+                updateImageReport( res_iid, 'AZ', param[1] );
                 updateTargetReport( target._id, 'AZ', param[1] );
                 break;
 
               case 'RA':
-                updateImageReport( iid, 'RA', param[1] );
+                updateImageReport( res_iid, 'RA', param[1] );
                 updateTargetReport( target._id, 'RA', param[1] );
                 break;
 
               case 'DEC':
-                updateImageReport( iid, 'DEC', param[1] );
+                updateImageReport( res_iid, 'DEC', param[1] );
                 updateTargetReport( target._id, 'DEC', param[1] );
                 break;
 
               case 'pointing':
-                updateImageReport( iid, 'pointing', param[1] );
+                updateImageReport( res_iid, 'pointing', param[1] );
                 updateTargetReport( target._id, 'pointing', param[1] );
                 break;
 
               case 'ANGLE':
-                updateImageReport( iid, 'ANGLE', param[1] );
+                updateImageReport( res_iid, 'ANGLE', param[1] );
                 updateTargetReport( target._id, 'pointing', param[1] );
                 break;
 
               case 'HA':
-                updateImageReport( iid, 'HA', param[1] );
+                updateImageReport( res_iid, 'HA', param[1] );
                 updateTargetReport( target._id, 'HA', param[1] );
                 break;
 
               case 'TRANSIT':
-                updateImageReport( iid, 'TRANSIT', param[1] );
+                updateImageReport( res_iid, 'TRANSIT', param[1] );
                 updateTargetReport( target._id, 'TRANSIT', param[1] );
                 break;
 
               case 'FOCUS_POS':
-                updateImageReport( iid, 'FOCUS_POS', param[1] );
+                updateImageReport( res_iid, 'FOCUS_POS', param[1] );
                 updateTargetReport( target._id, 'focusPosition', param[1] );
                 break;
 
               case 'sunAltitude':
-                updateImageReport( iid, 'sunAltitude', param[1] );
+                updateImageReport( res_iid, 'sunAltitude', param[1] );
                 updateTargetReport( target._id, 'sunAltitude', param[1] );
                 break;
 
               case 'focusTemp':
-                updateImageReport( iid, 'focusTemp', param[1] );
+                updateImageReport( res_iid, 'focusTemp', param[1] );
                 updateTargetReport( target._id, 'focusTemp', param[1] );
                 break;
 
               case 'ROTATOR_POS_ANGLE':
-                updateImageReport( iid, 'ROTATOR_POS_ANGLE', param[1] );
+                updateImageReport( res_iid, 'ROTATOR_POS_ANGLE', param[1] );
                 updateTargetReport( target._id, 'ROTATOR_POS_ANGLE', param[1] );
                 break;
 
               case 'RMS_ERROR':
-                updateImageReport( iid, 'RMS_ERROR', param[1] );
+                updateImageReport( res_iid, 'RMS_ERROR', param[1] );
 //                updateTargetReport( target._id, 'pointing', param[1] );
                 break;
 
               case 'fileName':
-                updateImageReport( iid, 'fileName', param[1] );
+                updateImageReport( res_iid, 'fileName', param[1] );
                 break;
-
-                case 'maxPix':
-                  updateImageReport( iid, 'fileName', param[1] );
-                  break;
 
               default:
                 //RunJavaScriptOutput.writeLine(param[0]+' not found.');
             }
           }
 
-          updateImageReport( iid, 'target', tName );
-          updateImageReport( iid, 'subFrameTypes', getFrameName(frame) );
-          updateImageReport( iid, 'filter', getFilterName(filterNum) );
-          updateImageReport( iid, 'exposure', exposure );
-//          updateImageReport( iid, 'level', tName );
-          updateImageReport( iid, 'binning', binning );
+          updateImageReport( res_iid, 'target', tName );
+          updateImageReport( res_iid, 'subFrameTypes', getFrameName(frame) );
+          updateImageReport( res_iid, 'filter', getFilterName(filterNum) );
+          updateImageReport( res_iid, 'exposure', exposure );
+//          updateImageReport( res_iid, 'level', tName );
+          updateImageReport( res_iid, 'binning', binning );
 
           // increment Dither count
           if( frame == '1 ' ) { // 1 = Light

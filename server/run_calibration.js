@@ -28,6 +28,11 @@ import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug,
 } from '../imports/api/theLoggers.js';
 
 import {
+  imageReportMaxPixel,
+  ImagingSessionLogs,
+} from '../imports/api/imagingSessionLogs.js';
+
+import {
   getFilterName,
   getFrameNumber,
   getFrameName,
@@ -77,7 +82,8 @@ import {
 const settlePanel = 3*1000; // seconds
 
 export function collect_calibration_images() {
-  UpdateStatus(" [CALIBRATION] Started collecting calibration frames");
+  tsxLog(" [CALIBRATION] *******************************");
+  UpdateStatus(" [CALIBRATION] STARTED");
 
   tsx_SetServerState( tsx_ServerStates.tool_active, true );
 
@@ -91,19 +97,14 @@ export function collect_calibration_images() {
   let cf; // get the enabled calibration calibrations
   cf = CalibrationFrames.find({ on_enabled: true }, { sort: { order: 1 } }).fetch();
   var fp_enabled = tsx_GetServerStateValue( tsx_ServerStates.flatbox_enabled);
-  if( fp_enabled == '' ) {
+  if( typeof fp_enabled === 'undefined' || fp_enabled === '' ) {
     fp_enabled = false;
     tsx_SetServerState( tsx_ServerStates.flatbox_enabled, false);
     tsxLog( ' Flatbox: turned off by default')
   }
-  if( fp_enabled ) {
-//    flatbox_setup(); // connect device
- //   Meteor.sleep(settlePanel);
-    flatbox_connect();
- //   Meteor.sleep(settlePanel);
-  }
-  // for loop for Quantity
   tsxLog( ' [CALIBRATION] calibration frame(s): ' + cf.length );
+
+  // for loop for Quantity
   for( var i=0; i < cf.length; i ++ ) {
     if( isSchedulerStopped() != false ) {
       tsxLog( ' [CALIBRATION] EXIT: Manually stopped' );
@@ -113,37 +114,60 @@ export function collect_calibration_images() {
     // what is the FOV position??
     tsxLog( ' [CALIBRATION] DEPRECATED>> Rotator disabled: ' + cal.rotation );
 
-    // check if level > 0; if so turn on light panel
-    if( fp_enabled == true && cal.level > 0 ) {
- //     Meteor.sleep(settlePanel);
+    // ensure valid level
+    if( cal.level < 0 || cal.level > 255 ) {
+      cal.level = 0;
+    }
+
+    // disconnect to turn off in case of darks
+    if( fp_enabled == true && cal.subFrameTypes === 'Flat' ) {
+      flatbox_connect();
       flatbox_on();
- //     Meteor.sleep(settlePanel);
       flatbox_level( cal.level );
- //     Meteor.sleep(settlePanel);
     }
-    else if( fp_enabled == true && cal.level <= 0 ) {
-//     Meteor.sleep(settlePanel);
-      flatbox_level( cal.level );
- //     Meteor.sleep(settlePanel);
-//      flatbox_off();
- //     Meteor.sleep(settlePanel);
+    else if( fp_enabled == true && (cal.subFrameTypes === 'Dark' || cal.subFrameTypes === 'Bias' ) ) {
+      flatbox_disconnect();
     }
+
     // take_image to actually take the picture
     try {
+      var maxPix = 0;
+      var numMaxPixs = 0;
+      var MAXIMUM_OCCURANCE = 2;
+      const MAX_VALUE = 65536; // TheSkyX's 16 bit maximumm value
       for( var sub=0; sub<=cal.quantity; sub++) {
         if( isSchedulerStopped() == false ) {
             var iid = takeCalibrationImages( cal );
-
-            // if test levels process the
-            if( typeof iid !== 'undefined' || iid !== '' ) {
-              var image = ImagingSessionLogs.findOne({_id: iid });
-              if( typeof image !== 'undefined' || image !== '' ) {
-               tsxLog( ' [CALIBRATION] frame MaximumPixel: ' + image.maxPix );
-             }
-            }
-
             var inc = sub+1;
             UpdateStatus( ' [CALIBRATION] frame: ' + cal.subFrameTypes + ' ' +  cal.filter + ' ' + cal.exposure + ' sec: '  +inc+'/' + cal.quantity    );
+
+            // *******************************
+            // MONITOR for MAX PIXEL and if max value decrease by one
+            // *******************************
+            if( fp_enabled == true && cal.subFrameTypes === 'Flat' ) {
+              maxPix = imageReportMaxPixel( iid );
+              tsxLog( ' [CALIBRATION] Maximum pixel value: ' + maxPix );
+              if( maxPix >= MAX_VALUE ) {
+                numMaxPixs++;
+              }
+              else {
+                numMaxPixs = 0;
+              }
+              if( numMaxPixs > MAXIMUM_OCCURANCE ) {
+                cal.level = cal.level - 1;
+                if( cal.level < 0 ) {
+                  cal.level = 0;
+                }
+                flatbox_level( cal.level );
+                updateCalibrationFrame(
+                  cal._id,
+                  'level',
+                  cal.level,
+                );
+              }
+            }
+            // *******************************
+
         }
         else {
           UpdateStatus( " [CALIBRATION] Manually stopped.");
@@ -161,13 +185,12 @@ export function collect_calibration_images() {
   }
   if( fp_enabled ) {
     flatbox_off();
- //   Meteor.sleep(settlePanel);
     flatbox_disconnect();
- //   Meteor.sleep(settlePanel);
   }
 
   tsx_SetServerState( tsx_ServerStates.tool_active, false );
-  UpdateStatus(" [CALIBRATION] Finished calibration frames");
+  UpdateStatus(" [CALIBRATION] Finished");
+  tsxLog(" [CALIBRATION] *******************************");
 }
 
 //var aFrame = $002; //  cdLight =1, cdBias, cdDark, cdFlat
@@ -179,7 +202,7 @@ function takeCalibrationImages( cal ) {
   var delay = tsx_GetServerStateValue( tsx_ServerStates.flatbox_camera_delay );
   var binning =cal.binning;
   var ccdTemp = cal.ccdTemp;
-  tsxDebug( ' Calibration: filter=' +filter +', exposure=' + exposure +', frame=' + frame +', name=' + tName + ', delay=' + delay+ ', binning=' + binning+ ', ccdTemp=' + ccdTemp);
+  tsxDebug( ' [CALIBRATION] filter=' + filter +', exposure=' + exposure +', frame=' + frame +', name=' + tName + ', delay=' + delay+ ', binning=' + binning+ ', ccdTemp=' + ccdTemp);
   return tsx_takeImage( filter, exposure, frame, tName, delay, binning, ccdTemp );
 }
 

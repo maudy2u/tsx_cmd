@@ -264,6 +264,11 @@ class DefaultSettings extends Component {
             return element.name == 'defaultUseImagingCooler_enabled';
           }).value,
 
+
+          defaultImageAutoSavePattern: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'defaultImageAutoSavePattern';
+          }).value,
+
           imagingBinning: nextProps.tsxInfo.find(function(element) {
             return element.name == 'imagingBinning';
           }).value,
@@ -445,6 +450,8 @@ class DefaultSettings extends Component {
       RUNNING = '';
       ACTIVE=false;
     }
+    var IMAGE_BINNINGS = renderDropDownImagingBinnings();
+
 //    style={{color: '#68c349'}}
 
     return (
@@ -474,18 +481,6 @@ class DefaultSettings extends Component {
               placeholder='Enter TheSkyX port'
               value={this.state.port}
               onChange={this.handleChange}
-            />
-            <Form.Input
-              label='Focal Length: '
-              name='imagingFocalLength'
-              placeholder='i.e. focal length in mm of OTA'
-              value={this.state.imagingFocalLength}
-              onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
-              errorLabel={ ERRORLABEL }
             />
           </Form.Group>
         </Segment>
@@ -523,6 +518,39 @@ class DefaultSettings extends Component {
           {rotator.manufacturer + ' | ' + rotator.model}
         </Label.Detail></Label></Segment>
       </Segment.Group>
+      <Segment>
+        <Form>
+          <Form.Field control={Dropdown}
+            fluid
+            label='Default Image Binning'
+            name='imagingBinning'
+            options={IMAGE_BINNINGS}
+            placeholder='Bin imaging camera'
+            text={this.state.imagingBinning}
+            onChange={this.handleChange}
+          />
+          <Form.Input
+            label='Focal Length: '
+            name='imagingFocalLength'
+            placeholder='i.e. focal length in mm of OTA'
+            value={this.state.imagingFocalLength}
+            onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
+            errorLabel={ ERRORLABEL }
+          />
+          <Form.Input
+            disabled={true}
+            label='Default AUTOSAVE Pattern: '
+            name='defaultImageAutoSavePattern'
+            placeholder='Same definition entered in TheSkyX, e.g. :t_:b'
+            value={this.state.defaultImageAutoSavePattern}
+            onChange={this.handleChange}
+          />
+        </Form>
+      </Segment>
     </Accordion.Content>
     </div>
     )
@@ -600,6 +628,13 @@ class DefaultSettings extends Component {
       />
       </Form.Group>
       </Form>
+        <Label>
+          REQUIREMENT:
+          <Label.Detail>
+          <a href='https://github.com/maudy2u/artesky_flat_box'>ARTEKSY_SRV</a> needs to be installed on the PC connected to the ARTESKY FLATBOX.<br/>
+            CLick to learn more.
+          </Label.Detail>
+        </Label>
       </Segment>
     </Accordion.Content>
     </div>
@@ -1076,14 +1111,20 @@ class DefaultSettings extends Component {
           validationError="Must be a positive number, e.g 1, 2, 3, 5..."
           errorLabel={ ERRORLABEL }
         />
-        <Checkbox
-          style={{color: '#68c349'}}
-          label='CLS before focusing in case of clouds'
-          name='focusRequiresCLS'
-          toggle
-          checked={this.state.focusRequiresCLS}
-          onClick={this.handleToggleAndSave.bind(this)}
-        />
+        </Form>
+        <Form>
+          &nbsp;
+          <br/>
+          <center>
+          <Checkbox
+            style={{color: '#68c349'}}
+            label='CLS before focusing in case of clouds'
+            name='focusRequiresCLS'
+            toggle
+            checked={this.state.focusRequiresCLS}
+            onClick={this.handleToggleAndSave.bind(this)}
+          />
+          </center>
         </Form>
         </Segment>
       </Accordion.Content>
@@ -1143,6 +1184,11 @@ class DefaultSettings extends Component {
               validationError="Must be a positive number, e.g 0, 5, 1800, 3600"
               errorLabel={ ERRORLABEL }
             />
+            </Form>
+            <Form>
+              &nbsp;
+              <br/>
+              <center>
             <Checkbox
               style={{color: '#68c349'}}
               label='CLS before focusing in case of clouds'
@@ -1151,6 +1197,7 @@ class DefaultSettings extends Component {
               checked={this.state.focusRequiresCLS}
               onClick={this.handleToggleAndSave.bind(this)}
             />
+            </center>
           </Form>
       </Segment>
       </Accordion.Content>

@@ -126,6 +126,7 @@ export function tsx_AltTimesForTargets( targets ) {
           let sTime = rpt.split('|')[2].trim();
           let eTime = rpt.split('|')[3].trim();
           let ref_id = rpt.split('|')[4].trim(); // passthru id
+          let maxAlt = rpt.split('|')[5].trim(); // passthru id
 
 
           // THIS IS THE PROBLEM IF THE FINDNAME IS USED MORE THAN ONCE
@@ -144,6 +145,7 @@ export function tsx_AltTimesForTargets( targets ) {
               alt_start: sTime,
               alt_end: eTime,
               passthru:ref_id,
+              maxAlt: maxAlt,
             });
           }
           else {
@@ -155,6 +157,7 @@ export function tsx_AltTimesForTargets( targets ) {
               alt_start: sTime,
               alt_end: eTime,
               passthru:ref_id,
+              maxAlt: maxAlt,
             });
           }
         }
@@ -183,10 +186,10 @@ Meteor.methods({
 
   planData() {
     tsx_SetServerState( tsx_ServerStates.night_plan_report, true );
-    tsxInfo( ' --- Night Plan: Computing');
+    tsxInfo( ' [PLANNER] Computing...');
     let plan = TargetPlans();
     tsx_SetServerState( tsx_ServerStates.night_plan_report, true );
-    tsxInfo( ' --- Night Plan: Loaded');
+    tsxInfo( ' [PLANNER] Done');
     return plan;
   },
 

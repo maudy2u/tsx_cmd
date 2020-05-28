@@ -79,6 +79,8 @@ export function removeTargetReport( tid ) {
        ROTATOR_POS_ANGLE: '',
        maxAlt: '',
        dirty: true,
+       LAT: '',
+       LON: '',
      }
    );
    return rid;
@@ -95,7 +97,7 @@ export function removeTargetReport( tid ) {
      var new_id = initTargetReport(tid);
      obj = TargetReports.findOne({_id: new_id});
    }
-   if( typeof obj != 'undefined') {
+   if( typeof obj !== 'undefined') {
      if( name == 'ALT') {
        obj.ALT = value;
      }
@@ -171,6 +173,12 @@ export function removeTargetReport( tid ) {
      else if( name == 'ROTATOR_POS_ANGLE') {
        obj.ROTATOR_POS_ANGLE = value;
      }
+     else if( name == 'LAT') {
+       obj.LAT = value;
+     }
+     else if( name == 'LON') {
+       obj.LON = value;
+     }
 
      id = TargetReports.update({_id: obj._id}, {
        $set: {
@@ -197,6 +205,8 @@ export function removeTargetReport( tid ) {
          RMS_ERROR: obj.RMS_ERROR,
          ROTATOR_POS_ANGLE: obj.ROTATOR_POS_ANGLE,
          dirty: obj.dirty,
+         LAT: obj.LAT,
+         LON: obj.LON,
        }
      });
      TargetSessions.update({_id: tid} , {
