@@ -15,7 +15,7 @@
 #     You should have received a copy of the GNU Affero General Public License
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-export app="Build All TSX Cmd v1.2"
+export app="Build All TSX Cmd v1.3"
 if [ $# -lt 2 ]
   then
     echo ""
@@ -41,37 +41,46 @@ for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|
 done
 export details=build_$(git rev-list --all --count)_v${version}_${date}_${1}
 
+if [ "$(uname -p)" == "aarch64" ]; then
+  export meteor_build=~/meteor/meteor
+else
+  export meteor_build=meteor
+fi
+
 build_tsx_cmd () {
+  build_type=$1
   folder=${base_dir}"tsx_cmd_"$1"_"${details}
   mkdir -p ${folder}
   echo " Building" ${folder}
-  ${compiler} build --architecture $1 --directory ${folder}
+  ${meteor_build} build --architecture $1 --directory ${folder}
+  package_tar ${folder}
+}
+
+
+package_tar() {
   cd ${base_dir}
-  tar -czf ${folder}.tar -C ${folder} .
-  rm -rf ${folder}
+  tar -czf $1.tar -C $1 .
+  rm -rf $1
   cd ${install_dir}
 }
-if [ "$(uname -p)" == "aarch64" ]; then
-  export compiler='~/meteor/meteor'
-else
-  export compiler='meteor'
-fi
 
-echo ""
-echo " *******************************"
-echo " "${app}
-echo " *******************************"
-echo ""
 if [ "$(uname -p)" == "aarch64" ]; then
   build_type="os.linux.aarch64"
   folder=${base_dir}"tsx_cmd_"${build_type}"_"${details}
   mkdir -p ${folder}
   echo " Building" ${folder}
-  ${compiler} build --directory ${folder}
-  cd ${base_dir}
-  tar -czf ${folder}.tar -C ${folder} .
-  rm -rf ${folder}
-  cd ${install_dir}
+  ${meteor_build} build --directory ${folder}
+  package_tar ${folder}
+fi
+
+
+if [ "$(uname -p)" == "aarch64" ]; then
+  build_type="os.linux.aarch64"
+  folder=${base_dir}"tsx_cmd_"${build_type}"_"${details}
+  mkdir -p ${folder}
+  echo " Building" ${folder}
+  ${meteor_build} build --directory ${folder}
+  package_tar ${folder}
 fi
 
 build_tsx_cmd "os.osx.x86_64"
