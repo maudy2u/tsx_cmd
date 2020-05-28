@@ -201,7 +201,7 @@ class App extends TrackerReact(Component) {
       <div>
         <Menu tabular icon size='huge'>
           <Menu.Item fitted name='Monitor' active={activeMenu === 'Monitor'} onClick={this.handleMenuItemClick}>
-            <Icon name='eye' size='large' />
+            <Icon name='play circle' size='large' />
           </Menu.Item>
           <Menu.Item fitted name='Plan' active={activeMenu === 'Plan'} onClick={this.handleMenuItemClick}>
             <Icon name='tasks' size='large' />

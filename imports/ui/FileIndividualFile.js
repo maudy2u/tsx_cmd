@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import {
+  Button
+} from 'semantic-ui-react'
+
 
 // client ref: https://github.com/VeliovGroup/Meteor-Files/blob/master/docs/react-example.md
 
@@ -62,20 +66,20 @@ class IndividualFile extends Component {
     }
   }
 
+  download() {
+    var DOWNLOAD = this.props.fileUrl;
+    window.open(DOWNLOAD, '_self');
+  }
+
   render() {
+
+
     return <div className="m-t-sm">
-          <strong>{this.props.fileName}</strong>
-          <button onClick={this.renameFile} className="btn btn-outline btn-primary btn-sm">
-            Rename
-          </button>
-          <a href={this.props.fileUrl} className="btn btn-outline btn-primary btn-sm"
-             target="_blank">Download</a>
-          <button onClick={this.removeFile} className="btn btn-outline btn-danger btn-sm">
-            Delete
-          </button>
-          <button onClick={this.restoreFile} className="btn btn-outline btn-danger btn-sm">
-            Restore
-          </button>
+          <strong>{this.props.fileName}&nbsp;&nbsp;</strong>
+          <Button size='mini' icon='edit' onClick={this.renameFile} />
+          <Button size='mini' icon='download' onClick={this.download.bind(this)} />
+          <Button size='mini' icon='undo' onClick={this.restoreFile} />
+          <Button size='mini' icon='delete' onClick={this.removeFile} />
           Size: {this.props.fileSize}
           <br/><hr/>
     </div>

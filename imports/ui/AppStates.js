@@ -155,7 +155,7 @@ class AppStates extends Component {
     }
     return (
       <Button.Group compact size='mini' floated='right'>
-        <Button icon='cloud download' onClick={this.modalOpenBackup}/>
+        <Button icon='save' onClick={this.modalOpenBackup}/>
         <Button disabled={DISABLE} icon='car' onClick={this.showConfirmPark}/>
         <Confirm
           open={this.state.confirmPark}
@@ -279,7 +279,7 @@ total={TOTAL}
           {STATUS}
         </Label>
         <Button.Group compact size='mini' floated='left'>
-          <Button icon='detective' onClick={this.modalOpenSessionsControls}/>
+          <Button icon='toggle on' onClick={this.modalOpenSessionsControls}/>
         </Button.Group>
         {this.appButtons(RUNNING, ACTIVE)}
         {this.renderSessionControls()}
