@@ -585,57 +585,61 @@ class DefaultSettings extends Component {
       Artesky Flatbox
       </Accordion.Title>
       <Accordion.Content  active={activeIndex === eFlatbox} >
-      <Segment>
-      <Checkbox
-        label='Enable Artseky Flatbox'
-        name='flatbox_enabled'
-        toggle
-        checked={this.state.flatbox_enabled}
-        onClick={this.handleToggleAndSave.bind(this)}
-        style={{ labelColor: 'black'  }}
-      />
-      &nbsp;
-      <Button
-        disabled={DISABLED}
-        onClick={this.testArteskyConnection.bind(this)}
-        style={{ backgroundColor: 'green', color: 'black'  }}
-      >TEST CONNECTION</Button>
-      <Form>
-      <Form.Group>
-      <Form.Input
-        disabled={DISABLED}
-        label='Artseky Flatbox Server IP'
-        name='flatbox_ip'
-        placeholder='Enter artesky_srv IP address, e.g. 127.0.0.1'
-        value={this.state.flatbox_ip}
-        onChange={this.handleChange}
-      />
-      <Form.Input
-        disabled={true}
-        label='Artseky Flatbox Device Port'
-        name='flatbox_device'
-        placeholder='Assumes /dev/ttyACM0'
-        value={this.state.flatbox_device}
-        onChange={this.handleChange}
-      />
-      <Form.Input
-        disabled={DISABLED}
-        label='Calibration image delay '
-        name='flatbox_camera_delay'
-        placeholder='Seconds to wait e.g. 1.3'
-        value={this.state.flatbox_camera_delay}
-        onChange={this.handleChange}
-      />
-      </Form.Group>
-      </Form>
-        <Label>
-          REQUIREMENT:
-          <Label.Detail>
-          <a href='https://github.com/maudy2u/artesky_flat_box'>ARTEKSY_SRV</a> needs to be installed on the PC connected to the ARTESKY FLATBOX.<br/>
-            CLick to learn more.
-          </Label.Detail>
-        </Label>
-      </Segment>
+      <Segment.Group>
+        <Segment tertiary>
+          <Checkbox
+            label='Enable Artseky Flatbox'
+            name='flatbox_enabled'
+            toggle
+            checked={this.state.flatbox_enabled}
+            onClick={this.handleToggleAndSave.bind(this)}
+            style={{ labelColor: 'black'  }}
+          />
+          &nbsp;
+          <Button
+            disabled={DISABLED}
+            onClick={this.testArteskyConnection.bind(this)}
+            style={{ backgroundColor: 'green', color: 'black'  }}
+          >TEST CONNECTION</Button>
+        </Segment>
+        <Segment>
+          <Form>
+            <Form.Input
+              disabled={DISABLED}
+              label='Artseky Flatbox Server IP'
+              name='flatbox_ip'
+              placeholder='Enter artesky_srv IP address, e.g. 127.0.0.1'
+              value={this.state.flatbox_ip}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              disabled={true}
+              label='Artseky Flatbox Device Port'
+              name='flatbox_device'
+              placeholder='Assumes /dev/ttyACM0'
+              value={this.state.flatbox_device}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              disabled={DISABLED}
+              label='Calibration image delay '
+              name='flatbox_camera_delay'
+              placeholder='Seconds to wait e.g. 1.3'
+              value={this.state.flatbox_camera_delay}
+              onChange={this.handleChange}
+            />
+          </Form>
+        </Segment>
+        <Segment>
+          <Label>
+            REQUIREMENT:
+            <Label.Detail>
+            <a href='https://github.com/maudy2u/artesky_flat_box'>ARTEKSY_SRV</a> needs to be installed on the PC connected to the ARTESKY FLATBOX.
+              CLick to learn more.
+            </Label.Detail>
+          </Label>
+        </Segment>
+      </Segment.Group>
     </Accordion.Content>
     </div>
     )
@@ -751,8 +755,8 @@ class DefaultSettings extends Component {
       Dithering
       </Accordion.Title>
       <Accordion.Content active={activeIndex === eDither} >
-      <Segment>
-        <Form>
+      <Segment.Group>
+        <Segment tertiary>
           <Checkbox
             label=' Enable Dithering'
             name='isDitheringEnabled'
@@ -761,34 +765,38 @@ class DefaultSettings extends Component {
             onClick={this.handleToggleAndSave.bind(this)}
             style={{ labelColor: 'black'  }}
           />
-          <Form.Input
-            disabled={DISABLE}
-            label='Dithering Minimum Pixel Move '
-            name='minDitherFactor'
-            placeholder='Minimum number of pixels'
-            value={this.state.minDitherFactor}
-            onChange={this.handleChange}
-            validations={{
-              matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
-            }}
-            validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
-            errorLabel={ ERRORLABEL }
-          />
-          <Form.Input
-            disabled={DISABLE}
-            label='Dithering Maximum Pixel Move '
-            name='maxDitherFactor'
-            placeholder='Maximum number of pixels'
-            value={this.state.maxDitherFactor}
-            onChange={this.handleChange}
-            validations={{
-              matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
-            }}
-            validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
-            errorLabel={ ERRORLABEL }
-          />
-        </Form>
         </Segment>
+        <Segment>
+          <Form>
+            <Form.Input
+              disabled={DISABLE}
+              label='Dithering Minimum Pixel Move '
+              name='minDitherFactor'
+              placeholder='Minimum number of pixels'
+              value={this.state.minDitherFactor}
+              onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
+              errorLabel={ ERRORLABEL }
+            />
+            <Form.Input
+              disabled={DISABLE}
+              label='Dithering Maximum Pixel Move '
+              name='maxDitherFactor'
+              placeholder='Maximum number of pixels'
+              value={this.state.maxDitherFactor}
+              onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
+              errorLabel={ ERRORLABEL }
+            />
+          </Form>
+          </Segment>
+        </Segment.Group>
       </Accordion.Content>
       </div>
     )
@@ -1005,6 +1013,7 @@ class DefaultSettings extends Component {
       Imaging Camera
       </Accordion.Title>
       <Accordion.Content  active={activeIndex === eCamera} >
+      <Segment.Group>
       <Segment>
         <Form>
           <Form.Input
@@ -1029,7 +1038,8 @@ class DefaultSettings extends Component {
             onChange={this.handleChange}
           />
         </Form>
-        <br/>
+        </Segment>
+        <Segment tertiary>
         <Checkbox
           label='Use imaging cooler'
           name='defaultUseImagingCooler_enabled'
@@ -1038,6 +1048,8 @@ class DefaultSettings extends Component {
           onClick={this.handleToggleAndSave.bind(this)}
           style={{ labelColor: 'black'  }}
         />
+        </Segment>
+        <Segment>
         <Form>
           <Form.Input
             disabled={NOT_DISABLE_TEMP}
@@ -1054,6 +1066,7 @@ class DefaultSettings extends Component {
           />
         </Form>
         </Segment>
+        </Segment.Group>
       </Accordion.Content>
       </div>
     )
@@ -1073,60 +1086,58 @@ class DefaultSettings extends Component {
       Focuser
       </Accordion.Title>
       <Accordion.Content  active={activeIndex === eFocuser} >
-      <Segment>
-        <Form>
-          <Form.Input
-            label='Starting Focusing Exposure '
-            name='defaultFocusExposure'
-            placeholder='Enter seconds'
-            value={this.state.defaultFocusExposure}
-            onChange={this.handleChange}
-            validations={{
-              matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-            }}
-            validationError="Must be a positive number, e.g 1, .7, 1.1"
-            errorLabel={ ERRORLABEL }
-          />
-        <Form.Input
-          label='Focus Temp Tolerance '
-          name='defaultFocusTempDiff'
-          placeholder='Temp diff to run auto focus'
-          value={this.state.defaultFocusTempDiff}
-          onChange={this.handleChange}
-          validations={{
-            matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
-          }}
-          validationError="Must be a positive number, e.g 1, .7, 1.1"
-          errorLabel={ ERRORLABEL }
-        />
-        <Form.Input
-          label='@Focus3 samples '
-          name='focus3Samples'
-          placeholder='Number of samples to take'
-          value={this.state.focus3Samples}
-          onChange={this.handleChange}
-          validations={{
-            matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
-          }}
-          validationError="Must be a positive number, e.g 1, 2, 3, 5..."
-          errorLabel={ ERRORLABEL }
-        />
-        </Form>
-        <Form>
-          &nbsp;
-          <br/>
-          <center>
-          <Checkbox
-            style={{color: '#68c349'}}
-            label='CLS before focusing in case of clouds'
-            name='focusRequiresCLS'
-            toggle
-            checked={this.state.focusRequiresCLS}
-            onClick={this.handleToggleAndSave.bind(this)}
-          />
-          </center>
-        </Form>
-        </Segment>
+        <Segment.Group>
+          <Segment tertiary>
+            <Checkbox
+              style={{color: '#68c349'}}
+              label='CLS before focusing in case of clouds'
+              name='focusRequiresCLS'
+              toggle
+              checked={this.state.focusRequiresCLS}
+              onClick={this.handleToggleAndSave.bind(this)}
+            />
+          </Segment>
+          <Segment>
+            <Form>
+              <Form.Input
+                label='Starting Focusing Exposure '
+                name='defaultFocusExposure'
+                placeholder='Enter seconds'
+                value={this.state.defaultFocusExposure}
+                onChange={this.handleChange}
+                validations={{
+                  matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+                }}
+                validationError="Must be a positive number, e.g 1, .7, 1.1"
+                errorLabel={ ERRORLABEL }
+              />
+            <Form.Input
+              label='Focus Temp Tolerance '
+              name='defaultFocusTempDiff'
+              placeholder='Temp diff to run auto focus'
+              value={this.state.defaultFocusTempDiff}
+              onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, .7, 1.1"
+              errorLabel={ ERRORLABEL }
+            />
+            <Form.Input
+              label='@Focus3 samples '
+              name='focus3Samples'
+              placeholder='Number of samples to take'
+              value={this.state.focus3Samples}
+              onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, 2, 3, 5..."
+              errorLabel={ ERRORLABEL }
+            />
+            </Form>
+          </Segment>
+        </Segment.Group>
       </Accordion.Content>
     </div>
     )
@@ -1146,6 +1157,17 @@ class DefaultSettings extends Component {
       Clouds
       </Accordion.Title>
       <Accordion.Content  active={activeIndex === eClouds} >
+        <Segment.Group>
+        <Segment tertiary>
+          <Checkbox
+            style={{color: '#68c349'}}
+            label='CLS before focusing in case of clouds'
+            name='focusRequiresCLS'
+            toggle
+            checked={this.state.focusRequiresCLS}
+            onClick={this.handleToggleAndSave.bind(this)}
+          />
+        </Segment>
         <Segment>
           <Form>
             <Form.Input
@@ -1185,21 +1207,8 @@ class DefaultSettings extends Component {
               errorLabel={ ERRORLABEL }
             />
             </Form>
-            <Form>
-              &nbsp;
-              <br/>
-              <center>
-            <Checkbox
-              style={{color: '#68c349'}}
-              label='CLS before focusing in case of clouds'
-              name='focusRequiresCLS'
-              toggle
-              checked={this.state.focusRequiresCLS}
-              onClick={this.handleToggleAndSave.bind(this)}
-            />
-            </center>
-          </Form>
-      </Segment>
+          </Segment>
+      </Segment.Group>
       </Accordion.Content>
     </div>
     )
