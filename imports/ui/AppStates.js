@@ -64,11 +64,6 @@ import {
   getFlatExposure,
 } from '../api/filters.js';
 
-import {
-  calcTargetFilterExposureSessionTotal,
-  calcTargetFilterExposureRunningTotal,
-} from '../api/imagingSessionLogs.js'
-
 class AppStates extends Component {
 
   constructor() {

@@ -172,7 +172,7 @@ class SessionReport extends Component {
                   <Table.Cell content='Target' />
                   <Table.Cell content='Filter' />
                   <Table.Cell content='Exp.' />
-                  <Table.Cell content='No.' />
+                  <Table.Cell content='Qty.' />
                   <Table.Cell content='Total' />
                 </Table.Row>
               </Table.Header>

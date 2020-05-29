@@ -213,7 +213,7 @@ class CalibrationFrame extends Component {
               onChange={this.handleChange}
             />
         </Table.Cell>
-        <Table.Cell   >
+        <Table.Cell>
           <Dropdown
             button
             size='mini'

@@ -29,7 +29,6 @@ import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug,
 
 import {
   imageReportMaxPixel,
-  ImagingSessionLogs,
 } from '../imports/api/imagingSessionLogs.js';
 
 import {
