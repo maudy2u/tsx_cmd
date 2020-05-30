@@ -27,7 +27,14 @@ import { Logger }     from 'meteor/ostrio:logger';
 import { LoggerFile } from 'meteor/ostrio:loggerfile';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { TextArea, Form, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Radio
+import {
+  Input,
+  Icon,
+  Label,
+  Segment,
+  Button,
+  Progress,
+  Modal,
 } from 'semantic-ui-react'
 
 // Import the API Model

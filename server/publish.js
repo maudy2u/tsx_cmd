@@ -1,8 +1,13 @@
-// import { TargetSessions } from '../imports/api/targetSessions.js';
-// import { TargetReports } from '../imports/api/targetReports.js';
-// import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
+import { TargetSessions } from '../imports/api/targetSessions.js';
+import { TargetReports } from '../imports/api/targetReports.js';
+import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
 // import { Seriess } from '../imports/api/seriess.js';
-// import { Filters } from '../imports/api/filters.js';
+import { Filters } from '../imports/api/filters.js';
+import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
+import { AppLogsDB } from '../imports/api/theLoggers.js';
+import { CalibrationFrames } from '../imports/api/calibrationFrames.js';
+import { FlatSeries } from '../imports/api/flatSeries.js';
+
 // import {
 //   tsxInfo,
 //   tsxLog,
@@ -20,11 +25,69 @@
 //   UpdateStatusWarn,
 //   UpdateStatusErr,
 // } from '../imports/api/serverStates.js'
-import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
 
 Meteor.publish('tsxInfo.all', function () {
-  return TheSkyXInfos.find().cursor;
+  var db = TheSkyXInfos.find();
+  this.ready();
+  return db;
 });
+
+Meteor.publish('targetSessions.all', function () {
+  return TargetSessions.find();
+});
+
+Meteor.publish('appLogsDB.all', function () {
+  return AppLogsDB.find();
+});
+
+Meteor.publish('filters.all', function () {
+  return Filters.find();
+});
+
+Meteor.publish('calibrationFrames.all', function () {
+  return CalibrationFrames.find();
+});
+
+Meteor.publish('flatSeries.all', function () {
+  return FlatSeries.find();
+});
+
+Meteor.publish('targetReports.all', function () {
+  return TargetReports.find();
+});
+
+Meteor.publish('takeSeriesTemplates.all', function () {
+  return TakeSeriesTemplates.find();
+});
+
+/*
+scheduler_running: TheSkyXInfos.findOne({name: 'scheduler_running'}),
+
+tool_active: TheSkyXInfos.findOne({name: 'tool_active'}),
+tool_flats_dec_az: TheSkyXInfos.findOne({name: 'tool_flats_dec_az'}),
+tool_flats_location: TheSkyXInfos.findOne({name: 'tool_flats_location'}),
+tool_flats_via: TheSkyXInfos.findOne({name: 'tool_flats_via'}),
+currentStage: TheSkyXInfos.findOne({name: 'currentStage'}),
+tsx_version: TheSkyXInfos.findOne({name: 'tsx_version'}),
+tsx_date: TheSkyXInfos.findOne({name: 'tsx_date'}),
+tsxIP: TheSkyXInfos.findOne({name: 'ip'}),
+tsxPort: TheSkyXInfos.findOne({name: 'port'}),
+srvLog: AppLogsDB.find({}, {sort:{time:-1}}).fetch(10),
+activeMenu: TheSkyXInfos.findOne({name: 'activeMenu'}),
+tsx_progress: TheSkyXInfos.findOne({name: 'tsx_progress'}),
+tsx_total:  TheSkyXInfos.findOne({name: 'tsx_total'}),
+scheduler_report: TheSkyXInfos.findOne({name: 'scheduler_report'}),
+filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
+calibrations: CalibrationFrames.find({}).fetch(),
+flatSeries: FlatSeries.find({}).fetch(),
+takeSeriesTemplates: TakeSeriesTemplates.find({ isCalibrationFrames: false }, { sort: { name: 1 } }).fetch(),
+targetSessions: TargetSessions.find({ isCalibrationFrames: false }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
+target_reports: TargetReports.find({}).fetch(),
+
+enabledTargetSessions: TargetSessions.find({ enabledActive: true }, { sort: { priority: 1, numericOrdering: true } }).fetch(),
+night_plan: TheSkyXInfos.findOne({name: 'night_plan'}),
+night_plan_reset: TheSkyXInfos.findOne({name: 'night_plan_reset'}),
+*/
 
 //
 // /*

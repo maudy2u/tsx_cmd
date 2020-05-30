@@ -105,8 +105,7 @@ function currentPA() {
 	ImageLink.scale = AILSSCALE; // SEEMS THIS MAY BE IGNORED
 	ImageLink.pathToFITS = CCDSC.LastImageFileName;
 	ImageLink.execute();
-	var p1=ImageLinkResults.imagePositionAngle;//sky position
-	return p1*1;
+	return Number( ImageLinkResults.imagePositionAngle );//sky position
 }
 
 

@@ -55,6 +55,7 @@ import { TakeSeriesTemplates} from '../api/takeSeriesTemplates.js';
 import { TargetSessions } from '../api/targetSessions.js';
 import { TargetReports } from '../api/targetReports.js';
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
+import { AppLogsDB } from '../api/theLoggers.js'
 
 // Import the UI
 import Target  from './Target.js';
@@ -533,7 +534,7 @@ class Monitor extends Component {
       TOTAL = 0;
     }
 
-    var LOG = [];
+    var LOG = '';
     var num = 0;
     try {
       num = this.props.srvLog.length;
@@ -654,8 +655,20 @@ class Monitor extends Component {
   }
 }
 export default withTracker(() => {
+  const appLogsDBHandle = Meteor.subscribe('appLogsDB.all');
+  var appLogsDBReadyYet = appLogsDBHandle.ready();
+  var srvLog = AppLogsDB.find({}, {sort:{time:-1}}).fetch(10);
+
+//  var srvLog = [];
+  // var num = srvLog.length;
+  // for (var i = num-1; i > -1; i--) { // this puts most resent line on top
+  //     var log = appLogsDB[i];
+  //     LOG = LOG + '[' + log.level +']' + log.message + '\n';
+  // }
 
   return {
+    appLogsDBReadyYet,
+    srvLog,
     reports: TargetReports.find().fetch(),
     // tsxInfo: TheSkyXInfos.find({}).fetch(),
     takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),

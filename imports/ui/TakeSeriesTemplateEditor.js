@@ -146,6 +146,12 @@ class TakeSeriesTemplateEditor extends Component {
           // console.log(b.id);
           var aO = Seriess.findOne({_id: a.id});
           var bO = Seriess.findOne({_id: b.id});
+
+          // this failed when DB was restored.
+          if( typeof a0 === 'undefined'
+            || typeof b0 === 'undefined') {
+              return 0;
+            }
           return aO.order- bO.order;
         }
       ).map((definedSeries)=>{

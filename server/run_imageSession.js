@@ -33,7 +33,6 @@ import {
 } from '../imports/api/targetSessions.js';
 
 import {
-  ImagingSessionLogs,
   addImageReport,
   updateImageReport,
 } from '../imports/api/imagingSessionLogs.js';
@@ -2519,7 +2518,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
           if( friendly === '' ) {
             friedly = tName;
           }
-          res_iid = addImageReport( friendly );
+          res_iid = addImageReport( target );
           for( var i=1; i<results.length;i++) {
             var token=results[i].trim();
             // RunJavaScriptOutput.writeLine(token);

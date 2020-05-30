@@ -225,6 +225,8 @@ class AppStates extends Component {
     var STATUS = 'Ready?';
     var DISABLE = true;
     var NOT_DISABLE = false;
+    var PROGRESS = 0;
+    var TOTAL = 0;
     try {
       RUNNING = this.props.scheduler_running.value;
       ACTIVE = this.props.tool_active.value;

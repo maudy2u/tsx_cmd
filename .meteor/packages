@@ -21,7 +21,7 @@
 # 'meteor add' and 'meteor remove' will edit this file for you,
 # but you can also edit it by hand.
 
-autopublish             # Publish all data to the clients (for prototyping)
+#autopublish             # Publish all data to the clients (for prototyping)
 
 meteor-base             # Packages every Meteor app needs to have
 mobile-experience       # Packages for a great mobile UX

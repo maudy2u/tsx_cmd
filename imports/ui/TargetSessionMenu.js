@@ -107,6 +107,7 @@ class TargetSessionMenu extends Component {
           desc = objs[i].description;
         }
         source.push({
+          key: objs[i]._id,
           id: objs[i]._id,
           title: title,
           description: desc,

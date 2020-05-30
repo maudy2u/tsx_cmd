@@ -32,7 +32,7 @@ export const ImagingSessionLogs = new Mongo.Collection('imagingSessionLogs');
 /*
 ImagingSessionLogs = {
  */
- export function addImageReport( targetFindName ) {
+ export function addImageReport( target ) {
    const id  = ImagingSessionLogs.insert(
      {
        ALT: 0,
@@ -49,7 +49,9 @@ ImagingSessionLogs = {
        ROTATOR_POS_ANGLE: '',
        RMS_ERROR: 0,
        FOCUS_POS: '',
-       target: targetFindName,
+       tid: target._id,
+       targetFriendlyName: target.getFriendlyName(),
+       target: target.targetFindName,
        sessionDate: sessionDate( new Date() ),
        created: new Date(),
        updatedAt: new Date(),
@@ -88,7 +90,7 @@ ImagingSessionLogs = {
    if( typeof obj == 'undefined' ) {
      return NULL;
    }
-   if( typeof obj != 'undefined') {
+   if( typeof obj !== 'undefined') {
      if( name == 'ALT') {
        obj.ALT = value;
      }

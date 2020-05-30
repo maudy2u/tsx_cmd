@@ -65,15 +65,21 @@ class TakeSeries extends Component {
   deleteEntry() {
     // check if the series is used - if so cannot delete... list the Targets using it
     var sessions  = this.props.targetSessions;
-    var targets = [];
+    var foundTargets = [];
+    var sid = this.props.seriesTemplate._id;
     for (var i = 0; i < sessions.length; i++) {
-      if( sessions[i].series._id == this.props.seriesTemplate._id) {
-        targets.push(sessions[i]);
+      var ses = sessions[i];
+      if( ses.series._id === sid ) {
+        foundTargets.push(sessions[i]);
       }
     }
-    if( targets.length>0 ) {
-      this.setState({ targetsPreventingDelete: targets });
-      this.deleteFailedOpen();
+    if( foundTargets.length>0 ) {
+      var msg = 'Cannot delete. Used by: ';
+      for( var  i=0; i<foundTargets.length; i++ ) {
+        var t = foundTargets[i];
+        msg = msg + '\n' + t.targetFindName;
+      }
+      alert(  msg );
     }
     else {
       for( var i=0; i<this.props.seriesTemplate.series.length; i++ ) {

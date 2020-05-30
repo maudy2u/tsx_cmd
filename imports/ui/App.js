@@ -29,7 +29,17 @@ import { LoggerFile } from 'meteor/ostrio:loggerfile';
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 
-import { Header, TextArea, Dimmer, Loader, Grid, Form, Input, Icon, Dropdown, Label, Table, Menu, Segment, Button, Progress, Modal, Radio } from 'semantic-ui-react'
+import {
+  Header,
+  Loader,
+  Dimmer,
+  Icon,
+  Label,
+  Menu,
+  Segment,
+  Progress,
+  Modal,
+} from 'semantic-ui-react'
 
 // Import the API Model
 import {
@@ -195,7 +205,7 @@ class App extends TrackerReact(Component) {
     tsx_UpdateServerState(param, value);
   }
 
-  renderMenu( MENU, RUNNING ) {
+  renderMenu() {
     const { activeMenu  } = this.state;
     return(
       <div>
@@ -225,14 +235,14 @@ class App extends TrackerReact(Component) {
             <Icon name='cloud' size='large'/>
           </Menu.Item>
         </Menu>
-        {this.renderMenuSegments( MENU )}
+        {this.renderMenuSegments()}
       </div>
     )
   }
 
   // *******************************
   //
-  renderMenuSegments( MENU ){
+  renderMenuSegments(){
     var RUNNING = '';
     try {
       RUNNING = this.props.scheduler_running.value;
@@ -246,6 +256,7 @@ class App extends TrackerReact(Component) {
     }
 
     if (this.state.activeMenu == 'Monitor' ) {
+//      srvLog={this.props.srvLog}
       return (
         <Monitor
           tsx_progress={this.props.tsx_progress}
@@ -254,7 +265,6 @@ class App extends TrackerReact(Component) {
           targetName={this.props.targetName}
           tsxInfo={this.props.tsxInfo}
           scheduler_running={this.props.scheduler_running}
-          srvLog={this.props.srvLog}
           tool_active = {this.props.tool_active}
         />
       )
@@ -407,47 +417,21 @@ class App extends TrackerReact(Component) {
     )
   }
 */
+
+
+/* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
+*/
   render() {
     if (
-      this.props.tsxInfo
-      && this.props.targetName
+     this.props.infoReadyYet
+//      &&
+      // this.props.activeMenu
+      // && typeof this.props.tsx_progress !== 'undefined'
+      // && this.props.activeMenu
+      // && typeof this.props.scheduler_running !== 'undefined'
+      // && typeof this.props.tsx_total !== 'undefined'
+      // && typeof this.props.currentStage !== 'undefined'
      ) {
-      /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
-      */
-      var MENU = 'Targets';
-      var RUNNING = '';
-      var ACTIVE = false;
-      var PROGRESS = 0;
-      var PROGRESS_TOTAL = 60;
-      var STAGE = 'Setting up';
-
-     try {
-        MENU = this.props.activeMenu.value;
-        RUNNING = this.props.scheduler_running.value;
-        ACTIVE = this.props.tool_active.value;
-        PROGRESS =  this.props.tsx_progress.value;
-        PROGRESS_TOTAL = this.props.tsx_total.value;
-        STAGE = this.props.currentStage.value;
-
-      } catch (e) {
-        MENU = 'Targets';
-        RUNNING = '';
-        ACTIVE = false;
-        PROGRESS = 0;
-        PROGRESS_TOTAL = 60;
-        STAGE = 'Setting up';
-      }
-      var LOG = [];
-      var num = 0;
-      try {
-        num = this.props.srvLog.length;
-      }
-      finally {
-        for (var i = num-1; i > -1; i--) { // this puts most resent line on top
-            var log = this.props.srvLog[i];
-            LOG = LOG + '[' + log.level +']' + log.message + '\n';
-        }
-      }
 
       return (
         <div className="container">
@@ -465,7 +449,7 @@ class App extends TrackerReact(Component) {
                 />
               </Segment>
               <Segment>
-                { this.renderMenu( MENU, RUNNING ) }
+                { this.renderMenu() }
               </Segment>
             {/* *******************************
 
@@ -485,8 +469,10 @@ class App extends TrackerReact(Component) {
     }
     else {
       return(
-        <Label>Loading...</Label>
-      )
+        <Dimmer active>
+           <Loader />
+         </Dimmer>
+       )
     }
   }
 }
@@ -494,69 +480,115 @@ class App extends TrackerReact(Component) {
 // THIS IS THE DEFAULT EXPORT AND IS WHERE THE LOADING OF THE COMPONENT STARTS
 export default withTracker(() => {
   const infoHandle = Meteor.subscribe('tsxInfo.all');
-  var infoReadyYet = infoHandle.ready();
-  var tsxInfo = TheSkyXInfos.find({}).fetch();
+  const tsxInfo = TheSkyXInfos.find({}).fetch();
+
+  // const activeMenu = tsxInfo.find(function(element) {
+  //   return element.name == 'activeMenu';
+  // });
+  const activeMenu = TheSkyXInfos.findOne({name: 'activeMenu'});
+  const tsx_progress = TheSkyXInfos.findOne({name: 'tsx_progress'});
+  const tsx_total =  TheSkyXInfos.findOne({name: 'tsx_total'});
+  const currentStage = TheSkyXInfos.findOne({name: 'currentStage'});
+
   var targetName = TheSkyXInfos.findOne({name: 'targetName'});
   var flatbox_enabled = TheSkyXInfos.findOne({name: 'flatbox_enabled'});
+  var scheduler_running= TheSkyXInfos.findOne({name: 'scheduler_running'});
+  var tool_active= TheSkyXInfos.findOne({name: 'tool_active'});
+  var tool_flats_dec_az= TheSkyXInfos.findOne({name: 'tool_flats_dec_az'});
+  var tool_flats_location = TheSkyXInfos.findOne({name: 'tool_flats_location'});
+  var tool_flats_via = TheSkyXInfos.findOne({name: 'tool_flats_via'});
+  var tsx_version = TheSkyXInfos.findOne({name: 'tsx_version'});
+  var tsx_date = TheSkyXInfos.findOne({name: 'tsx_date'});
+  var tsxIP = TheSkyXInfos.findOne({name: 'ip'});
+  var tsxPort = TheSkyXInfos.findOne({name: 'port'});
+  var scheduler_report = TheSkyXInfos.findOne({name: 'scheduler_report'});
+  var night_plan = TheSkyXInfos.findOne({name: 'night_plan'});
+  var night_plan_reset = TheSkyXInfos.findOne({name: 'night_plan_reset'});
+
+  const targetSessionsHandle = Meteor.subscribe('targetSessions.all');
+  const targetSessionsReadyYet = targetSessionsHandle.ready();
+
+  const filtersHandle = Meteor.subscribe('filters.all');
+  const filtersReadyYet = filtersHandle.ready();
+
+  const calibrationFramesHandle = Meteor.subscribe('calibrationFrames.all');
+  const calibrationFramesReadyYet = calibrationFramesHandle.ready();
+
+  const flatSeriesHandle = Meteor.subscribe('flatSeries.all');
+  const flatSeriesReadyYet = flatSeriesHandle.ready();
+
+  const targetReportsHandle = Meteor.subscribe('targetReports.all');
+  const targetReportsReadyYet = targetReportsHandle.ready();
+
+  const takeSeriesTemplatesHandle = Meteor.subscribe('takeSeriesTemplates.all');
+  const takeSeriesTemplatesReadyYet = takeSeriesTemplatesHandle.ready();
+
+  const infoReadyYet = infoHandle.ready();
 
   return {
     infoReadyYet,
+    targetSessionsReadyYet,
+    filtersReadyYet,
+    calibrationFramesReadyYet,
+    flatSeriesReadyYet,
+    targetReportsReadyYet,
+    takeSeriesTemplatesReadyYet,
+
     tsxInfo,
     targetName,
     flatbox_enabled,
-    scheduler_running: TheSkyXInfos.findOne({name: 'scheduler_running'}),
+    scheduler_running,
+    tool_active,
+    tool_flats_dec_az,
+    tool_flats_location,
+    tool_flats_via,
+    currentStage,
+    tsx_version,
+    tsx_date,
+    tsxIP,
+    tsxPort,
+    activeMenu,
+    tsx_progress,
+    tsx_total,
+    scheduler_report,
+    night_plan,
+    night_plan_reset,
 
-    tool_calibrate_via: TheSkyXInfos.findOne({name: 'tool_calibrate_via'}),
-    tool_calibrate_location: TheSkyXInfos.findOne({name: 'tool_calibrate_location'}),
-    tool_rotator_num: TheSkyXInfos.findOne({name: 'tool_rotator_num'}),
-    tool_rotator_type: TheSkyXInfos.findOne({name: 'tool_rotator_type'}),
-    tool_active: TheSkyXInfos.findOne({name: 'tool_active'}),
-    tool_flats_dec_az: TheSkyXInfos.findOne({name: 'tool_flats_dec_az'}),
-    tool_flats_location: TheSkyXInfos.findOne({name: 'tool_flats_location'}),
-    tool_flats_via: TheSkyXInfos.findOne({name: 'tool_flats_via'}),
-
-    // SESSION Controls
-    defaultMeridianFlip: TheSkyXInfos.findOne({name: 'defaultMeridianFlip'}),
-    defaultCLSEnabled: TheSkyXInfos.findOne({name: 'defaultCLSEnabled'}),
-    defaultSoftPark: TheSkyXInfos.findOne({name: 'defaultSoftPark'}),
-
-    isFOVAngleEnabled: TheSkyXInfos.findOne({name: 'isFOVAngleEnabled'}),
-    isFocus3Enabled: TheSkyXInfos.findOne({name: 'isFocus3Enabled'}),
-    isFocus3Binned: TheSkyXInfos.findOne({name: 'isFocus3Binned'}),
-
-    isAutoguidingEnabled: TheSkyXInfos.findOne({name: 'isAutoguidingEnabled'}),
-    isCalibrationEnabled: TheSkyXInfos.findOne({name: 'isCalibrationEnabled'}),
-    isGuideSettlingEnabled: TheSkyXInfos.findOne({name: 'isGuideSettlingEnabled'}),
-
-    isCLSRepeatEnabled: TheSkyXInfos.findOne({name: 'isCLSRepeatEnabled'}),
-    isTwilightEnabled: TheSkyXInfos.findOne({name: 'isTwilightEnabled'}),
-
-    // App stuf
-    currentStage: TheSkyXInfos.findOne({name: 'currentStage'}),
-    tsx_version: TheSkyXInfos.findOne({name: 'tsx_version'}),
-    tsx_date: TheSkyXInfos.findOne({name: 'tsx_date'}),
-    tsxIP: TheSkyXInfos.findOne({name: 'ip'}),
-    tsxPort: TheSkyXInfos.findOne({name: 'port'}),
-    srvLog: AppLogsDB.find({}, {sort:{time:-1}}).fetch(10),
-    activeMenu: TheSkyXInfos.findOne({name: 'activeMenu'}),
-
-    flatSettings: TheSkyXInfos.findOne({name: 'flatSettings'}),
-    tsx_progress: TheSkyXInfos.findOne({name: 'tsx_progress'}),
-    tsx_total:  TheSkyXInfos.findOne({name: 'tsx_total'}),
-    tsx_message: TheSkyXInfos.findOne({name: 'tsx_message'}),
-    scheduler_report: TheSkyXInfos.findOne({name: 'scheduler_report'}),
+    targetSessions: TargetSessions.find({ isCalibrationFrames: false }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
+    enabledTargetSessions: TargetSessions.find({ enabledActive: true }, { sort: { priority: 1, numericOrdering: true } }).fetch(),
     filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
-//    calibrations: CalibrationFrames.find({}, { sort: { order: 1 } }).fetch(),
     calibrations: CalibrationFrames.find({}).fetch(),
     flatSeries: FlatSeries.find({}).fetch(),
-    takeSeriesTemplates: TakeSeriesTemplates.find({ isCalibrationFrames: false }, { sort: { name: 1 } }).fetch(),
-    targetSessions: TargetSessions.find({ isCalibrationFrames: false }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
-    // targetSessions: TargetSessions.find({ }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
     target_reports: TargetReports.find({}).fetch(),
+    takeSeriesTemplates: TakeSeriesTemplates.find({ isCalibrationFrames: false }, { sort: { name: 1 } }).fetch(),
 
-    enabledTargetSessions: TargetSessions.find({ enabledActive: true }, { sort: { priority: 1, numericOrdering: true } }).fetch(),
-//    enabledTargetSessions: TargetSessions.find({ enabledActive: true }), { sort: { priority: 1, numericOrdering: true }).fetch(),
-    night_plan: TheSkyXInfos.findOne({name: 'night_plan'}),
-    night_plan_reset: TheSkyXInfos.findOne({name: 'night_plan_reset'}),
+    // SESSION Controls
+    //    tool_calibrate_via: TheSkyXInfos.findOne({name: 'tool_calibrate_via'}),
+    //    tool_calibrate_location: TheSkyXInfos.findOne({name: 'tool_calibrate_location'}),
+    //    tool_rotator_num: TheSkyXInfos.findOne({name: 'tool_rotator_num'}),
+    //    tool_rotator_type: TheSkyXInfos.findOne({name: 'tool_rotator_type'}),
+
+//    defaultMeridianFlip: TheSkyXInfos.findOne({name: 'defaultMeridianFlip'}),
+//    defaultCLSEnabled: TheSkyXInfos.findOne({name: 'defaultCLSEnabled'}),
+//    defaultSoftPark: TheSkyXInfos.findOne({name: 'defaultSoftPark'}),
+
+//    isFOVAngleEnabled: TheSkyXInfos.findOne({name: 'isFOVAngleEnabled'}),
+//    isFocus3Enabled: TheSkyXInfos.findOne({name: 'isFocus3Enabled'}),
+//    isFocus3Binned: TheSkyXInfos.findOne({name: 'isFocus3Binned'}),
+
+//    isAutoguidingEnabled: TheSkyXInfos.findOne({name: 'isAutoguidingEnabled'}),
+//    isCalibrationEnabled: TheSkyXInfos.findOne({name: 'isCalibrationEnabled'}),
+//    isGuideSettlingEnabled: TheSkyXInfos.findOne({name: 'isGuideSettlingEnabled'}),
+
+//    isCLSRepeatEnabled: TheSkyXInfos.findOne({name: 'isCLSRepeatEnabled'}),
+//    isTwilightEnabled: TheSkyXInfos.findOne({name: 'isTwilightEnabled'}),
+
+    // App stuf
+
+//    flatSettings: TheSkyXInfos.findOne({name: 'flatSettings'}),
+//    tsx_message: TheSkyXInfos.findOne({name: 'tsx_message'}),
+//    calibrations: CalibrationFrames.find({}, { sort: { order: 1 } }).fetch(),
+    // targetSessions: TargetSessions.find({ }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
+    //    enabledTargetSessions: TargetSessions.find({ enabledActive: true }), { sort: { priority: 1, numericOrdering: true }).fetch(),
   };
 })(App);

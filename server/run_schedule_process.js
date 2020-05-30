@@ -120,7 +120,7 @@ import {
 
        tsx_SetServerState(tsx_ServerStates.runScheduler, job);
 
-       UpdateStatus(' SCHEDULER STARTED');
+       UpdateStatus(' [SCHEDULER] STARTED');
        var schedule = job.data;
        tsxDebug( schedule );
        tsxDebug( job.data );
@@ -141,7 +141,7 @@ import {
          // *******************************
          // the job is used to run the scheduler.
          while( isSchedulerStopped() == false ) {
-           tsxInfo(" === Starting imaging targets");
+           tsxInfo(" [SCHEDULER]=== Starting imaging targets");
 
            tsx_MntUnpark();
            isParked = false;
@@ -175,7 +175,7 @@ import {
            // remove dark/bias/flat from targets...
 
            if (typeof target !== 'undefined' && isSchedulerStopped() == false ) {
-             tsxInfo ( ' ' + target.targetFindName + ' Preparing target...');
+             tsxInfo ( ' [SCHEDULER]' + target.targetFindName + ' Preparing target...');
 
              // Point, Focus, Guide
              var ready = false;
@@ -195,25 +195,25 @@ import {
                try {
                  res = err.split('|')[0].trim();
                  if( res == 'TSX_ERROR' ) {
-                   UpdateStatusErr( ' PAUSING SCHEDULER - Could not prepare target (CLS failed). Checking for clouds.' );
+                   UpdateStatusErr( ' [SCHEDULER]PAUSING SCHEDULER - Could not prepare target (CLS failed). Checking for clouds.' );
                    ParkMount( isParked );
                    isParked = true;
                  }
                  else {
-                   UpdateStatusErr( ' !!! SOMETHING WRONG - human needs to check ');
+                   UpdateStatusErr( ' [SCHEDULER]!!! SOMETHING WRONG - human needs to check ');
                    break;
                  }
                }
                catch( e ) {
                  // split may fail
-                 UpdateStatusErr( ' !!! SOMETHING WRONG - human needs to check: ' + err );
+                 UpdateStatusErr( ' [SCHEDULER]!!! SOMETHING WRONG - human needs to check: ' + err );
                  break;
                }
              }
              if( ready ) {
                // target images per Take Series
-               tsxInfo ( ' ************************1*');
-               tsxInfo ( ' ' +target.targetFindName  + ': start imaging');
+               tsxInfo ( ' [SCHEDULER]************************1*');
+               tsxInfo ( ' [SCHEDULER]' +target.targetFindName  + ': start imaging');
                try {
                  processTargetTakeSeries( target );
                  if( isSchedulerStopped() == true ) {
@@ -222,23 +222,23 @@ import {
                }
                catch( err ) {
                  // did we get a CLS Failure???
-                 tsxErr( ' !!! Error processing series: ' + err );
+                 tsxErr( ' [SCHEDULER]!!! Error processing series: ' + err );
                  var res = err.split('|')[0].trim();
                  if( res == 'TSX_ERROR' ) {
-                   UpdateStatusErr( ' PAUSING SCHEDULER - CLS failed - checking for clouds.' );
+                   UpdateStatusErr( ' [SCHEDULER] PAUSING SCHEDULER - CLS failed - checking for clouds.' );
                    ParkMount( isParked );
                    isParked = true;
                  }
                  else {
-                   UpdateStatus( ' !!! SOMETHING WRONG - human needs to check ');
+                   UpdateStatus( ' [SCHEDULER]!!! SOMETHING WRONG - human needs to check ');
                    break;
                  }
                }
-               tsxInfo ( ' ************************2*');
+               tsxInfo ( ' [SCHEDULER]************************2*');
              }
              // No target found so sleep and try again...
              else {
-               UpdateStatus( ' NO TARGETS READY. Will SLEEP and try in a bit.');
+               UpdateStatus( ' [SCHEDULER] NO TARGETS READY. Will SLEEP and try in a bit.');
                ParkMount( isParked );
                isParked = true;
                sleepScheduler( isParked );
@@ -246,7 +246,7 @@ import {
            }
            // Scheduler stopped so park
            else {
-             UpdateStatus( ' NO VALID TARGETS. Will sleep and try in a bit.');
+             UpdateStatus( ' [SCHEDULER] NO VALID TARGETS. Will sleep and try in a bit.');
              ParkMount( isParked );
              isParked = true;
              // no target found... so sleep and check again...
@@ -256,11 +256,11 @@ import {
 
            // Check if sun is up and no cal frames
            if( (!isDarkEnough()) && isSchedulerStopped() == false ) {
-             tsxLog( ' NOT DARK ENOUGH, or schedule is stopped');
+             tsxLog( ' [SCHEDULER] NOT DARK ENOUGH, or schedule is stopped');
              ParkMount( isParked );
              isParked = true;
              var approachingDawn = isTimeBeforeCurrentTime('3:00');
-             tsxInfo( ' Is approachingDawn: ' + approachingDawn);
+             tsxInfo( ' [SCHEDULER] Is approachingDawn: ' + approachingDawn);
              // var stillDaytime = isTimeBeforeCurrentTime('15:00');
              // tsxInfo( ' Is stillDaytime: ' + stillDaytime);
              if( approachingDawn ) {
@@ -269,7 +269,7 @@ import {
                tsx_AbortGuider();
                tsx_MntPark(defaultFilter, softPark);
                var defaultMinSunAlt = tsx_GetServerStateValue( tsx_ServerStates.defaultMinSunAlt );
-               UpdateStatus( ' Scheduler stopped: sun rose above limit ' + defaultMinSunAlt);
+               UpdateStatus( ' [SCHEDULER] STOPPED: sun rose above limit ' + defaultMinSunAlt);
                break;
              }
            }
@@ -277,7 +277,7 @@ import {
        }
        // While ended... exit process
        srvStopScheduler();
-       tsxLog( ' SCHEDULER STOPPED');
+       tsxLog( ' [SCHEDULER] STOPPED');
        tsxLog( ' ###############################  ');
        job.done();
        cb();
@@ -288,15 +288,15 @@ import {
 
 function sleepScheduler( isParked ) {
   var sleepTime = tsx_GetServerStateValue( tsx_ServerStates.defaultSleepTime );
-  tsxDebug( ' SLEEPING.')
+  tsxDebug( ' [SCHEDULER] SLEEPING.')
   if( isParked == false ) {
     ParkMount( isParked );
   }
-  UpdateStatus( ' Parked mount, waiting: '+ sleepTime + ' min');
+  UpdateStatus( ' [SCHEDULER] waiting: '+ sleepTime + ' min');
   var timeout = 0;
   var msSleep = Number(sleepTime); // number of seconds
   postProgressTotal(sleepTime);
-  postProgressMessage('Waiting ~' + sleepTime + 'min.');
+  postProgressMessage(' [SCHEDULER] Waiting ~' + sleepTime + 'min.');
 
   while( timeout < msSleep && isSchedulerStopped() == false ) { //
     var min = 1000*60; // one minute in milliseconds
@@ -305,14 +305,14 @@ function sleepScheduler( isParked ) {
     postProgressIncrement( timeout );
   }
   if( isSchedulerStopped() != false ) {
-    UpdateStatus( ' CANCELING SCHEDULER');
+    UpdateStatus( ' [SCHEDULER] CANCELING SCHEDULER');
   }
   else {
-    UpdateStatus(' WAKING UP...');
+    UpdateStatus(' [SCHEDULER] WAKING UP...');
   }
   postProgressTotal(0);
   postProgressIncrement( 0 );
-  postProgressMessage(' Processing');
+  postProgressMessage(' [SCHEDULER] Processing');
 }
 
 function isDarkEnough() {

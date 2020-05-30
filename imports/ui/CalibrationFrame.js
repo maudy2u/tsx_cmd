@@ -220,7 +220,7 @@ class CalibrationFrame extends Component {
             name='binning'
             options={renderDropDownImagingBinnings()}
             placeholder='Bin'
-            text={this.props.calibration.binning}
+            text={String(this.props.calibration.binning)}
             onChange={this.handleChange}
           />
         </Table.Cell>

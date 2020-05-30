@@ -50,7 +50,7 @@ export function addCalibrationFrame() {
       level: 0,
       rotation: "",
       order: 0,
-      binning: '',
+      binning: '1x1',
       ccdTemp: '',
       on_enabled: true,
     },

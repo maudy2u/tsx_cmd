@@ -216,7 +216,8 @@ class SessionControls extends Component {
             onChange={this.handleToggleAndSave.bind(this)}
           />
           </Form>
-
+          &nbsp;<br/>
+          &nbsp;<br/>
         </Segment>
       </Segment.Group>
     );
