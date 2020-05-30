@@ -21,23 +21,25 @@ import React, { Component } from 'react';
 // import {mount} from 'react-mounter';
 import { withTracker } from 'meteor/react-meteor-data';
 import {
-  Checkbox,
-  Confirm,
-  Input,
-  Icon,
-  Grid,
+  // Checkbox,
+  // Confirm,
+  // Input,
+  // Icon,
+  // Grid,
   Dropdown,
-  Label,
+  // Label,
   Table,
-  Menu,
-  Segment,
-  Button,
-  Progress,
-  Modal,
-  Form,
-  Radio,
+  // Menu,
+  // Segment,
+  // Button,
+  // Progress,
+  // Modal,
+  // Form,
+  // Radio,
   Accordion,
-  Divider,
+  Loader,
+  Dimmer,
+
 } from 'semantic-ui-react'
 
 import {
@@ -48,6 +50,7 @@ import {
 } from  '../api/serverStates.js';
 
 import { TheSkyXInfos } from '../api/theSkyXInfos.js';
+import { ImagingSessionLogs } from '../api/imagingSessionLogs.js';
 
 import {
   Filters,
@@ -131,63 +134,76 @@ class SessionReport extends Component {
 
   render() {
 
-    const { activeIndex } = this.state;
-    var sessionDates = getSessionDates();
+    if( this.props.reportsReadyYet ) {
 
-    var dropDownSessionDates = [];
-    for( var sd=0; sd<sessionDates.length; sd ++ ) {
-      dropDownSessionDates.push(
-        { key: sessionDates[sd], text: sessionDates[sd], value: sessionDates[sd]}
-      );
-    }
-    var reportData = createImagingReportSessionDateTemplate( this.state.sessionDate );
+      const { activeIndex } = this.state;
+      var sessionDates = getSessionDates();
 
+      var dropDownSessionDates = [];
+      for( var sd=0; sd<sessionDates.length; sd ++ ) {
+        dropDownSessionDates.push(
+          { key: sessionDates[sd], text: sessionDates[sd], value: sessionDates[sd]}
+        );
+      }
+      var reportData = createImagingReportSessionDateTemplate( this.state.sessionDate );
 
-    return (
-      <div>
-      <Accordion size='mini' styled>
-          <Accordion.Title
-            active={activeIndex === 0}
-            content='Session Report'
-            index={0}
-            onClick={this.handleClick}
-            />
-            <Dropdown
-              button
-              search
-              wrapSelection
-              scrolling
-              label='Session Dates'
-              name='sessionDate'
-              options={dropDownSessionDates}
-              placeholder='Pick a date'
-              text={this.state.sessionDate}
-              onChange={this.handleChange}
-            />
-
-          <Accordion.Content active={activeIndex === 0} >
-            <Table celled compact basic unstackable>
-              <Table.Header style={{background: 'black'}}>
-                <Table.Row>
-                  <Table.Cell content='Target' />
-                  <Table.Cell content='Filter' />
-                  <Table.Cell content='Exp.' />
-                  <Table.Cell content='Qty.' />
-                  <Table.Cell content='Total' />
-                </Table.Row>
-              </Table.Header>
-              <TargetLog
-                reportData={reportData}
-                sessionDate={this.state.sessionDate}
+      return (
+        <div>
+        <Accordion size='mini' styled>
+            <Accordion.Title
+              active={activeIndex === 0}
+              content='Session Report'
+              index={0}
+              onClick={this.handleClick}
               />
-            </Table>
-          </Accordion.Content>
-      </Accordion>
-      </div>
-    )
+            <Accordion.Content active={activeIndex === 0} >
+              <Dropdown
+                button
+                search
+                wrapSelection
+                scrolling
+                label='Session Dates'
+                name='sessionDate'
+                options={dropDownSessionDates}
+                placeholder='Pick a date'
+                text={this.state.sessionDate}
+                onChange={this.handleChange}
+              />
+              <Table celled compact basic unstackable>
+                <Table.Header style={{background: 'black'}}>
+                  <Table.Row>
+                    <Table.Cell content='Target' />
+                    <Table.Cell content='Filter' />
+                    <Table.Cell content='Exp.' />
+                    <Table.Cell content='Qty.' />
+                    <Table.Cell content='Total' />
+                  </Table.Row>
+                </Table.Header>
+                <TargetLog
+                  reportData={reportData}
+                  sessionDate={this.state.sessionDate}
+                />
+              </Table>
+            </Accordion.Content>
+        </Accordion>
+        </div>
+      )
+    }
+    else {
+      return(
+        <Dimmer active>
+           <Loader />
+         </Dimmer>
+       )
+    }
   }
 }
 export default withTracker(() => {
+  const reportHandle = Meteor.subscribe('imagingSessionLogs.all');
+  var reportsReadyYet = reportHandle.ready();
+
   return {
+    reportsReadyYet,
+    session_reports: ImagingSessionLogs.find({}).fetch(),
   };
 })(SessionReport);

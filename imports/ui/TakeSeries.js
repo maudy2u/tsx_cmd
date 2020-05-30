@@ -20,15 +20,16 @@ import React, { Component } from 'react'
 import { withTracker } from 'meteor/react-meteor-data';
 import {
   Button,
-  Modal,
+  // Modal,
   Segment,
-  Item,
+  // Item,
   Header,
-  Icon,
-  Table,
+  // Icon,
+  // Table,
   Accordion,
   Label,
-
+  Dimmer,
+  Loader,
 } from 'semantic-ui-react'
 
 import {
@@ -114,55 +115,69 @@ class TakeSeries extends Component {
   }
 
   render() {
-    let DESCRIPTION = '';
-    if( this.props.seriesTemplate.description != '') {
-      DESCRIPTION = this.props.seriesTemplate.description;
+    if( this.props.seriessReadyYet ) {
+
+      let DESCRIPTION = '';
+      if( this.props.seriesTemplate.description != '') {
+        DESCRIPTION = this.props.seriesTemplate.description;
+      }
+      let ENABLEACTIVE ='';
+      let TOOL_ACTIVE = false;
+      try {
+        ENABLEACTIVE = this.props.target.enabledActive;
+        TOOL_ACTIVE = this.props.tool_active.value;
+      } catch (e) {
+        ENABLEACTIVE = this.state.enabledActive;
+        TOOL_ACTIVE = false;
+      }
+
+      const { activeIndex } = this.state
+
+      return (
+        <Accordion styled fluid>
+          <Accordion.Title
+            active={activeIndex === 1}
+            index={1}
+            onClick={this.handleClick}>
+            <Header style={{color: 'black'}} as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, TOOL_ACTIVE)}>
+
+              {this.props.seriesTemplate.name}<Label><small> {DESCRIPTION}</small></Label>
+            </Header>
+            <Button icon='delete'  size='mini'  floated='right' onClick={this.deleteEntry.bind(this)}/>
+            </Accordion.Title>
+            <Accordion.Content  active={activeIndex === 1} >
+                  {/*
+                    <Segment>
+                      { this.seriesDetails() }
+                    </Segment>
+                    <Button.Group basic size='mini' floated='right'>
+                    </Button.Group>
+                    size='mini'  <Button icon='edit' onClick={this.editEntry.bind(this)}/>
+                    <Button icon='copy' onClick={this.copyEntry.bind(this)}/>                */}
+              { this.renderEditor() }
+          </Accordion.Content>
+        </Accordion>
+      )
     }
-    let ENABLEACTIVE ='';
-    let TOOL_ACTIVE = false;
-    try {
-      ENABLEACTIVE = this.props.target.enabledActive;
-      TOOL_ACTIVE = this.props.tool_active.value;
-    } catch (e) {
-      ENABLEACTIVE = this.state.enabledActive;
-      TOOL_ACTIVE = false;
+    else {
+      return(
+        <Dimmer active>
+           <Loader />
+         </Dimmer>
+       )
     }
-
-    const { activeIndex } = this.state
-
-    return (
-      <Accordion styled fluid>
-        <Accordion.Title
-          active={activeIndex === 1}
-          index={1}
-          onClick={this.handleClick}>
-          <Header style={{color: 'black'}} as='a' onClick={this.canHeaderClick(this.props.scheduler_running.value, TOOL_ACTIVE)}>
-
-            {this.props.seriesTemplate.name}<Label><small> {DESCRIPTION}</small></Label>
-          </Header>
-          <Button icon='delete'  size='mini'  floated='right' onClick={this.deleteEntry.bind(this)}/>
-          </Accordion.Title>
-          <Accordion.Content  active={activeIndex === 1} >
-                {/*
-                  <Segment>
-                    { this.seriesDetails() }
-                  </Segment>
-                  <Button.Group basic size='mini' floated='right'>
-                  </Button.Group>
-                  size='mini'  <Button icon='edit' onClick={this.editEntry.bind(this)}/>
-                  <Button icon='copy' onClick={this.copyEntry.bind(this)}/>                */}
-            { this.renderEditor() }
-        </Accordion.Content>
-      </Accordion>
-    )
   }
-
 }
 
 export default withTracker(() => {
-    return {
-      seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
-      takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
-      targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
+  const seriessHandle = Meteor.subscribe('seriess.all');
+  const seriessReadyYet = seriessHandle.ready();
+
+
+  return {
+    seriessReadyYet,
+    seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
+    takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
+    targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
   };
 })(TakeSeries);

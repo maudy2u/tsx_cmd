@@ -659,13 +659,6 @@ export default withTracker(() => {
   var appLogsDBReadyYet = appLogsDBHandle.ready();
   var srvLog = AppLogsDB.find({}, {sort:{time:-1}}).fetch(10);
 
-//  var srvLog = [];
-  // var num = srvLog.length;
-  // for (var i = num-1; i > -1; i--) { // this puts most resent line on top
-  //     var log = appLogsDB[i];
-  //     LOG = LOG + '[' + log.level +']' + log.message + '\n';
-  // }
-
   return {
     appLogsDBReadyYet,
     srvLog,

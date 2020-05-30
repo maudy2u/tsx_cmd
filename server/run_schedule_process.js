@@ -84,10 +84,6 @@ import {
    ParkMount,
  } from './mount.js'
 
- import {
-   srvStopScheduler,
- } from './main.js'
-
  export function getSchedulerState() {
    var state = tsx_GetServerStateValue( tsx_ServerStates.scheduler_running );
    return state;
@@ -95,6 +91,14 @@ import {
 
  export function setSchedulerState( value ) {
    tsx_SetServerState(tsx_ServerStates.scheduler_running, value);
+ }
+
+ export function srvStopScheduler() {
+   CleanUpJobs();
+   UpdateImagingSesionID( '' );
+   tsx_SetServerState(tsx_ServerStates.targetName, 'No Active Target');
+   tsx_SetServerState(tsx_ServerStates.scheduler_report, '');
+   setSchedulerState('Stop' );
  }
 
  export function runSchedulerProcess() {
@@ -317,10 +321,114 @@ function sleepScheduler( isParked ) {
 
 function isDarkEnough() {
   var isDark = tsx_isDark();
-  tsxDebug(' Is dark enough for target: ' + isDark );
+  tsxDebug(' [SCHEDULER] Is dark enough for target: ' + isDark );
   if( isDark === false ) {
-    tsxDebug( ' Sun is not low enough.' );
+    tsxDebug( ' [SCHEDULER] Sun is not low enough.' );
     return false;
   }
   return true;
 }
+
+
+function CleanUpJobs() {
+  // *******************************
+  // Server restarts and it means no session
+  // get rid of any old processes/jobs
+  scheduler.remove({});
+  //  var jobs = scheduler.find().fetch();
+  //  var jid = tsx_GetServerStateValue('runScheduler');
+  //  scheduler.remove( jid );
+  tsx_SetServerState(tsx_ServerStates.runScheduler, '');
+
+  // Clean up the scheduler process collections...
+  // Persistence across reboots is not needed at this time.
+  // tsxInfo('Number of Jobs found: ' + jobs.length);
+  // if( jobs.length > 0 ) {
+  //   tsxInfo( ' Cleaning up DB');
+  //   for (var i = 0; i < jobs.length; i++) {
+  //     if( typeof jobs[i] != 'undefined') {
+  //       scheduler.remove(jobs[i]._id);
+  //     }
+  //   }
+  //   tsxInfo(' Cleaned DB');
+  // }
+  return;
+}
+
+Meteor.methods({
+
+  // the question with the scheduler is...
+  // how to pause the "takeseries"
+  // and allow the other functions to run...
+  // do I need to create other "Jobs"
+  // 1. CLS?
+  // 2. focus?
+  // 3. autoguide?
+  // 4. start/end checks... ???
+  // or KISS and one big sequenital function...
+  startScheduler() {
+    tsxInfo(' ***********************2*');
+    // tsxLog('Found scheduler state: ' + getSchedulerState() );
+    if(
+      getSchedulerState() == 'Running'
+    ) {
+      tsxInfo("Running found");
+      tsxLog('Scheduler is alreadying running. Nothing to do.');
+      return;
+    }
+    else if(
+       getSchedulerState() == 'Stop'
+     ) {
+       tsxDebug("Stop found");
+
+       // Confirm whether the there is a script running...
+       if( !tsx_ServerIsOnline() ) {
+         UpdateStatus('Check TSX... is another script running, or is server not online.');
+         return;
+       }
+
+       runSchedulerProcess();
+
+       tsxDebug( ' @@ creating job' );
+       // Create a job:
+       var job = new Job(scheduler, tsx_ServerStates.runScheduler, // type of job
+         // Job data that you define, including anything the job
+         // needs to complete. May contain links to files, etc...
+         {
+           startTime: new Date(),
+           scheduleType: 'imaging',
+         }
+       );
+       tsxDebug( ' @@ Job created' );
+
+       // Set some properties of the job and then submit it
+       // the same submit the start time to the scheduler...
+       // at this time could add a tweet :)
+       job.priority('normal');
+       // .retry({ retries: 5,
+       //   wait: 5*60*1000 }) //15*60*1000 })  // 15 minutes between attempts
+       // .delay(0);// 60*60*1000)     // Wait an hour before first try
+
+       var jid = job.save();               // Commit it to the server
+       tsxDebug( ' @@ Job submitted' );
+
+       // tsxLog('Job id: ' + jid);
+       return;
+    }
+    else {
+      tsxErr("Invalid state found for scheduler.");
+      // logCon.error('Invalid state found for scheduler.');
+    }
+  },
+
+  stopScheduler() {
+    if( getSchedulerState() != 'Stop' ) {
+      UpdateStatus('MANUAL: STOPPING SCHEDULER');
+      srvStopScheduler();
+    }
+    else {
+      tsxInfo('Do nothing - Already Stopped');
+    }
+  },
+
+});

@@ -1,35 +1,22 @@
 import { TargetSessions } from '../imports/api/targetSessions.js';
 import { TargetReports } from '../imports/api/targetReports.js';
 import { TakeSeriesTemplates } from '../imports/api/takeSeriesTemplates.js';
-// import { Seriess } from '../imports/api/seriess.js';
+import { ImagingSessionLogs } from '../imports/api/imagingSessionLogs.js';
 import { Filters } from '../imports/api/filters.js';
 import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
 import { AppLogsDB } from '../imports/api/theLoggers.js';
 import { CalibrationFrames } from '../imports/api/calibrationFrames.js';
 import { FlatSeries } from '../imports/api/flatSeries.js';
-
-// import {
-//   tsxInfo,
-//   tsxLog,
-//   tsxErr,
-//   tsxWarn,
-//   tsxDebug,
-// } from '../imports/api/theLoggers.js';
-// import {
-//   tsx_UpdateDevice,
-//   tsx_ServerStates,
-//   tsx_SetServerState,
-//   tsx_GetServerState,
-//   tsx_GetServerStateValue,
-//   UpdateStatus,
-//   UpdateStatusWarn,
-//   UpdateStatusErr,
-// } from '../imports/api/serverStates.js'
+import { Seriess } from '../imports/api/seriess.js';
 
 Meteor.publish('tsxInfo.all', function () {
   var db = TheSkyXInfos.find();
   this.ready();
   return db;
+});
+
+Meteor.publish('seriess.all', function () {
+  return Seriess.find();
 });
 
 Meteor.publish('targetSessions.all', function () {
@@ -58,6 +45,10 @@ Meteor.publish('targetReports.all', function () {
 
 Meteor.publish('takeSeriesTemplates.all', function () {
   return TakeSeriesTemplates.find();
+});
+
+Meteor.publish('imagingSessionLogs.all', function () {
+  return ImagingSessionLogs.find();
 });
 
 /*

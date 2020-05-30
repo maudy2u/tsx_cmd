@@ -82,8 +82,6 @@ class AppInfo extends Component {
     return (
       <center>
         <Label>tsx_cmd - Imaging with TheSkyX</Label>
-        <Label>version <Label.Detail>{VERSION}</Label.Detail></Label>
-        <Label>date <Label.Detail>{DATE}</Label.Detail></Label>
         <Label>TSX ip:
           <Label.Detail>
             {IP}
@@ -95,6 +93,8 @@ class AppInfo extends Component {
             {PORT}
           </Label.Detail>
         </Label>
+        <Label>version <Label.Detail>{VERSION}</Label.Detail></Label>
+        <Label>date <Label.Detail>{DATE}</Label.Detail></Label>
         <br/>&nbsp;&nbsp;
       </center>
     )

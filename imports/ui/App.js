@@ -535,10 +535,14 @@ export default withTracker(() => {
   const takeSeriesTemplatesHandle = Meteor.subscribe('takeSeriesTemplates.all');
   const takeSeriesTemplatesReadyYet = takeSeriesTemplatesHandle.ready();
 
+  const seriessHandle = Meteor.subscribe('seriess.all');
+  const seriessReadyYet = seriessHandle.ready();
+
   const infoReadyYet = infoHandle.ready();
 
   return {
     infoReadyYet,
+    seriessReadyYet,
     targetSessionsReadyYet,
     filtersReadyYet,
     calibrationFramesReadyYet,

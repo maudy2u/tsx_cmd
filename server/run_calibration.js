@@ -32,6 +32,11 @@ import {
 } from '../imports/api/imagingSessionLogs.js';
 
 import {
+  runSchedulerProcess,
+  getSchedulerState,
+} from './run_schedule_process.js'
+
+import {
   getFilterName,
   getFrameNumber,
   getFrameName,
@@ -222,6 +227,82 @@ Meteor.methods({
     console.log( ' [ARTESKY] on: ' + err )
     err = flatbox_disconnect();
     console.log( ' [ARTESKY] on: ' + err )
-  }
+  },
+
+  processCalibrationTargets( ) {
+    if(
+      getSchedulerState() == 'Running'
+    ) {
+      tsxInfo("Running found");
+      tsxLog('Scheduler is alreadying running. Nothing to do.');
+      return;
+    }
+    else if( getSchedulerState() == 'Stop' ) {
+      tsx_SetServerState( tsx_ServerStates.tool_active, true );
+      tsxInfo(" Calibration File Processes");
+      runSchedulerProcess();
+      // Create a job:
+      var job = new Job(scheduler, tsx_ServerStates.runScheduler, // type of job
+        // Job data that you define, including anything the job
+        // needs to complete. May contain links to files, etc...
+        {
+          startTime: new Date(),
+          scheduleType: 'calibration',
+        }
+      );
+      job.priority('normal');
+      var jid = job.save();               // Commit it to the server
+    } else {
+        tsxErr("Invalid state found for scheduler.");
+        // logCon.error('Invalid state found for scheduler.');
+      }
+  },
+
+
+  calibrateGuider( slew, location, dec_az ) {
+    tsxInfo(' *** tsx_CalibrateAutoGuide' );
+    var enabled = tsx_GetServerStateValue( tsx_ServerStates.isCalibrationEnabled );
+    if( !enabled ) {
+      UpdateStatus(' *** Calibration disabled - enable to continue');
+      return false;
+    }
+
+    UpdateStatus(' TOOLBOX: Autoguider Calibration STARTED');
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
+    try {
+      let res = true;
+      if( slew != '' ) {
+        if( slew == 'Alt/Az'&& location !='' && dec_az != '') {
+          UpdateStatus(' --- slewing to Alt/Az: ' + location + '/' + dec_az );
+          res = tsx_SlewCmdCoords( 'SkyX_JS_SlewAltAz', location, dec_az );
+        }
+        else if( slew == 'Ra/Dec' && location !='' && dec_az != '') {
+          UpdateStatus(' --- slewing to Ra/Dec: ' + location + '/' + dec_az );
+          res = tsx_SlewCmdCoords( 'SkyX_JS_SlewRaDec', location, dec_az );
+        }
+        else if( slew == 'Target name' && location !='') {
+          UpdateStatus(' Tool: slewing to target: ' + location );
+          res = tsx_SlewTargetName( location  );
+        }
+        UpdateStatus(' --- slew finished');
+      }
+      else {
+        UpdateStatus(' --- no slew, using current position');
+      }
+      if( res = true ) {
+        tsxLog(' --- calibrating autoGuider');
+        CalibrateAutoGuider();
+      }
+    }
+    catch( e ) {
+      if( e == 'TsxError' ) {
+        UpdateStatus('!!! TheSkyX connection is no longer there!');
+      }
+    }
+    finally {
+      UpdateStatus(' TOOLBOX: Autoguider Calibration FINISHED');
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
+    }
+  },
 
 });

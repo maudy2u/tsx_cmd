@@ -236,8 +236,8 @@ export function tsx_IsParked() {
 
 // **************************************************************
 export function tsx_MntUnpark() {
-  tsxInfo('************************');
-  tsxInfo(' Unparking mount' );
+  tsxInfo('[MOUNT] ************************');
+  tsxInfo(' [MOUNT] Unparking mount' );
   var cmd = tsx_cmd('SkyX_JS_UnparkMount');
 
   var Out = '';
@@ -248,20 +248,20 @@ export function tsx_MntUnpark() {
         var result = tsx_return.split('|')[0].trim();
         tsxDebug( ' *** result: ' + result );
         if( result == 'unparked' ) {
-          UpdateStatus(' MOUNT: unparked' );
+          UpdateStatus(' [MOUNT] unparked' );
         }
         else {
-          UpdateStatusErr( ' !!! Unparking err: ' + result );
+          UpdateStatusErr( ' [MOUNT] !!! Unparking err: ' + result );
         }
 
         Out = result;
         tsx_is_waiting = false;
   }));
-  tsxInfo ( ' unpark waiting ') ;
+  tsxInfo ( ' [MOUNT] unpark waiting ') ;
   while( tsx_is_waiting ) {
     Meteor.sleep( 1000 );
   }
-  tsxInfo ( ' unpark done ') ;
+  tsxInfo ( ' [MOUNT] unpark done ') ;
   return Out;
 }
 
@@ -2516,9 +2516,10 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
         var result = results[0].trim();
         if( result == 'Success' ) {
           if( friendly === '' ) {
-            friedly = tName;
+            friendly = tName;
           }
           res_iid = addImageReport( target );
+          console.log( res_iid );
           for( var i=1; i<results.length;i++) {
             var token=results[i].trim();
             // RunJavaScriptOutput.writeLine(token);

@@ -540,7 +540,7 @@ class TargetEditor extends Component {
                     value={this.state.targetFindName}
                     onChange={this.handleChange}/>
                 <Form.Input
-                    label='Friendly Name'
+                    label='Friendly Name, for :t and filename'
                     name='friendlyName'
                     placeholder='Used for filename if needed, e.g. Not Sky Chart Centre'
                     value={this.state.friendlyName}
