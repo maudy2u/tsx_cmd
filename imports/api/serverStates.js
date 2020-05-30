@@ -157,6 +157,8 @@ export const tsx_ServerStates = {
 
   session_report: 'session_report',
 
+  cloudReportWidget: 'cloudReportWidget',
+
 };
 
 export function getDefaultStateValue( param ) {

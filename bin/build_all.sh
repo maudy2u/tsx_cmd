@@ -41,7 +41,8 @@ for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|
 done
 export details=build_$(git rev-list --all --count)_v${version}_${date}_${1}
 
-if [ "$(uname -p)" == "aarch64" ]; then
+
+if [ "$(uname -p)" == "aarch64" ] || [ "$(uname -p)" == "armv7l" ]; then
   export meteor_build=~/meteor/meteor
 else
   export meteor_build=meteor
@@ -56,7 +57,6 @@ build_tsx_cmd () {
   package_tar ${folder}
 }
 
-
 package_tar() {
   cd ${base_dir}
   tar -czf $1.tar -C $1 .
@@ -65,18 +65,15 @@ package_tar() {
 }
 
 if [ "$(uname -p)" == "aarch64" ]; then
-  build_type="os.linux.aarch64"
-  folder=${base_dir}"tsx_cmd_"${build_type}"_"${details}
-  mkdir -p ${folder}
-  echo " Building" ${folder}
-  ${meteor_build} build --directory ${folder}
-  package_tar ${folder}
+  export arm_build_type="os.linux.aarch64"
 fi
 
+if [ "$(uname -p)" == "armv7l" ]; then
+  export arm_build_type="os.linux.armv7l"
+fi
 
-if [ "$(uname -p)" == "aarch64" ]; then
-  build_type="os.linux.aarch64"
-  folder=${base_dir}"tsx_cmd_"${build_type}"_"${details}
+if [ "$(uname -p)" == "aarch64" ] || [ "$(uname -p)" == "armv7l" ]; then
+  folder=${base_dir}"tsx_cmd_"${arm_build_type}"_"${details}
   mkdir -p ${folder}
   echo " Building" ${folder}
   ${meteor_build} build --directory ${folder}

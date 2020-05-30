@@ -37,6 +37,7 @@ if [ $# -eq 0 ]
 fi
 
 if [ "${1}" == "init" ]; then
+
   if [ "$(uname)" == "Darwin" ]; then
     echo " *******************************"
     echo " tsx_cmd - Mac in" ${install_dir}
@@ -45,6 +46,7 @@ if [ "${1}" == "init" ]; then
     export NODEJS='https://nodejs.org/dist/v8.11.1/node-v8.11.1-darwin-x64.tar.gz'
     # https://nodejs.org/dist/v8.11.3/node-v8.11.3-darwin-x64.tar.xz
     export MONGO_PARAMS="-C ./mongodb --strip-components=1"
+
   elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     echo " *******************************"
     echo " Installing mongo-tools"
@@ -59,6 +61,7 @@ if [ "${1}" == "init" ]; then
       export MONGO='http://downloads.mongodb.org/linux/mongodb-linux-arm64-ubuntu1604-3.6.8.tgz'
       export NODEJS='https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-arm64.tar.xz'
       export MONGO_PARAMS="-C ./mongodb  --strip-components=1"
+
     elif [ "$(uname -p)" == "armv7l" ]; then
       echo armv7 in ${install_dir}
       echo ""
@@ -72,6 +75,7 @@ if [ "${1}" == "init" ]; then
       export NODEJS='https://nodejs.org/dist/v6.16.0/node-v6.16.0-linux-armv7l.tar.gz'
       # https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz
       export MONGO_PARAMS="-C ./mongodb/bin  --strip-components=1"
+
     elif [ "$(uname -p)" == "x86_64" ]; then
       echo ""
       echo " *******************************"
@@ -80,6 +84,7 @@ if [ "${1}" == "init" ]; then
       export MONGO='http://downloads.mongodb.org/linux/mongodb-linux-x86_64-ubuntu1804-4.0.5.tgz'
       export NODEJS='https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-x64.tar.xz'
       export MONGO_PARAMS="-C ./mongodb  --strip-components=1"
+
     else
       echo $(uname -s) $(uname -p) - NO NODEJS supported... yet
       echo $(uname -s) $(uname -p) - NO mongoDB supported... yet

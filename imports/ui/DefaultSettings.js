@@ -80,15 +80,15 @@ const XRegExpNegToPosInt = XRegExp('^(\\+|-)?\\d+$');
 const ERRORLABEL = <Label color="red" pointing/>
 
 const eSetup = 0;
-const eDefaultConstrainsts =1;
-const eStartStop = 2;
-const eClouds = 3;
-const eGuider = 4;
-const eFocuser =5;
+const eDither = 1;
+const eGuider = 2;
+const eFocuser =3;
+const eCamera =4;
+const eRotator = 5;
 const eFilterWheel = 6;
-const eRotator = 7;
-const eCamera =8;
-const eDither = 9;
+const eDefaultConstrainsts =7;
+const eStartStop = 8;
+const eClouds = 9;
 const eFlatbox = 10;
 
 // App component - represents the whole app
@@ -144,6 +144,8 @@ class DefaultSettings extends Component {
 
       ip: '',
       port: '',
+
+     cloudReportWidget: 'boulder_united-states-of-america_5574991',
 
       activeIndex: -1,
     };
@@ -376,7 +378,9 @@ class DefaultSettings extends Component {
           flatbox_camera_delay: nextProps.tsxInfo.find(function(element) {
             return element.name == 'flatbox_camera_delay';
           }).value,
-
+          cloudReportWidget: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'cloudReportWidget';
+          }).value,
         });
       }
   }
@@ -1206,9 +1210,16 @@ class DefaultSettings extends Component {
               validationError="Must be a positive number, e.g 0, 5, 1800, 3600"
               errorLabel={ ERRORLABEL }
             />
+            <Form.Input
+              label='Metroblue Widget City code  '
+              name='cloudReportWidget'
+              placeholder='e.g. boulder_united-states-of-america_5574991'
+              value={this.state.cloudReportWidget}
+              onChange={this.handleChange}
+            />
             </Form>
           </Segment>
-      </Segment.Group>
+        </Segment.Group>
       </Accordion.Content>
     </div>
     )
@@ -1230,15 +1241,15 @@ class DefaultSettings extends Component {
       <div>
         <Accordion fluid styled >
           {this.renderServers()}
-          {this.renderConstraints()}
-          {this.renderStartStopTimes()}
-          {this.renderClouds()}
           {this.renderGuider()}
+          {this.renderDithering()}
           {this.renderImager()}
           {this.renderFocuser()}
-          {this.renderFilterWheel()}
           {this.renderRotator()}
-          {this.renderDithering()}
+          {this.renderFilterWheel()}
+          {this.renderConstraints()}
+          {this.renderClouds()}
+          {this.renderStartStopTimes()}
           {this.renderFlatBox()}
 
       </Accordion>

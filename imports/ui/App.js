@@ -228,11 +228,11 @@ class App extends TrackerReact(Component) {
           <Menu.Item fitted name='Toolbox' active={activeMenu === 'Toolbox'} onClick={this.handleMenuItemClick}>
             <Icon name='briefcase' size='large' />
           </Menu.Item>
-          <Menu.Item fitted name='Settings' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick}>
-            <Icon name='configure' size='large'/>
-          </Menu.Item>
           <Menu.Item fitted name='Weather' active={activeMenu === 'Weather'} onClick={this.handleMenuItemClick}>
             <Icon name='cloud' size='large'/>
+          </Menu.Item>
+          <Menu.Item position ='right' fitted name='Settings' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick}>
+            <Icon name='settings' size='large'/>
           </Menu.Item>
         </Menu>
         {this.renderMenuSegments()}
@@ -333,13 +333,24 @@ class App extends TrackerReact(Component) {
         />
       )
     } else if (this.state.activeMenu == 'Weather') {
+      var metroLink =
+          'https://www.meteoblue.com/en/weather/forecast/seeing/'
+        + this.props.cloudReportWidget.value
+        + '?utm_source=weather_widget'
+        + '&utm_medium=linkus&utm_content=seeing&utm_campaign=Weather%2BWidget';
+      var frameLink =
+          'https://www.meteoblue.com/en/weather/widget/seeing/'
+          + this.props.cloudReportWidget.value
+        + '?geoloc=fixed&noground=0';
       return (
         <center>
-          <a href="https://www.meteoblue.com/en/weather/forecast/seeing/moncton_canada_6076211?utm_source=weather_widget&utm_medium=linkus&utm_content=seeing&utm_campaign=Weather%2BWidget" target="_blank">meteoblue
+          <a href={metroLink} target="_blank">meteoblue
           </a>
           <br/>
+          Change city code in Cloud Settings.
+          <br/>
           <iframe
-            src="https://www.meteoblue.com/en/weather/widget/seeing/moncton_canada_6076211?geoloc=fixed&noground=0"
+            src={frameLink}
             frameBorder="0"
             scrolling="NO"
             allowTransparency="true"
@@ -504,6 +515,7 @@ export default withTracker(() => {
   var scheduler_report = TheSkyXInfos.findOne({name: 'scheduler_report'});
   var night_plan = TheSkyXInfos.findOne({name: 'night_plan'});
   var night_plan_reset = TheSkyXInfos.findOne({name: 'night_plan_reset'});
+  var cloudReportWidget = TheSkyXInfos.findOne({name: 'cloudReportWidget'});
 
   const targetSessionsHandle = Meteor.subscribe('targetSessions.all');
   const targetSessionsReadyYet = targetSessionsHandle.ready();
@@ -535,6 +547,7 @@ export default withTracker(() => {
     takeSeriesTemplatesReadyYet,
 
     tsxInfo,
+    cloudReportWidget,
     targetName,
     flatbox_enabled,
     scheduler_running,
