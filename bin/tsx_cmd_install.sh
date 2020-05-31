@@ -62,7 +62,7 @@ if [ "${1}" == "init" ]; then
       export NODEJS='https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-arm64.tar.xz'
       export MONGO_PARAMS="-C ./mongodb  --strip-components=1"
 
-    elif [ "$(uname -p)" == "armv7l" ]; then
+    elif [ "$(uname -p)" == "armv7l" ] || [ "$(uname -m)" == "armv7l" ] ; then
       echo armv7 in ${install_dir}
       echo ""
       echo " *******************************"
@@ -188,8 +188,9 @@ echo '  "enable_warn": "yes",' >> ./settings.json
 echo '  "tsx_cmd_db": "tsx_cmd",' >> ./settings.json
 echo '  "meteor_db": "meteor",' >> ./settings.json
 echo '  "mongo_port": "27017",' >> ./settings.json
-echo '  "removed-to-enable: backup_location": "/home/odroid/app",' >> ./settings.json
-echo '  "removed-to-enable: log_file_location": "/media/odroid/PENSIVE2/tsx_cmd_logs"' >> ./settings.json
+echo '  "removed-to-enable: skySafari_files": "/media/odroid/usb_flash/tsx_cmd_skySafariSettings/",' >> ./settings.json
+echo '  "removed-to-enable: backup_location": "/media/odroid/usb_flash/tsx_cmd_backups",' >> ./settings.json
+echo '  "removed-to-enable: log_file_location": "/media/odroid/usb_flash/tsx_cmd_logs"' >> ./settings.json
 echo '}' >> ./settings.json
 
 
