@@ -21,6 +21,7 @@ header() {
   echo " Update TSX Cmd v1.0"
   echo " *******************************"
 }
+
 helpinfo() {
   echo ""
   header
@@ -35,10 +36,12 @@ helpinfo() {
   echo " *******************************"
   echo ""
 }
+
 if [ $# -eq 0 ]
   then
     helpinfo
 fi
+
 export tarfile=${1}
 
 install_tar_bundle() {
@@ -77,12 +80,15 @@ install_tar_bundle() {
   tar xf ${tarfile}
 }
 
-update_fibers() {
+get_version() {
   # *******************************
   # grab current bundle variables
   for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ./bundle/programs/server/assets/app/version.json ); do
       export $s
   done
+}
+
+update_fibers() {
 
   cd ${install_dir}/bundle/programs/server
   echo " *******************************"
@@ -107,6 +113,7 @@ export PATH=${install_dir}/mongodb/bin:${install_dir}/nodejs/bin:$PATH
 
 case ${tarfile} in
      update)
+          get_version
           update_fibers
           ;;
 #     pattern-3|pattern-4|pattern-5)
@@ -116,6 +123,7 @@ case ${tarfile} in
           helpinfo
           ;;
      *)
+          get_version
           install_tar_bundle;
           update_fibers;
           ;;
