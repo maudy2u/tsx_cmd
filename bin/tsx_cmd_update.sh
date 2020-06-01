@@ -50,7 +50,7 @@ install_tar_bundle() {
       echo Linux
       if [ "$(uname -p)" == "aarch64" ]; then
           echo ARMV8 in ${install_dir}
-      elif [ "$(uname -p)" == "armv7l" ]; then
+      elif [ "$(uname -p)" == "armv7l" ] || [ "$(uname -m)" == "armv7l" ] ; then
           echo ARMV7 in ${install_dir}
       elif [ "$(uname -p)" == "x86_64" ]; then
           echo x86_64 in ${install_dir}

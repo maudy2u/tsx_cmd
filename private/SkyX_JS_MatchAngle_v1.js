@@ -117,14 +117,14 @@ else if( TARGET_PA > 360 ) {
 	TARGET_PA = TARGET_PA %360;
 }
 
-if( getPointing() == "WEST" ) {
-		if( TARGET_PA < 180 ) {
-			TARGET_PA += 180;
-		}
-		else {
-			TARGET_PA -= 180;
-		}
-}
+// if( getPointing() == "WEST" ) {
+// 		if( TARGET_PA < 180 ) {
+// 			TARGET_PA += 180;
+// 		}
+// 		else {
+// 			TARGET_PA -= 180;
+// 		}
+// }
 
 
 // *******************************

@@ -2247,7 +2247,7 @@ export function tsx_RotateCamera( position, cls ) {
   let ACCURACY = tsx_GetServerStateValue( tsx_ServerStates.fovPositionAngleTolerance );
   if( typeof ACCURACY === 'undefined') {
     ACCURACY = 1; // assume within one degree default
-    tsxWarn( " *** Using default accuracy of 1 degree" );
+    UpdateStatusWArn( " [ROTATOR] Setting default accuracy of 1 degree" );
   }
 
   let cmd = tsx_cmd('SkyX_JS_MatchAngle');
@@ -2257,28 +2257,54 @@ export function tsx_RotateCamera( position, cls ) {
   cmd = cmd.replace('$003', ACCURACY);
   cmd = cmd.replace('$004', cls); // 1 = rotate; 0 = imagelink
   if( cls == 1) {
-    UpdateStatus(' MANUAL: Rotator/Camera rotating position: ' + position);
+    UpdateStatus(' [ROTATOR] MANUAL PA to: ' + position);
   }
   else {
-    UpdateStatus(' MANUAL: ImageLINK FOV: ' + position);
+    UpdateStatus(' [ROTATOR] Use ImageLINK for PA: ' + position);
   }
   let tsx_is_waiting = true;
   tsxDebug( '[TSX] SkyX_JS_MatchAngle, '+position+', '+pixelSize+', '+focalLength+', '+ACCURACY+', '+cls );
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-    let result = tsx_return.split('|')[0].trim();
     //e.g. Success|imageLinkAng=0.00|targetAngle=0.00|rotPos=-0.3305915915429978|newPos=-0.32895315919987494
-    tsxDebug('Any error?: ' + result);
-    if( result != 'Success') {
+    tsxDebug(' [ROTATOR] Any error?: ' + result);
+
+    var results = tsx_return.split('|');
+    var result = results[0].trim();
+    var pos = -1;
+    if( results.length > 0) {
+      for( var i=1; i<results.length;i++) {
+        var token=results[i].trim();
+        // RunJavaScriptOutput.writeLine(token);
+        var param=token.split("=");
+        switch( param[0] ) {
+
+          case 'newPos':
+            break;
+
+          case 'rotPos':
+            break;
+
+          case 'targetAngle':
+            break;
+
+          case 'imageLinkAng':
+            pos = param[1];
+
+            break;
+
+          default:
+            //RunJavaScriptOutput.writeLine(param[0]+' not found.');
+        }
+      }
+    }
+    if( result != 'Success' ) {
       forceAbort = true;
-      tsxWarn('!!! SkyX_JS_MatchAngle Failed. Error: ' + result);
+      UpdateStatusWarn(' [ROTATOR] Resulting PA: ' + Number(pos).toFixed(3) + ', check tolerance: ' + result);
     }
     else {
       rotateSucess = true;
-      var resMsg = tsx_return.split('|')[3].trim();
-      tsxLog( resMsg);
-      var pos = resMsg.split('=')[1].trim();
-     UpdateStatus(' MANUAL: Rotator/Camera set: ' + Number(pos).toFixed(3));
+      UpdateStatus(' [ROTATOR] MANUAL PA: ' + Number(pos).toFixed(3));
     }
     tsx_is_waiting = false;
   }));

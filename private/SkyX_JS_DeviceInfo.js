@@ -91,7 +91,7 @@ if( efwm != '<No Filter Wheel Selected>') {
 }
 
 
-if( SelectedHardware.autoguiderCameraModel != '<No Guider Selected>' ) {
+if( SelectedHardware.autoguiderCameraModel != '<No Camera Selected>' ) {
   var ccd = ccdsoftAutoguider;
   ccd.Connect();
   while (!ccd.State == 0) {

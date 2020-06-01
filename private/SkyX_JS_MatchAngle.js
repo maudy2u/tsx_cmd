@@ -19,7 +19,6 @@ var AILSSCALE = AILS.imageScale;
 var AILSFILTER = AILS.filterNameAILS;
 var TSX = RunJavaScriptOutput;
 
-
 // *******************************
 // Prepare Filter Wheel
 function setupFilterWheel() {
@@ -36,13 +35,14 @@ function setupFilterWheel() {
       }
     }
     if( slot > -1 ) {
-      CCDSC.FilterIndexZeroBased = slot; // match AILS
+    CCDSC.FilterIndexZeroBased = slot; // match AILS
     }
     else {
-      CCDSC.FilterIndexZeroBased = 0; // default setting
+    CCDSC.FilterIndexZeroBased = 0; // default setting
     }
   }
 }
+
 
 // *******************************
 // cannot get the AILS BIN setting, so need to
@@ -57,176 +57,166 @@ function calcBin() {
 }
 
 
-function adjustPA( pa ) {
-
-	var new_pa = pa;
-	if( pa < 0 ) {
-		pa = 360+pa;
-	}
-	else if( pa >= 360 ) {
-		pa = pa %360;
-	}
-	return new_pa*1;
-}
-// Now calculate rotate position
-// THE 180 DEGREE RULLE DEPENDS ON THE ROTATOR ROTATION
-
-function diff_PA( target_pa, cur_pa) {
-	// any need to handle pointing
-	var adj_pa = 0;
-	var cw = 0; // if positive add to the imageLinkPA
-	var ccw = 0; // if positive substract to the imageLinkPA
-	if( target_pa < 180 ) {
-		cw = target_pa*1-cur_pa*1;
-		ccw = cur_pa*1 - target_pa*1;
-	  TSX.writeLine ("  ccw adj: " + ccw ); // if this is greater than zero
-	  TSX.writeLine ("  cw adj: " + cw); // if this is greater than zero
-	}
-	else {
-		cw = target_pa*1+180*1-cur_pa*1;
-		ccw = cur_pa*1 - target_pa*1-180*1;
-	   TSX.writeLine ("  ccw adj: " + ccw ); // if this is greater than zero
-	 	TSX.writeLine ("  cw adj: " + cw); // if this is greater than zero
-	}
-
-	if( cw > 0 ) {
-		adj_pa = cw*1;
-	}
-	else {
-	   adj_pa = ccw*-1;
-	}
-
-	return adj_pa*1;
-}
-
-
 // TakeImage and return PA
 function currentPA() {
-	ImageLink.scale = AILSSCALE; // SEEMS THIS MAY BE IGNORED
-	ImageLink.pathToFITS = CCDSC.LastImageFileName;
-	ImageLink.execute();
-	return Number( ImageLinkResults.imagePositionAngle );//sky position
+  ImageLink.scale = AILSSCALE; // SEEMS THIS MAY BE IGNORED
+  ImageLink.pathToFITS = CCDSC.LastImageFileName;
+  ImageLink.execute();
+  return Number( ImageLinkResults.imagePositionAngle );//sky position
 }
+
 
 
 // *******************************
 // Calc position to rotate too...
 // Assume starting at the 180 position
+function calcMove( cur_pa, tar_pa) {
+  var move = Number(cur_pa)-Number(tar_pa);
+  //TSX.writeLine ("first  : " + move)
+  var i = 0;
+  while (Math.abs(move) > 90 && Math.abs(move) != 180) {
+    if( move > 90 && move < 180 ) {
+      move = move-180;
+      //TSX.writeLine ("iter direct: ", i)
+      i = i + 1;
+      continue;
+    }
+    else if( move < -90 && move > -180 ) {
+      move = move+180;
+      //TSX.writeLine ("iter neg: ", i)
+      i = i + 1;
+      continue;
+    }
 
-/*
-	1. get the current imageLink position
-	2. Make sure the target position is within 0-360
-	2. Next determine which way to rotate to TARGET_PA... relative to 180 rotation
-	3.
- */
+    if(   move > 180 ) {
+        move = (move-180);
+    }
+    else if( move < -180 ) {
+      move = move+180;
+    }
+    i = i + 1;
+    //TSX.writeLine ("iter adj: ", i)
+  }
+  return move;
+}
 
- // *******************************
- // Rotate to within accuracy
- function rotate( targetAng, imageScale, accuracy ) {
-	 var i = 0;
-	 var err = accuracy*1+1;
-	 var cur_pa = 0;
-	 var rotPA = 0;
-	 var new_rotPA = 0;
-	 var resultPA = 0;
-   var res = "FAILED";
-	 TSX.writeLine ("[ROTATOR] accuracy requested: " + accuracy.toFixed(2) + ", init: " + err  );
+function positivePA( pa ) {
+	if( pa < 0 ) {
+		pa = 360+(pa%360); // add 360 to make positive
+	}
+	else if( pa >= 360 ) {
+		pa = pa %360;
+	}
+	return Number(pa);
+}
 
-	 while( i< MAXTRIES && (err*1) > (accuracy*1) ) {
-		 // Make sure the target is witin 0-360
-		 cur_pa = currentPA(); //ImageLinkResults.imagePositionAngle;//sky position
+function isWithinAccuracy( target_pa, result_pa, accuracy, cur_pa, attempt ) {
+  var success = false;
+  var err = Math.abs(calcMove(target_pa, result_pa ));
 
- 	   TSX.writeLine ("\n[ROTATOR] ==== CURRENT PA ===== " + (i*1+1) );
-		 TSX.writeLine ("[ROTATOR] Orignal PA: " + cur_pa.toFixed(2) );
-		 cur_pa = adjustPA( cur_pa );
-		 TSX.writeLine ("[ROTATOR] Adjusted Target PA: " + cur_pa.toFixed(2) );
-		 var diff = diff_PA( targetAng*1, cur_pa*1);
-		 var exp_PA = cur_pa*1+diff*1;
-      exp_PA = adjustPA( exp_PA )*1;
-		 TSX.writeLine ("[ROTATOR] imageLink offset: " + diff.toFixed(2) + ", e.g. " + cur_pa.toFixed(2) + "+" + diff.toFixed(2) + "=" + exp_PA.toFixed(2) );
+  if( err < accuracy ) {
+    success = true;
+  }
+  TSX.writeLine (
+      "[ROTATOR] ATTEMPT " + attempt
+    + ": Target PA: " + target_pa.toFixed(2)
+    + ", Current PA: " + cur_pa.toFixed(2)
+    + ", Result PA: " + result_pa.toFixed(2)
+    +  ", Err: " + err.toFixed(2)
+  );
+  return success;
+}
 
-		 TSX.writeLine ("\n[ROTATOR] ==== ROTATOR PA ===== ");
-		 rotPA = CCDSC.rotatorPositionAngle()*1;
- 		 TSX.writeLine ("[ROTATOR] RotatorPa: " + rotPA.toFixed(2) );
-		 new_rotPA = rotPA*1 - diff*1;
+// *******************************
+// Rotate to within accuracy
+function rotate( target_pa, imageScale, accuracy ) {
+  var i = 0;
+  var err = 999; // init
+  var rot_pa = 0;
+  var new_rot_pa = 0;
+  var result_pa = 0;
+  var cur_pa = currentPA(); //ImageLinkResults.imagePositionAngle;//sky position
+  OUT = "FAILED";
+  TSX.writeLine ("[ROTATOR] Accuracy: " + accuracy.toFixed(2) );
+  CCDSC.TakeImage(); // take initial image
+  if( isWithinAccuracy( target_pa, cur_pa, accuracy, cur_pa, i ) ) {
+    OUT = 'Success';
+    i = MAXTRIES*2;
+  }
 
-//		 diff = diff_PA( new_rotPA*1, rotPA*1);
-//		 new_rotPA = rotPA*1 + diff*1;
-      new_rotPA = adjustPA( new_rotPA )*1;
+  while( i< Number(MAXTRIES) && Math.abs(err) > Number(accuracy) ) {
 
-		 TSX.writeLine ("[ROTATOR] Adjusted new Rot PA: " + new_rotPA.toFixed(2) );
 
-		 // SUCCESS AS LONG AS THIS I A SUBSTRACTED DIFFERENCE, WHY!!!!
-		 TSX.writeLine ("[ROTATOR] RotatorPa offset: " + diff.toFixed(2) );
-		 CCDSC.rotatorGotoPositionAngle(new_rotPA);
-		 TSX.writeLine ("[ROTATOR] RotatorPa adjustment: " + new_rotPA.toFixed(2) );
+    var move_pa = calcMove( cur_pa, target_pa );
+    rot_pa = Number(CCDSC.rotatorPositionAngle());
+    new_rot_pa = positivePA( Number(rot_pa)+Number(move_pa) );
+    CCDSC.rotatorGotoPositionAngle(new_rot_pa);
 
-		 TSX.writeLine ("\n[ROTATOR] ==== RESULT ===== ");
-		 CCDSC.TakeImage();
-		 resultPA = currentPA()*1;
+    CCDSC.TakeImage(); // take new image, reuse with next iteration
+    result_pa = currentPA();
 
-		 err = Math.abs( adjustPA(targetAng) - resultPA );
+    i++;
+    if( isWithinAccuracy( target_pa, result_pa, accuracy, cur_pa, i )) {
+      OUT = 'Success';
+      break;
+    }
+    else {
+      cur_pa = result_pa;
+    }
+  }
+  var resMsg = "imageLinkAng="+ result_pa.toFixed(3) + "|targetAngle=" + target_pa.toFixed(3) + "|rotPos=" + rot_pa + "|newPos=" + new_rot_pa;
+  OUT = OUT + "|" + resMsg;
+}
 
-		// MUST CONSIDER THE 180 DEGREE ROTATION RULE
-		 if( Math.abs(err-180) < err) {
-			err = err-180;
-		 }
-		 TSX.writeLine ("[ROTATOR] wanted: " + targetAng.toFixed(2) + ", was: " + cur_pa.toFixed(2) +", and now: " + resultPA.toFixed(2) );
-		 TSX.writeLine ("[ROTATOR] accuracy requested: " + accuracy.toFixed(2) + ", obtained: " + err.toFixed(2)  );
-		 i++;
-		 if( err < accuracy ) {
-			res = 'Success';
-		 }
-	 }
-	 var resMsg = "imageLinkAng="+ resultPA.toFixed(3) + "|targetAngle=" + targetAng.toFixed(3) + "|rotPos=" + rotPA + "|newPos=" + new_rotPA;
-	 OUT = res + "|" + resMsg;
- }
+// *******************************
+// Start the rotation process
+TSX.writeLine ("[ROTATOR] ==== IMAGELINK ===== ");
+TARGET_PA = positivePA( TARGET_PA );
+TSX.writeLine ("[ROTATOR] Target PA: " + TARGET_PA.toFixed(2) );
 
- TSX.writeLine ("[ROTATOR] ==== IMAGELINK ===== ");
- TSX.writeLine ("[ROTATOR] Target PA: " + TARGET_PA.toFixed(2) );
 if( JUSTROTATE == 1 ) {
-	TSX.writeLine ("[ROTATOR] Just Rotating ");
-	CCDSC.rotatorGotoPositionAngle(TARGET_PA);
-	var rotPA = CCDSC.rotatorPositionAngle(); // the real position
-	var resMsg = "imageLinkPA=NA|targetAngle=NA|rotPos=" + rotPA + "|targetPos=" + TARGET_PA;
-	OUT = "Success|" + resMsg;
+  TSX.writeLine ("[ROTATOR] Just Rotating ");
+  CCDSC.rotatorGotoPositionAngle(TARGET_PA);
+  var rotPA = CCDSC.rotatorPositionAngle(); // the real position
+  var resMsg = "imageLinkPA=NA|targetAngle=NA|rotPos=" + rotPA + "|targetPos=" + TARGET_PA;
+  OUT = "Success|" + resMsg;
 }
 else {
-	// Grab settings
-	var oFrame = CCDSC.Subframe;
-	var oExp = CCDSC.ExposureTime;
-	var obinX = CCDSC.BinX;
-	var obinY = CCDSC.BinY;
-	var oSave = CCDSC.AutoSaveOn;
-	setupFilterWheel();
+  // Grab settings
+  var oFrame = CCDSC.Subframe;
+  var oExp = CCDSC.ExposureTime;
+  var obinX = CCDSC.BinX;
+  var obinY = CCDSC.BinY;
+  var oSave = CCDSC.AutoSaveOn;
+  setupFilterWheel();
 
-	// take ref image
-	var ailsBin = calcBin()
-	CCDSC.Subframe = false;
-	CCDSC.ExposureTime=AILSEXPOSURE;
-	// Make sure bin is valid.
-	try {
-		CCDSC.BinX = ailsBin; // use AILS bin
-		CCDSC.BinY = ailsBin; // use AILS bin
-	}
-	catch( err ) {
-		OUT = "FAILED|BIN INVALID";
-		return OUT;
-	}
-	CCDSC.AutoSaveOn = 1;// save4link
-	CCDSC.Asynchronous = false;
-	CCDSC.Frame = 1;// light frame
+  // take ref image
+  var ailsBin = calcBin()
+  CCDSC.Subframe = false;
+  CCDSC.ExposureTime=AILSEXPOSURE;
+  // Make sure bin is valid.
+  try {
+      CCDSC.BinX = ailsBin; // use AILS bin
+      CCDSC.BinY = ailsBin; // use AILS bin
+  }
+  catch( err ) {
+      OUT = "FAILED|BIN INVALID";
+      return OUT;
+  }
+  CCDSC.AutoSaveOn = 1;// save4link
+  CCDSC.Asynchronous = false;
+  CCDSC.Frame = 1;// light frame
 
-	// SIMULATOR 1.7 and CCW=false
-	CCDSC.TakeImage(); // get an initial image
-	rotate( TARGET_PA*1, AILSSCALE*1, ACCURACY*1 );
+  // SIMULATOR 1.7 and CCW=false
+  rotate( TARGET_PA*1, AILSSCALE*1, ACCURACY*1 );
 
-	CCDSC.BinX = obinX;
-	CCDSC.BinY = obinY;
-	CCDSC.Subframe = oFrame;
-	CCDSC.ExposureTime = oExp;
-	CCDSC.AutoSaveOn = oSave;
+  CCDSC.BinX = obinX;
+  CCDSC.BinY = obinY;
+  CCDSC.Subframe = oFrame;
+  CCDSC.ExposureTime = oExp;
+  CCDSC.AutoSaveOn = oSave;
 }
+
 TSX.writeLine ("DONE: "+ OUT);
 OUT;
 /* Socket End Packet */

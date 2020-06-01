@@ -17,7 +17,7 @@
 #
 echo ''
 echo '*******************************'
-install_dir=$(pwd)
+export install_dir=$(pwd)
 mkdir -p ${install_dir}/db
 mkdir -p /tmp/mongod
 export MONGO_URL='mongodb://localhost/tsx_cmd'
@@ -47,7 +47,7 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     # https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz
     mongod --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log &
     tsx_cmd
-  elif [ "$(uname -p)" == "armv7l" ]; then
+  elif [ "$(uname -p)" == "armv7l" ]  || [ "$(uname -m)" == "armv7l" ] ; then
     echo Linux ARM-32bit_$(uname -p) in ${install_dir}
     mongod --dbpath ${install_dir}/db --logpath /tmp/mongod/mongod_log --journal &
     tsx_cmd

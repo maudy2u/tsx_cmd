@@ -57,16 +57,14 @@ function calcBin() {
 }
 
 
-function adjustPA( pa ) {
-
-	var new_pa = pa;
+function positivePA( pa ) {
 	if( pa < 0 ) {
-		pa = 360+pa;
+		pa = 360+(pa%360); // add 360 to make positive
 	}
 	else if( pa >= 360 ) {
 		pa = pa %360;
 	}
-	return new_pa*1;
+	return Number(pa);
 }
 // Now calculate rotate position
 // THE 180 DEGREE RULLE DEPENDS ON THE ROTATOR ROTATION
@@ -139,11 +137,11 @@ function currentPA() {
 
  	   TSX.writeLine ("\n[ROTATOR] ==== CURRENT PA ===== " + (i*1+1) );
 		 TSX.writeLine ("[ROTATOR] Orignal PA: " + cur_pa.toFixed(2) );
-		 cur_pa = adjustPA( cur_pa );
+		 cur_pa = positivePA( cur_pa );
 		 TSX.writeLine ("[ROTATOR] Adjusted Target PA: " + cur_pa.toFixed(2) );
 		 var diff = diff_PA( targetAng*1, cur_pa*1);
 		 var exp_PA = cur_pa*1+diff*1;
-      exp_PA = adjustPA( exp_PA )*1;
+      exp_PA = positivePA( exp_PA )*1;
 		 TSX.writeLine ("[ROTATOR] imageLink offset: " + diff.toFixed(2) + ", e.g. " + cur_pa.toFixed(2) + "+" + diff.toFixed(2) + "=" + exp_PA.toFixed(2) );
 
 		 TSX.writeLine ("\n[ROTATOR] ==== ROTATOR PA ===== ");
@@ -153,7 +151,7 @@ function currentPA() {
 
 //		 diff = diff_PA( new_rotPA*1, rotPA*1);
 //		 new_rotPA = rotPA*1 + diff*1;
-      new_rotPA = adjustPA( new_rotPA )*1;
+      new_rotPA = positivePA( new_rotPA )*1;
 
 		 TSX.writeLine ("[ROTATOR] Adjusted new Rot PA: " + new_rotPA.toFixed(2) );
 
@@ -166,7 +164,7 @@ function currentPA() {
 		 CCDSC.TakeImage();
 		 resultPA = currentPA()*1;
 
-		 err = Math.abs( adjustPA(targetAng) - resultPA );
+		 err = Math.abs( positivePA(targetAng) - resultPA );
 
 		// MUST CONSIDER THE 180 DEGREE ROTATION RULE
 		 if( Math.abs(err-180) < err) {
