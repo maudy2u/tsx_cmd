@@ -141,36 +141,36 @@ export function collect_calibration_images() {
       const MAX_VALUE = 65536; // TheSkyX's 16 bit maximumm value
       for( var sub=0; sub<cal.quantity; sub++) {
         if( isSchedulerStopped() == false ) {
-            UpdateStatus( ' [CALIBRATION] frame: ' + cal.subFrameTypes + ' ' +  cal.filter + ' ' + cal.exposure + ' sec: '  +inc+'/' + cal.quantity    );
-            var iid = takeCalibrationImages( cal );
-            var inc = sub+1;
+          var inc = sub+1;
+          UpdateStatus( ' [CALIBRATION] frame: ' + cal.subFrameTypes + ' ' +  cal.filter + ' ' + cal.exposure + ' sec: '  +inc+'/' + cal.quantity    );
+          var iid = takeCalibrationImage( cal );
 
-            // *******************************
-            // MONITOR for MAX PIXEL and if max value decrease by one
-            // *******************************
-            if( fp_enabled == true && cal.subFrameTypes === 'Flat' ) {
-              maxPix = imageReportMaxPixel( iid );
-              tsxLog( ' [CALIBRATION] Maximum pixel value: ' + maxPix );
-              if( maxPix >= MAX_VALUE ) {
-                numMaxPixs++;
-              }
-              else {
-                numMaxPixs = 0;
-              }
-              if( numMaxPixs > MAXIMUM_OCCURANCE ) {
-                cal.level = cal.level - 1;
-                if( cal.level < 0 ) {
-                  cal.level = 0;
-                }
-                flatbox_level( cal.level );
-                updateCalibrationFrame(
-                  cal._id,
-                  'level',
-                  cal.level,
-                );
-              }
+          // *******************************
+          // MONITOR for MAX PIXEL and if max value decrease by one
+          // *******************************
+          if( fp_enabled == true && cal.subFrameTypes === 'Flat' ) {
+            maxPix = imageReportMaxPixel( iid );
+            tsxLog( ' [CALIBRATION] Maximum pixel value: ' + maxPix );
+            if( maxPix >= MAX_VALUE ) {
+              numMaxPixs++;
             }
-            // *******************************
+            else {
+              numMaxPixs = 0;
+            }
+            if( numMaxPixs > MAXIMUM_OCCURANCE ) {
+              cal.level = cal.level - 1;
+              if( cal.level < 0 ) {
+                cal.level = 0;
+              }
+              flatbox_level( cal.level );
+              updateCalibrationFrame(
+                cal._id,
+                'level',
+                cal.level,
+              );
+            }
+          }
+          // *******************************
 
         }
         else {
@@ -179,12 +179,8 @@ export function collect_calibration_images() {
       }
     }
     catch( err ) {
-      tsxDebug( err )
-      var res = err.split('|')[0].trim();
-      if( res == 'TSX_ERROR' ) {
-        UpdateStatusErr( ' [CALIBRATION] *** UNKNOWN ERROR - Calibrating failed.' );
-        // do not move mount/park as calibrating....
-      }
+      tsxError( err )
+      UpdateStatusErr( ' [CALIBRATION] *** UNKNOWN ERROR - Calibrating failed.' );
     }
   }
   if( fp_enabled ) {
@@ -198,7 +194,7 @@ export function collect_calibration_images() {
 }
 
 //var aFrame = $002; //  cdLight =1, cdBias, cdDark, cdFlat
-function takeCalibrationImages( cal ) {
+function takeCalibrationImage( cal ) {
   var frame = getFrameNumber(cal.subFrameTypes);
   var filter = getFilterSlot( cal.filter );
   var exposure = cal.exposure;
