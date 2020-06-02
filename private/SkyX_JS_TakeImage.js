@@ -80,6 +80,10 @@ if( typeof friendly !== 'undefined' && friendly !== '$006' && friendly !== '' ) 
 }
 
 CCDSC.TakeImage();
+var avgPix = CCDSI.averagePixelValue();
+var maxPix = CCDSC.MaximumPixel;
+Out = Out.trim() + '|avgPix=' + avgPix + '|maxPix='+maxPix;
+
 if( typeof newASFormula !== 'undefined' && newASFormula !== '' ) {
 	ccdsoftCamera.setPropStr("m_csCustomFileNameLight", oldASFormula);
 }
@@ -89,7 +93,7 @@ CCDSC.BinY = obinY;
 CCDSC.Delay = oldDelay;
 CCDSC.Frame = oldFrame;
 
-Out = Out.trim() + '|fileName=' + CCDSC.LastImageFileName.trim() +'|maxPix='+ CCDSC.MaximumPixel;
+Out = Out.trim() + '|fileName=' + CCDSC.LastImageFileName.trim();
 
 // get the overall RMS error if guiding
 var rms = guideError();
@@ -201,9 +205,6 @@ if( aFrame == 1 ) { // not for calibrations
 	}
 }
 
-var avgPix = CCDSI.averagePixelValue();
-var maxPix = CCDSC.MaximumPixel;
-Out = Out + '|avgPix=' + avgPix + '|maxPix='+maxPix;
 //TSX.writeLine( 'SAMPLE: ' + Out )
 Out;
 /* Socket End Packet */

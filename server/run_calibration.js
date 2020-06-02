@@ -29,6 +29,7 @@ import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug,
 
 import {
   imageReportMaxPixel,
+  imageReportFilename,
 } from '../imports/api/imagingSessionLogs.js';
 
 import {
@@ -144,7 +145,7 @@ export function collect_calibration_images() {
           var inc = sub+1;
           UpdateStatus( ' [CALIBRATION] frame: ' + cal.subFrameTypes + ' ' +  cal.filter + ' ' + cal.exposure + ' sec: '  +inc+'/' + cal.quantity    );
           var iid = takeCalibrationImage( cal );
-
+          console.log( iid );
           // *******************************
           // MONITOR for MAX PIXEL and if max value decrease by one
           // *******************************
@@ -153,6 +154,9 @@ export function collect_calibration_images() {
             tsxLog( ' [CALIBRATION] Maximum pixel value: ' + maxPix );
             if( maxPix >= MAX_VALUE ) {
               numMaxPixs++;
+              var file = imageReportFilename( iid );
+              tsx_RemoveImage( file );
+              sub--;
             }
             else {
               numMaxPixs = 0;
@@ -191,6 +195,41 @@ export function collect_calibration_images() {
   tsx_SetServerState( tsx_ServerStates.tool_active, false );
   UpdateStatus(" [CALIBRATION] Finished");
   tsxLog(" [CALIBRATION] *******************************");
+}
+
+function tsx_RemoveImage( fileName ) {
+  tsxInfo('************************');
+  tsxInfo(' *** [CALIBRATION] tsx_RemoveImage' );
+
+  var success = false;
+  var cmd = tsx_cmd('SkyX_JS_AutoSavePathImager');
+
+  var tsx_is_waiting = true;
+  tsxDebug( '[TSX] SkyX_JS_AutoSavePathImager' );
+  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+
+    if( tsx_return !== '' ) {
+      var path = tsx_return;
+      import shelljs from 'shelljs';
+      // this is equivalent to the standard node require:
+      const Shelljs = require('shelljs');
+      let err = Shelljs.test( '-d', path ); // -e tests for valid path, -d tests for directory
+      if( err !== true ) {
+        tsxErr( ' [CALIBRATION] AutoSavePath is not a valid directory: ' + path );
+      }
+      else {
+        console.log( path + '/' + fileName );
+        err = Shelljs.rm( path + '/' + fileName ); // -e tests for valid path, -d tests for directory
+      }
+    }
+
+    tsx_is_waiting = false;
+  }));
+  while( tsx_is_waiting ) {
+    Meteor.sleep( 1000 );
+  }
+  return true;
+
 }
 
 //var aFrame = $002; //  cdLight =1, cdBias, cdDark, cdFlat
