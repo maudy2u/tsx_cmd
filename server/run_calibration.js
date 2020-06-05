@@ -105,7 +105,7 @@ export function collect_calibration_images() {
   if( typeof fp_enabled === 'undefined' || fp_enabled === '' ) {
     fp_enabled = false;
     tsx_SetServerState( tsx_ServerStates.flatbox_enabled, false);
-    tsxLog( ' Flatbox: turned off by default')
+    tsxLog( ' [CALIBRATION] Flatbox: turned off by default')
   }
   tsxLog( ' [CALIBRATION] calibration frame(s): ' + cf.length );
 
@@ -149,7 +149,7 @@ export function collect_calibration_images() {
           // *******************************
           // MONITOR for MAX PIXEL and if max value decrease by one
           // *******************************
-          if( fp_enabled == true && cal.subFrameTypes === 'Flat' ) {
+          if( fp_enabled == true && (cal.subFrameTypes === 'Flat') ) {
             maxPix = imageReportMaxPixel( iid );
             tsxLog( ' [CALIBRATION] Maximum pixel value: ' + maxPix );
             if( maxPix >= MAX_VALUE ) {
@@ -199,7 +199,7 @@ export function collect_calibration_images() {
 
 function tsx_RemoveImage( fileName ) {
   tsxInfo('************************');
-  tsxInfo(' *** [CALIBRATION] tsx_RemoveImage' );
+  tsxInfo(' CALIBRATION] tsx_RemoveImage' );
 
   var success = false;
   var cmd = tsx_cmd('SkyX_JS_AutoSavePathImager');
@@ -234,10 +234,18 @@ function tsx_RemoveImage( fileName ) {
 
 //var aFrame = $002; //  cdLight =1, cdBias, cdDark, cdFlat
 function takeCalibrationImage( cal ) {
+
   var frame = getFrameNumber(cal.subFrameTypes);
+  var tName = cal.subFrameTypes;
+
+  if( cal.subFrameTypes === 'Flat' ) {
+    UpdateStatusWarn( ' [CALIBRATION] Work around - Flat as Light to monitor max pixel');
+    frame = getFrameNumber('Light');
+    tName = 'FLAT';
+  }
+
   var filter = getFilterSlot( cal.filter );
   var exposure = cal.exposure;
-  var tName = cal.subFrameTypes;
   var delay = tsx_GetServerStateValue( tsx_ServerStates.flatbox_camera_delay );
   var binning =cal.binning;
   var ccdTemp = cal.ccdTemp;
@@ -268,13 +276,13 @@ Meteor.methods({
     if(
       getSchedulerState() == 'Running'
     ) {
-      tsxInfo("Running found");
-      tsxLog('Scheduler is alreadying running. Nothing to do.');
+      tsxInfo(" [CALIBRATION] Running found");
+      tsxLog(' [CALIBRATION] Scheduler is alreadying running. Nothing to do.');
       return;
     }
     else if( getSchedulerState() == 'Stop' ) {
       tsx_SetServerState( tsx_ServerStates.tool_active, true );
-      tsxInfo(" Calibration File Processes");
+      tsxInfo(" [CALIBRATION]  File Processes");
       runSchedulerProcess();
       // Create a job:
       var job = new Job(scheduler, tsx_ServerStates.runScheduler, // type of job
@@ -288,54 +296,54 @@ Meteor.methods({
       job.priority('normal');
       var jid = job.save();               // Commit it to the server
     } else {
-        tsxErr("Invalid state found for scheduler.");
+        tsxErr(" [CALIBRATION] Invalid state found for scheduler.");
         // logCon.error('Invalid state found for scheduler.');
       }
   },
 
 
   calibrateGuider( slew, location, dec_az ) {
-    tsxInfo(' *** tsx_CalibrateAutoGuide' );
+    tsxInfo(' [AUTOGUIDER] tsx_CalibrateAutoGuide' );
     var enabled = tsx_GetServerStateValue( tsx_ServerStates.isCalibrationEnabled );
     if( !enabled ) {
-      UpdateStatus(' *** Calibration disabled - enable to continue');
+      UpdateStatus(' [AUTOGUIDER] Calibration disabled - enable to continue');
       return false;
     }
 
-    UpdateStatus(' TOOLBOX: Autoguider Calibration STARTED');
+    UpdateStatus(' [AUTOGUIDER] TOOLBOX: Autoguider Calibration STARTED');
     tsx_SetServerState( tsx_ServerStates.tool_active, true );
     try {
       let res = true;
       if( slew != '' ) {
         if( slew == 'Alt/Az'&& location !='' && dec_az != '') {
-          UpdateStatus(' --- slewing to Alt/Az: ' + location + '/' + dec_az );
+          UpdateStatus(' [AUTOGUIDER] slewing to Alt/Az: ' + location + '/' + dec_az );
           res = tsx_SlewCmdCoords( 'SkyX_JS_SlewAltAz', location, dec_az );
         }
         else if( slew == 'Ra/Dec' && location !='' && dec_az != '') {
-          UpdateStatus(' --- slewing to Ra/Dec: ' + location + '/' + dec_az );
+          UpdateStatus(' [AUTOGUIDER] slewing to Ra/Dec: ' + location + '/' + dec_az );
           res = tsx_SlewCmdCoords( 'SkyX_JS_SlewRaDec', location, dec_az );
         }
         else if( slew == 'Target name' && location !='') {
-          UpdateStatus(' Tool: slewing to target: ' + location );
+          UpdateStatus(' [AUTOGUIDER] Tool: slewing to target: ' + location );
           res = tsx_SlewTargetName( location  );
         }
-        UpdateStatus(' --- slew finished');
+        UpdateStatus(' [AUTOGUIDER] slew finished');
       }
       else {
-        UpdateStatus(' --- no slew, using current position');
+        UpdateStatus(' [AUTOGUIDER] no slew, using current position');
       }
       if( res = true ) {
-        tsxLog(' --- calibrating autoGuider');
+        tsxLog(' [AUTOGUIDER] calibrating autoGuider');
         CalibrateAutoGuider();
       }
     }
     catch( e ) {
       if( e == 'TsxError' ) {
-        UpdateStatus('!!! TheSkyX connection is no longer there!');
+        UpdateStatus(' [AUTOGUIDER]!!! TheSkyX connection is no longer there!');
       }
     }
     finally {
-      UpdateStatus(' TOOLBOX: Autoguider Calibration FINISHED');
+      UpdateStatus(' [AUTOGUIDER] TOOLBOX: Autoguider Calibration FINISHED');
       tsx_SetServerState( tsx_ServerStates.tool_active, false );
     }
   },

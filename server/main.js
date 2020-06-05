@@ -236,6 +236,8 @@ Meteor.startup(() => {
 
   UpdateStatus(' ******* TSX_CMD ONLINE' );
   tsxLog(' ******************************', '');
+  //console.log( ' Browser: http://' + process.env.ROOT_URL'' );
+  tsxLog(' ******************************', '');
 
   return;
 

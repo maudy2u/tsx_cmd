@@ -45,7 +45,7 @@ export function getFilterSlot(filterName) {
   var slot = '';
   try {
     var filter = Filters.findOne({name: filterName});
-    tsxDebug(' Found Filter ' + filterName + ' at slot: ' + filter.slot);
+    tsxDebug(' [FILTERWHEEL] Filter ' + filterName + ' at slot: ' + filter.slot);
     slot = filter.slot;
   }
   catch( e ) {
@@ -62,7 +62,7 @@ export function getFilterName(slot) {
   try {
     var filterName = Filters.findOne({slot: slot});
     filterName = filterName.name;
-    tsxDebug(' Found Filter ' + slot + ' with name: ' + filterName);
+    tsxDebug(' [FILTERWHEEL] Filter ' + slot + ' with name: ' + filterName);
   }
   catch( e ) {
     // no slot found - assumed to be the err
@@ -84,12 +84,12 @@ const frames = [
 //  cdLight =1, cdBias, cdDark, cdFlat
 export function getFrameNumber(frame) {
   // tsxInfo('************************');
-  tsxInfo(' *** getFrameNumber: ' + frame );
+  tsxInfo(' [FILTERWHEEL] getFrameNumber: ' + frame );
 
   var num = frames.find(function(element) {
     return element.name == frame;
   }).id;
-  tsxDebug('Found '+frame+' frame number: ' + num);
+  tsxDebug('[FILTERWHEEL] '+frame+' frame number: ' + num);
   return num;
 }
 
@@ -97,6 +97,6 @@ export function getFrameName( fid ) {
   var nam = frames.find(function(element) {
     return element.id == fid;
   }).name;
-  tsxDebug('Found '+nam+' frame number: ' + fid);
+  tsxDebug('[FILTERWHEEL] Found '+nam+' frame number: ' + fid);
   return nam;
 }
