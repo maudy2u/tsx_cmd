@@ -39,6 +39,8 @@ import {
   Segment,
   Progress,
   Modal,
+  Accordion,
+  Sidebar,
 } from 'semantic-ui-react'
 
 // Import the API Model
@@ -109,8 +111,22 @@ class App extends TrackerReact(Component) {
 
       modalOpen: false,
       modalOpenTest: false,
+
+      eMetro: 0,
+      eClearSky: 1,
+      weatherIndex: 0,
+
     };
   }
+
+  handleWeatherReportClick = (e, titleProps) => {
+     const { index } = titleProps
+     const { weatherIndex } = this.state
+     const newIndex = weatherIndex === index ? -1 : index
+
+     this.setState({ weatherIndex: newIndex })
+  }
+  handleWeatherItemClick = (e, { name }) => this.setState({ weatherIndex: name });
 
   handleToggle = (e, { name, value }) => this.setState({ [name]: Boolean(!eval('this.state.'+name)) })
 
@@ -338,25 +354,93 @@ class App extends TrackerReact(Component) {
         + this.props.cloudReportWidget.value
         + '?utm_source=weather_widget'
         + '&utm_medium=linkus&utm_content=seeing&utm_campaign=Weather%2BWidget';
-      var frameLink =
+      var metroFrame =
           'https://www.meteoblue.com/en/weather/widget/seeing/'
           + this.props.cloudReportWidget.value
         + '?geoloc=fixed&noground=0';
+
+/*
+<a href=https://www.cleardarksky.com/c/Monctonkey.html>
+<img src="https://www.cleardarksky.com/c/Monctoncsk.gif?c=471637"></a>
+*/
+
+      var ccCity = "Monctoncsk.gif?c=471637";
+      // https://www.cleardarksky.com/c/Monctoncsk.gif?c=471637
+      var ccImage = "https://www.cleardarksky.com/c/" + ccCity ;//+ "\"";
+
+//            onHide={false}
+
       return (
-        <center>
-          <a href={metroLink} target="_blank">meteoblue
-          </a>
-          <br/>
-          Change city code in Cloud Settings.
-          <br/>
-          <iframe
-            src={frameLink}
-            frameBorder="0"
-            scrolling="NO"
-            allowTransparency="true"
-            sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"
-            style={{width: '520px', height: '727px'}}/>
-        </center>
+        <div>
+        <Sidebar.Pushable as={Segment}>
+          <Sidebar
+            as={Menu}
+            animation='overlay'
+            icon='labeled'
+            inverted
+            vertical
+            visible={true}
+            width='thin'
+          >
+            <Menu.Item as='a' name='metroBlue' onClick={this.handleWeatherItemClick} >
+              metroBlue
+            </Menu.Item>
+            <Menu.Item as='a' name='clearSky' onClick={this.handleWeatherItemClick}>
+              ClearSky
+            </Menu.Item>
+          </Sidebar>
+
+          <Sidebar.Pusher>
+            <Segment basic>
+              {this.renderClouds(this.state.weatherIndex)}
+            </Segment>
+          </Sidebar.Pusher>
+        </Sidebar.Pushable>
+        <Accordion fluid styled >
+          <Accordion.Title
+            active={this.state.weatherIndex === this.state.eMetro}
+            index={this.state.eMetro}
+            onClick={this.handleWeatherReportClick}
+          >
+          metroBlue
+          </Accordion.Title>
+          <Accordion.Content  active={this.state.weatherIndex === this.state.eMetro} >
+            <center>
+              <a href={metroLink} target="_blank">meteoblue
+              </a>
+              <br/>
+              Get your city code and pput it in Cloud Settings. e.g. Boulder Code<br/>
+              boulder_united-states-of-america_5574991
+              <br/>
+              <iframe
+                src={metroFrame}
+                frameBorder="0"
+                scrolling="NO"
+                allowTransparency="true"
+                sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"
+                style={{width: '520px', height: '727px'}}/>
+            </center>
+          </Accordion.Content>
+          <Accordion.Title
+            active={this.state.weatherIndex === this.state.eClearSky}
+            index={this.state.eClearSky}
+            onClick={this.handleWeatherReportClick}
+          >
+          ClearSky
+          </Accordion.Title>
+          <Accordion.Content  active={this.state.weatherIndex === this.state.eClearSky} >
+            <center>
+              <a href={"http://www.cleardarksky.com/csk/"} target="_blank">Clear Sky Chart
+              </a>
+              <br/>
+              Get your city code and pput it in Cloud Settings. e.g. Boulder Code<br/>
+                BldrCOkey.html?1<br/>
+              <br/>
+              <img src={ccImage}/>
+            </center>
+          </Accordion.Content>
+        </Accordion>
+        </div>
       )
     } else {
       return (
@@ -369,6 +453,63 @@ class App extends TrackerReact(Component) {
     }
     this.saveDefaultState('activeMenu');
 
+  }
+
+  renderClouds( index ) {
+    var metroLink =
+        'https://www.meteoblue.com/en/weather/forecast/seeing/'
+      + this.props.cloudReportWidget.value
+      + '?utm_source=weather_widget'
+      + '&utm_medium=linkus&utm_content=seeing&utm_campaign=Weather%2BWidget';
+    var metroFrame =
+        'https://www.meteoblue.com/en/weather/widget/seeing/'
+        + this.props.cloudReportWidget.value
+      + '?geoloc=fixed&noground=0';
+
+/*
+<a href=https://www.cleardarksky.com/c/Monctonkey.html>
+<img src="https://www.cleardarksky.com/c/Monctoncsk.gif?c=471637"></a>
+*/
+
+    var ccCity = "Monctoncsk.gif?c=471637";
+    // https://www.cleardarksky.com/c/Monctoncsk.gif?c=471637
+    var ccImage = "https://www.cleardarksky.com/c/" + ccCity ;//+ "\"";
+
+//            onHide={false}
+
+
+    if( index === 'clearSky' ) {
+      return (
+        <center>
+          <a href={"http://www.cleardarksky.com/csk/"} target="_blank">Clear Sky Chart
+          </a>
+          <br/>
+          Get your city code and pput it in Cloud Settings. e.g. Boulder Code<br/>
+            BldrCOkey.html?1<br/>
+          <br/>
+          <img src={ccImage}/>
+        </center>
+      )
+    }
+    else if( index === 'metroBlue' ) {
+      return (
+        <center>
+          <a href={metroLink} target="_blank">meteoblue
+          </a>
+          <br/>
+          Get your city code and pput it in Cloud Settings. e.g. Boulder Code<br/>
+          boulder_united-states-of-america_5574991
+          <br/>
+          <iframe
+            src={metroFrame}
+            frameBorder="0"
+            scrolling="NO"
+            allowTransparency="true"
+            sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"
+            style={{width: '520px', height: '727px'}}/>
+        </center>
+      )
+    }
   }
 
   renderTestModal() {
