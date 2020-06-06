@@ -116,22 +116,25 @@ class App extends TrackerReact(Component) {
       eClearSky: 1,
       weatherIndex: 'metroBlue',
       sideBarVisible: true,
+      sideBarSettingsVisible: true,
+      settingsIndex: 'TheSkyX Connection',
 
     };
   }
 
-  handleWeatherReportClick = (e, titleProps) => {
-     const { index } = titleProps
-     const { weatherIndex } = this.state
-     const newIndex = weatherIndex === index ? -1 : index
-
-     this.setState({ weatherIndex: newIndex })
-  }
   handleWeatherItemClick = (e, { name }) => this.setState({ weatherIndex: name });
-
   pushWeatherToggle = () => this.setState({ sideBarVisible: !this.state.sideBarVisible })
+  pushSettingsToggle = () => this.setState({ sideBarSettingsVisible: false })
+  handleSettingsItemClick = (e, { name }) => this.setState({ settingsIndex: name });
 
-  handleMenuItemClick = (e, { name }) => this.setState({ activeMenu: name });
+  handleMenuItemClick = (e, { name }) => {
+
+    this.setState({ activeMenu: name });
+    const { activeMenu  } = this.state;
+    if( activeMenu === 'Settings' ) {
+       this.setState({ sideBarSettingsVisible: !this.state.sideBarSettingsVisible });
+    }
+  }
   saveServerFailedOpen = () => this.setState({ saveServerFailed: true });
   saveServerFailedClose = () => this.setState({ saveServerFailed: false });
 
@@ -333,13 +336,6 @@ class App extends TrackerReact(Component) {
           tool_flats_dec_az = {this.props.tool_flats_dec_az}
         />
       )
-    } else if (this.state.activeMenu == 'Settings') {
-      return (
-        <DefaultSettings
-          scheduler_running={this.props.scheduler_running}
-        />
-      )
-
     } else if (this.state.activeMenu == 'Toolbox') {
       return (
         <Toolbox
@@ -354,7 +350,7 @@ class App extends TrackerReact(Component) {
         <Sidebar.Pushable width='very thin' as={Segment}>
           <Sidebar
             as={Menu}
-            animation='overlay'
+            animation='push'
             icon='labeled'
             inverted
             vertical
@@ -376,12 +372,28 @@ class App extends TrackerReact(Component) {
           </Sidebar.Pusher>
         </Sidebar.Pushable>
       )
+    } else if (this.state.activeMenu == 'Settings') {
+      return (
+        <DefaultSettings
+          scheduler_running={this.props.scheduler_running}
+          tsxInfo = { this.props.tsxInfo }
+          tool_active = { this.props.tool_active }
+          sideBarSettingsVisible = {this.state.sideBarSettingsVisible}
+          hideSideBar = {this.pushSettingsToggle }
+          handleSettingsItemClick={this.handleSettingsItemClick}
+          settingsIndex={this.state.settingsIndex}
+        />
+      )
     } else {
       return (
         <DefaultSettings
           scheduler_running={this.props.scheduler_running}
           tsxInfo = { this.props.tsxInfo }
           tool_active = { this.props.tool_active }
+          sideBarSettingsVisible = {this.state.sideBarSettingsVisible}
+          handleSettingsItemClick={this.handleSettingsItemClick}
+          hideSideBar = {this.pushSettingsToggle }
+          settingsIndex={this.state.settingsIndex}
         />
       )
     }
@@ -420,7 +432,7 @@ class App extends TrackerReact(Component) {
           Get your city code and pput it in Cloud Settings. e.g. Boulder Code<br/>
             BldrCOkey.html?1<br/>
           <br/>
-          <img src={ccImage}/>
+          <img src={ccImage} onClick={this.pushWeatherToggle}/>
         </center>
       )
     }
@@ -439,7 +451,9 @@ class App extends TrackerReact(Component) {
             scrolling="NO"
             allowTransparency="true"
             sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"
-            style={{width: '520px', height: '727px'}}/>
+            style={{width: '520px', height: '727px'}}
+            onClick={this.pushWeatherToggle}
+            />
         </center>
       )
     }

@@ -5,7 +5,9 @@
   "enable_warn": "yes",
   "tsx_cmd_db": "tsx_cmd",
   "mongo_port": "27017",
-  "removed-to-enable: skySafari_files": "/media/odroid/PENSIVE2/skySafariSettings/",
-  "removed-to-enable: backup_location": "/media/odroid/PENSIVE2/tsx_cmd_db_backups/",
-  "removed-to-enable: log_file_location": "/media/odroid/PENSIVE2/tsx_cmd_logs"
+  "tsx_cmd_server_ip": "10.9.8.34",
+  "tsx_cmd_server_port": "3000",
+  "removed-to-set-your-specific-directoy: skySafari_files": "/media/odroid/PENSIVE2/skySafariSettings/",
+  "removed-to-set-your-specific-directoy: backup_location": "/media/odroid/PENSIVE2/tsx_cmd_db_backups/",
+  "removed-to-set-your-specific-directoy:ß log_file_location": "/media/odroid/PENSIVE2/tsx_cmd_logs"
 }

@@ -31,6 +31,9 @@ import {
   Accordion,
   Checkbox,
   Icon,
+
+  Menu,
+  Sidebar,
 } from 'semantic-ui-react'
 
 import {
@@ -148,8 +151,16 @@ class DefaultSettings extends Component {
      cloudReportWidget: 'boulder_united-states-of-america_5574991',
 
       activeIndex: -1,
+
+      //settingsIndex: 'TheSkyX Connection',
+      sideBarSettingsVisible: true,
+
     };
   }
+
+  // handleSettingsItemClick = (e, { name }) => {
+  //   this.props.settingsIndex = name;
+  // }
 
   handleClick = (e, titleProps) => {
      const { index } = titleProps
@@ -433,6 +444,10 @@ class DefaultSettings extends Component {
   }
 
   renderServers() {
+    if( this.props.settingsIndex !== 'TheSkyX Connection' ) {
+      return;
+    }
+
     const { activeIndex } = this.state;
     var mount = TheSkyXInfos.findOne().mount();
     var camera = TheSkyXInfos.findOne().camera();
@@ -457,21 +472,12 @@ class DefaultSettings extends Component {
     var IMAGE_BINNINGS = renderDropDownImagingBinnings();
 
 //    style={{color: '#68c349'}}
+//      <Segment.Group compact>
 
     return (
-      <div>
-      <Accordion.Title
-        active={activeIndex === eSetup}
-        index={eSetup}
-        onClick={this.handleClick}
-      >
-      <Icon name='star' size='large' />
-      TheSkyX Connection
-      </Accordion.Title>
-      <Accordion.Content  active={activeIndex === eSetup} >
-      <Form>
-        <Segment>
-          <Form.Group>
+      <Segment.Group>
+      <Segment>
+        <Form>
             <Form.Input
               label='TheSkyX Server IP Address'
               name='ip'
@@ -486,11 +492,10 @@ class DefaultSettings extends Component {
               value={this.state.port}
               onChange={this.handleChange}
             />
-          </Form.Group>
-        </Segment>
-      </Form>
-      <Segment.Group>
-        {this.appButtons(RUNNING, ACTIVE)}
+        </Form>
+      </Segment>
+        &nbsp;<br/>
+        <center>{this.appButtons(RUNNING, ACTIVE)}</center>
         <Segment><Label>Mount<Label.Detail>
           {mount.manufacturer + ' | ' + mount.model}
         </Label.Detail></Label></Segment>
@@ -521,7 +526,6 @@ class DefaultSettings extends Component {
         <Segment><Label>Rotator<Label.Detail>
           {rotator.manufacturer + ' | ' + rotator.model}
         </Label.Detail></Label></Segment>
-      </Segment.Group>
       <Segment>
         <Form>
           <Form.Field control={Dropdown}
@@ -529,6 +533,8 @@ class DefaultSettings extends Component {
             label='Default Image Binning'
             name='imagingBinning'
             options={IMAGE_BINNINGS}
+            wrapSelection
+            scrolling
             placeholder='Bin imaging camera'
             text={this.state.imagingBinning}
             onChange={this.handleChange}
@@ -555,12 +561,14 @@ class DefaultSettings extends Component {
           />
         </Form>
       </Segment>
-    </Accordion.Content>
-    </div>
+      </Segment.Group>
     )
   }
 
   renderFlatBox() {
+    if( this.props.settingsIndex !== 'Artesky Flatbox' ) {
+      return;
+    }
     const { activeIndex } = this.state;
     // var RUNNING = '';
     // var ACTIVE = false;
@@ -578,18 +586,7 @@ class DefaultSettings extends Component {
 //    style={{color: '#68c349'}}
 
     return (
-      <div>
-      <Accordion.Title
-        active={activeIndex === eFlatbox}
-        index={eFlatbox}
-        onClick={this.handleClick}
-        icon='question'
-      >
-      <Icon name='chart area' size='large' />
-      Artesky Flatbox
-      </Accordion.Title>
-      <Accordion.Content  active={activeIndex === eFlatbox} >
-      <Segment.Group>
+      <Segment.Group compact>
         <Segment tertiary>
           <Checkbox
             label='Enable Artseky Flatbox'
@@ -638,31 +635,28 @@ class DefaultSettings extends Component {
           <Label>
             REQUIREMENT:
             <Label.Detail>
-            <a href='https://github.com/maudy2u/artesky_flat_box'>ARTEKSY_SRV</a> needs to be installed on the PC connected to the ARTESKY FLATBOX.
-              CLick to learn more.
+            <a href='https://github.com/maudy2u/artesky_flat_box'>ARTEKSY_SRV</a> needs
+            to be installed on the PC<br/>
+            connected to the ARTESKY FLATBOX.<br/>
+            CLick to learn more.
             </Label.Detail>
           </Label>
         </Segment>
       </Segment.Group>
-    </Accordion.Content>
-    </div>
     )
   }
   renderConstraints() {
+
+    if( this.props.settingsIndex !== 'Default Constraints' ) {
+      return;
+    }
+
     const { activeIndex } = this.state
 
     return (
-      <div>
-      <Accordion.Title
-        active={activeIndex === eDefaultConstrainsts}
-        index={eDefaultConstrainsts}
-        onClick={this.handleClick}
-      >
-      <Icon name='settings' size='large' />
-      Default Constraints
-      </Accordion.Title>
-      <Accordion.Content  active={activeIndex === eDefaultConstrainsts} >
+      <Segment.Group compact>
       <Segment>
+
       <h4 style={{color: "#5FB343"}} className="ui header">Priority: {this.state.defaultPriority}</h4>
       <ReactSimpleRange
         label
@@ -699,28 +693,21 @@ class DefaultSettings extends Component {
       />
       </Form>
       </Segment>
-    </Accordion.Content>
-    </div>
+      </Segment.Group>
     )
   }
 
   renderStartStopTimes() {
+    if( this.props.settingsIndex !== 'Default Start/Stop Times' ) {
+      return;
+    }
+
     var startT = `${this.state.defaultStartTime}`
     var stopT = `${this.state.defaultStopTime}`
     const { activeIndex } = this.state
 
     return (
-      <div>
-      <Accordion.Title
-        active={activeIndex === eStartStop}
-        index={eStartStop}
-        onClick={this.handleClick}
-      >
-      <Icon name='time' size='large' />
-      Default Start/Stop Times
-      </Accordion.Title>
-      <Accordion.Content  active={activeIndex === eStartStop} >
-      <div>
+      <Segment.Group compact>
         <Segment raised>
            <h4 className="ui header">Set Default START time</h4>
            <Timekeeper
@@ -738,28 +725,20 @@ class DefaultSettings extends Component {
              onChange={this.handleStopChange}
            />
          </Segment>
-         </div>
-      </Accordion.Content>
-      </div>
+       </Segment.Group>
     )
   }
 
   renderDithering() {
+    if( this.props.settingsIndex !== 'Dithering' ) {
+      return;
+    }
+
     const { activeIndex } = this.state
     var DISABLE = !this.state.isDitheringEnabled;
 
     return (
-      <div>
-      <Accordion.Title
-        active={activeIndex === eDither}
-        index={eDither}
-        onClick={this.handleClick}
-      >
-      <Icon name='moon' size='large' />
-      Dithering
-      </Accordion.Title>
-      <Accordion.Content active={activeIndex === eDither} >
-      <Segment.Group>
+      <Segment.Group compact>
         <Segment tertiary>
           <Checkbox
             label=' Enable Dithering'
@@ -801,26 +780,20 @@ class DefaultSettings extends Component {
           </Form>
           </Segment>
         </Segment.Group>
-      </Accordion.Content>
-      </div>
     )
   }
 
   renderRotator() {
+    if( this.props.settingsIndex !== 'Rotator' ) {
+      return;
+    }
+
     const { activeIndex } = this.state
 
     return (
-      <div>
-      <Accordion.Title
-        active={activeIndex === eRotator}
-        index={eRotator}
-        onClick={this.handleClick}
-      >
-      <Icon name='crop' size='large' />
-      Rotator
-      </Accordion.Title>
-      <Accordion.Content active={activeIndex === eRotator} >
+      <Segment.Group compact>
       <Segment>
+
         <Form>
           <Form.Input
             label='FOV Angle Tolerance '
@@ -848,12 +821,15 @@ class DefaultSettings extends Component {
           />
         </Form>
         </Segment>
-      </Accordion.Content>
-      </div>
+        </Segment.Group>
     )
   }
 
   renderGuider() {
+    if( this.props.settingsIndex !== 'Guider' ) {
+      return;
+    }
+
     const { activeIndex } = this.state
 
     let GUIDER_BINNINGS = '';
@@ -865,17 +841,9 @@ class DefaultSettings extends Component {
     }
 
     return (
-      <div>
-      <Accordion.Title
-        active={activeIndex === eGuider}
-        index={eGuider}
-        onClick={this.handleClick}
-      >
-      <Icon name='chart line' size='large' />
-      Guider
-      </Accordion.Title>
-      <Accordion.Content  active={activeIndex === eGuider} >
-      <Segment>
+      <Segment.Group compact>
+        <Segment>
+
         <Form>
           <Form.Input
             label='AutoGuider Exposure '
@@ -913,6 +881,8 @@ class DefaultSettings extends Component {
             label='Default Guider Binning'
             name='defaultGuiderBin'
             options={GUIDER_BINNINGS}
+            wrapSelection
+            scrolling
             placeholder='Bin guider image'
             text={this.state.defaultGuiderBin}
             onChange={this.handleChange}
@@ -943,12 +913,15 @@ class DefaultSettings extends Component {
           />
         </Form>
         </Segment>
-      </Accordion.Content>
-      </div>
+        </Segment.Group>
     )
   }
 
   renderFilterWheel() {
+    if( this.props.settingsIndex !== 'Filter Wheel' ) {
+      return;
+    }
+
     const { activeIndex } = this.state;
 
     let aFilters = '';
@@ -964,35 +937,44 @@ class DefaultSettings extends Component {
     }
 
     return (
-      <div>
-      <Accordion.Title
-        active={activeIndex === eFilterWheel}
-        index={eFilterWheel}
-        onClick={this.handleClick}
-      >
-      <Icon name='filter' size='large' />
-      Filter Wheel
-      </Accordion.Title>
-      <Accordion.Content  active={activeIndex === eFilterWheel} >
-      <Segment>
+      <Segment.Group compact >
+        <Segment>
+
         <Form>
         <Form.Field control={Dropdown}
           fluid
           label='Default Filter'
           name='defaultFilter'
           options={FILTERS}
+          wrapSelection
+          scrolling
           placeholder='Used CLS and Focusing'
           text={this.state.defaultFilter}
           onChange={this.handleChange}
         />
+        &nbsp;<br/>
+        &nbsp;<br/>
+        &nbsp;<br/>
+        &nbsp;<br/>
+        &nbsp;<br/>
+        &nbsp;<br/>
+        &nbsp;<br/>
+        &nbsp;<br/>
+        &nbsp;<br/>
+        &nbsp;<br/>
+        &nbsp;<br/>
+        &nbsp;<br/>
         </Form>
         </Segment>
-      </Accordion.Content>
-      </div>
+        </Segment.Group>
     )
   }
 
   renderImager() {
+    if( this.props.settingsIndex !== 'Imaging Camera' ) {
+      return;
+    }
+
     const { activeIndex } = this.state;
 
     var IMAGE_BINNINGS = renderDropDownImagingBinnings();
@@ -1007,17 +989,7 @@ class DefaultSettings extends Component {
 
 
     return (
-      <div>
-      <Accordion.Title
-        active={activeIndex === eCamera}
-        index={eCamera}
-        onClick={this.handleClick}
-      >
-      <Icon name='camera' size='large' />
-      Imaging Camera
-      </Accordion.Title>
-      <Accordion.Content  active={activeIndex === eCamera} >
-      <Segment.Group>
+      <Segment.Group compact>
       <Segment>
         <Form>
           <Form.Input
@@ -1037,6 +1009,8 @@ class DefaultSettings extends Component {
             label='Default Image Binning'
             name='imagingBinning'
             options={IMAGE_BINNINGS}
+            wrapSelection
+            scrolling
             placeholder='Bin imaging camera'
             text={this.state.imagingBinning}
             onChange={this.handleChange}
@@ -1071,26 +1045,18 @@ class DefaultSettings extends Component {
         </Form>
         </Segment>
         </Segment.Group>
-      </Accordion.Content>
-      </div>
     )
   }
 
   renderFocuser() {
+    if( this.props.settingsIndex !== 'Focuser' ) {
+      return;
+    }
+
     const { activeIndex } = this.state;
 
     return (
-      <div>
-      <Accordion.Title
-        active={activeIndex === eFocuser}
-        index={eFocuser}
-        onClick={this.handleClick}
-      >
-      <Icon name='adjust' size='large' />
-      Focuser
-      </Accordion.Title>
-      <Accordion.Content  active={activeIndex === eFocuser} >
-        <Segment.Group>
+        <Segment.Group compact>
           <Segment tertiary>
             <Checkbox
               style={{color: '#68c349'}}
@@ -1142,26 +1108,18 @@ class DefaultSettings extends Component {
             </Form>
           </Segment>
         </Segment.Group>
-      </Accordion.Content>
-    </div>
     )
   }
 
   renderClouds() {
+    if( this.props.settingsIndex !== 'Clouds' ) {
+      return;
+    }
+
     const { activeIndex } = this.state;
 
     return (
-      <div>
-      <Accordion.Title
-        active={activeIndex === eClouds}
-        index={eClouds}
-        onClick={this.handleClick}
-      >
-      <Icon name='cloud' size='large' />
-      Clouds
-      </Accordion.Title>
-      <Accordion.Content  active={activeIndex === eClouds} >
-        <Segment.Group>
+        <Segment.Group compact>
         <Segment tertiary>
           <Checkbox
             style={{color: '#68c349'}}
@@ -1220,8 +1178,6 @@ class DefaultSettings extends Component {
             </Form>
           </Segment>
         </Segment.Group>
-      </Accordion.Content>
-    </div>
     )
   }
 
@@ -1237,22 +1193,98 @@ class DefaultSettings extends Component {
     };
     // const handleToggle = () => this.handleToggle;
 
+/* used in the segement:
+<Sidebar.Pusher>
+  <Segment basic onClick={this.pushSettingsToggle} >
+*/
     return (
       <div>
-        <Accordion fluid styled >
-          {this.renderServers()}
-          {this.renderGuider()}
-          {this.renderDithering()}
-          {this.renderImager()}
-          {this.renderFocuser()}
-          {this.renderRotator()}
-          {this.renderFilterWheel()}
-          {this.renderConstraints()}
-          {this.renderClouds()}
-          {this.renderStartStopTimes()}
-          {this.renderFlatBox()}
-
-      </Accordion>
+        <Sidebar.Pushable width='very thin' as={Segment}>
+          <Sidebar
+            as={Menu}
+            animation='overlay'
+            icon='labeled'
+            inverted
+            vertical
+            visible={this.props.sideBarSettingsVisible}
+            width='thin'
+          >
+            <Menu.Item fitted as='a' name='TheSkyX Connection' onClick={this.props.handleSettingsItemClick} >
+              <Icon name='star' fitted={true} size='mini' />
+              TheSkyX Connection
+            </Menu.Item>
+            <Menu.Item fitted as='a' name='Guider' onClick={this.props.handleSettingsItemClick} >
+              <Icon name='chart line' size='mini' />
+              Guider
+            </Menu.Item>
+            <Menu.Item fitted as='a' name='Dithering' onClick={this.props.handleSettingsItemClick} >
+              <Icon name='moon' size='mini' />
+              Dithering
+            </Menu.Item>
+            <Menu.Item fitted as='a' name='Imaging Camera' onClick={this.props.handleSettingsItemClick} >
+              <Icon name='camera' size='mini' />
+              Imaging Camera
+            </Menu.Item>
+            <Menu.Item fitted as='a' name='Focuser' onClick={this.props.handleSettingsItemClick} >
+              <Icon name='adjust' size='mini' />
+              Focuser
+            </Menu.Item>
+            <Menu.Item fitted as='a' name='Rotator' onClick={this.props.handleSettingsItemClick} >
+              <Icon name='crop' size='mini' />
+              Rotator
+            </Menu.Item>
+            <Menu.Item fitted as='a' name='Filter Wheel' onClick={this.props.handleSettingsItemClick} >
+              <Icon name='filter' size='mini' />
+              Filter Wheel
+            </Menu.Item>
+            <Menu.Item fitted as='a' name='Default Constraints' onClick={this.props.handleSettingsItemClick} >
+              <Icon name='settings' size='mini' />
+              Default Constraints
+            </Menu.Item>
+            <Menu.Item fitted as='a' name='Clouds' onClick={this.props.handleSettingsItemClick} >
+              <Icon name='cloud' size='mini' />
+              Clouds
+            </Menu.Item>
+            <Menu.Item fitted as='a' name='Default Start/Stop Times' onClick={this.props.handleSettingsItemClick} >
+              <Icon name='time' size='mini' />
+              Default Start/Stop Times
+            </Menu.Item>
+            <Menu.Item fitted as='a' name='Artesky Flatbox' onClick={this.props.handleSettingsItemClick} >
+              <Icon name='chart area' size='mini' />
+              Artesky Flatbox
+            </Menu.Item>
+          </Sidebar>
+          <Sidebar.Pusher>
+          <center>
+            <Segment basic compact onClick={this.props.hideSideBar } >
+            {this.renderServers()}
+            {this.renderGuider()}
+            {this.renderDithering()}
+            {this.renderImager()}
+            {this.renderFocuser()}
+            {this.renderRotator()}
+            {this.renderFilterWheel()}
+            {this.renderConstraints()}
+            {this.renderClouds()}
+            {this.renderStartStopTimes()}
+            {this.renderFlatBox()}
+            </Segment>
+            </center>
+          </Sidebar.Pusher>
+          &nbsp;<br/>
+          &nbsp;<br/>
+          &nbsp;<br/>
+          &nbsp;<br/>
+          &nbsp;<br/>
+          &nbsp;<br/>
+          &nbsp;<br/>
+          &nbsp;<br/>
+          &nbsp;<br/>
+          &nbsp;<br/>
+          &nbsp;<br/>
+          &nbsp;<br/>
+          &nbsp;<br/>
+        </Sidebar.Pushable>
     </div>
     );
   }
