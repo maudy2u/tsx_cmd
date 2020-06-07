@@ -80,6 +80,7 @@ export const tsx_ServerStates = {
   // Dithering related states
   defaultDithering: 'defaultDithering',
   imagingPixelSize: 'imagingPixelSize',
+  imagingPixelMaximum: 'imagingPixelMaximum',
   imagingFocalLength: 'imagingFocalLength',
   minDitherFactor: 'minDitherFactor',
   maxDitherFactor: 'maxDitherFactor',
@@ -156,6 +157,7 @@ export const tsx_ServerStates = {
   flatbox_camera_delay: 'flatbox_camera_delay',
   flatbox_lamp_level: 'flatbox_lamp_level',
   flatbox_lamp_on: 'flatbox_lamp_on',
+  flatbox_monitor_max_pixel: 'flatbox_monitor_max_pixel',
 
   session_report: 'session_report',
 

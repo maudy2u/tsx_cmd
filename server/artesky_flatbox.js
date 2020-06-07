@@ -118,7 +118,7 @@ function flat_enabled() {
 
 export function flatbox_setup() {
   var cmd = flatbox_srv() + flat_device();
-  tsxLog(' [ARTESKY] Flatbox sending: ' + cmd );
+  tsxDebug(' [ARTESKY] Flatbox sending: ' + cmd );
 
   var Out =false;
 
@@ -130,7 +130,7 @@ export function flatbox_setup() {
         UpdateStatusErr(' [ARTESKY] CONNECTION FAILED!! Artesky server error: ' + err);
       }
       else {
-        UpdateStatus(' [ARTESKY] Flatbox Connected: ' + err );
+        UpdateStatus(' [ARTESKY] Flatbox Connected' );
         Out = true;
       }
     }
@@ -145,7 +145,7 @@ export function flatbox_setup() {
 
 export function flatbox_connect() {
   var cmd = flatbox_srv() + ' --connect ' + flat_device();
-  tsxLog(' [ARTESKY] Flatbox sending: ' + cmd );
+  tsxDebug(' [ARTESKY] Flatbox sending: ' + cmd );
 
   var Out =false;
   artesky_cmd(cmd, Meteor.bindEnvironment((artesky_return) => {
@@ -156,7 +156,7 @@ export function flatbox_connect() {
         UpdateStatusErr(' [ARTESKY] CONNECTION FAILED!! Artesky server error: ' + err);
       }
       else {
-        UpdateStatus(' [ARTESKY] Flatbox Connected: ' + err );
+        UpdateStatus(' [ARTESKY] Flatbox Connected' );
         Out = true;
       }
     }
@@ -172,7 +172,7 @@ export function flatbox_connect() {
 export function flatbox_on() {
   flatbox_connect();
   var cmd = flatbox_srv() + ' --on';
-  tsxLog(' [ARTESKY] Flatbox sending: ' + cmd );
+  tsxDebug(' [ARTESKY] Flatbox sending: ' + cmd );
   var Out =false;
   artesky_cmd(cmd, Meteor.bindEnvironment((artesky_return) => {
     var results = artesky_return.split(':');
@@ -182,7 +182,7 @@ export function flatbox_on() {
         UpdateStatusErr(' [ARTESKY] TURNING ON FAILED!! Artesky server error: ' + err);
       }
       else {
-        UpdateStatus(' [ARTESKY] Flatbox ON: ' + err  );
+        UpdateStatus(' [ARTESKY] Flatbox ON'  );
         Out =true;
       }
     }
@@ -204,7 +204,7 @@ export function flatbox_level( lvl ) {
     lvl = 0;
   }
   cmd = flatbox_srv() + ' --level ' + lvl;
-  tsxLog(' [ARTESKY] Flatbox sending: --level ' + cmd );
+  tsxDebug(' [ARTESKY] Flatbox sending: --level ' + cmd );
   var Out =false;
   artesky_cmd(cmd, Meteor.bindEnvironment((artesky_return) => {
     var results = artesky_return.split(':');
@@ -228,7 +228,7 @@ export function flatbox_level( lvl ) {
 
 export function flatbox_off() {
   var cmd = flatbox_srv() + ' --off';
-  tsxLog(' [ARTESKY] Flatbox sending: ' + cmd );
+  tsxDebug(' [ARTESKY] Flatbox sending: ' + cmd );
   var Out = false;
   artesky_cmd(cmd, Meteor.bindEnvironment((artesky_return) => {
     var results = artesky_return.split(':');
@@ -238,7 +238,8 @@ export function flatbox_off() {
         UpdateStatusErr(' [ARTESKY] Flatbox OFF FAILED!! Artesky server error: ' + err);
       }
       else {
-        UpdateStatus(' [ARTESKY] Flatbox OFF: ' + err );
+        UpdateStatus(' [ARTESKY] Flatbox OFF');
+//        UpdateStatus(' [ARTESKY] Flatbox OFF: ' + err );
         Out = true;
       }
     }
@@ -252,7 +253,7 @@ export function flatbox_off() {
 
 export function flatbox_disconnect() {
   var cmd = flatbox_srv() + ' --disconnect';
-  tsxLog(' [ARTESKY] Flatbox sending: ' + cmd );
+  tsxDebug(' [ARTESKY] Flatbox sending: ' + cmd );
   var Out =false;
   artesky_cmd(cmd, Meteor.bindEnvironment((artesky_return) => {
     var results = artesky_return.split(':');
@@ -262,7 +263,7 @@ export function flatbox_disconnect() {
         UpdateStatusErr(' [ARTESKY] Flatbox DISCONNECT FAILED!! Artesky server error: ' + err);
       }
       else {
-        UpdateStatus(' [ARTESKY] Flatbox Disconnected: ' + err );
+        UpdateStatus(' [ARTESKY] Flatbox Disconnected, and OFF' );
         Out =true;
       }
     }
@@ -276,7 +277,7 @@ export function flatbox_disconnect() {
 
 export function flatbox_status() {
   var cmd = flatbox_srv() + ' --status';
-  tsxLog(' [ARTESKY] Flatbox sending: ' + cmd );
+  tsxDebug(' [ARTESKY] Flatbox sending: ' + cmd );
   var Out =false;
   artesky_cmd(cmd, Meteor.bindEnvironment((artesky_return) => {
     var results = artesky_return.split(':');
@@ -390,9 +391,9 @@ Meteor.methods({
     try{
       tsx_SetServerState( tsx_ServerStates.tool_active, true );
       err = flatbox_connect();
-      console.log( ' [ARTESKY] connect: ' + err )
+      tsxDebug( ' [ARTESKY] connect: ' + err )
       err = flatbox_status();
-      console.log( ' [ARTESKY] status: ' + err )
+      tsxDebug( ' [ARTESKY] status: ' + err )
     }
     catch( e )  {
       UpdateStatus(' [ARTESKY] Is artesky_srv connection STILL there ?!?' + e );
@@ -408,11 +409,11 @@ Meteor.methods({
     try{
       tsx_SetServerState( tsx_ServerStates.tool_active, true );
       err = flatbox_connect();
-      console.log( ' [ARTESKY] connect: ' + err )
+      tsxDebug( ' [ARTESKY] connect: ' + err )
       err = flatbox_off();
-      console.log( ' [ARTESKY] off: ' + err )
+      tsxDebug( ' [ARTESKY] off: ' + err )
       err = flatbox_disconnect();
-      console.log( ' [ARTESKY] disconnect: ' + err )
+      tsxDebug( ' [ARTESKY] disconnect: ' + err )
     }
     catch( e )  {
       UpdateStatus(' [ARTESKY] Is artesky_srv connection STILL there ?!?' + e );
@@ -428,12 +429,12 @@ Meteor.methods({
     try{
       tsx_SetServerState( tsx_ServerStates.tool_active, true );
       err = flatbox_connect();
-      console.log( ' [ARTESKY] connect: ' + err )
+      tsxDebug( ' [ARTESKY] connect: ' + err )
       err = flatbox_on();
-      console.log( ' [ARTESKY] on: ' + err )
+      tsxDebug( ' [ARTESKY] on: ' + err )
       var level = tsx_GetServerStateValue( tsx_ServerStates.flatbox_lamp_level );
       err = flatbox_level( level );
-      console.log( ' [ARTESKY] level: ' + err )
+      tsxDebug( ' [ARTESKY] level: ' + err )
 
     }
     catch( e )  {
@@ -450,11 +451,11 @@ Meteor.methods({
     try {
       tsx_SetServerState( tsx_ServerStates.tool_active, true );
       ok = flatbox_connect();
-      console.log( ' [ARTESKY] connect: ' + ok )
+      tsxDebug( ' [ARTESKY] connect: ' + ok )
       if( ok ) {
         var level = tsx_GetServerStateValue( tsx_ServerStates.flatbox_lamp_level );
         ok = flatbox_level( level );
-        console.log( ' [ARTESKY] level: ' + ok )
+        tsxDebug( ' [ARTESKY] level: ' + ok )
       }
     }
     catch( e )  {
@@ -472,9 +473,9 @@ Meteor.methods({
       tsx_SetServerState( tsx_ServerStates.tool_active, true );
 
       res = flatbox_connect();
-      console.log( ' [ARTESKY] connect: ' + res )
+      tsxDebug( ' [ARTESKY] connect: ' + res )
       res = flatbox_status();
-      console.log( ' [ARTESKY] status: ' + res )
+      tsxDebug( ' [ARTESKY] status: ' + res )
       try {
         var status = res.split('Lamp is ');
         res = 'Lamp is ' + status[1];

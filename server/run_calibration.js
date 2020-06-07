@@ -28,6 +28,11 @@ import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug,
 } from '../imports/api/theLoggers.js';
 
 import {
+  tsx_cmd,
+  tsx_feeder,
+} from './tsx_feeder.js'
+
+import {
   imageReportMaxPixel,
   imageReportFilename,
 } from '../imports/api/imagingSessionLogs.js';
@@ -139,21 +144,24 @@ export function collect_calibration_images() {
     try {
       var maxPix = 0;
       var numMaxPixs = 0;
-      var MAXIMUM_OCCURANCE = 2;
-      const MAX_VALUE = 65536; // TheSkyX's 16 bit maximumm value
+      var MAXIMUM_OCCURANCE = 1;
+      const MAX_VALUE = tsx_GetServerStateValue( tsx_ServerStates.imagingPixelMaximum); // TheSkyX's 16 bit maximumm value
+      const MONITOR_PIXEL = tsx_GetServerStateValue( tsx_ServerStates.flatbox_monitor_max_pixel); // TheSkyX's 16 bit maximumm value
       for( var sub=0; sub<cal.quantity; sub++) {
         if( isSchedulerStopped() == false ) {
           var inc = sub+1;
           UpdateStatus( ' [CALIBRATION] frame: ' + cal.subFrameTypes + ' ' +  cal.filter + ' ' + cal.exposure + ' sec: '  +inc+'/' + cal.quantity    );
           var iid = takeCalibrationImage( cal );
-          console.log( iid );
           // *******************************
           // MONITOR for MAX PIXEL and if max value decrease by one
           // *******************************
-          if( fp_enabled == true && (cal.subFrameTypes === 'Flat') ) {
+          if( fp_enabled == true
+            && (cal.subFrameTypes === 'Flat'
+            && MONITOR_PIXEL )
+           ) {
             maxPix = imageReportMaxPixel( iid );
-            tsxLog( ' [CALIBRATION] Maximum pixel value: ' + maxPix );
-            if( maxPix >= MAX_VALUE ) {
+            tsxLog( ' [CALIBRATION] Maximum pixel value: ' + maxPix + ', vs. MAX ALLOWED: ' + MAX_VALUE );
+            if( Number(maxPix) >= Number(MAX_VALUE) ) {
               numMaxPixs++;
               var file = imageReportFilename( iid );
               tsx_RemoveImage( file );
@@ -166,6 +174,7 @@ export function collect_calibration_images() {
               cal.level = cal.level - 1;
               if( cal.level < 0 ) {
                 cal.level = 0;
+                throw( ' CALIBRATION] ERROR - MAX PIXEL at Flatpanel LEVEL 0');
               }
               flatbox_level( cal.level );
               updateCalibrationFrame(
@@ -199,38 +208,24 @@ export function collect_calibration_images() {
 }
 
 function tsx_RemoveImage( fileName ) {
-  tsxInfo('************************');
   tsxInfo(' CALIBRATION] tsx_RemoveImage' );
 
   var success = false;
-  var cmd = tsx_cmd('SkyX_JS_AutoSavePathImager');
+  import shelljs from 'shelljs';
+  // this is equivalent to the standard node require:
+  const Shelljs = require('shelljs');
+  // let err = Shelljs.test( '-e', fileName.trim() ); // -e tests for valid path, -d tests for directory, -f for just file
+  // if( err !== true ) {
+  //   tsxErr( ' [CALIBRATION] File to remove is not a valid directory: ' + fileName );
+  // }
+  // else {
+    console.log( fileName );
+    success = Shelljs.rm( fileName ); // -e tests for valid path, -d tests for directory
+    UpdateStatusWarn(" [CALIBRATION]  Removed file, Max Pixel detected: " + fileName );
+  //   return true;
+  // }
 
-  var tsx_is_waiting = true;
-  tsxDebug( '[TSX] SkyX_JS_AutoSavePathImager' );
-  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-
-    if( tsx_return !== '' ) {
-      var path = tsx_return;
-      import shelljs from 'shelljs';
-      // this is equivalent to the standard node require:
-      const Shelljs = require('shelljs');
-      let err = Shelljs.test( '-d', path ); // -e tests for valid path, -d tests for directory
-      if( err !== true ) {
-        tsxErr( ' [CALIBRATION] AutoSavePath is not a valid directory: ' + path );
-      }
-      else {
-        console.log( path + '/' + fileName );
-        err = Shelljs.rm( path + '/' + fileName ); // -e tests for valid path, -d tests for directory
-      }
-    }
-
-    tsx_is_waiting = false;
-  }));
-  while( tsx_is_waiting ) {
-    Meteor.sleep( 1000 );
-  }
-  return true;
-
+  return success;
 }
 
 //var aFrame = $002; //  cdLight =1, cdBias, cdDark, cdFlat
@@ -242,14 +237,17 @@ function takeCalibrationImage( cal ) {
   if( cal.subFrameTypes === 'Flat' ) {
     UpdateStatusWarn( ' [CALIBRATION] Work around - Flat as Light to monitor max pixel');
     frame = getFrameNumber('Light');
-    tName = 'FLAT';
+    tName = 'Flat';
   }
 
   var filter = getFilterSlot( cal.filter );
   var exposure = cal.exposure;
   var delay = tsx_GetServerStateValue( tsx_ServerStates.flatbox_camera_delay );
   var binning =cal.binning;
-  var ccdTemp = cal.ccdTemp;
+  var ccdTemp = '';
+  if( typeof cal.ccdTemp !== 'undefined' ) {
+    ccdTemp = cal.ccdTemp;
+  }
   tsxDebug( ' [CALIBRATION] filter=' + filter +', exposure=' + exposure +', frame=' + frame +', name=' + tName + ', delay=' + delay+ ', binning=' + binning+ ', ccdTemp=' + ccdTemp);
   return tsx_takeImage( filter, exposure, frame, tName, delay, binning, ccdTemp );
 }

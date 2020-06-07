@@ -165,7 +165,11 @@ else {
 }
 Out = Out +'|'+pointing;
 
-if( aFrame == 1 ) { // not for calibrations
+if( aFrame == 1
+	&& tName !== 'Flat'
+	&& tName !== 'Dark'
+	&& tName !== 'Bias'
+ ) { // not for calibrations
 	CHART.Find(tName);
 	var haveTarget = OBJI.Property(59); // altitude
 	if( haveTarget != 'TypeError: Object not found. Error = 250.') {

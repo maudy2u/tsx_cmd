@@ -93,9 +93,7 @@ ImagingSessionLogs = {
    // if test levels process the
    if( typeof iid !== 'undefined' || iid !== '' ) {
      var image = ImagingSessionLogs.findOne({_id: iid });
-     console.log( image )
      if( typeof image !== 'undefined' || image !== '' ) {
-       console.log (image.maxPix );
        return image.maxPix;
     }
    }
@@ -191,7 +189,6 @@ ImagingSessionLogs = {
        obj.enabled = value;
      }
      else if( name == 'maxPix') {
-       console.log( ' maxPixel=' + value )
        obj.maxPix = value;
      }
      else if( name == 'avgPix') {

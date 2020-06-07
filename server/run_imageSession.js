@@ -100,7 +100,7 @@ export function isSchedulerStopped() {
   if(
     (sched != 'Stop' && runScheduler != '')
   ) {
-    tsxDebug('scheduler_running: ' + sched);
+    tsxDebug(' [SCHEDULER] scheduler_running: ' + sched);
     return false; // exit
   }
   tsx_SetServerState( tsx_ServerStates.targetName, 'No Active Target');
@@ -1594,7 +1594,7 @@ function isFocusingNeeded(target) {
   // assume needed within 6 hours: 60sec *60 min * 6 hr
   let didTimePass = hasTimePassed( 21600, time_t );
   if( didTimePass ) {
-    console.log( 'Focus data old - assumed new date')
+    tsxDebug( 'Focus data old - assumed new date')
     return true;
   }
   // check temp difference
@@ -2484,6 +2484,14 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
     tName = target.targetFindName; // used for imaging
     friendly =  target.getFriendlyName();
   }
+  if(
+    tName === 'Flat'
+    || tName === 'Dark'
+    || tName === 'Bias'
+  ) {
+    UpdateStatusWarn( ' [CALIBRATION] Work around - Flat as Light to monitor max pixel');
+    friendly = tName;
+  }
 
   var cmd = tsx_cmd('SkyX_JS_TakeImage');
   postProgressTotal(exposure);
@@ -2530,7 +2538,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
   cmd = cmd.replace("$006", friendly );   // set target
 
   var tsx_is_waiting = true;
-  tsxDebug( '[TSX] SkyX_JS_TakeImage, '+filterNum+', '+exposure+', '+frame+', '+tName +', '+delay+', '+binning+', '+ccdTemp );
+  tsxDebug( '[TSX] SkyX_JS_TakeImage, '+filterNum+', '+exposure+', '+frame+', '+tName +', '+delay+', '+getBinningNumber(binning) +', '+ friendly +', AND waited for ccdTemp: '+ccdTemp  );
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     // e.g.
@@ -2545,7 +2553,6 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
             friendly = tName;
           }
           res_iid = addImageReport( target );
-          console.log( res_iid );
           for( var i=1; i<results.length;i++) {
             var token=results[i].trim();
             // RunJavaScriptOutput.writeLine(token);

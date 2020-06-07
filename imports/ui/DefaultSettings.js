@@ -124,6 +124,7 @@ class DefaultSettings extends Component {
       minDitherFactor: 3,
       maxDitherFactor: 7,
       imagingPixelSize: 3.8,
+      imagingPixelMaximum: 65504,
       imagingFocalLength: 2800,
       defaultUseImagingCooler_enabled: false,
       defaultCoolTemp: '',
@@ -146,6 +147,7 @@ class DefaultSettings extends Component {
       flatbox_camera_delay: 1,
       flatbox_lamp_on: false,
       flatbox_lamp_level: 0,
+      flatbox_monitor_max_pixel: false,
 
       ip: '',
       port: '',
@@ -348,6 +350,9 @@ class DefaultSettings extends Component {
           imagingPixelSize: nextProps.tsxInfo.find(function(element) {
             return element.name == 'imagingPixelSize';
           }).value,
+          imagingPixelMaximum: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'imagingPixelMaximum';
+          }).value,
           imagingFocalLength: nextProps.tsxInfo.find(function(element) {
             return element.name == 'imagingFocalLength';
           }).value,
@@ -394,9 +399,13 @@ class DefaultSettings extends Component {
           flatbox_camera_delay: nextProps.tsxInfo.find(function(element) {
             return element.name == 'flatbox_camera_delay';
           }).value,
-          flatbox_lamp_on: nextProps.flatbox_lamp_on.find(function(element) {
+          flatbox_lamp_on: nextProps.tsxInfo.find(function(element) {
             return element.name == 'flatbox_lamp_on';
           }).value,
+          flatbox_monitor_max_pixel: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'flatbox_monitor_max_pixel';
+          }).value,
+
           flatbox_lamp_level: nextProps.flatbox_lamp_level.value,
 
         });
@@ -620,6 +629,7 @@ class DefaultSettings extends Component {
               value={this.state.flatbox_camera_delay}
               onChange={this.handleChange}
             />
+            &nbsp; <br/>
           </Form>
         </Segment>
         <Segment>
@@ -639,6 +649,17 @@ class DefaultSettings extends Component {
             onClick={this.statusArtesky.bind(this)}
             style={{ backgroundColor: 'green', color: 'black'  }}
           >STATUS</Button>
+          &nbsp; <br/>
+          &nbsp; <br/>
+          <Checkbox
+            label='Monitor MaximumPixel, to reduce level'
+            name='flatbox_monitor_max_pixel'
+            disabled={DISABLED}
+            toggle
+            checked={this.state.flatbox_monitor_max_pixel}
+            onClick={this.handleToggleAndSave.bind(this)}
+            style={{ labelColor: 'black'  }}
+          />
           &nbsp;
           &nbsp; <br/>
           {this.renderArteskyLevel(DISABLED)}
@@ -1120,6 +1141,19 @@ class DefaultSettings extends Component {
               matchRegexp: XRegExpPosNum, // https://github.com/slevithan/xregexp#unicode
             }}
             validationError="Must be a positive number, e.g 1, .7, 1.1"
+            errorLabel={ ERRORLABEL }
+          />
+          <Form.Input
+            disabled={NOT_DISABLE_TEMP}
+            label='Image Camera MAXIMUM pixel value: '
+            name='defaultCoolTemp'
+            placeholder='e.g. 16 bit can use 65504 '
+            value={this.state.imagingPixelMaximum}
+            onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be a real number, e.g -20, -1, 0, 3, 5, ..."
             errorLabel={ ERRORLABEL }
           />
           <Form.Field control={Dropdown}

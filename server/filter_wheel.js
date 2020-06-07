@@ -89,7 +89,7 @@ export function getFrameNumber(frame) {
   var num = frames.find(function(element) {
     return element.name == frame;
   }).id;
-  tsxDebug('[FILTERWHEEL] '+frame+' frame number: ' + num);
+  tsxDebug(' [FILTERWHEEL] '+frame+' frame number: ' + num);
   return num;
 }
 
@@ -97,6 +97,6 @@ export function getFrameName( fid ) {
   var nam = frames.find(function(element) {
     return element.id == fid;
   }).name;
-  tsxDebug('[FILTERWHEEL] Found '+nam+' frame number: ' + fid);
+  tsxDebug(' [FILTERWHEEL] Found '+nam+' frame number: ' + fid);
   return nam;
 }

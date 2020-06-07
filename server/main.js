@@ -125,6 +125,11 @@ function initServerStates() {
   tsx_SetServerState(tsx_ServerStates.currentSessionReport, '' );
   tsx_SetServerState(tsx_ServerStates.night_plan_reset, true );
 
+  var maxPixel = tsx_GetServerStateValue( tsx_ServerStates.imagingPixelMaximum );
+  if( maxPixel == '' || maxPixel ===0 ) {
+    tsx_SetServerState(tsx_ServerStates.imagingPixelMaximum, 65504 );
+  }
+
   // prepare hardware... ensures all works for install
   var mount = TheSkyXInfos.findOne().mount();
   var camera = TheSkyXInfos.findOne().camera();

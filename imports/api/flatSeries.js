@@ -147,11 +147,8 @@ export function addFlatSeries() {
 }
 
 export function addFlatFilter(flatSeries_id){
-  console.log('flat id: '+flatSeries_id);
   var fs = FlatSeries.findOne({_id:flatSeries_id});
-  console.log('FlatSeries: ' + fs.rotatorPosition);
   var fg = fs.filtergroup;
-  console.log('filtergroup: ' + fg);
   var nid = Random.id();
   var nf = defaultFlat;
   nf._id=nid;
@@ -203,7 +200,6 @@ export function updateFlatFilter(
 }
 
 export function deleteFlatFilter(flatSeries_id, filter_id ){
-  console.log('flat id: '+flatSeries_id);
   var fs = FlatSeries.findOne({_id:flatSeries_id});
   var newgroup = [];
   for( var i=0; i<fs.filtergroup.length; i++ ) {

@@ -73,7 +73,7 @@ Meteor.methods({
       },
    });
 
-    console.log(' [Saved] '+ name + '='+ value);
+    tsxDebug(' [Saved] '+ name + '='+ value);
   },
 
 });
