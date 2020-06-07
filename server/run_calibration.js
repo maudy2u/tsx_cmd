@@ -52,6 +52,7 @@ import {
   tsx_GetServerStateValue,
   UpdateStatus,
   UpdateStatusErr,
+  UpdateStatusWarn,
   postProgressTotal,
   postProgressIncrement,
   postProgressMessage,
@@ -183,7 +184,7 @@ export function collect_calibration_images() {
       }
     }
     catch( err ) {
-      tsxError( err )
+      tsxErr( err )
       UpdateStatusErr( ' [CALIBRATION] *** UNKNOWN ERROR - Calibrating failed.' );
     }
   }
@@ -255,23 +256,6 @@ function takeCalibrationImage( cal ) {
 
 Meteor.methods({
 
-  testArteskyConnection() {
-    var err = flatbox_connect();
-    console.log( ' [ARTESKY] connect: ' + err )
-    err = flatbox_status();
-    console.log( ' [ARTESKY] status: ' + err )
-    return err;
-  },
-
-  artesky_off() {
-    var err = flatbox_connect();
-    console.log( ' [ARTESKY] connect: ' + err )
-    err = flatbox_off();
-    console.log( ' [ARTESKY] on: ' + err )
-    err = flatbox_disconnect();
-    console.log( ' [ARTESKY] on: ' + err )
-  },
-
   processCalibrationTargets( ) {
     if(
       getSchedulerState() == 'Running'
@@ -338,7 +322,7 @@ Meteor.methods({
       }
     }
     catch( e ) {
-      if( e == 'TsxError' ) {
+      if( e == 'tsxErr' ) {
         UpdateStatus(' [AUTOGUIDER]!!! TheSkyX connection is no longer there!');
       }
     }

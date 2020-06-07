@@ -54,6 +54,7 @@ import {
   postProgressIncrement,
   postProgressMessage,
   UpdateImagingSesionID,
+  saveDefaultStateValue,
 } from '../imports/api/serverStates.js';
 
 import {
@@ -287,7 +288,7 @@ export function flatbox_status() {
       else {
         // tsxLog('Dither success');
         UpdateStatus(' [ARTESKY] Flatbox STATUS: ' + err );
-        Out =true;
+        Out =artesky_return;
       }
     }
     stop_artesky_is_waiting();
@@ -381,3 +382,114 @@ export function artesky_cmd( cmd, callback ) {
   }
   tsx.end(); // will announce tsx_close
 };
+
+Meteor.methods({
+
+  testArteskyConnection() {
+    var err = false;
+    try{
+      tsx_SetServerState( tsx_ServerStates.tool_active, true );
+      err = flatbox_connect();
+      console.log( ' [ARTESKY] connect: ' + err )
+      err = flatbox_status();
+      console.log( ' [ARTESKY] status: ' + err )
+    }
+    catch( e )  {
+      UpdateStatus(' [ARTESKY] Is artesky_srv connection STILL there ?!?' + e );
+    }
+    finally {
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
+    }
+    return err;
+  },
+
+  artesky_off() {
+    var err = false;
+    try{
+      tsx_SetServerState( tsx_ServerStates.tool_active, true );
+      err = flatbox_connect();
+      console.log( ' [ARTESKY] connect: ' + err )
+      err = flatbox_off();
+      console.log( ' [ARTESKY] off: ' + err )
+      err = flatbox_disconnect();
+      console.log( ' [ARTESKY] disconnect: ' + err )
+    }
+    catch( e )  {
+      UpdateStatus(' [ARTESKY] Is artesky_srv connection STILL there ?!?' + e );
+    }
+    finally {
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
+    }
+    return err;
+  },
+
+  artesky_on() {
+    var err = false;
+    try{
+      tsx_SetServerState( tsx_ServerStates.tool_active, true );
+      err = flatbox_connect();
+      console.log( ' [ARTESKY] connect: ' + err )
+      err = flatbox_on();
+      console.log( ' [ARTESKY] on: ' + err )
+      var level = tsx_GetServerStateValue( tsx_ServerStates.flatbox_lamp_level );
+      err = flatbox_level( level );
+      console.log( ' [ARTESKY] level: ' + err )
+
+    }
+    catch( e )  {
+      UpdateStatus(' [ARTESKY] Is artesky_srv connection STILL there ?!?' + e );
+    }
+    finally {
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
+    }
+    return err;
+  },
+
+  artesky_level() {
+    var ok = true;
+    try {
+      tsx_SetServerState( tsx_ServerStates.tool_active, true );
+      ok = flatbox_connect();
+      console.log( ' [ARTESKY] connect: ' + ok )
+      if( ok ) {
+        var level = tsx_GetServerStateValue( tsx_ServerStates.flatbox_lamp_level );
+        ok = flatbox_level( level );
+        console.log( ' [ARTESKY] level: ' + ok )
+      }
+    }
+    catch( e )  {
+      UpdateStatus(' [ARTESKY] Is artesky_srv connection STILL there ?!?' + e );
+    }
+    finally {
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
+    }
+    return ok;
+  },
+
+  artesky_status() {
+    var res = true;
+    try {
+      tsx_SetServerState( tsx_ServerStates.tool_active, true );
+
+      res = flatbox_connect();
+      console.log( ' [ARTESKY] connect: ' + res )
+      res = flatbox_status();
+      console.log( ' [ARTESKY] status: ' + res )
+      try {
+        var status = res.split('Lamp is ');
+        res = 'Lamp is ' + status[1];
+      }
+      catch( err ) {
+        res = err;
+      }
+    }
+    catch( e )  {
+      UpdateStatus(' [ARTESKY] Is artesky_srv connection STILL there ?!?' + e );
+    }
+    finally {
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
+    }
+    return res;
+  },
+
+});

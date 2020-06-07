@@ -62,19 +62,20 @@ const Shelljs = require('shelljs');
 //  "tsx_cmd_db": "tsx_cmd",
 //  "mongo_port": "27017"
 var tsx_cmd_db = '';
-if( Meteor.settings.tsx_cmd_db === '' || typeof Meteor.settings.tsx_cmd_db === 'undefined' ) {
+if( typeof Meteor.settings.tsx_cmd_db === 'undefined' || Meteor.settings.tsx_cmd_db === ''  ) {
   tsx_cmd_db = 'meteor';
 }
 else {
   tsx_cmd_db = Meteor.settings.tsx_cmd_db;
 }
 var mongo_port = '';
-if( Meteor.settings.mongo_port === '' || typeof Meteor.settings.mongo_port === 'undefined' ) {
+if( typeof Meteor.settings.mongo_port === 'undefined' || Meteor.settings.mongo_port === '' ) {
   mongo_port = "3001";
 }
 else {
   mongo_port = Meteor.settings.mongo_port;
 }
+
 
 
 

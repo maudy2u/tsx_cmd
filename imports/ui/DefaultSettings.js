@@ -144,6 +144,8 @@ class DefaultSettings extends Component {
       flatbox_ip: '',
       flatbox_enabled: false,
       flatbox_camera_delay: 1,
+      flatbox_lamp_on: false,
+      flatbox_lamp_level: 0,
 
       ip: '',
       port: '',
@@ -379,6 +381,9 @@ class DefaultSettings extends Component {
           calibrationFrameSize: nextProps.tsxInfo.find(function(element) {
             return element.name == 'calibrationFrameSize';
           }).value,
+          cloudReportWidget: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'cloudReportWidget';
+          }).value,
 
           flatbox_ip: nextProps.tsxInfo.find(function(element) {
             return element.name == 'flatbox_ip';
@@ -389,9 +394,11 @@ class DefaultSettings extends Component {
           flatbox_camera_delay: nextProps.tsxInfo.find(function(element) {
             return element.name == 'flatbox_camera_delay';
           }).value,
-          cloudReportWidget: nextProps.tsxInfo.find(function(element) {
-            return element.name == 'cloudReportWidget';
+          flatbox_lamp_on: nextProps.flatbox_lamp_on.find(function(element) {
+            return element.name == 'flatbox_lamp_on';
           }).value,
+          flatbox_lamp_level: nextProps.flatbox_lamp_level.value,
+
         });
       }
   }
@@ -423,22 +430,6 @@ class DefaultSettings extends Component {
         // show a nice error message
       }
       else {
-      }
-    }.bind(this));
-  }
-
-  testArteskyConnection() {
-    // these are all working methods
-    // on the client
-    Meteor.call("testArteskyConnection", function (error, result) {
-      // identify the error
-      if (result === false || (error && error.reason === "Internal server error")) {
-        // show a nice error message
-        alert('Artesky connection failed');
-
-      }
-      else {
-        alert('Artesky connection SUCCESSFUL');
       }
     }.bind(this));
   }
@@ -475,7 +466,7 @@ class DefaultSettings extends Component {
 //      <Segment.Group compact>
 
     return (
-      <Segment.Group>
+      <Segment.Group compact>
       <Segment>
         <Form>
             <Form.Input
@@ -569,18 +560,18 @@ class DefaultSettings extends Component {
     if( this.props.settingsIndex !== 'Artesky Flatbox' ) {
       return;
     }
-    const { activeIndex } = this.state;
-    // var RUNNING = '';
-    // var ACTIVE = false;
+
     var DISABLED = true;
     try {
-      // RUNNING = this.props.scheduler_running.value;
-      // ACTIVE = this.props.tool_active.value;
-      DISABLED= !this.state.flatbox_enabled;
-
+      if(
+        this.state.flatbox_enabled // must be enabled...
+        && this.props.scheduler_running.value === 'Stop' // if stopped can enable
+        && this.props.tool_active.value === false // if no tool can enable
+      ){
+        DISABLED = false;
+      }
     } catch (e) {
-      // RUNNING = '';
-      // ACTIVE=false;
+      console.log( e )
       DISABLED = true;
     }
 //    style={{color: '#68c349'}}
@@ -632,6 +623,27 @@ class DefaultSettings extends Component {
           </Form>
         </Segment>
         <Segment>
+          <Checkbox
+            label='Turn on lamp'
+            name='flatbox_lamp_on'
+            disabled={DISABLED}
+            toggle
+            checked={this.state.flatbox_lamp_on}
+            onClick={this.handleArteskyLampToggle.bind(this)}
+            style={{ labelColor: 'black'  }}
+          />
+          &nbsp;
+          &nbsp;
+          <Button
+            disabled={DISABLED}
+            onClick={this.statusArtesky.bind(this)}
+            style={{ backgroundColor: 'green', color: 'black'  }}
+          >STATUS</Button>
+          &nbsp;
+          &nbsp; <br/>
+          {this.renderArteskyLevel(DISABLED)}
+        </Segment>
+        <Segment>
           <Label>
             REQUIREMENT:
             <Label.Detail>
@@ -645,6 +657,112 @@ class DefaultSettings extends Component {
       </Segment.Group>
     )
   }
+  renderArteskyLevel( no_show ) {
+    if( !no_show) {
+      return (
+        <left>
+        &nbsp;
+        <h4 style={{color: "#5FB343"}} className="ui header">Lamp level: {this.state.flatbox_lamp_level}</h4>
+          <ReactSimpleRange
+            label
+            step={1}
+            min={1}
+            max={254}
+            value={Number(this.state.flatbox_lamp_level)}
+            sliderSize={12}
+            thumbSize={18}
+            onChange={this.handleLampLevelChange}
+            onChangeComplete={this.arteskySetLampLevel.bind(this)}
+          />
+        </left>
+      )
+    }
+  }
+
+  testArteskyConnection() {
+    // these are all working methods
+    // on the client
+    Meteor.call("testArteskyConnection", function (error, result) {
+      // identify the error
+      if (result === false || (error && error.reason === "Internal server error")) {
+        // show a nice error message
+        alert('Artesky connection failed: ' + result);
+
+      }
+      else {
+        alert('Artesky connection SUCCESSFUL ' + result);
+      }
+    }.bind(this));
+  }
+
+  statusArtesky() {
+      // these are all working methods
+      // on the client
+      Meteor.call("artesky_status", function (error, result) {
+        // identify the error
+        if (result === false || (error && error.reason === "Internal server error")) {
+          // show a nice error message
+          alert('Artesky staus failed: ' + result);
+
+        }
+        else {
+          alert('Artesky status: ' + result);
+        }
+      }.bind(this));
+    }
+
+  handleArteskyLampToggle = () => {
+
+    if( !this.state.flatbox_lamp_on ) {
+      // these are all working methods
+      // on the client
+      Meteor.call("artesky_on", function (error, result) {
+        // identify the error
+        if (result === false || (error && error.reason === "Internal server error")) {
+          // show a nice error message
+          alert('Artesky Lamp ON failed. Try again (may be out of sync.)');
+        }
+        else {
+          this.setState({
+            flatbox_lamp_on: true
+          });
+          saveDefaultStateValue( 'flatbox_lamp_on', true );
+        }
+      }.bind(this));
+    }
+    else {
+      Meteor.call("artesky_off", function (error, result) {
+        // identify the error
+        if (result === false || (error && error.reason === "Internal server error")) {
+          // show a nice error message
+          alert('Artesky Lamp OFF failed. Try again (may be out of sync.)');
+
+        }
+        else {
+          this.setState({
+            flatbox_lamp_on: false
+          });
+          saveDefaultStateValue( 'flatbox_lamp_on', false );
+        }
+      }.bind(this));
+    }
+  }
+
+  handleLampLevelChange = ( value ) => {
+    this.setState({flatbox_lamp_level: value.value });
+    saveDefaultStateValue( 'flatbox_lamp_level', value.value );
+  }
+
+  arteskySetLampLevel() {
+    Meteor.call("artesky_level", Number(this.state.flatbox_lamp_level), function (error, result) {
+      // identify the error
+      if (result === false || (error && error.reason === "Internal server error")) {
+        // show a nice error message
+        alert('Artesky Level failed');
+      }
+    }.bind(this));
+  }
+
   renderConstraints() {
 
     if( this.props.settingsIndex !== 'Default Constraints' ) {
@@ -658,16 +776,16 @@ class DefaultSettings extends Component {
       <Segment>
 
       <h4 style={{color: "#5FB343"}} className="ui header">Priority: {this.state.defaultPriority}</h4>
-      <ReactSimpleRange
-        label
-        step={1}
-        min={1}
-        max={19}
-        value={Number(this.state.defaultPriority)}
-        sliderSize={12}
-        thumbSize={18}
-        onChange={this.handlePriorityChange}
-      />
+        <ReactSimpleRange
+          label
+          step={1}
+          min={1}
+          max={19}
+          value={Number(this.state.defaultPriority)}
+          sliderSize={12}
+          thumbSize={18}
+          onChange={this.handlePriorityChange}
+        />
       <Form>
       <Form.Input
         label='Twilight Altitude for Sun '
@@ -1254,7 +1372,7 @@ class DefaultSettings extends Component {
               Artesky Flatbox
             </Menu.Item>
           </Sidebar>
-          <Sidebar.Pusher>
+          <Sidebar.Pusher onClick={this.props.hideSideBar } >
           <center>
             <Segment basic compact onClick={this.props.hideSideBar } >
             {this.renderServers()}
@@ -1293,8 +1411,12 @@ class DefaultSettings extends Component {
 // THIS IS THE DEFAULT EXPORT AND IS WHERE THE LOADING OF THE COMPONENT STARTS
 // USE THIS POINT TO GRAB THE FILTERS
 export default withTracker(() => {
+    const infoHandle = Meteor.subscribe('tsxInfo.all');
+    const tsxInfo = TheSkyXInfos.find({}).fetch();
+    var flatbox_lamp_level = TheSkyXInfos.findOne({name: 'flatbox_lamp_level'});
+
     return {
-      tsxInfo: TheSkyXInfos.find({}).fetch(),
+      flatbox_lamp_level,
       filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
   };
 })(DefaultSettings);
