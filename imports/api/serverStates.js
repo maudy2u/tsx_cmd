@@ -158,6 +158,7 @@ export const tsx_ServerStates = {
   flatbox_lamp_level: 'flatbox_lamp_level',
   flatbox_lamp_on: 'flatbox_lamp_on',
   flatbox_monitor_max_pixel: 'flatbox_monitor_max_pixel',
+  flatbox_imagingPixelMaximumOccurance: 'flatbox_imagingPixelMaximumOccurance',
 
   session_report: 'session_report',
 

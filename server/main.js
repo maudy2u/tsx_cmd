@@ -129,6 +129,10 @@ function initServerStates() {
   if( maxPixel == '' || maxPixel ===0 ) {
     tsx_SetServerState(tsx_ServerStates.imagingPixelMaximum, 65504 );
   }
+  maxPixel = tsx_GetServerStateValue( tsx_ServerStates.flatbox_imagingPixelMaximumOccurance );
+  if( maxPixel == '' ) {
+    tsx_SetServerState(tsx_ServerStates.flatbox_imagingPixelMaximumOccurance, 0 );
+  }
 
   // prepare hardware... ensures all works for install
   var mount = TheSkyXInfos.findOne().mount();

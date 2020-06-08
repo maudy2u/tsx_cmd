@@ -148,6 +148,7 @@ class DefaultSettings extends Component {
       flatbox_lamp_on: false,
       flatbox_lamp_level: 0,
       flatbox_monitor_max_pixel: false,
+      flatbox_imagingPixelMaximumOccurance: 1,
 
       ip: '',
       port: '',
@@ -405,6 +406,9 @@ class DefaultSettings extends Component {
           flatbox_monitor_max_pixel: nextProps.tsxInfo.find(function(element) {
             return element.name == 'flatbox_monitor_max_pixel';
           }).value,
+          flatbox_imagingPixelMaximumOccurance: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'flatbox_imagingPixelMaximumOccurance';
+          }).value,
 
           flatbox_lamp_level: nextProps.flatbox_lamp_level.value,
 
@@ -628,6 +632,11 @@ class DefaultSettings extends Component {
               placeholder='Seconds to wait e.g. 1.3'
               value={this.state.flatbox_camera_delay}
               onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
+              errorLabel={ ERRORLABEL }
             />
             &nbsp; <br/>
           </Form>
@@ -660,7 +669,20 @@ class DefaultSettings extends Component {
             onClick={this.handleToggleAndSave.bind(this)}
             style={{ labelColor: 'black'  }}
           />
-          &nbsp;
+          &nbsp; <br/>
+          <Form.Input
+            disabled={DISABLED}
+            label='Calibration image delay '
+            name='flatbox_imagingPixelMaximumOccurance'
+            placeholder='Maximum times in a row to allow Maximum Pixel value, e.g. 1'
+            value={this.state.flatbox_imagingPixelMaximumOccurance}
+            onChange={this.handleChange}
+            validations={{
+              matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+            }}
+            validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
+            errorLabel={ ERRORLABEL }
+          />
           &nbsp; <br/>
           {this.renderArteskyLevel(DISABLED)}
         </Segment>

@@ -2525,6 +2525,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
       tsxInfo( "Cooler temperature NOT within 0.3 of: " + ccdTemp );
     }
     if( isSchedulerStopped() ) {
+      tsxDebug( ' scheduler stopped after cooling. exiting');
       return res_iid;
     }
   }

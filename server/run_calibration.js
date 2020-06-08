@@ -40,6 +40,8 @@ import {
 import {
   runSchedulerProcess,
   getSchedulerState,
+  setSchedulerState,
+  srvStopScheduler,
 } from './run_schedule_process.js'
 
 import {
@@ -144,9 +146,6 @@ export function collect_calibration_images() {
     try {
       var maxPix = 0;
       var numMaxPixs = 0;
-      var MAXIMUM_OCCURANCE = 1;
-      const MAX_VALUE = tsx_GetServerStateValue( tsx_ServerStates.imagingPixelMaximum); // TheSkyX's 16 bit maximumm value
-      const MONITOR_PIXEL = tsx_GetServerStateValue( tsx_ServerStates.flatbox_monitor_max_pixel); // TheSkyX's 16 bit maximumm value
       for( var sub=0; sub<cal.quantity; sub++) {
         if( isSchedulerStopped() == false ) {
           var inc = sub+1;
@@ -155,10 +154,15 @@ export function collect_calibration_images() {
           // *******************************
           // MONITOR for MAX PIXEL and if max value decrease by one
           // *******************************
+          const MONITOR_PIXEL = tsx_GetServerStateValue( tsx_ServerStates.flatbox_monitor_max_pixel); // TheSkyX's 16 bit maximumm value
           if( fp_enabled == true
             && (cal.subFrameTypes === 'Flat'
             && MONITOR_PIXEL )
-           ) {
+           )
+           {
+            const MAX_VALUE = tsx_GetServerStateValue( tsx_ServerStates.imagingPixelMaximum); // TheSkyX's 16 bit maximumm value
+            const MAXIMUM_PIXEL_OCCURANCE = tsx_GetServerStateValue( tsx_ServerStates.imagingPixelMaximumOccurance); // TheSkyX's 16 bit maximumm value
+
             maxPix = imageReportMaxPixel( iid );
             tsxLog( ' [CALIBRATION] Maximum pixel value: ' + maxPix + ', vs. MAX ALLOWED: ' + MAX_VALUE );
             if( Number(maxPix) >= Number(MAX_VALUE) ) {
@@ -170,7 +174,7 @@ export function collect_calibration_images() {
             else {
               numMaxPixs = 0;
             }
-            if( numMaxPixs > MAXIMUM_OCCURANCE ) {
+            if( numMaxPixs > MAXIMUM_PIXEL_OCCURANCE ) {
               cal.level = cal.level - 1;
               if( cal.level < 0 ) {
                 cal.level = 0;
@@ -205,6 +209,69 @@ export function collect_calibration_images() {
   tsx_SetServerState( tsx_ServerStates.tool_active, false );
   UpdateStatus(" [CALIBRATION] Finished");
   tsxLog(" [CALIBRATION] *******************************");
+}
+
+/*
+  1. After calibration frame check if max pixel ok, return number of fails
+    i.e. 0 = no fail, 1 = is one fail so skipped lowering
+  2. If okay CONTINUE,
+  3. if not okay... then redo, and lowerLevel
+
+
+  var upperLevel = calibrationItem.level;
+  var lowerLevel = 0; //Math.floor(calibrationItem.level/2);
+
+*/
+function findFilterLevel( calibrationItem, upperLevel, lowerLevel ) {
+  // *******************************
+  // MONITOR for MAX PIXEL and if max value decrease by one
+  // *******************************
+  const FP_ENABLED = tsx_GetServerStateValue( tsx_ServerStates.flatbox_enabled);
+  const MAX_VALUE = tsx_GetServerStateValue( tsx_ServerStates.imagingPixelMaximum); // TheSkyX's 16 bit maximumm value
+  const MAXIMUM_PIXEL_OCCURANCE = tsx_GetServerStateValue( tsx_ServerStates.imagingPixelMaximumOccurance); // TheSkyX's 16 bit maximumm value
+  const MONITOR_PIXEL_ENABLED = tsx_GetServerStateValue( tsx_ServerStates.flatbox_monitor_max_pixel); // TheSkyX's 16 bit maximumm value
+
+  if(
+      FP_ENABLED
+    && MONITOR_PIXEL_ENABLED
+    && calibrationItem.subFrameTypes === 'Flat'
+   )
+   {
+    var iid = takeCalibrationImage( calibrationItem );
+    var maxPix = imageReportMaxPixel( iid );
+    var found = false;
+    while( Number(maxPix) >= Number(MAX_VALUE)
+      && calibrationItem.level > lowerLevel
+      && calibrationItem.level < upperLevel
+      && found === false
+      )
+      {
+      UpdateStatus( ' [CALIBRATION] Detected panel level' );
+      var file = imageReportFilename( iid );
+      tsx_RemoveImage( file );
+
+      upperLevel = calibrationItem.level;
+      calibrationItem.level = upperLevel - Math.floor(lowerLevel/2);
+      lowerLevel = Math.floor(lowerLevel/2);
+
+      if( calibrationItem.level < 0 ) {
+        calibrationItem.level = 0;
+        throw( ' CALIBRATION] ERROR - MAX PIXEL at Flatpanel LEVEL 0');
+      }
+      flatbox_level( calibrationItem.level );
+      updateCalibrationFrame(
+        calibrationItem._id,
+        'level',
+        calibrationItem.level,
+      );
+
+      if( findFilterLevel( calibrationItem, upperLevel, lowerLevel)  ) {
+        found = true;
+      }
+
+    }
+  }
+  // *******************************
 }
 
 function tsx_RemoveImage( fileName ) {
@@ -249,10 +316,35 @@ function takeCalibrationImage( cal ) {
     ccdTemp = cal.ccdTemp;
   }
   tsxDebug( ' [CALIBRATION] filter=' + filter +', exposure=' + exposure +', frame=' + frame +', name=' + tName + ', delay=' + delay+ ', binning=' + binning+ ', ccdTemp=' + ccdTemp);
-  return tsx_takeImage( filter, exposure, frame, tName, delay, binning, ccdTemp );
+  var res = tsx_takeImage( filter, exposure, frame, tName, delay, binning, ccdTemp );
+  return res;
 }
 
 Meteor.methods({
+
+  findFilterLevels() {
+    var res = '';
+    try{
+      setSchedulerState( 'Running' );
+      flatbox_connect();
+      flatbox_on();
+
+      var cf = CalibrationFrames.find({ on_enabled: true }, { sort: { order: 1 } }).fetch();
+      for( var i=0; i < cf.length; i ++ ) {
+        findFilterLevel( cf[i] );
+      }
+      res = 'DONE';
+    }
+    catch( e ) {
+
+      res = e;
+    }
+    finally {
+      flatbox_disconnect();
+      srvStopScheduler();
+    }
+    return res;
+  },
 
   processCalibrationTargets( ) {
     if(
