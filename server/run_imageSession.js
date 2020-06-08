@@ -2505,11 +2505,10 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
   if( typeof ccdTemp === 'undefined' ) {
     ccdTemp = '';
   }
-  ccdTemp = ccdTemp.trim();
 
   // *******************************
   // if temp set then set and check
-  if( ccdTemp != '') {
+  if( ccdTemp != '' && ccdTemp !== 'null') {
     tsx_setCCDTemp( ccdTemp );
     var chks = 0;
     var timeout = 2; //mins

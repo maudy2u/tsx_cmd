@@ -632,11 +632,6 @@ class DefaultSettings extends Component {
               placeholder='Seconds to wait e.g. 1.3'
               value={this.state.flatbox_camera_delay}
               onChange={this.handleChange}
-              validations={{
-                matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
-              }}
-              validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
-              errorLabel={ ERRORLABEL }
             />
             &nbsp; <br/>
           </Form>
@@ -670,9 +665,10 @@ class DefaultSettings extends Component {
             style={{ labelColor: 'black'  }}
           />
           &nbsp; <br/>
+          <Form>
           <Form.Input
             disabled={DISABLED}
-            label='Calibration image delay '
+            label='Lower level after '
             name='flatbox_imagingPixelMaximumOccurance'
             placeholder='Maximum times in a row to allow Maximum Pixel value, e.g. 1'
             value={this.state.flatbox_imagingPixelMaximumOccurance}
@@ -683,6 +679,7 @@ class DefaultSettings extends Component {
             validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
             errorLabel={ ERRORLABEL }
           />
+          </Form>
           &nbsp; <br/>
           {this.renderArteskyLevel(DISABLED)}
         </Segment>

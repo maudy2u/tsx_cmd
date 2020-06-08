@@ -237,62 +237,116 @@ function findFilterLevel( calibrationItem, upperLevel, lowerLevel ) {
     && calibrationItem.subFrameTypes === 'Flat'
    )
    {
-    var iid = takeCalibrationImage( calibrationItem );
-    var maxPix = imageReportMaxPixel( iid );
-    var found = false;
-    while( Number(maxPix) >= Number(MAX_VALUE)
-      && calibrationItem.level > lowerLevel
-      && calibrationItem.level < upperLevel
-      && found === false
-      )
-      {
-      UpdateStatus( ' [CALIBRATION] Detected panel level' );
-      var file = imageReportFilename( iid );
-      tsx_RemoveImage( file );
 
-      upperLevel = calibrationItem.level;
-      calibrationItem.level = upperLevel - Math.floor(lowerLevel/2);
-      lowerLevel = Math.floor(lowerLevel/2);
+    var not_found = true;
+    while( Number(maxPix) >= Number(MAX_VALUE) || not_found ) {
+      console.log( ' test - start ' )
+      flatbox_level( calibrationItem.level )
+      var iid = takeCalibrationImage( calibrationItem );
+      var maxPix = imageReportMaxPixel( iid );
+      UpdateStatus( ' [CALIBRATION] Max pixel level: ' + maxPix );
+
+      var prev_level = Number(calibrationItem.level);
+      console.log( '### Upper:   ' + upperLevel );
+      console.log( '### current: ' + prev_level );
+      console.log( '### Lower:   ' + lowerLevel );
+      if( Number(maxPix) >= Number(MAX_VALUE) ) {
+        upperLevel = Number(prev_level);
+        calibrationItem.level = Number(upperLevel) - Math.floor((Number(prev_level)-Number(lowerLevel))/2);
+        UpdateStatus( ' [CALIBRATION] LOWER panel level' );
+        updateCalibrationFrame(
+          calibrationItem._id,
+          'level',
+          calibrationItem.level,
+        );
+      }
+
+      if( Number(maxPix) < Number(MAX_VALUE) ) {
+        lowerLevel = Number(calibrationItem.level);
+        calibrationItem.level = Number(prev_level) + Math.floor((Number(upperLevel)-Number(prev_level))/2);
+        UpdateStatus( ' [CALIBRATION] HIGHER panel level' );
+        updateCalibrationFrame(
+          calibrationItem._id,
+          'level',
+          calibrationItem.level,
+        );
+      }
 
       if( calibrationItem.level < 0 ) {
         calibrationItem.level = 0;
-        throw( ' CALIBRATION] ERROR - MAX PIXEL at Flatpanel LEVEL 0');
+        tsxDebug( ' calibrationItem.level set to zero...')
+        throw( ' [CALIBRATION] ERROR - MAX PIXEL at Flatpanel LEVEL 0');
       }
-      flatbox_level( calibrationItem.level );
-      updateCalibrationFrame(
-        calibrationItem._id,
-        'level',
-        calibrationItem.level,
-      );
 
-      if( findFilterLevel( calibrationItem, upperLevel, lowerLevel)  ) {
-        found = true;
+      console.log( '### Revised Upper:   ' + upperLevel );
+      console.log( '### Revised current: ' + calibrationItem.level );
+      console.log( '### Revised Lower:   ' + lowerLevel );
+
+      if( Number(calibrationItem.level) === Number(prev_level) ) {
+        tsxDebug( ' level match exiting...')
+        not_found = false;
+        break;
       }
+
+      if( isSchedulerStopped() ) {
+        tsxDebug( ' [CALIBRATION] scheduler stopped. exiting');
+        break;
+      }
+
+
+      console.log( ' test2 ' )
+      var file = imageReportFilename( iid );
+  //      tsx_RemoveImage( file );
 
     }
+
   }
+  return true;
   // *******************************
 }
 
-function tsx_RemoveImage( fileName ) {
+function tsx_RemoveImage( fullPath ) {
   tsxInfo(' CALIBRATION] tsx_RemoveImage' );
 
   var success = false;
-  import shelljs from 'shelljs';
-  // this is equivalent to the standard node require:
-  const Shelljs = require('shelljs');
-  // let err = Shelljs.test( '-e', fileName.trim() ); // -e tests for valid path, -d tests for directory, -f for just file
-  // if( err !== true ) {
-  //   tsxErr( ' [CALIBRATION] File to remove is not a valid directory: ' + fileName );
-  // }
-  // else {
-    console.log( fileName );
-    success = Shelljs.rm( fileName ); // -e tests for valid path, -d tests for directory
-    UpdateStatusWarn(" [CALIBRATION]  Removed file, Max Pixel detected: " + fileName );
-  //   return true;
-  // }
+  var filename = fullPath.replace(/^.*[\\\/]/, '')
+  var path = fullPath.split(filename);
+
+  const fs = require('fs');
+  fs.unlinkSync(fullPath, function (err) {
+    if( err  ) {
+      tsxErr( ' [CALIBRATION] File to remove is not a valid directory: ' + filename );
+    }
+    else {
+      console.log( fileName );
+      console.log( path );
+      UpdateStatusWarn(" [CALIBRATION]  Removed file, Max Pixel detected: " + filename );
+      return true;
+    }
+  });
 
   return success;
+
+  // //
+  // // var success = false;
+  // // import shelljs from 'shelljs';
+  // // // this is equivalent to the standard node require:
+  // // const Shelljs = require('shelljs');
+  // // var filename = fullPath.replace(/^.*[\\\/]/, '')
+  // // var path = fullPath.split(filename);
+  // // let err = Shelljs.test( '-e', path ); // -e tests for valid path, -d tests for directory, -f for just file
+  // // if( err !== true ) {
+  // //    tsxErr( ' [CALIBRATION] File to remove is not a valid directory: ' + filename );
+  // // }
+  // // else {
+  // //   console.log( fileName );
+  // //   console.log( path );
+  // //   success = Shelljs.rm( '-rf', filename ); // -e tests for valid path, -d tests for directory
+  // //   UpdateStatusWarn(" [CALIBRATION]  Removed file, Max Pixel detected: " + filename );
+  // //   return true;
+  // // }
+  //
+  // return success;
 }
 
 //var aFrame = $002; //  cdLight =1, cdBias, cdDark, cdFlat
@@ -324,25 +378,28 @@ Meteor.methods({
 
   findFilterLevels() {
     var res = '';
-    try{
+//    try{
       setSchedulerState( 'Running' );
+      tsx_SetServerState( tsx_ServerStates.tool_active, true );
       flatbox_connect();
       flatbox_on();
 
       var cf = CalibrationFrames.find({ on_enabled: true }, { sort: { order: 1 } }).fetch();
       for( var i=0; i < cf.length; i ++ ) {
-        findFilterLevel( cf[i] );
+        findFilterLevel( cf[i], 254, 0 );
       }
       res = 'DONE';
-    }
-    catch( e ) {
-
-      res = e;
-    }
-    finally {
-      flatbox_disconnect();
-      srvStopScheduler();
-    }
+    // }
+    // catch( e ) {
+    //   console.log( e )
+    //   res = e;
+    // }
+    // finally {
+    //   flatbox_disconnect();
+     srvStopScheduler();
+     tsx_SetServerState( tsx_ServerStates.tool_active, false );
+    // }
+    console.log( res )
     return res;
   },
 

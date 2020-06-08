@@ -306,7 +306,7 @@ class CalibrationsMenu extends Component {
       <Button.Group basic size='mini' floated='right'>
         <Button disabled={DISABLED} onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
         <Button disabled  compact  />
-        <Button disabled={DISABLED} icon='find' onClick={this.findFilterLevels.bind(this)} />
+        <Button disabled={DISABLED} icon='search' onClick={this.findFilterLevels.bind(this)} />
         <Button disabled compact />
         <Button disabled={true} icon='recycle' onClick={this.resetAngles.bind(this)}/>
         <Button disabled={DISABLED} icon='settings' onClick={this.showModalCalibrationSettings.bind(this)}/>
