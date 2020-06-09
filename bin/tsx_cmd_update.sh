@@ -70,8 +70,8 @@ install_tar_bundle() {
   echo " Updating tsx_cmd in ${install_dir}"
   echo " *******************************"
   echo ""
-  mv ./bundle ./bundle_${version}_${date}
-  echo " ./bundle backed up to ./bundle_${version}_${date}"
+  mv ./bundle ./bundle_${version}_${date}_(${build_num})
+  echo " ./bundle backed up to ./bundle_${version}_${date}_(${build_num})"
 
   echo " *******************************"
   echo " TSX_CMD - Extract" ${tarfile}
@@ -86,6 +86,7 @@ get_version() {
   for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ./bundle/programs/server/assets/app/version.json ); do
       export $s
   done
+  export build_num=$(git rev-list --all --count)
 }
 
 update_fibers() {
@@ -112,10 +113,10 @@ update_fibers() {
 export PATH=${install_dir}/mongodb/bin:${install_dir}/nodejs/bin:$PATH
 
 case ${tarfile} in
-     update)
-          get_version
-          update_fibers
-          ;;
+#     update)
+#          get_version
+#          update_fibers
+#          ;;
 #     pattern-3|pattern-4|pattern-5)
 #          commands
 #          ;;

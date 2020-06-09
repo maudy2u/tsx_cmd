@@ -39,6 +39,7 @@ export install_dir=$(pwd)
 for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ./private/version.json ); do
     export $s
 done
+export build_num=$(git rev-list --all --count)
 export details=build_$(git rev-list --all --count)_v${version}_${date}_${1}
 
 package_tar() {
@@ -48,7 +49,20 @@ package_tar() {
   cd ${install_dir}
 }
 
+update_version_info() {
+
+  export build_file = "../etc/build_version.json"
+
+  echo '{' > ${build_file}
+  echo '  "version: "'${version}'"",' >> ${build_file}
+  echo '  "date": "'${date}'",' >> ${build_file}
+  echo '  "build": "'${build_num}'"' >> ${build_file}
+  echo '}' >> ${build_file}
+}
+
 build_tsx_cmd () {
+  update_version_info
+
   folder=${base_dir}"tsx_cmd_"$1"_"${details}
   mkdir -p ${folder}
   echo " Building" ${folder}

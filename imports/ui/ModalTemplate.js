@@ -105,42 +105,8 @@ class ModalTemplate extends TrackerReact(Component) {
 // *******************************
 // THIS IS THE DEFAULT EXPORT AND IS WHERE THE LOADING OF THE COMPONENT STARTS
 export default withTracker(() => {
-  // Meteor.subscribe('targetSessions');
-  // Meteor.subscribe('tsxIP');
-  // Meteor.subscribe('scheduler_running');
-  // Meteor.subscribe('scheduler_report');
-  // Meteor.subscribe('currentStage');
-  return {
-    /*
-    tool_calibrate_via: TheSkyXInfos.findOne({name: 'tool_calibrate_via'}),
-    tool_calibrate_location: TheSkyXInfos.findOne({name: 'tool_calibrate_location'}),
-    tool_rotator_num: TheSkyXInfos.findOne({name: 'tool_rotator_num'}),
-    tool_rotator_type: TheSkyXInfos.findOne({name: 'tool_rotator_type'}),
-    tool_active: TheSkyXInfos.findOne({name: 'tool_active'}),
-    tool_flats_dec_az: TheSkyXInfos.findOne({name: 'tool_flats_dec_az'}),
-    tool_flats_location: TheSkyXInfos.findOne({name: 'tool_flats_location'}),
-    tool_flats_via: TheSkyXInfos.findOne({name: 'tool_flats_via'}),
 
-    tsx_version: TheSkyXInfos.findOne({name: 'tsx_version'}),
-    tsx_date: TheSkyXInfos.findOne({name: 'tsx_date'}),
-    flatSettings: TheSkyXInfos.findOne({name: 'flatSettings'}),
-    currentStage: TheSkyXInfos.findOne({name: 'currentStage'}),
-    activeMenu: TheSkyXInfos.findOne({name: 'activeMenu'}),
-    targetName: TheSkyXInfos.findOne({name: 'targetName'}),
-    tsx_progress: TheSkyXInfos.findOne({name: 'tsx_progress'}),
-    tsx_total:  TheSkyXInfos.findOne({name: 'tsx_total'}),
-    tsx_message: TheSkyXInfos.findOne({name: 'tsx_message'}),
-    scheduler_running: TheSkyXInfos.findOne({name: 'scheduler_running'}),
-    scheduler_report: TheSkyXInfos.findOne({name: 'scheduler_report'}),
-    tsxIP: TheSkyXInfos.findOne({name: 'ip'}),
-    tsxPort: TheSkyXInfos.findOne({name: 'port'}),
-    tsxInfo: TheSkyXInfos.find({}).fetch(),
-    srvLog: AppLogsDB.find({}, {sort:{time:-1}}).fetch(10),
-    filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
-    flatSeries: FlatSeries.find({}).fetch(),
-    takeSeriesTemplates: TakeSeriesTemplates.find({ isCalibrationFrames: false }, { sort: { name: 1 } }).fetch(),
-    targetSessions: TargetSessions.find({ isCalibrationFrames: false }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
-    targetReports: TargetReports.find({}).fetch(),
-*/
+  return {
+
   };
 })(ModalTemplate);

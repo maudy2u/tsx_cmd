@@ -562,6 +562,7 @@ class App extends TrackerReact(Component) {
             port = {this.props.tsxPort}
             version = {this.props.tsx_version}
             date = {this.props.tsx_date}
+            build = {this.props.tsx_build}
             />
         </div>
       );
@@ -598,6 +599,7 @@ export default withTracker(() => {
   var tool_flats_via = TheSkyXInfos.findOne({name: 'tool_flats_via'});
   var tsx_version = TheSkyXInfos.findOne({name: 'tsx_version'});
   var tsx_date = TheSkyXInfos.findOne({name: 'tsx_date'});
+  var tsx_build = TheSkyXInfos.findOne({name: 'tsx_build'});
   var tsxIP = TheSkyXInfos.findOne({name: 'ip'});
   var tsxPort = TheSkyXInfos.findOne({name: 'port'});
   var scheduler_report = TheSkyXInfos.findOne({name: 'scheduler_report'});
@@ -650,6 +652,7 @@ export default withTracker(() => {
     currentStage,
     tsx_version,
     tsx_date,
+    tsx_build,
     tsxIP,
     tsxPort,
     activeMenu,

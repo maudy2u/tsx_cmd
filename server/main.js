@@ -197,7 +197,7 @@ Meteor.startup(() => {
   srvStopScheduler();
 
   var version_dat = {};
-  version_dat = JSON.parse(Assets.getText('version.json'));
+  version_dat = JSON.parse(Assets.getText('build_version.json'));
   if( version_dat.version != '') {
     tsx_SetServerState(tsx_ServerStates.tsx_version, version_dat.version);
     tsxLog('            Version', version_dat.version);
@@ -205,6 +205,10 @@ Meteor.startup(() => {
   if( version_dat.date != '') {
     tsx_SetServerState(tsx_ServerStates.tsx_date, version_dat.date);
     tsxLog('               Date', version_dat.date);
+  }
+  if( version_dat.buid != '') {
+    tsx_SetServerState(tsx_ServerStates.tsx_build, version_dat.build);
+    tsxLog('              Build', version_dat.build);
   }
 
   var dbIp = '';
