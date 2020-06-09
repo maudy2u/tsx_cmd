@@ -78,6 +78,7 @@ import {
 
  import {
    collect_calibration_images,
+   calibrate_flatbox_levels,
  } from './run_calibration.js'
 
  import {
@@ -135,11 +136,18 @@ import {
 
        var isParked = '';
 
-       if( schedule.scheduleType == 'calibration' &&
+       if( schedule.scheduleType === 'calibration' &&
          isSchedulerStopped() == false )
        {
          // *******************************
-           collect_calibration_images();
+         collect_calibration_images();
+       }
+       
+       else if ( schedule.scheduleType === 'flatbox calibration'
+       &&
+         isSchedulerStopped() == false)
+       {
+         calibrate_flatbox_levels();
        }
        else {
          // *******************************

@@ -255,20 +255,20 @@ class CalibrationsMenu extends Component {
 
   stopButton() {
     // this.tsxStopSession();
-    Meteor.call("artesky_off", function (error, result) {
-        // identify the error
-        tsx_UpdateServerState(tsx_ServerStates.imagingSessionId, '' );
-        tsx_UpdateServerState(tsx_ServerStates.targetImageName, '');
-        tsx_UpdateServerState(tsx_ServerStates.targetDEC, '_');
-        tsx_UpdateServerState(tsx_ServerStates.targetRA, '_');
-        tsx_UpdateServerState(tsx_ServerStates.targetALT, '_');
-        tsx_UpdateServerState(tsx_ServerStates.targetAZ, '_');
-        tsx_UpdateServerState(tsx_ServerStates.targetHA, '_');
-        tsx_UpdateServerState(tsx_ServerStates.targetTransit, '_');
-//        tsx_UpdateServerState(tsx_ServerStates.currentStage, 'Stopped');
-
-      }.bind(this));
-
+//     Meteor.call("artesky_off", function (error, result) {
+//         // identify the error
+//         tsx_UpdateServerState(tsx_ServerStates.imagingSessionId, '' );
+//         tsx_UpdateServerState(tsx_ServerStates.targetImageName, '');
+//         tsx_UpdateServerState(tsx_ServerStates.targetDEC, '_');
+//         tsx_UpdateServerState(tsx_ServerStates.targetRA, '_');
+//         tsx_UpdateServerState(tsx_ServerStates.targetALT, '_');
+//         tsx_UpdateServerState(tsx_ServerStates.targetAZ, '_');
+//         tsx_UpdateServerState(tsx_ServerStates.targetHA, '_');
+//         tsx_UpdateServerState(tsx_ServerStates.targetTransit, '_');
+// //        tsx_UpdateServerState(tsx_ServerStates.currentStage, 'Stopped');
+//
+//       }.bind(this));
+//
     Meteor.call("stopScheduler", function (error, result) {
         // identify the error
         tsx_UpdateServerState(tsx_ServerStates.imagingSessionId, '' );
@@ -304,14 +304,30 @@ class CalibrationsMenu extends Component {
     }
     return (
       <Button.Group basic size='mini' floated='right'>
+        {this.renderFlatboxLevelCalibration()}
         <Button disabled={DISABLED} onClick={this.gotoFlatPosition.bind(this)}>Slew</Button>
         <Button disabled  compact  />
-        <Button disabled={DISABLED} icon='search' onClick={this.findFilterLevels.bind(this)} />
-        <Button disabled compact />
         <Button disabled={true} icon='recycle' onClick={this.resetAngles.bind(this)}/>
         <Button disabled={DISABLED} icon='settings' onClick={this.showModalCalibrationSettings.bind(this)}/>
       </Button.Group>
     )
+  }
+
+  renderFlatboxLevelCalibration() {
+    let DISABLED = true;
+
+    if( this.props.scheduler_running.value == 'Stop'  && this.props.tool_active.value == false ){
+      DISABLED = false;
+    }
+    if( (this.props.flatbox_enabled.value === true)  ){
+      ENABLED_SEARCH_LEVEL = true;
+      return (
+        <Button.Group>
+          <Button disabled={DISABLED} icon='search' onClick={this.findFilterLevels.bind(this)} />
+          <Button disabled compact />
+        </Button.Group>
+      )
+    }
   }
 
   renderModalCalibrationSettings() {

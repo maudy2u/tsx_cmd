@@ -94,6 +94,34 @@ import {
 
 const settlePanel = 3*1000; // seconds
 
+export function calibrate_flatbox_levels() {
+  var res = '';
+  try{
+    setSchedulerState( 'Running' );
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
+    flatbox_connect();
+    flatbox_on();
+
+    var cf = CalibrationFrames.find({ on_enabled: true }, { sort: { order: 1 } }).fetch();
+    for( var i=0; i < cf.length; i ++ ) {
+      findFilterLevel( cf[i], 254, 0 );
+    }
+    res = 'DONE';
+  }
+  catch( e ) {
+    console.log( e )
+    res = e;
+  }
+  finally {
+    flatbox_disconnect();
+    srvStopScheduler();
+    tsx_SetServerState( tsx_ServerStates.tool_active, false );
+  }
+  console.log( res )
+
+  return res;
+}
+
 export function collect_calibration_images() {
   tsxLog(" [CALIBRATION] *******************************");
   UpdateStatus(" [CALIBRATION] STARTED");
@@ -377,30 +405,34 @@ function takeCalibrationImage( cal ) {
 Meteor.methods({
 
   findFilterLevels() {
-    var res = '';
-//    try{
-      setSchedulerState( 'Running' );
-      tsx_SetServerState( tsx_ServerStates.tool_active, true );
-      flatbox_connect();
-      flatbox_on();
 
-      var cf = CalibrationFrames.find({ on_enabled: true }, { sort: { order: 1 } }).fetch();
-      for( var i=0; i < cf.length; i ++ ) {
-        findFilterLevel( cf[i], 254, 0 );
+    if(
+      getSchedulerState() == 'Running'
+    ) {
+      UpdateStatusWarn(" [CALIBRATION] Flatbox Level calibration cannot start");
+      tsxLog(' [CALIBRATION] Scheduler is alreadying running. Nothing to do.');
+      return;
+    }
+    else if( getSchedulerState() == 'Stop' ) {
+      tsx_SetServerState( tsx_ServerStates.tool_active, true );
+      tsxInfo(" [CALIBRATION] Flatbox Level calibration");
+      runSchedulerProcess();
+      // Create a job:
+      var job = new Job(scheduler, tsx_ServerStates.runScheduler, // type of job
+        // Job data that you define, including anything the job
+        // needs to complete. May contain links to files, etc...
+        {
+          startTime: new Date(),
+          scheduleType: 'flatbox calibration',
+        }
+      );
+      job.priority('normal');
+      var jid = job.save();               // Commit it to the server
+    } else {
+        tsxErr(" [CALIBRATION] Invalid state found for scheduler.");
+        // logCon.error('Invalid state found for scheduler.');
       }
-      res = 'DONE';
-    // }
-    // catch( e ) {
-    //   console.log( e )
-    //   res = e;
-    // }
-    // finally {
-    //   flatbox_disconnect();
-     srvStopScheduler();
-     tsx_SetServerState( tsx_ServerStates.tool_active, false );
-    // }
-    console.log( res )
-    return res;
+
   },
 
   processCalibrationTargets( ) {
