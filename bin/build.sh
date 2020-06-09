@@ -51,7 +51,7 @@ package_tar() {
 
 update_version_info() {
 
-  export build_file = "../etc/build_version.json"
+  export build_file="../etc/build_version.json"
 
   echo '{' > ${build_file}
   echo '  "version: "'${version}'"",' >> ${build_file}
