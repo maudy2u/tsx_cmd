@@ -70,8 +70,8 @@ install_tar_bundle() {
   echo " Updating tsx_cmd in ${install_dir}"
   echo " *******************************"
   echo ""
-  mv ./bundle ./bundle_${version}_${date}_(${build_num})
-  echo " ./bundle backed up to ./bundle_${version}_${date}_(${build_num})"
+  mv ./bundle ./bundle_${version}_${date}_${build}
+  echo " ./bundle backed up to ./bundle_${version}_${date}_(${build})"
 
   echo " *******************************"
   echo " TSX_CMD - Extract" ${tarfile}
@@ -83,10 +83,9 @@ install_tar_bundle() {
 get_version() {
   # *******************************
   # grab current bundle variables
-  for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ./bundle/programs/server/assets/app/version.json ); do
+  for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ./bundle/programs/server/assets/app/build_version.json ); do
       export $s
   done
-  export build_num=$(git rev-list --all --count)
 }
 
 update_fibers() {
