@@ -404,12 +404,12 @@ class App extends TrackerReact(Component) {
   renderClouds( index ) {
     var metroLink =
         'https://www.meteoblue.com/en/weather/forecast/seeing/'
-      + this.props.cloudReportWidget.value
+      + this.props.metroBlueReportWidget.value
       + '?utm_source=weather_widget'
       + '&utm_medium=linkus&utm_content=seeing&utm_campaign=Weather%2BWidget';
     var metroFrame =
         'https://www.meteoblue.com/en/weather/widget/seeing/'
-        + this.props.cloudReportWidget.value
+        + this.props.metroBlueReportWidget.value
       + '?geoloc=fixed&noground=0';
 
 /*
@@ -417,7 +417,7 @@ class App extends TrackerReact(Component) {
 <img src="https://www.cleardarksky.com/c/Monctoncsk.gif?c=471637"></a>
 */
 
-    var ccCity = "Monctoncsk.gif?c=471637";
+    var ccCity = this.props.clearSkyReportWidget.value;
     // https://www.cleardarksky.com/c/Monctoncsk.gif?c=471637
     var ccImage = "https://www.cleardarksky.com/c/" + ccCity ;//+ "\"";
 
@@ -605,7 +605,8 @@ export default withTracker(() => {
   var scheduler_report = TheSkyXInfos.findOne({name: 'scheduler_report'});
   var night_plan = TheSkyXInfos.findOne({name: 'night_plan'});
   var night_plan_reset = TheSkyXInfos.findOne({name: 'night_plan_reset'});
-  var cloudReportWidget = TheSkyXInfos.findOne({name: 'cloudReportWidget'});
+  var metroBlueReportWidget = TheSkyXInfos.findOne({name: 'metroBlueReportWidget'});
+  var clearSkyReportWidget = TheSkyXInfos.findOne({name: 'clearSkyReportWidget'});
 
   const targetSessionsHandle = Meteor.subscribe('targetSessions.all');
   const targetSessionsReadyYet = targetSessionsHandle.ready();
@@ -641,7 +642,8 @@ export default withTracker(() => {
     takeSeriesTemplatesReadyYet,
 
     tsxInfo,
-    cloudReportWidget,
+    metroBlueReportWidget,
+    clearSkyReportWidget,
     targetName,
     flatbox_enabled,
     scheduler_running,

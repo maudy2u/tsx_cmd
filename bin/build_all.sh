@@ -15,7 +15,7 @@
 #     You should have received a copy of the GNU Affero General Public License
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-export app="Build All TSX Cmd v1.3"
+export app="Build ALL TSX Cmd v1.4"
 if [ $# -lt 2 ]
   then
     echo ""
@@ -39,23 +39,9 @@ export install_dir=$(pwd)
 for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ./private/version.json ); do
     export $s
 done
-export details=build_$(git rev-list --all --count)_v${version}_${date}_${1}
-
-
-if [ "$(uname -p)" == "aarch64" ] || [ "$(uname -p)" == "armv7l" ]; then
-  export meteor_build=~/meteor/meteor
-else
-  export meteor_build=meteor
-fi
-
-build_tsx_cmd () {
-  build_type=$1
-  folder=${base_dir}"tsx_cmd_"$1"_"${details}
-  mkdir -p ${folder}
-  echo " Building" ${folder}
-  ${meteor_build} build --architecture $1 --directory ${folder}
-  package_tar ${folder}
-}
+export build_num=$(git rev-list --all --count)
+#export details=build_$(git rev-list --all --count)_v${version}_${date}_${1}
+export details=v${version}_${date}_${1}.${build_num}
 
 package_tar() {
   cd ${base_dir}
@@ -64,27 +50,53 @@ package_tar() {
   cd ${install_dir}
 }
 
-if [ "$(uname -p)" == "aarch64" ]; then
-  export arm_build_type="os.linux.aarch64"
-fi
+update_version_info() {
 
-if [ "$(uname -p)" == "armv7l" ]; then
-  export arm_build_type="os.linux.armv7l"
-fi
+  export build_file=./private/build_version.json
 
-if [ "$(uname -p)" == "aarch64" ] || [ "$(uname -p)" == "armv7l" ]; then
-  folder=${base_dir}"tsx_cmd_"${arm_build_type}"_"${details}
+  echo '{' > ${build_file}
+  echo '  "version": "'${version}'",' >> ${build_file}
+  echo '  "date": "'${date}'",' >> ${build_file}
+  echo '  "build": "'${build_num}'"' >> ${build_file}
+  echo '}' >> ${build_file}
+}
+
+build_tsx_cmd () {
+  update_version_info
+
+  folder=${base_dir}"tsx_cmd_"$1"_"${details}
   mkdir -p ${folder}
   echo " Building" ${folder}
-  ${meteor_build} build --directory ${folder}
+  if [ "$(uname -m)" == "aarch64" ] || [ "$(uname -m)" == "armv7l" ]; then
+    ${meteor_build} build --directory ${folder}
+  else
+    ${meteor_build} build --architecture $1 --directory ${folder}
+  fi
   package_tar ${folder}
+}
+
+if [ "$(uname -m)" == "aarch64" ] || [ "$(uname -m)" == "armv7l" ]; then
+  export meteor_build=~/meteor/meteor
+else
+  export meteor_build=meteor
 fi
 
+if [ "$(uname -s)" == "Linux" ]; then
+  export build_type="os.$(uname -s).$(uname -m)"
+fi
+
+if [ "$(uname -s)" == "Darwin" ]; then
+  export build_type="os.osx.$(uname -m)"
+fi
+
+build_tsx_cmd ${build_type}
 build_tsx_cmd "os.osx.x86_64"
 build_tsx_cmd "os.linux.x86_64"
 build_tsx_cmd "os.windows.x86_32"
+
 echo ""
 echo " *******************************"
 echo "  Finished: "${app}
+echo "  Location: "${folder}".tar"
 echo " *******************************"
 echo ""

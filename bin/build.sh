@@ -15,7 +15,7 @@
 #     You should have received a copy of the GNU Affero General Public License
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-export app="Build All TSX Cmd v1.3"
+export app="Build TSX Cmd v1.4"
 if [ $# -lt 2 ]
   then
     echo ""
@@ -40,7 +40,8 @@ for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|
     export $s
 done
 export build_num=$(git rev-list --all --count)
-export details=build_$(git rev-list --all --count)_v${version}_${date}_${1}
+#export details=build_$(git rev-list --all --count)_v${version}_${date}_${1}
+export details=v${version}_${date}_${1}.${build_num}
 
 package_tar() {
   cd ${base_dir}

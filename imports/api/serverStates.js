@@ -164,7 +164,8 @@ export const tsx_ServerStates = {
 
   session_report: 'session_report',
 
-  cloudReportWidget: 'cloudReportWidget',
+  metroBlueReportWidget: 'metroBlueReportWidget',
+  clearSkyReportWidget: 'clearSkyReportWidget',
 
 };
 

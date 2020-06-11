@@ -93,6 +93,7 @@ const eDefaultConstrainsts =7;
 const eStartStop = 8;
 const eClouds = 9;
 const eFlatbox = 10;
+const eWeatherReports = 11;
 
 // App component - represents the whole app
 class DefaultSettings extends Component {
@@ -153,7 +154,8 @@ class DefaultSettings extends Component {
       ip: '',
       port: '',
 
-     cloudReportWidget: 'boulder_united-states-of-america_5574991',
+      metroBlueReportWidget: 'boulder_united-states-of-america_5574991',
+      clearSkyReportWidget: 'BldrCOkey.html?1',
 
       activeIndex: -1,
 
@@ -387,8 +389,11 @@ class DefaultSettings extends Component {
           calibrationFrameSize: nextProps.tsxInfo.find(function(element) {
             return element.name == 'calibrationFrameSize';
           }).value,
-          cloudReportWidget: nextProps.tsxInfo.find(function(element) {
-            return element.name == 'cloudReportWidget';
+          metroBlueReportWidget: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'metroBlueReportWidget';
+          }).value,
+          clearSkyReportWidget: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'clearSkyReportWidget';
           }).value,
 
           flatbox_ip: nextProps.tsxInfo.find(function(element) {
@@ -1290,6 +1295,16 @@ class DefaultSettings extends Component {
     const { activeIndex } = this.state;
 
     return (
+      <div>
+      <Accordion.Title
+        active={activeIndex === eClouds}
+        index={eWeatherReports}
+        onClick={this.handleClick}
+      >
+      <Icon name='cloud' size='large' />
+      Clouds
+      </Accordion.Title>
+      <Accordion.Content  active={activeIndex === eClouds} >
         <Segment.Group compact>
         <Segment tertiary>
           <Checkbox
@@ -1339,16 +1354,54 @@ class DefaultSettings extends Component {
               validationError="Must be a positive number, e.g 0, 5, 1800, 3600"
               errorLabel={ ERRORLABEL }
             />
+            </Form>
+          </Segment>
+        </Segment.Group>
+        </Accordion.Content>
+        </div>
+    )
+  }
+
+  renderWeatherReports() {
+    if( this.props.settingsIndex !== 'Weather' ) {
+      return;
+    }
+
+    const { activeIndex } = this.state;
+
+    return (
+      <div>
+      <Accordion.Title
+        active={activeIndex === eWeatherReports}
+        index={eWeatherReports}
+        onClick={this.handleClick}
+      >
+      <Icon name='cloud' size='large' />
+      Clouds
+      </Accordion.Title>
+      <Accordion.Content  active={activeIndex === eWeatherReports} >
+        <Segment.Group>
+        <Segment>
+          <Form>
             <Form.Input
               label='Metroblue Widget City code  '
-              name='cloudReportWidget'
+              name='metroBlueReportWidget'
               placeholder='e.g. boulder_united-states-of-america_5574991'
-              value={this.state.cloudReportWidget}
+              value={this.state.metroBlueReportWidget}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              label='ClearSky Widget City code  '
+              name='clearSkyReportWidget'
+              placeholder='e.g. BldrCOkey.html?1'
+              value={this.state.clearSkyReportWidget}
               onChange={this.handleChange}
             />
             </Form>
           </Segment>
         </Segment.Group>
+      </Accordion.Content>
+    </div>
     )
   }
 
@@ -1383,6 +1436,10 @@ class DefaultSettings extends Component {
             <Menu.Item fitted as='a' name='TheSkyX Connection' onClick={this.props.handleSettingsItemClick} >
               <Icon name='star' fitted={true} size='mini' />
               TheSkyX Connection
+            </Menu.Item>
+            <Menu.Item fitted as='a' name='Weather' onClick={this.props.handleSettingsItemClick} >
+              <Icon name='cloud' size='mini' />
+              Clouds
             </Menu.Item>
             <Menu.Item fitted as='a' name='Guider' onClick={this.props.handleSettingsItemClick} >
               <Icon name='chart line' size='mini' />
@@ -1429,6 +1486,7 @@ class DefaultSettings extends Component {
           <center>
             <Segment basic compact onClick={this.props.hideSideBar } >
             {this.renderServers()}
+            {this.renderWeatherReports()}
             {this.renderGuider()}
             {this.renderDithering()}
             {this.renderImager()}
