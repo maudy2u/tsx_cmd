@@ -40,6 +40,7 @@ class AppInfo extends Component {
      port: 3040,
      version: 'tbd',
      date: 'unknown',
+     build: 'tbd',
    };
  }
 
@@ -68,6 +69,7 @@ class AppInfo extends Component {
           port: nextProps.port.value,
           version: nextProps.version.value,
           date: nextProps.date.value,
+          build: nextProps.build.value,
         });
       }
   }
@@ -78,10 +80,10 @@ class AppInfo extends Component {
     var PORT = this.state.port;
     var VERSION = this.state.version;
     var DATE = this.state.date;
+    var BUILD = this.state.build;
 
     return (
       <center>
-        <Label>tsx_cmd - Imaging with TheSkyX</Label>
         <Label>TSX ip:
           <Label.Detail>
             {IP}
@@ -95,6 +97,8 @@ class AppInfo extends Component {
         </Label>
         <Label>version <Label.Detail>{VERSION}</Label.Detail></Label>
         <Label>date <Label.Detail>{DATE}</Label.Detail></Label>
+        <Label>build <Label.Detail>{BUILD}</Label.Detail></Label>
+        <Label>tsx_cmd - Imaging with TheSkyX</Label>
         <br/>&nbsp;&nbsp;
       </center>
     )
