@@ -54,7 +54,7 @@ update_version_info() {
   export build_file=./private/build_version.json
 
   echo '{' > ${build_file}
-  echo '  "version: "'${version}'"",' >> ${build_file}
+  echo '  "version": "'${version}'",' >> ${build_file}
   echo '  "date": "'${date}'",' >> ${build_file}
   echo '  "build": "'${build_num}'"' >> ${build_file}
   echo '}' >> ${build_file}
