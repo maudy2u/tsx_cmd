@@ -2112,6 +2112,7 @@ function tsx_TargetReport( target ) {
 }
 
 // **************************************************************
+// Graham (Craig) and Stephen Townsend
 function tsx_MatchRotation( target ) {
   // tsxInfo('************************');
   var rotateSucess = false;
@@ -2210,6 +2211,7 @@ function tsx_MatchRotation( target ) {
 }
 
 // **************************************************************
+// Graham (Craig) and Stephen Townsend
 export function tsx_RotateCamera( position, cls ) {
   // tsxInfo('************************');
   tsxInfo(' *** tsx_RotateCamera: ' + position);

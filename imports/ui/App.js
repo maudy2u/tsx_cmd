@@ -249,7 +249,7 @@ class App extends TrackerReact(Component) {
             <Icon name='briefcase' size='large' />
           </Menu.Item>
           <Menu.Item fitted name='Weather' active={activeMenu === 'Weather'} onClick={this.handleMenuItemClick}>
-            <Icon name='cloud' size='large'/>
+            <Icon name='mixcloud' size='large'/>
           </Menu.Item>
           <Menu.Item position ='right' fitted name='Settings' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick}>
             <Icon name='settings' size='large'/>
@@ -402,14 +402,20 @@ class App extends TrackerReact(Component) {
   }
 
   renderClouds( index ) {
+
+    var metro = this.props.metroBlueReportWidget.value;
+    if( metro == '') {
+          metro = 'boulder_united-states-of-america_5574991';
+    }
+
     var metroLink =
         'https://www.meteoblue.com/en/weather/forecast/seeing/'
-      + this.props.metroBlueReportWidget.value
+      + metro
       + '?utm_source=weather_widget'
       + '&utm_medium=linkus&utm_content=seeing&utm_campaign=Weather%2BWidget';
     var metroFrame =
         'https://www.meteoblue.com/en/weather/widget/seeing/'
-        + this.props.metroBlueReportWidget.value
+        + metro
       + '?geoloc=fixed&noground=0';
 
 /*
@@ -418,6 +424,9 @@ class App extends TrackerReact(Component) {
 */
 
     var ccCity = this.props.clearSkyReportWidget.value;
+    if( ccCity == '' ) {
+      ccCity = 'BldrCOkey.html?1';
+    }
     // https://www.cleardarksky.com/c/Monctoncsk.gif?c=471637
     var ccImage = "https://www.cleardarksky.com/c/" + ccCity ;//+ "\"";
 

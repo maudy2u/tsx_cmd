@@ -1298,7 +1298,7 @@ class DefaultSettings extends Component {
       <div>
       <Accordion.Title
         active={activeIndex === eClouds}
-        index={eWeatherReports}
+        index={eClouds}
         onClick={this.handleClick}
       >
       <Icon name='cloud' size='large' />
@@ -1376,8 +1376,8 @@ class DefaultSettings extends Component {
         index={eWeatherReports}
         onClick={this.handleClick}
       >
-      <Icon name='cloud' size='large' />
-      Clouds
+      <Icon name='mixcloud' size='large' />
+      Weather Reports
       </Accordion.Title>
       <Accordion.Content  active={activeIndex === eWeatherReports} >
         <Segment.Group>
@@ -1438,8 +1438,8 @@ class DefaultSettings extends Component {
               TheSkyX Connection
             </Menu.Item>
             <Menu.Item fitted as='a' name='Weather' onClick={this.props.handleSettingsItemClick} >
-              <Icon name='cloud' size='mini' />
-              Clouds
+              <Icon name='mixcloud' size='mini' />
+              Weather Reports
             </Menu.Item>
             <Menu.Item fitted as='a' name='Guider' onClick={this.props.handleSettingsItemClick} >
               <Icon name='chart line' size='mini' />

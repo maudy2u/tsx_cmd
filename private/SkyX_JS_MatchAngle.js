@@ -1,8 +1,8 @@
 /* Java Script */
 /* Socket Start Packet */
 // SkyX_JS_MatchAngle
-//  Stephen Townsend
-//  2018-11-29
+//  Graham (Craig) and Stephen Townsend
+//  2020-05-27
 // *******************************
 var TARGET_PA =  $000;
 var ACCURACY = $003; // DIFF target angle VS. ImageLink angle
