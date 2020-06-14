@@ -162,6 +162,9 @@ class DefaultSettings extends Component {
       //settingsIndex: 'TheSkyX Connection',
       sideBarSettingsVisible: true,
 
+      isNoVNCEnabled: false,
+      noVNCPWD: '',
+      noVNCPort: '6080',
     };
   }
 
@@ -394,6 +397,16 @@ class DefaultSettings extends Component {
           }).value,
           clearSkyReportWidget: nextProps.tsxInfo.find(function(element) {
             return element.name == 'clearSkyReportWidget';
+          }).value,
+
+          isNoVNCEnabled: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'isNoVNCEnabled';
+          }).value,
+          noVNCPWD: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'noVNCPWD';
+          }).value,
+          noVNCPort: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'noVNCPort';
           }).value,
 
           flatbox_ip: nextProps.tsxInfo.find(function(element) {
@@ -1404,6 +1417,54 @@ class DefaultSettings extends Component {
     </div>
     )
   }
+  rendernoVNC() {
+    if( this.props.settingsIndex !== 'noVNC' ) {
+      return;
+    }
+
+    const { activeIndex } = this.state
+    var DISABLE = !this.state.isNoVNCEnabled;
+
+    return (
+      <Segment.Group compact>
+        <Segment tertiary>
+          <Checkbox
+            label=' Enable noVNC'
+            name='isNoVNCEnabled'
+            toggle
+            checked={this.state.isNoVNCEnabled}
+            onClick={this.handleToggleAndSave.bind(this)}
+            style={{ labelColor: 'black'  }}
+          />
+        </Segment>
+        <Segment>
+          <Form>
+            <Form.Input
+              disabled={DISABLE}
+              label='noVNC password to log in '
+              name='noVNCPWD'
+              placeholder='If your VNC server needs a password enter here'
+              value={this.state.noVNCPWD}
+              onChange={this.handleChange}
+            />
+            <Form.Input
+              disabled={DISABLE}
+              label='Enter port for noVNC URL, e.g. 6080'
+              name='noVNCPort'
+              placeholder='Default is 6080'
+              value={this.state.noVNCPort}
+              onChange={this.handleChange}
+              validations={{
+                matchRegexp: XRegExpNonZeroPosInt, // https://github.com/slevithan/xregexp#unicode
+              }}
+              validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
+              errorLabel={ ERRORLABEL }
+            />
+          </Form>
+          </Segment>
+        </Segment.Group>
+    )
+  }
 
   // *******************************
   //
@@ -1477,6 +1538,10 @@ class DefaultSettings extends Component {
               <Icon name='time' size='mini' />
               Default Start/Stop Times
             </Menu.Item>
+            <Menu.Item fitted as='a' name='noVNC' onClick={this.props.handleSettingsItemClick} >
+              <Icon name='tv' size='mini' />
+              noVNC
+            </Menu.Item>
             <Menu.Item fitted as='a' name='Artesky Flatbox' onClick={this.props.handleSettingsItemClick} >
               <Icon name='chart area' size='mini' />
               Artesky Flatbox
@@ -1496,6 +1561,7 @@ class DefaultSettings extends Component {
             {this.renderConstraints()}
             {this.renderClouds()}
             {this.renderStartStopTimes()}
+            {this.rendernoVNC()}
             {this.renderFlatBox()}
             </Segment>
             </center>
@@ -1518,6 +1584,7 @@ class DefaultSettings extends Component {
     );
   }
 }
+
 // *******************************
 // THIS IS THE DEFAULT EXPORT AND IS WHERE THE LOADING OF THE COMPONENT STARTS
 // USE THIS POINT TO GRAB THE FILTERS

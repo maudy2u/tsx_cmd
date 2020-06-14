@@ -145,6 +145,15 @@ function initServerStates() {
   // check the setting of the start/stop time initialization
   var startT, stopT;
   try {
+    var chk = TheSkyXInfos.findOne({name: tsx_ServerStates.isNoVNCEnabled}).value;
+    if( chk === '' ) {
+      tsx_SetServerState(tsx_ServerStates.isNoVNCEnabled, false);
+    }
+  }
+  catch(e) {
+    tsx_SetServerState(tsx_ServerStates.isNoVNCEnabled, false);
+  }
+  try {
     TheSkyXInfos.findOne({name: tsx_ServerStates.defaultUseImagingCooler_enabled}).value;
   }
   catch(e) {
@@ -193,6 +202,9 @@ function initServerStates() {
 Meteor.startup(() => {
   tsxLog(' ******************************', '');
   tsxLog(' ****** TSX_CMD STARTING', '');
+//  var x = location.hostname;
+//  console.log( x)
+
   AppLogsDB.remove({});
   srvStopScheduler();
 

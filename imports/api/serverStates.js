@@ -167,6 +167,10 @@ export const tsx_ServerStates = {
   metroBlueReportWidget: 'metroBlueReportWidget',
   clearSkyReportWidget: 'clearSkyReportWidget',
 
+  isNoVNCEnabled: 'isNoVNCEnabled',
+  noVNCPWD: 'noVNCPWD',
+  noVNCPort: 'noVNCPort',
+
 };
 
 export function getDefaultStateValue( param ) {

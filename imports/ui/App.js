@@ -41,6 +41,7 @@ import {
   Modal,
   Accordion,
   Sidebar,
+  Embed
 } from 'semantic-ui-react'
 
 // Import the API Model
@@ -227,37 +228,81 @@ class App extends TrackerReact(Component) {
 
   renderMenu() {
     const { activeMenu  } = this.state;
-    return(
-      <div>
-        <Menu tabular icon size='huge'>
-          <Menu.Item fitted name='Monitor' active={activeMenu === 'Monitor'} onClick={this.handleMenuItemClick}>
-            <Icon name='play circle' size='large' />
-          </Menu.Item>
-          <Menu.Item fitted name='Plan' active={activeMenu === 'Plan'} onClick={this.handleMenuItemClick}>
-            <Icon name='tasks' size='large' />
-          </Menu.Item>
-          <Menu.Item fitted name='Targets' active={activeMenu === 'Targets'} onClick={this.handleMenuItemClick}>
-            <Icon name='target' size='large' />
-          </Menu.Item>
-          <Menu.Item fitted name='Series' active={activeMenu === 'Series'} onClick={this.handleMenuItemClick}>
-            <Icon name='list ol' size='large' />
-          </Menu.Item>
-          <Menu.Item fitted name='Calibration' active={activeMenu === 'Calibration'} onClick={this.handleMenuItemClick}>
-            <Icon name="area graph" size='large' />
-          </Menu.Item>
-          <Menu.Item fitted name='Toolbox' active={activeMenu === 'Toolbox'} onClick={this.handleMenuItemClick}>
-            <Icon name='briefcase' size='large' />
-          </Menu.Item>
-          <Menu.Item fitted name='Weather' active={activeMenu === 'Weather'} onClick={this.handleMenuItemClick}>
-            <Icon name='mixcloud' size='large'/>
-          </Menu.Item>
-          <Menu.Item position ='right' fitted name='Settings' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick}>
-            <Icon name='settings' size='large'/>
-          </Menu.Item>
-        </Menu>
-        {this.renderMenuSegments()}
-      </div>
-    )
+
+    var enableNoVNC = this.props.isNoVNCEnabled.value;
+
+    if( enableNoVNC ) {
+      return(
+        <div>
+          <Menu tabular icon size='huge'>
+            <Menu.Item fitted name='Monitor' active={activeMenu === 'Monitor'} onClick={this.handleMenuItemClick}>
+              <Icon name='play circle' size='large' />
+            </Menu.Item>
+            <Menu.Item fitted name='Plan' active={activeMenu === 'Plan'} onClick={this.handleMenuItemClick}>
+              <Icon name='tasks' size='large' />
+            </Menu.Item>
+            <Menu.Item fitted name='Targets' active={activeMenu === 'Targets'} onClick={this.handleMenuItemClick}>
+              <Icon name='target' size='large' />
+            </Menu.Item>
+            <Menu.Item fitted name='Series' active={activeMenu === 'Series'} onClick={this.handleMenuItemClick}>
+              <Icon name='list ol' size='large' />
+            </Menu.Item>
+            <Menu.Item fitted name='Calibration' active={activeMenu === 'Calibration'} onClick={this.handleMenuItemClick}>
+              <Icon name="area graph" size='large' />
+            </Menu.Item>
+            <Menu.Item fitted name='Toolbox' active={activeMenu === 'Toolbox'} onClick={this.handleMenuItemClick}>
+              <Icon name='briefcase' size='large' />
+            </Menu.Item>
+            <Menu.Item fitted name='noVNC' active={activeMenu === 'noVNC'} onClick={this.handleMenuItemClick}>
+              <Icon name='tv' size='large'/>
+            </Menu.Item>
+            <Menu.Item fitted name='Weather' active={activeMenu === 'Weather'} onClick={this.handleMenuItemClick}>
+              <Icon name='mixcloud' size='large'/>
+            </Menu.Item>
+            <Menu.Item position ='right' fitted name='Settings' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick}>
+              <Icon name='settings' size='large'/>
+            </Menu.Item>
+          </Menu>
+          {this.renderMenuSegments()}
+        </div>
+      )
+
+    }
+    else {
+      return(
+        <div>
+          <Menu tabular icon size='huge'>
+            <Menu.Item fitted name='Monitor' active={activeMenu === 'Monitor'} onClick={this.handleMenuItemClick}>
+              <Icon name='play circle' size='large' />
+            </Menu.Item>
+            <Menu.Item fitted name='Plan' active={activeMenu === 'Plan'} onClick={this.handleMenuItemClick}>
+              <Icon name='tasks' size='large' />
+            </Menu.Item>
+            <Menu.Item fitted name='Targets' active={activeMenu === 'Targets'} onClick={this.handleMenuItemClick}>
+              <Icon name='target' size='large' />
+            </Menu.Item>
+            <Menu.Item fitted name='Series' active={activeMenu === 'Series'} onClick={this.handleMenuItemClick}>
+              <Icon name='list ol' size='large' />
+            </Menu.Item>
+            <Menu.Item fitted name='Calibration' active={activeMenu === 'Calibration'} onClick={this.handleMenuItemClick}>
+              <Icon name="area graph" size='large' />
+            </Menu.Item>
+            <Menu.Item fitted name='Toolbox' active={activeMenu === 'Toolbox'} onClick={this.handleMenuItemClick}>
+              <Icon name='briefcase' size='large' />
+            </Menu.Item>
+            <Menu.Item fitted name='Weather' active={activeMenu === 'Weather'} onClick={this.handleMenuItemClick}>
+              <Icon name='mixcloud' size='large'/>
+            </Menu.Item>
+            <Menu.Item position ='right' fitted name='Settings' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick}>
+              <Icon name='settings' size='large'/>
+            </Menu.Item>
+          </Menu>
+          {this.renderMenuSegments()}
+        </div>
+      )
+
+    }
+
   }
 
   // *******************************
@@ -372,6 +417,23 @@ class App extends TrackerReact(Component) {
           </Sidebar.Pusher>
         </Sidebar.Pushable>
       )
+    } else if (this.state.activeMenu == 'noVNC') {
+      // 10.9.8.34
+      var IP = this.props.tsxIP.value;
+      var PWD = '1password'; // this.props.noVNCPWD.value;
+      var PORT = ''; //this.props.noVNCPort.value;
+      var URL = 'http://'+IP+':6080/vnc.html?host='+IP+'&port=6080&autoconnect=true';
+      if( PWD !== '') {
+          URL = URL + '&password=' + PWD;
+      }
+      console.log( URL )
+
+      return (
+        <Embed
+        icon='right circle arrow'
+        url={URL}
+        />
+      )
     } else if (this.state.activeMenu == 'Settings') {
       return (
         <DefaultSettings
@@ -431,6 +493,7 @@ class App extends TrackerReact(Component) {
     var ccImage = "https://www.cleardarksky.com/c/" + ccCity ;//+ "\"";
 
 //            onHide={false}
+//          placeholder='/images/image-16by9.png'
 
     if( index === 'clearSky' ) {
       return (
@@ -616,6 +679,9 @@ export default withTracker(() => {
   var night_plan_reset = TheSkyXInfos.findOne({name: 'night_plan_reset'});
   var metroBlueReportWidget = TheSkyXInfos.findOne({name: 'metroBlueReportWidget'});
   var clearSkyReportWidget = TheSkyXInfos.findOne({name: 'clearSkyReportWidget'});
+  var isNoVNCEnabled = TheSkyXInfos.findOne({name: 'isNoVNCEnabled'});
+  var noVNCPWD = TheSkyXInfos.findOne({name: 'noVNCPWD'});
+  var noVNCPort = TheSkyXInfos.findOne({name: 'noVNCPort'});
 
   const targetSessionsHandle = Meteor.subscribe('targetSessions.all');
   const targetSessionsReadyYet = targetSessionsHandle.ready();
@@ -649,6 +715,10 @@ export default withTracker(() => {
     flatSeriesReadyYet,
     targetReportsReadyYet,
     takeSeriesTemplatesReadyYet,
+
+    isNoVNCEnabled,
+    noVNCPort,
+    noVNCPWD,
 
     tsxInfo,
     metroBlueReportWidget,

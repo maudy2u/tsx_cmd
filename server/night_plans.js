@@ -182,14 +182,35 @@ export function tsx_AltTimesForTargets( targets ) {
   return Out;
 }
 
+// if report is dirty then it needs updating
+function isReportDirty() {
+
+// 1. were the default times changed
+// 2. is it a new imaging night... (check scheduler to determine imaging date)
+
+// ANY OF THE ABOVE WILL STATE DIRTY
+
+}
+
+// if a target is dirty then it needs updating
+function isTargetDirty() {
+
+// 3. was a target added, no update needed if removed
+// 4. was a target's minAlt changed.
+
+// ANY OF THE ABOVE WILL STATE DIRTY
+
+}
+
 Meteor.methods({
 
   planData() {
+
     tsx_SetServerState( tsx_ServerStates.night_plan_report, true );
-    tsxInfo( ' [PLANNER] Computing...');
+    UpdateStatus( ' [PLANNER] Computing...');
     let plan = TargetPlans();
     tsx_SetServerState( tsx_ServerStates.night_plan_report, true );
-    tsxInfo( ' [PLANNER] Done');
+    UpdateStatus( ' [PLANNER] Done');
     return plan;
   },
 

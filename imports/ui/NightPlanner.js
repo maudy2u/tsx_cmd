@@ -167,13 +167,13 @@ class NightPlanner extends Component {
       }
       catch(e) {
         // no plan so do not process
-        result = '';
+        result === '';
         this.setState({
           planData: '',
           night_plan_reset: true,
         });
       }
-      if( result != '') {
+      if( typeof result !== 'undefined' || result !== '') {
         this.setState({
           planData: result,
           night_plan_reset: false,
