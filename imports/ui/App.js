@@ -743,13 +743,13 @@ export default withTracker(() => {
     night_plan,
     night_plan_reset,
 
-    targetSessions: TargetSessions.find({ isCalibrationFrames: false }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
-    enabledTargetSessions: TargetSessions.find({ enabledActive: true }, { sort: { priority: 1, numericOrdering: true } }).fetch(),
+    targetSessions: TargetSessions.find({ isCalibrationFrames: false }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(10),
+    enabledTargetSessions: TargetSessions.find({ enabledActive: true }, { sort: { priority: 1, numericOrdering: true } }).fetch(10),
     filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
     calibrations: CalibrationFrames.find({}).fetch(),
-    flatSeries: FlatSeries.find({}).fetch(),
-    target_reports: TargetReports.find({}).fetch(),
-    takeSeriesTemplates: TakeSeriesTemplates.find({ isCalibrationFrames: false }, { sort: { name: 1 } }).fetch(),
+    flatSeries: FlatSeries.find({}).fetch(10),
+    target_reports: TargetReports.find({}).fetch(10),
+    takeSeriesTemplates: TakeSeriesTemplates.find({ isCalibrationFrames: false }, { sort: { name: 1 } }).fetch(10),
 
     // SESSION Controls
     //    tool_calibrate_via: TheSkyXInfos.findOne({name: 'tool_calibrate_via'}),

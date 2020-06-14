@@ -176,8 +176,8 @@ export default withTracker(() => {
 
   return {
     seriessReadyYet,
-    seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(),
-    takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(),
-    targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
+    seriess: Seriess.find({}, { sort: { order: 1 } }).fetch(10),
+    takeSeriesTemplates: TakeSeriesTemplates.find({}, { sort: { name: 1 } }).fetch(10),
+    targetSessions: TargetSessions.find({}, { sort: { name: 1 } }).fetch(10),
   };
 })(TakeSeries);

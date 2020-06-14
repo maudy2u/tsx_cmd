@@ -204,6 +204,6 @@ export default withTracker(() => {
 
   return {
     reportsReadyYet,
-    session_reports: ImagingSessionLogs.find({}).fetch(),
+    session_reports: ImagingSessionLogs.find({}).fetch(10),
   };
 })(SessionReport);
