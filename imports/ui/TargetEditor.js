@@ -249,12 +249,10 @@ class TargetEditor extends Component {
         let link = SkySafariFiles.findOne({_id: aFile._id}).link('version');  // 'version' is needed in the case the file is renamed.
 
         // get the TSXIP, and replace the "host with this value"
-        let tsxip = TheSkyXInfos.findOne({name: 'ip'});
-        if( typeof tsxip != 'undefined' || tsxip != '') {
           var url = new URL(link);
-          url.hostname = tsxip.value;
+          url.hostname = this.props.ip.value;
+          url.port = this.props.port.value;
           link = url.href //'http://example.com:8080/one/two'
-        }
 
         // Send out components that show details of each file
         return <div key={'file' + key}>
@@ -860,9 +858,13 @@ export default withTracker(() => {
   const sFilesHandle = Meteor.subscribe('files.skysafari.all');
   const sDocsReadyYet = sFilesHandle.ready();
   const sFiles = SkySafariFiles.find({}, {sort: {name: 1}}).fetch();
+  var ip = TheSkyXInfos.findOne({name: 'tsx_ip'});
+  var port = TheSkyXInfos.findOne({name: 'tsx_port'});
   return {
       sDocsReadyYet,
       sFiles,
+      ip,
+      port,
       filters: Filters.find({}, { sort: { slot: 1 } }).fetch(),
 //      targets1: TargetSessions.find({}, { sort: { name: 1 } }).fetch(),
       seriesTemplates: TakeSeriesTemplates.find({ isCalibrationFrames: false }, { sort: { name: 1 } }).fetch(),

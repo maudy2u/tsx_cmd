@@ -32,6 +32,8 @@ export const tsx_ServerStates = {
   tsx_version: 'tsx_version',
   tsx_date: 'tsx_date',
   tsx_build: 'tsx_build',
+  tsx_ip: 'tsx_ip',
+  tsx_port: 'tsx_port',
 
   ip: 'ip',
   port: 'port',

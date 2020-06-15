@@ -162,7 +162,7 @@ class BackupModal extends Component {
   }
 
   showUploads() {
-   console.log('**********************************', this.state.uploading);
+   //console.log('**********************************', this.state.uploading);
 
    if (this.state.uploading.length > 0) {
      return <div>
@@ -240,12 +240,10 @@ class BackupModal extends Component {
         let link = Backups.findOne({_id: aFile._id}).link('version');  // 'version' is needed in the case the file is renamed.
 
         // get the TSXIP, and replace the "host with this value"
-        let tsxip = TheSkyXInfos.findOne({name: 'ip'});
-        if( typeof tsxip != 'undefined' || tsxip != '') {
           var url = new URL(link);
-          url.hostname = tsxip.value;
+          url.hostname = this.props.ip.value;
+          url.port = this.props.port.value;
           link = url.href //'http://example.com:8080/one/two'
-        }
 
         // Send out components that show details of each file
         return <div key={'file' + key}>
@@ -307,8 +305,12 @@ export default withTracker(( props ) => {
   const filesHandle = Meteor.subscribe('files.backups.all');
   const docsReadyYet = filesHandle.ready();
   const files = Backups.find({}, {sort: {name: 1}}).fetch();
+  var ip = TheSkyXInfos.findOne({name: 'tsx_ip'});
+  var port = TheSkyXInfos.findOne({name: 'tsx_port'});
   return {
     docsReadyYet,
     files,
+    ip,
+    port
   };
 })(BackupModal);
