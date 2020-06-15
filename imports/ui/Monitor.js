@@ -105,6 +105,7 @@ class Monitor extends Component {
       isCalibrationEnabled: false,
 
       activeIndex: 1,
+      playClicked: false,
 
   };
 
@@ -309,9 +310,16 @@ class Monitor extends Component {
   }
 
   playScheduler() {
+    this.setState({
+      playClicked: true
+    });
     Meteor.call("startScheduler", function (error, result) {
       this.forceUpdate();
-      }.bind(this));
+      this.setState({
+        playClicked: false
+      });
+
+    }.bind(this));
   }
 
   pauseScheduler() {
@@ -487,7 +495,8 @@ class Monitor extends Component {
   };
 
   playButtons( state ) {
-    if( state == 'Stop') {
+
+    if( state == 'Stop' && !this.state.playClicked ) {
       return (
         <div>
         <Button icon='play'  onClick={this.playScheduler.bind(this)}/>

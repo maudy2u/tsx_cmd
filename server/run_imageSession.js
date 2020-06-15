@@ -121,8 +121,8 @@ export function string_replace(haystack, find, sub) {
 
 // **************************************************************
 export function tsx_Connect() {
-  tsxInfo('************************');
-  tsxInfo(' *** tsx_Connect' );
+  tsxDebug('************************');
+  tsxDebug(' *** tsx_Connect' );
 
   var success = false;
   var cmd = tsx_cmd('SkyX_JS_Connect');
@@ -132,6 +132,7 @@ export function tsx_Connect() {
   tsxDebug( '[TSX] SkyX_JS_Connect' );
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         tsx_is_waiting = false;
+        UpdateStatus( ' [TSX] Connected ')
       }
     )
   );
@@ -143,8 +144,8 @@ export function tsx_Connect() {
 
 // **************************************************************
 export function tsx_Disconnect() {
-  tsxInfo('************************');
-  tsxInfo(' *** tsx_Disconnect' );
+  tsxDebug('************************');
+  tsxDebug(' *** tsx_Disconnect' );
 
   var success = false;
   var cmd = tsx_cmd('SkyX_JS_Disconnect');
@@ -154,6 +155,7 @@ export function tsx_Disconnect() {
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         tsx_is_waiting = false;
+        UpdateStatus( ' [TSX] Disconnected ')
       }
     )
   );
@@ -207,7 +209,7 @@ var imagingSession;
 export function tsx_AbortGuider() {
   var success = false;
   // tsxInfo('************************');
-  tsxInfo(' *** tsx_AbortGuider');
+  tsxDebug(' *** tsx_AbortGuider');
 
   var cmd = tsx_cmd('SkyX_JS_AbortGuider');
 
@@ -216,8 +218,8 @@ export function tsx_AbortGuider() {
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
         tsx_is_waiting = false;
-
-  }));
+        UpdateStatus(' [AUTOGUIDER] aborted');
+   }));
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
@@ -227,13 +229,13 @@ export function tsx_AbortGuider() {
 // just do calibration
 export function CalibrateAutoGuider() {
   if( !isSchedulerStopped() ) {
-    tsxInfo(' Calibrating Exiting - Scheduler active');
+    tsxInfo(' [AUTOGUIDER] Calibrating Exiting - Scheduler active');
     return;
   }
   // tsxInfo('************************');
   var enabled = tsx_GetServerStateValue( tsx_ServerStates.isAutoguidingEnabled );
   if( !enabled ) {
-    tsxInfo(' *** @Autoguiding disabled');
+    tsxInfo(' [AUTOGUIDER] disabled');
     return;
   }
 
@@ -245,7 +247,7 @@ export function CalibrateAutoGuider() {
     // Calibrate....
     var cal_res = tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
     if( cal_res ) {
-      tsxLog(' AutoGuider Calibrated');
+      tsxLog(' [AUTOGUIDER] Calibrated');
     }
   }
 }
@@ -256,14 +258,14 @@ export function CalibrateAutoGuider() {
 // non-tsx_ functions are higher level
 function SetUpAutoGuiding( target, doCalibration ) {
   // tsxInfo('************************');
-  tsxInfo(' *** SetUpAutoGuiding: ' + target.getFriendlyName() );
+  tsxDebug(' *** SetUpAutoGuiding: ' + target.getFriendlyName() );
   var enabled = tsx_GetServerStateValue( tsx_ServerStates.isAutoguidingEnabled );
   if( !enabled ) {
-    tsxInfo(' *** @Autoguiding disabled: ' + target.getFriendlyName());
+    tsxInfo(' [AUTOGUIDER] disabled: ' + target.getFriendlyName());
     return;
   }
 
-  UpdateStatus(' ' + target.getFriendlyName() + ": Autoguider setup");
+  UpdateStatus(' [AUTOGUIDER] find guide star for: ' + target.getFriendlyName() );
   tsx_TakeAutoGuideImage( );
   if( isSchedulerStopped() ) {
     return;
@@ -283,7 +285,7 @@ function SetUpAutoGuiding( target, doCalibration ) {
     if( doCalibration == true ) {
       var cal_res = tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
       if( cal_res ) {
-        UpdateStatus(' ' + target.getFriendlyName() + ": AutoGuider Calibrated");
+        UpdateStatus(' [AUTOGUIDER] calibrated: ' + target.getFriendlyName() );
       }
       if( isSchedulerStopped() ) {
         return;
@@ -298,7 +300,7 @@ function SetUpAutoGuiding( target, doCalibration ) {
     if( isSchedulerStopped() ) {
       return;
     }
-    UpdateStatus(' ' + target.getFriendlyName() + ": Autoguiding Active");
+    UpdateStatus(' [AUTOGUIDER] running: ' + target.getFriendlyName() );
   }
 }
 
@@ -307,7 +309,7 @@ function tsx_TakeAutoGuideImage( ) {
   // tsxInfo('************************');
   var enabled = tsx_GetServerStateValue( tsx_ServerStates.isAutoguidingEnabled );
   if( !enabled ) {
-    tsxInfo(' *** @Autoguiding disabled ');
+    tsxInfo(' [AUTOGUIDER] disabled ');
     return;
   }
 
@@ -321,7 +323,7 @@ function tsx_TakeAutoGuideImage( ) {
   tsxDebug( '[TSX] SkyX_JS_TakeGuideImage,'+exp+', '+exp );
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        tsxInfo( " Autoguider image taken" );
+        tsxInfo( " [AUTOGUIDER] image taken" );
         tsx_is_waiting = false;
   }));
 
@@ -494,10 +496,10 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
 // **************************************************************
 function tsx_SettleAutoGuide( target ) {
   // tsxInfo('************************');
-  tsxInfo(' *** tsx_SettleAutoGuide' );
+  tsxDebug(' *** tsx_SettleAutoGuide' );
   var enabled = tsx_GetServerStateValue( tsx_ServerStates.isAutoguidingEnabled );
   if( !enabled ) {
-    tsxInfo(' *** Autoguider disabled ');
+    tsxInfo(' [AUTOGUIDER] Autoguider disabled ');
     return;
   }
 
@@ -507,7 +509,7 @@ function tsx_SettleAutoGuide( target ) {
   }
 
   if( !isGuideSettlingEnabled ) {
-    tsxInfo(' *** Autoguider Settling is disabled ');
+    tsxInfo(' [AUTOGUIDER] Settling is disabled ');
     return;
   }
 
@@ -552,7 +554,7 @@ function tsx_SettleAutoGuide( target ) {
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     var result = tsx_return.split('|')[0].trim();
     if( result != 'Success') {
-      UpdateStatusErr(' *** Autoguiding Failed: ' + result);
+      UpdateStatusErr(' [AUTOGUIDER] Settling Failed: ' + result);
     }
     else {
       quality = tsx_return.split('|')[1].trim()
@@ -562,21 +564,21 @@ function tsx_SettleAutoGuide( target ) {
   while( tsx_is_waiting ) {
     Meteor.sleep( 1000 );
   }
-  UpdateStatus( ' ' + target.getFriendlyName() + ': Autoguider Settling(' + guidingPixelErrorTolerance + '):' + quality );
+  UpdateStatus( ' [AUTOGUIDER] ' + target.getFriendlyName() + ' settling (' + guidingPixelErrorTolerance + '):' + quality );
 }
 
 // **************************************************************
 //    B. Slew to target
 function tsx_Slew( target ) {
   // tsxInfo('************************');
-  tsxInfo(' *** tsx_Slew: ' + target.getFriendlyName() );
+  tsxDebug(' *** tsx_Slew: ' + target.getFriendlyName() );
   //var cmd = tsx_cmd('SkyX_JS_Slew');
   Out = tsx_SlewTargetName (target.targetFindName)
   return Out;
 }
 
 export function tsx_SlewTargetName( targetName ) {
-  tsxInfo(' *** tsx_SlewTargetName: ' + targetName );
+  tsxDebug(' *** tsx_SlewTargetName: ' + targetName );
 
   var cmd = tsx_cmd('SkyX_JS_SlewTarget');
   cmd = cmd.replace('$000',  targetName  );
@@ -589,10 +591,10 @@ export function tsx_SlewTargetName( targetName ) {
     // tsxInfo('Any error?: ' + result);
     if( result != 'Success') {
       forceAbort = true;
-      tsxDebug(' *** Slew failed: ' + result);
+      tsxDebug(' [SLEW] failed: ' + result);
     }
     else {
-      tsxInfo(' Slew finished');
+      tsxInfo(' [SLEW] finished');
     }
     tsx_is_waiting = false;
   }));
@@ -688,11 +690,10 @@ function updateTargetIsCloudy( target, isCloudy ) {
 //    B. CLS to target
 function tsx_CLS( target ) {
   // tsxInfo('************************');
-  tsxInfo(' *** tsx_CLS: ' + target.getFriendlyName() );
   var Out = false;
   var doCLS = tsx_GetServerStateValue( tsx_ServerStates.defaultCLSEnabled );
   if( doCLS == false ) {
-    tsxInfo(' *** tsx_CLS: disabled, slewing' );
+    tsxDebug(' [CLS ] disabled, slewing' );
     // If CLS not enabled then Slew...
     Out = tsx_Slew( target );
     return Out;
@@ -720,7 +721,7 @@ function resetCLSTimeCheck () {
 
 function tsx_CLS_target( target, filter ) {
   // tsxInfo('************************');
-  tsxInfo(' *** tsx_CLS_target: ' + target );
+  tsxDebug(' *** tsx_CLS_target: ' + target );
   var clsSuccess =false;
   var tsx_is_waiting = true;
   var retries = tsx_GetServerStateValue( tsx_ServerStates.defaultCLSRetries );
@@ -742,26 +743,26 @@ function tsx_CLS_target( target, filter ) {
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       tsx_err = tsx_has_error( tsx_return );
-      tsxInfo( ' CLS res: ' + tsx_return );
+      tsxDebug( ' [CLS] res: ' + tsx_return );
       var result = tsx_return.split('|')[0].trim();
       if( result != 'Success') {
         // So if we fail here... what do we do...
-        UpdateStatusErr(' !!! CLS Failed (centring): ' + tsx_return);
+        UpdateStatusErr(' [CLS] !!! Failed (centring): ' + tsx_return);
         tsx_err = true;
       }
       else {
         clsSuccess = true;
-        tsxInfo(' ' + target + ': centred' );
+        UpdateStatus(' [CLS] ' + target + ': centred' );
         var angle = tsx_return.split('|')[1].trim();
 
-        tsxInfo(' ' + target + ': Position Angle: ' + angle );
+        tsxInfo(' [CLS] ' + target + ': Position Angle: ' + angle );
         var rpt = updateTargetReport( target._id, 'ANGLE', angle );
         target.report = rpt;
 
         var rotPos;
         try {
           rotPos = tsx_return.split('|')[2].trim();
-          tsxWarn( ' tsx_CLS_target did not set rotator position');
+          tsxWarn( ' [CLS] did not set rotator position');
         }
         finally {
           // all good do nothing
@@ -1077,7 +1078,6 @@ function SetUpForImagingRun(target, doRotator, doCalibration ) {
 
   // *******************************
   // CLS: put target in the centre
-  UpdateStatus( ' ' + target.getFriendlyName() + ': centring' );
 	var cls = tsx_CLS(target); 						//# Call the Closed-Loop-Slew function to go to the target
   updateTargetIsCloudy( target, cls );
   if( !cls ) {
@@ -1089,7 +1089,7 @@ function SetUpForImagingRun(target, doRotator, doCalibration ) {
   }
 
   // *******************************
-  UpdateStatus( ' ' + target.getFriendlyName() + ': centred' );
+  //UpdateStatus( ' [SCHEDULER] centred: ' + target.getFriendlyName() );
   // Get Mount Coords and Orientations
 	var mntOrient = tsx_GetMountReport();
   if( isSchedulerStopped() ) {
@@ -2230,11 +2230,11 @@ function takeSeriesImage(target, series) {
   var frame = getFrameNumber( series.frame );//  cdLight =1, cdBias, cdDark, cdFlat
   var num = taken+1;
   if( (remainingImages <= series.repeat) && (remainingImages > 0) ) {
-    UpdateStatus( ' ' + target.getFriendlyName() + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds, ' + num + '/' +series.repeat + ' TAKING' );
+    UpdateStatus( ' [IMAGER] ' + target.getFriendlyName() + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds, ' + num + '/' +series.repeat + ' TAKING' );
 
     var res = tsx_takeImage( slot, series.exposure, frame, target ); //delay, binning, ccdTemp )
     if( res !== '' ) {
-      UpdateStatus( ' ' + target.getFriendlyName() + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds, ' + num + '/' +series.repeat + ' DONE' );
+      UpdateStatus( ' [IMAGER] ' + target.getFriendlyName() + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds, ' + num + '/' +series.repeat + ' DONE' );
       // *******************************
       // Update progress
       // tsxLog(' *** Image taken: ' + series.filter + ' at ' + series.exposure + ' seconds');
@@ -2247,7 +2247,7 @@ function takeSeriesImage(target, series) {
     }
   }
   else {
-    UpdateStatus( target.getFriendlyName() + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds: ' + num + '/' +series.repeat + ' COMPLETED' );
+    UpdateStatus( ' [IMAGER] ' +target.getFriendlyName() + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds: ' + num + '/' +series.repeat + ' COMPLETED' );
   }
   var jid = tsx_GetServerState( tsx_ServerStates.runScheduler );
   if( jid == '' ) {
@@ -2280,6 +2280,7 @@ function targetDither( target ) {
 // **************************************************************
 export function processTargetTakeSeries( target ) {
   // process for each filter
+  tsxLog( ' -------------------------------');
   tsxDebug( ' === ' + target.getFriendlyName() + ": Target started");
   tsxDebug(' === processTargetTakeSeries: ' + target.getFriendlyName());
 
@@ -2320,7 +2321,7 @@ export function processTargetTakeSeries( target ) {
     }
   }
 
-  UpdateStatus(' [DITHER] ' + targetDither( target ));
+  UpdateStatus(' === Dither: ' + targetDither( target ));
   if( template.repeatSeries == true ) {
     UpdateStatus(' === Repeating: ' + template.repeatSeries );
   }
@@ -2438,7 +2439,7 @@ export function processTargetTakeSeries( target ) {
 
   tsx_AbortGuider();
   var filter = tsx_GetServerStateValue( tsx_ServerStates.defaultFilter );
-  UpdateStatus( ' === ' + target.getFriendlyName() + ": Target stopped");
+  UpdateStatus( ' [IMAGER] Stopped: ' + target.getFriendlyName() );
   tsxLog( ' =============================== ');
   return;
 }
@@ -2455,13 +2456,13 @@ export function prepareTargetForImaging( target, doRotator, doCalibration ) {
   }
   else {
     UpdateImagingSesionID( target._id );
-    UpdateStatus( ' '+ target.getFriendlyName() + ": SELECTED");
+    UpdateStatus( ' [SCHEDULER] centring: '+ target.getFriendlyName() );
     tsx_SetServerState( tsx_ServerStates.targetName, target.targetFindName);
 
     var targetCoords = UpdateImagingTargetReport( target );
     var curDir = targetCoords.direction;
     tsx_SetServerState( tsx_ServerStates.lastTargetDirection, curDir);
-    UpdateStatus( ' '+ target.getFriendlyName() + ": pointing " + curDir);
+//    UpdateStatus( ' '+ target.getFriendlyName() + ": pointing " + curDir);
 
     // check here for the rotator...
     var ready = SetUpForImagingRun( target, doRotator, doCalibration );
@@ -2611,7 +2612,7 @@ export function canTargetSessionStart( target ) {
   try {
     let isRepeating = TakeSeriesTemplates.findOne({_id: target.series._id }).repeatSeries;
     if( isComplete && target.isCalibrationFrames == false && !isRepeating ) {
-      UpdateStatus( ' ' + target.getFriendlyName() + ': is completed' );
+      UpdateStatus( ' [SCHEDULER] completed series: ' + target.getFriendlyName() );
       return false;
     }
   }

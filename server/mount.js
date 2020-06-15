@@ -57,9 +57,13 @@ import {
   tsx_StopTracking,
 } from './run_imageSession.js';
 
+import {
+  getFilterSlot,
+} from './filter_wheel.js'
+
 export function ParkMount( isParked ) {
    if( !isParked ) {
-     UpdateStatus(' Parking mount...');
+     UpdateStatus(' [MOUNT] Parking mount...');
      var defaultFilter = tsx_GetServerStateValue( tsx_ServerStates.defaultFilter );
      var softPark = Boolean(tsx_GetServerStateValue( tsx_ServerStates.defaultSoftPark ));
      tsx_AbortGuider();
@@ -70,8 +74,8 @@ export function ParkMount( isParked ) {
 
 // *******************************
 export function tsx_IsParked() {
-   tsxInfo('************************');
-   tsxInfo(' *** tsx_IsParked' );
+   tsxDebug('************************');
+   tsxDebug(' *** tsx_IsParked' );
 
    var out = false;
    var cmd = tsx_cmd('SkyX_JS_IsParked');
@@ -94,8 +98,8 @@ export function tsx_IsParked() {
 
 // **************************************************************
 export function tsx_MntUnpark() {
-   tsxInfo('[MOUNT] ************************');
-   tsxInfo(' [MOUNT] Unparking mount' );
+   tsxDebug('[MOUNT] ************************');
+   tsxDebug(' [MOUNT] Unparking mount' );
    var cmd = tsx_cmd('SkyX_JS_UnparkMount');
 
    var Out = '';
@@ -104,7 +108,7 @@ export function tsx_MntUnpark() {
 
    tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
          var result = tsx_return.split('|')[0].trim();
-         tsxDebug( ' *** result: ' + result );
+         tsxDebug( ' [MOUNT] *** result: ' + result );
          if( result == 'unparked' ) {
            UpdateStatus(' [MOUNT] unparked' );
          }
@@ -125,7 +129,7 @@ export function tsx_MntUnpark() {
 
 export function tsx_MntPark(defaultFilter, softPark) {
    // tsxInfo('************************');
-   tsxInfo(' *** tsx_MntPark' );
+   tsxDebug(' [MOUNT] *** tsx_MntPark' );
 
    var dts = new Date();
    var slot = 0;
@@ -139,10 +143,10 @@ export function tsx_MntPark(defaultFilter, softPark) {
 
    if( softPark ) {
      // if true just set filter and turn off tracking
-     UpdateStatus(' Soft Parking... ');
+     UpdateStatus(' [MOUNT] Soft Parking... ');
    }
    else {
-     UpdateStatus(' Parking... ');
+     UpdateStatus(' [MOUNT] Parking... ');
    }
    var cmd = tsx_cmd('SkyX_JS_ParkMount');
    cmd = cmd.replace("$000", slot ); // set filter
@@ -154,22 +158,22 @@ export function tsx_MntPark(defaultFilter, softPark) {
 
    tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
          var result = tsx_return.split('|')[0].trim();
-         tsxInfo( ' park result: ' + result );
+         tsxInfo( ' [MOUNT] park result: ' + result );
          if( result === 'Parked' || result === 'Soft Parked' ) {
-           UpdateStatus( ' ' + result );
+           UpdateStatus( ' [MOUNT] ' + result );
          }
          else {
-           UpdateStatusErr( ' !!! Parking err: ' + tsx_return );
+           UpdateStatusErr( ' [MOUNT] !!! Parking err: ' + tsx_return );
          }
 
          Out = result;
          tsx_is_waiting = false;
    }));
-   tsxInfo( ' Park waiting' );
+   tsxInfo( ' [MOUNT] Park waiting' );
    while( tsx_is_waiting ) {
     Meteor.sleep( 1000 );
    }
-   tsxInfo( ' Park wait done' );
+   tsxInfo( ' [MOUNT] Park wait done' );
    return Out;
 }
 
@@ -183,7 +187,7 @@ Meteor.methods({
     }
     catch( e )  {
       if( e == 'TsxError' ) {
-        UpdateStatus('!!! TheSkyX connection is no longer there!');
+        UpdateStatus(' [MOUNT] !!! TheSkyX connection is no longer there!');
       }
     }
     finally {

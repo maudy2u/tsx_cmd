@@ -140,7 +140,7 @@ import {
        //  ###############################  ');
        // This will only be called if a 'runScheduler' job is obtained
        // THE ONLY SPOT FOR THIS setMethod
-       tsxLog( '  ###############################  ');
+       tsxLog( ' ###############################  ');
        setSchedulerState( 'Running' );
        //  ###############################  ');
 
