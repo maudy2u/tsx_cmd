@@ -208,7 +208,8 @@ Meteor.startup(() => {
   var link = process.env.ROOT_URL;
   var p = process.env.PORT;
   try {
-    console.log(link)
+    console.log(process.env);
+    console.log(link);
     tsx_SetServerState(tsx_ServerStates.tsx_ip, link.split('/')[2].split(':')[0]);
     tsx_SetServerState(tsx_ServerStates.tsx_port, p);
   }

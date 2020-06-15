@@ -188,12 +188,6 @@ echo '  "enable_warn": "yes",' >> ./settings.json
 echo '  "tsx_cmd_db": "tsx_cmd",' >> ./settings.json
 echo '  "meteor_db": "meteor",' >> ./settings.json
 echo '  "mongo_port": "27017",' >> ./settings.json
-if [ "${2}" != "" ]; then
-  echo '  "tsx_cmd_server_ip": "'${2}'",' >> ./settings.json
-else
-  echo '  "tsx_cmd_server_ip": "127.0.0.1",' >> ./settings.json
-fi
-echo '  "tsx_cmd_server_port": "3000",' >> ./settings.json
 echo '  "removed-to-enable: skySafari_files": "/media/odroid/usb_flash/tsx_cmd_skySafariSettings/",' >> ./settings.json
 echo '  "removed-to-enable: backup_location": "/media/odroid/usb_flash/tsx_cmd_backups",' >> ./settings.json
 echo '  "removed-to-enable: log_file_location": "/media/odroid/usb_flash/tsx_cmd_logs"' >> ./settings.json
