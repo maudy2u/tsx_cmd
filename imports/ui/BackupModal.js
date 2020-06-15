@@ -244,7 +244,6 @@ class BackupModal extends Component {
         if( typeof tsxip != 'undefined' || tsxip != '') {
           var url = new URL(link);
           url.hostname = tsxip.value;
-          url.port = app.address().port; // assuming default meteor port
           link = url.href //'http://example.com:8080/one/two'
         }
 
