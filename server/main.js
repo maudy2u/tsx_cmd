@@ -203,10 +203,11 @@ Meteor.startup(() => {
   tsxLog(' ******************************', '');
   tsxLog(' ****** TSX_CMD STARTING', '');
 
-    //console.log(process.env);
+  console.log(process.env);
     //MOBILE_ROOT_URL: 'http://10.9.8.38:3000/',
 
   var link = process.env.MOBILE_ROOT_URL;
+  console.log(link)
   tsx_SetServerState(tsx_ServerStates.tsx_ip, link.split('/')[2].split(':')[0]);
   tsx_SetServerState(tsx_ServerStates.tsx_port, link.split('/')[2].split(':')[1]);
 
