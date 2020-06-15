@@ -24,7 +24,6 @@ import {
   tsx_GetServerStateValue,
   UpdateStatus,
   UpdateStatusErr,
-  postStatus,
   postProgressTotal,
   postProgressIncrement,
   tsx_ServerStates,
@@ -40,6 +39,30 @@ import {
 
 
 var tsx_waiting = false;
+
+// **************************************************************
+export function tsx_ServerIsOnline() {
+  tsxInfo(' *** tsx_ServerIsOnline' );
+  var success = false;
+
+  var cmd = tsxHeader + tsxFooter;
+  var tsx_is_waiting = true;
+  tsx_feeder( cmd, Meteor.bindEnvironment((tsx_return) => {
+    try{
+      var result = tsx_return.split('|')[0].trim();
+      if( result == 'undefined') {
+        success = true;
+      }
+    }
+    finally {
+      tsx_is_waiting = false;
+    }
+  }));
+  while( tsx_is_waiting ) {
+    Meteor.sleep( 3000 );
+  }
+  return success;
+}
 
 // **************************************************************
 export function tsx_cmd(script) {
@@ -149,7 +172,6 @@ export function tsx_feeder( cmd, callback ) {
     waiting = waiting + sec;
     var incr = waiting /sec;
     postProgressIncrement( incr );
-    // postStatus( 'tsx_waiting (sec): ' + waiting /sec  );
     // Meteor._debug('tsx_waiting (sec): ' + waiting /sec );
     if( imageChk ) {
       processId = tsx_GetServerStateValue( tsx_ServerStates.runScheduler );

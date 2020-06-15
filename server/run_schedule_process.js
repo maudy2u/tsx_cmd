@@ -32,6 +32,13 @@ import {
 } from '../imports/api/theLoggers.js';
 
 import {
+  tsx_feeder,
+  tsx_cmd,
+  tsx_has_error,
+  tsx_ServerIsOnline,
+} from './tsx_feeder.js'
+
+import {
   backupFolder,
 } from '../imports/api/backups.js';
 
@@ -56,24 +63,17 @@ import {
 import {
   tsx_Connect,
   tsx_Disconnect,
-  tsx_MntPark,
   tsx_AbortGuider,
   getValidTargetSession,
   prepareTargetForImaging,
   processTargetTakeSeries,
-  tsx_ServerIsOnline,
   tsx_isDark,
-  isTimeBeforeCurrentTime,
-  hasStartTimePassed,
-  tsx_MntUnpark,
-  tsx_IsParked,
   findCalibrationSession,
   CalibrateAutoGuider,
   tsx_RotateCamera,
   tsx_SlewTargetName,
   tsx_SlewCmdCoords,
   tsx_StopTracking,
-  isSchedulerStopped,
 } from './run_imageSession.js';
 
  import {
@@ -83,6 +83,8 @@ import {
 
  import {
    ParkMount,
+   tsx_MntUnpark,
+   tsx_MntPark,
  } from './mount.js'
 
  export function getSchedulerState() {
@@ -100,6 +102,25 @@ import {
    tsx_SetServerState(tsx_ServerStates.targetName, 'No Active Target');
    tsx_SetServerState(tsx_ServerStates.scheduler_report, '');
    setSchedulerState('Stop' );
+ }
+
+ // *******************************
+ export function isSchedulerStopped() {
+   tsxInfo(' *** isSchedulerStopped ' );
+   var sched = getSchedulerState();
+   var runScheduler =   tsx_SetServerState( tsx_ServerStates.runScheduler, '');
+   if(
+     (sched != 'Stop' && runScheduler != '')
+   ) {
+     tsxDebug(' [SCHEDULER] scheduler_running: ' + sched);
+     return false; // exit
+   }
+   tsx_SetServerState( tsx_ServerStates.targetName, 'No Active Target');
+   tsx_SetServerState( tsx_ServerStates.scheduler_report, '');
+   // THis line is needed in the tsx_feeder
+   tsx_SetServerState( tsx_ServerStates.imagingSessionId, '');
+
+   return true;
  }
 
  export function runSchedulerProcess() {
@@ -142,7 +163,7 @@ import {
          // *******************************
          collect_calibration_images();
        }
-       
+
        else if ( schedule.scheduleType === 'flatbox calibration'
        &&
          isSchedulerStopped() == false)
@@ -362,6 +383,96 @@ function CleanUpJobs() {
   // }
   return;
 }
+
+// *************************** ***********************************
+// Assuming a time in seconds is provided and a Date Object
+export function hasTimePassed( duration, timestamp ) {
+  // if( typeof timestamp === 'undefined' || duration === '' ) {
+  //   return true;
+  // }
+  var now = new Date();
+  var diff = parseInt(now - timestamp)/1000; // Difference in seconds
+  if( diff >= duration) {
+    return true;
+  }
+  return false;
+}
+// *************************** ***********************************
+// Assuming a time in seconds is provided and a Date Object
+export function howMuchTimeHasPassed( duration, timestamp ) {
+  var now = new Date();
+  var diff = parseInt(now - timestamp)/1000; // Difference in seconds
+  return diff;
+}
+
+export function hasStartTimePassed( target ) {
+  // tsxInfo('************************');
+  tsxInfo(' *** hasStartTimePassed: ' + target.getFriendlyName() );
+
+  var start_time = target.startTime;
+  var canStart = isTimeBeforeCurrentTime( start_time );
+  // do not start if undefined
+  return canStart;
+}
+
+export function isDateBeforeCurrentDate( chkDate ) {
+  var cur_dts = new Date();
+  var cur_time = cur_dts.getHours()+(cur_dts.getMinutes()/60);
+  // tsxInfo('Current time: ' + cur_time );
+
+  // add 24 to the morning time so that
+  ((cur_time < 8) ? cur_time=cur_time+24 : cur_time);
+
+  chkDate = chkDate.getHours()+(chkDate.getMinutes()/60);
+
+
+  // tsxInfo('Start time: ' + start_time );
+  var hrs = ts.split(':')[0].trim();
+  // tsxInfo('Start hrs: ' + hrs );
+  var min = ts.split(':')[1].trim();
+  // tsxInfo('Start min: ' + min );
+  ts = Number(hrs) + Number(min/60);
+  ((ts < 8) ? ts=ts+24 : ts);
+  // tsxInfo('curtime: ' + cur_time + ' vs ' + ts);
+  var curBefore = ((ts < cur_time ) ? true : false);
+  return curBefore;
+
+}
+
+// **************************************************************
+// #TODO used this for one consistent time comparing function
+//
+// 24hrs e.g.
+// 21:00
+// return true if undedefined
+export function isTimeBeforeCurrentTime( ts ) {
+  // tsxInfo('************************');
+  tsxInfo(' *** isTimeBeforeCurrentTime: ' + ts );
+
+  if( typeof ts == 'undefined') {
+    tsxDebug( ' isTimeBeforeCurrentTime FAILED - ts is undefined')
+    return true; // as undefined....
+  }
+
+  var cur_dts = new Date();
+  var cur_time = cur_dts.getHours()+(cur_dts.getMinutes()/60);
+  // tsxInfo('Current time: ' + cur_time );
+
+  // add 24 to the morning time so that
+  ((cur_time < 8) ? cur_time=cur_time+24 : cur_time);
+
+  // tsxInfo('Start time: ' + start_time );
+  var hrs = ts.split(':')[0].trim();
+  // tsxInfo('Start hrs: ' + hrs );
+  var min = ts.split(':')[1].trim();
+  // tsxInfo('Start min: ' + min );
+  ts = Number(hrs) + Number(min/60);
+  ((ts < 8) ? ts=ts+24 : ts);
+  // tsxInfo('curtime: ' + cur_time + ' vs ' + ts);
+  var curBefore = ((ts < cur_time ) ? true : false);
+  return curBefore;
+}
+
 
 Meteor.methods({
 

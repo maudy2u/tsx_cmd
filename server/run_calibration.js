@@ -42,6 +42,7 @@ import {
   getSchedulerState,
   setSchedulerState,
   srvStopScheduler,
+  isSchedulerStopped,
 } from './run_schedule_process.js'
 
 import {
@@ -62,17 +63,14 @@ import {
   UpdateStatusWarn,
   postProgressTotal,
   postProgressIncrement,
-  postProgressMessage,
   UpdateImagingSesionID,
 } from '../imports/api/serverStates.js';
 
 import {
   tsx_takeImage,
-  tsx_ServerIsOnline,
   tsx_SlewTargetName,
   tsx_SlewCmdCoords,
   tsx_StopTracking,
-  isSchedulerStopped,
 } from './run_imageSession.js';
 
 import {

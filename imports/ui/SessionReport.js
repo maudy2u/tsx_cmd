@@ -134,7 +134,7 @@ class SessionReport extends Component {
 
   render() {
 
-    if( this.props.reportsReadyYet ) {
+    // if( this.props.reportsReadyYet ) {
 
       const { activeIndex } = this.state;
       var sessionDates = getSessionDates();
@@ -149,53 +149,43 @@ class SessionReport extends Component {
 
       return (
         <div>
-        <Accordion size='mini' styled>
-            <Accordion.Title
-              active={activeIndex === 0}
-              content='Session Report'
-              index={0}
-              onClick={this.handleClick}
-              />
-            <Accordion.Content active={activeIndex === 0} >
-              <Dropdown
-                button
-                search
-                wrapSelection
-                scrolling
-                label='Session Dates'
-                name='sessionDate'
-                options={dropDownSessionDates}
-                placeholder='Pick a date'
-                text={this.state.sessionDate}
-                onChange={this.handleChange}
-              />
-              <Table celled compact basic unstackable>
-                <Table.Header style={{background: 'black'}}>
-                  <Table.Row>
-                    <Table.Cell content='Target' />
-                    <Table.Cell content='Filter' />
-                    <Table.Cell content='Exp.' />
-                    <Table.Cell content='Qty.' />
-                    <Table.Cell content='Total' />
-                  </Table.Row>
-                </Table.Header>
-                <TargetLog
-                  reportData={reportData}
-                  sessionDate={this.state.sessionDate}
-                />
-              </Table>
-            </Accordion.Content>
-        </Accordion>
+          <Dropdown
+            button
+            search
+            wrapSelection
+            scrolling
+            label='Session Dates'
+            name='sessionDate'
+            options={dropDownSessionDates}
+            placeholder='Pick a date'
+            text={this.state.sessionDate}
+            onChange={this.handleChange}
+          />
+          <Table celled compact basic unstackable>
+            <Table.Header style={{background: 'black'}}>
+              <Table.Row>
+                <Table.Cell content='Target' />
+                <Table.Cell content='Filter' />
+                <Table.Cell content='Exp.' />
+                <Table.Cell content='Qty.' />
+                <Table.Cell content='Total' />
+              </Table.Row>
+            </Table.Header>
+            <TargetLog
+              reportData={reportData}
+              sessionDate={this.state.sessionDate}
+            />
+          </Table>
         </div>
       )
-    }
-    else {
-      return(
-        <Dimmer active>
-           <Loader />
-         </Dimmer>
-       )
-    }
+    // }
+    // else {
+    //   return(
+    //     <Dimmer active>
+    //        <Loader />
+    //      </Dimmer>
+    //    )
+    // }
   }
 }
 export default withTracker(() => {

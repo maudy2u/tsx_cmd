@@ -50,9 +50,6 @@ import {
   tsx_UpdateServerState,
   UpdateStatus,
   UpdateStatusErr,
-  postProgressTotal,
-  postProgressIncrement,
-  postProgressMessage,
   UpdateImagingSesionID,
   saveDefaultStateValue,
 } from '../imports/api/serverStates.js';
@@ -60,23 +57,17 @@ import {
 import {
   tsx_Connect,
   tsx_Disconnect,
-  tsx_MntPark,
   tsx_AbortGuider,
-  prepareTargetForImaging,
   processTargetTakeSeries,
-  tsx_ServerIsOnline,
   tsx_isDark,
   isTimeBeforeCurrentTime,
   hasStartTimePassed,
-  tsx_MntUnpark,
-  tsx_IsParked,
   findCalibrationSession,
   CalibrateAutoGuider,
   tsx_RotateCamera,
   tsx_SlewTargetName,
   tsx_SlewCmdCoords,
   tsx_StopTracking,
-  isSchedulerStopped,
 } from './run_imageSession.js';
 
 //const arteksy_cmd = '/usr/local/bin/arteksy_cmd'

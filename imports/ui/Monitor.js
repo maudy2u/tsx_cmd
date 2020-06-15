@@ -615,9 +615,19 @@ class Monitor extends Component {
               </Segment>
             </Accordion.Content>
         </Accordion>
-        <SessionReport
-          enabledTargetSessions={this.props.enabledTargetSessions}
-          />
+        <Accordion size='mini' styled>
+          <Accordion.Title
+            active={activeIndex === 1}
+            content='Session Report'
+            index={1}
+            onClick={this.handleClick}
+            />
+          <Accordion.Content active={activeIndex === 1} >
+            <SessionReport
+              enabledTargetSessions={this.props.enabledTargetSessions}
+              />
+          </Accordion.Content>
+        </Accordion>
         <br/>
         <Form unstackable>
           <Form.Group>

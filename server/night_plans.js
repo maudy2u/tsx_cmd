@@ -24,6 +24,10 @@ import {
 } from '../imports/api/serverStates.js'
 
 import {
+  updateTargetReport,
+} from '../imports/api/targetReports.js';
+
+import {
   tsx_feeder,
   tsx_cmd,
   tsx_has_error,
@@ -147,6 +151,11 @@ export function tsx_AltTimesForTargets( targets ) {
               passthru:ref_id,
               maxAlt: maxAlt,
             });
+
+            // set target not dirty...
+            updateTargetReport( target._id, 'dirty', false );
+            updateTargetReport( target._id, 'maxAlt', maxAlt );
+
           }
           else {
             Out.push({

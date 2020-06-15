@@ -84,21 +84,14 @@ class AppInfo extends Component {
 
     return (
       <center>
-        <Label>TSX ip:
-          <Label.Detail>
-            {IP}
-          </Label.Detail>
-        </Label>
-        <Label>
-          TSX port:
-          <Label.Detail>
-            {PORT}
-          </Label.Detail>
-        </Label>
+        <Label>TSX ip:<Label.Detail>{IP}</Label.Detail></Label>
+        <Label>TSX port:<Label.Detail>{PORT}</Label.Detail></Label>
+        <br/>&nbsp;&nbsp;
         <Label>version <Label.Detail>{VERSION}</Label.Detail></Label>
         <Label>date <Label.Detail>{DATE}</Label.Detail></Label>
         <Label>build <Label.Detail>{BUILD}</Label.Detail></Label>
-        <Label>tsx_cmd - Imaging with TheSkyX</Label>
+        <br/>&nbsp;&nbsp;
+        <Label>tsx_cmd <Label.Detail>Imaging with TheSkyX</Label.Detail></Label>
         <br/>&nbsp;&nbsp;
       </center>
     )

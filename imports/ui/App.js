@@ -41,7 +41,7 @@ import {
   Modal,
   Accordion,
   Sidebar,
-  Embed
+  Embed,
 } from 'semantic-ui-react'
 
 // Import the API Model
@@ -228,10 +228,10 @@ class App extends TrackerReact(Component) {
 
   renderMenu() {
     const { activeMenu  } = this.state;
+    const { noVNC_enabled } = this.props;
 
-    var enableNoVNC = this.props.isNoVNCEnabled.value;
-
-    if( enableNoVNC ) {
+//    if( noVNC_enabled.value ) {
+    if( noVNC_enabled.value ) {
       return(
         <div>
           <Menu tabular icon size='huge'>
@@ -420,8 +420,8 @@ class App extends TrackerReact(Component) {
     } else if (this.state.activeMenu == 'noVNC') {
       // 10.9.8.34
       var IP = this.props.tsxIP.value;
-      var PWD = '1password'; // this.props.noVNCPWD.value;
-      var PORT = ''; //this.props.noVNCPort.value;
+      var PWD = this.props.noVNCPWD.value;
+      var PORT = this.props.noVNCPort.value;
       var URL = 'http://'+IP+':6080/vnc.html?host='+IP+'&port=6080&autoconnect=true';
       if( PWD !== '') {
           URL = URL + '&password=' + PWD;
@@ -593,9 +593,13 @@ class App extends TrackerReact(Component) {
 /* https://react.semantic-ui.com/modules/checkbox#checkbox-example-radio-group
 */
   render() {
+
+    const { infoReadyYet } = this.props;
+    const { noVNCReadyYet } = this.props;
+
     if (
-     this.props.infoReadyYet
-//      &&
+     infoReadyYet
+      && noVNCReadyYet
       // this.props.activeMenu
       // && typeof this.props.tsx_progress !== 'undefined'
       // && this.props.activeMenu
@@ -642,7 +646,8 @@ class App extends TrackerReact(Component) {
     else {
       return(
         <Dimmer active>
-           <Loader />
+           <Loader
+           />
          </Dimmer>
        )
     }
@@ -652,36 +657,40 @@ class App extends TrackerReact(Component) {
 // THIS IS THE DEFAULT EXPORT AND IS WHERE THE LOADING OF THE COMPONENT STARTS
 export default withTracker(() => {
   const infoHandle = Meteor.subscribe('tsxInfo.all');
+  const noVNCHandle = Meteor.subscribe('noVNC.status');
   const tsxInfo = TheSkyXInfos.find({}).fetch();
 
   // const activeMenu = tsxInfo.find(function(element) {
   //   return element.name == 'activeMenu';
   // });
+
   const activeMenu = TheSkyXInfos.findOne({name: 'activeMenu'});
   const tsx_progress = TheSkyXInfos.findOne({name: 'tsx_progress'});
   const tsx_total =  TheSkyXInfos.findOne({name: 'tsx_total'});
   const currentStage = TheSkyXInfos.findOne({name: 'currentStage'});
 
-  var targetName = TheSkyXInfos.findOne({name: 'targetName'});
-  var flatbox_enabled = TheSkyXInfos.findOne({name: 'flatbox_enabled'});
-  var scheduler_running= TheSkyXInfos.findOne({name: 'scheduler_running'});
-  var tool_active= TheSkyXInfos.findOne({name: 'tool_active'});
-  var tool_flats_dec_az= TheSkyXInfos.findOne({name: 'tool_flats_dec_az'});
-  var tool_flats_location = TheSkyXInfos.findOne({name: 'tool_flats_location'});
-  var tool_flats_via = TheSkyXInfos.findOne({name: 'tool_flats_via'});
-  var tsx_version = TheSkyXInfos.findOne({name: 'tsx_version'});
-  var tsx_date = TheSkyXInfos.findOne({name: 'tsx_date'});
-  var tsx_build = TheSkyXInfos.findOne({name: 'tsx_build'});
-  var tsxIP = TheSkyXInfos.findOne({name: 'ip'});
-  var tsxPort = TheSkyXInfos.findOne({name: 'port'});
-  var scheduler_report = TheSkyXInfos.findOne({name: 'scheduler_report'});
-  var night_plan = TheSkyXInfos.findOne({name: 'night_plan'});
-  var night_plan_reset = TheSkyXInfos.findOne({name: 'night_plan_reset'});
-  var metroBlueReportWidget = TheSkyXInfos.findOne({name: 'metroBlueReportWidget'});
-  var clearSkyReportWidget = TheSkyXInfos.findOne({name: 'clearSkyReportWidget'});
-  var isNoVNCEnabled = TheSkyXInfos.findOne({name: 'isNoVNCEnabled'});
-  var noVNCPWD = TheSkyXInfos.findOne({name: 'noVNCPWD'});
-  var noVNCPort = TheSkyXInfos.findOne({name: 'noVNCPort'});
+  const targetName = TheSkyXInfos.findOne({name: 'targetName'});
+  const flatbox_enabled = TheSkyXInfos.findOne({name: 'flatbox_enabled'});
+  const scheduler_running= TheSkyXInfos.findOne({name: 'scheduler_running'});
+  const tool_active= TheSkyXInfos.findOne({name: 'tool_active'});
+  const tool_flats_dec_az= TheSkyXInfos.findOne({name: 'tool_flats_dec_az'});
+  const tool_flats_location = TheSkyXInfos.findOne({name: 'tool_flats_location'});
+  const tool_flats_via = TheSkyXInfos.findOne({name: 'tool_flats_via'});
+  const tsx_version = TheSkyXInfos.findOne({name: 'tsx_version'});
+  const tsx_date = TheSkyXInfos.findOne({name: 'tsx_date'});
+  const tsx_build = TheSkyXInfos.findOne({name: 'tsx_build'});
+  const tsxIP = TheSkyXInfos.findOne({name: 'ip'});
+  const tsxPort = TheSkyXInfos.findOne({name: 'port'});
+  const scheduler_report = TheSkyXInfos.findOne({name: 'scheduler_report'});
+  const night_plan = TheSkyXInfos.findOne({name: 'night_plan'});
+  const night_plan_reset = TheSkyXInfos.findOne({name: 'night_plan_reset'});
+  const metroBlueReportWidget = TheSkyXInfos.findOne({name: 'metroBlueReportWidget'});
+  const clearSkyReportWidget = TheSkyXInfos.findOne({name: 'clearSkyReportWidget'});
+
+  const noVNC_enabled =  TheSkyXInfos.findOne({name: 'isNoVNCEnabled'});
+
+  const noVNCPWD = TheSkyXInfos.findOne({name: 'noVNCPWD'});
+  const noVNCPort = TheSkyXInfos.findOne({name: 'noVNCPort'});
 
   const targetSessionsHandle = Meteor.subscribe('targetSessions.all');
   const targetSessionsReadyYet = targetSessionsHandle.ready();
@@ -705,9 +714,11 @@ export default withTracker(() => {
   const seriessReadyYet = seriessHandle.ready();
 
   const infoReadyYet = infoHandle.ready();
+  const noVNCReadyYet = noVNCHandle.ready();
 
   return {
     infoReadyYet,
+    noVNCReadyYet,
     seriessReadyYet,
     targetSessionsReadyYet,
     filtersReadyYet,
@@ -716,7 +727,7 @@ export default withTracker(() => {
     targetReportsReadyYet,
     takeSeriesTemplatesReadyYet,
 
-    isNoVNCEnabled,
+    noVNC_enabled,
     noVNCPort,
     noVNCPWD,
 
@@ -751,33 +762,5 @@ export default withTracker(() => {
     target_reports: TargetReports.find({}).fetch(10),
     takeSeriesTemplates: TakeSeriesTemplates.find({ isCalibrationFrames: false }, { sort: { name: 1 } }).fetch(10),
 
-    // SESSION Controls
-    //    tool_calibrate_via: TheSkyXInfos.findOne({name: 'tool_calibrate_via'}),
-    //    tool_calibrate_location: TheSkyXInfos.findOne({name: 'tool_calibrate_location'}),
-    //    tool_rotator_num: TheSkyXInfos.findOne({name: 'tool_rotator_num'}),
-    //    tool_rotator_type: TheSkyXInfos.findOne({name: 'tool_rotator_type'}),
-
-//    defaultMeridianFlip: TheSkyXInfos.findOne({name: 'defaultMeridianFlip'}),
-//    defaultCLSEnabled: TheSkyXInfos.findOne({name: 'defaultCLSEnabled'}),
-//    defaultSoftPark: TheSkyXInfos.findOne({name: 'defaultSoftPark'}),
-
-//    isFOVAngleEnabled: TheSkyXInfos.findOne({name: 'isFOVAngleEnabled'}),
-//    isFocus3Enabled: TheSkyXInfos.findOne({name: 'isFocus3Enabled'}),
-//    isFocus3Binned: TheSkyXInfos.findOne({name: 'isFocus3Binned'}),
-
-//    isAutoguidingEnabled: TheSkyXInfos.findOne({name: 'isAutoguidingEnabled'}),
-//    isCalibrationEnabled: TheSkyXInfos.findOne({name: 'isCalibrationEnabled'}),
-//    isGuideSettlingEnabled: TheSkyXInfos.findOne({name: 'isGuideSettlingEnabled'}),
-
-//    isCLSRepeatEnabled: TheSkyXInfos.findOne({name: 'isCLSRepeatEnabled'}),
-//    isTwilightEnabled: TheSkyXInfos.findOne({name: 'isTwilightEnabled'}),
-
-    // App stuf
-
-//    flatSettings: TheSkyXInfos.findOne({name: 'flatSettings'}),
-//    tsx_message: TheSkyXInfos.findOne({name: 'tsx_message'}),
-//    calibrations: CalibrationFrames.find({}, { sort: { order: 1 } }).fetch(),
-    // targetSessions: TargetSessions.find({ }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch(),
-    //    enabledTargetSessions: TargetSessions.find({ enabledActive: true }), { sort: { priority: 1, numericOrdering: true }).fetch(),
   };
 })(App);

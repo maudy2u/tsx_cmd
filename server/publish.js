@@ -15,6 +15,13 @@ Meteor.publish('tsxInfo.all', function () {
   return db;
 });
 
+Meteor.publish('noVNC.status', function () {
+  var db = TheSkyXInfos.find({name: 'isNoVNCEnabled'});
+  this.ready();
+  return db;
+});
+
+
 Meteor.publish('seriess.all', function () {
   return Seriess.find();
 });

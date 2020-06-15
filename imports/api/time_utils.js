@@ -1,6 +1,3 @@
-import { FilesCollection } from 'meteor/ostrio:files';
-import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug, logFileForClient, AppLogsDB } from './theLoggers.js';
-
 export function sessionDate( today ) {
   // desired format:
   // 2018-01-01

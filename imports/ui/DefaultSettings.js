@@ -124,6 +124,7 @@ class DefaultSettings extends Component {
       defaultFocusExposure: 1,
       minDitherFactor: 3,
       maxDitherFactor: 7,
+      isDitheringEnabled: false,
       imagingPixelSize: 3.8,
       imagingPixelMaximum: 65504,
       imagingFocalLength: 2800,
@@ -346,6 +347,9 @@ class DefaultSettings extends Component {
           }).value,
           defaultDithering: nextProps.tsxInfo.find(function(element) {
             return element.name == 'defaultDithering';
+          }).value,
+          isDitheringEnabled: nextProps.tsxInfo.find(function(element) {
+            return element.name == 'isDitheringEnabled';
           }).value,
           minDitherFactor: nextProps.tsxInfo.find(function(element) {
             return element.name == 'minDitherFactor';

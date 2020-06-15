@@ -57,7 +57,22 @@ import {
 
 import {
   getSchedulerState,
-} from './run_schedule_process.js'
+  hasTimePassed,
+  howMuchTimeHasPassed,
+  hasStartTimePassed,
+  isDateBeforeCurrentDate,
+  isTimeBeforeCurrentTime,
+  isSchedulerStopped,
+} from './run_schedule_process.js';
+
+import {
+  tsx_MntPark,
+} from './mount.js'
+
+import {
+  UpdateImagingTargetReport,
+  tsx_TargetReport,
+} from './target_reports.js'
 
 //Tools
 import {
@@ -71,8 +86,6 @@ import {
   UpdateStatusErr,
   postProgressTotal,
   UpdateImagingSesionID,
-  tsx_UpdateDeviceManufacturer,
-  tsx_UpdateDeviceModel,
 } from '../imports/api/serverStates.js'
 
 import {
@@ -91,25 +104,6 @@ import {
 var tsxHeader =  '/* Java Script *//* Socket Start Packet */';
 var tsxFooter = '/* Socket End Packet */';
 var forceAbort = false;
-
-// *******************************
-export function isSchedulerStopped() {
-  tsxInfo(' *** isSchedulerStopped ' );
-  var sched = getSchedulerState();
-  var runScheduler =   tsx_SetServerState( tsx_ServerStates.runScheduler, '');
-  if(
-    (sched != 'Stop' && runScheduler != '')
-  ) {
-    tsxDebug(' [SCHEDULER] scheduler_running: ' + sched);
-    return false; // exit
-  }
-  tsx_SetServerState( tsx_ServerStates.targetName, 'No Active Target');
-  tsx_SetServerState( tsx_ServerStates.scheduler_report, '');
-  // THis line is needed in the tsx_feeder
-  tsx_SetServerState( tsx_ServerStates.imagingSessionId, '');
-
-  return true;
-}
 
 // **************************************************************
 // Substrung replacement routine for the loading of tsx.js library
@@ -209,113 +203,6 @@ function tsxCmdTestCLS() {
 //
 var imagingSession;
 
-
-// *******************************
-export function tsx_IsParked() {
-  tsxInfo('************************');
-  tsxInfo(' *** tsx_IsParked' );
-
-  var out = false;
-  var cmd = tsx_cmd('SkyX_JS_IsParked');
-
-  var tsx_is_waiting = true;
-  tsxDebug( '[TSX] SkyX_JS_IsParked' );
-
-  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-    var result = tsx_return.split('|')[0].trim();
-    tsxDebug( result );
-    out = result;
-    tsx_is_waiting = false;
-  }));
-  while( tsx_is_waiting ) {
-    Meteor.sleep( 1000 );
-  }
-  return out;
-}
-
-
-// **************************************************************
-export function tsx_MntUnpark() {
-  tsxInfo('[MOUNT] ************************');
-  tsxInfo(' [MOUNT] Unparking mount' );
-  var cmd = tsx_cmd('SkyX_JS_UnparkMount');
-
-  var Out = '';
-  var tsx_is_waiting = true;
-  tsxDebug( '[TSX] SkyX_JS_UnparkMount' );
-
-  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        var result = tsx_return.split('|')[0].trim();
-        tsxDebug( ' *** result: ' + result );
-        if( result == 'unparked' ) {
-          UpdateStatus(' [MOUNT] unparked' );
-        }
-        else {
-          UpdateStatusErr( ' [MOUNT] !!! Unparking err: ' + result );
-        }
-
-        Out = result;
-        tsx_is_waiting = false;
-  }));
-  tsxInfo ( ' [MOUNT] unpark waiting ') ;
-  while( tsx_is_waiting ) {
-    Meteor.sleep( 1000 );
-  }
-  tsxInfo ( ' [MOUNT] unpark done ') ;
-  return Out;
-}
-
-
-export function tsx_MntPark(defaultFilter, softPark) {
-  // tsxInfo('************************');
-  tsxInfo(' *** tsx_MntPark' );
-
-  var dts = new Date();
-  var slot = 0;
-
-  if( defaultFilter != '' ) {
-    slot = getFilterSlot(defaultFilter);
-  }
-  else {
-    slot = 0;
-  }
-
-  if( softPark ) {
-    // if true just set filter and turn off tracking
-    UpdateStatus(' Soft Parking... ');
-  }
-  else {
-    UpdateStatus(' Parking... ');
-  }
-  var cmd = tsx_cmd('SkyX_JS_ParkMount');
-  cmd = cmd.replace("$000", slot ); // set filter
-  cmd = cmd.replace("$001", softPark ); // set filter
-
-  var Out;
-  var tsx_is_waiting = true;
-  tsxDebug( '[TSX] SkyX_JS_ParkMount,'+slot+', '+softPark );
-
-  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        var result = tsx_return.split('|')[0].trim();
-        tsxInfo( ' park result: ' + result );
-        if( result === 'Parked' || result === 'Soft Parked' ) {
-          UpdateStatus( ' ' + result );
-        }
-        else {
-          UpdateStatusErr( ' !!! Parking err: ' + tsx_return );
-        }
-
-        Out = result;
-        tsx_is_waiting = false;
-  }));
-  tsxInfo( ' Park waiting' );
-  while( tsx_is_waiting ) {
-   Meteor.sleep( 1000 );
-  }
-  tsxInfo( ' Park wait done' );
-  return Out;
-}
-
 // **************************************************************
 export function tsx_AbortGuider() {
   var success = false;
@@ -389,8 +276,11 @@ function SetUpAutoGuiding( target, doCalibration ) {
 
   // Calibrate.... only if a star is found...
   if( star !== '') {
+    // is calibration enabled
+    var enabled = tsx_GetServerStateValue( tsx_ServerStates.isAutoguidingEnabled );
+
+
     if( doCalibration == true ) {
-      UpdateStatus(' ' + target.getFriendlyName() + ": AutoGuider Calibration STARTED");
       var cal_res = tsx_CalibrateAutoGuide( star.guideStarX, star.guideStarY );
       if( cal_res ) {
         UpdateStatus(' ' + target.getFriendlyName() + ": AutoGuider Calibrated");
@@ -457,7 +347,6 @@ function tsx_FindGuideStar() {
   // var cmd = tsxCmdFindGuideStar();
   var cmd = tsx_cmd('SkyX_JS_FindAutoGuideStar');
   tsxDebug( '[TSX] SkyX_JS_FindAutoGuideStar' );
-
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     try {
       tsxDebug(' Guide star info: ' + tsx_return);
@@ -491,18 +380,18 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
   tsxInfo(' *** tsx_CalibrateAutoGuide' );
   var enabled = tsx_GetServerStateValue( tsx_ServerStates.isCalibrationEnabled );
   if( !enabled ) {
-    tsxInfo(' *** Autoguider calibration disabled');
+    tsxInfo(' [AUTOGUIDER] calibration disabled');
     return false;
   }
   enabled = tsx_GetServerStateValue( tsx_ServerStates.isAutoguidingEnabled );
   if( !enabled ) {
-    tsxInfo(' *** Autoguider disabled ');
+    tsxInfo(' [AUTOGUIDER] disabled ');
     return false;
   }
   var fSize = tsx_GetServerStateValue( tsx_ServerStates.calibrationFrameSize );
   if( typeof fSize == 'undefined' || fSize === '' ) {
     fSize = 300;
-    UpdateStatusErr(' *** Autoguider calibration frame needs setting ');
+    UpdateStatusWarn(' [AUTOGUIDER] calibration frame needs setting ');
   }
 
   tsx_is_waiting = true;
@@ -514,11 +403,12 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
 
   var success = false;
   tsxDebug( '[TSX] SkyX_JS_AutoguideCalibrate,'+guideStarX+', '+guideStarY+', '+fSize );
+  UpdateStatus(' [AUTOGUIDER] Calibration STARTED ');
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     var result = tsx_return.split('|')[0].trim();
     if( result != 'Success') {
-      UpdateStatusErr(' *** FAILED- calibrating autoguider: ' + result);
+      UpdateStatusErr(' [AUTOGUIDER] *** FAILED- calibrating autoguider: ' + result);
     }
     else {
       success = true;
@@ -531,6 +421,7 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
   }
   if( !success ) {
   }
+  UpdateStatus(' [AUTOGUIDER] Calibration FINISHED ');
   return success;
 }
 
@@ -540,7 +431,7 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
   tsxInfo(' *** tsx_StartAutoGuide' );
   var enabled = tsx_GetServerStateValue( tsx_ServerStates.isAutoguidingEnabled );
   if( !enabled ) {
-    tsxInfo(' *** Autoguider disabled ');
+    tsxInfo(' [AUTOGUIDER] Autoguider disabled ');
     return;
   }
 
@@ -1249,183 +1140,6 @@ export function getValidTargetSession() {
 }
 
 // **************************************************************
-function tsx_DeviceInfo() {
-  // tsxInfo('************************');
-  tsxInfo(' *** tsx_DeviceInfo' );
-
-  // tsx_Connect();
-  var cmd = tsx_cmd('SkyX_JS_DeviceInfo');
-  // cmd = cmd.replace('$000', Number(filterNum) ); // set filter
-  // cmd = cmd.replace('$001', Number(exposure) ); // set exposure
-
-  var success;
-  var tsx_is_waiting = true;
-  var numFilters = -1;
-  var numBins = -1;
-  var numGuiderBins = -1;
-
-  tsxDebug( '[TSX] SkyX_JS_DeviceInfo' );
-
-  tsx_feeder( String(cmd), Meteor.bindEnvironment((tsx_return) => {
-    // e.g.
-    // Success|RMS_ERROR=0.00|ROTATOR_POS_ANGLE=-350|ANGLE=349.468|FOCUS_POS=0.000
-    tsxDebug(' SkyX_JS_DeviceInfo return: ' + tsx_return );
-    if( tsx_has_error(tsx_return) == false ) {
-      var results = tsx_return.split('|');
-      if( results.length > 0) {
-        var result = results[0].trim();
-        if( result == 'Success' ) {
-          success = true;
-          for( var i=1; i<results.length;i++) {
-            var token=results[i].trim();
-            //
-            var param=token.split("=");
-            switch( param[0] ) {
-
-              case 'aMan':
-                tsx_UpdateDeviceManufacturer( 'guider', param[1] );
-                break;
-
-              case 'aMod':
-                tsx_UpdateDeviceModel( 'guider', param[1] );
-                break;
-
-              case 'cMan':
-                tsx_UpdateDeviceManufacturer( 'camera', param[1] );
-                break;
-
-              case 'cMod':
-                tsx_UpdateDeviceModel( 'camera', param[1] );
-                break;
-
-              case 'efwMan':
-                tsx_UpdateDeviceManufacturer( 'efw', param[1] );
-                break;
-
-              case 'efwMod':
-                tsx_UpdateDeviceModel( 'efw', param[1] );
-                break;
-
-              case 'focMan':
-                tsx_UpdateDeviceManufacturer( 'focuser', param[1] );
-                break;
-
-              case 'focMod':
-                tsx_UpdateDeviceModel( 'focuser', param[1] );
-                break;
-
-              case 'mntMan':
-                tsx_UpdateDeviceManufacturer( 'mount', param[1] );
-                break;
-
-              case 'mntMod':
-                tsx_UpdateDeviceModel( 'mount', param[1] );
-                break;
-
-              case 'rotMan':
-                tsx_UpdateDeviceManufacturer( 'rotator', param[1] );
-                break;
-
-              case 'rotMod':
-                tsx_UpdateDeviceModel( 'rotator', param[1] );
-                break;
-
-              case 'numBins':
-                numBins = param[1];
-                tsx_SetServerState( 'numberOfBins', numBins );
-                break;
-
-              case 'numFilters':
-                numFilters = param[1];
-                tsx_SetServerState( 'numberOfFilters', numFilters );
-                break;
-
-              case 'numGuiderBins':
-                numGuiderBins = param[1];
-                tsx_SetServerState( 'numGuiderBins', numGuiderBins );
-                break;
-
-              default:
-                //RunJavaScriptOutput.writeLine(param[0]+' not found.');
-            }
-          }
-
-          if( numFilters > -1 ) {
-            // if too many filters... reduce to matching
-            // if not enough then upsert will clean up
-            var filters = Filters.find({}, { sort: { slot: 1 } }).fetch();
-            if( filters.length > numFilters ) {
-              // need to reduce the filters
-              for (var i = 0; i < filters.length; i++) {
-                if( filters[i].slot > numFilters-1) {
-                   Filters.remove(filters[i]._id);
-                }
-              }
-            }
-
-            for( var s=0; s<numFilters; s++ ) {
-              var slot = "slot_" +s;
-              for( var i=1; i<results.length;i++) {
-                var token=results[i].trim();
-                var param=token.split("=");
-                if( slot == param[0] ) {
-                  var name = param[1];
-                  let filter = Filters.findOne({name: name });
-                  Filters.upsert( {slot: s }, {
-                    $set: {
-                      name: name,
-                    }
-                  });
-                }
-              }
-            }
-          }
-          UpdateStatus( ' Devices Updated');
-        }
-      }
-      else {
-        tsxWarn(' Device update failed: ' + tsx_return);
-      }
-    }
-    Meteor.sleep( 500 ); // needs a sleep before next image
-    tsx_is_waiting = false;
-  }));
-  while( tsx_is_waiting ) {
-   Meteor.sleep( 1000 );
-   if( isSchedulerStopped() ) {
-     tsxInfo(' Device Update Stopped');
-     tsx_is_waiting = false;
-     success = false;
-   }
-  }
-}
-
-// **************************************************************
-export function tsx_ServerIsOnline() {
-  // tsxInfo('************************');
-  tsxInfo(' *** tsx_ServerIsOnline' );
-  var success = false;
-
-  var cmd = tsxHeader + tsxFooter;
-  var tsx_is_waiting = true;
-  tsx_feeder( cmd, Meteor.bindEnvironment((tsx_return) => {
-    try{
-      var result = tsx_return.split('|')[0].trim();
-      if( result == 'undefined') {
-        success = true;
-      }
-    }
-    finally {
-      tsx_is_waiting = false;
-    }
-  }));
-  while( tsx_is_waiting ) {
-    Meteor.sleep( 3000 );
-  }
-  return success;
-}
-
-// **************************************************************
 function tsx_isDarkEnough(target) {
   // tsxInfo('************************');
   tsxInfo(' *** tsx_isDarkEnough: ' + target.getFriendlyName() );
@@ -1671,60 +1385,6 @@ export function tsx_SetTarget2ChartCentre( tid ) {
   return Out;
 }
 
-// **************************************************************
-// if targetDone/stopped... find next
-// *******************************
-//  8. Image done... next?
-//    - check priority - is there another target to take over
-//    - check for meridian flip
-//    - check end time
-//    - check end Altitude
-//    - Report for next image... step 6
-//      - do we dither?
-//      - did temp change to refocus?
-
-// *******************************
-// 8. End session activities
-// return TRUE if reached end condition
-export function UpdateImagingTargetReport( target ) {
-  // tsxInfo('************************');
-  tsxInfo(' *** UpdateImagingTargetReport: ' + target.getFriendlyName() );
-
-  // how old is report... if less than 1 minute get report
-  var tRprt = TargetReports.findOne({target_id: target._id });
-
-  // // no report so get one...
-  // if( typeof tRprt === 'undefined' ) {
-  //   tsxDebug(' Ran TargetReport for new report: ' + target.getFriendlyName());
-  //   tRprt = tsx_TargetReport( target );
-  // }
-
-  // var msecDiff = cTime - tRprt.updatedAt;
-  // tsxInfo('Report time diff: ' + msecDiff);
-  // var mm = Math.floor(msecDiff / 1000 / 60);
-  if( typeof tRprt === 'undefined' || typeof tRprt.updatedAt === 'undefined' || hasTimePassed( 60, tRprt.updatedAt ) ) { // one minte passed so update report.
-    tsxDebug(' Ran TargetReport for new report: ' + target.getFriendlyName());
-    tRprt = tsx_TargetReport( target );
-  }
-  else {
-    tsxDebug(' Reuse TargetReport: ' + target.getFriendlyName());
-    tRprt = target.report;
-  }
-
-  // Now have reprt and need to set the variables
-  // the other checks use
-  if( tRprt.ready != false && typeof tRprt != 'undefined' && tRprt != '') {
-    TargetSessions.upsert({_id: target._id}, {
-      $set:{
-        report: tRprt,
-      }
-    });
-  }
-
-  return tRprt;
-}
-
-
 // need to return true if to stop
 function isTargetConditionInValid(target) {
   tsxInfo(' [SCHEDULER] ************************');
@@ -1956,159 +1616,10 @@ function tsx_dither( target ) {
     }
   }
   else{
-    tsxLog(' [DITHER] dithering disabled');
+    tsxWarn(' [DITHER] TakeSeries has dither set to 0 - did you mean it?');
   }
   return Out;
 
-}
-
-// **************************************************************
-function update_monitor_coordinates( rpt, targetFindName ) {
-  tsx_SetServerState( tsx_ServerStates.targetRA, rpt.RA );
-  tsx_SetServerState( tsx_ServerStates.targetDEC, rpt.DEC );
-  tsx_SetServerState( tsx_ServerStates.targetALT, rpt.ALT );
-  tsx_SetServerState(tsx_ServerStates.targetAZ, rpt.AZ );
-  tsx_SetServerState( tsx_ServerStates.targetHA, rpt.HA );
-  tsx_SetServerState( tsx_ServerStates.targetTransit, rpt.TRANSIT );
-  tsx_SetServerState( 'mntMntPointing', rpt.pointing );
-  tsxInfo( targetFindName + ' ' + rpt.ALT);
-}
-
-// **************************************************************
-function tsx_TargetReport( target ) {
-  // tsxInfo('************************');
-  tsxInfo(' *** tsx_TargetReport: ' + target.getFriendlyName());
-
-  // only get the new data if dirty or not existant
-  // var org_rpt = TargetReports.findOne({target_id: target._id });
-  // var dirty = true;
-  updateTargetReport( target._id, 'dirty', true );
-
-  // var cmd = tsxCmdMatchAngle(targetSession.angle,targetSession.scale, target.expos);
-  var cmd = tsx_cmd('SkyX_JS_TargetReport');
-  cmd = cmd.replace('$000', target.targetFindName );
-
-  var sunAlt = tsx_GetServerStateValue( tsx_ServerStates.defaultMinSunAlt );
-  if( typeof sunAlt === 'undefined'  || sunAlt == '') {
-    // hard coded to ~ nautical twilight
-    // #TODO put the sun altitude into Settings
-    sunAlt = -15;
-  }
-
-  cmd = cmd.replace('$001', sunAlt);
-  cmd = cmd.replace('$002', target.minAlt);
-  tsxInfo(' TargetReport.target:', target.getFriendlyName());
-  tsxInfo(' TargetReport.sunAlt:', sunAlt);
-  tsxInfo(' TargetReport.minAlt:', target.minAlt);
-  var Out = {
-    ready: false,
-  };
-  var tsx_is_waiting = true;
-  tsxDebug( '[SkyX_JS_TargetReport] sent: '+target.targetFindName+', '+sunAlt+', '+target.minAlt );
-
-  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-    if( tsx_has_error(tsx_return) == false ) {
-      // e.g.
-      // false|6.812618943699146|
-      // true|West|42.2|5.593339690591149|22.023446766485247|3.4187695344846833|16.2723491463255240.0|0|
-      // No error. Error = 0.
-      tsxDebug( '[SkyX_JS_TargetReport] recv: '+tsx_return );
-      var result = tsx_return.split('|')[0].trim();
-      if( result == 'TypeError: Object not found. Error = 250.') {
-        UpdateStatusErr('!!! TargetReport failed. Target not found.');
-        tsxLog( tsx_return );
-      }
-      else {
-        var results = tsx_return.split('|');
-        if( results.length > 0) {
-          var result = results[0].trim();
-          if( result == 'Success') {
-            success = true;
-          }
-          for( var i=1; i<results.length;i++) {
-            var token=results[i].trim();
-            var param=token.split("=");
-            switch( param[0] ) {
-
-              case 'LAT':
-                updateTargetReport( target._id, 'LAT', param[1] );
-                break;
-              case 'LON':
-                updateTargetReport( target._id, 'LON', param[1] );
-                break;
-              case 'focusPosition':
-                updateTargetReport( target._id, 'focusPosition', param[1] );
-                break;
-              case 'maxAlt':
-                updateTargetReport( target._id, 'maxAlt', param[1] );
-                break;
-              case 'focusTemp':
-                updateTargetReport( target._id, 'focusTemp', param[1] );
-                break;
-              case 'readyMsg':
-                updateTargetReport( target._id, 'readyMsg', param[1] );
-                break;
-              case 'ready':
-                updateTargetReport( target._id, 'ready', param[1] );
-                break;
-              case 'isDark':
-                updateTargetReport( target._id, 'isDark', param[1] );
-                break;
-              case 'sunAltitude':
-                updateTargetReport( target._id, 'sunAltitude', param[1] );
-                break;
-              case 'isValid':
-                updateTargetReport( target._id, 'isValid', param[1] );
-                break;
-              case 'AZ':
-                updateTargetReport( target._id, 'AZ', param[1] );
-                break;
-              case 'ALT':
-                updateTargetReport( target._id, 'ALT', param[1] );
-                break;
-              case 'RA':
-                updateTargetReport( target._id, 'RA', param[1] );
-                break;
-              case 'DEC':
-                updateTargetReport( target._id, 'DEC', param[1] );
-                break;
-              case 'HA':
-                updateTargetReport( target._id, 'HA', param[1] );
-                break;
-              case 'TRANSIT':
-                updateTargetReport( target._id, 'TRANSIT', param[1] );
-                break;
-              case 'isValid':
-                UpdateStatusErr('!!! TargetReport failed. Not found ('+target.getFriendlyName()+'): ' + param[1]);
-                break;
-              case 'pointing':
-                updateTargetReport( target._id, 'pointing', param[1] );
-                break;
-              default:
-
-            }
-          }
-        }
-        updateTargetReport( target._id, 'dirty', false );
-        var rpt = TargetReports.findOne({target_id: target._id });
-        update_monitor_coordinates( rpt, target.targetFindName );
-// *******************************
-// THIS LINE IS OF UPTMOST IMPORTANCE... IT IS A REFERENCE AND UPDATES
-// THE REPORT ON THE TARGET FOR ADDITIONALLY SUPPORT.
-// *******************************
-        target.report = rpt; // set the current target's report... it passes back
-// *******************************
-// *******************************
-        Out=rpt;
-        tsxInfo( ' --- Refreshed ' + target.getFriendlyName()  );
-      }
-    }
-    tsx_is_waiting = false;
-  }));
-  while( tsx_is_waiting ) {
-    Meteor.sleep( 1000 );
-  }
-  return Out;
 }
 
 // **************************************************************
@@ -3071,94 +2582,6 @@ function isTargetComplete( target ) {
   }
   return true;
 }
-// *************************** ***********************************
-// Assuming a time in seconds is provided and a Date Object
-export function hasTimePassed( duration, timestamp ) {
-  // if( typeof timestamp === 'undefined' || duration === '' ) {
-  //   return true;
-  // }
-  var now = new Date();
-  var diff = parseInt(now - timestamp)/1000; // Difference in seconds
-  if( diff >= duration) {
-    return true;
-  }
-  return false;
-}
-// *************************** ***********************************
-// Assuming a time in seconds is provided and a Date Object
-export function howMuchTimeHasPassed( duration, timestamp ) {
-  var now = new Date();
-  var diff = parseInt(now - timestamp)/1000; // Difference in seconds
-  return diff;
-}
-
-export function hasStartTimePassed( target ) {
-  // tsxInfo('************************');
-  tsxInfo(' *** hasStartTimePassed: ' + target.getFriendlyName() );
-
-  var start_time = target.startTime;
-  var canStart = isTimeBeforeCurrentTime( start_time );
-  // do not start if undefined
-  return canStart;
-}
-
-export function isDateBeforeCurrentDate( chkDate ) {
-  var cur_dts = new Date();
-  var cur_time = cur_dts.getHours()+(cur_dts.getMinutes()/60);
-  // tsxInfo('Current time: ' + cur_time );
-
-  // add 24 to the morning time so that
-  ((cur_time < 8) ? cur_time=cur_time+24 : cur_time);
-
-  chkDate = chkDate.getHours()+(chkDate.getMinutes()/60);
-
-
-  // tsxInfo('Start time: ' + start_time );
-  var hrs = ts.split(':')[0].trim();
-  // tsxInfo('Start hrs: ' + hrs );
-  var min = ts.split(':')[1].trim();
-  // tsxInfo('Start min: ' + min );
-  ts = Number(hrs) + Number(min/60);
-  ((ts < 8) ? ts=ts+24 : ts);
-  // tsxInfo('curtime: ' + cur_time + ' vs ' + ts);
-  var curBefore = ((ts < cur_time ) ? true : false);
-  return curBefore;
-
-}
-
-// **************************************************************
-// #TODO used this for one consistent time comparing function
-//
-// 24hrs e.g.
-// 21:00
-// return true if undedefined
-export function isTimeBeforeCurrentTime( ts ) {
-  // tsxInfo('************************');
-  tsxInfo(' *** isTimeBeforeCurrentTime: ' + ts );
-
-  if( typeof ts == 'undefined') {
-    tsxDebug( ' isTimeBeforeCurrentTime FAILED - ts is undefined')
-    return true; // as undefined....
-  }
-
-  var cur_dts = new Date();
-  var cur_time = cur_dts.getHours()+(cur_dts.getMinutes()/60);
-  // tsxInfo('Current time: ' + cur_time );
-
-  // add 24 to the morning time so that
-  ((cur_time < 8) ? cur_time=cur_time+24 : cur_time);
-
-  // tsxInfo('Start time: ' + start_time );
-  var hrs = ts.split(':')[0].trim();
-  // tsxInfo('Start hrs: ' + hrs );
-  var min = ts.split(':')[1].trim();
-  // tsxInfo('Start min: ' + min );
-  ts = Number(hrs) + Number(min/60);
-  ((ts < 8) ? ts=ts+24 : ts);
-  // tsxInfo('curtime: ' + cur_time + ' vs ' + ts);
-  var curBefore = ((ts < cur_time ) ? true : false);
-  return curBefore;
-}
 
 // *************************** ***********************************
 // This method is used to confirm the target can be used.
@@ -3257,38 +2680,6 @@ export function canTargetSessionStart( target ) {
 // **************************************************************
 Meteor.methods({
 
-  // **************************************************************
-  connectToTSX() {
-    tsx_SetServerState( tsx_ServerStates.tool_active, true );
-
-    tsxInfo(' ******************************* ');
-    UpdateStatus(' Refreshing Devices...');
-    try {
-      var isOnline = tsx_ServerIsOnline();
-      tsxInfo('tsx_ServerIsOnline: ' + isOnline);
-      // *******************************
-      //  GET THE CONNECTED EQUIPEMENT
-      tsxInfo(' ******************************* ');
-      tsxInfo('Loading devices');
-      var out = tsx_DeviceInfo();
-    }
-    catch( e ) {
-      if( e == 'TsxError' ) {
-        UpdateStatus('!!! TheSkyX connection is no longer there!');
-      }
-    }
-    finally {
-      tsx_SetServerState( tsx_ServerStates.tool_active, false );
-    }
-   },
-
-   // this from the monitor
-   // it is used to test the image session
-/*
-
-Use this to set the last focus
-
-*/
   //
   // **************************************************************
   // Used to pass RA/DEC to target editors
@@ -3490,91 +2881,5 @@ Use this to set the last focus
     }
     return result;
   },
-
-
-  getTargetReport( tid ) {
-    var target = TargetSessions.findOne({_id: tid});
-
-    tsx_SetServerState( tsx_ServerStates.tool_active, true );
-    UpdateStatus( ' Getting report : ' + target.getFriendlyName() );
-    try {
-      var result = tsx_TargetReport( target );
-      UpdateStatus( ' Refresh complete' );
-    }
-    catch( e )  {
-      if( e == 'TsxError' ) {
-        UpdateStatus('!!! TheSkyX connection is no longer there!');
-      }
-    }
-    finally {
-      tsx_SetServerState( tsx_ServerStates.tool_active, false );
-    }
-    return;
-  },
-
-  getTargetReports( targetArray ) {
-    tsx_SetServerState( tsx_ServerStates.tool_active, true );
-    try {
-      for (let i = 0; i < targetArray.length; i++) {
-        let target = TargetSessions.findOne({_id: targetArray[i]._id });
-        UpdateStatus( ' Getting report : ' + target.getFriendlyName() );
-        let result = tsx_TargetReport( target );
-        UpdateStatus( ' Received report' );
-      }
-      UpdateStatus( ' Refresh complete' );
-    }
-    catch( e )  {
-      if( e == 'TsxError' ) {
-        UpdateStatus('!!! TheSkyX connection is no longer there!');
-      }
-    }
-    finally {
-      tsx_SetServerState( tsx_ServerStates.tool_active, false );
-    }
-    return;
-  },
-
-  refreshEnabledTargetReports() {
-    tsx_SetServerState( tsx_ServerStates.tool_active, true );
-    UpdateStatus( ' Refreshing targets' );
-    try {
-      let targets = TargetSessions.find({ isCalibrationFrames: false, enabledActive: true }).fetch();
-
-      for (let i = 0; i < targets.length; i++) {
-        let target = TargetSessions.findOne({_id: targets[i]._id });
-        if( typeof target != 'undefined') {
-          let rpt = tsx_TargetReport( target );
-        }
-      }
-      UpdateStatus( ' Refresh complete' );
-    }
-    catch( e )  {
-      if( e == 'TsxError' ) {
-        UpdateStatus('!!! TheSkyX connection is no longer there!');
-      }
-    }
-    finally {
-      tsx_SetServerState( tsx_ServerStates.tool_active, false );
-    }
-  },
-
-  park( ) {
-    tsx_SetServerState( tsx_ServerStates.tool_active, true );
-    let filter = tsx_GetServerStateValue( tsx_ServerStates.defaultFilter );
-    let result = '';
-    try {
-      result = tsx_MntPark(filter, false ); // use default filter
-    }
-    catch( e )  {
-      if( e == 'TsxError' ) {
-        UpdateStatus('!!! TheSkyX connection is no longer there!');
-      }
-    }
-    finally {
-      tsx_SetServerState( tsx_ServerStates.tool_active, false );
-    }
-    return result;
-  }
-
 
 });

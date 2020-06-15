@@ -105,15 +105,12 @@ class Target extends Component {
   getTargetReport() {
 
     try {
-
       Meteor.call( 'getUpdateTargetReport', this.props.target._id , function(error, result) {
 
         if( typeof result !== 'undefined' ) {
         }
-
       }.bind(this));
     } catch (e) {
-
     }
   }
 

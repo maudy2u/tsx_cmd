@@ -44,37 +44,28 @@ import {
   tsx_ServerStates,
   tsx_SetServerState,
   tsx_GetServerState,
-  tsx_UpdateDevice,
   tsx_GetServerStateValue,
   UpdateStatus,
   UpdateStatusErr,
-  postProgressTotal,
-  postProgressIncrement,
-  postProgressMessage,
-  UpdateImagingSesionID,
+  tsx_UpdateDevice,
+  tsx_UpdateDeviceManufacturer,
+  tsx_UpdateDeviceModel,
 } from '../imports/api/serverStates.js';
 
 import {
   tsx_Connect,
   tsx_Disconnect,
-  tsx_MntPark,
   tsx_AbortGuider,
-  prepareTargetForImaging,
   processTargetTakeSeries,
-  tsx_ServerIsOnline,
   tsx_isDark,
   isTimeBeforeCurrentTime,
   hasStartTimePassed,
-  tsx_MntUnpark,
-  tsx_IsParked,
   findCalibrationSession,
   CalibrateAutoGuider,
   tsx_RotateCamera,
-  UpdateImagingTargetReport,
   tsx_SlewTargetName,
   tsx_SlewCmdCoords,
   tsx_StopTracking,
-  isSchedulerStopped,
 } from './run_imageSession.js';
 
 import {
@@ -82,7 +73,19 @@ import {
   getSchedulerState,
   setSchedulerState,
   srvStopScheduler,
+  isSchedulerStopped,
 } from './run_schedule_process.js'
+
+import {
+  tsx_feeder,
+  tsxHeader,
+  tsxFooter,
+  tsx_cmd,
+  tsx_has_error,
+  tsx_ServerIsOnline,
+} from './tsx_feeder.js'
+
+
 
 /*
 tsx_SetServerState
@@ -200,8 +203,9 @@ function initServerStates() {
 }
 
 Meteor.startup(() => {
-  tsxLog(' ******************************', '');
+  tsxLog(' ##############################', '');
   tsxLog(' ****** TSX_CMD STARTING', '');
+  tsxLog('  ', '');
 
   var link = process.env.ROOT_URL;
   var p = process.env.PORT;
@@ -221,6 +225,9 @@ Meteor.startup(() => {
 
   AppLogsDB.remove({});
   srvStopScheduler();
+
+  // Initialze the server on startup
+  initServerStates();
 
   var version_dat = {};
   version_dat = JSON.parse(Assets.getText('build_version.json'));
@@ -257,6 +264,13 @@ Meteor.startup(() => {
   // removing so can start up easier without error.
   tsxLog('         TheSkyX IP',  dbIp );
   tsxLog('       TheSkyX port', dbPort );
+
+  tsxLog(' ', '');
+  tsxLog( '            Logfile', logFileForClient() );
+  tsxLog( '   DB Backup Folder', backupFolder );
+  tsxLog( ' SkySafari Settings', skySafariFilesFolder );
+
+  tsxLog(' ', '');
   tsxLog('        Browser URL',
     'http://'
     + tsx_GetServerStateValue(tsx_ServerStates.tsx_ip)
@@ -264,36 +278,198 @@ Meteor.startup(() => {
     + tsx_GetServerStateValue(tsx_ServerStates.tsx_port)
     + '/'
   );
-
-  initServerStates();
-
-  // Initialze the server on startup
-/*  tsx_UpdateDevice('mount', 'Not connected ', '' );
-  tsx_UpdateDevice('camera', 'Not connected ', '' );
-  tsx_UpdateDevice('guider', 'Not connected ', '' );
-  tsx_UpdateDevice('rotator', 'Not connected ', '' );
-  tsx_UpdateDevice('efw', 'Not connected ', '' );
-  tsx_UpdateDevice('focuser', 'Not connected ', '' );
-*/
-  tsxLog( '            Logfile', logFileForClient() );
-  tsxLog( '   DB Backup Folder', backupFolder );
-  tsxLog( ' SkySafari Settings', skySafariFilesFolder );
-
-
+  tsxLog(' ', '');
   UpdateStatus(' ******* TSX_CMD ONLINE' );
-  tsxLog(' ******************************', '');
-  tsxLog(' ******************************', '');
+  tsxLog(' ##############################', '');
+  tsxLog(' ', '');
 
   return;
 
 });
 
+// **************************************************************
+function tsx_DeviceInfo() {
+  // tsxInfo('************************');
+  tsxInfo(' *** tsx_DeviceInfo' );
+
+  // tsx_Connect();
+  var cmd = tsx_cmd('SkyX_JS_DeviceInfo');
+  // cmd = cmd.replace('$000', Number(filterNum) ); // set filter
+  // cmd = cmd.replace('$001', Number(exposure) ); // set exposure
+
+  var success;
+  var tsx_is_waiting = true;
+  var numFilters = -1;
+  var numBins = -1;
+  var numGuiderBins = -1;
+
+  tsxDebug( '[TSX] SkyX_JS_DeviceInfo' );
+
+  tsx_feeder( String(cmd), Meteor.bindEnvironment((tsx_return) => {
+    // e.g.
+    // Success|RMS_ERROR=0.00|ROTATOR_POS_ANGLE=-350|ANGLE=349.468|FOCUS_POS=0.000
+    tsxDebug(' SkyX_JS_DeviceInfo return: ' + tsx_return );
+    if( tsx_has_error(tsx_return) == false ) {
+      var results = tsx_return.split('|');
+      if( results.length > 0) {
+        var result = results[0].trim();
+        if( result == 'Success' ) {
+          success = true;
+          for( var i=1; i<results.length;i++) {
+            var token=results[i].trim();
+            //
+            var param=token.split("=");
+            switch( param[0] ) {
+
+              case 'aMan':
+                tsx_UpdateDeviceManufacturer( 'guider', param[1] );
+                break;
+
+              case 'aMod':
+                tsx_UpdateDeviceModel( 'guider', param[1] );
+                break;
+
+              case 'cMan':
+                tsx_UpdateDeviceManufacturer( 'camera', param[1] );
+                break;
+
+              case 'cMod':
+                tsx_UpdateDeviceModel( 'camera', param[1] );
+                break;
+
+              case 'efwMan':
+                tsx_UpdateDeviceManufacturer( 'efw', param[1] );
+                break;
+
+              case 'efwMod':
+                tsx_UpdateDeviceModel( 'efw', param[1] );
+                break;
+
+              case 'focMan':
+                tsx_UpdateDeviceManufacturer( 'focuser', param[1] );
+                break;
+
+              case 'focMod':
+                tsx_UpdateDeviceModel( 'focuser', param[1] );
+                break;
+
+              case 'mntMan':
+                tsx_UpdateDeviceManufacturer( 'mount', param[1] );
+                break;
+
+              case 'mntMod':
+                tsx_UpdateDeviceModel( 'mount', param[1] );
+                break;
+
+              case 'rotMan':
+                tsx_UpdateDeviceManufacturer( 'rotator', param[1] );
+                break;
+
+              case 'rotMod':
+                tsx_UpdateDeviceModel( 'rotator', param[1] );
+                break;
+
+              case 'numBins':
+                numBins = param[1];
+                tsx_SetServerState( 'numberOfBins', numBins );
+                break;
+
+              case 'numFilters':
+                numFilters = param[1];
+                tsx_SetServerState( 'numberOfFilters', numFilters );
+                break;
+
+              case 'numGuiderBins':
+                numGuiderBins = param[1];
+                tsx_SetServerState( 'numGuiderBins', numGuiderBins );
+                break;
+
+              default:
+                //RunJavaScriptOutput.writeLine(param[0]+' not found.');
+            }
+          }
+
+          if( numFilters > -1 ) {
+            // if too many filters... reduce to matching
+            // if not enough then upsert will clean up
+            var filters = Filters.find({}, { sort: { slot: 1 } }).fetch();
+            if( filters.length > numFilters ) {
+              // need to reduce the filters
+              for (var i = 0; i < filters.length; i++) {
+                if( filters[i].slot > numFilters-1) {
+                   Filters.remove(filters[i]._id);
+                }
+              }
+            }
+
+            for( var s=0; s<numFilters; s++ ) {
+              var slot = "slot_" +s;
+              for( var i=1; i<results.length;i++) {
+                var token=results[i].trim();
+                var param=token.split("=");
+                if( slot == param[0] ) {
+                  var name = param[1];
+                  let filter = Filters.findOne({name: name });
+                  Filters.upsert( {slot: s }, {
+                    $set: {
+                      name: name,
+                    }
+                  });
+                }
+              }
+            }
+          }
+          UpdateStatus( ' Devices Updated');
+        }
+      }
+      else {
+        tsxWarn(' Device update failed: ' + tsx_return);
+      }
+    }
+    Meteor.sleep( 500 ); // needs a sleep before next image
+    tsx_is_waiting = false;
+  }));
+  while( tsx_is_waiting ) {
+   Meteor.sleep( 1000 );
+   if( isSchedulerStopped() ) {
+     tsxInfo(' Device Update Stopped');
+     tsx_is_waiting = false;
+     success = false;
+   }
+  }
+}
 
 // *******************************
 // *******************************
 // *******************************
 // *******************************
 Meteor.methods({
+
+  // **************************************************************
+  connectToTSX() {
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
+
+    tsxInfo(' ******************************* ');
+    UpdateStatus(' Refreshing Devices...');
+    try {
+      var isOnline = tsx_ServerIsOnline();
+      tsxInfo('tsx_ServerIsOnline: ' + isOnline);
+      // *******************************
+      //  GET THE CONNECTED EQUIPEMENT
+      tsxInfo(' ******************************* ');
+      tsxInfo('Loading devices');
+      var out = tsx_DeviceInfo();
+    }
+    catch( e ) {
+      if( e == 'TsxError' ) {
+        UpdateStatus('!!! TheSkyX connection is no longer there!');
+      }
+      console.log(e)
+    }
+    finally {
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
+    }
+   },
 
   slewPosition( slew, location, dec_az, stopTracking ) {
     tsx_SetServerState( tsx_ServerStates.tool_active, true );
@@ -373,25 +549,6 @@ Meteor.methods({
       tsx_SetServerState( tsx_ServerStates.tool_active, false );
     }
   },
-
-   getUpdateTargetReport(tid) {
-     var target = TargetSessions.findOne({_id: tid});
-
-     var rpt = '';
-     try {
-       tsxLog( ' TargetReport: ' + target.getFriendlyName() );
-       rpt = UpdateImagingTargetReport( target )
-     }
-     catch( e ) {
-       if( e == 'TsxError' ) {
-         UpdateStatus('!!! TheSkyX connection is no longer there!');
-       }
-       rpt = {
-         ready: false,
-       }
-     }
-     return rpt;
-   },
 
    updateServerState( name, value ) {
      if( typeof name !== 'undefined' && name !== '' ) {

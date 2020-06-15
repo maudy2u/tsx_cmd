@@ -33,9 +33,6 @@ import {
   tsx_GetServerStateValue,
   UpdateStatus,
   UpdateStatusErr,
-  postProgressTotal,
-  postProgressIncrement,
-  postProgressMessage,
   UpdateImagingSesionID,
 } from '../imports/api/serverStates.js';
 

@@ -40,7 +40,7 @@ export const tsx_ServerStates = {
   activeMenu: 'Settings',
   currentStage: 'currentStage', // this is a status line update for the dashboard
   scheduler_running: 'scheduler_running',
-  SchedulerStatus: 'SchedulerStatus',
+//  SchedulerStatus: 'SchedulerStatus',
   scheduler_report: 'scheduler_report', // used by monitor to get target report
   currentJob: 'currentJob',
   tsx_progress: 'tsx_progress', // used for monitor progress minute increment
@@ -249,6 +249,26 @@ export function postProgressIncrement( info ) {
 export function postProgressMessage( info ) {
   // Create a job:
   tsx_SetServerState('tsx_message', info );
+};
+
+export function updateServerState( name, value) {
+  var dts = new Date();
+  TheSkyXInfos.update( {name: name }, {
+    $set: {
+      value: value,
+      timestamp: dts,
+     }
+  })
+};
+
+export function updateServerStatus(value) {
+  var dts = new Date();
+  TheSkyXInfos.update( {name: 'currentStage' }, {
+    $set: {
+      value: value,
+      timestamp: dts,
+     }
+  })
 };
 
 export function tsx_SetServerState( name, value) {

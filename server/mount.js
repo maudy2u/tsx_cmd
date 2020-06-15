@@ -23,11 +23,15 @@ import {
   tsx_GetServerStateValue,
   UpdateStatus,
   UpdateStatusErr,
-  postStatus,
   postProgressTotal,
   postProgressIncrement,
   tsx_ServerStates,
  } from '../imports/api/serverStates.js'
+
+ import {
+   tsx_feeder,
+   tsx_cmd,
+ } from './tsx_feeder.js'
 
  import {
    tsxInfo,
@@ -37,29 +41,23 @@ import {
    tsxDebug,
  } from '../imports/api/theLoggers.js';
 
- import {
-   tsx_Connect,
-   tsx_Disconnect,
-   tsx_MntPark,
-   tsx_AbortGuider,
-   prepareTargetForImaging,
-   processTargetTakeSeries,
-   tsx_ServerIsOnline,
-   tsx_isDark,
-   isTimeBeforeCurrentTime,
-   hasStartTimePassed,
-   tsx_MntUnpark,
-   tsx_IsParked,
-   findCalibrationSession,
-   CalibrateAutoGuider,
-   tsx_RotateCamera,
-   tsx_SlewTargetName,
-   tsx_SlewCmdCoords,
-   tsx_StopTracking,
-   isSchedulerStopped,
- } from './run_imageSession.js';
+import {
+  tsx_Connect,
+  tsx_Disconnect,
+  tsx_AbortGuider,
+  processTargetTakeSeries,
+  tsx_isDark,
+  isTimeBeforeCurrentTime,
+  hasStartTimePassed,
+  findCalibrationSession,
+  CalibrateAutoGuider,
+  tsx_RotateCamera,
+  tsx_SlewTargetName,
+  tsx_SlewCmdCoords,
+  tsx_StopTracking,
+} from './run_imageSession.js';
 
- export function ParkMount( isParked ) {
+export function ParkMount( isParked ) {
    if( !isParked ) {
      UpdateStatus(' Parking mount...');
      var defaultFilter = tsx_GetServerStateValue( tsx_ServerStates.defaultFilter );
@@ -68,4 +66,129 @@ import {
      tsx_MntPark(defaultFilter, softPark);
    }
    isParked = true;
- }
+}
+
+// *******************************
+export function tsx_IsParked() {
+   tsxInfo('************************');
+   tsxInfo(' *** tsx_IsParked' );
+
+   var out = false;
+   var cmd = tsx_cmd('SkyX_JS_IsParked');
+
+   var tsx_is_waiting = true;
+   tsxDebug( '[TSX] SkyX_JS_IsParked' );
+
+   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+     var result = tsx_return.split('|')[0].trim();
+     tsxDebug( result );
+     out = result;
+     tsx_is_waiting = false;
+   }));
+   while( tsx_is_waiting ) {
+     Meteor.sleep( 1000 );
+   }
+   return out;
+}
+
+
+// **************************************************************
+export function tsx_MntUnpark() {
+   tsxInfo('[MOUNT] ************************');
+   tsxInfo(' [MOUNT] Unparking mount' );
+   var cmd = tsx_cmd('SkyX_JS_UnparkMount');
+
+   var Out = '';
+   var tsx_is_waiting = true;
+   tsxDebug( '[TSX] SkyX_JS_UnparkMount' );
+
+   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+         var result = tsx_return.split('|')[0].trim();
+         tsxDebug( ' *** result: ' + result );
+         if( result == 'unparked' ) {
+           UpdateStatus(' [MOUNT] unparked' );
+         }
+         else {
+           UpdateStatusErr( ' [MOUNT] !!! Unparking err: ' + result );
+         }
+
+         Out = result;
+         tsx_is_waiting = false;
+   }));
+   tsxInfo ( ' [MOUNT] unpark waiting ') ;
+   while( tsx_is_waiting ) {
+     Meteor.sleep( 1000 );
+   }
+   tsxInfo ( ' [MOUNT] unpark done ') ;
+   return Out;
+}
+
+export function tsx_MntPark(defaultFilter, softPark) {
+   // tsxInfo('************************');
+   tsxInfo(' *** tsx_MntPark' );
+
+   var dts = new Date();
+   var slot = 0;
+
+   if( defaultFilter != '' ) {
+     slot = getFilterSlot(defaultFilter);
+   }
+   else {
+     slot = 0;
+   }
+
+   if( softPark ) {
+     // if true just set filter and turn off tracking
+     UpdateStatus(' Soft Parking... ');
+   }
+   else {
+     UpdateStatus(' Parking... ');
+   }
+   var cmd = tsx_cmd('SkyX_JS_ParkMount');
+   cmd = cmd.replace("$000", slot ); // set filter
+   cmd = cmd.replace("$001", softPark ); // set filter
+
+   var Out;
+   var tsx_is_waiting = true;
+   tsxDebug( '[TSX] SkyX_JS_ParkMount,'+slot+', '+softPark );
+
+   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
+         var result = tsx_return.split('|')[0].trim();
+         tsxInfo( ' park result: ' + result );
+         if( result === 'Parked' || result === 'Soft Parked' ) {
+           UpdateStatus( ' ' + result );
+         }
+         else {
+           UpdateStatusErr( ' !!! Parking err: ' + tsx_return );
+         }
+
+         Out = result;
+         tsx_is_waiting = false;
+   }));
+   tsxInfo( ' Park waiting' );
+   while( tsx_is_waiting ) {
+    Meteor.sleep( 1000 );
+   }
+   tsxInfo( ' Park wait done' );
+   return Out;
+}
+
+Meteor.methods({
+  park( ) {
+    tsx_SetServerState( tsx_ServerStates.tool_active, true );
+    let filter = tsx_GetServerStateValue( tsx_ServerStates.defaultFilter );
+    let result = '';
+    try {
+      result = tsx_MntPark(filter, false ); // use default filter
+    }
+    catch( e )  {
+      if( e == 'TsxError' ) {
+        UpdateStatus('!!! TheSkyX connection is no longer there!');
+      }
+    }
+    finally {
+      tsx_SetServerState( tsx_ServerStates.tool_active, false );
+    }
+    return result;
+  }
+});
