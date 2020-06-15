@@ -240,10 +240,10 @@ class BackupModal extends Component {
         let link = Backups.findOne({_id: aFile._id}).link('version');  // 'version' is needed in the case the file is renamed.
 
         // get the TSXIP, and replace the "host with this value"
-          var url = new URL(link);
-          url.hostname = this.props.ip.value;
-          url.port = this.props.port.value;
-          link = url.href //'http://example.com:8080/one/two'
+        var url = new URL(link);
+        url.hostname = this.props.ip.value;
+        url.port = this.props.port.value;
+        link = url.href //'http://example.com:8080/one/two'
 
         // Send out components that show details of each file
         return <div key={'file' + key}>

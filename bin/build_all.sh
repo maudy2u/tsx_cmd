@@ -16,6 +16,8 @@
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 export app="Build ALL TSX Cmd v1.4"
+export METEOR_DISABLE_OPTIMISTIC_CACHING=1
+
 if [ $# -lt 2 ]
   then
     echo ""

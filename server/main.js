@@ -203,8 +203,6 @@ Meteor.startup(() => {
   tsxLog(' ******************************', '');
   tsxLog(' ****** TSX_CMD STARTING', '');
 
-    //MOBILE_ROOT_URL: 'http://10.9.8.38:3000/',
-
   var link = process.env.ROOT_URL;
   var p = process.env.PORT;
   try {
@@ -259,7 +257,7 @@ Meteor.startup(() => {
   // removing so can start up easier without error.
   tsxLog('         TheSkyX IP',  dbIp );
   tsxLog('       TheSkyX port', dbPort );
-  tsxLog('                URL',
+  tsxLog('        Browser URL',
     'http://'
     + tsx_GetServerStateValue(tsx_ServerStates.tsx_ip)
     + ':'
@@ -284,7 +282,6 @@ Meteor.startup(() => {
 
   UpdateStatus(' ******* TSX_CMD ONLINE' );
   tsxLog(' ******************************', '');
-  //console.log( ' Browser: http://' + process.env.ROOT_URL'' );
   tsxLog(' ******************************', '');
 
   return;

@@ -410,12 +410,12 @@ class TargetEditor extends Component {
     let link = SkySafariFiles.findOne({_id: this.state.skysafariFile_id}); //.link('version');  // 'version' is needed in the case the file is renamed.
     link = link.path('version');
     // get the TSXIP, and replace the "host with this value"
-    let tsxip = TheSkyXInfos.findOne({name: 'ip'});
-    if( typeof tsxip != 'undefined' || tsxip != '') {
-      var url = new URL(link);
-      url.hostname = tsxip.value;
-      link = url.href //'http://example.com:8080/one/two'
-    }
+
+    var url = new URL(link);
+    url.hostname = this.props.ip.value;
+    url.port = this.props.port.value;
+    link = url.href //'http://example.com:8080/one/two'
+
     return (
       <a href={link} className="btn btn-outline btn-primary btn-sm"
          target="_blank">Download</a>

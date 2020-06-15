@@ -35,6 +35,7 @@ if [ $# -lt 2 ]
 fi
 
 export base_dir=${2}
+export METEOR_DISABLE_OPTIMISTIC_CACHING=1
 export install_dir=$(pwd)
 for s in $(echo $values | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" ./private/version.json ); do
     export $s

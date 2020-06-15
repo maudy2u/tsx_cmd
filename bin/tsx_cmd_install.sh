@@ -102,11 +102,6 @@ else
 fi
 
 mkdir -p ${install_dir}/db
-export MONGO_URL='mongodb://localhost/tsx_cmd'
-export PORT=3000
-# NEED TO PUT THE PORT IN THE URL ELSE IT WILL NOT WORK FOR DOWNLOADING
-export ROOT_URL='http://127.0.0.1:3000'
-
 cd ${install_dir}
 
 echo ""
