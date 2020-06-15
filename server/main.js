@@ -203,13 +203,22 @@ Meteor.startup(() => {
   tsxLog(' ******************************', '');
   tsxLog(' ****** TSX_CMD STARTING', '');
 
-  console.log(process.env);
     //MOBILE_ROOT_URL: 'http://10.9.8.38:3000/',
 
-  var link = process.env.MOBILE_ROOT_URL;
-  console.log(link)
-  tsx_SetServerState(tsx_ServerStates.tsx_ip, link.split('/')[2].split(':')[0]);
-  tsx_SetServerState(tsx_ServerStates.tsx_port, link.split('/')[2].split(':')[1]);
+  var link = process.env.ROOT_URL;
+  var p = process.env.PORT;
+  try {
+    console.log(link)
+    tsx_SetServerState(tsx_ServerStates.tsx_ip, link.split('/')[2].split(':')[0]);
+    tsx_SetServerState(tsx_ServerStates.tsx_port, p);
+  }
+  catch(e) {
+    console.log(process.env);
+    console.log(' *******************************');
+    console.log( ' FAILED: Need to define ENV VAR ROOT_URL and PORT')
+    console.log(' *******************************');
+    exit(1);
+  }
 
   AppLogsDB.remove({});
   srvStopScheduler();
@@ -249,6 +258,13 @@ Meteor.startup(() => {
   // removing so can start up easier without error.
   tsxLog('         TheSkyX IP',  dbIp );
   tsxLog('       TheSkyX port', dbPort );
+  tsxLog('                URL',
+    'http://'
+    + tsx_GetServerStateValue(tsx_ServerStates.tsx_ip)
+    + ':'
+    + tsx_GetServerStateValue(tsx_ServerStates.tsx_port)
+    + '/'
+  );
 
   initServerStates();
 
