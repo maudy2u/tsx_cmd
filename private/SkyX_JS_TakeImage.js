@@ -108,7 +108,7 @@ if( rms > -1 ) {
 var success = CCDSI.AttachToActiveImager();
 
 //Enter the rotator angle
-if( CCDSC.rotatorIsConnected ) {
+if( CCDSC.rotatorIsConnected() ) {
 	var rotatorPosition = CCDSC.rotatorPositionAngle();
   CCDSI.setFITSKeyword("ROTATOR_POS_ANGLE", rotatorPosition);
 	Out = Out+'|ROTATOR_POS_ANGLE='+Number(rotatorPosition).toFixed(3);
