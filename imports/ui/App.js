@@ -259,6 +259,9 @@ class App extends TrackerReact(Component) {
             <Menu.Item fitted name='Weather' active={activeMenu === 'Weather'} onClick={this.handleMenuItemClick}>
               <Icon name='mixcloud' size='large'/>
             </Menu.Item>
+            <Menu.Item fitted name='INDIGO' active={activeMenu === 'INDIGO'} onClick={this.handleMenuItemClick}>
+              <Icon name='wrench' size='large'/>
+            </Menu.Item>
             <Menu.Item position ='right' fitted name='Settings' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick}>
               <Icon name='settings' size='large'/>
             </Menu.Item>
@@ -292,6 +295,9 @@ class App extends TrackerReact(Component) {
             </Menu.Item>
             <Menu.Item fitted name='Weather' active={activeMenu === 'Weather'} onClick={this.handleMenuItemClick}>
               <Icon name='mixcloud' size='large'/>
+            </Menu.Item>
+            <Menu.Item fitted name='INDIGO' active={activeMenu === 'INDIGO'} onClick={this.handleMenuItemClick}>
+              <Icon name='wrench' size='large'/>
             </Menu.Item>
             <Menu.Item position ='right' fitted name='Settings' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick}>
               <Icon name='settings' size='large'/>
@@ -416,6 +422,18 @@ class App extends TrackerReact(Component) {
             </Segment>
           </Sidebar.Pusher>
         </Sidebar.Pushable>
+      )
+    } else if (this.state.activeMenu == 'INDIGO') {
+      // 10.9.8.34
+      var IP = this.props.tsxIP.value;
+      var URL = 'http://'+IP+':7624/ctrl.html';
+      console.log( URL )
+
+      return (
+        <Embed
+        icon='right circle arrow'
+        url={URL}
+        />
       )
     } else if (this.state.activeMenu == 'noVNC') {
       // 10.9.8.34
