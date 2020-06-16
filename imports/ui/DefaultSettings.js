@@ -1542,10 +1542,11 @@ class DefaultSettings extends Component {
               <Icon name='time' size='mini' />
               Default Start/Stop Times
             </Menu.Item>
-            <Menu.Item fitted as='a' name='noVNC' onClick={this.props.handleSettingsItemClick} >
+            {/*}<Menu.Item fitted as='a' name='noVNC' onClick={this.props.handleSettingsItemClick} >
               <Icon name='tv' size='mini' />
               noVNC
             </Menu.Item>
+            */}
             <Menu.Item fitted as='a' name='Artesky Flatbox' onClick={this.props.handleSettingsItemClick} >
               <Icon name='chart area' size='mini' />
               Artesky Flatbox
@@ -1565,7 +1566,7 @@ class DefaultSettings extends Component {
             {this.renderConstraints()}
             {this.renderClouds()}
             {this.renderStartStopTimes()}
-            {this.rendernoVNC()}
+            {/*this.rendernoVNC()*/}
             {this.renderFlatBox()}
             </Segment>
             </center>

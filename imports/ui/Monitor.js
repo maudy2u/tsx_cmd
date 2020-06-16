@@ -104,18 +104,26 @@ class Monitor extends Component {
       isCLSRepeatEnabled: false,
       isCalibrationEnabled: false,
 
-      activeIndex: 1,
+      activeIndex: -1,
+      activeIndex1: -1,
       playClicked: false,
 
   };
 
   handleClick = (e, titleProps) => {
-   const { index } = titleProps
-   const { activeIndex } = this.state
-   const newIndex = activeIndex === index ? -1 : index
+    const { index } = titleProps
+    const { activeIndex } = this.state
+    const newIndex = activeIndex === index ? -1 : index
 
-   this.setState({ activeIndex: newIndex })
- }
+    this.setState({ activeIndex: newIndex })
+  }
+  handleClick1 = (e, titleProps) => {
+    const { index } = titleProps
+    const { activeIndex1 } = this.state
+    const newIndex = activeIndex1 === index ? -1 : index
+
+    this.setState({ activeIndex1: newIndex })
+  }
 
   handleChange = (e, { name, value }) => this.setState({ [name]: value });
 
@@ -562,6 +570,7 @@ class Monitor extends Component {
     }
 
     const { activeIndex } = this.state
+    const { activeIndex1 } = this.state
 
     return (
       <div>
@@ -572,12 +581,12 @@ class Monitor extends Component {
         <h1>&nbsp;&nbsp;{' ' + TARGETNAME}</h1>
         <Accordion size='mini' styled>
             <Accordion.Title
-              active={activeIndex === 0}
+              active={activeIndex1 === 0}
               content='Coordinates'
               index={0}
-              onClick={this.handleClick}
+              onClick={this.handleClick1}
               />
-            <Accordion.Content active={activeIndex === 0} >
+            <Accordion.Content active={activeIndex1 === 0} >
               <Segment>
                 <Statistic size='mini'>
                   <Statistic.Label>Alt</Statistic.Label>

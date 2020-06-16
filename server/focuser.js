@@ -46,52 +46,9 @@ import {
   tsx_has_error,
 } from './tsx_feeder.js'
 
-// grab npm version
-import shelljs from 'shelljs';
-// this is equivalent to the standard node require:
-const Shelljs = require('shelljs');
-
-// if these variables are defined then use their settings... else it is dev mode
-//  "tsx_cmd_db": "tsx_cmd",
-//  "mongo_port": "27017"
-var tsx_cmd_db = '';
-if( typeof Meteor.settings.tsx_cmd_db === 'undefined' || Meteor.settings.tsx_cmd_db === ''  ) {
-  tsx_cmd_db = 'meteor';
-}
-else {
-  tsx_cmd_db = Meteor.settings.tsx_cmd_db;
-}
-var mongo_port = '';
-if( typeof Meteor.settings.mongo_port === 'undefined' || Meteor.settings.mongo_port === '' ) {
-  mongo_port = "3001";
-}
-else {
-  mongo_port = Meteor.settings.mongo_port;
-}
-
-
-
-
 Meteor.startup(function () {
 
 });
-
-function fileNameDate( today ) {
-  // desired format:
-  // 2018-01-01
-
-  var HH = today.getHours();
-  var MM = today.getMinutes();
-  var SS = today.getSeconds();
-  var mm = today.getMonth()+1; // month is zero based
-  var dd = today.getDate();
-  var yyyy = today.getFullYear();
-
-  // set to the date of the "night" session
-  ((HH < 8) ? dd=dd-1 : dd=dd);
-
-  return yyyy +'_'+ ('0'  + mm).slice(-2) +'_'+ ('0'  + dd).slice(-2)+'_HH'+ ('0'  + HH).slice(-2)+'_MM'+ ('0'  + MM).slice(-2)+'_SS'+ ('0'  + SS).slice(-2);
-}
 
 Meteor.methods({
 

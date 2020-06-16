@@ -135,6 +135,7 @@ class App extends TrackerReact(Component) {
     if( activeMenu === 'Settings' ) {
        this.setState({ sideBarSettingsVisible: !this.state.sideBarSettingsVisible });
     }
+    tsx_UpdateServerState('activeMenu', name );
   }
   saveServerFailedOpen = () => this.setState({ saveServerFailed: true });
   saveServerFailedClose = () => this.setState({ saveServerFailed: false });
@@ -171,7 +172,7 @@ class App extends TrackerReact(Component) {
 
   componentDidUpdate(prevProps) {
     // Typical usage (don't forget to compare props):
-    if (this.props.target !== prevProps.target) {
+    if (this.props !== prevProps) {
       this.updateDefaults(this.props);
     }
   }
@@ -203,6 +204,12 @@ class App extends TrackerReact(Component) {
         progress_total: nextProps.tsx_total.value,
       });
     }
+
+    if( typeof nextProps.activeMenu !== 'undefined' && typeof nextProps.activeMenu.value !== 'undefined') {
+      this.setState({
+        activeMenu: nextProps.activeMenu.value,
+      });
+    }
   }
 
   getDefault( name ) {
@@ -220,95 +227,62 @@ class App extends TrackerReact(Component) {
     }
   }
 
-  // Generic Method to determine default to save.
-  saveDefaultState( param ) {
-    var value = eval("this.state."+param);
-    tsx_UpdateServerState(param, value);
+  renderIndigoWebPanelMenu() {
+    const { activeMenu  } = this.state;
+    if( this.props.indigo_web_panel.value !== '' ) {
+      return (
+        <Menu.Item fitted name='INDIGO' active={activeMenu === 'INDIGO'} onClick={this.handleMenuItemClick}>
+          <Icon name='wrench' size='large'/>
+        </Menu.Item>
+      )
+    }
+  }
+  renderNoVNCMenu() {
+    const { activeMenu  } = this.state;
+    if( this.props.noVNC_enabled.value === true ) {
+      return (
+        <Menu.Item fitted name='noVNC' active={activeMenu === 'noVNC'} onClick={this.handleMenuItemClick}>
+          <Icon name='tv' size='large'/>
+        </Menu.Item>
+      )
+    }
   }
 
   renderMenu() {
     const { activeMenu  } = this.state;
-    const { noVNC_enabled } = this.props;
-
-//    if( noVNC_enabled.value ) {
-    if( noVNC_enabled.value ) {
-      return(
-        <div>
-          <Menu tabular icon size='huge'>
-            <Menu.Item fitted name='Monitor' active={activeMenu === 'Monitor'} onClick={this.handleMenuItemClick}>
-              <Icon name='play circle' size='large' />
-            </Menu.Item>
-            <Menu.Item fitted name='Plan' active={activeMenu === 'Plan'} onClick={this.handleMenuItemClick}>
-              <Icon name='tasks' size='large' />
-            </Menu.Item>
-            <Menu.Item fitted name='Targets' active={activeMenu === 'Targets'} onClick={this.handleMenuItemClick}>
-              <Icon name='target' size='large' />
-            </Menu.Item>
-            <Menu.Item fitted name='Series' active={activeMenu === 'Series'} onClick={this.handleMenuItemClick}>
-              <Icon name='list ol' size='large' />
-            </Menu.Item>
-            <Menu.Item fitted name='Calibration' active={activeMenu === 'Calibration'} onClick={this.handleMenuItemClick}>
-              <Icon name="area graph" size='large' />
-            </Menu.Item>
-            <Menu.Item fitted name='Toolbox' active={activeMenu === 'Toolbox'} onClick={this.handleMenuItemClick}>
-              <Icon name='briefcase' size='large' />
-            </Menu.Item>
-            <Menu.Item fitted name='noVNC' active={activeMenu === 'noVNC'} onClick={this.handleMenuItemClick}>
-              <Icon name='tv' size='large'/>
-            </Menu.Item>
-            <Menu.Item fitted name='Weather' active={activeMenu === 'Weather'} onClick={this.handleMenuItemClick}>
-              <Icon name='mixcloud' size='large'/>
-            </Menu.Item>
-            <Menu.Item fitted name='INDIGO' active={activeMenu === 'INDIGO'} onClick={this.handleMenuItemClick}>
-              <Icon name='wrench' size='large'/>
-            </Menu.Item>
-            <Menu.Item position ='right' fitted name='Settings' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick}>
-              <Icon name='settings' size='large'/>
-            </Menu.Item>
-          </Menu>
-          {this.renderMenuSegments()}
-        </div>
-      )
-
-    }
-    else {
-      return(
-        <div>
-          <Menu tabular icon size='huge'>
-            <Menu.Item fitted name='Monitor' active={activeMenu === 'Monitor'} onClick={this.handleMenuItemClick}>
-              <Icon name='play circle' size='large' />
-            </Menu.Item>
-            <Menu.Item fitted name='Plan' active={activeMenu === 'Plan'} onClick={this.handleMenuItemClick}>
-              <Icon name='tasks' size='large' />
-            </Menu.Item>
-            <Menu.Item fitted name='Targets' active={activeMenu === 'Targets'} onClick={this.handleMenuItemClick}>
-              <Icon name='target' size='large' />
-            </Menu.Item>
-            <Menu.Item fitted name='Series' active={activeMenu === 'Series'} onClick={this.handleMenuItemClick}>
-              <Icon name='list ol' size='large' />
-            </Menu.Item>
-            <Menu.Item fitted name='Calibration' active={activeMenu === 'Calibration'} onClick={this.handleMenuItemClick}>
-              <Icon name="area graph" size='large' />
-            </Menu.Item>
-            <Menu.Item fitted name='Toolbox' active={activeMenu === 'Toolbox'} onClick={this.handleMenuItemClick}>
-              <Icon name='briefcase' size='large' />
-            </Menu.Item>
-            <Menu.Item fitted name='Weather' active={activeMenu === 'Weather'} onClick={this.handleMenuItemClick}>
-              <Icon name='mixcloud' size='large'/>
-            </Menu.Item>
-            <Menu.Item fitted name='INDIGO' active={activeMenu === 'INDIGO'} onClick={this.handleMenuItemClick}>
-              <Icon name='wrench' size='large'/>
-            </Menu.Item>
-            <Menu.Item position ='right' fitted name='Settings' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick}>
-              <Icon name='settings' size='large'/>
-            </Menu.Item>
-          </Menu>
-          {this.renderMenuSegments()}
-        </div>
-      )
-
-    }
-
+    return(
+      <div>
+        <Menu tabular icon size='huge'>
+          <Menu.Item fitted name='Monitor' active={activeMenu === 'Monitor'} onClick={this.handleMenuItemClick}>
+            <Icon name='play circle' size='large' />
+          </Menu.Item>
+          <Menu.Item fitted name='Plan' active={activeMenu === 'Plan'} onClick={this.handleMenuItemClick}>
+            <Icon name='tasks' size='large' />
+          </Menu.Item>
+          <Menu.Item fitted name='Targets' active={activeMenu === 'Targets'} onClick={this.handleMenuItemClick}>
+            <Icon name='target' size='large' />
+          </Menu.Item>
+          <Menu.Item fitted name='Series' active={activeMenu === 'Series'} onClick={this.handleMenuItemClick}>
+            <Icon name='list ol' size='large' />
+          </Menu.Item>
+          <Menu.Item fitted name='Calibration' active={activeMenu === 'Calibration'} onClick={this.handleMenuItemClick}>
+            <Icon name="area graph" size='large' />
+          </Menu.Item>
+          <Menu.Item fitted name='Toolbox' active={activeMenu === 'Toolbox'} onClick={this.handleMenuItemClick}>
+            <Icon name='briefcase' size='large' />
+          </Menu.Item>
+          <Menu.Item fitted name='Weather' active={activeMenu === 'Weather'} onClick={this.handleMenuItemClick}>
+            <Icon name='mixcloud' size='large'/>
+          </Menu.Item>
+          {this.renderNoVNCMenu()}
+          {this.renderIndigoWebPanelMenu()}
+          <Menu.Item position ='right' fitted name='Settings' active={activeMenu === 'Settings'} onClick={this.handleMenuItemClick}>
+            <Icon name='settings' size='large'/>
+          </Menu.Item>
+        </Menu>
+        {this.renderMenuSegments()}
+      </div>
+    )
   }
 
   // *******************************
@@ -426,14 +400,52 @@ class App extends TrackerReact(Component) {
     } else if (this.state.activeMenu == 'INDIGO') {
       // 10.9.8.34
       var IP = this.props.tsxIP.value;
-      var URL = 'http://'+IP+':7624/ctrl.html';
+//      var URL = 'http://'+IP+':7624/ctrl.html';
+      var URL = 'http://10.9.8.34:7624/ctrl.html';
       console.log( URL )
+      // <Embed
+      // icon='right circle arrow'
+      // url={URL}
+      // />
+
+/*
+    <Embed
+      iframe={{
+        allowFullScreen: true,
+        style: {
+          padding: 10,
+        },
+        url={URL},
+      }}
+      icon='right circle arrow'
+    />
+
+
+    <iframe src={URL}>
+    </iframe>
+
+// does not works
+<Embed
+  iframe={{
+    allowFullScreen: true,
+    style: {
+      padding: 10,
+    },
+    src: URL,
+  }}
+  icon='right circle arrow'
+/>
+
+*/
 
       return (
-        <Embed
-        icon='right circle arrow'
-        url={URL}
-        />
+        <Segment basic >
+          <iframe
+            allowFullScreen ='true'
+            src ={URL}
+          >
+          </iframe>
+        </Segment>
       )
     } else if (this.state.activeMenu == 'noVNC') {
       // 10.9.8.34
@@ -477,8 +489,6 @@ class App extends TrackerReact(Component) {
         />
       )
     }
-    this.saveDefaultState('activeMenu');
-
   }
 
   renderClouds( index ) {
@@ -614,16 +624,12 @@ class App extends TrackerReact(Component) {
 
     const { infoReadyYet } = this.props;
     const { noVNCReadyYet } = this.props;
+    const { indigoWebPanelReadyYet } = this.props;
 
     if (
      infoReadyYet
       && noVNCReadyYet
-      // this.props.activeMenu
-      // && typeof this.props.tsx_progress !== 'undefined'
-      // && this.props.activeMenu
-      // && typeof this.props.scheduler_running !== 'undefined'
-      // && typeof this.props.tsx_total !== 'undefined'
-      // && typeof this.props.currentStage !== 'undefined'
+      && indigoWebPanelReadyYet
      ) {
 
       return (
@@ -676,11 +682,10 @@ class App extends TrackerReact(Component) {
 export default withTracker(() => {
   const infoHandle = Meteor.subscribe('tsxInfo.all');
   const noVNCHandle = Meteor.subscribe('noVNC.status');
-  const tsxInfo = TheSkyXInfos.find({}).fetch();
+  const indigoWebPanelHandle = Meteor.subscribe('indigo_web_panel.status');
+  const activeMenuHandle = Meteor.subscribe('activeMenu.status');
 
-  // const activeMenu = tsxInfo.find(function(element) {
-  //   return element.name == 'activeMenu';
-  // });
+  const tsxInfo = TheSkyXInfos.find({}).fetch();
 
   const activeMenu = TheSkyXInfos.findOne({name: 'activeMenu'});
   const tsx_progress = TheSkyXInfos.findOne({name: 'tsx_progress'});
@@ -706,7 +711,6 @@ export default withTracker(() => {
   const clearSkyReportWidget = TheSkyXInfos.findOne({name: 'clearSkyReportWidget'});
 
   const noVNC_enabled =  TheSkyXInfos.findOne({name: 'isNoVNCEnabled'});
-
   const noVNCPWD = TheSkyXInfos.findOne({name: 'noVNCPWD'});
   const noVNCPort = TheSkyXInfos.findOne({name: 'noVNCPort'});
 
@@ -731,10 +735,20 @@ export default withTracker(() => {
   const seriessHandle = Meteor.subscribe('seriess.all');
   const seriessReadyYet = seriessHandle.ready();
 
+  const indigo_web_panel = TheSkyXInfos.findOne({name: 'indigo_web_panel'});
+
   const infoReadyYet = infoHandle.ready();
+  const activeMenuReadyYet = activeMenuHandle.ready();
   const noVNCReadyYet = noVNCHandle.ready();
+  const indigoWebPanelReadyYet = indigoWebPanelHandle.ready();
 
   return {
+    indigoWebPanelReadyYet,
+    indigo_web_panel,
+
+    activeMenuReadyYet,
+    activeMenu,
+
     infoReadyYet,
     noVNCReadyYet,
     seriessReadyYet,

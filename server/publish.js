@@ -9,18 +9,32 @@ import { CalibrationFrames } from '../imports/api/calibrationFrames.js';
 import { FlatSeries } from '../imports/api/flatSeries.js';
 import { Seriess } from '../imports/api/seriess.js';
 
-Meteor.publish('tsxInfo.all', function () {
-  var db = TheSkyXInfos.find();
-  this.ready();
-  return db;
-});
-
+// *******************************
+// ensure specific info is infoReadyYet
 Meteor.publish('noVNC.status', function () {
   var db = TheSkyXInfos.find({name: 'isNoVNCEnabled'});
   this.ready();
   return db;
 });
+Meteor.publish('indigo_web_panel.status', function () {
+  var db = TheSkyXInfos.find({name: 'indigo_web_panel'});
+  this.ready();
+  return db;
+});
+Meteor.publish('activeMenu.status', function () {
+  var db = TheSkyXInfos.find({name: 'activeMenu'});
+  this.ready();
+  return db;
+});
 
+
+// *******************************
+// all tsxInfo
+Meteor.publish('tsxInfo.all', function () {
+  var db = TheSkyXInfos.find();
+  this.ready();
+  return db;
+});
 
 Meteor.publish('seriess.all', function () {
   return Seriess.find();

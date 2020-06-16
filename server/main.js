@@ -85,7 +85,13 @@ import {
   tsx_ServerIsOnline,
 } from './tsx_feeder.js'
 
-
+import {
+  initServerStates,
+  processEnvVars,
+  processBuildInfo,
+  processTheSkyXnfo,
+  processSettingsJSON,
+} from './settings.js'
 
 /*
 tsx_SetServerState
@@ -105,170 +111,28 @@ currentTargetSession: 'currentTargetSession', // use to report current imaging t
 isCurrentlyImaging: 'isCurrentlyImaging',
 */
 
-function initServerStates() {
-  tsx_SetServerState(tsx_ServerStates.activeMenu, 'Settings');
-//  tsx_SetServerState(tsx_ServerStates.tsx_total, 1);
-//  tsx_SetServerState(tsx_ServerStates.tsx_progress, 0);
-//  tsx_SetServerState(tsx_ServerStates.targetName, '');
-
-  tsx_SetServerState(tsx_ServerStates.mntMntDir, '');
-  tsx_SetServerState(tsx_ServerStates.mntMntAlt, '');
-  tsx_SetServerState(tsx_ServerStates.targetRA, '');
-  tsx_SetServerState(tsx_ServerStates.targetDEC, '');
-  tsx_SetServerState(tsx_ServerStates.targetALT, '');
-  tsx_SetServerState(tsx_ServerStates.targetAZ, '');
-  tsx_SetServerState(tsx_ServerStates.targetHA, '');
-  tsx_SetServerState(tsx_ServerStates.targetTransit, '');
-  tsx_SetServerState(tsx_ServerStates.lastTargetDirection, '');
-  tsx_SetServerState(tsx_ServerStates.lastCheckMinSunAlt, '');
-  // tsx_SetServerState( tsx_ServerStates.lastFocusPos', '');
-  // tsx_SetServerState( tsx_ServerStates.lastFocusTemp', '');
-  tsx_SetServerState(tsx_ServerStates.imagingSessionDither, 0);
-  tsx_SetServerState(tsx_ServerStates.tool_active, false );
-  tsx_SetServerState(tsx_ServerStates.currentSessionReport, '' );
-  tsx_SetServerState(tsx_ServerStates.night_plan_reset, true );
-
-  var maxPixel = tsx_GetServerStateValue( tsx_ServerStates.imagingPixelMaximum );
-  if( maxPixel == '' || maxPixel ===0 ) {
-    tsx_SetServerState(tsx_ServerStates.imagingPixelMaximum, 65504 );
-  }
-  maxPixel = tsx_GetServerStateValue( tsx_ServerStates.flatbox_imagingPixelMaximumOccurance );
-  if( maxPixel == '' ) {
-    tsx_SetServerState(tsx_ServerStates.flatbox_imagingPixelMaximumOccurance, 0 );
-  }
-
-  // prepare hardware... ensures all works for install
-  var mount = TheSkyXInfos.findOne().mount();
-  var camera = TheSkyXInfos.findOne().camera();
-  var guider = TheSkyXInfos.findOne().guider();
-  var rotator = TheSkyXInfos.findOne().rotator();
-  var efw = TheSkyXInfos.findOne().efw();
-  var focuser = TheSkyXInfos.findOne().focuser();
-
-  // check the setting of the start/stop time initialization
-  var startT, stopT;
-  try {
-    var chk = TheSkyXInfos.findOne({name: tsx_ServerStates.isNoVNCEnabled}).value;
-    if( chk === '' ) {
-      tsx_SetServerState(tsx_ServerStates.isNoVNCEnabled, false);
-    }
-  }
-  catch(e) {
-    tsx_SetServerState(tsx_ServerStates.isNoVNCEnabled, false);
-  }
-  try {
-    TheSkyXInfos.findOne({name: tsx_ServerStates.defaultUseImagingCooler_enabled}).value;
-  }
-  catch(e) {
-    tsx_SetServerState(tsx_ServerStates.defaultUseImagingCooler_enabled, false);
-  }
-  try {
-    minDefAlt = TheSkyXInfos.findOne({name: tsx_ServerStates.defaultMinAlt}).value;
-  }
-  catch(e) {
-    tsx_SetServerState(tsx_ServerStates.defaultMinAltitude, '45');
-  }
-  try {
-    startT = TheSkyXInfos.findOne({name: tsx_ServerStates.defaultStartTime}).value;
-  }
-  catch(e) {
-    tsx_SetServerState(tsx_ServerStates.defaultStartTime, '21:00');
-  }
-  try {
-    stopT = TheSkyXInfos.findOne({name: tsx_ServerStates.defaultStopTime}).value;
-  }
-  catch(e) {
-    tsx_SetServerState(tsx_ServerStates.defaultStopTime, '5:00');
-  }
-  try {
-    TheSkyXInfos.findOne({name: tsx_ServerStates.defaultFocusExposure}).value;
-  }
-  catch(e) {
-    tsx_SetServerState(tsx_ServerStates.defaultFocusExposure, '1');
-  }
-
-  for (var m in tsx_ServerStates){
-    var state = tsx_ServerStates[m];
-    try {
-      var isDefined = TheSkyXInfos.findOne({name: state });
-      // force a throw??
-      tsxInfo(state, isDefined.value);
-
-    } catch (e) {
-      tsxWarn('Initialized: ', state);
-      tsx_SetServerState(state, '');
-    } finally {
-    }
-  }
-}
 
 Meteor.startup(() => {
   tsxLog(' ##############################', '');
   tsxLog(' ****** TSX_CMD STARTING', '');
   tsxLog('  ', '');
 
-  var link = process.env.ROOT_URL;
-  var p = process.env.PORT;
-  try {
-    // console.log(process.env);
-    // console.log(link);
-    tsx_SetServerState(tsx_ServerStates.tsx_ip, link.split('/')[2].split(':')[0]);
-    tsx_SetServerState(tsx_ServerStates.tsx_port, p);
-  }
-  catch(e) {
-    console.log(process.env);
-    console.log(' *******************************');
-    console.log( ' FAILED: Need to define ENV VAR ROOT_URL and PORT')
-    console.log(' *******************************');
-    exit(1);
-  }
-
   AppLogsDB.remove({});
-  srvStopScheduler();
 
+  srvStopScheduler();
   // Initialze the server on startup
+  processEnvVars();
   initServerStates();
 
-  var version_dat = {};
-  version_dat = JSON.parse(Assets.getText('build_version.json'));
-  if( version_dat.version != '') {
-    tsx_SetServerState(tsx_ServerStates.tsx_version, version_dat.version);
-    tsxLog('            Version', version_dat.version);
-  }
-  if( version_dat.date != '') {
-    tsx_SetServerState(tsx_ServerStates.tsx_date, version_dat.date);
-    tsxLog('               Date', version_dat.date);
-  }
-  if( version_dat.buid != '') {
-    tsx_SetServerState(tsx_ServerStates.tsx_build, version_dat.build);
-    tsxLog('              Build', version_dat.build);
-  }
-
-  var dbIp = '';
-  var dbPort = '';
-  try {
-    dbIp = TheSkyXInfos.findOne().ip() ;
-  } catch( err ) {
-    // do nothing
-    tsx_SetServerState(tsx_ServerStates.ip, 'localhost');
-    dbIp = 'localhost';
-  }
-  try {
-    dbPort = TheSkyXInfos.findOne().port();
-  } catch( err ) {
-    // do nothing
-    tsx_SetServerState(tsx_ServerStates.port, '3040');
-    dbPort = '3040';
-  }
-
-  // removing so can start up easier without error.
-  tsxLog('         TheSkyX IP',  dbIp );
-  tsxLog('       TheSkyX port', dbPort );
+  processBuildInfo();
+  tsxLog(' ', '');
+  processTheSkyXnfo();
+  processSettingsJSON();
 
   tsxLog(' ', '');
   tsxLog( '            Logfile', logFileForClient() );
-  tsxLog( '   DB Backup Folder', backupFolder );
-  tsxLog( ' SkySafari Settings', skySafariFilesFolder );
+  tsxLog( '    DB Backup Files', backupFolder );
+  tsxLog( '    SkySafari Files', skySafariFilesFolder );
 
   tsxLog(' ', '');
   tsxLog('        Browser URL',

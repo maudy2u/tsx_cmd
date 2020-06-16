@@ -16,6 +16,7 @@
 #
 if [ "$(uname -s)" == "Darwin" ]; then
   if [ "$(uname -p)" == "i386" ]; then
+    cat ./etc/settings.json
     meteor --settings ./etc/settings.json
   else
     echo $(uname -s) $(uname -p) - Not Supported
@@ -23,9 +24,7 @@ if [ "$(uname -s)" == "Darwin" ]; then
   fi
 elif [ "$(uname -s)" == "Linux" ]; then
 
-  if [ "$(uname -p)" == "aarch64" ]; then
-    ~/meteor/meteor --settings ./etc/settings.json
-  elif [ "$(uname -p)" == "armv7l" ]; then
+  if [ "$(uname -m)" == "aarch64" ] || [ "$(uname -m)" == "armv7l" ] ; then
     ~/meteor/meteor --settings ./etc/settings.json
   else
     meteor --settings ./etc/settings.json

@@ -21,7 +21,7 @@ var tsxc = ccdsoftCamera;
 if( tsxc.focIsConnected ) {
   tsxi.setFITSKeyword("FOCUS_POS", tsxc.focPosition);
 }
-if( tsxc.rotatorIsConnected ) {
+if( tsxc.rotatorIsConnected() ) {
   tsxi.setFITSKeyword("ROTATOR_POS", tsxc.rotatorPositionAngle());
 }
 

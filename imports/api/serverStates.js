@@ -173,6 +173,7 @@ export const tsx_ServerStates = {
   noVNCPWD: 'noVNCPWD',
   noVNCPort: 'noVNCPort',
 
+  indigo_web_panel: 'indigo_web_panel',
 };
 
 export function getDefaultStateValue( param ) {

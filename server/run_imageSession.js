@@ -2591,24 +2591,24 @@ function isTargetComplete( target ) {
 //
 export function canTargetSessionStart( target ) {
   // tsxInfo('************************');
-  tsxInfo(' *** canTargetSessionStart: ' + target.getFriendlyName() );
+  tsxDebug(' [SCHEDULER] canTargetSessionStart: ' + target.getFriendlyName() );
 
   var result =  UpdateImagingTargetReport( target );
   // The problem is the new report is not used if it is updated!!!
   if( !result.ready ) {
-    tsxInfo( ' !!! Target not found: ' + target.getFriendlyName() );
+    tsxWarn( ' [SCHEDULER] !!! Target not found: ' + target.getFriendlyName() );
     return false;
   }
   var canStart = true;
   tsxInfo( ' Is target active: ' + target.enabledActive );
   if(!target.enabledActive){
-    UpdateStatus( ' *** ' + target.getFriendlyName() + ': not enabled' );
+    UpdateStatus( ' [SCHEDULER] rejected, not enabled: ' + target.getFriendlyName() );
     return false; // the session is disabled
   }
 
   // check for target not ready
   var isComplete = isTargetComplete( target );
-  tsxInfo( ' Is target complete: ' + isComplete );
+  tsxDebug( ' [SCHEDULER] Is target complete: ' + isComplete );
   try {
     let isRepeating = TakeSeriesTemplates.findOne({_id: target.series._id }).repeatSeries;
     if( isComplete && target.isCalibrationFrames == false && !isRepeating ) {
@@ -2617,47 +2617,47 @@ export function canTargetSessionStart( target ) {
     }
   }
   catch( e ) {
-    UpdateStatus( ' !!! Needs serie assigned: ' + target.getFriendlyName());
+    UpdateStatusWarn( ' [SCHEDULER] series not assigned: ' + target.getFriendlyName());
   }
 
   // check start time pasted
   var hasPassed = hasStartTimePassed( target );
-  tsxInfo( ' Is target start ready: ' + hasPassed );
+  tsxDebug( ' Is target start ready: ' + hasPassed );
   if( !(hasPassed) ) {
-    UpdateStatus( ' ' + target.getFriendlyName() + ': too early ' + target.startTime );
+    UpdateStatus( ' [SCHEDULER] too early: ' + target.getFriendlyName() + ', needs (' + target.startTime + ')' );
     return false;
   }
 
   // check stoptime pasted
   var hasStopped = hasStopTimePassed( target );
-  tsxInfo( ' Is target stop reached: ' + hasStopped );
+  tsxDebug( ' [SCHEDULER] Is target stop reached: ' + hasStopped );
   if( hasStopped ) {
-    UpdateStatus( ' ' + target.getFriendlyName() + ': too late ' + target.stopTime );
+    UpdateStatus( ' [SCHEDULER]  too late: ' + target.getFriendlyName() + ', needed (' + target.stopTime + ')' );
     return false;
   }
 
   // check if TSX says okay... Altitude and here
   // ready also checks for the sun to be below specific altitude e.g. -18 degrees
   // see up above... do not redo... var result =   UpdateImagingTargetReport( target );
-  tsxInfo( ' Is target ready: ' + result.ready );
+  tsxDebig( ' [SCHEDULER] Is target ready: ' + result.ready );
   if( !result.ready ) {
-    UpdateStatus( ' ' + target.getFriendlyName() + ' per report ready: ' + result.ready );
+    UpdateStatus( ' [SCHEDULER] not ready: ' + target.getFriendlyName() + result.ready );
     return false;
   }
 
   // can be redundant with ready above... ready above can also mean not found
   var minAlt = tsx_reachedMinAlt( target );
-  tsxInfo( ' Is target minAlt: ' + minAlt );
+  tsxDebug( ' [SCHEDULER] Is target minAlt: ' + minAlt );
   if( minAlt ) {
-    UpdateStatus( target.getFriendlyName()+': current alt. ('+result.ALT+')' + ' vs. minimum (' + target.minAlt + ')');
+    UpdateStatus( ' [SCHEDULER] not high enough: ' + target.getFriendlyName()+', currently ('+result.ALT+')' + ' vs. needs (' + target.minAlt + ')');
     return false;
   }
 
   var isDark = tsx_isDarkEnough( target );
-  tsxInfo(' Is dark enough for target: ' + isDark );
+  tsxDebug(' Is dark enough for target: ' + isDark );
   if( isDark === false ) {
     // tsxInfo( 'inside canstart to return false' );
-    UpdateStatus( ' ' + target.getFriendlyName() + ': Not dark enough' );
+    UpdateStatus( ' [SCHEDULER] no longer dark: ' + target.getFriendlyName() );
     return false;
   }
   // tsxInfo( 'inside canstart did not return false' );
