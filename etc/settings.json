@@ -9,7 +9,7 @@
   "noVNC_port": "6080",
   "noVNC_enabled": "",
   "indigo_url": "http://hostname:7624/ctrl.html",
-  "removed-to-set-your-specific-directoy: skySafari_files": "/media/odroid/PENSIVE2/skySafariSettings/",
-  "removed-to-set-your-specific-directoy: backup_location": "/media/odroid/PENSIVE2/tsx_cmd_db_backups/",
-  "removed-to-set-your-specific-directoy:ß log_file_location": "/media/odroid/PENSIVE2/tsx_cmd_logs"
+  "removed-to-set-your-specific-directoy: skySafari_files": "/media/odroid/USB/skySafariSettings/",
+  "removed-to-set-your-specific-directoy: backup_location": "/media/odroid/USB/tsx_cmd_db_backups/",
+  "removed-to-set-your-specific-directoy: log_file_location": "/media/odroid/USB/tsx_cmd_logs"
 }
