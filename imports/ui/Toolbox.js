@@ -100,7 +100,6 @@ class Toolbox extends Component {
 
       // tsx_progress: 0,
       tsx_total: 0,
-      tsx_actions: '',
       targetSessionId: '',
 
       isTwilightEnabled: true,

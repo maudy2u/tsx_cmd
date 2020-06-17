@@ -16,7 +16,6 @@
 #
 if [ "$(uname -s)" == "Darwin" ]; then
   if [ "$(uname -p)" == "i386" ]; then
-    cat ./etc/settings.json
     meteor --settings ./etc/settings.json
   else
     echo $(uname -s) $(uname -p) - Not Supported

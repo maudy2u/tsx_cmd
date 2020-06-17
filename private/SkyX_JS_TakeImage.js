@@ -115,10 +115,10 @@ if( CCDSC.rotatorIsConnected() ) {
 }
 //CCDSC.Asynchronous = true;		// We are going to wait for it
 
-if( ImageLinkResults.imageFilePath ) {
-	CCDSI.setFITSKeyword("ANGLE", ImageLinkResults.imagePositionAngle);
-	Out = Out+'|ANGLE='+Number(ImageLinkResults.imagePositionAngle).toFixed(3);
-}
+// if( ImageLinkResults.imageFilePath ) {
+// 	CCDSI.setFITSKeyword("ANGLE", ImageLinkResults.imagePositionAngle);
+// 	Out = Out+'|ANGLE='+Number(ImageLinkResults.imagePositionAngle).toFixed(3);
+// }
 
 //Enter the focsuer position
 if( CCDSC.focIsConnected ) {

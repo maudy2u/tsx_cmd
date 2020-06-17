@@ -69,9 +69,6 @@ import {
 } from './run_imageSession.js';
 
 import {
-  runSchedulerProcess,
-  getSchedulerState,
-  setSchedulerState,
   srvStopScheduler,
   isSchedulerStopped,
 } from './run_schedule_process.js'
@@ -118,6 +115,7 @@ Meteor.startup(() => {
   tsxLog('  ', '');
 
   AppLogsDB.remove({});
+  tsx_SetServerState(tsx_ServerStates.runScheduler, '');
 
   srvStopScheduler();
   // Initialze the server on startup
@@ -167,6 +165,13 @@ function tsx_DeviceInfo() {
   var numBins = -1;
   var numGuiderBins = -1;
 
+  var notFoundGuider = true;
+  var notFoundMount = true;
+  var notFoundCamera = true;
+  var notFoundEFW = true;
+  var notFoundRotator = true;
+  var notFoundFocuser = true;
+
   tsxDebug( '[TSX] SkyX_JS_DeviceInfo' );
 
   tsx_feeder( String(cmd), Meteor.bindEnvironment((tsx_return) => {
@@ -187,6 +192,7 @@ function tsx_DeviceInfo() {
 
               case 'aMan':
                 tsx_UpdateDeviceManufacturer( 'guider', param[1] );
+                notFoundMount = false;
                 break;
 
               case 'aMod':
@@ -195,67 +201,114 @@ function tsx_DeviceInfo() {
 
               case 'cMan':
                 tsx_UpdateDeviceManufacturer( 'camera', param[1] );
+                notFoundCamera = false;
                 break;
 
               case 'cMod':
                 tsx_UpdateDeviceModel( 'camera', param[1] );
+                UpdateStatus( ' [SETTINGS] Updated Camera Model');
                 break;
 
               case 'efwMan':
                 tsx_UpdateDeviceManufacturer( 'efw', param[1] );
+                notFoundEFW = false;
                 break;
 
               case 'efwMod':
                 tsx_UpdateDeviceModel( 'efw', param[1] );
+                UpdateStatus( ' [SETTINGS] Updated EFW Model');
                 break;
 
               case 'focMan':
                 tsx_UpdateDeviceManufacturer( 'focuser', param[1] );
+                notFoundFocuser = false;
                 break;
 
               case 'focMod':
                 tsx_UpdateDeviceModel( 'focuser', param[1] );
+                UpdateStatus( ' [SETTINGS] Updated Focuser Model');
                 break;
 
               case 'mntMan':
                 tsx_UpdateDeviceManufacturer( 'mount', param[1] );
+                notFoundMount = false;
                 break;
 
               case 'mntMod':
                 tsx_UpdateDeviceModel( 'mount', param[1] );
+                UpdateStatus( ' [SETTINGS] Updated Mount Model');
                 break;
 
               case 'rotMan':
                 tsx_UpdateDeviceManufacturer( 'rotator', param[1] );
+                notFoundRotator = false;
                 break;
 
               case 'rotMod':
                 tsx_UpdateDeviceModel( 'rotator', param[1] );
+                UpdateStatus( ' [SETTINGS] Updated Rotator Model');
                 break;
 
               case 'numBins':
                 numBins = param[1];
                 tsx_SetServerState( 'numberOfBins', numBins );
+                UpdateStatus( ' [SETTINGS] Updated Imager binings');
                 break;
 
               case 'numFilters':
                 numFilters = param[1];
                 tsx_SetServerState( 'numberOfFilters', numFilters );
+                UpdateStatus( ' [SETTINGS] Updated number of filters');
                 break;
 
               case 'numGuiderBins':
                 numGuiderBins = param[1];
                 tsx_SetServerState( 'numGuiderBins', numGuiderBins );
+                UpdateStatus( ' [SETTINGS] Updated Guider binnings');
                 break;
 
               default:
                 //RunJavaScriptOutput.writeLine(param[0]+' not found.');
             }
           }
+          if(notFoundEFW) {
+            tsx_SetServerState( 'numberOfFilters', 0 );
+            tsx_UpdateDeviceManufacturer( 'efw', 'Not Found' );
+            tsx_UpdateDeviceModel( 'efw', 'NotFound' );
+            UpdateStatus( ' [SETTINGS] EFW Not Found');
+          }
+          if(notFoundMount) {
+            tsx_UpdateDeviceManufacturer( 'mount', 'Not Found' );
+            tsx_UpdateDeviceModel( 'mount', 'NotFound' );
+            UpdateStatus( ' [SETTINGS] mount Not Found');
+          }
+          if(notFoundRotator) {
+            tsx_UpdateDeviceManufacturer( 'rotator', 'Not Found' );
+            tsx_UpdateDeviceModel( 'rotator', 'NotFound' );
+            UpdateStatus( ' [SETTINGS] rotator Not Found');
+          }
+          if(notFoundFocuser) {
+            tsx_UpdateDeviceManufacturer( 'focuser', 'Not Found' );
+            tsx_UpdateDeviceModel( 'focuser', 'NotFound' );
+            UpdateStatus( ' [SETTINGS] focuser Not Found');
+          }
+          if(notFoundCamera) {
+            tsx_SetServerState( 'numberOfBins', 0 );
+            tsx_UpdateDeviceManufacturer( 'camera', 'Not Found' );
+            tsx_UpdateDeviceModel( 'camera', 'NotFound' );
+            UpdateStatus( ' [SETTINGS] camera Not Found');
+          }
+          if(notFoundGuider) {
+            tsx_UpdateDeviceManufacturer( 'guider', 'Not Found' );
+            tsx_UpdateDeviceModel( 'guider', 'NotFound' );
+            tsx_SetServerState( 'numGuiderBins', 0 );
+            UpdateStatus( ' [SETTINGS] guider Not Found');
+          }
 
           if( numFilters > -1 ) {
             // if too many filters... reduce to matching
             // if not enough then upsert will clean up
+            UpdateStatus( ' [SETTINGS] Updated Filters');
             var filters = Filters.find({}, { sort: { slot: 1 } }).fetch();
             if( filters.length > numFilters ) {
               // need to reduce the filters
@@ -282,12 +335,13 @@ function tsx_DeviceInfo() {
                 }
               }
             }
+            UpdateStatus( ' [SETTINGS] Updated Filters');
           }
-          UpdateStatus( ' Devices Updated');
+          UpdateStatus( ' [SETTINGS] Devices Updated');
         }
       }
       else {
-        tsxWarn(' Device update failed: ' + tsx_return);
+        tsxWarn(' [SETTINGS] Device update failed: ' + tsx_return);
       }
     }
     Meteor.sleep( 500 ); // needs a sleep before next image
@@ -296,7 +350,7 @@ function tsx_DeviceInfo() {
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
    if( isSchedulerStopped() ) {
-     tsxInfo(' Device Update Stopped');
+     tsxInfo(' [SETTINGS] Device Update Stopped');
      tsx_is_waiting = false;
      success = false;
    }
@@ -314,19 +368,19 @@ Meteor.methods({
     tsx_SetServerState( tsx_ServerStates.tool_active, true );
 
     tsxInfo(' ******************************* ');
-    UpdateStatus(' Refreshing Devices...');
+    UpdateStatus(' [SETTINGS] Refreshing Devices...');
     try {
       var isOnline = tsx_ServerIsOnline();
       tsxInfo('tsx_ServerIsOnline: ' + isOnline);
       // *******************************
       //  GET THE CONNECTED EQUIPEMENT
       tsxInfo(' ******************************* ');
-      tsxInfo('Loading devices');
+      tsxInfo(' [SETTINGS] Loading devices');
       var out = tsx_DeviceInfo();
     }
     catch( e ) {
       if( e == 'TsxError' ) {
-        UpdateStatus('!!! TheSkyX connection is no longer there!');
+        UpdateStatus(' [SETTINGS] !!! TheSkyX connection is no longer there!');
       }
       console.log(e)
     }

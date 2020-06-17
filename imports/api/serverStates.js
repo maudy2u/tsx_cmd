@@ -174,6 +174,8 @@ export const tsx_ServerStates = {
   noVNCPort: 'noVNCPort',
 
   indigo_web_panel: 'indigo_web_panel',
+  isTargetConditionInValidExpired: 'isTargetConditionInValidExpired',
+
 };
 
 export function getDefaultStateValue( param ) {

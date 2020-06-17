@@ -108,10 +108,7 @@ import {
  export function isSchedulerStopped() {
    tsxInfo(' *** isSchedulerStopped ' );
    var sched = getSchedulerState();
-   var runScheduler =   tsx_SetServerState( tsx_ServerStates.runScheduler, '');
-   if(
-     (sched != 'Stop' && runScheduler != '')
-   ) {
+   if( sched !== 'Stop' ) {
      tsxDebug(' [SCHEDULER] scheduler_running: ' + sched);
      return false; // exit
    }
@@ -135,7 +132,7 @@ import {
    // Assume TPoint recalibration done
    // Assumed Accurate Polar Alignment (APA) done
    // Do not assume Autoguider calibrated, will be done once guide star found
-   var workers = scheduler.processJobs( 'runScheduler',
+   var workers = scheduler.processJobs( tsx_ServerStates.runScheduler,
      function (job, cb) {
        //  ###############################  ');
        // This will only be called if a 'runScheduler' job is obtained
@@ -309,9 +306,10 @@ import {
          }
        }
        // While ended... exit process
-       srvStopScheduler();
        tsxLog( ' [SCHEDULER] STOPPED');
        tsxLog( ' ###############################  ');
+       srvStopScheduler();
+       tsx_SetServerState(tsx_ServerStates.runScheduler, '');
        job.done();
        cb();
      }
@@ -367,7 +365,6 @@ function CleanUpJobs() {
   //  var jobs = scheduler.find().fetch();
   //  var jid = tsx_GetServerStateValue('runScheduler');
   //  scheduler.remove( jid );
-  tsx_SetServerState(tsx_ServerStates.runScheduler, '');
 
   // Clean up the scheduler process collections...
   // Persistence across reboots is not needed at this time.

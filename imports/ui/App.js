@@ -288,18 +288,6 @@ class App extends TrackerReact(Component) {
   // *******************************
   //
   renderMenuSegments(){
-    var RUNNING = '';
-    try {
-      RUNNING = this.props.scheduler_running.value;
-    } catch (e) {
-      RUNNING = '';
-    }
-
-    var DISABLE = true;
-    if( RUNNING == 'Stop'){
-      DISABLE = false;
-    }
-
     if (this.state.activeMenu == 'Monitor' ) {
 //      srvLog={this.props.srvLog}
       return (
@@ -310,6 +298,7 @@ class App extends TrackerReact(Component) {
           targetName={this.props.targetName}
           tsxInfo={this.props.tsxInfo}
           scheduler_running={this.props.scheduler_running}
+          runScheduler={this.props.runScheduler}
           tool_active = {this.props.tool_active}
         />
       )
@@ -713,6 +702,7 @@ export default withTracker(() => {
   const noVNC_enabled =  TheSkyXInfos.findOne({name: 'isNoVNCEnabled'});
   const noVNCPWD = TheSkyXInfos.findOne({name: 'noVNCPWD'});
   const noVNCPort = TheSkyXInfos.findOne({name: 'noVNCPort'});
+  const runScheduler =  TheSkyXInfos.findOne({name: 'runScheduler'});
 
   const targetSessionsHandle = Meteor.subscribe('targetSessions.all');
   const targetSessionsReadyYet = targetSessionsHandle.ready();
@@ -748,6 +738,7 @@ export default withTracker(() => {
 
     activeMenuReadyYet,
     activeMenu,
+    runScheduler,
 
     infoReadyYet,
     noVNCReadyYet,

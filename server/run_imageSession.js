@@ -484,6 +484,7 @@ function tsx_StartAutoGuide(guideStarX, guideStarY) {
   cmd = cmd.replace("$007", isGuideSettlingEnabled ); // set guidingPixelErrorTolerance
   tsxDebug( '[TSX] SkyX_JS_FrameAndGuide,'+guideStarX+', '+guideStarY+', '+fSize+', '+camScale+', '+guiderScale+', '+guidingPixelErrorTolerance+' ,'+isGuideSettlingEnabled );
 
+  UpdateStatus(' [AUTOGUIDER] starting' );
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
 
     tsx_is_waiting = false;
@@ -551,6 +552,7 @@ function tsx_SettleAutoGuide( target ) {
 
   tsxDebug( '[TSX] SkyX_JS_GuideSettle,'+camScale+', '+guiderScale+', '+guidingPixelErrorTolerance+' ,'+isGuideSettlingEnabled );
 
+  UpdateStatus(' [AUTOGUIDER] setting to < ' + guidingPixelErrorTolerance + ' rms' );
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     var result = tsx_return.split('|')[0].trim();
     if( result != 'Success') {
@@ -742,36 +744,44 @@ function tsx_CLS_target( target, filter ) {
   tsxDebug( '[TSX] SkyX_JS_CLS,'+target+', '+slot+', '+retries );
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-      tsx_err = tsx_has_error( tsx_return );
-      tsxDebug( ' [CLS] res: ' + tsx_return );
-      var result = tsx_return.split('|')[0].trim();
-      if( result != 'Success') {
+    tsx_err = tsx_has_error( tsx_return );
+    tsxDebug( ' [CLS] res: ' + tsx_return );
+    var results = tsx_return.split('|');
+    if( results.length > 0) {
+      var result = results[0].trim();
+      if( result !== 'Success') {
         // So if we fail here... what do we do...
         UpdateStatusErr(' [CLS] !!! Failed (centring): ' + tsx_return);
         tsx_err = true;
       }
-      else {
+      else if( result === 'Success' ) {
         clsSuccess = true;
         UpdateStatus(' [CLS] ' + target + ': centred' );
-        var angle = tsx_return.split('|')[1].trim();
+        for( var i=1; i<results.length;i++) {
+          var token=results[i].trim();
+          var param=token.split("=");
+          switch( param[0] ) {
 
-        tsxInfo(' [CLS] ' + target + ': Position Angle: ' + angle );
-        var rpt = updateTargetReport( target._id, 'ANGLE', angle );
-        target.report = rpt;
+            case 'PA':
+              tsxInfo(' [CLS] ' + target + ': Position Angle: ' + param[1] );
+              var rpt = updateTargetReport( target._id, 'ANGLE', param[1] );
+              target.report = rpt;
+              break;
 
-        var rotPos;
-        try {
-          rotPos = tsx_return.split('|')[2].trim();
-          tsxWarn( ' [CLS] did not set rotator position');
+            case 'rotPos':
+              tsxWarn( ' [CLS] did not store rotator position: ' + param[1]);
+              var rpt = updateTargetReport( target._id, 'ROTATOR_POS_ANGLE', param[1] );
+              target.report = rpt;
+              break;
+
+            default:
+          }
         }
-        finally {
-          // all good do nothing
-          // reset dithering....
-          resetCLSTimeCheck();
-          tsx_SetServerState( tsx_ServerStates.imagingSessionDither, 0);
-        }
+        resetCLSTimeCheck();
+        tsx_SetServerState( tsx_ServerStates.imagingSessionDither, 0);
       }
-      tsx_is_waiting = false;
+    }
+    tsx_is_waiting = false;
   }));
 
   while( tsx_is_waiting ) {
@@ -1394,7 +1404,7 @@ function isTargetConditionInValid(target) {
   // *******************************
   // Were checks just run
   let timeToCheck = tsx_GetServerStateValue( tsx_ServerStates.isTargetConditionInValidExpired );
-  if( typeof timeToCheck == 'undefined') {
+  if( typeof timeToCheck === 'undefined' || timeToCheck === '' ) {
     timeToCheck = new Date();
     tsx_SetServerState( tsx_ServerStates.isTargetConditionInValidExpired, timeToCheck );
   }
@@ -1404,16 +1414,16 @@ function isTargetConditionInValid(target) {
   if( !didTimePass ) {
     if( isSchedulerStopped() ) {
       forceAbort = true;
-      tsxInfo( ' [SCHEDULER] No need try next frame - scheduler aborted');
+      tsxLog( ' [SCHEDULER] No need try next frame - scheduler aborted');
       return true;
     }
     else {
-      tsxInfo( ' [SCHEDULER] less than 60 seconds, goto next frame');
+      tsxLog( ' [SCHEDULER] less than 60 seconds, goto next frame');
       return false;
     }
   }
   else {
-    tsxInfo( ' [SCHEDULER] checking stop conditions');
+    tsxLog( ' [SCHEDULER] checking stop conditions');
     timeToCheck = new Date();
     tsx_SetServerState( tsx_ServerStates.isTargetConditionInValidExpired, timeToCheck );
   }
@@ -1422,7 +1432,6 @@ function isTargetConditionInValid(target) {
     forceAbort = true;
     return true; // exit
   }
-
 
   // *******************************
   // reassess the target state
@@ -1440,7 +1449,7 @@ function isTargetConditionInValid(target) {
   // *******************************
   // confirm should use same target... and not higher priority
   var priorityTarget = getHigherPriorityTarget( target ); // no return
-  if( priorityTarget.targetFindName != target.targetFindName ) {
+  if( priorityTarget.targetFindName !== target.targetFindName ) {
     UpdateStatus(' [SCHEDULER] HIGHER PRORITY FOUND: ' + priorityTarget.getFriendlyName() + ', stopping: ' + target.getFriendlyName() );
     forceAbort = true;
     return true;
@@ -2074,77 +2083,77 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
 
               case 'avgPix':
                 updateImageReport( res_iid, 'avgPix', param[1] );
-                updateTargetReport( target._id, 'avgPix', param[1] );
+                target.report = updateTargetReport( target._id, 'avgPix', param[1] );
                 break;
 
               case 'maxPix':
                 updateImageReport( res_iid, 'maxPix', param[1] );
-                updateTargetReport( target._id, 'maxPix', param[1] );
+                target.report = updateTargetReport( target._id, 'maxPix', param[1] );
                 break;
 
               case 'ALT':
                 updateImageReport( res_iid, 'ALT', param[1] );
-                updateTargetReport( target._id, 'ALT', param[1] );
+                target.report = updateTargetReport( target._id, 'ALT', param[1] );
                 break;
 
               case 'AZ':
                 updateImageReport( res_iid, 'AZ', param[1] );
-                updateTargetReport( target._id, 'AZ', param[1] );
+                target.report = updateTargetReport( target._id, 'AZ', param[1] );
                 break;
 
               case 'RA':
                 updateImageReport( res_iid, 'RA', param[1] );
-                updateTargetReport( target._id, 'RA', param[1] );
+                target.report = updateTargetReport( target._id, 'RA', param[1] );
                 break;
 
               case 'DEC':
                 updateImageReport( res_iid, 'DEC', param[1] );
-                updateTargetReport( target._id, 'DEC', param[1] );
+                target.report = updateTargetReport( target._id, 'DEC', param[1] );
                 break;
 
               case 'pointing':
                 updateImageReport( res_iid, 'pointing', param[1] );
-                updateTargetReport( target._id, 'pointing', param[1] );
+                target.report = updateTargetReport( target._id, 'pointing', param[1] );
                 break;
 
               case 'ANGLE':
                 updateImageReport( res_iid, 'ANGLE', param[1] );
-                updateTargetReport( target._id, 'pointing', param[1] );
+                target.report = updateTargetReport( target._id, 'ANGLE', param[1] );
                 break;
 
               case 'HA':
                 updateImageReport( res_iid, 'HA', param[1] );
-                updateTargetReport( target._id, 'HA', param[1] );
+                target.report = updateTargetReport( target._id, 'HA', param[1] );
                 break;
 
               case 'TRANSIT':
                 updateImageReport( res_iid, 'TRANSIT', param[1] );
-                updateTargetReport( target._id, 'TRANSIT', param[1] );
+                target.report = updateTargetReport( target._id, 'TRANSIT', param[1] );
                 break;
 
               case 'FOCUS_POS':
                 updateImageReport( res_iid, 'FOCUS_POS', param[1] );
-                updateTargetReport( target._id, 'focusPosition', param[1] );
+                target.report = updateTargetReport( target._id, 'focusPosition', param[1] );
                 break;
 
               case 'sunAltitude':
                 updateImageReport( res_iid, 'sunAltitude', param[1] );
-                updateTargetReport( target._id, 'sunAltitude', param[1] );
+                target.report = updateTargetReport( target._id, 'sunAltitude', param[1] );
                 break;
 
               case 'focusTemp':
                 updateImageReport( res_iid, 'focusTemp', param[1] );
-                updateTargetReport( target._id, 'focusTemp', param[1] );
+                target.report = updateTargetReport( target._id, 'focusTemp', param[1] );
                 break;
 
               case 'ROTATOR_POS_ANGLE':
                 updateImageReport( res_iid, 'ROTATOR_POS_ANGLE', param[1] );
-                updateTargetReport( target._id, 'ROTATOR_POS_ANGLE', param[1] );
+                target.report = updateTargetReport( target._id, 'ROTATOR_POS_ANGLE', param[1] );
                 break;
 
               case 'RMS_ERROR':
                 updateImageReport( res_iid, 'RMS_ERROR', param[1] );
-//                updateTargetReport( target._id, 'pointing', param[1] );
+                target.report = updateTargetReport( target._id, 'RMS_ERROR', param[1] );
                 break;
 
               case 'fileName':
@@ -2250,7 +2259,7 @@ function takeSeriesImage(target, series) {
     UpdateStatus( ' [IMAGER] ' +target.getFriendlyName() + ': ' + series.frame + ' ' + series.filter + ' at ' + series.exposure + ' seconds: ' + num + '/' +series.repeat + ' COMPLETED' );
   }
   var jid = tsx_GetServerState( tsx_ServerStates.runScheduler );
-  if( jid == '' ) {
+  if( jid === '' ) {
     // the process was stopped...
     tsxInfo('Throwing in imaging...');
     throw(' *** END SESSIONS');
@@ -2520,6 +2529,8 @@ export function findTargetSession() {
     tsxDebug( ' chose: ' + validSession.getFriendlyName() );
   }
   tsxInfo('************************');
+  UpdateStatus( ' [SCHEDULER] selected: ' + validSession.getFriendlyName() );
+
   return validSession;
 }
 
@@ -2596,35 +2607,37 @@ export function canTargetSessionStart( target ) {
   var result =  UpdateImagingTargetReport( target );
   // The problem is the new report is not used if it is updated!!!
   if( !result.ready ) {
-    tsxWarn( ' [SCHEDULER] !!! Target not found: ' + target.getFriendlyName() );
+    tsxWarn( ' [SCHEDULER] stopping (not ready/found): ' + target.getFriendlyName() );
     return false;
   }
+
   var canStart = true;
   tsxInfo( ' Is target active: ' + target.enabledActive );
   if(!target.enabledActive){
-    UpdateStatus( ' [SCHEDULER] rejected, not enabled: ' + target.getFriendlyName() );
+    UpdateStatus( ' [SCHEDULER] stopping (not enabled): ' + target.getFriendlyName() );
     return false; // the session is disabled
   }
 
   // check for target not ready
-  var isComplete = isTargetComplete( target );
-  tsxDebug( ' [SCHEDULER] Is target complete: ' + isComplete );
   try {
+    var isComplete = isTargetComplete( target );
+    tsxDebug( ' [SCHEDULER] Is target complete: ' + isComplete );
     let isRepeating = TakeSeriesTemplates.findOne({_id: target.series._id }).repeatSeries;
     if( isComplete && target.isCalibrationFrames == false && !isRepeating ) {
-      UpdateStatus( ' [SCHEDULER] completed series: ' + target.getFriendlyName() );
+      UpdateStatus( ' [SCHEDULER] stopping (series complete): ' + target.getFriendlyName() );
       return false;
     }
   }
   catch( e ) {
-    UpdateStatusWarn( ' [SCHEDULER] series not assigned: ' + target.getFriendlyName());
+    UpdateStatusWarn( ' [SCHEDULER] stopping (series not assigned): ' + target.getFriendlyName());
+    return false;
   }
 
   // check start time pasted
   var hasPassed = hasStartTimePassed( target );
   tsxDebug( ' Is target start ready: ' + hasPassed );
   if( !(hasPassed) ) {
-    UpdateStatus( ' [SCHEDULER] too early: ' + target.getFriendlyName() + ', needs (' + target.startTime + ')' );
+    UpdateStatus( ' [SCHEDULER] skipping (too early): ' + target.getFriendlyName() + ', needs (' + target.startTime + ')' );
     return false;
   }
 
@@ -2632,24 +2645,17 @@ export function canTargetSessionStart( target ) {
   var hasStopped = hasStopTimePassed( target );
   tsxDebug( ' [SCHEDULER] Is target stop reached: ' + hasStopped );
   if( hasStopped ) {
-    UpdateStatus( ' [SCHEDULER]  too late: ' + target.getFriendlyName() + ', needed (' + target.stopTime + ')' );
+    UpdateStatus( ' [SCHEDULER] stopping (too late): ' + target.getFriendlyName() + ', needed (' + target.stopTime + ')' );
     return false;
   }
 
   // check if TSX says okay... Altitude and here
   // ready also checks for the sun to be below specific altitude e.g. -18 degrees
   // see up above... do not redo... var result =   UpdateImagingTargetReport( target );
-  tsxDebig( ' [SCHEDULER] Is target ready: ' + result.ready );
-  if( !result.ready ) {
-    UpdateStatus( ' [SCHEDULER] not ready: ' + target.getFriendlyName() + result.ready );
-    return false;
-  }
-
-  // can be redundant with ready above... ready above can also mean not found
   var minAlt = tsx_reachedMinAlt( target );
   tsxDebug( ' [SCHEDULER] Is target minAlt: ' + minAlt );
   if( minAlt ) {
-    UpdateStatus( ' [SCHEDULER] not high enough: ' + target.getFriendlyName()+', currently ('+result.ALT+')' + ' vs. needs (' + target.minAlt + ')');
+    UpdateStatus( ' [SCHEDULER] stopping (too low): ' + target.getFriendlyName()+', currently ('+result.ALT+')' + ' vs. needs (' + target.minAlt + ')');
     return false;
   }
 
@@ -2657,10 +2663,11 @@ export function canTargetSessionStart( target ) {
   tsxDebug(' Is dark enough for target: ' + isDark );
   if( isDark === false ) {
     // tsxInfo( 'inside canstart to return false' );
-    UpdateStatus( ' [SCHEDULER] no longer dark: ' + target.getFriendlyName() );
+    UpdateStatus( ' [SCHEDULER] stopping (not dark): ' + target.getFriendlyName() );
     return false;
   }
   // tsxInfo( 'inside canstart did not return false' );
+  UpdateStatus( ' [SCHEDULER] could do ('+canStart+'): ' + target.getFriendlyName() );
 
   return canStart;
 }
@@ -2786,23 +2793,9 @@ Meteor.methods({
     }
   },
 
-  testEndConditions() {
-    tsxInfo('************************');
-    tsxInfo(' *** testEndConditions' );
-    var target = findTargetSession();
-    if( typeof target == 'undefined') {
-      tsxInfo('No target found');
-    }
-    else {
-      tsxInfo('Found: ' + target.getFriendlyName());
-      var endCond = isTargetConditionInValid( target );
-      tsxInfo(target.getFriendlyName() + ' ending=' + endCond );
-    }
-  },
-
   testTryTarget() {
     tsxInfo('************************');
-    tsxInfo(' *** testEndConditions' );
+    tsxInfo(' *** testTryTarget' );
 
     // neeed to get a session here...
     var targets = TargetSessions.find().fetch();

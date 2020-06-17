@@ -86,7 +86,6 @@ class Monitor extends Component {
 
       // tsx_progress: 0,
       tsx_total: 0,
-      tsx_actions: '',
       targetSessionId: '',
 
 
@@ -375,13 +374,6 @@ class Monitor extends Component {
     }.bind(this));
   }
 
-  testEndConditions() {
-    Meteor.call( 'testEndConditions', function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
   startImaging() {
 
     Meteor.call( 'startImaging', this.getCurrentTarget(), function(error, result) {
@@ -445,66 +437,13 @@ class Monitor extends Component {
     }
   }
 
-  getTsxActions() {
-
-    var actionArray = [];
-    actionArray.push({
-      key: 'Pick',
-      text: 'test Picking target',
-      value: 'Pick'
-    });
-    actionArray.push({
-      key: 'Test End',
-      text: 'Test End',
-      value: 'Test End'
-    });
-    actionArray.push({
-      key: '@Focus3',
-      text: '@Focus3',
-      value: '@Focus3'
-    });
-    actionArray.push({
-      key: 'Dither',
-      text: 'Dither',
-      value: 'Dither'
-    });
-    actionArray.push({
-      key: 'Guide',
-      text: 'Guide',
-      value: 'Guide'
-    });
-    actionArray.push({
-      key: 'Solve',
-      text: 'Solve',
-      value: 'Solve'
-    });
-    actionArray.push({
-      key: 'Test Angle',
-      text: 'Test Angle',
-      value: 'Test Angle'
-    });
-    actionArray.push({
-      key: 'Start Series',
-      text: 'Start Series',
-      value: 'Start Series'
-    });
-    actionArray.push({
-      key: 'AbortGuide',
-      text: 'AbortGuide',
-      value: 'AbortGuide'
-    });
-
-
-    return actionArray;
-  }
-
-  handleTsx_actionsChange = (e, { name, value }) => {
-    this.setState({ [name]: value })
-  };
-
   playButtons( state ) {
 
-    if( state == 'Stop' && !this.state.playClicked ) {
+    if( state === 'Stop'
+      && !this.state.playClicked
+      && this.props.runScheduler.value === ''
+      && this.props.tool_active.value === false
+    ) {
       return (
         <div>
         <Button icon='play'  onClick={this.playScheduler.bind(this)}/>
@@ -524,7 +463,6 @@ class Monitor extends Component {
 
   render() {
 
-    var tsx_actions = this.getTsxActions();
     var TARGETNAME = this.props.targetName.value;
     if( TARGETNAME !== 'No Active Target') {
       var sid = tsx_GetServerState(tsx_ServerStates.imagingSessionId);
