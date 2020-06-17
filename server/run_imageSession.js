@@ -2526,10 +2526,13 @@ export function findTargetSession() {
   // priotiry
   if( foundSession ) {
     validSession = getHigherPriorityTarget( validSession );
-    tsxDebug( ' chose: ' + validSession.getFriendlyName() );
+    tsxDebug( ' chose: ' + validSession.targetFindName() );
+    UpdateStatus( ' [SCHEDULER] selected: ' + validSession.getFriendlyName() );
+  }
+  else {
+    UpdateStatus( ' [SCHEDULER] found no target' );
   }
   tsxInfo('************************');
-  UpdateStatus( ' [SCHEDULER] selected: ' + validSession.getFriendlyName() );
 
   return validSession;
 }
