@@ -2526,7 +2526,6 @@ export function findTargetSession() {
   // priotiry
   if( foundSession ) {
     validSession = getHigherPriorityTarget( validSession );
-    tsxDebug( ' chose: ' + validSession.targetFindName() );
     UpdateStatus( ' [SCHEDULER] selected: ' + validSession.getFriendlyName() );
   }
   else {
