@@ -562,7 +562,7 @@ class Monitor extends Component {
                 </Statistic>
                 <Statistic size='mini'>
                   <Statistic.Label>PA</Statistic.Label>
-                  <Statistic.Value>{Number(this.props.scheduler_report.value.ANGLE).toFixed(2)}</Statistic.Value>
+                  <Statistic.Value>{Number(this.props.last_PA.value).toFixed(2)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
                   <Statistic.Label>RMS</Statistic.Label>

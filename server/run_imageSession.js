@@ -765,6 +765,7 @@ function tsx_CLS_target( target, filter ) {
             case 'PA':
               tsxInfo(' [CLS] ' + target + ': Position Angle: ' + param[1] );
               var rpt = updateTargetReport( target._id, 'ANGLE', param[1] );
+              tsx_SetServerState( 'last_PA',  param[1] );
               target.report = rpt;
               break;
 
@@ -2117,8 +2118,9 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
                 break;
 
               case 'ANGLE':
-                updateImageReport( res_iid, 'ANGLE', param[1] );
-                target.report = updateTargetReport( target._id, 'ANGLE', param[1] );
+                //updateImageReport( res_iid, 'ANGLE', param[1] );
+                //target.report = updateTargetReport( target._id, 'ANGLE', param[1] );
+                tsxWarn( ' [IMAGER] not saving ANGLE/PA: ' + param[1] );
                 break;
 
               case 'HA':
@@ -2149,6 +2151,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
               case 'ROTATOR_POS_ANGLE':
                 updateImageReport( res_iid, 'ROTATOR_POS_ANGLE', param[1] );
                 target.report = updateTargetReport( target._id, 'ROTATOR_POS_ANGLE', param[1] );
+                tsxWarn( ' [IMAGER] not using  ROTATOR_POS_ANGLE: ' + param[1] );
                 break;
 
               case 'RMS_ERROR':

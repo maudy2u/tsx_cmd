@@ -300,6 +300,7 @@ class App extends TrackerReact(Component) {
           scheduler_running={this.props.scheduler_running}
           runScheduler={this.props.runScheduler}
           tool_active = {this.props.tool_active}
+          last_PA={this.props.last_PA}
         />
       )
     } else if (this.state.activeMenu == 'Plan' ) {
@@ -703,6 +704,7 @@ export default withTracker(() => {
   const noVNCPWD = TheSkyXInfos.findOne({name: 'noVNCPWD'});
   const noVNCPort = TheSkyXInfos.findOne({name: 'noVNCPort'});
   const runScheduler =  TheSkyXInfos.findOne({name: 'runScheduler'});
+  const last_PA =  TheSkyXInfos.findOne({name: 'last_PA'});
 
   const targetSessionsHandle = Meteor.subscribe('targetSessions.all');
   const targetSessionsReadyYet = targetSessionsHandle.ready();
@@ -739,6 +741,7 @@ export default withTracker(() => {
     activeMenuReadyYet,
     activeMenu,
     runScheduler,
+    last_PA,
 
     infoReadyYet,
     noVNCReadyYet,
