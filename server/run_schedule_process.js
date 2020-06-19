@@ -539,7 +539,7 @@ Meteor.methods({
 
   stopScheduler() {
     if( getSchedulerState() != 'Stop' ) {
-      UpdateStatus('MANUAL: STOPPING SCHEDULER');
+      UpdateStatus(' [SCHEDULER] MANUALLY Stopping');
       srvStopScheduler();
     }
     else {

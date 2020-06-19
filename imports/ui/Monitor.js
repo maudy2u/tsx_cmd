@@ -561,6 +561,10 @@ class Monitor extends Component {
                   <Statistic.Value>{Number(this.props.scheduler_report.value.focusPosition).toFixed(0)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
+                  <Statistic.Label>Foc. Temp.</Statistic.Label>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.focusTemp).toFixed(0)}</Statistic.Value>
+                </Statistic>
+                <Statistic size='mini'>
                   <Statistic.Label>PA</Statistic.Label>
                   <Statistic.Value>{Number(this.props.last_PA.value).toFixed(2)}</Statistic.Value>
                 </Statistic>

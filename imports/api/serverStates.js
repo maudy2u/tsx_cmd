@@ -176,7 +176,7 @@ export const tsx_ServerStates = {
   indigo_web_panel: 'indigo_web_panel',
   isTargetConditionInValidExpired: 'isTargetConditionInValidExpired',
 
-  last_PA: 'last_PA', 
+  last_PA: 'last_PA',
 
 };
 

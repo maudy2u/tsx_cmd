@@ -111,7 +111,7 @@ export function UpdateImagingTargetReport( target ) {
 
   // Now have reprt and need to set the variables
   // the other checks use
-  if( tRprt.ready != false && typeof tRprt != 'undefined' && tRprt != '') {
+  if( typeof tRprt != 'undefined' && tRprt.ready != false &&  tRprt != '') {
     TargetSessions.upsert({_id: target._id}, {
       $set:{
         report: tRprt,

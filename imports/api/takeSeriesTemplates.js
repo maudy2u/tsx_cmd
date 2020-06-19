@@ -67,9 +67,9 @@ export function takeSeriesDropDown() {
 export function getTakeSeriesName( tSeries ) {
 
   var name = '';
-  if( tSeries._id !=''&& typeof tSeries._id != 'undefined') {
+  if( typeof tSeries._id != 'undefined' && tSeries._id !='') {
     var obj = TakeSeriesTemplates.findOne({_id: tSeries._id});
-    if( obj != '' && typeof obj != 'undefined') {
+    if( typeof obj != 'undefined' && obj != '') {
       name = obj.name;
     }
   }
@@ -147,7 +147,7 @@ export function seriesDescription( sid ) {
     let seriesArray = template.series;
     let details = "";
     let repeating = '';
-    if( template.repeatSeries !='' && typeof template.repeatSeries != 'undefined'  ) {
+    if( typeof template.repeatSeries != 'undefined'  && template.repeatSeries !='' ) {
       repeating = 'repeating, ';
     }
 

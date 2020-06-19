@@ -58,7 +58,7 @@ class IndividualFile extends Component {
       prompt.trim();
     }
 
-    if (prompt != '' && prompt != 'undefined' ) {
+    if (typeof prompt != 'undefined' && prompt != '' ) {
       Meteor.call('RenameFile', this.props.fileId, prompt, function (err, res) {
         if (err)
           console.log(err);

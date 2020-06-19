@@ -3,7 +3,7 @@ import { tsxInfo, tsxLog, tsxErr, tsxWarn, tsxDebug, logFileForClient, AppLogsDB
 
 // check here for extras: https://github.com/VeliovGroup/Meteor-Files/wiki/Constructor
 var folder = '';
-if( Meteor.settings.backup_location === '' || typeof Meteor.settings.backup_location === 'undefined' ) {
+if( typeof Meteor.settings.backup_location === 'undefined' || Meteor.settings.backup_location === '' ) {
   folder = Meteor.absolutePath + '/backup/';
 }
 else {

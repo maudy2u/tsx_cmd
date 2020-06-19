@@ -205,7 +205,7 @@ function formatDate( today ) {
 // // var c = Meteor.absolutePath;
 // srcPath = srcPath +'/server/logs/';
 var logFolder = '';
-if( Meteor.settings.log_file_location === '' || typeof Meteor.settings.log_file_location === 'undefined' ) {
+if( typeof Meteor.settings.log_file_location === 'undefined' || Meteor.settings.log_file_location === '' ) {
   logFolder = Meteor.absolutePath;
 }
 else {
@@ -214,7 +214,7 @@ else {
 
 export function logFileForClient() {
   var logFolder = '';
-  if( Meteor.settings.log_file_location === '' || typeof Meteor.settings.log_file_location === 'undefined' ) {
+  if( typeof Meteor.settings.log_file_location === 'undefined' || Meteor.settings.log_file_location === '' ) {
     logFolder = Meteor.absolutePath;
   }
   else {

@@ -26,7 +26,7 @@ import { Random } from 'meteor/random';
 // Used to store the sessions for a Target - the actual imaging
 // check here for extras: https://github.com/VeliovGroup/Meteor-Files/wiki/Constructor
 var sfolder = '';
-if( Meteor.settings.skySafari_files === '' || typeof Meteor.settings.skySafari_files === 'undefined' ) {
+if( typeof Meteor.settings.skySafari_files === 'undefined'  || Meteor.settings.skySafari_files === '' ) {
   sfolder = Meteor.absolutePath + '/skySafari_files/';
 }
 else {
@@ -134,9 +134,9 @@ export function convertORIENT2PA( orient ) {
 
 export function getSkySafariSkySetName( sid ) {
   var name = '';
-  if( sid !=''&& typeof sid != 'undefined') {
+  if( typeof sid != 'undefined' && sid !='') {
     var sFile = SkySafariFiles.findOne({_id: sid});
-    if( sFile != '' && typeof sFile != 'undefined') {
+    if( typeof sFile != 'undefined' && sFile != '') {
       name = sFile.name;
     }
   }

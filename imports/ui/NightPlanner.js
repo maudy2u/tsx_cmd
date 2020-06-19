@@ -216,7 +216,7 @@ class NightPlanner extends Component {
       let target = TargetSessions.findOne({_id:obj.passthru});
       if( typeof target != 'undefined' && target != '') {
         let nam = target.friendlyName;
-        if( nam != '' && typeof nam != 'undefined') {
+        if( typeof nam != 'undefined' && nam != '') {
           oName = nam;
         }
       }

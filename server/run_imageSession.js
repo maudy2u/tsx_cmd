@@ -763,7 +763,7 @@ function tsx_CLS_target( target, filter ) {
           switch( param[0] ) {
 
             case 'PA':
-              tsxInfo(' [CLS] ' + target + ': Position Angle: ' + param[1] );
+              tsxLog(' [CLS] ' + target + ': Position Angle: ' + param[1] );
               var rpt = updateTargetReport( target._id, 'ANGLE', param[1] );
               tsx_SetServerState( 'last_PA',  param[1] );
               target.report = rpt;
@@ -883,8 +883,7 @@ function tsx_RunFocus3( target ) {
       curFocusTemp = lastFocusTemp;
     }
 
-    UpdateStatus(' ' + target.getFriendlyName() +': @Focus3 (using ' + focusTarget + ') for current temp ' + lastFocusTemp + ', vs ' + curFocusTemp );
-
+    UpdateStatus(' [FOCUSER] @FoCUs3 started (using ' + focusTarget + ') for temp ' + curFocusTemp + ' (was ' + lastFocusTemp + ')');
     var position = '';
     var temp = '';
     var tsx_is_waiting = true;
@@ -1196,7 +1195,7 @@ export function tsx_isDark() {
       tsxDebug('Any error?: ' + result);
       if( result == "Light" || result == "Dark" ) {
         isDark = result;
-        tsxLog( ' Sun altitude: ' + tsx_return.split('|')[1].trim());
+        tsxLog( ' [SCHEDULER] Sun altitude is: ' + tsx_return.split('|')[1].trim());
       }
       else {
         forceAbort = true;
@@ -1210,16 +1209,16 @@ export function tsx_isDark() {
 
     tsxDebug(' Dark enough: ' + isDark);
     if( isDark == 'Light') {
-      tsxInfo( ' Not Dark enough.');
+      tsxInfo( ' [SCHEDULER] Not Dark enough.');
       return false;
     }
     else {
-      tsxInfo( ' Dark enough.');
+      tsxInfo( ' [SCHEDULER] Dark enough.');
       return true;
     }
 	}
   else {
-    tsxInfo(' *** Twilight disabled');
+    tsxWarn(' [SCHEDULER] *** Twilight check disabled');
     return true;
   }
 }
@@ -1432,6 +1431,11 @@ function isTargetConditionInValid(target) {
   if( isSchedulerStopped() ) {
     forceAbort = true;
     return true; // exit
+  }
+
+  if( !tsx_isDark() ) {
+    UpdateStatus( ' [SCHEDULER] NOT DARK - NOT VALID');
+    return false;
   }
 
   // *******************************
@@ -2157,6 +2161,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
               case 'RMS_ERROR':
                 updateImageReport( res_iid, 'RMS_ERROR', param[1] );
                 target.report = updateTargetReport( target._id, 'RMS_ERROR', param[1] );
+                tsxWarn( ' [IMAGER] got RMS Error: ' + param[1] );
                 break;
 
               case 'fileName':
