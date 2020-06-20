@@ -1433,11 +1433,6 @@ function isTargetConditionInValid(target) {
     return true; // exit
   }
 
-  if( !tsx_isDark() ) {
-    UpdateStatus( ' [SCHEDULER] NOT DARK - NOT VALID');
-    return false;
-  }
-
   // *******************************
   // reassess the target state
   if( !(canTargetSessionStart( target )) ) {
