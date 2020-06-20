@@ -572,6 +572,10 @@ class Monitor extends Component {
                   <Statistic.Label>RMS</Statistic.Label>
                   <Statistic.Value>{Number(this.props.scheduler_report.value.RMS_ERROR).toFixed(2)}</Statistic.Value>
                 </Statistic>
+                <Statistic size='mini'>
+                  <Statistic.Label>Sun Alt.</Statistic.Label>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.sunAltitude).toFixed(2)}</Statistic.Value>
+                </Statistic>
               </Segment>
             </Accordion.Content>
         </Accordion>

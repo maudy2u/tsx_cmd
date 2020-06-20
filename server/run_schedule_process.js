@@ -382,7 +382,7 @@ function CleanUpJobs() {
 }
 
 // *************************** ***********************************
-// Assuming a time in seconds is provided and a Date Object
+// Assuming a time/duration in seconds is provided and a Date Object
 export function hasTimePassed( duration, timestamp ) {
   // if( typeof timestamp === 'undefined' || duration === '' ) {
   //   return true;
@@ -446,13 +446,13 @@ export function isTimeBeforeCurrentTime( ts ) {
   // tsxInfo('************************');
   tsxInfo(' *** isTimeBeforeCurrentTime: ' + ts );
 
-  if( typeof ts == 'undefined') {
-    tsxDebug( ' isTimeBeforeCurrentTime FAILED - ts is undefined')
+  if( typeof ts === 'undefined') {
+    tsxWarn( ' isTimeBeforeCurrentTime FAILED - target start is undefined')
     return true; // as undefined....
   }
 
   var cur_dts = new Date();
-  var cur_time = cur_dts.getHours()+(cur_dts.getMinutes()/60);
+  var cur_time = Number(cur_dts.getHours())+Number((cur_dts.getMinutes()/60));
   // tsxInfo('Current time: ' + cur_time );
 
   // add 24 to the morning time so that

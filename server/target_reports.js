@@ -216,6 +216,7 @@ export function tsx_TargetReport( target ) {
                 break;
               case 'sunAltitude':
                 updateTargetReport( target._id, 'sunAltitude', param[1] );
+                tsx_SetServerState( tsx_ServerStates.lastCheckSunAlt, param[1] );
                 break;
               case 'isValid':
                 updateTargetReport( target._id, 'isValid', param[1] );

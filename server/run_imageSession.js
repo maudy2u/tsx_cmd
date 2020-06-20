@@ -883,7 +883,7 @@ function tsx_RunFocus3( target ) {
       curFocusTemp = lastFocusTemp;
     }
 
-    UpdateStatus(' [FOCUSER] @FoCUs3 started (using ' + focusTarget + ') for temp ' + curFocusTemp + ' (was ' + lastFocusTemp + ')');
+    UpdateStatus(' [FOCUSER] @FoCUs3 started (using ' + focusTarget + ') for temp ' + curFocusTemp + ' (last ' + lastFocusTemp + ')');
     var position = '';
     var temp = '';
     var tsx_is_waiting = true;
@@ -1150,77 +1150,73 @@ export function getValidTargetSession() {
 }
 
 // **************************************************************
-function tsx_isDarkEnough(target) {
-  // tsxInfo('************************');
-  tsxInfo(' *** tsx_isDarkEnough: ' + target.getFriendlyName() );
-
-  var targetFindName = target.targetFindName;
-  UpdateImagingTargetReport( target );
-	var chkTwilight = tsx_GetServerStateValue( tsx_ServerStates.isTwilightEnabled );
-  tsxDebug(' Twilight check enabled: ' + chkTwilight);
-	if( chkTwilight ) {
-    // tsxInfo(target.report);
-    tsxDebug('Dark enough for ' + target.getFriendlyName() +': ' + target.report.isDark);
-    if( target.report.isDark == 'false') {
-      tsxInfo( 'Dark enough found to be false');
-      return false;
-    }
-    else {
-      tsxInfo( 'Dark enough found to be true');
-      return true;
-    }
-	}
-  else {
-    tsxInfo(' *** Twilight disabled');
-    return true;
-  }
-}
-
-// **************************************************************
 export function tsx_isDark() {
   // tsxInfo('************************');
   tsxInfo(' *** tsx_isDark' );
 	var chkTwilight = tsx_GetServerStateValue( tsx_ServerStates.isTwilightEnabled );
+  tsxInfo(' [SCHEDULER] Twilight check enabled: ' + chkTwilight);
+  if( !chkTwilight ) {
+    tsxWarn(' [SCHEDULER] *** Twilight check disabled - ASSUMING DARK');
+    return true;
+  }
+
+  var sunAlt = tsx_GetServerState( tsx_ServerStates.lastCheckSunAlt );
+  // need to check last time the "darkness" was check...
+  // if old... then need to Recheck
+  // old assumes older than 15 minutes... (arbitrary choice)
+  // the choice needs to come from monitoring real sunaltitude... until
+  // can get a method to the time the sun reaches "X" altitude
+  var timePassed = true;
+  if( typeof sunAlt !== 'undefined' && sunAlt == '' ) {
+      timePassed = hasTimePassed( (15*60), sunAlt.timestamp );
+  }
+
   var defaultMinSunAlt = tsx_GetServerStateValue( tsx_ServerStates.defaultMinSunAlt );
-  tsxInfo(' Twilight check enabled: ' + chkTwilight);
-  var isDark = '';
-  var tsx_is_waiting = true;
-	if( chkTwilight ) {
+  var isDark = 'Light'; // always assume Light
+
+  if( timePassed ) { // go to TheSkyX and check
+
     var cmd = tsx_cmd('SkyX_JS_Twilight');
     cmd = cmd.replace('$000', defaultMinSunAlt );
-    tsxDebug( '[TSX] SkyX_JS_Twilight, '+defaultMinSunAlt );
-
+    tsxDebug( '[TSX] SkyX_JS_Twilight, did sun pass: '+ defaultMinSunAlt );
+    var tsx_is_waiting = true;
     tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
       var result = tsx_return.split('|')[0].trim();
       tsxDebug('Any error?: ' + result);
-      if( result == "Light" || result == "Dark" ) {
+      if( result === "Light" || result === "Dark" ) {
         isDark = result;
-        tsxLog( ' [SCHEDULER] Sun altitude is: ' + tsx_return.split('|')[1].trim());
+        var sunAltRes = tsx_return.split('|')[1].trim();
+        tsxLog( ' [SCHEDULER] Sun altitude now: ' + sunAltRes );
+        tsx_SetServerState( tsx_ServerStates.lastCheckSunAlt, sunAltRes );
+        sunAlt = tsx_GetServerState( tsx_ServerStates.lastCheckSunAlt );
       }
       else {
         forceAbort = true;
-        tsxLog('SkyX_JS_Twilight Failed. Error: ' + result);
+        isDark = 'Light';
+        tsxErr('  [TSX] SkyX_JS_Twilight Failed. Error: ' + result);
       }
       tsx_is_waiting = false;
     }));
+
     while( tsx_is_waiting ) {
       Meteor.sleep( 1000 );
     }
-
-    tsxDebug(' Dark enough: ' + isDark);
-    if( isDark == 'Light') {
-      tsxInfo( ' [SCHEDULER] Not Dark enough.');
-      return false;
-    }
-    else {
-      tsxInfo( ' [SCHEDULER] Dark enough.');
-      return true;
-    }
-	}
+  }
   else {
-    tsxWarn(' [SCHEDULER] *** Twilight check disabled');
+    if( sunAlt.value < defaultMinAlt ) {
+      isDark = 'Dark';
+    }
+  }
+
+  if( isDark === 'Light') {
+    tsxLog( ' [SCHEDULER] Ah, sigh, STOPPING, it is now: '+isDark );
+    return false;
+  }
+  else {
+    tsxLog( ' [SCHEDULER] YAY, it is: '+isDark );
     return true;
   }
+
 }
 
 // **************************************************************
@@ -1407,6 +1403,11 @@ function isTargetConditionInValid(target) {
   if( typeof timeToCheck === 'undefined' || timeToCheck === '' ) {
     timeToCheck = new Date();
     tsx_SetServerState( tsx_ServerStates.isTargetConditionInValidExpired, timeToCheck );
+  }
+
+  if( !tsx_isDark ) {
+    tsxLog(' [SCHEDULER] setting IMAGER target invalid - now light!');
+    return true;
   }
 
   // Only check ever minute
@@ -1662,7 +1663,7 @@ function tsx_MatchRotation( target ) {
       if( typeof pixelSize === 'undefined' || pixelSize === '') {
         var str =  ' *** Rotating failed: fix by setting default image pixel size';
         UpdateStatusErr( str );
-        tsxError( str );
+        tsxErr( str );
         return rotateSucess;
       }
 
@@ -1670,7 +1671,7 @@ function tsx_MatchRotation( target ) {
       if( typeof focalLength === 'undefined' || focalLength === '') {
         var str =  ' *** Rotating failed: fix by setting default focal length';
         UpdateStatusErr( str );
-        tsxError( str );
+        tsxErr( str );
         return rotateSucess;
       }
 
@@ -2140,6 +2141,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
               case 'sunAltitude':
                 updateImageReport( res_iid, 'sunAltitude', param[1] );
                 target.report = updateTargetReport( target._id, 'sunAltitude', param[1] );
+                tsx_SetServerState( tsx_ServerStates.lastCheckSunAlt, param[1] );
                 break;
 
               case 'focusTemp':
@@ -2664,8 +2666,7 @@ export function canTargetSessionStart( target ) {
     return false;
   }
 
-  var isDark = tsx_isDarkEnough( target );
-  tsxDebug(' Is dark enough for target: ' + isDark );
+  var isDark = tsx_isDark();
   if( isDark === false ) {
     // tsxInfo( 'inside canstart to return false' );
     UpdateStatus( ' [SCHEDULER] stopping (not dark): ' + target.getFriendlyName() );

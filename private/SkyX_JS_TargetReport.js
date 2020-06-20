@@ -46,15 +46,12 @@ OBJI.Property(59);
 var sunAlt = OBJI.ObjInfoPropOut;
 var report = 'Success';
 if (sunAlt > twightlightAlt ) {
-report  = report +'|isDark=' + false
-  + '|sunAltitude=' +
-  sunAlt;
-
+	report  = report +'|isDark=' + false;
 } else {
-  report  = report +'|isDark=' + true
-    + '|sunAltitude=' +
-    sunAlt;
+  report  = report +'|isDark=' + true;
 };
+report  = report
+  + '|sunAltitude=' + Number(sunAlt).toFixed(3);
 
 try {
   //

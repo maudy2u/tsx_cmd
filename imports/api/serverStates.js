@@ -123,7 +123,7 @@ export const tsx_ServerStates = {
   isFOVAngleEnabled: 'isFOVAngleEnabled',
 
   lastTargetDirection: 'lastTargetDirection',
-  lastCheckMinSunAlt: 'lastCheckMinSunAlt',
+  lastCheckSunAlt: 'lastCheckSunAlt',
 
   lastFocusPos: 'lastFocusPos',
   lastFocusTemp: 'lastFocusTemp',

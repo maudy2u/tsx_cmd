@@ -158,7 +158,7 @@ export function initServerStates() {
   tsx_SetServerState(tsx_ServerStates.targetHA, '');
   tsx_SetServerState(tsx_ServerStates.targetTransit, '');
   tsx_SetServerState(tsx_ServerStates.lastTargetDirection, '');
-  tsx_SetServerState(tsx_ServerStates.lastCheckMinSunAlt, '');
+  tsx_SetServerState(tsx_ServerStates.lastCheckSunAlt, '');
   // tsx_SetServerState( tsx_ServerStates.lastFocusPos', '');
   // tsx_SetServerState( tsx_ServerStates.lastFocusTemp', '');
   tsx_SetServerState(tsx_ServerStates.imagingSessionDither, 0);

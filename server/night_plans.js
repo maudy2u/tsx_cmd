@@ -138,7 +138,7 @@ export function tsx_AltTimesForTargets( targets ) {
           if( obj != 'Sun' && obj != 'Moon') {
             let target = TargetSessions.findOne({ _id: ref_id });
             if( typeof target == 'undefined' ) {
-              tsxError( ' cannot find: ' + obj);
+              tsxErr( ' cannot find: ' + obj);
               continue;
             }
             Out.push({
