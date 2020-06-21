@@ -101,7 +101,9 @@ export function calibrate_flatbox_levels() {
     flatbox_on();
 
     var cf = CalibrationFrames.find({ on_enabled: true }, { sort: { order: 1 } }).fetch();
+    console.log( ' cf.length=' + cf.length)
     for( var i=0; i < cf.length; i ++ ) {
+      console.log(cf[i])
       findFilterLevel( cf[i], 254, 0 );
     }
     res = 'DONE';
@@ -252,6 +254,7 @@ function findFilterLevel( calibrationItem, upperLevel, lowerLevel ) {
   // *******************************
   // MONITOR for MAX PIXEL and if max value decrease by one
   // *******************************
+  console.log('findFilterLevel 1')
   const FP_ENABLED = tsx_GetServerStateValue( tsx_ServerStates.flatbox_enabled);
   const MAX_VALUE = tsx_GetServerStateValue( tsx_ServerStates.imagingPixelMaximum); // TheSkyX's 16 bit maximumm value
   const MAXIMUM_PIXEL_OCCURANCE = tsx_GetServerStateValue( tsx_ServerStates.imagingPixelMaximumOccurance); // TheSkyX's 16 bit maximumm value

@@ -159,7 +159,7 @@ class CalibrationsMenu extends Component {
   findFilterLevels() {
     // obtain calibration targetSession
     Meteor.call( 'findFilterLevels', function(error, result) {
-      alert('Filter Levels: ' + result);
+      alert('Filter Levels: ' + error);
     }.bind(this));
   }
 
