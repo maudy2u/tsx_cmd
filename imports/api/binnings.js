@@ -63,7 +63,7 @@ export function renderDropDownImagingBinnings() {
 export function getBinningNumber ( bStr ) {
   var num = 1;
   var pNum = bStr.split('x')[0].trim();
-  if( typeof pNum != 'undefined' || pNum > 1 ) {
+  if( typeof pNum !== 'undefined' && pNum != '' && pNum > 1 ) {
     num = pNum;
   }
 
