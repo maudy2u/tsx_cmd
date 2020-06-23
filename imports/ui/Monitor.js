@@ -565,16 +565,16 @@ class Monitor extends Component {
                   <Statistic.Value>{Number(this.props.scheduler_report.value.TRANSIT).toFixed(2)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
+                  <Statistic.Label>Sun Alt.</Statistic.Label>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.sunAltitude).toFixed(2)}</Statistic.Value>
+                </Statistic>
+                <Statistic size='mini'>
                   <Statistic.Label>Foc. Pos.</Statistic.Label>
                   <Statistic.Value>{Number(this.props.scheduler_report.value.focusPosition).toFixed(0)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
                   <Statistic.Label>Foc. Temp.</Statistic.Label>
                   <Statistic.Value>{Number(this.props.scheduler_report.value.focusTemp).toFixed(0)}</Statistic.Value>
-                </Statistic>
-                <Statistic size='mini'>
-                  <Statistic.Label>Sun Alt.</Statistic.Label>
-                  <Statistic.Value>{Number(this.props.scheduler_report.value.sunAltitude).toFixed(2)}</Statistic.Value>
                 </Statistic>
               </Segment>
             </Accordion.Content>

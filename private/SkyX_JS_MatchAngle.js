@@ -65,8 +65,6 @@ function currentPA() {
   return Number( ImageLinkResults.imagePositionAngle );//sky position
 }
 
-
-
 // *******************************
 // Calc position to rotate too...
 // Assume starting at the 180 position

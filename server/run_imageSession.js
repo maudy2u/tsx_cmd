@@ -1744,33 +1744,29 @@ export function tsx_RotateCamera( position, cls ) {
   if(
     typeof position === 'undefined' || position === ''
   ) {
-    let str = ' !!! Rotating failed: Exiting - type or position needed.';
+    let str = ' [ROTATOR] Rotating failed: Exiting - type or position needed.';
     UpdateStatusErr( str );
-    tsxErr( str );
     return rotateSucess;
   }
   if( typeof pixelSize === 'undefined') {
-    let str =  ' !!! Rotating failed: fix by setting default image pixel size';
+    let str =  ' [ROTATOR] Rotating failed: fix by setting default image pixel size';
     UpdateStatusErr( str );
-    tsxErr( str );
     return rotateSucess;
   }
   if( typeof focalLength === 'undefined') {
-    let str =  ' !!! Rotating failed: fix by setting default focal length';
+    let str =  ' [ROTATOR] Rotating failed: fix by setting default focal length';
     UpdateStatusErr( str );
-    tsxErr( str );
     return rotateSucess;
   }
   if( typeof fovExposure === 'undefined') {
     tsx_SetServerState( 'fovExposure', 4 );
-    let str = ' *** Rotating FIXED: set to a default 4 sec, check on default page';
-    UpdateStatusErr( str );
-    tsxWarn( str );
+    let str = ' [ROTATOR] Rotating FIXED: set to a default 4 sec, check on default page';
+    UpdateStatusWarn( str );
   }
   let ACCURACY = tsx_GetServerStateValue( tsx_ServerStates.fovPositionAngleTolerance );
   if( typeof ACCURACY === 'undefined') {
     ACCURACY = 1; // assume within one degree default
-    UpdateStatusWArn( " [ROTATOR] Setting default accuracy of 1 degree" );
+    UpdateStatusWarn( " [ROTATOR] Setting default accuracy of 1 degree" );
   }
 
   let cmd = tsx_cmd('SkyX_JS_MatchAngle');
@@ -2023,8 +2019,8 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
     delay = 1;
   }
   if( typeof binning === 'undefined' ) {
-    binning = '1x1'; 
-    tsxLog( ' [IMAGER] binning not available yet setting to 1x1')
+    binning = '1x1';
+    tsxWarn( ' [IMAGER] binning not available yet setting to 1x1')
   }
   if( typeof ccdTemp === 'undefined' ) {
     ccdTemp = '';
