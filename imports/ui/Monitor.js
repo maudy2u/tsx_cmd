@@ -509,6 +509,7 @@ class Monitor extends Component {
 
     const { activeIndex } = this.state
     const { activeIndex1 } = this.state
+    console.log( ' pointing value: ' + this.props.scheduler_report.value.pointing ); 
 
     return (
       <div>
