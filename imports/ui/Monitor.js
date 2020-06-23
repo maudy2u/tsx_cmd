@@ -543,11 +543,19 @@ class Monitor extends Component {
                   <Statistic.Value>{Number(this.props.scheduler_report.value.DEC).toFixed(3)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
+                  <Statistic.Label>PA</Statistic.Label>
+                  <Statistic.Value>{Number(this.props.last_PA.value).toFixed(2)}</Statistic.Value>
+                </Statistic>
+                <Statistic size='mini'>
                   <Statistic.Label>Pointing</Statistic.Label>
                   <Statistic.Value>{this.props.scheduler_report.value.pointing}</Statistic.Value>
                 </Statistic>
               </Segment>
               <Segment>
+                <Statistic size='mini'>
+                  <Statistic.Label>RMS</Statistic.Label>
+                  <Statistic.Value>{Number(this.props.scheduler_report.value.RMS_ERROR).toFixed(2)}</Statistic.Value>
+                </Statistic>
                 <Statistic size='mini'>
                   <Statistic.Label>HA</Statistic.Label>
                   <Statistic.Value>{Number(this.props.scheduler_report.value.HA).toFixed(2)}</Statistic.Value>
@@ -563,14 +571,6 @@ class Monitor extends Component {
                 <Statistic size='mini'>
                   <Statistic.Label>Foc. Temp.</Statistic.Label>
                   <Statistic.Value>{Number(this.props.scheduler_report.value.focusTemp).toFixed(0)}</Statistic.Value>
-                </Statistic>
-                <Statistic size='mini'>
-                  <Statistic.Label>PA</Statistic.Label>
-                  <Statistic.Value>{Number(this.props.last_PA.value).toFixed(2)}</Statistic.Value>
-                </Statistic>
-                <Statistic size='mini'>
-                  <Statistic.Label>RMS</Statistic.Label>
-                  <Statistic.Value>{Number(this.props.scheduler_report.value.RMS_ERROR).toFixed(2)}</Statistic.Value>
                 </Statistic>
                 <Statistic size='mini'>
                   <Statistic.Label>Sun Alt.</Statistic.Label>

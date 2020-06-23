@@ -763,14 +763,14 @@ function tsx_CLS_target( target, filter ) {
           switch( param[0] ) {
 
             case 'PA':
-              tsxLog(' [CLS] ' + target + ': Position Angle: ' + param[1] );
+              tsxLog(' [CLS] ' + target + ' reports Position Angle: ' + param[1] );
               var rpt = updateTargetReport( target._id, 'ANGLE', param[1] );
               tsx_SetServerState( 'last_PA',  param[1] );
               target.report = rpt;
               break;
 
             case 'rotPos':
-              tsxWarn( ' [CLS] did not store rotator position: ' + param[1]);
+              tsxWarn( ' [CLS] does not store rotator position: ' + param[1]);
               var rpt = updateTargetReport( target._id, 'ROTATOR_POS_ANGLE', param[1] );
               target.report = rpt;
               break;
@@ -1692,7 +1692,7 @@ function tsx_MatchRotation( target ) {
       cmd = cmd.replace('$002', focalLength);
       cmd = cmd.replace('$003', ACCURACY);
 
-      UpdateStatus( ' ' + target.getFriendlyName() + ': setting FOV to ('+ angle +')' );
+      UpdateStatus( ' [ROTATOR] setting ' + target.getFriendlyName() + "'s PA: (" + angle +')' );
       cmd = cmd.replace('$000', angle );
       cmd = cmd.replace('$004', 0); // ImageLink Angle
       tsxDebug( '[TSX] SkyX_JS_MatchAngle, '+angle+', '+pixelSize+', '+focalLength+', '+ACCURACY+', '+'0' );
@@ -1703,7 +1703,7 @@ function tsx_MatchRotation( target ) {
         tsxDebug('Any error?: ' + result);
         if( result != 'Success') {
           forceAbort = true;
-          tsxWarn(' !!! SkyX_JS_MatchAngle Failed. Error: ' + result);
+          tsxWarn(' [ROTATOR] FAILED!!! SkyX_JS_MatchAngle Error: ' + result);
         }
         else {
           rotateSucess = true;
@@ -1711,7 +1711,7 @@ function tsx_MatchRotation( target ) {
 
           var linkAngle = tsx_return.split('|')[1].trim();
           var angle = linkAngle.split('=')[1].trim();
-          UpdateStatus(' ' + target.getFriendlyName() + ': Rotator FOV angle: ' + angle);
+          UpdateStatus(' [ROTATOR] ' + target.getFriendlyName() + ' PA set: ' + angle );
         }
         tsx_is_waiting = false;
       }));
@@ -2115,6 +2115,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
               case 'pointing':
                 updateImageReport( res_iid, 'pointing', param[1] );
                 target.report = updateTargetReport( target._id, 'pointing', param[1] );
+                tsxLog( ' [IMAGER] found pointing: ' + param[1])
                 break;
 
               case 'ANGLE':
@@ -2152,7 +2153,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
               case 'ROTATOR_POS_ANGLE':
                 updateImageReport( res_iid, 'ROTATOR_POS_ANGLE', param[1] );
                 target.report = updateTargetReport( target._id, 'ROTATOR_POS_ANGLE', param[1] );
-                tsxWarn( ' [IMAGER] not using  ROTATOR_POS_ANGLE: ' + param[1] );
+                tsxWarn( ' [IMAGER] not reporting ROTATOR_POS_ANGLE: ' + param[1] );
                 break;
 
               case 'RMS_ERROR':

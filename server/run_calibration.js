@@ -109,7 +109,7 @@ export function calibrate_flatbox_levels() {
     res = 'DONE';
   }
   catch( e ) {
-    console.log( e )
+    console.log( 'exception' + e )
     res = e;
   }
   finally {
