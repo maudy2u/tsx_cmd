@@ -2023,7 +2023,8 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
     delay = 1;
   }
   if( typeof binning === 'undefined' ) {
-    binning = '';
+    binning = '1x1'; 
+    tsxLog( ' [IMAGER] binning not available yet setting to 1x1')
   }
   if( typeof ccdTemp === 'undefined' ) {
     ccdTemp = '';

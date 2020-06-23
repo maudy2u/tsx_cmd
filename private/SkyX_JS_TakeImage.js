@@ -193,7 +193,7 @@ if( aFrame == 1
 		OBJI.Property(68); // TransitTime			// Pull the transitTime value
 		var targetTransit = OBJI.ObjInfoPropOut; 		// Stuff DEC into variable
 
-		Out = Out +
+		Out = Out
 			+ '|AZ=' +
 			azimuth
 			+ '|ALT=' +
