@@ -41,7 +41,7 @@ if [ "${1}" == "init" ]; then
   if [ "$(uname)" == "Darwin" ]; then
     echo " *******************************"
     echo " tsx_cmd - Mac in" ${install_dir}
-    export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC_29/tsx_cmd_os.osx.x86_64_build_572_v3.6.4_2020-05-27_RC29.tar'
+    export APP='https://github.com/maudy2u/tsx_cmd/releases/download/untagged-1d84598b3568064b6d82/tsx_cmd_os.osx.x86_64_v3.6.5_2020-06-07_RC33.626.tar'
     export MONGO='https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-4.0.5.tgz'
     export NODEJS='https://nodejs.org/dist/v8.11.1/node-v8.11.1-darwin-x64.tar.gz'
     # https://nodejs.org/dist/v8.11.3/node-v8.11.3-darwin-x64.tar.xz
@@ -57,7 +57,7 @@ if [ "${1}" == "init" ]; then
       echo ""
       echo " *******************************"
       echo " tsx_cmd - aarch64/armv8 in" ${install_dir}
-      export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC_29/tsx_cmd_os.linux.aarch64_build_572_v3.6.4_2020-05-27_RC29.tar'
+      export APP='https://github.com/maudy2u/tsx_cmd/releases/download/untagged-1d84598b3568064b6d82/tsx_cmd_os.Linux.aarch64_v3.6.5_2020-06-07_RC33.626.tar'
       export MONGO='http://downloads.mongodb.org/linux/mongodb-linux-arm64-ubuntu1604-3.6.8.tgz'
       export NODEJS='https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-arm64.tar.xz'
       export MONGO_PARAMS="-C ./mongodb  --strip-components=1"
@@ -70,7 +70,7 @@ if [ "${1}" == "init" ]; then
       echo " Mongodb - CAN BE BUILT MANUALLY."
       echo " (it can take a few hours to build)"
       echo "  CHECK HERE: ./bin/mongod_arm_build.sh"
-      export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC_29/tsx_cmd_os.linux.armv7l_build_573_v3.6.4_2020-05-27_RC29.tar'
+      export APP='https://github.com/maudy2u/tsx_cmd/releases/download/untagged-1d84598b3568064b6d82/tsx_cmd_os.Linux.armv7l_v3.6.5_2020-06-07_RC33.626.tar'
       export MONGO='https://github.com/maudy2u/tsx_cmd/releases/download/armv7_mongo/mongoDB_armv7.tar'
       export NODEJS='https://nodejs.org/dist/v6.16.0/node-v6.16.0-linux-armv7l.tar.gz'
       # https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-armv7l.tar.xz
@@ -80,7 +80,7 @@ if [ "${1}" == "init" ]; then
       echo ""
       echo " *******************************"
       echo " tsx_cmd - Linux X86_64 in" ${install_dir}
-      export APP='https://github.com/maudy2u/tsx_cmd/releases/download/RC_29/tsx_cmd_os.linux.x86_64_build_572_v3.6.4_2020-05-27_RC28.tar'
+      export APP='https://github.com/maudy2u/tsx_cmd/releases/download/untagged-1d84598b3568064b6d82/tsx_cmd_os.linux.x86_64_v3.6.5_2020-06-07_RC33.626.tar'
       export MONGO='http://downloads.mongodb.org/linux/mongodb-linux-x86_64-ubuntu1804-4.0.5.tgz'
       export NODEJS='https://nodejs.org/dist/v8.11.3/node-v8.11.3-linux-x64.tar.xz'
       export MONGO_PARAMS="-C ./mongodb  --strip-components=1"
@@ -93,7 +93,7 @@ if [ "${1}" == "init" ]; then
   else
       # Do something under 64 bits Windows NT platform
       echo $(uname -s) $(uname -p) - No Installer yet.
-      echo Windows binary is here: https://github.com/maudy2u/tsx_cmd/releases/download/RC_29/tsx_cmd_os.windows.x86_32_build_572_v3.6.4_2020-05-27_RC28.tar
+      echo Windows binary is here: https://github.com/maudy2u/tsx_cmd/releases/download/untagged-1d84598b3568064b6d82/tsx_cmd_os.windows.x86_32_v3.6.5_2020-06-07_RC33.626.tar
       exit 5
   fi
 else
