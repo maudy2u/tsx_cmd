@@ -1698,20 +1698,42 @@ function tsx_MatchRotation( target ) {
       tsxDebug( '[TSX] SkyX_JS_MatchAngle, '+angle+', '+pixelSize+', '+focalLength+', '+ACCURACY+', '+'0' );
 
       tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-        var result = tsx_return.split('|')[0].trim();
         //e.g. Success|imageLinkAng=0.00|targetAngle=0.00|rotPos=-0.3305915915429978|newPos=-0.32895315919987494
         tsxDebug('Any error?: ' + result);
+
+        var results = tsx_return.split('|');
+        var result = results[0].trim();
         if( result != 'Success') {
           forceAbort = true;
           tsxWarn(' [ROTATOR] FAILED!!! SkyX_JS_MatchAngle Error: ' + result);
         }
         else {
-          rotateSucess = true;
-  //        var resMsg = "imageLinkAng=NA|targetAngle=NA|rotPos=" + TARGETANG + "|newPos=" + rotPos;
+          if( results.length > 0) {
+            for( var i=1; i<results.length;i++) {
+              var token=results[i].trim();
+              // RunJavaScriptOutput.writeLine(token);
+              var param=token.split("=");
+              switch( param[0] ) {
 
-          var linkAngle = tsx_return.split('|')[1].trim();
-          var angle = linkAngle.split('=')[1].trim();
-          UpdateStatus(' [ROTATOR] ' + target.getFriendlyName() + ' PA set: ' + angle );
+                case 'newPos':
+                  break;
+
+                case 'rotPos':
+                  break;
+
+                case 'targetAngle':
+                  break;
+
+                case 'imageLinkAng':
+                  UpdateStatus(' [ROTATOR] ' + target.getFriendlyName() + ' PA set: ' + param[1]; );
+                  break;
+
+                default:
+                  //RunJavaScriptOutput.writeLine(param[0]+' not found.');
+              }
+            }
+          }
+          rotateSucess = true;
         }
         tsx_is_waiting = false;
       }));

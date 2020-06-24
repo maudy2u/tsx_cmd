@@ -133,10 +133,10 @@ function rotate( target_pa, imageScale, accuracy ) {
   var rot_pa = 0;
   var new_rot_pa = 0;
   var result_pa = 0;
+  CCDSC.TakeImage(); // take initial image
   var cur_pa = currentPA(); //ImageLinkResults.imagePositionAngle;//sky position
   OUT = "FAILED";
   TSX.writeLine ("[ROTATOR] Accuracy: " + accuracy.toFixed(2) );
-  CCDSC.TakeImage(); // take initial image
   if( isWithinAccuracy( target_pa, cur_pa, accuracy, cur_pa, i ) ) {
     OUT = 'Success';
     i = MAXTRIES*2;
