@@ -134,6 +134,7 @@ export const tsx_ServerStates = {
 
   isCalibrationEnabled: 'isCalibrationEnabled',
   calibrationFrameSize: 'calibrationFrameSize',
+  disconnectCameraWhenCalibrationIsDone: 'disconnectCameraWhenCalibrationIsDone',
 
   tool_calibrate_via: 'tool_calibrate_via',
   tool_calibrate_location: 'tool_calibrate_location',
