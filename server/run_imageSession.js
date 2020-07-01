@@ -1725,7 +1725,7 @@ function tsx_MatchRotation( target ) {
                   break;
 
                 case 'imageLinkAng':
-                  UpdateStatus(' [ROTATOR] ' + target.getFriendlyName() + ' PA set: ' + param[1] );
+                  UpdateStatus(' [ROTATOR] ' + target.getFriendlyName() + ' PA set: ' + param[1]; );
                   break;
 
                 default:
