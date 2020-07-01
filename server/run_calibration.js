@@ -71,8 +71,6 @@ import {
   tsx_SlewTargetName,
   tsx_SlewCmdCoords,
   tsx_StopTracking,
-  tsx_TurnOffCooler,
-  tsx_Disconnect,
 } from './run_imageSession.js';
 
 import {
@@ -118,10 +116,6 @@ export function calibrate_flatbox_levels() {
     flatbox_disconnect();
     srvStopScheduler();
     tsx_SetServerState( tsx_ServerStates.tool_active, false );
-    var doDisconnect = tsx_GetServerStateValue( tsx_ServerStates.disconnectCameraWhenCalibrationIsDone );
-    if( doDisconnect ) {
-      tsx_Disconnect();
-    }
   }
   console.log( res )
 
@@ -151,7 +145,6 @@ export function collect_calibration_images() {
   }
   tsxLog( ' [CALIBRATION] calibration frame(s): ' + cf.length );
 
-  UpdateStatusWarn( ' [CALIBRATION] Work around - Flat as Light to monitor max pixel');
   // for loop for Quantity
   for( var i=0; i < cf.length; i ++ ) {
     if( isSchedulerStopped() != false ) {
@@ -203,12 +196,7 @@ export function collect_calibration_images() {
             if( Number(maxPix) >= Number(MAX_VALUE) ) {
               numMaxPixs++;
               var file = imageReportFilename( iid );
-              try{
-                tsx_RemoveImage( file );
-              }
-              catch(err) {
-                UpdateStatusWarn(' [CALIBRATION] CONTINUING... Even though, could not removed file exceed maxPixel. tsx_cmd server MUST be on same PC as TheSkyX for this to work.')
-              }
+              tsx_RemoveImage( file );
               sub--;
             }
             else {
@@ -240,18 +228,10 @@ export function collect_calibration_images() {
       tsxErr( err )
       UpdateStatusErr( ' [CALIBRATION] *** UNKNOWN ERROR - Calibrating failed.' );
     }
-    finally{
-
-    }
   }
   if( fp_enabled ) {
     flatbox_off();
     flatbox_disconnect();
-  }
-
-  var doDisconnect = tsx_GetServerStateValue( tsx_ServerStates.disconnectCameraWhenCalibrationIsDone );
-  if( doDisconnect ) {
-    tsx_Disconnect();
   }
 
   tsx_SetServerState( tsx_ServerStates.tool_active, false );
@@ -280,14 +260,13 @@ function findFilterLevel( calibrationItem, upperLevel, lowerLevel ) {
   const MAXIMUM_PIXEL_OCCURANCE = tsx_GetServerStateValue( tsx_ServerStates.imagingPixelMaximumOccurance); // TheSkyX's 16 bit maximumm value
   const MONITOR_PIXEL_ENABLED = tsx_GetServerStateValue( tsx_ServerStates.flatbox_monitor_max_pixel); // TheSkyX's 16 bit maximumm value
 
-  UpdateStatusWarn( ' [CALIBRATION] Work around - Flat as Light to monitor max pixel');
-
   if(
       FP_ENABLED
     && MONITOR_PIXEL_ENABLED
     && calibrationItem.subFrameTypes === 'Flat'
    )
    {
+
     var not_found = true;
     while( Number(maxPix) >= Number(MAX_VALUE) || not_found ) {
       console.log( ' test - start ' )
@@ -406,7 +385,7 @@ function takeCalibrationImage( cal ) {
   var tName = cal.subFrameTypes;
 
   if( cal.subFrameTypes === 'Flat' ) {
-    //UpdateStatusWarn( ' [CALIBRATION] Work around - Flat as Light to monitor max pixel');
+    UpdateStatusWarn( ' [CALIBRATION] Work around - Flat as Light to monitor max pixel');
     frame = getFrameNumber('Light');
     tName = 'Flat';
   }
@@ -425,8 +404,6 @@ function takeCalibrationImage( cal ) {
 }
 
 Meteor.methods({
-
-// disconnectCameraWhenCalibrationIsDone
 
   findFilterLevels() {
 

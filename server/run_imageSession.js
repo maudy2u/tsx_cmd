@@ -1938,29 +1938,6 @@ function takenImagesFor(target, seriesId) {
   return taken;
 }
 
-export function tsx_TurnOffCooler() {
-  tsxInfo(' *** tsx_TurnOffCooler: ' + ccdTemp );
-  var success = false;
-  var cmd = tsx_cmd('SkyX_JS_ImagingCoolerOff');
-
-  tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-    tsxDebug(' tsx_TurnOffCooler return: ' + tsx_return );
-
-    Meteor.sleep( 500 ); // needs a sleep before next image
-    tsx_is_waiting = false;
-  }));
-  while( tsx_is_waiting ) {
-    Meteor.sleep( 1000 );
-    if( isSchedulerStopped() ) {
-      tsxInfo('Stop Waiting Image - scheduler Stopped');
-      tsx_is_waiting = false;
-      success = false;
-    }
-  }
-  return;
-}
-
-
 export function tsx_setCCDTemp( ccdTemp ) {
   tsxInfo(' *** tsx_setCCDTemp: ' + ccdTemp );
   var success = false;
@@ -2053,6 +2030,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
     || tName === 'Dark'
     || tName === 'Bias'
   ) {
+    UpdateStatusWarn( ' [CALIBRATION] Work around - Flat as Light to monitor max pixel');
     friendly = tName;
   }
 

@@ -77,9 +77,6 @@ class CalibrationsMenu extends Component {
       tool_flats_via: '',
       tool_flats_location: '',
       tool_flats_dec_az: '',
-      disconnectCameraWhenCalibrationIsDone: false,
-      flatbox_monitor_max_pixel: false,
-      flatbox_enabled: false,
 
       activeIndex: 1,
     };
@@ -121,13 +118,6 @@ class CalibrationsMenu extends Component {
     saveDefaultStateValue( name, !val );
   };
 
-  // NEEDED
-  componentDidMount() {
-    // Typical usage (don't forget to compare props):
-    this.updateDefaults(this.props);
-  }
-
-  // NEEDED
   componentDidUpdate(prevProps) {
     // Typical usage (don't forget to compare props):
     if (this.props.target !== prevProps.target) {
@@ -135,7 +125,6 @@ class CalibrationsMenu extends Component {
     }
   }
 
-  // NEEDED
   updateDefaults(nextProps) {
     if( typeof nextProps == 'undefined'  ) {
       return;
@@ -156,17 +145,8 @@ class CalibrationsMenu extends Component {
         tool_flats_location: nextProps.tsxInfo.find(function(element) {
           return element.name == 'tool_flats_location';
       }).value});
-
-      this.setState({
-        flatbox_monitor_max_pixel: nextProps.tsxInfo.find(function(element) {
-          return element.name == 'flatbox_monitor_max_pixel';
-      }).value});
-
-      this.setState({
-        disconnectCameraWhenCalibrationIsDone: nextProps.tsxInfo.find(function(element) {
-          return element.name == 'disconnectCameraWhenCalibrationIsDone';
-      }).value});
     }
+
   }
 
   playButton() {
@@ -388,32 +368,8 @@ class CalibrationsMenu extends Component {
     }
   }
 
-  renderMaxPixelMonitor() {
-  if( this.props.flatbox_enabled.value === true ) {
-    console.log('flatbox')
-     return (
-           <Checkbox
-             label='Monitor MaximumPixel, to reduce level'
-             name='flatbox_monitor_max_pixel'
-             toggle
-             checked={this.state.flatbox_monitor_max_pixel}
-             onClick={this.handleToggleAndSave.bind(this)}
-             style={{ labelColor: 'black'  }}
-           />
-     )
-   }
-  }
 
-  /*
-
-
- */
   render() {
-
-    var NUMCOLS = 8;
-    if( this.props.flatbox_enabled.value === true ) {
-      NUMCOLS = 9;
-    }
 
     return (
       <div>
@@ -422,7 +378,7 @@ class CalibrationsMenu extends Component {
       <Table basic celled compact unstackable >
            <Table.Header>
              <Table.Row >
-              <Table.HeaderCell colSpan={NUMCOLS}  >
+              <Table.HeaderCell colSpan='7'  >
               {this.renderCalibrationControls(
                 this.props.scheduler_running
                 , this.props.tool_active
@@ -430,19 +386,6 @@ class CalibrationsMenu extends Component {
               { this.renderCalibrationButtonBar() }
               { this.renderModalCalibrationSettings()}
               </Table.HeaderCell>
-             </Table.Row>
-             <Table.Row>
-              <Table.HeaderCell colSpan={NUMCOLS}  >
-                 &nbsp;&nbsp;&nbsp;<Checkbox
-                  label=' Disconnect Camera when done '
-                  name='disconnectCameraWhenCalibrationIsDone'
-                  toggle
-                  placeholder= 'Enable Autoguiding Calibrating'
-                  checked={Boolean(this.state.disconnectCameraWhenCalibrationIsDone)}
-                  onChange={this.handleToggleAndSave.bind(this)}
-                 />
-                 &nbsp;&nbsp;&nbsp;{this.renderMaxPixelMonitor()}
-               </Table.HeaderCell>
              </Table.Row>
              <Table.Row>
                <Table.HeaderCell  >On/Off</Table.HeaderCell>
@@ -461,8 +404,12 @@ class CalibrationsMenu extends Component {
             return (
                <CalibrationFrame
                 key={obj._id}
+                calibrations={this.props.calibrations}
                 calibration={obj}
                 flatbox_enabled={this.props.flatbox_enabled}
+                tsxInfo={this.props.tsxInfo}
+                scheduler_running={this.props.scheduler_running}
+                tool_active={this.props.tool_active}
               />
             )
           })}

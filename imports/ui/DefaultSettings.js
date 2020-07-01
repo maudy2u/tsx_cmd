@@ -226,13 +226,11 @@ class DefaultSettings extends Component {
   saveServerFailedOpen = () => this.setState({ saveServerFailed: true });
   saveServerFailedClose = () => this.setState({ saveServerFailed: false });
 
-  // NEEDED
   componentDidMount() {
     // Typical usage (don't forget to compare props):
     this.updateDefaults(this.props);
   }
 
-  // NEEDED
   componentDidUpdate(prevProps) {
     // Typical usage (don't forget to compare props):
     if (this.props.target !== prevProps.target) {
@@ -240,7 +238,6 @@ class DefaultSettings extends Component {
     }
   }
 
-  // NEEDED
   updateDefaults(nextProps) {
       if( typeof nextProps == 'undefined'  ) {
         return;
@@ -678,6 +675,17 @@ class DefaultSettings extends Component {
             onClick={this.statusArtesky.bind(this)}
             style={{ backgroundColor: 'green', color: 'black'  }}
           >STATUS</Button>
+          &nbsp; <br/>
+          &nbsp; <br/>
+          <Checkbox
+            label='Monitor MaximumPixel, to reduce level'
+            name='flatbox_monitor_max_pixel'
+            disabled={DISABLED}
+            toggle
+            checked={this.state.flatbox_monitor_max_pixel}
+            onClick={this.handleToggleAndSave.bind(this)}
+            style={{ labelColor: 'black'  }}
+          />
           &nbsp; <br/>
           <Form>
           <Form.Input
