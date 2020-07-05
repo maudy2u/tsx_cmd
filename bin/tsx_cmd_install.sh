@@ -16,11 +16,11 @@
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 install_dir=$(pwd)
-APP_aarch64='https://github.com/maudy2u/tsx_cmd/releases/download/untagged-979fc7001b98ddd839d9/tsx_cmd_os.Linux.aarch64_v3.7.0_2020-06-26_RC33.634.tar'
-APP_armv7l='https://github.com/maudy2u/tsx_cmd/releases/download/untagged-979fc7001b98ddd839d9/tsx_cmd_os.Linux.armv7l_v3.7.0_2020-06-26_RC33.634.tar'
-APP_Linux='https://github.com/maudy2u/tsx_cmd/releases/download/untagged-979fc7001b98ddd839d9/tsx_cmd_os.linux.x86_64_v3.7.0_2020-06-26_RC33.634.tar'
-APP_macos='https://github.com/maudy2u/tsx_cmd/releases/download/untagged-979fc7001b98ddd839d9/tsx_cmd_os.osx.x86_64_v3.7.0_2020-06-26_RC33.634.tar'
-APP_windows='https://github.com/maudy2u/tsx_cmd/releases/download/untagged-979fc7001b98ddd839d9/tsx_cmd_os.windows.x86_32_v3.7.0_2020-06-26_RC33.634.tar'
+APP_aarch64='https://github.com/maudy2u/tsx_cmd/releases/download/RC33/tsx_cmd_os.Linux.aarch64_v3.7.0_2020-06-26_RC33.634.tar'
+APP_armv7l='https://github.com/maudy2u/tsx_cmd/releases/download/RC33/tsx_cmd_os.Linux.armv7l_v3.7.0_2020-06-26_RC33.634.tar'
+APP_Linux='https://github.com/maudy2u/tsx_cmd/releases/download/RC33/tsx_cmd_os.linux.x86_64_v3.7.0_2020-06-26_RC33.634.tar'
+APP_macos='https://github.com/maudy2u/tsx_cmd/releases/download/RC33/tsx_cmd_os.osx.x86_64_v3.7.0_2020-06-26_RC33.634.tar'
+APP_windows='https://github.com/maudy2u/tsx_cmd/releases/download/RC33/tsx_cmd_os.windows.x86_32_v3.7.0_2020-06-26_RC33.634.tar'
 
 if [ $# -eq 0 ]
   then
