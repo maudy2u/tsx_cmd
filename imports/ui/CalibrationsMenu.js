@@ -187,7 +187,7 @@ class CalibrationsMenu extends Component {
     var slew = this.state.tool_flats_via;
     var location = this.state.tool_flats_location;
     var dec_az = this.state.tool_flats_dec_az;
-    Meteor.call( 'slewPosition', slew, location, dec_az, 1, function(error, result) {
+    Meteor.call( 'flatSlewPosition', slew, location, dec_az, 1, function(error, result) {
       console.log('Slew result: ' + result);
     }.bind(this));
   }

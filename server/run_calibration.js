@@ -70,7 +70,6 @@ import {
   tsx_takeImage,
   tsx_SlewTargetName,
   tsx_SlewCmdCoords,
-  tsx_StopTracking,
   tsx_TurnOffCooler,
   tsx_Disconnect,
 } from './run_imageSession.js';

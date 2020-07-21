@@ -9,7 +9,7 @@ try
 	while( sky6RASCOMTele.IsParked() ) {
 		sky6Web.Sleep(1000);
 	}
-
+	sky6RASCOMTele.SetTracking(1, 1, 0 ,0);
 	out = 'unparked';
 }
 catch (repErr) {

@@ -67,7 +67,6 @@ import {
   tsx_RotateCamera,
   tsx_SlewTargetName,
   tsx_SlewCmdCoords,
-  tsx_StopTracking,
 } from './run_imageSession.js';
 
 //const arteksy_cmd = '/usr/local/bin/arteksy_cmd'

@@ -389,7 +389,7 @@ Meteor.methods({
     }
    },
 
-  slewPosition( slew, location, dec_az, stopTracking ) {
+  flatSlewPosition( slew, location, dec_az, stopTracking ) {
     tsx_SetServerState( tsx_ServerStates.tool_active, true );
     tsxInfo( '  slew'+slew);
     tsxInfo( '  location'+location);
@@ -426,7 +426,7 @@ Meteor.methods({
         tsx_SetServerState( tsx_ServerStates.tool_active, true );
         let res = '';
         try {
-          res = tsx_StopTracking();
+          res = tsx_StopTracking(); // used for flats
           UpdateStatus('Stopped tracking');
         }
         catch (e) {
