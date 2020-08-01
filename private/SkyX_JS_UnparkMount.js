@@ -12,8 +12,8 @@ try
 	sky6RASCOMTele.SetTracking(1, 1, 0 ,0);
 	out = 'unparked';
 }
-catch (repErr) {
-	out += "Mount: " + refErr + cr;
+catch (refErr) {
+	out += "Mount: " + refErr;
 }
 out
 /* Socket End Packet */

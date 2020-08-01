@@ -2555,32 +2555,53 @@ export function findTargetSession() {
   var numSessions = targetSessions.length;
   tsxInfo(' Targets to check: ' + numSessions);
 
-  // get first validSession
-  var validSession;
+  // get the valid sessions
+  var choosenSession;
+  var validSessions = [];
   var foundSession = false;
   for (var i = 0; i < numSessions; i++) {
     var canStart = canTargetSessionStart( targetSessions[i]);
     // tsxLog( 'Checked ' + targetSessions[i].getFriendlyName() + ': ' + canStart);
     if( canStart ) {
-      validSession = targetSessions[i];
+      validSessions.push(targetSessions[i]);
       foundSession = true;
-      tsxInfo( ' Candidate: ' + validSession.getFriendlyName());
-      break;
+      tsxInfo( ' Candidate: ' + targetSessions[i].getFriendlyName());
     }
   }
 
-  // now iterate the sessions to find anyting with higher
-  // priotiry
+  // use validsession with highest priority
   if( foundSession ) {
-    validSession = getHigherPriorityTarget( validSession );
-    UpdateStatus( ' [SCHEDULER] selected: ' + validSession.getFriendlyName() );
+    choosenSession = validSessions[0]; // get first session
+    for( var j=1; j<validSessions.length; j++ ){
+      // now iterate the sessions to find anyting with higher
+      // priotiry
+
+      var curPriority = Number(choosenSession.priority);
+      var valPriority = Number(validSessions[j].priority);
+      var chk = curPriority - valPriority;
+      tsxLog( ' [SCHEDULER] Priority check: ('
+        + choosenSession.priority
+        + ')'
+        + choosenSession.getFriendlyName()
+        + ' vs. ('
+        + validSessions[j].priority
+        + ')'
+        + validSessions[j].getFriendlyName()
+      );
+      if( (chk > 0) ) {
+            choosenSession = validSessions[j];
+            tsxDebug( ' *** priority given: ' + choosenSession.getFriendlyName());
+      }
+    }
+    UpdateStatus( ' [SCHEDULER] selected: ' + choosenSession.getFriendlyName() );
   }
   else {
     UpdateStatus( ' [SCHEDULER] found no target' );
   }
+
   tsxInfo('************************');
 
-  return validSession;
+  return choosenSession;
 }
 
 // *******************************

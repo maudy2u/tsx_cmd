@@ -1,0 +1,72 @@
+conky.config = {
+    own_window_hints='below',
+    double_buffer = true,
+    own_window = true,
+    own_window_class = 'Conky',
+    own_window_type = 'normal',
+
+
+    alignment = 'top_right',
+    background = false,
+    border_width = 1,
+    cpu_avg_samples = 2,
+	  default_color = 'white',
+    default_outline_color = 'white',
+    default_shade_color = 'white',
+    draw_borders = false,
+    draw_graph_borders = true,
+    draw_outline = false,
+    draw_shades = false,
+    use_xft = true,
+
+    gap_x = 8,
+    gap_y = 35,
+    minimum_height = 5,
+    maximum_width = 300,
+	minimum_width = 300,
+    net_avg_samples = 2,
+    no_buffers = true,
+    out_to_console = false,
+    out_to_stderr = false,
+    extra_newline = false,
+    stippled_borders = 0,
+    update_interval = 1.0,
+    uppercase = false,
+    use_spacer = 'none',
+    show_graph_scale = false,
+    show_graph_range = false
+}
+
+conky.text = [[
+${scroll 45 $nodename - $sysname $kernel on $machine | }
+$hr
+${color grey}Uptime:$color $uptime
+${color grey}Frequency (in MHz):$color $freq
+${color grey}Frequency (in GHz):$color $freq_g
+${color grey}RAM Usage:$color $mem/$memmax - $memperc% ${membar 4}
+${color grey}Swap Usage:$color $swap/$swapmax - $swapperc% ${swapbar 4}
+${color grey}CPU Usage:$color $cpu% ${cpubar 4}
+${color grey}Processes:$color $processes ${color grey}Running:$color $running_processes
+${color grey}CPU Temp: $color ${exec awk '{printf "%3.1fÂ°C\n", $1/1000}' /sys/class/thermal/thermal_zone0/temp}
+$hr
+$hr
+${color grey}File systems:
+ / $color${fs_used /}/${fs_size /} ${fs_bar 6 /}
+# ${if_existing /media/odroid/PENSIVE1} ${color grey}PENSIVE1:
+# / ${if_existing /media/odroid/PENSIVE1} $color${fs_used /media/odroid/PENSIVE1}/${fs_size /media/odroid/PENSIVE1} ${fs_bar /media/odroid/PENSIVE1}
+${color grey}
+${if_existing /media/odroid/Tardis} Tardis: /$color${fs_used /media/odroid/Tardis}/${fs_size /media/odroid/Tardis} ${fs_bar /media/odroid/Tardis} ${endif}
+${if_existing /media/odroid/IOmega} IOmega: /$color${fs_used /media/odroid/IOmega}/${fs_size /media/odroid/IOmega} ${fs_bar /media/odroid/IOmega} ${endif}
+${if_existing /media/odroid/Imaging4} Imaging4: /$color${fs_used /media/odroid/Imaging4}/${fs_size /media/odroid/Imaging4} ${fs_bar /media/odroid/Imaging4} ${endif}
+${if_existing /media/odroid/Imaging3} Imaging3: /$color${fs_used /media/odroid/Imaging3}/${fs_size /media/odroid/Imaging3} ${fs_bar /media/odroid/Imaging3} ${endif}
+$hr
+${color grey}Networking:
+Up:$color ${upspeed eth0} ${color grey} - Down:$color ${downspeed eth0}
+$hr
+${color grey}Name              PID   CPU%   MEM%
+${color lightgrey} ${top name 1} ${top pid 1} ${top cpu 1} ${top mem 1}
+${color lightgrey} ${top name 2} ${top pid 2} ${top cpu 2} ${top mem 2}
+${color lightgrey} ${top name 3} ${top pid 3} ${top cpu 3} ${top mem 3}
+${color lightgrey} ${top name 4} ${top pid 4} ${top cpu 4} ${top mem 4}
+${color lightgrey} ${top name 5} ${top pid 5} ${top cpu 5} ${top mem 5}
+]]
