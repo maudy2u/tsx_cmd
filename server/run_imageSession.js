@@ -1226,13 +1226,16 @@ function tsx_reachedMinAlt( target ) {
   tsxInfo(' *** tsx_reachedMinAlt for: ' + target.getFriendlyName());
 
   var targetMinAlt = target.minAlt;
-	if( typeof targetMinAlt == 'undefined' ) {
-		targetMinAlt = tsx_GetServerStateValue(tsx_ServerStates.defaultMinAltitude);
+  var rpt = TargetReports.findOne({target_id: target._id });
+	var curAlt = rpt.ALT;
+  if( typeof targetMinAlt == 'undefined' || typeof curAlt == 'undefined') {
+    tsxError(' [MIN_ALT] ERROR!! ' + target.getFriendlyName() );
+		//targetMinAlt = tsx_GetServerStateValue(tsx_ServerStates.defaultMinAltitude);
+    return false;
 	}
-	var curAlt = target.report.ALT;
-	tsxInfo(' ' + target.getFriendlyName() + ': altitude (' + curAlt + ') <'+ ' minAlt (' + targetMinAlt + ')' );
-	if( curAlt < targetMinAlt ) {
-		tsxInfo( ' ' + target.getFriendlyName() + ': Stoped, below Minimum Altitude.' );
+	tsxLog('  [MIN_ALT] ' + target.getFriendlyName() + ': altitude (' + curAlt + ') <'+ ' minAlt (' + targetMinAlt + ')' );
+	if( curAlt > targetMinAlt ) {
+		tsxLog( '  [MIN_ALT] ' + target.getFriendlyName() + ': Stoped, below Minimum Altitude.' );
 		return true;
 	}
   return false;
@@ -2565,7 +2568,7 @@ export function findTargetSession() {
     if( canStart ) {
       validSessions.push(targetSessions[i]);
       foundSession = true;
-      tsxInfo( ' Candidate: ' + targetSessions[i].getFriendlyName());
+      tsxLog( ' Candidate: ' + targetSessions[i].getFriendlyName());
     }
   }
 
@@ -2724,7 +2727,7 @@ export function canTargetSessionStart( target ) {
   // see up above... do not redo... var result =   UpdateImagingTargetReport( target );
   var minAlt = tsx_reachedMinAlt( target );
   tsxDebug( ' [SCHEDULER] Is target minAlt: ' + minAlt );
-  if( minAlt ) {
+  if( !minAlt ) {
     UpdateStatus( ' [SCHEDULER] stopping (too low): ' + target.getFriendlyName()+', currently ('+result.ALT+')' + ' vs. needs (' + target.minAlt + ')');
     return false;
   }
