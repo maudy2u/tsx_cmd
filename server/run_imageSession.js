@@ -1234,7 +1234,7 @@ function tsx_reachedMinAlt( target ) {
     return false;
 	}
 	tsxLog('  [MIN_ALT] ' + target.getFriendlyName() + ': altitude (' + curAlt + ') <'+ ' minAlt (' + targetMinAlt + ')' );
-	if( curAlt > targetMinAlt ) {
+	if( Number(curAlt) > Number(targetMinAlt) ) {
 		tsxLog( '  [MIN_ALT] ' + target.getFriendlyName() + ': Stoped, below Minimum Altitude.' );
 		return true;
 	}
