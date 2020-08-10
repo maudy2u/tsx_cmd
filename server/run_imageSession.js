@@ -409,8 +409,9 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
     var result = tsx_return.split('|')[0].trim();
-    if( result != 'Success') {
-      UpdateStatusErr(' [AUTOGUIDER] *** FAILED- calibrating autoguider: ' + result);
+    if( result !== 'Success') {
+      UpdateStatusErr(' [AUTOGUIDER] *** FAILED- calibrating autoguider: ' + tsx_return);
+      throw( 'TSX_ERROR| [AUTOGUIDER] calibration failed - starting over');
     }
     else {
       success = true;

@@ -49,13 +49,12 @@ ${color grey}CPU Usage:$color $cpu% ${cpubar 4}
 ${color grey}Processes:$color $processes ${color grey}Running:$color $running_processes
 ${color grey}CPU Temp: $color ${exec awk '{printf "%3.1fÂ°C\n", $1/1000}' /sys/class/thermal/thermal_zone0/temp}
 $hr
-$hr
 ${color grey}File systems:
  / $color${fs_used /}/${fs_size /} ${fs_bar 6 /}
 # ${if_existing /media/odroid/PENSIVE1} ${color grey}PENSIVE1:
 # / ${if_existing /media/odroid/PENSIVE1} $color${fs_used /media/odroid/PENSIVE1}/${fs_size /media/odroid/PENSIVE1} ${fs_bar /media/odroid/PENSIVE1}
-${color grey}
-${if_existing /media/odroid/Tardis} Tardis: /$color${fs_used /media/odroid/Tardis}/${fs_size /media/odroid/Tardis} ${fs_bar /media/odroid/Tardis} ${endif}
+$hr
+${color grey}${if_existing /media/odroid/Tardis} Tardis: /$color${fs_used /media/odroid/Tardis}/${fs_size /media/odroid/Tardis} ${fs_bar /media/odroid/Tardis} ${endif}
 ${if_existing /media/odroid/IOmega} IOmega: /$color${fs_used /media/odroid/IOmega}/${fs_size /media/odroid/IOmega} ${fs_bar /media/odroid/IOmega} ${endif}
 ${if_existing /media/odroid/Imaging4} Imaging4: /$color${fs_used /media/odroid/Imaging4}/${fs_size /media/odroid/Imaging4} ${fs_bar /media/odroid/Imaging4} ${endif}
 ${if_existing /media/odroid/Imaging3} Imaging3: /$color${fs_used /media/odroid/Imaging3}/${fs_size /media/odroid/Imaging3} ${fs_bar /media/odroid/Imaging3} ${endif}
