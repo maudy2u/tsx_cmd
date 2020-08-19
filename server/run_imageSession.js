@@ -346,6 +346,7 @@ function tsx_FindGuideStar() {
   tsx_is_waiting = true;
   var guideStarX = 0;
   var guideStarY = 0;
+  var success = false;
   // var cmd = tsxCmdFindGuideStar();
   var cmd = tsx_cmd('SkyX_JS_FindAutoGuideStar');
   tsxDebug( '[TSX] SkyX_JS_FindAutoGuideStar' );
@@ -353,18 +354,22 @@ function tsx_FindGuideStar() {
     try {
       tsxDebug(' Guide star info: ' + tsx_return);
       guideStarX = tsx_return.split('|')[0].trim();
-      if( guideStarX == "TypeError:") {
-        throw("Guider Star not found!")
-      }
       guideStarY = tsx_return.split('|')[1].trim();
-      tsxDebug( " --- Guide star: "+guideStarX+", "+guideStarY );
       out = {
         guideStarX: guideStarX,
         guideStarY: guideStarY,
       };
+      tsxLog( " [AUTOGUIDER] Guide star: "+guideStarX+", "+guideStarY );
+      if( guideStarX != "TypeError:") {
+        success = true;
+      }
+      else {
+        UpdateStatusErr( " [AUTOGUIDER] Guide star: ERROR - " + tsx_return );
+      }
     }
     catch( e ) {
-      UpdateStatusErr( " --- Guide star: NOT FOUND - " + e );
+      UpdateStatusErr( " [AUTOGUIDER] Guide star: NOT FOUND - " + e );
+      success = false;
     }
     finally {
       tsx_is_waiting = false;
@@ -372,6 +377,10 @@ function tsx_FindGuideStar() {
   }));
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
+  }
+  if( success === false ) {
+    UpdateStatusErr( " [AUTOGUIDER] Guide star: NOT FOUND - " );
+    throw(" [AUTOGUIDER] Guide Star not found!")
   }
   return out;
 }
@@ -391,7 +400,7 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
     return false;
   }
   var fSize = tsx_GetServerStateValue( tsx_ServerStates.calibrationFrameSize );
-  if( typeof fSize == 'undefined' || fSize === '' ) {
+  if( typeof fSize === 'undefined' || fSize === '' || fSize <1 ) {
     fSize = 300;
     UpdateStatusWarn(' [AUTOGUIDER] calibration frame needs setting ');
   }
@@ -408,22 +417,27 @@ function tsx_CalibrateAutoGuide(guideStarX, guideStarY) {
   UpdateStatus(' [AUTOGUIDER] Calibration STARTED ');
 
   tsx_feeder(cmd, Meteor.bindEnvironment((tsx_return) => {
-    var result = tsx_return.split('|')[0].trim();
-    if( result !== 'Success') {
+    try {
+      var result = tsx_return.split('|')[0].trim();
+      if( result == 'Success') {
+        success = true;
+      }
+    }
+    catch( e ) {
       UpdateStatusErr(' [AUTOGUIDER] *** FAILED- calibrating autoguider: ' + tsx_return);
-      throw( 'TSX_ERROR| [AUTOGUIDER] calibration failed - starting over');
     }
-    else {
-      success = true;
+    finally {
+      tsx_is_waiting = false;
     }
-
-    tsx_is_waiting = false;
   }));
   while( tsx_is_waiting ) {
    Meteor.sleep( 1000 );
   }
   if( !success ) {
+    UpdateStatusErr(' [AUTOGUIDER] *** FAILED- calibration ');
+    throw( 'TSX_ERROR| [AUTOGUIDER] calibration failed - starting over');
   }
+
   UpdateStatus(' [AUTOGUIDER] Calibration FINISHED ');
   return success;
 }
@@ -1038,11 +1052,11 @@ function tsx_GetMountReport() {
 // 6. CLS.
 // 7. Guide...
 // **************************************************************
-function SetUpForImagingRun(target, doRotator, doCalibration ) {
+function SetUpForImagingRun(target, doRotator, doCalibration, doFocus, doCentre ) {
   tsxInfo('************************');
   tsxInfo(' *** SetUpForImagingRun: ' + target.getFriendlyName() );
 
-  Meteor.sleep(3000); // pause 3 seconds
+// not sure why....  Meteor.sleep(3000); // pause 3 seconds
   // UpdateStatus(  " Stopping autoguider" );
   // tsx_AbortGuider(); // now done in CLS
 
@@ -1069,9 +1083,11 @@ function SetUpForImagingRun(target, doRotator, doCalibration ) {
   // *******************************
   // get initial focus....
   // needs initial focus temp
-  InitialFocus( target );
-  if( isSchedulerStopped() ) {
-    return false; // exit
+  if( doFocus ) {
+    InitialFocus( target );
+    if( isSchedulerStopped() ) {
+      return false; // exit
+    }
   }
 
   // *******************************
@@ -1234,24 +1250,12 @@ function tsx_reachedMinAlt( target ) {
 		//targetMinAlt = tsx_GetServerStateValue(tsx_ServerStates.defaultMinAltitude);
     return false;
 	}
-	tsxLog('  [MIN_ALT] ' + target.getFriendlyName() + ': altitude (' + curAlt + ') <'+ ' minAlt (' + targetMinAlt + ')' );
+	tsxDebug('  [MIN_ALT] ' + target.getFriendlyName() + ': altitude (' + curAlt + ') <'+ ' minAlt (' + targetMinAlt + ')' );
 	if( Number(curAlt) > Number(targetMinAlt) ) {
-		tsxLog( '  [MIN_ALT] ' + target.getFriendlyName() + ': Stoped, below Minimum Altitude.' );
+		tsxDebug( '  [MIN_ALT] ' + target.getFriendlyName() + ': Stoped, below Minimum Altitude.' );
 		return true;
 	}
   return false;
-}
-
-// **************************************************************
-function isPriorityTarget( target ) {
-  // tsxInfo('************************');
-  tsxInfo(' *** isPriorityTarget: ' + target.getFriendlyName());
-
-  var priority = getHigherPriorityTarget( target );
-  if( priority._id != target._id ) {
-    return false;
-  }
-  return true;
 }
 
 // **************************************************************
@@ -1401,14 +1405,21 @@ function isTargetConditionInValid(target) {
   tsxInfo(' [SCHEDULER] isTargetConditionInValid: ' + target.getFriendlyName() );
   tsxInfo(' [SCHEDULER] Evaluating: ' + target.getFriendlyName() );
 
+  // check if scheduler is stopped.
+  if( isSchedulerStopped() ) {
+    forceAbort = true;
+    return true; // exit
+  }
+
   // *******************************
-  // Were checks just run
+  // Were checks just run, if so check sun and whether to run again
   let timeToCheck = tsx_GetServerStateValue( tsx_ServerStates.isTargetConditionInValidExpired );
   if( typeof timeToCheck === 'undefined' || timeToCheck === '' ) {
     timeToCheck = new Date();
     tsx_SetServerState( tsx_ServerStates.isTargetConditionInValidExpired, timeToCheck );
   }
 
+  // check sun
   if( !tsx_isDark ) {
     tsxLog(' [SCHEDULER] setting IMAGER target invalid - now light!');
     return true;
@@ -1433,32 +1444,35 @@ function isTargetConditionInValid(target) {
     tsx_SetServerState( tsx_ServerStates.isTargetConditionInValidExpired, timeToCheck );
   }
 
+  // check if scheduler is stopped.
   if( isSchedulerStopped() ) {
     forceAbort = true;
     return true; // exit
   }
 
   // *******************************
-  // reassess the target state
-  if( !(canTargetSessionStart( target )) ) {
-    UpdateStatus(' [SCHEDULER] STOPPING: ' + target.getFriendlyName());
-    forceAbort = true;
-    return true;
+  // *******************************
+  // CHECK IF THE TARGET SHOULD BE CHANGED
+  var activeTarget = findTargetSession();
+  if( typeof activeTarget !== 'undefined'
+  && activeTarget !== '' )  {
+    if( target._id !== activeTarget._id ) {
+      UpdateStatus( ' [SCHEDULER] New Target found: ' + activeTarget.getFriendlyName() );
+      return true;
+    }
+    else {
+      UpdateStatus( ' [SCHEDULER] Continue: ' + target.getFriendlyName() );
+    }
   }
   else {
-    // Used to update the monitor, as it is this target to continue
-    UpdateStatus(' [SCHEDULER] Continuing: ' + target.getFriendlyName());
-    tsx_SetServerState( tsx_ServerStates.scheduler_report, target.report );
+    tsxLog( '[SCHEDULER] No active Target found.')
+    return true; // no valid active target
   }
 
   // *******************************
-  // confirm should use same target... and not higher priority
-  var priorityTarget = getHigherPriorityTarget( target ); // no return
-  if( priorityTarget.targetFindName !== target.targetFindName ) {
-    UpdateStatus(' [SCHEDULER] HIGHER PRORITY FOUND: ' + priorityTarget.getFriendlyName() + ', stopping: ' + target.getFriendlyName() );
-    forceAbort = true;
-    return true;
-  }
+  // GETTING HERE MEANS THAT THE TARGET IS Valid
+  // CHECK IF THERE IS ANY MAINTENANCE
+  // *******************************
 
 	// *******************************
 	// if meridian  - flip/slew...
@@ -1470,7 +1484,7 @@ function isTargetConditionInValid(target) {
     // prepare target of imaging again...
     // no need to focus or dither as done in prerun
     UpdateStatus( ' [SCHEDULER] MERIDIAN FLIP NEEDED: ' + target.getFriendlyName() + '...');
-    let res = prepareTargetForImaging( target, false, false ) ;
+    let res = SetUpForImagingRun( target, false, false ) ;
 
     return false; // all good continue
   }
@@ -1507,7 +1521,6 @@ function isTargetConditionInValid(target) {
         }
         // UpdateStatus( " Setup guider: " + target.getFriendlyName() );
       	SetUpAutoGuiding( target, false );			// Setup & Start Auto-Guiding.
-
         return false;
       }
       else {
@@ -1526,29 +1539,21 @@ function isTargetConditionInValid(target) {
 	// *******************************
 	// check if reFocusTemp - needs to refocus
   let runFocus3 = isFocusingNeeded( target );
-  if( runFocus3 ) {
+  let didDither = false;
+  let needDither = isDitheringNeeded( target );
+  if( runFocus3 || needDither ) {
     tsx_AbortGuider();
-    InitialFocus( target );
+
+    if( runFocus3 == true ) {
+      tsxInfo( ' [SCHEDULER] Time to check fOcUs3');
+      InitialFocus( target );
+    }
     // no need to return false... can keep going.
-    tsxInfo( ' [SCHEDULER] refocus, and redo autoguider');
-    let didDither = false;
-    let doDither = isDitheringNeeded( target );
-    if( doDither == true  ) {
+    if( needDither == true  ) {
+      tsxInfo( ' [SCHEDULER] Time to dither');
       didDither = tsx_dither( target ); //  runs SetUpAutoGuiding
     }
-    else {
-      SetUpAutoGuiding( target, false );			// Setup & Start Auto-Guiding.
-    }
-  }
-  else {
-    //
-    // *******************************
-    // Recheck if only dither is needed
-    let didDither = false;
-    let doDither = isDitheringNeeded( target );
-    if( doDither == true ) {
-      didDither = tsx_dither( target ); //  runs SetUpAutoGuiding
-    }
+    SetUpAutoGuiding( target, false );			// Setup & Start Auto-Guiding.
   }
   tsxInfo( ' [SCHEDULER] isTargetConditionInValid returns false to continue.');
   return false;
@@ -1609,7 +1614,7 @@ function tsx_dither( target ) {
         }
         else {
           // tsxLog('Dither success');
-          UpdateStatus(' [DITHER]' + target.getFriendlyName() +'');
+          UpdateStatus(' [DITHER] ' + target.getFriendlyName() +'');
           // dither succeeded so reset count
           tsx_SetServerState( tsx_ServerStates.imagingSessionDither, 0);
         }
@@ -1696,7 +1701,7 @@ function tsx_MatchRotation( target ) {
       cmd = cmd.replace('$002', focalLength);
       cmd = cmd.replace('$003', ACCURACY);
 
-      UpdateStatus( ' [ROTATOR] setting ' + target.getFriendlyName() + "'s PA: (" + angle +')' );
+      UpdateStatus( ' [ROTATOR] Framing ' + target.getFriendlyName() + "'s PA: (" + angle +')' );
       cmd = cmd.replace('$000', angle );
       cmd = cmd.replace('$004', 0); // ImageLink Angle
       tsxDebug( '[TSX] SkyX_JS_MatchAngle, '+angle+', '+pixelSize+', '+focalLength+', '+ACCURACY+', '+'0' );
@@ -2160,7 +2165,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
               case 'pointing':
                 updateImageReport( res_iid, 'pointing', param[1] );
                 target.report = updateTargetReport( target._id, 'pointing', param[1] );
-                tsxLog( ' [IMAGER] found pointing: ' + param[1])
+                tsxDebug( ' [IMAGER] found pointing: ' + param[1])
                 break;
 
               case 'ANGLE':
@@ -2204,7 +2209,6 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
               case 'RMS_ERROR':
                 updateImageReport( res_iid, 'RMS_ERROR', param[1] );
                 target.report = updateTargetReport( target._id, 'RMS_ERROR', param[1] );
-                tsxWarn( ' [IMAGER] got RMS Error: ' + param[1] );
                 break;
 
               case 'fileName':
@@ -2505,9 +2509,9 @@ export function processTargetTakeSeries( target ) {
 }
 
 // **************************************************************
-export function prepareTargetForImaging( target, doRotator, doCalibration ) {
+export function initialPrepOfTargetForImaging( target, doRotator, doCalibration ) {
   tsxInfo(' ***********************');
-  tsxInfo(' *** prepareTargetForImaging: ' + target.getFriendlyName());
+  tsxInfo(' *** initialPrepOfTargetForImaging: ' + target.getFriendlyName());
   forceAbort = false;
   if( typeof target == 'undefined') {
     target = 'No target found. Check constraints.'
@@ -2516,7 +2520,6 @@ export function prepareTargetForImaging( target, doRotator, doCalibration ) {
   }
   else {
     UpdateImagingSesionID( target._id );
-    UpdateStatus( ' [SCHEDULER] centring: '+ target.getFriendlyName() );
     tsx_SetServerState( tsx_ServerStates.targetName, target.targetFindName);
 
     var targetCoords = UpdateImagingTargetReport( target );
@@ -2524,8 +2527,10 @@ export function prepareTargetForImaging( target, doRotator, doCalibration ) {
     tsx_SetServerState( tsx_ServerStates.lastTargetDirection, curDir);
 //    UpdateStatus( ' '+ target.getFriendlyName() + ": pointing " + curDir);
 
+    var doFocus = true;
+    var doCentre = true;
     // check here for the rotator...
-    var ready = SetUpForImagingRun( target, doRotator, doCalibration );
+    var ready = SetUpForImagingRun( target, doRotator, doCalibration, doFocus, doCentre  );
     if( ready ) {
 //      var rpt = TargetReports.findOne({ target_id: target._id })
       tsx_SetServerState( tsx_ServerStates.scheduler_report, target.report );
@@ -2569,7 +2574,7 @@ export function findTargetSession() {
     if( canStart ) {
       validSessions.push(targetSessions[i]);
       foundSession = true;
-      tsxLog( ' Candidate: ' + targetSessions[i].getFriendlyName());
+      tsxDebug( ' [SCHEDULER] Candidate: ' + targetSessions[i].getFriendlyName());
     }
   }
 
@@ -2597,10 +2602,10 @@ export function findTargetSession() {
             tsxDebug( ' *** priority given: ' + choosenSession.getFriendlyName());
       }
     }
-    UpdateStatus( ' [SCHEDULER] selected: ' + choosenSession.getFriendlyName() );
+    UpdateStatus( ' [SCHEDULER] Selected: ' + choosenSession.getFriendlyName() );
   }
   else {
-    UpdateStatus( ' [SCHEDULER] found no target' );
+    UpdateStatus( ' [SCHEDULER] No targets ready.' );
   }
 
   tsxInfo('************************');
@@ -2698,7 +2703,7 @@ export function canTargetSessionStart( target ) {
     tsxDebug( ' [SCHEDULER] Is target complete: ' + isComplete );
     let isRepeating = TakeSeriesTemplates.findOne({_id: target.series._id }).repeatSeries;
     if( isComplete && target.isCalibrationFrames == false && !isRepeating ) {
-      UpdateStatus( ' [SCHEDULER] stopping (series complete): ' + target.getFriendlyName() );
+      UpdateStatus( ' [SCHEDULER] Stopped, series complete: ' + target.getFriendlyName() );
       return false;
     }
   }
@@ -2729,7 +2734,7 @@ export function canTargetSessionStart( target ) {
   var minAlt = tsx_reachedMinAlt( target );
   tsxDebug( ' [SCHEDULER] Is target minAlt: ' + minAlt );
   if( !minAlt ) {
-    UpdateStatus( ' [SCHEDULER] stopping (too low): ' + target.getFriendlyName()+', currently ('+result.ALT+')' + ' vs. needs (' + target.minAlt + ')');
+    UpdateStatus( ' [SCHEDULER] Too low: ' + target.getFriendlyName()+', currently ('+result.ALT+')' + ' vs. needs (' + target.minAlt + ')');
     return false;
   }
 
@@ -2740,7 +2745,7 @@ export function canTargetSessionStart( target ) {
     return false;
   }
   // tsxInfo( 'inside canstart did not return false' );
-  UpdateStatus( ' [SCHEDULER] could do ('+canStart+'): ' + target.getFriendlyName() );
+  UpdateStatus( ' [SCHEDULER] Candidate: ' + target.getFriendlyName() );
 
   return canStart;
 }
@@ -2881,26 +2886,6 @@ Meteor.methods({
 
   },
 
-  testFocus3( tid ) {
-    var target = TargetSessions.findOne({_id: tid});
-
-    tsxInfo('************************');
-    tsxInfo(' *** testFocus3' );
-
-    return InitialFocus( target );
-
-  },
-
-  testGuide( tid ) {
-    var target = TargetSessions.findOne({_id: tid});
-
-    tsxInfo('************************');
-    tsxInfo(' *** testGuide' );
-
-    return SetUpAutoGuiding( target, true );
-
-  },
-
   testAbortGuiding( tid ) {
     var target = TargetSessions.findOne({_id: tid});
 
@@ -2908,16 +2893,6 @@ Meteor.methods({
     tsxInfo(' *** testAbortGuiding' );
 
     return tsx_AbortGuider();
-  },
-
-  testSolve( tid ) {
-    var target = TargetSessions.findOne({_id: tid});
-
-    tsxInfo('************************');
-    tsxInfo(' *** testSolve' );
-
-    return SetUpAutoGuiding( target, true );
-
   },
 
   centreTarget( tid ) {

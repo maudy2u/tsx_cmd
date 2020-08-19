@@ -65,11 +65,10 @@ import {
   tsx_Disconnect,
   tsx_AbortGuider,
   getValidTargetSession,
-  prepareTargetForImaging,
+  initialPrepOfTargetForImaging,
   processTargetTakeSeries,
   tsx_isDark,
   findCalibrationSession,
-  CalibrateAutoGuider,
   tsx_RotateCamera,
   tsx_SlewTargetName,
   tsx_SlewCmdCoords,
@@ -187,14 +186,21 @@ import {
 
            1.  getValidTargetSession returns a target.
                It needs to a add a check that if isCloudy = false then it is skipped
-           2.  prepareTargetForImaging can return false.. meaning the chosen target
+           2.  initialPrepOfTargetForImaging can return false.. meaning the chosen target
                could not be prepared... CLS failed. If so then market the target as FAILED
                (The start of the job needs to "reset" all targets as isCloudy = false.)
 
            */
 
            // Process Targets
-           var target = getValidTargetSession(); // no return
+           var target = '';
+           try {
+             target = getValidTargetSession(); // no return
+           }
+           catch( e ) {
+             UpdateStatusErr(' [SCHEDULER] No valid target: ' + e);
+             target = '';
+           }
            // if no valid target then check for calibration sessions...
            // how to detect calibation sessions...
            // Create Calibration sessions similar to Targets..
@@ -203,7 +209,7 @@ import {
            // anything else? enable/disable... Flat/Dark/Bias
            // remove dark/bias/flat from targets...
 
-           if (typeof target !== 'undefined' && isSchedulerStopped() == false ) {
+           if ( typeof target !== 'undefined' && target !== '' && isSchedulerStopped() == false ) {
              tsxInfo ( ' [SCHEDULER]' + target.targetFindName + ' Preparing target...');
 
              // Point, Focus, Guide
@@ -212,8 +218,8 @@ import {
              try {
                // First true = do the rotator
                // Second true = do the calibration
-               // Check the prepareTargetForImaging and see where the rotate is
-               ready = prepareTargetForImaging( target, true, true );
+               // Check the initialPrepOfTargetForImaging and see where the rotate is
+               ready = initialPrepOfTargetForImaging( target, true, true );
                if( isSchedulerStopped() == true ) {
                  break;
                }

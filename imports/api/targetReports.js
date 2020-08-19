@@ -176,6 +176,9 @@ export function removeTargetReport( tid ) {
      else if( name == 'LAT') {
        obj.LAT = value;
      }
+     else if( name == 'RMS_ERROR') {
+       obj.RMS_ERROR = value;
+     }
      else if( name == 'LON') {
        obj.LON = value;
      }

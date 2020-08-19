@@ -4,11 +4,11 @@
 //  Graham (Craig) and Stephen Townsend
 //  2020-05-27
 // *******************************
-var TARGET_PA =  $000;
-var ACCURACY = $003; // DIFF target angle VS. ImageLink angle
-var JUSTROTATE = $004;
-var PIXELSIZE = $001; // 23.07 ... for simulator with 1.7 imagescale and 2800 FL
-var FOCALLENGTH = $002; // use 2800 on SIM
+var TARGET_PA =  $000; // the desire angle for ImageLink to report, e.g. 0, or 22.3
+var ACCURACY = $003; // The difference required b/w TARGET_PA cf. ImageLink, e.g. 0.05
+var JUSTROTATE = $004; // Use 0 to get ImageLink PA within ACCURACY; 1 will just rotate assuming in sync 
+var PIXELSIZE = $001; // ImageLink Camera pixelscale. Used in case BINNING is used. Simulator is 1.7
+var FOCALLENGTH = $002; // System focal length.  Use to in case BINNING is used. Simulator is 1.7
 var OUT="";
 var MAXTRIES = 5;
 var NUMTRIES = 0;

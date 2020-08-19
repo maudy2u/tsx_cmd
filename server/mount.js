@@ -51,7 +51,6 @@ import {
   isTimeBeforeCurrentTime,
   hasStartTimePassed,
   findCalibrationSession,
-  CalibrateAutoGuider,
   tsx_RotateCamera,
   tsx_SlewTargetName,
   tsx_SlewCmdCoords,

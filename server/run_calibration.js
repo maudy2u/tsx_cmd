@@ -72,6 +72,7 @@ import {
   tsx_SlewCmdCoords,
   tsx_TurnOffCooler,
   tsx_Disconnect,
+  CalibrateAutoGuider,
 } from './run_imageSession.js';
 
 import {
