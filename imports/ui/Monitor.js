@@ -382,30 +382,6 @@ class Monitor extends Component {
     }.bind(this));
   }
 
-  testGuide() {
-
-    Meteor.call( 'testGuide', this.getCurrentTarget(),  function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  testSolve() {
-
-    Meteor.call( 'testSolve', this.getCurrentTarget(),  function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
-  testFocus3 () {
-
-    Meteor.call( 'testFocus3', this.getCurrentTarget(),  function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
   testAbortGuide () {
 
     Meteor.call( 'testAbortGuide', this.getCurrentTarget(),  function(error, result) {

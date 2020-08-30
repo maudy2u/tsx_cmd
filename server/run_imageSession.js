@@ -2519,6 +2519,7 @@ export function initialPrepOfTargetForImaging( target, doRotator, doCalibration 
     return false;
   }
   else {
+    UpdateStatus(' [SCHEDULER] Preparing: ' + target.getFriendlyName() );
     UpdateImagingSesionID( target._id );
     tsx_SetServerState( tsx_ServerStates.targetName, target.targetFindName);
 
