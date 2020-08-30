@@ -1399,6 +1399,8 @@ export function tsx_SetTarget2ChartCentre( tid ) {
   return Out;
 }
 
+// *******************************
+// *******************************
 // need to return true if to stop
 function isTargetConditionInValid(target) {
   tsxInfo(' [SCHEDULER] ************************');
@@ -1483,7 +1485,7 @@ function isTargetConditionInValid(target) {
     // okay we have a lot to do...
     // prepare target of imaging again...
     // no need to focus or dither as done in prerun
-    UpdateStatus( ' [SCHEDULER] MERIDIAN FLIP NEEDED: ' + target.getFriendlyName() + '...');
+    UpdateStatus( ' [SCHEDULER] Time for MERIDIAN FLIP: ' + target.getFriendlyName() + '...');
     let res = SetUpForImagingRun( target, false, false ) ;
 
     return false; // all good continue
@@ -1509,7 +1511,7 @@ function isTargetConditionInValid(target) {
       tsxDebug( ' [SCHEDULER] Check time: ' + defaultCLSRepeat.timestamp );
       var doCLS = hasTimePassed( defaultCLSRepeat.value, defaultCLSRepeat.timestamp )
       if( doCLS === true ) {
-        UpdateStatus( ' [SCHEDULER] ' + target.getFriendlyName() + ': time to recentre ' + pTime+ ' of ' + defaultCLSRepeat.value + ' sec');
+        UpdateStatus( ' [SCHEDULER] Time to recentre ' + target.getFriendlyName() + ': ' + pTime+ ' sec of ' + defaultCLSRepeat.value + ' sec');
         // This will cause a calibration to happen...
         // do not need to calibrate wth a meridian flip
 
@@ -1545,7 +1547,7 @@ function isTargetConditionInValid(target) {
     tsx_AbortGuider();
 
     if( runFocus3 == true ) {
-      tsxInfo( ' [SCHEDULER] Time to check fOcUs3');
+      tsxInfo( ' [SCHEDULER] Time to fOcUs3');
       InitialFocus( target );
     }
     // no need to return false... can keep going.
