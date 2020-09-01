@@ -37,6 +37,7 @@ import {
   Input,
   Divider,
   Button,
+  Label,
 } from 'semantic-ui-react'
 
 // Import the API Model
@@ -229,6 +230,7 @@ class NightPlanner extends Component {
       let rise = obj.alt_start;
       let down = obj.alt_end;
       let ref =obj.passthru;
+      let priority = target.priority;
 
       let COL = [];
       // only do the planner number of cols
@@ -267,12 +269,34 @@ class NightPlanner extends Component {
           colour = 'green';
         }
         var note = '';
+        const priorityColours = [
+          'green',
+          'teal',
+          'blue',
+          'olive',
+          'violet',
+          'purple',
+          'pink',
+          'brown',
+          'grey',
+          'black',
+          'red',
+          'orange',
+          'yellow',
+        ];
 
         if( j == 0 ) {
           note = oName;
           if( hr >= rHr ) {
-            note = '['+rise+'] '+note;
+            note = note + ' ['+rise+']';
           }
+          COL.push(
+            <Table.Cell textAlign={'left'} key={j} style={{ backgroundColor: colour, color: 'white'  }}>
+              <Label circular color={priorityColours[priority]}>{priority}</Label>
+              <small>{note}</small>
+            </Table.Cell>
+          );
+          continue;
         }
         else if( hr == rHr ) {
           note = rise;

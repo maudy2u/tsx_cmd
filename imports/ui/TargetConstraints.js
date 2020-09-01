@@ -26,6 +26,7 @@ import {
   Icon,
   Table,
   Dropdown,
+  Modal,
 } from 'semantic-ui-react'
 
 import {
@@ -40,9 +41,12 @@ import {
   TheSkyXInfos
 } from '../api/theSkyXInfos.js';
 
+import TargetEditor from './TargetEditor.js';
+
 import {
   TargetSessions,
 } from '../api/targetSessions.js'
+
 import {
   takeSeriesDropDown,
   getTakeSeriesName,
@@ -103,6 +107,10 @@ function updateTargetPlan( fid, name, value ) {
 
 class TargetConstraints extends Component {
 
+  state = {
+    modalOpenTargetEditor: false,
+  }
+
   handleChange = (e, { name, value }) => {
     this.setState({ [name]: value });
     updateTargetPlan(
@@ -140,6 +148,23 @@ class TargetConstraints extends Component {
     }
   }
 
+  canClickTarget( state, active ) {
+    if( state === 'Stop' && active === false ) {
+      return this.editTarget.bind(this);
+    }
+  }
+
+  handleOpenTargetEditor = () => this.setState({ modalOpenTargetEditor: true })
+  handleCloseTargetEditor = () => this.setState({ modalOpenTargetEditor: false })
+
+  editTarget() {
+    // console.log('In the DefineTemplate editEntry');
+    this.handleOpenTargetEditor();
+    this.forceUpdate();
+  }
+
+
+  // this can be the entry point to put the "target link"
   getTargetDetails() {
     var TARGET_DESC = '';
     if( this.props.targetPlan.friendlyName !='' && typeof this.props.targetPlan.friendlyName != 'undefined' ) {
@@ -153,12 +178,12 @@ class TargetConstraints extends Component {
 
     if( typeof this.props.targetPlan.report !== 'undefined' && this.props.targetPlan.report.dirty === true) {
       return (
-        <Label ribbon>{TARGET_DESC}</Label>
+        <Label ribbon as='a' onClick={this.canClickTarget(this.props.scheduler_running.value, this.props.tool_active.value)}>{TARGET_DESC}</Label>
       )
     }
     else {
       return(
-        <div>{TARGET_DESC}</div>
+        <Button onClick={this.canClickTarget(this.props.scheduler_running.value, this.props.tool_active.value)}>{TARGET_DESC}</Button>
       )
     }
 
@@ -167,6 +192,7 @@ class TargetConstraints extends Component {
   render() {
     var TAKESERIES = takeSeriesDropDown(this.props.seriesTemplates);
     var TAKESERIESNAME = getTakeSeriesName(this.props.targetPlan.series);
+    var TARGET_NAME = this.props.targetPlan.getFriendlyName();
     var DISABLE = true;
     var IS_UPDATING = this.props.plan_is_updating;
 
@@ -179,10 +205,45 @@ class TargetConstraints extends Component {
       DISABLE = true;
     }
 
+/*
+<Modal
+  open={this.state.modalOpenTargetEditor}
+  onClose={this.handleCloseTargetEditor}
+  basic
+  size='small'
+  closeIcon>
+  <Modal.Header>Editing Target {TARGET_NAME}</Modal.Header>
+  <Modal.Content>
+    <Modal.Description>
+      <TargetEditor
+        key={this.props.targetPlan._id}
+        target={this.props.targetPlan}
+      />
+    </Modal.Description>
+  </Modal.Content>
+</Modal>
+*/
+
     return (
       <Table.Row>
         <Table.Cell width={3}>
           {this.getTargetDetails()}
+          <Modal
+            open={this.state.modalOpenTargetEditor}
+            onClose={this.handleCloseTargetEditor}
+            basic
+            size='small'
+            closeIcon>
+            <Modal.Header>Editing Target {TARGET_NAME}</Modal.Header>
+            <Modal.Content>
+              <Modal.Description>
+                <TargetEditor
+                  key={this.props.targetPlan._id}
+                  target={this.props.targetPlan}
+                />
+              </Modal.Description>
+            </Modal.Content>
+          </Modal>
         </Table.Cell>
         <Table.Cell width={1}>
           <Form.Field control={Dropdown}
