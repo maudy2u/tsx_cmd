@@ -66,10 +66,6 @@ import {
 } from './run_schedule_process.js';
 
 import {
-  tsx_MntPark,
-} from './mount.js'
-
-import {
   UpdateImagingTargetReport,
   tsx_TargetReport,
 } from './target_reports.js'
@@ -300,7 +296,7 @@ function SetUpAutoGuiding( target, doCalibration ) {
     if( isSchedulerStopped() ) {
       return;
     }
-    UpdateStatus(' [AUTOGUIDER] running: ' + target.getFriendlyName() );
+    UpdateStatus(' [AUTOGUIDER] Guiding: ' + target.getFriendlyName() );
   }
 }
 
@@ -1226,11 +1222,11 @@ export function tsx_isDark() {
   }
 
   if( isDark === 'Light') {
-    tsxLog( ' [SCHEDULER] Ah, sigh, STOPPING, it is now: '+isDark );
+    tsxDebug( ' [SCHEDULER] Ah, sigh, STOPPING, it is now: '+isDark );
     return false;
   }
   else {
-    tsxLog( ' [SCHEDULER] YAY, it is: '+isDark );
+    tsxDebug( ' [SCHEDULER] YAY, it is: '+isDark );
     return true;
   }
 
@@ -1423,8 +1419,8 @@ function isTargetConditionInValid(target) {
   }
 
   // check sun
-  if( !tsx_isDark ) {
-    tsxLog(' [SCHEDULER] setting IMAGER target invalid - now light!');
+  if( !tsx_isDark() ) {
+    tsxLog(' [SCHEDULER] Ah, sigh, STOPPING, it is now Light');
     return true;
   }
 
@@ -2634,35 +2630,35 @@ export function findCalibrationSession() {
 }
 
 // **************************************************************
-function getHigherPriorityTarget( validSession ) {
-  // tsxInfo('************************');
-  tsxInfo(' *** getHigherPriorityTarget: ' + validSession.getFriendlyName());
-
-  var targetSessions = TargetSessions.find({
-    enabledActive: true,
-    isCalibrationFrames: false,
-  }).fetch();
-  var numSessions = targetSessions.length;
-
-  for (var i = 0; i < numSessions; i++) {
-    var chkSession = targetSessions[i];
-    if( validSession._id != chkSession._id ) {
-      var canStart = canTargetSessionStart( chkSession );
-      if( canStart ) {
-        tsxInfo( 'canStart: ' + chkSession.getFriendlyName() );
-        var valPriority = Number(validSession.priority);
-        var chkPriority = Number(chkSession.priority);
-        var chk = valPriority - chkPriority;
-        if( (chk > 0) ) {
-              validSession = chkSession;
-              tsxDebug( ' *** priority given: ' + validSession.getFriendlyName());
-        }
-      }
-    }
-  }
-  return validSession;
-
-}
+// Depreacted and removing
+// function getHigherPriorityTarget( validSession ) {
+//   // tsxInfo('************************');
+//   tsxInfo(' *** getHigherPriorityTarget: ' + validSession.getFriendlyName());
+//
+//   var targetSessions = TargetSessions.find({
+//     enabledActive: true,
+//     isCalibrationFrames: false,
+//   }).fetch();
+//   var numSessions = targetSessions.length;
+//
+//   for (var i = 0; i < numSessions; i++) {
+//     var chkSession = targetSessions[i];
+//     if( validSession._id != chkSession._id ) {
+//       var canStart = canTargetSessionStart( chkSession );
+//       if( canStart ) {
+//         tsxInfo( 'canStart: ' + chkSession.getFriendlyName() );
+//         var valPriority = Number(validSession.priority);
+//         var chkPriority = Number(chkSession.priority);
+//         var chk = valPriority - chkPriority;
+//         if( (chk > 0) ) {
+//               validSession = chkSession;
+//               tsxDebug( ' *** priority given: ' + validSession.getFriendlyName());
+//         }
+//       }
+//     }
+//   }
+//   return validSession;
+// }
 
 // **************************************************************
 function isTargetComplete( target ) {
@@ -2742,12 +2738,14 @@ export function canTargetSessionStart( target ) {
     return false;
   }
 
-  var isDark = tsx_isDark();
-  if( isDark === false ) {
-    // tsxInfo( 'inside canstart to return false' );
-    UpdateStatus( ' [SCHEDULER] stopping (not dark): ' + target.getFriendlyName() );
-    return false;
-  }
+  // Commenting out to reduce calls and speed up
+  // needs to be before starting and after each image
+  // var isDark = tsx_isDark();
+  // if( isDark === false ) {
+  //   // tsxInfo( 'inside canstart to return false' );
+  //   UpdateStatus( ' [SCHEDULER] stopping (not dark): ' + target.getFriendlyName() );
+  //   return false;
+  // }
   // tsxInfo( 'inside canstart did not return false' );
   UpdateStatus( ' [SCHEDULER] Candidate: ' + target.getFriendlyName() );
 
@@ -2863,18 +2861,6 @@ Meteor.methods({
     tsx_AbortGuider();
   },
 
-  testTargetPicking() {
-    tsxInfo('************************');
-    tsxInfo(' *** testTargetPicking' );
-    var target = findTargetSession();
-    if( typeof target == 'undefined') {
-      tsxInfo('No target found');
-    }
-    else {
-      tsxInfo('Found: ' + target.getFriendlyName());
-    }
-  },
-
   testTryTarget() {
     tsxInfo('************************');
     tsxInfo(' *** testTryTarget' );
@@ -2888,15 +2874,6 @@ Meteor.methods({
 
     return  UpdateImagingTargetReport( target );
 
-  },
-
-  testAbortGuiding( tid ) {
-    var target = TargetSessions.findOne({_id: tid});
-
-    tsxInfo('************************');
-    tsxInfo(' *** testAbortGuiding' );
-
-    return tsx_AbortGuider();
   },
 
   centreTarget( tid ) {

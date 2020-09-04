@@ -367,13 +367,6 @@ class Monitor extends Component {
     }.bind(this));
   }
 
-  testPicking() {
-    Meteor.call( 'testTargetPicking', function(error, result) {
-      console.log('Error: ' + error);
-      console.log('result: ' + result);
-    }.bind(this));
-  }
-
   startImaging() {
 
     Meteor.call( 'startImaging', this.getCurrentTarget(), function(error, result) {

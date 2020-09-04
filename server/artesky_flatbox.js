@@ -59,7 +59,6 @@ import {
   tsx_Disconnect,
   tsx_AbortGuider,
   processTargetTakeSeries,
-  tsx_isDark,
   isTimeBeforeCurrentTime,
   hasStartTimePassed,
   findCalibrationSession,

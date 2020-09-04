@@ -195,7 +195,10 @@ import {
            // Process Targets
            var target = '';
            try {
-             target = getValidTargetSession(); // no return
+             // Check if dark enough and if so get target
+             if( isDarkEnough() === true ) {
+               target = getValidTargetSession(); // no return
+             }
            }
            catch( e ) {
              UpdateStatusErr(' [SCHEDULER] No valid target: ' + e);
@@ -291,7 +294,7 @@ import {
 
            // Check if sun is up and no cal frames
            if( (!isDarkEnough()) && isSchedulerStopped() == false ) {
-             tsxLog( ' [SCHEDULER] NOT DARK ENOUGH, or schedule is stopped');
+             tsxDebug( ' [SCHEDULER] NOT DARK ENOUGH, or schedule is stopped');
              ParkMount( isParked );
              isParked = true;
              var approachingDawn = isTimeBeforeCurrentTime('3:00');
@@ -300,8 +303,8 @@ import {
              // tsxInfo( ' Is stillDaytime: ' + stillDaytime);
              if( approachingDawn ) {
                var defaultFilter = tsx_GetServerStateValue( tsx_ServerStates.defaultFilter );
-               var softPark = false;
-               tsx_AbortGuider();
+               var softPark = false; // hardpark
+               //tsx_AbortGuider(); // should already be stopped
                tsx_MntPark(defaultFilter, softPark);
                var defaultMinSunAlt = tsx_GetServerStateValue( tsx_ServerStates.defaultMinSunAlt );
                UpdateStatus( ' [SCHEDULER] STOPPED: sun rose above limit ' + defaultMinSunAlt);

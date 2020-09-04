@@ -47,7 +47,6 @@ import {
   tsx_Disconnect,
   tsx_AbortGuider,
   processTargetTakeSeries,
-  tsx_isDark,
   isTimeBeforeCurrentTime,
   hasStartTimePassed,
   findCalibrationSession,
@@ -63,10 +62,10 @@ import {
 
 export function ParkMount( isParked ) {
    if( !isParked ) {
-     UpdateStatus(' [MOUNT] Parking mount...');
      var defaultFilter = tsx_GetServerStateValue( tsx_ServerStates.defaultFilter );
      var softPark = Boolean(tsx_GetServerStateValue( tsx_ServerStates.defaultSoftPark ));
      tsx_AbortGuider();
+     UpdateStatus(' [MOUNT] Parking mount...');
      tsx_MntPark(defaultFilter, softPark);
    }
    isParked = true;
@@ -143,7 +142,7 @@ export function tsx_MntPark(defaultFilter, softPark) {
 
    if( softPark ) {
      // if true just set filter and turn off tracking
-     UpdateStatus(' [MOUNT] Soft Parking... ');
+     UpdateStatus(' [MOUNT] Stop tracking... ');
    }
    else {
      UpdateStatus(' [MOUNT] Parking... ');
@@ -169,7 +168,7 @@ export function tsx_MntPark(defaultFilter, softPark) {
          Out = result;
          tsx_is_waiting = false;
    }));
-   tsxInfo( ' [MOUNT] Park waiting' );
+   tsxDebug( ' [MOUNT] Park waiting' );
    while( tsx_is_waiting ) {
     Meteor.sleep( 1000 );
    }
