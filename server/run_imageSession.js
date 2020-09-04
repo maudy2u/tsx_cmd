@@ -1238,9 +1238,10 @@ export function tsx_isDark() {
 
 // **************************************************************
 // check minAlt - stop - find next
-function tsx_reachedMinAlt( target ) {
+// reached minalt... need to rename to AboveMin
+function tsx_aboveMinAlt( target ) {
   // tsxInfo('************************');
-  tsxInfo(' *** tsx_reachedMinAlt for: ' + target.getFriendlyName());
+  tsxInfo(' *** tsx_aboveMinAlt for: ' + target.getFriendlyName());
 
   var targetMinAlt = target.minAlt;
   var rpt = TargetReports.findOne({target_id: target._id });
@@ -1252,7 +1253,7 @@ function tsx_reachedMinAlt( target ) {
 	}
 	tsxDebug('  [MIN_ALT] ' + target.getFriendlyName() + ': altitude (' + curAlt + ') <'+ ' minAlt (' + targetMinAlt + ')' );
 	if( Number(curAlt) > Number(targetMinAlt) ) {
-		tsxDebug( '  [MIN_ALT] ' + target.getFriendlyName() + ': Stoped, below Minimum Altitude.' );
+		tsxDebug( '  [MIN_ALT] ' + target.getFriendlyName() + ': All good, above Minimum Altitude.' );
 		return true;
 	}
   return false;
@@ -2734,8 +2735,8 @@ export function canTargetSessionStart( target ) {
   // check if TSX says okay... Altitude and here
   // ready also checks for the sun to be below specific altitude e.g. -18 degrees
   // see up above... do not redo... var result =   UpdateImagingTargetReport( target );
-  var minAlt = tsx_reachedMinAlt( target );
-  tsxDebug( ' [SCHEDULER] Is target minAlt: ' + minAlt );
+  var minAlt = tsx_aboveMinAlt( target );
+  tsxDebug( ' [SCHEDULER] Is target above minAlt: ' + minAlt );
   if( !minAlt ) {
     UpdateStatus( ' [SCHEDULER] Too low: ' + target.getFriendlyName()+', currently ('+result.ALT+')' + ' vs. needs (' + target.minAlt + ')');
     return false;
