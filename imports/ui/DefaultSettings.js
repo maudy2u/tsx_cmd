@@ -131,6 +131,7 @@ class DefaultSettings extends Component {
       defaultUseImagingCooler_enabled: false,
       defaultCoolTemp: '',
       imagingBinning: '1',
+      defaultImageAutoSavePattern: '',
       guiderPixelSize: 3.8,
       guidingPixelErrorTolerance: 0.9,
       guider_camera_delay: 1.0,
@@ -579,14 +580,6 @@ class DefaultSettings extends Component {
             }}
             validationError="Must be a positive number, e.g 1, 5, 1800, 3600"
             errorLabel={ ERRORLABEL }
-          />
-          <Form.Input
-            disabled={true}
-            label='Default AUTOSAVE Pattern: '
-            name='defaultImageAutoSavePattern'
-            placeholder='Same definition entered in TheSkyX, e.g. :t_:b'
-            value={this.state.defaultImageAutoSavePattern}
-            onChange={this.handleChange}
           />
         </Form>
       </Segment>
@@ -1189,6 +1182,10 @@ class DefaultSettings extends Component {
             validationError="Must be a real number, e.g -20, -1, 0, 3, 5, ..."
             errorLabel={ ERRORLABEL }
           />
+          </Form>
+          </Segment>
+          <Segment>
+          <Form>
           <Form.Field control={Dropdown}
             fluid
             label='Default Image Binning'
@@ -1228,6 +1225,17 @@ class DefaultSettings extends Component {
             errorLabel={ ERRORLABEL }
           />
         </Form>
+        </Segment>
+        <Segment>
+          <Form>
+            <Form.Input
+              label='Default AUTOSAVE Pattern: '
+              name='defaultImageAutoSavePattern'
+              placeholder='Same definition entered in TheSkyX, e.g. :t_:b'
+              value={this.state.defaultImageAutoSavePattern}
+              onChange={this.handleChange}
+            />
+          </Form>
         </Segment>
         </Segment.Group>
     )

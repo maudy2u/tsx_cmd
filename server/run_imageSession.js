@@ -1403,6 +1403,7 @@ function isTargetConditionInValid(target) {
   tsxInfo(' [SCHEDULER] ************************');
   tsxInfo(' [SCHEDULER] isTargetConditionInValid: ' + target.getFriendlyName() );
   tsxInfo(' [SCHEDULER] Evaluating: ' + target.getFriendlyName() );
+  tsxLog( ' [SCHEDULER] checking stop conditions');
 
   // check if scheduler is stopped.
   if( isSchedulerStopped() ) {
@@ -1438,7 +1439,6 @@ function isTargetConditionInValid(target) {
     }
   }
   else {
-    tsxLog( ' [SCHEDULER] checking stop conditions');
     timeToCheck = new Date();
     tsx_SetServerState( tsx_ServerStates.isTargetConditionInValidExpired, timeToCheck );
   }
@@ -2101,6 +2101,12 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
     }
   }
 
+  var fPattern = tsx_GetServerStateValue( tsx_ServerStates.defaultImageAutoSavePattern );
+  if( typeof fPattern === 'undefined'  ) {
+  	fPattern = ''; // use a pattern if it is defined
+  }
+
+
   cmd = cmd.replace("$000", filterNum ); // set filter
   cmd = cmd.replace("$001", exposure );  // set exposure
   cmd = cmd.replace("$002", frame );     // set Light/Dark/Flat/Bias
@@ -2108,6 +2114,7 @@ export function tsx_takeImage( filterNum, exposure, frame, target, delay, binnin
   cmd = cmd.replace("$004", delay );   // set target
   cmd = cmd.replace("$005", getBinningNumber(binning) ); // set target
   cmd = cmd.replace("$006", friendly );   // set target
+  cmd = cmd.replace("$007", fPattern );   // set target
 
   var tsx_is_waiting = true;
   tsxDebug( '[TSX] SkyX_JS_TakeImage, '+filterNum+', '+exposure+', '+frame+', '+tName +', '+delay+', '+getBinningNumber(binning) +', '+ friendly +', AND waited for ccdTemp: '+ccdTemp  );

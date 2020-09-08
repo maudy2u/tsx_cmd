@@ -317,9 +317,9 @@ Meteor.methods({
       for (let i = 0; i < targets.length; i++) {
         let target = TargetSessions.findOne({_id: targets[i]._id });
         if( typeof target != 'undefined') {
-          UpdateStatus( ' [TARGETREPORT] Retrieving: ' + target.getFriendlyName() );
+          tsxDebug( ' [TARGETREPORT] Retrieving: ' + target.getFriendlyName() );
           let rpt = tsx_TargetReport( target );
-          UpdateStatus( ' [TARGETREPORT] Completed: ' + target.getFriendlyName() );
+          UpdateStatus( ' [TARGETREPORT] Retrieved: ' + target.getFriendlyName() );
         }
       }
       UpdateStatus( ' [TARGETREPORT] Refresh complete' );
@@ -340,9 +340,9 @@ Meteor.methods({
 
     try {
       var target = TargetSessions.findOne({_id: tid});
-      UpdateStatus( ' [TARGETREPORT] Retrieving: ' + target.getFriendlyName() );
+      tsxDebug( ' [TARGETREPORT] Retrieving: ' + target.getFriendlyName() );
       var result = tsx_TargetReport( target );
-      UpdateStatus( ' [TARGETREPORT] Completed: ' + target.getFriendlyName() );
+      UpdateStatus( ' [TARGETREPORT] Retrieved: ' + target.getFriendlyName() );
     }
     catch( e )  {
       if( e == 'TsxError' ) {
@@ -360,9 +360,9 @@ Meteor.methods({
     try {
       for (let i = 0; i < targetArray.length; i++) {
         let target = TargetSessions.findOne({_id: targetArray[i]._id });
-        UpdateStatus( ' [TARGETREPORT] Retrieving: ' + target.getFriendlyName() );
+        tsxDebug( ' [TARGETREPORT] Retrieving: ' + target.getFriendlyName() );
         let result = tsx_TargetReport( target );
-        UpdateStatus( ' [TARGETREPORT] Completed: ' + target.getFriendlyName() );
+        UpdateStatus( ' [TARGETREPORT] Retrieved: ' + target.getFriendlyName() );
       }
       UpdateStatus( ' [TARGETREPORT] All updated' );
     }

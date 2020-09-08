@@ -49,7 +49,6 @@ export const tsx_ServerStates = {
   runScheduler: 'runScheduler',
 
   initialFocusTemperature: 'initialFocusTemperature',
-  defaultImageAutoSavePattern: 'defaultImageAutoSavePattern',
   mntRA: 'mntRA',
   mntDEC: 'mntDEC',
   mntMHS: 'mntMHS',
@@ -75,6 +74,7 @@ export const tsx_ServerStates = {
   imagingSession: 'imagingSession', // use to report current imaging targets
   imagingSessionDither: 'imagingSessionDither',
   imagingBinning: 'imagingBinning',
+  defaultImageAutoSavePattern: 'defaultImageAutoSavePattern',
   defaultUseImagingCooler_enabled: 'defaultUseImagingCooler_enabled',
   defaultCoolTemp: 'defaultCoolTemp',
   defaultMinAltitude: 'defaultMinAltitude', // used for scheduling

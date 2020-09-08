@@ -10,6 +10,7 @@ var tName = '$003';
 var delay = '$004';
 var binning = '$005';
 var friendly = '$006';
+var fPattern = '$007';
 
 var TSX = RunJavaScriptOutput;
 var CCDSC = ccdsoftCamera;
@@ -72,11 +73,14 @@ if( typeof binning !== 'undefined' && binning !== '') {
 }
 
 // Use Friendly name if it is defined
-var oldASFormula = ccdsoftCamera.PropStr("m_csCustomFileNameLight")
-var newASFormula = '';
+var orgASFormula = ccdsoftCamera.PropStr("m_csCustomFileNameLight")
+var asFormula = '';
+if( typeof fPattern !== 'undefined' && fPattern !== '$007' && fPattern !== '' ) {
+	asFormula = fPattern; // use a pattern if it is defined
+}
 if( typeof friendly !== 'undefined' && friendly !== '$006' && friendly !== '' ) {
-	newASFormula = oldASFormula.replace(/:t/g, friendly);
-	ccdsoftCamera.setPropStr("m_csCustomFileNameLight", newASFormula);
+	asFormula = asFormula.replace(/:t/g, friendly);
+	ccdsoftCamera.setPropStr("m_csCustomFileNameLight", asFormula);
 }
 
 CCDSC.TakeImage();
@@ -84,9 +88,7 @@ var avgPix = CCDSI.averagePixelValue();
 var maxPix = CCDSC.MaximumPixel;
 Out = Out.trim() + '|avgPix=' + avgPix + '|maxPix='+maxPix;
 
-if( typeof newASFormula !== 'undefined' && newASFormula !== '' ) {
-	ccdsoftCamera.setPropStr("m_csCustomFileNameLight", oldASFormula);
-}
+ccdsoftCamera.setPropStr("m_csCustomFileNameLight", orgASFormula);
 
 CCDSC.BinX = obinX;
 CCDSC.BinY = obinY;
