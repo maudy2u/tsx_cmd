@@ -59,6 +59,15 @@ export function TargetPlans() {
   // so need the time target last checked
 
   let targets = TargetSessions.find({ isCalibrationFrames: false, enabledActive: true }, { sort: { enabledActive: -1, targetFindName: 1 } }).fetch();
+  for (let i = 0; i < targets.length; i++) {
+    let aTarget = TargetSessions.findOne({_id: targets[i]._id });
+    if( typeof aTarget != 'undefined') {
+      tsxDebug( ' [TARGETREPORT] Retrieving: ' + aTarget.getFriendlyName() );
+      let rpt = tsx_TargetReport( aTarget );
+      UpdateStatus( ' [TARGETREPORT] Retrieved: ' + aTarget.getFriendlyName() );
+    }
+  }
+
   let tsx_data = MOONRISE + '##' + SUNRISE;
   // get all targets and their limiting altitudes
   for( let i=0; i<targets.length; i++ ) {
