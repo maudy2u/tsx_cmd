@@ -1,3 +1,5 @@
+// DEPRECATED 
+
 /*
 tsx cmd - A web page to send commands to TheSkyX server
     Copyright (C) 2018  Stephen Townsend

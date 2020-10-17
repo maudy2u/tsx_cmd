@@ -150,6 +150,7 @@ OBJI.Property(59);
 var sunAlt = OBJI.ObjInfoPropOut;
 Out = Out+ '|sunAltitude=' + Number(sunAlt).toFixed(3);
 
+sky6RASCOMTele.DoCommand(11, "")
 var BTP = sky6RASCOMTele.DoCommandOutput;
 var pointing = '';
 if (BTP == 1)

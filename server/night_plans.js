@@ -5,6 +5,12 @@ import { TargetReports } from '../imports/api/targetReports.js';
 //import { Seriess } from '../imports/api/seriess.js';
 //import { Filters } from '../imports/api/filters.js';
 //import { TheSkyXInfos } from '../imports/api/theSkyXInfos.js';
+
+import {
+  UpdateImagingTargetReport,
+  tsx_TargetReport,
+} from './target_reports.js'
+
 import {
   tsxInfo,
   tsxLog,
