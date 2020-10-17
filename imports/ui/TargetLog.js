@@ -74,9 +74,13 @@ class TargetLog extends Component {
     return (
       <Table.Body>
       { this.props.reportData.map((obj)=> {
+          var TNAME = obj.target;
+          if( typeof obj.targetFriendlyName !=='undefined' && obj.targetFriendlyName !== '') {
+            TNAME = obj.targetFriendlyName;
+          }
           return (
             <Table.Row style={{color: 'white'}} key={obj.key}>
-              <Table.Cell width={2} content={obj.target } />
+              <Table.Cell width={2} content={ TNAME } />
               <Table.Cell width={1} content={obj.filter } />
               <Table.Cell width={1} content={obj.exposure } />
               <Table.Cell width={1} content={ calcTargetFilterExposureSessionTotal(obj) } />

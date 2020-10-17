@@ -62,9 +62,8 @@ import {
 } from '../api/time_utils.js'
 
 import {
-  createImagingReportSessionDate,
+  getSessionDates,
   createImagingReportSessionDateTemplate,
-  getSessionDates
 } from '../api/imagingSessionLogs.js'
 
 import TargetLog from './TargetLog.js';
@@ -137,7 +136,12 @@ class SessionReport extends Component {
     // if( this.props.reportsReadyYet ) {
 
       const { activeIndex } = this.state;
-      var sessionDates = getSessionDates();
+      if( !this.props.sessionDatesReadyYet ) {
+        return (
+          <div/>
+        );
+      }
+      var sessionDates = this.props.sessionDates;
 
       var dropDownSessionDates = [];
       for( var sd=0; sd<sessionDates.length; sd ++ ) {
@@ -192,8 +196,13 @@ export default withTracker(() => {
   const reportHandle = Meteor.subscribe('imagingSessionLogs.all');
   var reportsReadyYet = reportHandle.ready();
 
+  const sessionDatesHandle = Meteor.subscribe('sessionDates.status');
+  const sessionDatesReadyYet = sessionDatesHandle.ready();
+
   return {
     reportsReadyYet,
+    sessionDatesReadyYet,
     session_reports: ImagingSessionLogs.find({}).fetch(10),
+    sessionDates: getSessionDates(),
   };
 })(SessionReport);

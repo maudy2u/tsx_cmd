@@ -556,9 +556,11 @@ class Monitor extends Component {
             onClick={this.handleClick}
             />
           <Accordion.Content active={activeIndex === 1} >
-            <SessionReport
-              enabledTargetSessions={this.props.enabledTargetSessions}
+            { //
+              <SessionReport
+
               />
+            }
           </Accordion.Content>
         </Accordion>
         <br/>

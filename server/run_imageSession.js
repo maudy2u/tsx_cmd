@@ -2350,7 +2350,6 @@ function targetDither( target ) {
 export function processTargetTakeSeries( target ) {
   // process for each filter
   tsxLog( ' -------------------------------');
-  tsxDebug( ' === ' + target.getFriendlyName() + ": Target started");
   tsxDebug(' === processTargetTakeSeries: ' + target.getFriendlyName());
 
   var template = TakeSeriesTemplates.findOne( {_id:target.series._id});
@@ -2381,6 +2380,7 @@ export function processTargetTakeSeries( target ) {
 
   // create report
   var seriesReport = ' === Series Name: ' +template.name;
+  UpdateStatus( ' === Target: ' + target.getFriendlyName() );
   UpdateStatus( seriesReport );
   UpdateStatus(' === Process: ' + template.processSeries);
   for (var i = 0; i < numSeries; i++) {

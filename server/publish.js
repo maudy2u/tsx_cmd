@@ -27,6 +27,13 @@ Meteor.publish('activeMenu.status', function () {
   return db;
 });
 
+Meteor.publish('sessionDates.status', function () {
+  var db = ImagingSessionLogs.find({}, {  sort: { sessionDate: -1} });
+
+  this.ready();
+  return db;
+});
+
 
 // *******************************
 // all tsxInfo
