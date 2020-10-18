@@ -194,6 +194,9 @@ ImagingSessionLogs = {
      else if( name == 'avgPix') {
        obj.avgPix = value;
      }
+     else if( name == 'targetFriendlyName') {
+       obj.targetFriendlyName = value;
+     }
 
      id = ImagingSessionLogs.update({_id: obj._id}, {
        $set: {
@@ -212,6 +215,7 @@ ImagingSessionLogs = {
          RMS_ERROR: obj.RMS_ERROR,
          FOCUS_POS: obj.FOCUS_POS,
          target: obj.target,
+         targetFriendlyName: obj.targetFriendlyName,
          sessionDate: sessionDate( new Date() ),
          updatedAt: new Date(),
          fileName: obj.fileName,
@@ -261,26 +265,31 @@ export function getSessionDates() {
    var takeSeries = ImagingSessionLogs.find({sessionDate: sDate}).fetch();
    var keys = []; // target | filter | exposure
    var reportData = [];
+
    for( var i=0; i<takeSeries.length; i++ ) {
      var e = takeSeries[i];
-     var k = e.target+'|'+e.filter+'|'+e.exposure;
+     var k = e.target+'|'+e.filter+'|'+e.exposure+'|'+e.targetFriendlyName;
      if( keys.indexOf(k)<0) {
        keys.push(k);
        reportData.push({
          key: k,
          sessionDate: e.sessionDate,
          target: e.target,
+         rid: e._id,
          filter: e.filter,
          exposure: e.exposure,
          sessionTotal: 0,
          runningTotal: 0,
+         targetFriendlyName: e.targetFriendlyName,
        })
      }
    }
    return reportData;
  }
 
- export function getTargetReportTemplate( sDate, target ) {
+// DEPRECATED
+/*
+ export function DEPRECATED getTargetReportTemplate( sDate, target ) {
    var takeSeries = TakeSeriesTemplates.findOne({_id:target.series._id});
    var report = [];
    for( var i=0; i<takeSeries.series.length; i++ ) {
@@ -297,6 +306,7 @@ export function getSessionDates() {
          id: s._id,
          sessionDate: sDate,
          target: target.targetFindName,
+         targetFriendlyName: target.targetFriendlyName,
          repeating: takeSeries.repeatSeries,
          subFrameType: s.frame,
          filter: s.filter,
@@ -311,6 +321,7 @@ export function getSessionDates() {
    }
    return report;
  }
+*/
 
  export function calcTargetFilterExposureSessionTotal( reportRow ) {
    var data = ImagingSessionLogs.find({
@@ -318,6 +329,7 @@ export function getSessionDates() {
      target: reportRow.target,
      filter: reportRow.filter,
      exposure: reportRow.exposure,
+     targetFriendlyName: reportRow.targetFriendlyName,
    }).fetch();
    var num = data.length;
    return num;
@@ -328,6 +340,7 @@ export function getSessionDates() {
      target: reportRow.target,
      filter: reportRow.filter,
      exposure: reportRow.exposure,
+     targetFriendlyName: reportRow.targetFriendlyName,
    }).fetch();
    var num = data.length;
    return num;

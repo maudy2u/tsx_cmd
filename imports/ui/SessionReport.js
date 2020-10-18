@@ -150,7 +150,6 @@ class SessionReport extends Component {
         );
       }
       var reportData = createImagingReportSessionDateTemplate( this.state.sessionDate );
-
       return (
         <div>
           <Dropdown

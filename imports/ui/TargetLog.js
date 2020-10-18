@@ -57,7 +57,7 @@ import {
 class TargetLog extends Component {
 
   state = {
-    reportData: [],
+    //reportData: [],
   };
 
   // Initialize states
@@ -70,11 +70,12 @@ class TargetLog extends Component {
 
   render() {
     // get the ses
-
     return (
       <Table.Body>
       { this.props.reportData.map((obj)=> {
+
           var TNAME = obj.target;
+
           if( typeof obj.targetFriendlyName !=='undefined' && obj.targetFriendlyName !== '') {
             TNAME = obj.targetFriendlyName;
           }
