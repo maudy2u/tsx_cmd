@@ -19,11 +19,11 @@ install_dir=$(pwd)
 if [ "$(uname)" == "Darwin" ]; then
   echo Mac in ${install_dir}
   sudo pkill node
-  sudo service mongod stop
+  mongo --eval "db.getSiblingDB('admin').shutdownServer()"
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   echo Linux in ${install_dir}
-  sudo killall node
-#  sudo service mongod stop
+  killall node
+  mongo --eval "db.getSiblingDB('admin').shutdownServer()"
 elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
     # Do something under 32 bits Windows NT platform
     Echo windows32 - not yet supported
